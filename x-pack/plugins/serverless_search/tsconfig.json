@@ -42,5 +42,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/es-types",
     "@kbn/code-editor",
+    "@kbn/console-plugin",
   ]
 }

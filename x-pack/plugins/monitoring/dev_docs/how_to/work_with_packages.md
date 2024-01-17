@@ -61,6 +61,8 @@ A package can define the services it needs to monitor for development and automa
 
 This can be done by creating a `docker-compose` file under the package `_dev/deploy` directory, then running `elastic-package service up -v` in the package folder. An example is the [elasticsearch package](https://github.com/elastic/integrations/tree/main/packages/elasticsearch/_dev/deploy/docker) that starts a service which generates every types of logs with the help of a script executing queries.
 
+**Note** that the container started with `elastic-package service up` will run in its own network and elastic-agent running with `elastic-package stack up` needs to specify the full docker service name to reach it. For example, if you want to collect metrics from the [elasticsearch instance](https://github.com/elastic/integrations/blob/main/packages/elasticsearch/_dev/deploy/docker/docker-compose.yml#L17) started with `elastic-package service up` you can configure elasticsearch integration to reach it at `http://elastic-package-service-elasticsearch-1:9200` (this may vary depending on OS/docker version). Alternatively you can reach the service on localhost via the forwarded port `http://host.docker.internal:9201`.
+
 ### Collecting logs
 
 To collect logs elastic-agent needs access to the raw files. Let's see how that works taking `elasticsearch` package as an  example.
