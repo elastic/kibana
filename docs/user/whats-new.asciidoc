@@ -126,6 +126,7 @@ image::images/alerts.png[A screenshot of details of the alerts]
 [discrete]
 === ResponseOps
 
+[discrete]
 ==== Maintenance window filters
 
 In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope:
