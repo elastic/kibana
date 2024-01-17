@@ -207,7 +207,9 @@
             "label": "runTask",
             "description": [],
             "signature": [
-              "(jobId: string, payload: TaskPayloadType, cancellationToken: ",
+              "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
+              "TaskInstanceFields",
+              ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
                 "scope": "common",
@@ -256,6 +258,20 @@
                 "id": "def-server.ExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "{ startedAt: Date | null; retryAt: Date | null; }"
+                ],
+                "path": "packages/kbn-reporting/server/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/reporting-server",
+                "id": "def-server.ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -273,7 +289,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-server",
-                "id": "def-server.ExportType.runTask.$4",
+                "id": "def-server.ExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
@@ -1510,7 +1526,9 @@
         "label": "RunTaskFn",
         "description": [],
         "signature": [
-          "(jobId: string, payload: TaskPayloadType, cancellationToken: ",
+          "(jobId: string, payload: TaskPayloadType, taskInstanceFields: ",
+          "TaskInstanceFields",
+          ", cancellationToken: ",
           {
             "pluginId": "@kbn/reporting-common",
             "scope": "common",
@@ -1559,6 +1577,20 @@
             "id": "def-server.RunTaskFn.$3",
             "type": "Object",
             "tags": [],
+            "label": "taskInstanceFields",
+            "description": [],
+            "signature": [
+              "{ startedAt: Date | null; retryAt: Date | null; }"
+            ],
+            "path": "packages/kbn-reporting/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-server",
+            "id": "def-server.RunTaskFn.$4",
+            "type": "Object",
+            "tags": [],
             "label": "cancellationToken",
             "description": [],
             "signature": [
@@ -1576,7 +1608,7 @@
           },
           {
             "parentPluginId": "@kbn/reporting-server",
-            "id": "def-server.RunTaskFn.$4",
+            "id": "def-server.RunTaskFn.$5",
             "type": "Object",
             "tags": [],
             "label": "stream",
