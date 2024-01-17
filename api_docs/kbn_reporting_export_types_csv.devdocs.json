@@ -290,6 +290,8 @@
                 "section": "def-common.TaskPayloadCSV",
                 "text": "TaskPayloadCSV"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -349,6 +351,21 @@
                 "id": "def-server.CsvSearchSourceExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/csv/csv_searchsource.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-csv",
+                "id": "def-server.CsvSearchSourceExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -367,7 +384,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvSearchSourceExportType.runTask.$4",
+                "id": "def-server.CsvSearchSourceExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
@@ -1057,6 +1074,8 @@
                 "section": "def-common.TaskPayloadCsvFromSavedObject",
                 "text": "TaskPayloadCsvFromSavedObject"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -1116,6 +1135,21 @@
                 "id": "def-server.CsvV2ExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/csv/csv_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-csv",
+                "id": "def-server.CsvV2ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -1134,7 +1168,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-csv",
-                "id": "def-server.CsvV2ExportType.runTask.$4",
+                "id": "def-server.CsvV2ExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
