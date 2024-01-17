@@ -445,7 +445,7 @@ export class Embeddable
 
   private activeData?: TableInspectorAdapter;
 
-  private dataViews: DataView[] = [];
+  private internalDataViews: DataView[] = [];
 
   private viewUnderlyingDataArgs?: ViewUnderlyingDataArgs;
 
@@ -1406,7 +1406,7 @@ export class Embeddable
       activeVisualization: this.activeVisualization,
       activeVisualizationState: this.activeVisualizationState,
       activeData: this.activeData,
-      dataViews: this.dataViews,
+      dataViews: this.internalDataViews,
       capabilities: this.deps.capabilities,
       query: mergedSearchContext.query,
       filters: mergedSearchContext.filters || [],
@@ -1452,7 +1452,7 @@ export class Embeddable
       )
     ).forEach((dataView) => indexPatterns.push(dataView));
 
-    this.dataViews = uniqBy(indexPatterns, 'id');
+    this.internalDataViews = uniqBy(indexPatterns, 'id');
 
     // passing edit url and index patterns to the output of this embeddable for
     // the container to pick them up and use them to configure filter bar and
@@ -1502,7 +1502,7 @@ export class Embeddable
       description,
       editPath: getEditPath(savedObjectId),
       editUrl: this.deps.basePath.prepend(`/app/lens${getEditPath(savedObjectId)}`),
-      indexPatterns: this.dataViews,
+      indexPatterns: this.internalDataViews,
     });
   }
 
@@ -1540,20 +1540,25 @@ export class Embeddable
    * Gets the Lens embeddable's local filters
    * @returns Local/panel-level array of filters for Lens embeddable
    */
-  public async getFilters() {
-    return mapAndFlattenFilters(
-      this.deps.injectFilterReferences(
-        this.savedVis?.state.filters ?? [],
-        this.savedVis?.references ?? []
-      )
-    );
+  public getFilters() {
+    try {
+      return mapAndFlattenFilters(
+        this.deps.injectFilterReferences(
+          this.savedVis?.state.filters ?? [],
+          this.savedVis?.references ?? []
+        )
+      );
+    } catch (e) {
+      // if we can't parse the filters, we publish an empty array.
+      return [];
+    }
   }
 
   /**
    * Gets the Lens embeddable's local query
    * @returns Local/panel-level query for Lens embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedVis?.state.query;
   }
 
