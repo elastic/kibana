@@ -13,7 +13,10 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { CustomFieldFlyout } from './flyout';
 import { customFieldsConfigurationMock } from '../../containers/mock';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+} from '../../../common/constants';
 import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
@@ -155,6 +158,25 @@ describe('CustomFieldFlyout ', () => {
         expect(screen.getByText('Default value is required.')).toBeInTheDocument();
       });
     });
+
+    it('shows an error if default value is too long', async () => {
+      appMockRender.render(<CustomFieldFlyout {...props} />);
+
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
+      userEvent.click(await screen.findByTestId('text-custom-field-required'));
+      userEvent.paste(
+        await screen.findByTestId('text-custom-field-default-value'),
+        'z'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1)
+      );
+
+      await waitFor(() => {
+        expect(
+          screen.getByText(
+            i18n.MAX_LENGTH_ERROR('default value', MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH)
+          )
+        ).toBeInTheDocument();
+      });
+    });
   });
 
   describe('Toggle custom field', () => {
@@ -212,7 +234,8 @@ describe('CustomFieldFlyout ', () => {
       expect(await screen.findByTestId('custom-field-type-selector')).toHaveAttribute('disabled');
       expect(await screen.findByTestId('toggle-custom-field-required')).toHaveAttribute('checked');
       expect(await screen.findByTestId('toggle-custom-field-default-value')).toHaveAttribute(
-        'checked'
+        'aria-checked',
+        'true'
       );
     });
   });

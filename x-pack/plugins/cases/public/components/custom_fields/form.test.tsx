@@ -79,7 +79,7 @@ describe('CustomFieldsForm ', () => {
 
     userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
     userEvent.click(await screen.findByTestId('text-custom-field-required'));
-    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Summary');
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
 
     await act(async () => {
       const { data } = await formState!.submit();
@@ -89,7 +89,7 @@ describe('CustomFieldsForm ', () => {
         label: 'Summary',
         required: true,
         type: 'text',
-        defaultValue: 'Summary',
+        defaultValue: 'Default value',
       });
     });
   });
@@ -172,7 +172,8 @@ describe('CustomFieldsForm ', () => {
     );
     expect(await screen.findByTestId('toggle-custom-field-required')).toHaveAttribute('checked');
     expect(await screen.findByTestId('toggle-custom-field-default-value')).toHaveAttribute(
-      'checked'
+      'aria-checked',
+      'true'
     );
 
     await act(async () => {

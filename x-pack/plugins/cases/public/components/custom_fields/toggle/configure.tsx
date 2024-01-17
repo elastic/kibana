@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { CheckBoxField, ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldToggle } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
 import * as i18n from '../translations';
@@ -32,7 +32,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldToggle>['Configure'] = 
       {required && (
         <UseField
           path="defaultValue"
-          component={CheckBoxField}
+          component={ToggleField}
           config={{ defaultValue: false }}
           componentProps={{
             label: i18n.DEFAULT_VALUE,

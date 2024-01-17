@@ -7,7 +7,10 @@
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+} from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
 
@@ -46,6 +49,12 @@ export const schema = {
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.DEFAULT_VALUE)),
+      },
+      {
+        validator: maxLengthField({
+          length: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
+          message: i18n.MAX_LENGTH_ERROR('default value', MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH),
+        }),
       },
     ],
   },
