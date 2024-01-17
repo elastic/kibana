@@ -24,6 +24,7 @@ import type {
   InlineEditLensEmbeddableContext,
 } from '@kbn/lens-plugin/public';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import ReactDOM from 'react-dom';
 import useAsync from 'react-use/lib/useAsync';
 import type { VisualizeESQLFunctionArguments } from '../../common/functions/visualize_esql';
 import type {
@@ -160,6 +161,9 @@ function VisualizeESQL({
             query,
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
+          if (chatFlyoutSecondSlotHandler?.container) {
+            ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
+          }
         },
         onCancel: () => {
           onActionClick({
@@ -168,6 +172,9 @@ function VisualizeESQL({
             query,
           });
           chatFlyoutSecondSlotHandler?.setVisibility?.(false);
+          if (chatFlyoutSecondSlotHandler?.container) {
+            ReactDOM.unmountComponentAtNode(chatFlyoutSecondSlotHandler.container);
+          }
         },
         container: chatFlyoutSecondSlotHandler?.container,
       };

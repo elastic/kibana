@@ -13,6 +13,7 @@ export {
   getKbnFieldType,
   getKbnTypeNames,
   getFilterableKbnTypeNames,
+  normalizeType,
 } from './src/kbn_field_types';
 
 export type { KbnFieldTypeOptions } from './src/types';

@@ -35,12 +35,7 @@ export function MultiPaneFlyout({
   }, [secondSlotContentVisibility]);
 
   return (
-    <EuiFlyout
-      onClose={onClose}
-      size={secondSlotContentVisibility ? 'l' : 'm'}
-      ownFocus={false}
-      outsideClickCloses
-    >
+    <EuiFlyout onClose={onClose} size={secondSlotContentVisibility ? 'l' : 'm'} outsideClickCloses>
       <EuiFlexGroup direction="row" gutterSize={'none'} style={{ height: '100%' }}>
         <EuiFlexItem
           style={{
@@ -80,7 +75,7 @@ function InlineEditingContent({
   const style = css`
     padding: 0;
     position: relative;
-    height: 100%;
+    block-size: 100%;
    }
 `;
 
@@ -109,6 +104,7 @@ function MainContent({ content }: { content: JSX.Element }) {
   const style = css`
     padding-top: ${euiThemeVars.euiSizeM};
     padding-botton: ${euiThemeVars.euiSizeM};
+    block-size: 100%;
    }
   `;
 

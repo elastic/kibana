@@ -8,13 +8,9 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { buildEsQuery } from '@kbn/es-query';
-import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { normalizeType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
-import type {
-  Datatable,
-  DatatableColumnType,
-  ExpressionFunctionDefinition,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
@@ -59,21 +55,6 @@ interface EssqlStartDependencies {
   nowProvider?: NowProviderPublicContract;
   search: ISearchGeneric;
   uiSettings: UiSettingsCommon;
-}
-
-function normalizeType(type: string): DatatableColumnType {
-  switch (type) {
-    case ES_FIELD_TYPES._INDEX:
-    case ES_FIELD_TYPES.GEO_POINT:
-    case ES_FIELD_TYPES.IP:
-      return KBN_FIELD_TYPES.STRING;
-    case '_version':
-      return KBN_FIELD_TYPES.NUMBER;
-    case 'datetime':
-      return KBN_FIELD_TYPES.DATE;
-    default:
-      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
-  }
 }
 
 function sanitize(value: string) {
