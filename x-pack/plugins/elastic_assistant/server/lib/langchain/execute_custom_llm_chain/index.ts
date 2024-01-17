@@ -8,9 +8,9 @@ import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { Tool } from 'langchain/tools';
-import { ChatOpenAI } from '@langchain/openai';
 
-import { PassThrough, Readable } from 'stream';
+import { streamFactory } from '@kbn/ml-response-stream/server';
+import { RunLogPatch } from '@langchain/core/dist/tracers/log_stream';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/openai';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -34,13 +34,13 @@ export const callAgentExecutor = async ({
   isEnabledKnowledgeBase,
   assistantTools = [],
   connectorId,
-  config,
   elserId,
   esClient,
   kbResource,
   langChainMessages,
   llmType,
   logger,
+  isStream = false,
   onNewReplacements,
   replacements,
   request,
@@ -48,24 +48,13 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  // do not commit to main. For development only
-  const azureCreds = config.preconfigured['my-gen-ai'];
   const llm = new ActionsClientLlm({
     actions,
     connectorId,
     request,
     llmType,
     logger,
-    streaming: true,
-  });
-  const llm3 = new ChatOpenAI({
-    modelName: 'gpt-3.5-turbo-1106',
-    temperature: 0,
-    streaming: true,
-    azureOpenAIApiKey: azureCreds.secrets.apiKey,
-    azureOpenAIApiVersion: azureCreds.secrets.apiVersion,
-    azureOpenAIApiInstanceName: azureCreds.secrets.apiInstanceName,
-    azureOpenAIApiDeploymentName: azureCreds.secrets.apiDeploymentName,
+    streaming: isStream,
   });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
@@ -113,41 +102,27 @@ export const callAgentExecutor = async ({
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
-    // agentType: 'chat-conversational-react-description',
     agentType: 'openai-functions',
     memory,
     verbose: false,
   });
 
-  if (true) {
+  if (isStream) {
     const logStream = await executor.streamLog({
       input: latestMessage[0].content,
       chat_history: [],
     });
 
-    const textEncoder = new TextEncoder();
-    const transformStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of logStream) {
-          if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
-            const addOp = chunk.ops[0];
-            if (
-              addOp.path.startsWith('/logs/ActionsClientLlm') &&
-              typeof addOp.value === 'string' &&
-              addOp.value.length
-            ) {
-              console.log('SERVER CHUNK', addOp.value);
-              controller.enqueue(textEncoder.encode(addOp.value));
-            }
-          }
-        }
-        controller.close();
-      },
-    });
-    // return Readable.from(transformStream).pipe(new PassThrough());
-    return Readable.from(transformStream, { highWaterMark: 16 }).pipe(
-      new PassThrough({ highWaterMark: 16 })
-    );
+    const {
+      end: streamEnd,
+      push,
+      responseWithHeaders,
+    } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+
+    // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
+    readStream(logStream, push, streamEnd);
+
+    return responseWithHeaders;
   }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
   // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
@@ -177,10 +152,34 @@ export const callAgentExecutor = async ({
   });
 
   return {
-    connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
-    trace_data: traceData,
-    replacements,
-    status: 'ok',
+    body: {
+      connector_id: connectorId,
+      data: llm.getActionResultData(), // the response from the actions framework
+      trace_data: traceData,
+      replacements,
+      status: 'ok',
+    },
+    headers: {
+      'content-type': 'application/json',
+    },
   };
 };
+async function readStream(
+  logStream: AsyncGenerator<RunLogPatch>,
+  push: (arg0: { type: string; payload: string }) => void,
+  streamEnd: () => void
+) {
+  for await (const chunk of logStream) {
+    if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
+      const addOp = chunk.ops[0];
+      if (
+        addOp.path.startsWith('/logs/ActionsClientLlm') &&
+        typeof addOp.value === 'string' &&
+        addOp.value.length
+      ) {
+        push({ type: 'content', payload: addOp.value });
+      }
+    }
+  }
+  streamEnd();
+}

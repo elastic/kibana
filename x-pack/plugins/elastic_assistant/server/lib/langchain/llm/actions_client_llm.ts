@@ -8,11 +8,9 @@
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { LLM } from 'langchain/llms/base';
 import { get } from 'lodash/fp';
 
-import { BaseChatModel } from 'langchain/chat_models/base';
-// import { BaseMessageChunk, ChatGeneration } from 'langchain/schema';
-import { AIMessage, BaseMessage, ChatResult } from 'langchain/schema';
 import { getMessageContentAndRole } from '../helpers';
 import { RequestBody } from '../types';
 
@@ -24,17 +22,15 @@ interface ActionsClientLlmParams {
   llmType?: string;
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
-  streaming?: boolean;
   traceId?: string;
 }
 
-export class ActionsClientLlm extends BaseChatModel {
+export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
   #logger: Logger;
   #request: KibanaRequest<unknown, unknown, RequestBody>;
   #actionResultData: string;
-  streaming = false;
   #traceId: string;
 
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
@@ -48,7 +44,6 @@ export class ActionsClientLlm extends BaseChatModel {
     llmType,
     logger,
     request,
-    streaming,
   }: ActionsClientLlmParams) {
     super({});
 
@@ -59,7 +54,6 @@ export class ActionsClientLlm extends BaseChatModel {
     this.#logger = logger;
     this.#request = request;
     this.#actionResultData = '';
-    this.streaming = streaming ?? this.streaming;
   }
 
   getActionResultData(): string {
@@ -116,25 +110,7 @@ export class ActionsClientLlm extends BaseChatModel {
       );
     }
     this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
-    return content;
-  }
 
-  async _generate(messages: BaseMessage[]): Promise<ChatResult> {
-    const prompt = messages.reduce((str, i) => str + i.content, '');
-    console.log('HEREHEREHERE: prompt:', prompt);
-    const response = await this._call(prompt);
-    console.log('HEREHEREHERE: response:', response);
-    const message = new AIMessage(response);
-    if (typeof message.content !== 'string') {
-      throw new Error('Cannot generate with a simple chat model when output is not a string.');
-    }
-    return {
-      generations: [
-        {
-          text: message.content,
-          message,
-        },
-      ],
-    };
+    return content; // per the contact of _call, return a string
   }
 }

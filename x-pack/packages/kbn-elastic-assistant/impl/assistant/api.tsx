@@ -83,7 +83,7 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
+  const isStream = assistantStreamingEnabled;
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
@@ -114,7 +114,7 @@ export const fetchConnectorExecuteAction = async ({
       };
 
   try {
-    if (isStream || isEnabledKnowledgeBase || isEnabledRAGAlerts) {
+    if (isStream) {
       const response = await http.fetch(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
@@ -125,7 +125,6 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: true,
         }
       );
-      console.log('response?.response?', response?.response);
 
       const streamResponse = response?.response?.body;
       if (!streamResponse) {
@@ -210,7 +209,6 @@ export const fetchConnectorExecuteAction = async ({
       traceData,
     };
   } catch (error) {
-    console.log('ERROR', error);
     const getReader = error?.response?.body?.getReader;
     const reader =
       isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;

@@ -11,6 +11,12 @@ import OpenAI from 'openai';
 import { PassThrough } from 'stream';
 import { IncomingMessage } from 'http';
 import {
+  ChatCompletionChunk,
+  ChatCompletionCreateParamsStreaming,
+  ChatCompletionMessageParam,
+} from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import {
   RunActionParamsSchema,
   RunActionResponseSchema,
   DashboardActionParamsSchema,
@@ -25,7 +31,11 @@ import type {
   RunActionResponse,
   StreamActionParams,
 } from '../../../common/openai/types';
-import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
+import {
+  DEFAULT_OPENAI_MODEL,
+  OpenAiProviderType,
+  SUB_ACTION,
+} from '../../../common/openai/constants';
 import {
   DashboardActionParams,
   DashboardActionResponse,
@@ -175,7 +185,6 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       data: executeBody,
       ...axiosOptions,
     });
-    // console.log('streamApi response', response);
     return stream ? pipeStreamingResponse(response) : response.data;
   }
 
@@ -230,13 +239,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return res.pipe(new PassThrough());
   }
 
-  public async invokeAsyncIterator(body: InvokeAIActionParams): Promise<PassThrough> {
-    const stream = await this.openAI.chat.completions.create({
+  public async invokeAsyncIterator(
+    body: InvokeAIActionParams
+  ): Promise<Stream<ChatCompletionChunk>> {
+    const messages = body.messages as unknown as ChatCompletionMessageParam[];
+    const requestBody: ChatCompletionCreateParamsStreaming = {
       ...body,
       stream: true,
-    });
-    console.log('stream', stream);
-    return stream;
+      messages,
+      model:
+        body.model ??
+        ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+    };
+    return this.openAI.chat.completions.create(requestBody);
   }
 
   /**

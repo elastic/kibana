@@ -41,7 +41,6 @@ import { appContextService, GetRegisteredTools } from './services/app_context';
 interface CreateRouteHandlerContextParams {
   core: CoreSetup<ElasticAssistantPluginStart, unknown>;
   logger: Logger;
-  config: PluginInitializerContext['config'];
   getRegisteredTools: GetRegisteredTools;
   telemetry: AnalyticsServiceSetup;
 }
@@ -56,11 +55,9 @@ export class ElasticAssistantPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: PluginInitializerContext['config'];
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get();
   }
 
   private createRouteHandlerContext = ({
@@ -68,7 +65,6 @@ export class ElasticAssistantPlugin
     logger,
     getRegisteredTools,
     telemetry,
-    config,
   }: CreateRouteHandlerContextParams): IContextProvider<
     ElasticAssistantRequestHandlerContext,
     typeof PLUGIN_ID
@@ -81,7 +77,6 @@ export class ElasticAssistantPlugin
         getRegisteredTools,
         logger,
         telemetry,
-        config,
       };
     };
   };
@@ -98,7 +93,6 @@ export class ElasticAssistantPlugin
           return appContextService.getRegisteredTools(pluginName);
         },
         telemetry: core.analytics,
-        config: this.config,
       })
     );
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));

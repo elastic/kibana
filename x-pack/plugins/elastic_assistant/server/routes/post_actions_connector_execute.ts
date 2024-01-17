@@ -46,7 +46,6 @@ export const postActionsConnectorExecuteRoute = (
       const assistantContext = await context.elasticAssistant;
       const logger: Logger = assistantContext.logger;
       const telemetry = assistantContext.telemetry;
-      const config = assistantContext.config;
 
       try {
         const connectorId = decodeURIComponent(request.params.connectorId);
@@ -65,7 +64,6 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
-          console.log('result', result);
           return response.ok(result);
         }
 
@@ -97,7 +95,7 @@ export const postActionsConnectorExecuteRoute = (
           latestReplacements = { ...latestReplacements, ...newReplacements };
         };
 
-        const langChainResponseBody = await callAgentExecutor({
+        const langChainResponse = await callAgentExecutor({
           alertsIndexPattern: request.body.alertsIndexPattern,
           allow: request.body.allow,
           allowReplacement: request.body.allowReplacement,
@@ -105,11 +103,11 @@ export const postActionsConnectorExecuteRoute = (
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           assistantTools,
           connectorId,
-          config,
           elserId,
           esClient,
           kbResource: ESQL_RESOURCE,
           langChainMessages,
+          isStream: request.body.params.subAction !== 'invokeAI',
           // TODO make dynamic
           llmType: 'openai',
           logger,
@@ -119,10 +117,7 @@ export const postActionsConnectorExecuteRoute = (
           size: request.body.size,
           telemetry,
         });
-        console.log('helloworld, returning!!', langChainResponseBody);
-        return response.ok({
-          body: langChainResponseBody,
-        });
+        return response.ok(langChainResponse);
 
         telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
@@ -130,14 +125,13 @@ export const postActionsConnectorExecuteRoute = (
         });
         return response.ok({
           body: {
-            ...langChainResponseBody,
+            ...langChainResponse,
             replacements: latestReplacements,
           },
         });
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
-        console.log('error??????', error);
         telemetry.reportEvent(INVOKE_ASSISTANT_ERROR_EVENT.eventType, {
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,

@@ -96,7 +96,6 @@ export class ActionsClientLlm extends ChatOpenAI {
   > {
     return this.caller.call(async () => {
       try {
-        console.log('RequestRequestRequest', completionRequest);
         const requestBody = this.formatRequestForActionsClient(completionRequest);
         // stream
 
@@ -111,7 +110,6 @@ export class ActionsClientLlm extends ChatOpenAI {
           );
         }
 
-        console.log('actions client result::::', actionResult);
         // cast typing as this is the contract of the actions client
         const result = get('data', actionResult) as
           | AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>
@@ -128,7 +126,6 @@ export class ActionsClientLlm extends ChatOpenAI {
         // The type you're expecting from OpenAI is AsyncIterable where I am expecting IncomingMessage.
         // return (result as unknown as IncomingMessage).pipe(new PassThrough());
       } catch (e) {
-        console.log('there was an error', e);
         // const error = wrapOpenAIClientError(e);
         throw e;
       }
@@ -156,7 +153,6 @@ export class ActionsClientLlm extends ChatOpenAI {
     };
   } {
     this.#logger.debug(`ActionsClientLlm#_call assistantMessage:\n${JSON.stringify('todo')} `);
-    console.log('completionRequest', completionRequest);
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,

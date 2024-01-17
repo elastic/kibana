@@ -9,9 +9,10 @@ import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/s
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { BaseMessage } from 'langchain/schema';
 import { Logger } from '@kbn/logging';
-import { KibanaRequest } from '@kbn/core-http-server';
+import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from 'langchain/callbacks';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import { RequestBody, ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
@@ -28,6 +29,7 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
+  isStream?: boolean;
   onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -37,7 +39,13 @@ export interface AgentExecutorParams {
   telemetry: AnalyticsServiceSetup;
 }
 
-export type AgentExecutorResponse = Promise<ResponseBody>;
+interface StaticReturnType {
+  body: ResponseBody;
+  headers: ResponseHeaders;
+}
+export type AgentExecutorResponse = Promise<
+  StaticReturnType | StreamFactoryReturnType['responseWithHeaders']
+>;
 
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 

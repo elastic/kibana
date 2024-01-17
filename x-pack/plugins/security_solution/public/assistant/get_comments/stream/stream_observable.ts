@@ -43,14 +43,12 @@ export const getStreamObservable = ({
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
-    function readLangChain() {
+    function readSSE() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
-            console.log('WE ARE HERE reading langchain', { done, value });
             if (done) {
-              console.log('WE ARE HERE done', chunks.join(''));
               observer.next({
                 chunks,
                 message: chunks.join(''),
@@ -75,7 +73,20 @@ export const getStreamObservable = ({
             } else {
               const output = decoded;
               const lines = output.split('\n');
-              nextChunks = lines;
+              nextChunks = lines.reduce((acc: string[], b: string) => {
+                if (b.length) {
+                  try {
+                    const obj = JSON.parse(b);
+                    if (obj.type === 'content') {
+                      return [...acc, obj.payload];
+                    }
+                    return acc;
+                  } catch (e) {
+                    return acc;
+                  }
+                }
+                return acc;
+              }, []);
               nextChunks.forEach((chunk: string) => {
                 chunks.push(chunk);
                 observer.next({
@@ -115,10 +126,6 @@ export const getStreamObservable = ({
             }
 
             const decoded = decoder.decode(value);
-            console.log('inside read', {
-              value,
-              decoded,
-            });
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
@@ -127,7 +134,6 @@ export const getStreamObservable = ({
               lines[0] = openAIBuffer + lines[0];
               openAIBuffer = lines.pop() || '';
               nextChunks = getOpenAIChunks(lines);
-              console.log('nextChunks', nextChunks);
             }
             nextChunks.forEach((chunk: string) => {
               chunks.push(chunk);
@@ -230,7 +236,7 @@ export const getStreamObservable = ({
       });
       observer.complete();
     }
-    if (true) readLangChain();
+    if (true) readSSE();
     else if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     else badConnector();
@@ -275,7 +281,6 @@ export const getStreamObservable = ({
  * @returns {string[]} - Parsed string array from the OpenAI response.
  */
 const getOpenAIChunks = (lines: string[]): string[] => {
-  console.log('getOpenAIChunks', lines);
   const nextChunk = lines.map((line) => {
     try {
       const openaiResponse = JSON.parse(line);
