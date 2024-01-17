@@ -8,7 +8,7 @@
 import React, { Suspense, useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { ValidFeatureId, AlertConsumers } from '@kbn/rule-data-utils';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -428,7 +428,8 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter = hasFieldsForAAD;
+  const showActionAlertsFilter =
+    hasFieldsForAAD || producerId === AlertConsumers.SIEM || hasAlertsMappings;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
