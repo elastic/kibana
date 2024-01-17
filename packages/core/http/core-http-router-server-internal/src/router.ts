@@ -128,8 +128,8 @@ export interface RouterOptions {
     /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
     defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
 
-    /** {@inheritdoc VersionedRouterArgs['useDefaultResolutionStrategyForInternalPaths'] }*/
-    useDefaultResolutionStrategyForInternalPaths?: string[];
+    /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
+    useVersionResolutionStrategyForInternalPaths?: string[];
   };
 }
 

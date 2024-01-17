@@ -17,7 +17,7 @@ const routerOptions: RouterOptions = {
   isDev: false,
   versionedRouterOptions: {
     defaultHandlerResolutionStrategy: 'oldest',
-    useDefaultResolutionStrategyForInternalPaths: [],
+    useVersionResolutionStrategyForInternalPaths: [],
   },
 };
 

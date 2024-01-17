@@ -255,7 +255,7 @@ export class HttpService
 function getVersionedRouterOptions(config: HttpConfig): RouterOptions['versionedRouterOptions'] {
   return {
     defaultHandlerResolutionStrategy: config.versioned.versionResolution,
-    useDefaultResolutionStrategyForInternalPaths:
-      config.versioned.useDefaultResolutionStrategyForInternalPaths,
+    useVersionResolutionStrategyForInternalPaths:
+      config.versioned.useVersionResolutionStrategyForInternalPaths,
   };
 }

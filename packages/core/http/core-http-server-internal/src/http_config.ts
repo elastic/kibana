@@ -205,7 +205,7 @@ const configSchema = schema.object(
       strictClientVersionCheck: schema.boolean({ defaultValue: true }),
 
       /** This should not be configurable in serverless */
-      useDefaultResolutionStrategyForInternalPaths: offeringBasedSchema({
+      useVersionResolutionStrategyForInternalPaths: offeringBasedSchema({
         traditional: schema.arrayOf(schema.string(), { defaultValue: [] }),
         serverless: schema.never(),
       }),
@@ -286,7 +286,7 @@ export class HttpConfig implements IHttpConfig {
   public versioned: {
     versionResolution: HandlerResolutionStrategy;
     strictClientVersionCheck: boolean;
-    useDefaultResolutionStrategyForInternalPaths: string[];
+    useVersionResolutionStrategyForInternalPaths: string[];
   };
   public shutdownTimeout: Duration;
   public restrictInternalApis: boolean;

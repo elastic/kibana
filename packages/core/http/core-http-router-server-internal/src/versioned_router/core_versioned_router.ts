@@ -36,33 +36,33 @@ export interface VersionedRouterArgs {
    *
    * @default []
    */
-  useDefaultResolutionStrategyForInternalPaths?: string[];
+  useVersionResolutionStrategyForInternalPaths?: string[];
 }
 
 export class CoreVersionedRouter implements VersionedRouter {
   private readonly routes = new Set<CoreVersionedRoute>();
-  public readonly useDefaultResolutionStrategyForInternalPaths: Map<string, boolean> = new Map();
+  public readonly useVersionResolutionStrategyForInternalPaths: Map<string, boolean> = new Map();
   public static from({
     router,
     defaultHandlerResolutionStrategy,
     isDev,
-    useDefaultResolutionStrategyForInternalPaths,
+    useVersionResolutionStrategyForInternalPaths,
   }: VersionedRouterArgs) {
     return new CoreVersionedRouter(
       router,
       defaultHandlerResolutionStrategy,
       isDev,
-      useDefaultResolutionStrategyForInternalPaths
+      useVersionResolutionStrategyForInternalPaths
     );
   }
   private constructor(
     public readonly router: IRouter,
     public readonly defaultHandlerResolutionStrategy: HandlerResolutionStrategy = 'oldest',
     public readonly isDev: boolean = false,
-    useDefaultResolutionStrategyForInternalPaths: string[] = []
+    useVersionResolutionStrategyForInternalPaths: string[] = []
   ) {
-    for (const path of useDefaultResolutionStrategyForInternalPaths) {
-      this.useDefaultResolutionStrategyForInternalPaths.set(path, true);
+    for (const path of useVersionResolutionStrategyForInternalPaths) {
+      this.useVersionResolutionStrategyForInternalPaths.set(path, true);
     }
   }
 

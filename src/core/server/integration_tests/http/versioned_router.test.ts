@@ -24,7 +24,7 @@ let server: HttpService;
 let logger: ReturnType<typeof loggingSystemMock.create>;
 
 interface AdditionalOptions {
-  useDefaultResolutionStrategyForInternalPaths?: string[];
+  useVersionResolutionStrategyForInternalPaths?: string[];
 }
 
 describe('Routing versioned requests', () => {
@@ -38,8 +38,8 @@ describe('Routing versioned requests', () => {
       versioned: {
         versionResolution: cliArgs.dev ? 'none' : cliArgs.serverless ? 'newest' : 'oldest',
         strictClientVersionCheck: !cliArgs.serverless,
-        useDefaultResolutionStrategyForInternalPaths:
-          options.useDefaultResolutionStrategyForInternalPaths ?? [],
+        useVersionResolutionStrategyForInternalPaths:
+          options.useVersionResolutionStrategyForInternalPaths ?? [],
       },
     };
     server = createHttpServer({
@@ -509,7 +509,7 @@ describe('Routing versioned requests', () => {
   it('ignores version parameters for select internal paths', async () => {
     await setupServer(
       {},
-      { useDefaultResolutionStrategyForInternalPaths: ['/my_path_to_bypass/{id?}'] }
+      { useVersionResolutionStrategyForInternalPaths: ['/my_path_to_bypass/{id?}'] }
     );
 
     router.versioned
