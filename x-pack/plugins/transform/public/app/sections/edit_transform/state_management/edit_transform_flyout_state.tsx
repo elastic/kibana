@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  type FC,
-  type PropsWithChildren,
-} from 'react';
+import React, { createContext, useContext, useMemo, type FC, type PropsWithChildren } from 'react';
 import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { useDispatch, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
+import useMount from 'react-use/lib/useMount';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
@@ -66,10 +60,9 @@ export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> =
   const store = useMemo(getReduxStore, []);
 
   // Apply original transform config to redux form state.
-  useEffect(() => {
+  useMount(() => {
     store.dispatch(editTransformFlyoutSlice.actions.initialize(props));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  });
 
   return (
     <EditTransformFlyoutContext.Provider value={props}>
