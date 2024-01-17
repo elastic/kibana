@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
-  ENDPOINT_ARTIFACT_LISTS,
+  ENDPOINT_LIST_DESCRIPTION,
+  ENDPOINT_LIST_ID,
+  ENDPOINT_LIST_NAME,
   EXCEPTION_LIST_ITEM_URL,
   INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
 } from '@kbn/securitysolution-list-constants';
@@ -17,6 +20,7 @@ import type {
   CreateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { memoize } from 'lodash';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { catchAxiosErrorFormatAndThrow } from '../../../common/endpoint/format_axios_error';
 import { TRUSTED_APPS_EXCEPTION_LIST_DEFINITION } from '../../../public/management/pages/trusted_apps/constants';
 import { EVENT_FILTER_LIST_DEFINITION } from '../../../public/management/pages/event_filters/constants';
@@ -26,8 +30,10 @@ import type { NewTrustedApp } from '../../../common/endpoint/types';
 import { newTrustedAppToCreateExceptionListItem } from '../../../public/management/pages/trusted_apps/service/mappers';
 
 const ensureArtifactListExists = memoize(
-  async (kbnClient: KbnClient, artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS) => {
-    const listId = ENDPOINT_ARTIFACT_LISTS[artifactType].id;
+  async (
+    kbnClient: KbnClient,
+    artifactType: keyof typeof ENDPOINT_ARTIFACT_LISTS | 'endpointExceptions'
+  ) => {
     let listDefinition: CreateExceptionListSchema;
 
     switch (artifactType) {
@@ -46,16 +52,25 @@ const ensureArtifactListExists = memoize(
       case 'trustedApps':
         listDefinition = TRUSTED_APPS_EXCEPTION_LIST_DEFINITION;
         break;
+
+      case 'endpointExceptions':
+        listDefinition = {
+          name: ENDPOINT_LIST_NAME,
+          namespace_type: 'agnostic',
+          description: ENDPOINT_LIST_DESCRIPTION,
+          list_id: ENDPOINT_LIST_ID,
+          type: ExceptionListTypeEnum.ENDPOINT,
+        };
+
+      default:
+        throw new Error(`Unknown Artifact list: ${artifactType}`);
     }
 
     await kbnClient
       .request({
         method: 'POST',
         path: INTERNAL_EXCEPTIONS_LIST_ENSURE_CREATED_URL,
-        body: {
-          ...listDefinition,
-          list_id: listId,
-        },
+        body: listDefinition,
         headers: {
           'elastic-api-version': '1',
         },
@@ -118,6 +133,14 @@ export const createBlocklist = async (
 };
 
 export const createHostIsolationException = async (
+  kbnClient: KbnClient,
+  data: CreateExceptionListItemSchema
+): Promise<ExceptionListItemSchema> => {
+  await ensureArtifactListExists(kbnClient, 'hostIsolationExceptions');
+  return createExceptionListItem(kbnClient, data);
+};
+
+export const createEndpointException = async (
   kbnClient: KbnClient,
   data: CreateExceptionListItemSchema
 ): Promise<ExceptionListItemSchema> => {

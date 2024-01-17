@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { EndpointExceptionsGenerator } from '../../../../common/endpoint/data_generators/endpoint_exceptions_generator';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import type { ExecutionThrottler } from '../../common/execution_throttler';
@@ -141,6 +142,20 @@ export const createEndpointExceptions = async ({
   log,
   count,
   reportProgress,
+  throttler,
 }: ArtifactCreationOptions): Promise<void> => {
-  log.warning(`TBD: need to implement: createEndpointExceptions()`);
+  const generate = new EndpointExceptionsGenerator();
+  let doneCount = 0;
+
+  loop(count, () => {
+    throttler.addToQueue(async () => {
+      await createHostIsolationException(
+        kbnClient,
+        generate.generateEndpointExceptionForCreate()
+      ).finally(() => {
+        doneCount++;
+        reportProgress({ doneCount });
+      });
+    });
+  });
 };
