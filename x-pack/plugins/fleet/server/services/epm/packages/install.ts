@@ -875,7 +875,7 @@ export async function installCustomPackage(
     acc.set(asset.path, asset.content);
     return acc;
   }, new Map<string, Buffer | undefined>());
-  const paths = [...Object.keys(assetsMap)];
+  const paths = [...assetsMap.keys()];
 
   const packageInstallContext: PackageInstallContext = {
     assetsMap,
