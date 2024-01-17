@@ -26,7 +26,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
         .service({
           name: `synthtrace-high-cardinality-0`,
           environment: ENVIRONMENT,
-          agentName: 'nodejs',
+          agentName: 'java',
         })
         .instance('instance');
 
@@ -43,7 +43,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: errorMessage, type: getExceptionTypeForIndex(index) })
+                .error({
+                  message: errorMessage,
+                  type: getExceptionTypeForIndex(index),
+                  culprit: 'request (node_modules/@elastic/transport/src/Transport.ts)',
+                })
                 .timestamp(timestamp + 50)
             );
         });

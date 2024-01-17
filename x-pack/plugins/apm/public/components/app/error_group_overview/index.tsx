@@ -38,6 +38,8 @@ type ErrorGroupMainStatistics =
 type ErrorGroupDetailedStatistics =
   APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
 
+type ErrorFields = keyof ErrorGroupMainStatistics['errorGroups'][0];
+
 const INITIAL_STATE_MAIN_STATISTICS: {
   mainStatistics: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
@@ -94,14 +96,14 @@ export function ErrorGroupOverview() {
 
   const tableSearchBar = useMemo(() => {
     return {
-      fieldsToSearch: ['name', 'groupId'],
+      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as ErrorFields[],
       maxCountExceeded,
       isSearchSideSearchQueryActive,
       onChangeSearchQuery: setDebouncedSearchQuery,
       onChangeCurrentPage: () => {},
       placeholder: i18n.translate(
         'xpack.apm.errorsTable.filterErrorsPlaceholder',
-        { defaultMessage: 'Search errors by message or group ID' }
+        { defaultMessage: 'Search errors by message, type or culprit' }
       ),
     };
   }, [

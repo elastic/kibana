@@ -86,9 +86,8 @@ export async function getErrorGroupMainStatistics({
           ...wildcardQuery(ERROR_LOG_MESSAGE, searchQuery),
           ...wildcardQuery(ERROR_EXC_MESSAGE, searchQuery),
           ...wildcardQuery(ERROR_GROUP_NAME, searchQuery),
-          ...wildcardQuery(ERROR_GROUP_ID, searchQuery, {
-            leadingWildcard: false,
-          }),
+          ...wildcardQuery(ERROR_EXC_TYPE, searchQuery),
+          ...wildcardQuery(ERROR_CULPRIT, searchQuery),
         ],
         minimum_should_match: 1,
       }

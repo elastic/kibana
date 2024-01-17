@@ -40,7 +40,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
           .service({
             name: `synthtrace-high-cardinality-${index}`,
             environment: ENVIRONMENT,
-            agentName: 'go',
+            agentName: 'java',
           })
           .instance(`instance-${index}`)
       );
@@ -67,6 +67,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
                 .error({
                   message: '[ResponseError] index_not_found_exception',
                   type: 'ResponseError',
+                  culprit: 'elasticsearch',
                 })
                 .timestamp(timestamp + 50)
             )
