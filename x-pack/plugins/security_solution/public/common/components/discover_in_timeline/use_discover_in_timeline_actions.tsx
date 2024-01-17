@@ -205,6 +205,10 @@ export const useDiscoverInTimelineActions = (
       } else {
         // If no saved search exists. Create a new saved search instance and associate it with the timeline.
         try {
+          // Make sure we're not creating a saved search while a previous creation call is in progress
+          if (status !== 'idle') {
+            return;
+          }
           dispatch(
             timelineActions.startTimelineSaving({
               id: TimelineId.active,
@@ -218,7 +222,7 @@ export const useDiscoverInTimelineActions = (
           const responseIsEmpty = !response || !response?.id;
           if (responseIsEmpty) {
             throw new Error('Response is empty');
-          } else if (!savedSearchId && !responseIsEmpty && status !== 'loading') {
+          } else if (!savedSearchId && !responseIsEmpty) {
             dispatch(
               timelineActions.updateSavedSearchId({
                 id: TimelineId.active,
