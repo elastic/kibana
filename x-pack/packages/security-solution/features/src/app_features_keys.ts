@@ -45,6 +45,11 @@ export enum AppFeatureSecurityKey {
   osqueryAutomatedResponseActions = 'osquery_automated_response_actions',
 
   /**
+   * Enables Agent Tamper Protection
+   */
+  endpointProtectionUpdates = 'endpoint_protection_updates',
+
+  /**
    * Enables managing endpoint exceptions on rules and alerts
    */
   endpointExceptions = 'endpointExceptions',

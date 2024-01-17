@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { loadPage } from '../../tasks/common';
-import { login } from '../../tasks/login';
-import { visitPolicyDetailsPage } from '../../screens/policy_details';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { APP_POLICIES_PATH } from '../../../../../common/constants';
+import type { IndexedFleetEndpointPolicyResponse } from '../../../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { login } from '../../../../tasks/login';
+import { loadPage } from '../../../../tasks/common';
+import { APP_POLICIES_PATH } from '../../../../../../../common/constants';
 
 describe(
-  'When displaying the Policy Details in Security Essentials PLI',
+  'When displaying the Policy Details in Endpoint Essentials PLI',
   {
     tags: ['@serverless'],
     env: {
       ftrConfig: {
-        productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'complete' },
+        ],
       },
     },
   },
@@ -47,12 +49,6 @@ describe(
       login();
     });
 
-    it('should display upselling section for protections', () => {
-      visitPolicyDetailsPage(policyId);
-      cy.getByTestSubj('endpointPolicy-protectionsLockedCard', { timeout: 60000 })
-        .should('exist')
-        .and('be.visible');
-    });
     it('should display upselling section for protection updates', () => {
       loadPage(`${APP_POLICIES_PATH}/${policyId}/protectionUpdates`);
       [
@@ -60,9 +56,16 @@ describe(
         'endpointPolicy-protectionUpdatesLockedCard',
         'endpointPolicy-protectionUpdatesLockedCard-badge',
       ].forEach((testSubj) => {
-        cy.getByTestSubj(testSubj, { timeout: 60000 }).should('exist').and('be.visible');
+        cy.getByTestSubj(testSubj).should('not.exist');
       });
-      cy.getByTestSubj('protection-updates-layout').should('not.exist');
+      [
+        'protection-updates-warning-callout',
+        'protection-updates-automatic-updates-enabled',
+        'protection-updates-manifest-switch',
+        'protection-updates-manifest-name-title',
+      ].forEach((testSubj) => {
+        cy.getByTestSubj(testSubj).should('exist').and('be.visible');
+      });
     });
   }
 );

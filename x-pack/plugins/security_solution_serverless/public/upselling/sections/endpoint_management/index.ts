@@ -18,3 +18,9 @@ export const RuleDetailsEndpointExceptionsLazy = lazy(() =>
     default: RuleDetailsEndpointExceptions,
   }))
 );
+
+export const EndpointProtectionUpdatesLazy = lazy(() =>
+  import('./endpoint_protection_updates').then(({ EndpointProtectionUpdates }) => ({
+    default: EndpointProtectionUpdates,
+  }))
+);
