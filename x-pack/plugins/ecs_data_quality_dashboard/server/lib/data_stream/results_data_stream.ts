@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { InstallParams } from '@kbn/data-stream-adapter';
-import { DataStreamSpacesAdapter } from '@kbn/data-stream-adapter';
-import { ecsFieldMap } from '@kbn/data-stream-adapter/ecs';
+import { DataStreamSpacesAdapter, ecsFieldMap, type InstallParams } from '@kbn/data-stream-adapter';
 import { resultsFieldMap } from './results_field_map';
 
 const TOTAL_FIELDS_LIMIT = 2500;

@@ -112,9 +112,6 @@ export class DataStreamAdapter {
     pluginStop$,
     tasksTimeoutMs,
   }: InstallParams) {
-    if (this.installed) {
-      throw new Error('Cannot re-install data stream');
-    }
     this.installed = true;
 
     const esClient = await esClientToResolve;

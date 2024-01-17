@@ -177,10 +177,13 @@ export const useResultsRollup = ({ ilmPhases, patterns }: Props): UseResultsRoll
             indexName,
             isCheckAll: true,
             numberOfDocuments: getDocsCount({ indexName, stats }),
+            numberOfFields: partitionedFieldMetadata.all.length,
             numberOfIncompatibleFields: getIndexIncompatible({
               indexName,
               results,
             }),
+            numberOfEcsFields: partitionedFieldMetadata.ecsCompliant.length,
+            numberOfCustomFields: partitionedFieldMetadata.custom.length,
             numberOfIndices: 1,
             numberOfIndicesChecked: 1,
             numberOfSameFamily: getTotalPatternSameFamily(results),

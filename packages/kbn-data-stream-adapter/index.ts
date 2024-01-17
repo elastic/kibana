@@ -8,6 +8,9 @@
 
 export { DataStreamAdapter } from './src/data_stream_adapter';
 export { DataStreamSpacesAdapter } from './src/data_stream_spaces_adapter';
+export { retryTransientEsErrors } from './src/retry_transient_es_errors';
+export { ecsFieldMap, type EcsFieldMap } from './src/field_maps/ecs_field_map';
+
 export type {
   DataStreamAdapterParams,
   SetComponentTemplateParams,
