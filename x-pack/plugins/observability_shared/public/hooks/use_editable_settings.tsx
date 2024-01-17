@@ -9,7 +9,7 @@ import React, { useMemo, useState } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import {
+import type {
   FieldDefinition,
   OnFieldChangeFn,
   UiSettingMetadata,
