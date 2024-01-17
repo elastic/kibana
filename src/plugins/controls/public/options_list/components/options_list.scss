@@ -31,10 +31,12 @@
       color: $euiColorDanger;
     }
 
-    .euiFilterButton__text-hasNotification {
-      flex-grow: 1;
-      justify-content: space-between;
-      width: 0;
+    .euiFilterButton__text {
+      text-align: left;
+
+      &-hasNotification {
+        flex-grow: 1;
+      }
     }
   }
 
