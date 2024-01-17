@@ -30,6 +30,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('Connector app is loaded and  has no connectors', async () => {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
     });
+    it('has embedded dev console', async () => {
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+    });
     describe('create and configure connector', async () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
         await pageObjects.svlSearchConnectorsPage.connectorConfigurationPage.createConnector();
