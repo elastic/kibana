@@ -7,13 +7,11 @@
 
 import React from 'react';
 import { EuiIcon, EuiButton } from '@elastic/eui';
-import { useObservable } from 'react-use';
 import { MANAGE_PROJECTS } from './translations';
-import { useKibana } from '../../../../lib/kibana';
+import { useGetStartedContext } from '../context/get_started_context';
 
 const ManageProjectsButtonComponent = () => {
-  const { projectsUrl$ } = useKibana().services;
-  const projectsUrl = useObservable(projectsUrl$);
+  const { projectsUrl } = useGetStartedContext();
   return projectsUrl ? (
     <EuiButton
       aria-label={MANAGE_PROJECTS}

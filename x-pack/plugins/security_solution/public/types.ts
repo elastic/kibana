@@ -83,8 +83,6 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
-import type { SecurityProductTypes } from './common/components/landing_page/get_started/configs';
-import type { StepId } from './common/components/landing_page/get_started/types';
 import type { GetStartedPageService } from './contract_get_started_page';
 
 export interface SetupPlugins {
@@ -150,10 +148,6 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  productTypes$: Observable<SecurityProductTypes | undefined>;
-  projectFeaturesUrl$?: Observable<string | undefined>;
-  projectsUrl$?: Observable<string | undefined>;
-  availableSteps$: Observable<StepId[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
   getStartedPageSettings: GetStartedPageService['getSettings'];
@@ -193,10 +187,6 @@ export interface PluginSetup {
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setAvailableSteps: (availableSteps: StepId[]) => void;
-  setProductTypes: (productTypes: SecurityProductTypes) => void;
-  setProjectFeaturesUrl: (projectFeaturesUrl: string | undefined) => void;
-  setProjectsUrl: (projectsUrl: string | undefined) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;

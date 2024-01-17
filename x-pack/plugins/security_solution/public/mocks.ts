@@ -11,13 +11,16 @@ import type { BreadcrumbsNav } from './common/breadcrumbs';
 import type { NavigationLink } from './common/links/types';
 import { allowedExperimentalValues } from '../common/experimental_features';
 import type { PluginStart, PluginSetup, ContractStartServices } from './types';
+import { GetStartedPageService } from './contract_get_started_page';
 
 const upselling = new UpsellingService();
+const getStartedPageService = new GetStartedPageService();
 
 export const contractStartServicesMock: ContractStartServices = {
   extraRoutes$: of([]),
   getComponents$: jest.fn(() => of({})),
   upselling,
+  getStartedPageSettings: jest.fn(),
 };
 
 const setupMock = (): PluginSetup => ({
@@ -35,6 +38,7 @@ const startMock = (): PluginStart => ({
   ),
   setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
+  setGetStartedPageSettings: getStartedPageService,
 });
 
 export const securitySolutionMock = {
