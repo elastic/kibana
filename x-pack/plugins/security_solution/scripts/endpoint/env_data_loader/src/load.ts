@@ -134,9 +134,6 @@ export const load = async ({
       }),
   ]);
 
-  // DO => re-enable the task
-  //
-
   await throttler.complete();
   reportProgress.stopReporting();
 };
