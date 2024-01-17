@@ -15,10 +15,12 @@ import { chatClient, esClient, synthtraceEsClients } from '../../services';
 async function evaluateEsqlQuery({
   question,
   expected,
+  execute,
   criteria = [],
 }: {
   question: string;
   expected?: string;
+  execute?: boolean;
   criteria?: string[];
 }): Promise<void> {
   const conversation = await chatClient.complete(question);
@@ -30,7 +32,7 @@ async function evaluateEsqlQuery({
       ${expected}`,
       ]
       : []),
-    ...(expected ? [`The query successfully executed without an error`] : []),
+    ...(execute ? [`The query successfully executed without an error`] : [`The query was not executed`]),
     ...criteria,
   ]);
 
@@ -74,11 +76,12 @@ describe('ES|QL query generation', () => {
       it('top 10 unique domains', async () => {
         await evaluateEsqlQuery({
           question:
-            'For standard Elastic ECS compliant packetbeat data view, create an ES|QL query that shows the top 10 unique destination.domain by doc count',
+            'For standard Elastic ECS compliant packetbeat data view, shows the top 10 unique destination.domain by doc count',
           expected: `FROM packetbeat-*
           | STATS doc_count = COUNT(destination.domain) BY destination.domain
           | SORT doc_count DESC
           | LIMIT 10`,
+          execute: true
         });
       });
 
@@ -119,7 +122,7 @@ describe('ES|QL query generation', () => {
         });
       });
 
-      it('five earliest employees', async () => {
+      it('employees five earliest', async () => {
         await evaluateEsqlQuery({
           question:
             'From employees, I want to see the 5 earliest employees (hire_date), I want to display only the month and the year that they were hired in and their employee number (emp_no). Format the date as e.g. "September 2019".',
@@ -128,6 +131,7 @@ describe('ES|QL query generation', () => {
           | SORT hire_date
           | KEEP emp_no, hire_date_formatted
           | LIMIT 5`,
+          execute: true
         });
       });
 
@@ -144,11 +148,12 @@ describe('ES|QL query generation', () => {
       it('employee hire date', async () => {
         await evaluateEsqlQuery({
           question:
-            'From employees, give me a query that shows 10 employees whose hire_date year was 2024',
+            'From employees, show 10 employees whose hire_date year was 2024',
           expected: `FROM employees
           | EVAL year_of_hire = DATE_EXTRACT("year", hire_date)
           | WHERE year_of_hire == 2024
           | LIMIT 10`,
+          execute: true
         });
       });
 
@@ -162,34 +167,38 @@ describe('ES|QL query generation', () => {
     it('logs avg cpu', async () => {
       await evaluateEsqlQuery({
         question:
-          'My metric logs data (ECS) is in .ds-metrics-apm* Show me a query that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
+          'My metric data (ECS) is in .ds-metrics-apm* Show me a query that gets the average CPU per service, limit it to the top 10 results, in 1m buckets, and only include the last 15m. ',
         expected: `FROM .ds-metrics-apm*
         | WHERE @timestamp >= NOW() - 15 minutes
         | EVAL bucket = DATE_TRUNC(1 minute, @timestamp)
         | STATS avg_cpu = AVG(system.cpu.total.norm.pct) BY bucket, service.name
+        | SORT avg_cpu DESC
         | LIMIT 10`,
+        execute: false
       });
     });
 
-    // it('metricbeat avg cpu', async () => {
-    //   await evaluateEsqlQuery({
-    //     question: `from metricbeat*, using ES|QL, I want to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
-    //     expected: `FROM metricbeat*
-    //     | EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
-    //     | STATS AVG(cpu_pct_normalized) BY host.name`,
-    //   });
-    // });
+    it('metricbeat avg cpu', async () => {
+      await evaluateEsqlQuery({
+        question: `From metricbeat*, using ES|QL, show me a query to see the percentage of CPU time normalized by the number of CPU cores, broken down by hostname. the fields are system.cpu.user.pct, system.cpu.system.pct, and system.cpu.cores`,
+        expected: `FROM metricbeat*
+        | EVAL cpu_pct_normalized = (system.cpu.user.pct + system.cpu.system.pct) / system.cpu.cores
+        | STATS AVG(cpu_pct_normalized) BY host.name`,
+        execute: false
+      });
+    });
 
-    // it('postgres avg duration', async () => {
-    //   await evaluateEsqlQuery({
-    //     question:
-    //       'generate an esql query to extract the query duration from postgres log messages in postgres-logs*, using ECS fields, and calculate the avg',
-    //     expected: `FROM postgres-logs
-    //     | DISSECT message "%{} duration: %{query_duration} ms"
-    //     | EVAL query_duration_num = TO_DOUBLE(query_duration)
-    //     | STATS avg_duration = AVG(query_duration_num)`,
-    //   });
-    // });
+    it('postgres avg duration dissect', async () => {
+      await evaluateEsqlQuery({
+        question:
+          'Show me an ESQL query to extract the query duration from postgres log messages in postgres-logs*, with this format "2021-01-01 00:00:00 UTC [12345]: [1-1] user=postgres,db=mydb,app=[unknown],client=127.0.0.1 LOG:  duration: 123.456 ms  statement: SELECT * FROM my_table", using ECS fields, and calculate the avg',
+        expected: `FROM postgres-logs
+        | DISSECT message "%{timestamp} UTC [%{pid}]: [%{session_id}] user=%{user},db=%{db},app=%{app},client=%{client} LOG:  duration: %{query_duration} ms  statement: %{query}"
+        | EVAL query_duration_num = TO_DOUBLE(query_duration)
+        | STATS avg_duration = AVG(query_duration_num)`,
+        execute: false
+      });
+    });
 
   });
 
@@ -223,7 +232,7 @@ describe('ES|QL query generation', () => {
               .duration(50)
               .failure()
               .errors(
-                myServiceInstance.error({ message: "2024-11-15T13:12:00 - ERROR - Query duration: 12ms", type: 'My Type' }).timestamp(timestamp)
+                myServiceInstance.error({ message: "2024-11-15T13:12:00 - ERROR - duration: 12ms", type: 'My Type' }).timestamp(timestamp)
               )
           ));
     });
@@ -231,54 +240,58 @@ describe('ES|QL query generation', () => {
     it('metrics avg duration', async () => {
       await evaluateEsqlQuery({
         question:
-          'I want to see a query for metrics-apm*, filtering on metricset.name:service_transaction and metricset.interval:1m, showing the average duration (via transaction.duration.histogram), in 50 buckets.',
+          'I want to see for metrics-apm*, filtering on metricset.name:service_transaction and metricset.interval:1m, the average duration (via transaction.duration.histogram), in 50 buckets.',
         expected: `FROM metrics-apm*
         | WHERE metricset.name == "service_transaction" AND metricset.interval == "1m"
         | EVAL bucket = AUTO_BUCKET(@timestamp, 50, <start-date>, <end-date>)
         | STATS avg_duration = AVG(transaction.duration.histogram) BY bucket`,
+        execute: true
       });
     });
 
     it('service inventory', async () => {
       await evaluateEsqlQuery({
         question:
-          'I want to show a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
+          'I want to see a list of services with APM data. My data is in `traces-apm*`. I want to show the average transaction duration, the success rate (by dividing event.outcome:failure by event.outcome:failure+success), and total amount of requests. As a time range, select the last 24 hours. Use ES|QL.',
         expected: `FROM traces-apm*
       | WHERE @timestamp >= NOW() - 24 hours
       | EVAL is_failure = CASE(event.outcome == "failure", 1, 0), is_success = CASE(event.outcome == "success", 1, 0)
       | STATS total_requests = COUNT(*), avg_duration = AVG(transaction.duration.us), total_failures = SUM(is_failure), total_success = SUM(is_success) BY service.name
       | EVAL success_rate = total_success / (total_failures + total_success)
       | KEEP service.name, avg_duration, success_rate, total_requests`,
+        execute: true
       });
     });
 
-    // it('exit span', async () => {
-    //   await evaluateEsqlQuery({
-    //     question: `I've got APM data in metrics-apm*. Filter on metricset.name:service_destination and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
-    //     expected: `FROM metrics-apm
-    //     | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
-    //     | EVAL total_response_time = span.destination.service.response_time.sum.us / span.destination.service.response_time.count, total_failures = CASE(event.outcome == "failure", 1, 0) * span.destination.service.response_time.count
-    //     | STATS
-    //       avg_throughput = AVG(span.destination.service.response_time.count),
-    //       avg_latency = AVG(total_response_time),
-    //       failure_rate = AVG(total_failures)
-    //       BY span.destination.service.resource`,
-    //   });
-    // });
+    it('exit span', async () => {
+      await evaluateEsqlQuery({
+        question: `I've got APM data in metrics-apm*. Show me a query that filters on metricset.name:service_destination and the last 24 hours. Break down by span.destination.service.resource. Each document contains the count of total events (span.destination.service.response_time.count) for that document's interval and the total amount of latency (span.destination.service.response_time.sum.us). A document either contains an aggregate of failed events (event.outcome:success) or failed events (event.outcome:failure). A single document might represent multiple failures or successes, depending on the value of span.destination.service.response_time.count. For each value of span.destination.service.resource, give me the average throughput, latency per request, and failure rate, as a value between 0 and 1.  Just show me the query.`,
+        expected: `FROM metrics-apm
+        | WHERE metricset.name == "service_destination" AND @timestamp >= NOW() - 24 hours
+        | EVAL total_response_time = span.destination.service.response_time.sum.us / span.destination.service.response_time.count, total_failures = CASE(event.outcome == "failure", 1, 0) * span.destination.service.response_time.count
+        | STATS
+          avg_throughput = AVG(span.destination.service.response_time.count),
+          avg_latency = AVG(total_response_time),
+          failure_rate = AVG(total_failures)
+          BY span.destination.service.resource`,
+        execute: false
+      });
+    });
 
     it('trace duration', async () => {
       await evaluateEsqlQuery({
         question:
-          'My APM data is in .ds-traces-apm-default-*. Generate a query to find the average for `transaction.duration.us` per service over the last hour',
+          'My APM data is in .ds-traces-apm-default-*. Execute a query to find the average for `transaction.duration.us` per service over the last hour',
         expected: `FROM .ds-traces-apm-default-*
         | WHERE @timestamp > NOW() - 1 hour
         | STATS AVG(transaction.duration.us) BY service.name`,
+        execute: true
       });
     });
 
     it('error logs rate', async () => {
       await evaluateEsqlQuery({
-        question: `i have logs in logs-apm* . errors are found when processor.event contais the value error. generate a query to obtain the error rate as a percetage of the total logs per day for the last 7 days`,
+        question: `i have logs in logs-apm*. Show me the error rate as a percetage of the error logs vs the total logs per day for the last 7 days. Errors are the logs identified as processor.event containing the value error. `,
         expected: `FROM logs-apm*
         | WHERE @timestamp >= NOW() - 7 days
         | EVAL day = DATE_TRUNC(1 day, @timestamp)
@@ -286,6 +299,7 @@ describe('ES|QL query generation', () => {
         | STATS total_logs = COUNT(*), total_errors = SUM(is_error) BY day
         | EVAL error_rate = total_errors / total_logs * 100
         | SORT day ASC`,
+        execute: true
       });
     });
 
