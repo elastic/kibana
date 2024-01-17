@@ -18,6 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const toasts = getService('toasts');
+
   let simulatorUrl: string;
   let editSimulatorUrl: string;
 

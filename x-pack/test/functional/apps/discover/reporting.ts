@@ -300,7 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       afterEach(async () => {
-        await PageObjects.reporting.checkForReportingToasts();
+        await toasts.checkForReportingToasts();
       });
 
       it('generates a report with data', async () => {
