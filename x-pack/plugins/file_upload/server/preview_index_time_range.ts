@@ -6,8 +6,13 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IngestPipeline,
+  IngestSimulateDocument,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
+
+type Doc = IngestSimulateDocument['_source'];
 
 /**
  * Returns the start and end time range in epoch milliseconds for a given set of documents
@@ -21,7 +26,7 @@ export async function previewIndexTimeRange(
   client: IScopedClusterClient,
   timeField: string,
   pipeline: IngestPipeline,
-  docs: any[]
+  docs: Doc[]
 ): Promise<{ start: number | null; end: number | null }> {
   for (const doc of docs) {
     if (doc.event === undefined) {
