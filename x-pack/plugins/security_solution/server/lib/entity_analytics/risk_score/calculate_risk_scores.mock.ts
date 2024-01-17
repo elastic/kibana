@@ -9,6 +9,7 @@ import {
   ALERT_RISK_SCORE,
   ALERT_RULE_NAME,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import type { RiskScore } from '../../../../common/entity_analytics/risk_engine';
 import { RiskCategories } from '../../../../common/entity_analytics/risk_engine';
 import type {
   CalculateRiskScoreAggregations,
@@ -114,8 +115,12 @@ const buildResponseMock = (
   ...overrides,
 });
 
+const buildResponseWithOneScoreMock = () =>
+  buildResponseMock({ scores: { host: [{} as RiskScore] } });
+
 export const calculateRiskScoresMock = {
   buildResponse: buildResponseMock,
+  buildResponseWithOneScore: buildResponseWithOneScoreMock,
   buildAggregationResponse: buildAggregationResponseMock,
   buildRiskScoreBucket: buildRiskScoreBucketMock,
 };
