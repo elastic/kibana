@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keyBy } from 'lodash';
+import { keyBy, orderBy } from 'lodash';
 import { InstancesSortField } from '../../../../common/instances';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -38,13 +38,18 @@ export type ServiceInstanceMainStatisticsResponse = Array<{
   memoryUsage?: number | null;
 }>;
 
-export async function getServiceInstancesMainStatistics(
-  params: Omit<ServiceInstanceMainStatisticsParams, 'size'>
-): Promise<ServiceInstanceMainStatisticsResponse> {
+export async function getServiceInstancesMainStatistics({
+  sortDirection,
+  sortField,
+  ...params
+}: Omit<
+  ServiceInstanceMainStatisticsParams,
+  'size'
+>): Promise<ServiceInstanceMainStatisticsResponse> {
   return withApmSpan('get_service_instances_main_statistics', async () => {
     const paramsForSubQueries = {
       ...params,
-      size: 100,
+      size: 1000,
     };
 
     const transactionStats = await getServiceInstancesTransactionStatistics({
@@ -66,6 +71,6 @@ export async function getServiceInstancesMainStatistics(
         }))
       : systemMetricStats;
 
-    return stats;
+    return orderBy(stats, sortField, sortDirection).slice(0, 100);
   });
 }

@@ -12,7 +12,7 @@
  */
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import { apm, Instance, timerange } from '@kbn/apm-synthtrace-client';
 import { LatencyAggregationType } from '@kbn/apm-plugin/common/latency_aggregation_types';
 import { InstancesSortField } from '@kbn/apm-plugin/common/instances';
 import { sum } from 'lodash';
@@ -76,6 +76,96 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     'Instances main statistics when data is loaded',
     { config: 'basic', archives: [] },
     () => {
+      describe('Return Top 100 instances', () => {
+        const serviceName = 'synth-node-1';
+        before(() => {
+          const range = timerange(start, end);
+          const transactionName = 'foo';
+
+          const successfulTimestamps = range.interval('1m').rate(1);
+          const failedTimestamps = range.interval('1m').rate(1);
+
+          const instances = [...Array(200).keys()].map((index) =>
+            apm
+              .service({ name: serviceName, environment: 'production', agentName: 'nodejs' })
+              .instance(`instance-${index}`)
+          );
+
+          const instanceSpans = (instance: Instance) => {
+            const successfulTraceEvents = successfulTimestamps.generator((timestamp) =>
+              instance
+                .transaction({ transactionName })
+                .timestamp(timestamp)
+                .duration(1000)
+                .success()
+                .children(
+                  instance
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
+                    .duration(1000)
+                    .success()
+                    .destination('elasticsearch')
+                    .timestamp(timestamp),
+                  instance
+                    .span({ spanName: 'custom_operation', spanType: 'custom' })
+                    .duration(100)
+                    .success()
+                    .timestamp(timestamp)
+                )
+            );
+
+            const failedTraceEvents = failedTimestamps.generator((timestamp) =>
+              instance
+                .transaction({ transactionName })
+                .timestamp(timestamp)
+                .duration(1000)
+                .failure()
+                .errors(
+                  instance
+                    .error({ message: '[ResponseError] index_not_found_exception' })
+                    .timestamp(timestamp + 50)
+                )
+            );
+
+            const metricsets = range
+              .interval('30s')
+              .rate(1)
+              .generator((timestamp) =>
+                instance
+                  .appMetrics({
+                    'system.memory.actual.free': 800,
+                    'system.memory.total': 1000,
+                    'system.cpu.total.norm.pct': 0.6,
+                    'system.process.cpu.total.norm.pct': 0.7,
+                  })
+                  .timestamp(timestamp)
+              );
+
+            return [successfulTraceEvents, failedTraceEvents, metricsets];
+          };
+
+          return synthtrace.index(instances.flatMap((instance) => instanceSpans(instance)));
+        });
+
+        after(() => {
+          return synthtrace.clean();
+        });
+        describe('feetch instances', () => {
+          let instancesMainStats: ServiceOverviewInstancesMainStatistics['currentPeriod'];
+          before(async () => {
+            instancesMainStats = await getServiceOverviewInstancesMainStatistics({
+              serviceName,
+            });
+          });
+          it('returns top 100 instances', () => {
+            expect(instancesMainStats.length).to.be(100);
+          });
+        });
+      });
+
       describe('Order by error rate', () => {
         const serviceName = 'synth-node-1';
         before(async () => {

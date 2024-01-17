@@ -212,6 +212,7 @@ export function getColumns({
         { defaultMessage: 'CPU usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
@@ -247,6 +248,7 @@ export function getColumns({
         { defaultMessage: 'Memory usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;

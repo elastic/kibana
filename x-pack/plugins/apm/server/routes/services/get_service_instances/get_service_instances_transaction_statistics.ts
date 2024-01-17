@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   EVENT_OUTCOME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
+import { EventOutcome } from '../../../../common/event_outcome';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 import { SERVICE_NODE_NAME_MISSING } from '../../../../common/service_nodes';
 import { Coordinate } from '../../../../typings/timeseries';
@@ -29,7 +29,6 @@ import {
 } from '../../../lib/helpers/latency_aggregation_type';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { InstancesSortField } from '../../../../common/instances';
 
 interface ServiceInstanceTransactionPrimaryStatistics {
   serviceNodeName: string;
@@ -49,20 +48,6 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   ? ServiceInstanceTransactionComparisonStatistics
   : ServiceInstanceTransactionPrimaryStatistics;
 
-export function getOrderInstructions(
-  sortField: Exclude<InstancesSortField, 'errorRate'>,
-  sortDirection: 'asc' | 'desc'
-): Record<string, 'asc' | 'desc'> {
-  switch (sortField) {
-    case 'latency':
-      return { latency: sortDirection };
-    case 'serviceNodeName':
-      return { _key: sortDirection };
-    default:
-      return { _count: sortDirection };
-  }
-}
-
 export async function getServiceInstancesTransactionStatistics<
   T extends true | false
 >({
@@ -80,8 +65,6 @@ export async function getServiceInstancesTransactionStatistics<
   numBuckets,
   includeTimeseries,
   offset,
-  sortField,
-  sortDirection = 'desc',
 }: {
   latencyAggregationType: LatencyAggregationType;
   apmEventClient: APMEventClient;
@@ -97,8 +80,6 @@ export async function getServiceInstancesTransactionStatistics<
   size?: number;
   numBuckets?: number;
   offset?: string;
-  sortField?: InstancesSortField;
-  sortDirection?: 'asc' | 'desc';
 }): Promise<Array<ServiceInstanceTransactionStatistics<T>>> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -119,32 +100,13 @@ export async function getServiceInstancesTransactionStatistics<
 
   const subAggs = {
     ...getLatencyAggregation(latencyAggregationType, field),
-    eventOutcomes: {
-      terms: { field: EVENT_OUTCOME },
-    },
-    errorRate: {
-      bucket_script: {
-        gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
-        buckets_path: {
-          success: "eventOutcomes['success']._count",
-          failure: "eventOutcomes['failure']._count",
+    failures: {
+      filter: {
+        term: {
+          [EVENT_OUTCOME]: EventOutcome.failure,
         },
-        script: `
-          def success = params.success ?: 0;
-          def failure = params.failure ?: 0;
-          return (success + failure) > 0 ? failure / (success + failure) : 0;
-        `,
       },
     },
-    ...(sortField === 'errorRate'
-      ? {
-          errorRateSort: {
-            bucket_sort: {
-              sort: [{ errorRate: { order: sortDirection } }],
-            },
-          },
-        }
-      : {}),
   };
 
   const query = {
@@ -175,9 +137,6 @@ export async function getServiceInstancesTransactionStatistics<
         missing: SERVICE_NODE_NAME_MISSING,
         ...(size ? { size } : {}),
         ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
-        ...(sortField && sortField !== 'errorRate'
-          ? { order: getOrderInstructions(sortField, sortDirection) }
-          : {}),
       },
       aggs: includeTimeseries
         ? {
@@ -222,7 +181,7 @@ export async function getServiceInstancesTransactionStatistics<
             serviceNodeName,
             errorRate: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
-              y: dateBucket.errorRate.value,
+              y: dateBucket.failures.doc_count / dateBucket.doc_count,
             })),
             throughput: timeseries.buckets.map((dateBucket) => ({
               x: dateBucket.key,
@@ -237,10 +196,10 @@ export async function getServiceInstancesTransactionStatistics<
             })),
           };
         } else {
-          const { latency, errorRate } = serviceNodeBucket;
+          const { failures, latency } = serviceNodeBucket;
           return {
             serviceNodeName,
-            errorRate: errorRate.value,
+            errorRate: failures.doc_count / count,
             latency: getLatencyValue({
               aggregation: latency,
               latencyAggregationType,
