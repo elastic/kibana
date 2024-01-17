@@ -7,29 +7,26 @@
 
 import { get } from 'lodash/fp';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
-import { streamFactory, StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
-import { Logger } from '@kbn/logging';
-import { Stream } from 'openai/src/streaming';
-import { ChatCompletionChunk } from 'openai/src/resources/chat/completions';
+import { KibanaRequest } from '@kbn/core-http-server';
+import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
 export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
-  logger: Logger;
 }
-export interface StaticReturnType {
-  body: { connector_id: string; data: string; status: string };
-  headers: ResponseHeaders;
+interface StaticResponse {
+  connector_id: string;
+  data: string;
+  status: string;
 }
+
 export const executeAction = async ({
   actions,
   request,
   connectorId,
-  logger,
-}: Props): Promise<StaticReturnType | StreamFactoryReturnType['responseWithHeaders']> => {
+}: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const actionResult = await actionsClient.execute({
@@ -45,35 +42,16 @@ export const executeAction = async ({
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
-      body: {
-        connector_id: connectorId,
-        data: content, // non-streamed response from the actions framework
-        status: 'ok',
-      },
-      headers: {
-        'content-type': 'application/json',
-      },
+      connector_id: connectorId,
+      data: content, // the response from the actions framework
+      status: 'ok',
     };
   }
-  const readable = get('data', actionResult) as Stream<ChatCompletionChunk>;
+  const readable = get('data', actionResult) as Readable;
 
-  const {
-    end: streamEnd,
-    push,
-    responseWithHeaders,
-  } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
-
-  async function readStream() {
-    for await (const chunk of readable) {
-      const delta = chunk?.choices[0]?.delta;
-      if (delta?.content && delta.content.length > 0) {
-        push({ type: 'content', payload: delta.content });
-      }
-    }
-    streamEnd();
+  if (typeof readable?.read !== 'function') {
+    throw new Error('Action result status is error: result is not streamable');
   }
-  // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
-  readStream();
 
-  return responseWithHeaders;
+  return readable.pipe(new PassThrough());
 };

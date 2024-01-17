@@ -15,20 +15,24 @@ const MIN_DELAY = 35;
 
 interface StreamObservable {
   connectorTypeTitle: string;
+  isEnabledLangChain: boolean;
+  isError: boolean;
   reader: ReadableStreamDefaultReader<Uint8Array>;
   setLoading: Dispatch<SetStateAction<boolean>>;
-  isError: boolean;
 }
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
+ * @param connectorTypeTitle - The title of the connector type.
+ * @param isEnabledLangChain - indicates whether langchain is enabled or not
+ * @param isError - indicates whether the reader response is an error message or not
  * @param reader - The ReadableStreamDefaultReader used to read data from the stream.
  * @param setLoading - A function to update the loading state.
- * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = ({
   connectorTypeTitle,
+  isEnabledLangChain,
   isError,
   reader,
   setLoading,
@@ -236,7 +240,7 @@ export const getStreamObservable = ({
       });
       observer.complete();
     }
-    if (true) readSSE();
+    if (isEnabledLangChain) readSSE();
     else if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     else badConnector();
@@ -281,14 +285,17 @@ export const getStreamObservable = ({
  * @returns {string[]} - Parsed string array from the OpenAI response.
  */
 const getOpenAIChunks = (lines: string[]): string[] => {
-  const nextChunk = lines.map((line) => {
-    try {
-      const openaiResponse = JSON.parse(line);
-      return openaiResponse.choices[0]?.delta.content ?? '';
-    } catch (err) {
-      return '';
-    }
-  });
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const openaiResponse = JSON.parse(line);
+        return openaiResponse.choices[0]?.delta.content ?? '';
+      } catch (err) {
+        return '';
+      }
+    });
   return nextChunk;
 };
 

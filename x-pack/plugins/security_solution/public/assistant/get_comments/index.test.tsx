@@ -25,6 +25,7 @@ const showAnonymizedValues = false;
 const testProps = {
   amendMessage: jest.fn(),
   regenerateMessage: jest.fn(),
+  isEnabledLangChain: false,
   isFetchingResponse: false,
   currentConversation,
   showAnonymizedValues,

@@ -17,6 +17,7 @@ import { MessageText } from './message_text';
 interface Props {
   amendMessage: (message: string) => void;
   content?: string;
+  isEnabledLangChain: boolean;
   isError?: boolean;
   isFetching?: boolean;
   isLastComment: boolean;
@@ -32,6 +33,7 @@ export const StreamComment = ({
   content,
   connectorTypeTitle,
   index,
+  isEnabledLangChain,
   isError = false,
   isFetching = false,
   isLastComment,
@@ -44,6 +46,7 @@ export const StreamComment = ({
     content,
     connectorTypeTitle,
     reader,
+    isEnabledLangChain,
     isError,
   });
 

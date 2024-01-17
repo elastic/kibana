@@ -11,9 +11,10 @@ import { getPlaceholderObservable, getStreamObservable } from './stream_observab
 
 interface UseStreamProps {
   amendMessage: (message: string) => void;
-  isError: boolean;
-  content?: string;
   connectorTypeTitle: string;
+  content?: string;
+  isEnabledLangChain: boolean;
+  isError: boolean;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -32,16 +33,19 @@ interface UseStream {
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
  * that can be used to handle streaming data from a readable stream
  * @param amendMessage - handles the amended message
+ * @param connectorTypeTitle - the title of the connector type
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
- * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
+ * @param isEnabledLangChain - indicates whether langchain is enabled or not
  * @param isError - indicates whether the reader response is an error message or not
+ * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
  */
 export const useStream = ({
   amendMessage,
-  content,
   connectorTypeTitle,
-  reader,
+  content,
+  isEnabledLangChain,
   isError,
+  reader,
 }: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
@@ -50,7 +54,13 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError })
+        ? getStreamObservable({
+            connectorTypeTitle,
+            reader,
+            setLoading,
+            isError,
+            isEnabledLangChain,
+          })
         : getPlaceholderObservable(),
     [content, isError, reader, connectorTypeTitle]
   );

@@ -97,7 +97,7 @@ export const fetchConnectorExecuteAction = async ({
     ? {
         params: {
           subActionParams: body,
-          subAction: 'invokeAsyncIterator',
+          subAction: 'invokeStream',
         },
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,

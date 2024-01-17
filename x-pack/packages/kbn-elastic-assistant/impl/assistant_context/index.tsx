@@ -66,21 +66,10 @@ export interface AssistantProviderProps {
   baseSystemPrompts?: Prompt[];
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
-  getComments: ({
-    amendMessage,
-    currentConversation,
-    isFetchingResponse,
-    regenerateMessage,
-    showAnonymizedValues,
-  }: {
-    amendMessage: ({
-      conversationId,
-      content,
-    }: {
-      conversationId: string;
-      content: string;
-    }) => void;
+  getComments: (commentArgs: {
+    amendMessage: (args: { conversationId: string; content: string }) => void;
     currentConversation: Conversation;
+    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
@@ -116,21 +105,11 @@ export interface UseAssistantContext {
   baseSystemPrompts: Prompt[];
   conversationIds: string[];
   conversations: Record<string, Conversation>;
-  getComments: ({
-    currentConversation,
-    showAnonymizedValues,
-    amendMessage,
-    isFetchingResponse,
-  }: {
+  getComments: (commentArgs: {
     currentConversation: Conversation;
+    isEnabledLangChain: boolean;
     isFetchingResponse: boolean;
-    amendMessage: ({
-      conversationId,
-      content,
-    }: {
-      conversationId: string;
-      content: string;
-    }) => void;
+    amendMessage: (args: { conversationId: string; content: string }) => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];

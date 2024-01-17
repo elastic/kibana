@@ -81,6 +81,7 @@ const AssistantComponent: React.FC<Props> = ({
     docLinks,
     getComments,
     http,
+    knowledgeBase: { isEnabledKnowledgeBase, isEnabledRAGAlerts },
     promptContexts,
     setLastConversationId,
     getConversationId,
@@ -367,6 +368,7 @@ const AssistantComponent: React.FC<Props> = ({
             showAnonymizedValues,
             amendMessage,
             regenerateMessage: handleRegenerateResponse,
+            isEnabledLangChain: isEnabledKnowledgeBase || isEnabledRAGAlerts,
             isFetchingResponse: isLoadingChatSend,
           })}
           css={css`

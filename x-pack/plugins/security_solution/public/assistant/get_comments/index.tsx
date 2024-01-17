@@ -45,12 +45,14 @@ const transformMessageWithReplacements = ({
 export const getComments = ({
   amendMessage,
   currentConversation,
+  isEnabledLangChain,
   isFetchingResponse,
   regenerateMessage,
   showAnonymizedValues,
 }: {
   amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
+  isEnabledLangChain: boolean;
   isFetchingResponse: boolean;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
@@ -80,6 +82,7 @@ export const getComments = ({
               connectorTypeTitle={connectorTypeTitle}
               content=""
               regenerateMessage={regenerateMessageOfConversation}
+              isEnabledLangChain={isEnabledLangChain}
               isLastComment
               transformMessage={() => ({ content: '' } as unknown as ContentMessage)}
               isFetching
@@ -127,6 +130,7 @@ export const getComments = ({
               amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               index={index}
+              isEnabledLangChain={isEnabledLangChain}
               isLastComment={isLastComment}
               isError={message.isError}
               reader={message.reader}
@@ -149,6 +153,7 @@ export const getComments = ({
             connectorTypeTitle={connectorTypeTitle}
             content={transformedMessage.content}
             index={index}
+            isEnabledLangChain={isEnabledLangChain}
             isLastComment={isLastComment}
             // reader is used to determine if streaming controls are shown
             reader={transformedMessage.reader}
