@@ -22,8 +22,8 @@ else
   echo "--- Running performance tests"
   for i in {1..4}
   do
-    echo "--- Running journey #$i"
-    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey=x-pack/performance/journeys/login.ts
+    echo "--- Running login journey #$i"
+    node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/performance/journeys/login.ts"
   done
 fi
 
