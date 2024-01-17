@@ -9,10 +9,10 @@
 // TODO: delete this once ES client can be used for Connectors API
 
 enum Result {
-  created,
-  updated,
-  deleted,
-  not_found,
+  created = 'created',
+  updated = 'updated',
+  deleted = 'deleted',
+  not_found = 'not_found',
   no_op = 'noop',
 }
 
