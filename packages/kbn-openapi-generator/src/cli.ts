@@ -36,11 +36,6 @@ export function runCli() {
             type: 'boolean',
             default: false,
           })
-          .option('outputDir', {
-            describe: 'Output directory for generated types',
-            demandOption: false,
-            type: 'string',
-          })
           .showHelpOnFail(false),
       (argv) => {
         generate(argv).catch((err) => {

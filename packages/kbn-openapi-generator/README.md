@@ -62,7 +62,7 @@ node scripts/generate_openapi --rootDir ./x-pack/plugins/security_solution
 
 ![Generator command output](image.png)
 
-By default it uses the `zod_operation_schema` template which produces runtime types for request and response schemas described in OpenAPI specification. The generated code will be placed adjacent to the `.schema.yaml` file and will have `.gen.ts` extension. You can specify a different output directory using the `--outputDir` option.
+By default it uses the `zod_operation_schema` template which produces runtime types for request and response schemas described in OpenAPI specification. The generated code will be placed adjacent to the `.schema.yaml` file and will have `.gen.ts` extension.
 
 Example of generated code:
 
