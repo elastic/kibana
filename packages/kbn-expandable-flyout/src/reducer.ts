@@ -6,107 +6,58 @@
  * Side Public License, v 1.
  */
 
-import { FlyoutPanelProps } from './types';
-import { Action, ActionType } from './actions';
+import { createReducer } from '@reduxjs/toolkit';
+import {
+  openPanelsAction,
+  openLeftPanelAction,
+  openRightPanelAction,
+  closePanelsAction,
+  closeLeftPanelAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  previousPreviewPanelAction,
+  openPreviewPanelAction,
+} from './actions';
+import { initialState } from './state';
 
-export interface State {
-  /**
-   * Panel to render in the left section
-   */
-  left: FlyoutPanelProps | undefined;
-  /**
-   * Panel to render in the right section
-   */
-  right: FlyoutPanelProps | undefined;
-  /**
-   * Panels to render in the preview section
-   */
-  preview: FlyoutPanelProps[];
-}
+export const reducer = createReducer(initialState, (builder) => {
+  builder.addCase(openPanelsAction, (state, { payload: { preview, left, right } }) => {
+    state.preview = preview ? [preview] : [];
+    state.right = right;
+    state.left = left;
+  });
 
-export const initialState: State = {
-  left: undefined,
-  right: undefined,
-  preview: [],
-};
+  builder.addCase(openLeftPanelAction, (state, { payload }) => {
+    state.left = payload;
+  });
 
-export function reducer(state: State, action: Action) {
-  switch (action.type) {
-    /**
-     * Open the flyout by replacing the entire state with new panels.
-     */
-    case ActionType.openFlyout: {
-      const { left, right, preview } = action.payload;
-      return {
-        left,
-        right,
-        preview: preview ? [preview] : [],
-      };
-    }
+  builder.addCase(openRightPanelAction, (state, { payload }) => {
+    state.right = payload;
+  });
 
-    /**
-     * Opens a right section by replacing the previous right panel with the new one.
-     */
-    case ActionType.openRightPanel: {
-      return { ...state, right: action.payload };
-    }
+  builder.addCase(openPreviewPanelAction, (state, { payload }) => {
+    state.preview.push(payload);
+  });
 
-    /**
-     * Opens a left section by replacing the previous left panel with the new one.
-     */
-    case ActionType.openLeftPanel: {
-      return { ...state, left: action.payload };
-    }
+  builder.addCase(previousPreviewPanelAction, (state) => {
+    state.preview.pop();
+  });
 
-    /**
-     * Opens a preview section by adding to the array of preview panels.
-     */
-    case ActionType.openPreviewPanel: {
-      return { ...state, preview: [...state.preview, action.payload] };
-    }
+  builder.addCase(closePanelsAction, (state) => {
+    state.preview = [];
+    state.right = undefined;
+    state.left = undefined;
+  });
 
-    /**
-     * Closes the right section by removing the right panel.
-     */
-    case ActionType.closeRightPanel: {
-      return { ...state, right: undefined };
-    }
+  builder.addCase(closeLeftPanelAction, (state) => {
+    state.left = undefined;
+  });
 
-    /**
-     * Close the left section by  removing the left panel.
-     */
-    case ActionType.closeLeftPanel: {
-      return { ...state, left: undefined };
-    }
+  builder.addCase(closeRightPanelAction, (state) => {
+    state.right = undefined;
+  });
 
-    /**
-     * Closes the preview section by removing all the preview panels.
-     */
-    case ActionType.closePreviewPanel: {
-      return { ...state, preview: [] };
-    }
-
-    /**
-     * Navigates to the previous preview panel by removing the last entry in the array of preview panels.
-     */
-    case ActionType.previousPreviewPanel: {
-      const p: FlyoutPanelProps[] = [...state.preview];
-      p.pop();
-      return { ...state, preview: p };
-    }
-
-    /**
-     * Close the flyout by removing all the panels.
-     */
-    case ActionType.closeFlyout: {
-      return {
-        left: undefined,
-        right: undefined,
-        preview: [],
-      };
-    }
-
-    default:
-      return state;
-  }
-}
+  builder.addCase(closePreviewPanelAction, (state) => {
+    state.preview = [];
+  });
+});
