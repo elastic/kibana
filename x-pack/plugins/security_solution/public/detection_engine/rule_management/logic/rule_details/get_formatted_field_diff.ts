@@ -7,10 +7,8 @@
 
 import stringify from 'json-stable-stringify';
 import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
-import { DataSourceType } from '../../../../../common/api/detection_engine';
 
-const sortAndStringifyJson = (jsObject: Record<string, unknown>): string =>
-  stringify(jsObject, { space: 2 });
+const sortAndStringifyJson = (jsObject: unknown): string => stringify(jsObject, { space: 2 });
 
 export const getFormattedFieldDiff = (
   fieldName: keyof AllFieldsDiff,
@@ -35,41 +33,71 @@ export const getFormattedFieldDiff = (
           targetVersion: fields[fieldName].target_version,
         },
       ];
-    case 'version':
-    case 'max_signals':
-    case 'anomaly_threshold':
+    case 'data_source':
+      const dataSourceObj = fields[fieldName];
       return [
         {
-          fieldName,
-          currentVersion: fields[fieldName].current_version.toString(),
-          targetVersion: fields[fieldName].target_version.toString(),
+          fieldName: 'Type',
+          currentVersion: fields[fieldName].current_version?.type,
+          targetVersion: fields[fieldName].target_version?.type,
+        },
+        {
+          fieldName: 'Index Patterns',
+          currentVersion: sortAndStringifyJson(
+            dataSourceObj.current_version.index_patterns ?? undefined
+          ),
+          targetVersion: sortAndStringifyJson(
+            dataSourceObj.target_version.index_patterns ?? undefined
+          ),
+        },
+        {
+          fieldName: 'Data View ID',
+          currentVersion: dataSourceObj.current_version.data_view_id ?? undefined,
+          targetVersion: dataSourceObj.target_version.data_view_id ?? undefined,
         },
       ];
     case 'eql_query':
       return [
         {
-          fieldName: 'query',
+          fieldName: 'Query',
           currentVersion: fields[fieldName].current_version.query,
           targetVersion: fields[fieldName].target_version.query,
         },
         {
-          fieldName: 'filters',
+          fieldName: 'Filters',
           currentVersion: sortAndStringifyJson(fields[fieldName].current_version.filters),
           targetVersion: sortAndStringifyJson(fields[fieldName].target_version.filters),
         },
         {
-          fieldName: 'language',
+          fieldName: 'Language',
           currentVersion: fields[fieldName].current_version.language,
           targetVersion: fields[fieldName].target_version.language,
         },
       ];
+    case 'kql_query':
+      return [
+        {
+          fieldName: 'Query',
+          currentVersion: fields[fieldName].current_version.query,
+          targetVersion: fields[fieldName].target_version.query,
+        },
+        {
+          fieldName: 'Filters',
+          currentVersion: sortAndStringifyJson(fields[fieldName].current_version.filters),
+          targetVersion: sortAndStringifyJson(fields[fieldName].target_version.filters),
+        },
+        {
+          fieldName: 'Language',
+          currentVersion: fields[fieldName].current_version.language,
+          targetVersion: fields[fieldName].target_version.language,
+        },
+        {
+          fieldName: 'Type',
+          currentVersion: fields[fieldName].current_version.type,
+          targetVersion: fields[fieldName].target_version.type,
+        },
+      ];
 
-    //   case 'data_source':
-    //     if(fields[fieldName].current_version?.type === DataSourceType.index_patterns){
-    //         currentVersion = fields[fieldName].current_version.;
-
-    //     }
-    //     targetVersion = fields[fieldName].target_version;
     default:
       return [
         {

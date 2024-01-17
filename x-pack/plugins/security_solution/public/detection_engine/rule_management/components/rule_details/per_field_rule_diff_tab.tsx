@@ -14,6 +14,7 @@ import { DiffView } from './json_diff/diff_view';
 import * as i18n from './json_diff/translations';
 import { FieldDiffComponent } from './diff_components';
 import { getFormattedFieldDiff } from '../../logic/rule_details/get_formatted_field_diff';
+import { UPGRADE_FIELD_ORDER } from './constants';
 
 interface PerFieldRuleDiffTabProps {
   ruleDiff: FullRuleDiff;
@@ -36,7 +37,10 @@ export const PerFieldRuleDiffTab = ({ ruleDiff }: PerFieldRuleDiffTabProps) => {
         fields.push({ formattedDiffs, fieldName: field });
       }
     }
-    return fields;
+    const sortedFields = fields.sort(
+      (a, b) => UPGRADE_FIELD_ORDER.indexOf(a.fieldName) - UPGRADE_FIELD_ORDER.indexOf(b.fieldName)
+    );
+    return sortedFields;
   }, [ruleDiff.fields]);
 
   return (
