@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { DiscoverAppLocatorParams } from '@kbn/discover-locators';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import {
   DEFAULT_LOG_VIEW,
   LogViewColumnConfiguration,
@@ -15,6 +14,9 @@ import {
   LogsLocatorParams,
 } from '@kbn/logs-shared-plugin/common';
 import { flowRight } from 'lodash';
+
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { InfraClientCoreSetup } from '../../public/types';
 import { MESSAGE_FIELD, TIMESTAMP_FIELD } from '../constants';
 import type { TimeRange } from '../time';
@@ -51,7 +53,7 @@ export const getLocationToDiscover = async ({
   logView = DEFAULT_LOG_VIEW,
 }: LocationToDiscoverParams) => {
   const [, plugins] = await core.getStartServices();
-  const { discover, logsShared } = plugins;
+  const { share, logsShared } = plugins;
   const { logViews } = logsShared;
   const resolvedLogView = await logViews.client.getResolvedLogView(logView);
 
@@ -67,11 +69,7 @@ export const getLocationToDiscover = async ({
       : {}),
   };
 
-  const discoverLocation = await constructDiscoverLocation(
-    discover,
-    discoverParams,
-    resolvedLogView
-  );
+  const discoverLocation = await constructDiscoverLocation(share, discoverParams, resolvedLogView);
 
   if (!discoverLocation) {
     throw new Error('Discover location not found');
@@ -81,18 +79,20 @@ export const getLocationToDiscover = async ({
 };
 
 const constructDiscoverLocation = async (
-  discover: DiscoverStart,
+  share: SharePluginStart,
   discoverParams: DiscoverAppLocatorParams,
   resolvedLogView?: ResolvedLogView
 ) => {
+  const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
   if (!resolvedLogView) {
-    return await discover.locator?.getLocation(discoverParams);
+    return await locator?.getLocation(discoverParams);
   }
 
   const columns = parseColumns(resolvedLogView.columns);
   const dataViewSpec = resolvedLogView.dataViewReference.toSpec();
 
-  return await discover.locator?.getLocation({
+  return await locator?.getLocation({
     ...discoverParams,
     columns,
     dataViewId: dataViewSpec.id,

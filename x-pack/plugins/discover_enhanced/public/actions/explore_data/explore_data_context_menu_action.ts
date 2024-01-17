@@ -8,7 +8,7 @@ import type { Filter } from '@kbn/es-query';
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { EmbeddableContext, EmbeddableInput, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';
 import { AbstractExploreDataAction } from './abstract_explore_data_action';
@@ -41,7 +41,7 @@ export class ExploreDataContextMenuAction
     context: EmbeddableQueryContext
   ): Promise<KibanaLocation> => {
     const { plugins } = this.params.start();
-    const { locator } = plugins.discover;
+    const locator = plugins.share?.url.locators.get(DISCOVER_APP_LOCATOR);
 
     if (!locator) {
       throw new Error('Discover URL locator not available.');

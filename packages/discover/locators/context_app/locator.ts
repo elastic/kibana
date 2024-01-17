@@ -10,8 +10,8 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { Filter } from '@kbn/es-query';
 import type { GlobalQueryStateFromUrl } from '@kbn/data-plugin/public';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import { addProfile } from '@kbn/discover-utils';
 
 export const DISCOVER_CONTEXT_APP_LOCATOR = 'DISCOVER_CONTEXT_APP_LOCATOR';

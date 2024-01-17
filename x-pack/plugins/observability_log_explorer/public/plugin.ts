@@ -41,9 +41,9 @@ export class ObservabilityLogExplorerPlugin
 
   public setup(
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
-    _pluginsSetup: ObservabilityLogExplorerSetupDeps
+    pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
-    const { share, serverless, discover } = _pluginsSetup;
+    const { share, serverless, discover } = pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({

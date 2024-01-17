@@ -6,8 +6,11 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
-import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import {
+  DiscoverAppLocatorParams,
+  DISCOVER_APP_LOCATOR,
+  type DiscoverAppLocator,
+} from '@kbn/discover-locators';
 import { hydrateDatasetSelection } from '@kbn/log-explorer-plugin/common';
 import {
   getDiscoverColumnsFromDisplayOptions,
@@ -26,13 +29,14 @@ import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {
   const {
-    services: { discover },
+    services: { share },
   } = useKibanaContextForPlugin();
 
   const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
 
   if (pageState.matches({ initialized: 'validLogExplorerState' })) {
-    return <DiscoverLinkForValidState discover={discover} pageState={pageState} />;
+    const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+    return <DiscoverLinkForValidState {...{ locator, pageState }} />;
   } else {
     return <DiscoverLinkForUnknownState />;
   }
@@ -45,12 +49,12 @@ type InitializedPageState = MatchedStateFromActor<
 
 export const DiscoverLinkForValidState = React.memo(
   ({
-    discover,
+    locator,
     pageState: {
       context: { logExplorerState },
     },
   }: {
-    discover: DiscoverStart;
+    locator?: DiscoverAppLocator;
     pageState: InitializedPageState;
   }) => {
     const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
@@ -66,7 +70,7 @@ export const DiscoverLinkForValidState = React.memo(
       [logExplorerState]
     );
 
-    return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
+    return <DiscoverLink {...{ locator, discoverLinkParams }} />;
   }
 );
 
@@ -83,16 +87,16 @@ export const DiscoverLinkForUnknownState = React.memo(() => (
 
 export const DiscoverLink = React.memo(
   ({
-    discover,
+    locator,
     discoverLinkParams,
   }: {
-    discover: DiscoverStart;
+    locator?: DiscoverAppLocator;
     discoverLinkParams: DiscoverAppLocatorParams;
   }) => {
-    const discoverUrl = discover.locator?.getRedirectUrl(discoverLinkParams);
+    const discoverUrl = locator?.getRedirectUrl(discoverLinkParams);
 
     const navigateToDiscover = () => {
-      discover.locator?.navigate(discoverLinkParams);
+      locator?.navigate(discoverLinkParams);
     };
 
     const discoverLinkProps = getRouterLinkProps({

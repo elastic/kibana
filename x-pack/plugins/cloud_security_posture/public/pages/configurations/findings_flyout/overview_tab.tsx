@@ -20,6 +20,7 @@ import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { truthy } from '../../../../common/utils/helpers';
 import { CSP_MOMENT_FORMAT } from '../../../common/constants';
 import {
@@ -162,16 +163,16 @@ const getEvidenceList = ({ result }: CspFinding) =>
 
 export const OverviewTab = ({ data }: { data: CspFinding }) => {
   const {
-    services: { discover },
+    services: { share },
   } = useKibana();
   const latestFindingsDataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
 
   const discoverIndexLink = useMemo(
     () =>
-      discover.locator?.getRedirectUrl({
+      share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
         indexPatternId: latestFindingsDataView.data?.id,
       }),
-    [discover.locator, latestFindingsDataView.data?.id]
+    [share.url.locators, latestFindingsDataView.data?.id]
   );
 
   const hasEvidence = !isEmpty(data.result.evidence);

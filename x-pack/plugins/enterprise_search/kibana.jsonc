@@ -15,7 +15,6 @@
       "security",
       "licensing",
       "data",
-      "discover",
       "charts",
       "logsShared",
       "cloud",
@@ -34,7 +33,8 @@
       "guidedOnboarding",
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils"
     ]
   }
 }

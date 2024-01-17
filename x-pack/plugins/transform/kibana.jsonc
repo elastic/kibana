@@ -37,7 +37,6 @@
     ],
     "requiredBundles": [
       "esUiShared",
-      "discover",
       "kibanaUtils",
       "kibanaReact",
       "ml"

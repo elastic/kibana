@@ -8,7 +8,8 @@
 import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { parseDataViewListItem } from '../../../utils/parse_data_view_list_item';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
@@ -125,19 +126,19 @@ export const createPureDataViewsStateMachine = (
 export interface DataViewsStateMachineDependencies {
   initialContext?: DefaultDataViewsContext;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
+  share: SharePluginStart;
 }
 
 export const createDataViewsStateMachine = ({
   initialContext,
   dataViews,
-  discover,
+  share,
 }: DataViewsStateMachineDependencies) =>
   createPureDataViewsStateMachine(initialContext).withConfig({
     actions: {
       navigateToDiscoverDataView: (_context, event) => {
         if (event.type === 'SELECT_DATA_VIEW' && 'dataView' in event) {
-          discover.locator?.navigate({ dataViewId: event.dataView.id });
+          share.url.locators.get(DISCOVER_APP_LOCATOR)?.navigate({ dataViewId: event.dataView.id });
         }
       },
     },

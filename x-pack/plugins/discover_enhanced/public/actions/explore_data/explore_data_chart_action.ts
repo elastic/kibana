@@ -6,7 +6,7 @@
  */
 
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
+import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { SearchInput } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
@@ -43,7 +43,7 @@ export class ExploreDataChartAction
     context: ExploreDataChartActionContext
   ): Promise<KibanaLocation> => {
     const { plugins } = this.params.start();
-    const { locator } = plugins.discover;
+    const locator = plugins.share?.url.locators.get(DISCOVER_APP_LOCATOR);
 
     if (!locator) {
       throw new Error('Discover URL locator not available.');

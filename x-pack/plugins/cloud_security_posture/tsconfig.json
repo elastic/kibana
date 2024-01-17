@@ -28,7 +28,6 @@
     "@kbn/cloud-plugin",
     "@kbn/unified-search-plugin",
     "@kbn/charts-plugin",
-    "@kbn/discover-plugin",
     "@kbn/i18n",
     "@kbn/ui-theme",
     "@kbn/i18n-react",
@@ -63,7 +62,8 @@
     "@kbn/securitysolution-grouping",
     "@kbn/alerting-plugin",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/discover-locators"
   ],
   "exclude": ["target/**/*"]
 }

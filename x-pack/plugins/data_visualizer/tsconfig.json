@@ -24,7 +24,6 @@
     "@kbn/data-view-field-editor-plugin",
     "@kbn/data-views-plugin",
     "@kbn/datemath",
-    "@kbn/discover-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",
@@ -70,7 +69,9 @@
     "@kbn/ml-chi2test",
     "@kbn/field-utils",
     "@kbn/visualization-utils",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/discover-locators",
+    "@kbn/discover-plugin"
   ],
   "exclude": [
     "target/**/*",

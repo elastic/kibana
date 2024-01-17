@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { DatasetSelection } from '../../common/dataset_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
@@ -24,7 +25,7 @@ interface EsqlContextDeps {
 
 export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult => {
   const {
-    services: { uiSettings, discover },
+    services: { uiSettings, share },
   } = useKibanaContextForPlugin();
 
   const isEsqlEnabled = uiSettings?.get('discover:enableESQL');
@@ -35,10 +36,11 @@ export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult =>
     },
   };
 
-  const href = discover.locator?.useUrl(discoverLinkParams);
+  const locator = share?.url.locators.get(DISCOVER_APP_LOCATOR);
+  const href = locator?.useUrl(discoverLinkParams);
 
   const onClick = () => {
-    discover.locator?.navigate(discoverLinkParams);
+    locator?.navigate(discoverLinkParams);
   };
 
   return {

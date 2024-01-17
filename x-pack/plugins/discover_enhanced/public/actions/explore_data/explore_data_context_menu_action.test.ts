@@ -16,6 +16,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { DiscoverAppLocator } from '@kbn/discover-locators';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 
 const i18nTranslateSpy = i18n.translate as unknown as jest.SpyInstance;
 
@@ -43,9 +44,13 @@ const setup = () => {
   };
 
   const plugins: PluginDeps = {
-    discover: {
-      locator,
-    },
+    share: {
+      url: {
+        locators: {
+          get: () => locator,
+        },
+      },
+    } as any as SharePluginStart,
   };
 
   const params: Params = {
@@ -116,7 +121,13 @@ describe('"Explore underlying data" panel action', () => {
 
     test('returns false when URL generator is not present', async () => {
       const { action, plugins, context } = setup();
-      (plugins.discover as any).locator = undefined;
+      plugins.share = {
+        url: {
+          locators: {
+            get: () => undefined,
+          },
+        },
+      } as any as SharePluginStart;
 
       const isCompatible = await action.isCompatible(context);
 

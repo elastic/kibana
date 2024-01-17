@@ -10,6 +10,7 @@ import React from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiCode, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
@@ -44,8 +45,9 @@ const CRAWLER_LOGS_DISCOVER_RECORD = {
 export const CrawlRequestsPanel: React.FC = () => {
   const { data } = useValues(CrawlerLogic);
   const {
-    services: { discover },
+    services: { share },
   } = useKibana<KibanaDeps>();
+  const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
 
   return (
     <DataPanel
@@ -60,7 +62,7 @@ export const CrawlRequestsPanel: React.FC = () => {
       titleSize="s"
       iconType="documents"
       action={
-        <EuiButton onClick={() => discover.locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
+        <EuiButton onClick={() => locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
           {i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.linkToDiscover', {
             defaultMessage: 'View in Discover',
           })}

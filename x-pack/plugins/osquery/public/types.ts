@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -18,6 +17,7 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   getLazyLiveQueryField,
   getLazyOsqueryAction,
@@ -46,9 +46,9 @@ export interface AppPluginStartDependencies {
 }
 
 export interface StartPlugins {
-  discover: DiscoverStart;
   data: DataPublicPluginStart;
   fleet: FleetStart;
+  share: SharePluginStart;
   lens?: LensPublicStart;
   security: SecurityPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;

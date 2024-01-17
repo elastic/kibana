@@ -10,7 +10,6 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   EmbeddableSetup,
@@ -21,16 +20,14 @@ import { ExploreDataContextMenuAction, ExploreDataChartAction } from './actions'
 import { Config } from '../common';
 
 export interface DiscoverEnhancedSetupDependencies {
-  discover: DiscoverSetup;
   embeddable: EmbeddableSetup;
-  share?: SharePluginSetup;
+  share: SharePluginSetup;
   uiActions: UiActionsSetup;
 }
 
 export interface DiscoverEnhancedStartDependencies {
-  discover: DiscoverStart;
   embeddable: EmbeddableStart;
-  share?: SharePluginStart;
+  share: SharePluginStart;
   uiActions: UiActionsStart;
 }
 
