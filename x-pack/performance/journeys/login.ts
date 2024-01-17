@@ -33,7 +33,8 @@ export const journey = new Journey({
     ],
     maxDuration: '10m',
   },
-}).step('Login', async ({ page, kbnUrl, inputDelays, auth, kibanaPage }) => {
+}).step('Login', async ({ page, kbnUrl, inputDelays, auth, kibanaPage, log }) => {
+  log.info('test started');
   await page.goto(kbnUrl.get());
   if (auth.isCloud()) {
     await page.click(subj('loginCard-basic/cloud-basic'), { delay: inputDelays.MOUSE_CLICK });
@@ -44,4 +45,5 @@ export const journey = new Journey({
   await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
 
   await kibanaPage.waitForHeader();
+  log.info('test finished');
 });

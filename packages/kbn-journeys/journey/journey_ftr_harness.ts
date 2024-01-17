@@ -226,11 +226,14 @@ export class JourneyFtrHarness {
   }
 
   private async onTeardown() {
+    this.log.info('--tearDownBrowserAndPage');
     await this.tearDownBrowserAndPage();
     // It is important that we complete the APM transaction after we close the browser and before we start
     // unloading the test data so that the scalability data extractor can focus on just the APM data produced
     // by Kibana running under test.
+    this.log.info('--teardownApm');
     await this.teardownApm();
+    this.log.info('--deleteArchives');
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
