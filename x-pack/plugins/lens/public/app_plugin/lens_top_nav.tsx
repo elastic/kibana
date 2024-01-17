@@ -26,6 +26,7 @@ import {
   useLensDispatch,
   LensAppState,
   switchAndCleanDatasource,
+  selectIsManaged,
 } from '../state_management';
 import {
   getIndexPatternsObjects,
@@ -1050,6 +1051,8 @@ export const LensTopNavMenu = ({
     severity: 'error',
   }).map(({ shortMessage }) => new Error(shortMessage));
 
+  const managed = useLensSelector(selectIsManaged);
+
   return (
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
@@ -1059,6 +1062,11 @@ export const LensTopNavMenu = ({
           ? 'allowed_by_app_privilege'
           : 'globally_managed'
       }
+      badges={[
+        {
+          badgeText: managed ? 'Managed' : 'not managed',
+        },
+      ]}
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}
