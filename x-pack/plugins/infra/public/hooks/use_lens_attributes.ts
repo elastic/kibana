@@ -7,7 +7,6 @@
 
 import { useCallback } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
@@ -16,14 +15,14 @@ import {
   type LensConfig,
   LensConfigBuilder,
 } from '@kbn/lens-embeddable-utils/config_builder';
-import { InfraClientStartDeps } from '../types';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export type UseLensAttributesParams = LensConfig;
 
 export const useLensAttributes = (params: UseLensAttributesParams) => {
   const {
     services: { lens, dataViews },
-  } = useKibana<InfraClientStartDeps>();
+  } = useKibanaContextForPlugin();
   const { navigateToPrefilledEditor } = lens;
 
   const { value: attributes, error } = useAsync(async () => {
