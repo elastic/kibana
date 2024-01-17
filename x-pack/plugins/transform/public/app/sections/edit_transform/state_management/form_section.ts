@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isDefined } from '@kbn/ml-is-defined';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
 import type { TransformConfigUnion } from '../../../../../common/types/transform';
@@ -33,7 +34,7 @@ export const initializeFormSection = (
 ): FormSection => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
   const rawEnabled = getNestedProperty(config ?? {}, configFieldName, undefined);
-  const enabled = rawEnabled !== undefined && rawEnabled !== null;
+  const enabled = isDefined(rawEnabled);
 
   return {
     formSectionName,
