@@ -447,6 +447,7 @@ describe('Test discover state actions', () => {
         "sort": Array [],
         "timeRange": undefined,
         "usesAdHocDataView": false,
+        "visContextJSON": undefined,
       }
     `);
     expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');
