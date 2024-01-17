@@ -7,37 +7,45 @@
 
 import React, { useEffect, useMemo, type FC } from 'react';
 
-import { i18n } from '@kbn/i18n';
-
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
+
+import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { ToastNotificationText } from '../../../../components';
-import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
-import { useGetTransformsPreview } from '../../../../hooks';
+
+import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
+import { getErrorMessage } from '../../../../../common/utils/errors';
+
+import { useAppDependencies, useToastNotifications } from '../../../app_dependencies';
+import { useGetTransformsPreview } from '../../../hooks';
+import { ToastNotificationText } from '../../../components';
+
+import {
+  useEditTransformFlyoutActions,
+  useEditTransformFlyoutContext,
+} from '../state_management/edit_transform_flyout_state';
+import { useFormSections } from '../state_management/selectors/form_sections';
+import { useRetentionPolicyField } from '../state_management/selectors/retention_policy_field';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
-import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {
   const { i18n: i18nStart, theme } = useAppDependencies();
 
   const toastNotifications = useToastNotifications();
 
-  const dataViewId = useEditTransformFlyout('dataViewId');
-  const formSections = useEditTransformFlyout('stateFormSection');
-  const retentionPolicyField = useEditTransformFlyout('retentionPolicyField');
-  const { formField, formSection } = useEditTransformFlyout('actions');
-  const requestConfig = useEditTransformFlyout('config');
+  const { config, dataViewId } = useEditTransformFlyoutContext();
+  const formSections = useFormSections();
+  const retentionPolicyField = useRetentionPolicyField();
+  const { setFormField, setFormSection } = useEditTransformFlyoutActions();
 
-  const previewRequest = useMemo(() => {
+  const previewRequest: PostTransformsPreviewRequestSchema = useMemo(() => {
     return {
-      source: requestConfig.source,
-      ...(isPivotTransform(requestConfig) ? { pivot: requestConfig.pivot } : {}),
-      ...(isLatestTransform(requestConfig) ? { latest: requestConfig.latest } : {}),
+      source: config.source,
+      ...(isPivotTransform(config) ? { pivot: config.pivot } : {}),
+      ...(isLatestTransform(config) ? { latest: config.latest } : {}),
     };
-  }, [requestConfig]);
+  }, [config]);
 
   const { error: transformsPreviewError, data: transformPreview } =
     useGetTransformsPreview(previewRequest);
@@ -98,7 +106,7 @@ export const EditTransformRetentionPolicy: FC = () => {
           )}
           checked={formSections.retentionPolicy.enabled}
           onChange={(e) =>
-            formSection({
+            setFormSection({
               section: 'retentionPolicy',
               enabled: e.target.checked,
             })
@@ -142,7 +150,7 @@ export const EditTransformRetentionPolicy: FC = () => {
                   options={retentionDateFieldOptions}
                   value={retentionPolicyField.value}
                   onChange={(e) =>
-                    formField({ field: 'retentionPolicyField', value: e.target.value })
+                    setFormField({ field: 'retentionPolicyField', value: e.target.value })
                   }
                   hasNoInitialSelection={
                     !retentionDateFieldOptions

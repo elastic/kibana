@@ -20,15 +20,16 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { isManagedTransform } from '../../../../common/managed_transforms_utils';
+import { isManagedTransform } from '../../../common/managed_transforms_utils';
 
-import { ManagedTransformsWarningCallout } from '../managed_transforms_callout/managed_transforms_callout';
-import type { EditAction } from '../action_edit';
+import { ManagedTransformsWarningCallout } from '../../transform_management/components/managed_transforms_callout/managed_transforms_callout';
+import type { EditAction } from '../../transform_management/components/action_edit';
+
+import { EditTransformFlyoutProvider } from '../state_management/edit_transform_flyout_state';
 
 import { EditTransformApiErrorCallout } from './edit_transform_api_error_callout';
 import { EditTransformFlyoutCallout } from './edit_transform_flyout_callout';
 import { EditTransformFlyoutForm } from './edit_transform_flyout_form';
-import { EditTransformFlyoutProvider } from './use_edit_transform_flyout';
 import { EditTransformUpdateButton } from './edit_transform_update_button';
 
 export const EditTransformFlyout: FC<EditAction> = ({

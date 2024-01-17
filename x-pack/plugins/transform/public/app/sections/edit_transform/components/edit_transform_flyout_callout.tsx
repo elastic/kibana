@@ -18,7 +18,7 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
 export const EditTransformFlyoutCallout: FC = () => {
   const { esTransformUpdate } = useDocumentationLinks();
 

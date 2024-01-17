@@ -11,14 +11,13 @@ import { EuiFormRow, EuiTextArea } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  useEditTransformFlyout,
-  type EditTransformHookTextInputSelectors,
-} from './use_edit_transform_flyout';
-import { capitalizeFirstLetter } from './capitalize_first_letter';
+import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
+import { useFormField } from '../state_management/selectors/form_field';
+import type { FormFields } from '../state_management/form_field';
+import { capitalizeFirstLetter } from '../utils/capitalize_first_letter';
 
 interface EditTransformFlyoutFormTextInputProps {
-  field: EditTransformHookTextInputSelectors;
+  field: FormFields;
   label: string;
   helpText?: string;
   placeHolder?: boolean;
@@ -30,8 +29,8 @@ export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInpu
   helpText,
   placeHolder = false,
 }) => {
-  const { defaultValue, errorMessages, value } = useEditTransformFlyout(field);
-  const { formField } = useEditTransformFlyout('actions');
+  const { defaultValue, errorMessages, value } = useFormField(field);
+  const { setFormField } = useEditTransformFlyoutActions();
   const upperCaseField = capitalizeFirstLetter(field);
 
   return (
@@ -53,7 +52,7 @@ export const EditTransformFlyoutFormTextArea: FC<EditTransformFlyoutFormTextInpu
         }
         isInvalid={errorMessages.length > 0}
         value={value}
-        onChange={(e) => formField({ field, value: e.target.value })}
+        onChange={(e) => setFormField({ field, value: e.target.value })}
         aria-label={label}
       />
     </EuiFormRow>

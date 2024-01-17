@@ -11,10 +11,12 @@ import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@ela
 
 import { i18n } from '@kbn/i18n';
 
-import { useGetEsIngestPipelines } from '../../../../hooks';
+import { useGetEsIngestPipelines } from '../../../hooks';
+
+import { useEditTransformFlyoutActions } from '../state_management/edit_transform_flyout_state';
+import { useFormField } from '../state_management/selectors/form_field';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
-import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
@@ -25,8 +27,8 @@ const ingestPipelineLabel = i18n.translate(
 
 export const EditTransformIngestPipeline: FC = () => {
   const { euiTheme } = useEuiTheme();
-  const { errorMessages, value } = useEditTransformFlyout('destinationIngestPipeline');
-  const { formField } = useEditTransformFlyout('actions');
+  const { errorMessages, value } = useFormField('destinationIngestPipeline');
+  const { setFormField } = useEditTransformFlyoutActions();
 
   const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -66,7 +68,7 @@ export const EditTransformIngestPipeline: FC = () => {
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
                 selectedOptions={[{ label: value }]}
                 onChange={(o) =>
-                  formField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
+                  setFormField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
                 }
               />
             </EuiSkeletonRectangle>

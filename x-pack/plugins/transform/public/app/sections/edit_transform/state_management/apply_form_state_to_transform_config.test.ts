@@ -5,51 +5,22 @@
  * 2.0.
  */
 
-import { TransformPivotConfig } from '../../../../../../common/types/transform';
+import { getTransformConfigMock } from './__mocks__/transform_config';
 
-import {
-  applyFormStateToTransformConfig,
-  formReducerFactory,
-  getDefaultState,
-} from './use_edit_transform_flyout';
-
-const getTransformConfigMock = (): TransformPivotConfig => ({
-  id: 'the-transform-id',
-  source: {
-    index: ['the-transform-source-index'],
-    query: {
-      match_all: {},
-    },
-  },
-  dest: {
-    index: 'the-transform-destination-index',
-  },
-  pivot: {
-    group_by: {
-      airline: {
-        terms: {
-          field: 'airline',
-        },
-      },
-    },
-    aggregations: {
-      'responsetime.avg': {
-        avg: {
-          field: 'responsetime',
-        },
-      },
-    },
-  },
-  description: 'the-description',
-});
+import { applyFormStateToTransformConfig } from './apply_form_state_to_transform_config';
+import { getDefaultState } from './get_default_state';
 
 describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should exclude unchanged form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const formState = getDefaultState(transformConfigMock);
+    const { formFields, formSections } = getDefaultState(transformConfigMock);
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
 
     // This case will return an empty object. In the actual UI, this case should not happen
     // because the Update-Button will be disabled when no form field was changed.
@@ -65,7 +36,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should include previously nonexisting attributes', () => {
     const { description, frequency, ...transformConfigMock } = getTransformConfigMock();
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       description: 'the-new-description',
       dest: {
@@ -77,7 +48,11 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
 
     expect(Object.keys(updateConfig)).toHaveLength(4);
     expect(updateConfig.description).toBe('the-new-description');
@@ -89,7 +64,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should only include changed form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       description: 'the-updated-description',
       dest: {
@@ -98,7 +73,11 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
 
     expect(Object.keys(updateConfig)).toHaveLength(2);
     expect(updateConfig.description).toBe('the-updated-description');
@@ -111,7 +90,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should include dependent form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       dest: {
         ...transformConfigMock.dest,
@@ -119,7 +98,11 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should include the dependent unchanged destination index
     expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
@@ -135,7 +118,7 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     };
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       dest: {
         ...transformConfigMock.dest,
@@ -143,7 +126,11 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
       },
     });
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should include the dependent unchanged destination index
     expect(updateConfig.dest?.index).toBe(transformConfigMock.dest.index);
@@ -153,12 +140,16 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should exclude unrelated dependent form fields', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       description: 'the-updated-description',
     });
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should exclude the dependent unchanged destination section
     expect(typeof updateConfig.dest).toBe('undefined');
@@ -168,63 +159,24 @@ describe('Transform: applyFormStateToTransformConfig()', () => {
   it('should return the config to reset retention policy', () => {
     const transformConfigMock = getTransformConfigMock();
 
-    const formState = getDefaultState({
+    const { formFields, formSections } = getDefaultState({
       ...transformConfigMock,
       retention_policy: {
         time: { field: 'the-time-field', max_age: '1d' },
       },
     });
 
-    formState.formSections.retentionPolicy.enabled = false;
+    formSections.retentionPolicy.enabled = false;
 
-    const updateConfig = applyFormStateToTransformConfig(transformConfigMock, formState);
+    const updateConfig = applyFormStateToTransformConfig(
+      transformConfigMock,
+      formFields,
+      formSections
+    );
 
     expect(Object.keys(updateConfig)).toHaveLength(1);
     // It should exclude the dependent unchanged destination section
     expect(typeof updateConfig.dest).toBe('undefined');
     expect(updateConfig.retention_policy).toBe(null);
-  });
-});
-
-describe('Transform: formReducerFactory()', () => {
-  it('field updates should trigger form validation', () => {
-    const transformConfigMock = getTransformConfigMock();
-    const reducer = formReducerFactory(transformConfigMock);
-
-    const state1 = reducer(getDefaultState(transformConfigMock), {
-      name: 'form_field',
-      payload: {
-        field: 'description',
-        value: 'the-updated-description',
-      },
-    });
-
-    expect(state1.isFormTouched).toBe(true);
-    expect(state1.isFormValid).toBe(true);
-
-    const state2 = reducer(state1, {
-      name: 'form_field',
-      payload: {
-        field: 'description',
-        value: transformConfigMock.description as string,
-      },
-    });
-
-    expect(state2.isFormTouched).toBe(false);
-    expect(state2.isFormValid).toBe(true);
-
-    const state3 = reducer(state2, {
-      name: 'form_field',
-      payload: {
-        field: 'frequency',
-        value: 'the-invalid-value',
-      },
-    });
-
-    expect(state3.isFormTouched).toBe(true);
-    expect(state3.isFormValid).toBe(false);
-    expect(state3.formFields.frequency.errorMessages).toStrictEqual([
-      'The frequency value is not valid.',
-    ]);
   });
 });
