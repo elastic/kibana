@@ -58,12 +58,12 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'action' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action/5ebfb140-3a76-4875-9f31-967851bd1e0b`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action/1e78caea-c2d9-47ec-bba5-5b69c211c274`
           )
           .expect(200);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
-        expect(decryptedObject.attributes.secrets).to.eql({}); // ToDo: need an action with secrets
+        expect(decryptedObject.attributes.secrets).to.eql({ token: 'some-random-token-value' });
       });
 
       it(`successfully decrypts 'synthetics-monitor' objects`, async () => {

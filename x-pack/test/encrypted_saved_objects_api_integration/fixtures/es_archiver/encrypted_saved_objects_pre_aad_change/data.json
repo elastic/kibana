@@ -153,18 +153,16 @@
   "type": "doc",
   "value": {
     "index": ".kibana_alerting_cases",
-    "id": "action:5ebfb140-3a76-4875-9f31-967851bd1e0b",
+    "id": "action:1e78caea-c2d9-47ec-bba5-5b69c211c274",
     "source": {
       "action": {
-        "actionTypeId": ".index",
-        "name": "test_index_connector",
+        "actionTypeId": ".torq",
+        "name": "test-torq-connector",
         "isMissingSecrets": false,
         "config": {
-          "index": ".alerts-default.alerts-default",
-          "refresh": false,
-          "executionTimeField": null
+          "webhookIntegrationUrl": "https://hooks.torq.io/v1/hookid"
         },
-        "secrets": "IjVohrL6NNraSK2Qc3TWud7qJSadXiUzx7mlUScUG8AHbZjm/p3OIWA2Ec6LfwK39PN6Pq2sgQMyugM2cRcNA4u28FDt9NPCgXcFk6ospISzQwZ9cSap16LmBUIw6Q=="
+        "secrets": "3BUB4WqB0+RM/ty2XwJLppQWl9o0rzbmdpGGzzMBhWYSM+4uzVesnULPQjHz7mP8EQDrveFip/J+1kdcbQ5OqgdbEpnZt6luK43HJfT3c0A3t9n6V3mkS6o7lLMag41Gs9AJEYLKD140zRdECHkzsXkGIwFBdY6QR0rFt8r95Q=="
       },
       "type": "action",
       "references": [],
@@ -174,8 +172,8 @@
       ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.3.0",
-      "updated_at": "2024-01-16T22:08:34.209Z",
-      "created_at": "2024-01-16T22:08:34.209Z"
+      "updated_at": "2024-01-17T00:04:47.371Z",
+      "created_at": "2024-01-17T00:04:47.371Z"
     }
   }
 }
