@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
@@ -50,7 +49,7 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
 export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
-export function normalizeType(type: string): DatatableColumnType {
+export function normalizeType(type: string) {
   switch (type) {
     case ES_FIELD_TYPES._INDEX:
     case ES_FIELD_TYPES.GEO_POINT:
@@ -61,6 +60,6 @@ export function normalizeType(type: string): DatatableColumnType {
     case 'datetime':
       return KBN_FIELD_TYPES.DATE;
     default:
-      return castEsToKbnFieldTypeName(type) as DatatableColumnType;
+      return castEsToKbnFieldTypeName(type);
   }
 }
