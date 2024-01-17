@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { get } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   Chart,
@@ -58,7 +59,23 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
 };
 
 const getSubTitle = (slo: SLOWithSummaryResponse) => {
-  return slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
+  return getGroupings(slo);
+};
+
+const getGroupings = (slo: SLOWithSummaryResponse) => {
+  const isArray = Array.isArray(slo.groupBy);
+  let groupByFields: string;
+
+  if (isArray) {
+    groupByFields = slo.groupBy.reduce<string>((acc, group) => {
+      acc += `${group}: ${get(slo.groupings, group)}`;
+      return acc;
+    }, '');
+  } else {
+    groupByFields =
+      slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
+  }
+  return groupByFields;
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {

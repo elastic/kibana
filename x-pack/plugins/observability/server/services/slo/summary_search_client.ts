@@ -130,6 +130,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
             sliValue: toHighPrecision(doc._source!.sliValue),
             status: doc._source!.status,
           },
+          groupings: doc._source!.slo.groupings,
         })),
       };
     } catch (err) {

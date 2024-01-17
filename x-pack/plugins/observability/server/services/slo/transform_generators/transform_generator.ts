@@ -70,7 +70,12 @@ export abstract class TransformGenerator {
                 },
               };
             },
-            { 'slo.instanceId': { terms: { field: slo.groupBy } } }
+            // TODO: figure out groupBy schema
+            {
+              'slo.instanceId': {
+                terms: { field: Array.isArray(slo.groupBy) ? slo.groupBy[0] : slo.groupBy },
+              },
+            }
           )
         : { 'slo.instanceId': { terms: { field: 'slo.instanceId' } } };
 

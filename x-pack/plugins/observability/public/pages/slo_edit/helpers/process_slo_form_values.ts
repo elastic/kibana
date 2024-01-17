@@ -73,7 +73,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
         }),
     },
     tags: values.tags,
-    groupBy: values.groupBy,
+    groupBy: Array.isArray(values.groupBy) ? values.groupBy : [values.groupBy],
   };
 }
 
@@ -99,7 +99,7 @@ export function transformValuesToUpdateSLOInput(values: CreateSLOForm): UpdateSL
         }),
     },
     tags: values.tags,
-    groupBy: values.groupBy,
+    groupBy: Array.isArray(values.groupBy) ? values.groupBy : [values.groupBy],
   };
 }
 

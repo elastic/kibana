@@ -33,6 +33,7 @@ import {
   timesliceMetricBasicMetricWithField,
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
+  allOrAnyStringOrArray,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -49,7 +50,7 @@ const createSLOParamsSchema = t.type({
       id: sloIdSchema,
       settings: optionalSettingsSchema,
       tags: tagsSchema,
-      groupBy: allOrAnyString,
+      groupBy: allOrAnyStringOrArray,
       revision: t.number,
     }),
   ]),
@@ -108,7 +109,7 @@ const sloResponseSchema = t.intersection([
     settings: settingsSchema,
     enabled: t.boolean,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
     createdAt: dateType,
     updatedAt: dateType,
     version: t.number,
@@ -152,7 +153,7 @@ const updateSLOParamsSchema = t.type({
     objective: objectiveSchema,
     settings: optionalSettingsSchema,
     tags: tagsSchema,
-    groupBy: allOrAnyString,
+    groupBy: allOrAnyStringOrArray,
   }),
 });
 

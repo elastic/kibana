@@ -12,6 +12,12 @@ const ALL_VALUE = '*';
 
 const allOrAnyString = t.union([t.literal(ALL_VALUE), t.string]);
 
+const allOrAnyStringOrArray = t.union([
+  t.literal(ALL_VALUE),
+  t.string,
+  t.array(t.union([t.literal(ALL_VALUE), t.string])),
+]);
+
 const dateType = new t.Type<Date, string, unknown>(
   'DateType',
   (input: unknown): input is Date => input instanceof Date,
@@ -43,6 +49,8 @@ const summarySchema = t.type({
   errorBudget: errorBudgetSchema,
 });
 
+const groupingSchema = t.type(t.object);
+
 const historicalSummarySchema = t.intersection([
   t.type({
     date: dateType,
@@ -69,9 +77,11 @@ const dateRangeSchema = t.type({ from: dateType, to: dateType });
 export {
   ALL_VALUE,
   allOrAnyString,
+  allOrAnyStringOrArray,
   dateRangeSchema,
   dateType,
   errorBudgetSchema,
+  groupingSchema,
   historicalSummarySchema,
   previewDataSchema,
   statusSchema,
