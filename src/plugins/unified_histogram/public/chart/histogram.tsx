@@ -30,12 +30,12 @@ import {
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
   UnifiedHistogramInputMessage,
+  LensAttributesContext,
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
 import { useStableCallback } from './hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
   services: UnifiedHistogramServices;

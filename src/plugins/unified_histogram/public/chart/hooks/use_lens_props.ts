@@ -12,8 +12,11 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useCallback, useEffect, useState } from 'react';
 import type { Observable } from 'rxjs';
-import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../../types';
-import type { LensAttributesContext } from '../utils/get_lens_attributes';
+import type {
+  UnifiedHistogramInputMessage,
+  UnifiedHistogramRequestContext,
+  LensAttributesContext,
+} from '../../types';
 import { useStableCallback } from './use_stable_callback';
 
 export const useLensProps = ({
@@ -45,10 +48,10 @@ export const useLensProps = ({
   const [lensPropsContext, setLensPropsContext] = useState(buildLensProps());
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
-  // Reverting a saved search changes might change only attributesContext without a refetch
+  // Reverting saved search changes would change only attributesContext without a refetch
   useEffect(() => {
-    setLensPropsContext(buildLensProps());
-  }, [buildLensProps, setLensPropsContext]);
+    updateLensPropsContext();
+  }, [attributesContext, updateLensPropsContext]);
 
   useEffect(() => {
     const subscription = refetch$.subscribe(updateLensPropsContext);
