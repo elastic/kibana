@@ -1,0 +1,3 @@
+# Placeholder for the pipeline definition. Will be done in a follow-up PR.
+steps:
+  - command: echo "Hello, World"
