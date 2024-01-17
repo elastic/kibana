@@ -28,7 +28,7 @@ describe('SeverityFilterGroup', () => {
   });
 
   it('preserves sort order when severityCount is out of order', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[]}
@@ -47,17 +47,13 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    expect(getAllByTestId('risk-score').map((ele) => ele.textContent)).toEqual([
-      'Unknown',
-      'Low',
-      'Moderate',
-      'High',
-      'Critical',
-    ]);
+    expect(getByTestId('risk-filter-selectable').textContent).toEqual(
+      ['Unknown', 'Low', 'Moderate', 'High', 'Critical'].join('')
+    );
   });
 
   it('sends telemetry when selecting a classification', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[]}
@@ -76,12 +72,12 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    fireEvent.click(getAllByTestId('risk-score').at(0)!);
+    fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(1);
   });
 
   it('does not send telemetry when deselecting a classification', () => {
-    const { getByTestId, getAllByTestId } = render(
+    const { getByTestId } = render(
       <TestProviders>
         <SeverityFilterGroup
           selectedSeverities={[
@@ -106,7 +102,7 @@ describe('SeverityFilterGroup', () => {
 
     fireEvent.click(getByTestId('risk-filter-button'));
 
-    fireEvent.click(getAllByTestId('risk-score').at(0)!);
+    fireEvent.click(getByTestId('risk-filter-item-Unknown'));
     expect(mockedTelemetry.reportEntityRiskFiltered).toHaveBeenCalledTimes(0);
   });
 });
