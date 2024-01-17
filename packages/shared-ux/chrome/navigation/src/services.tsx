@@ -27,7 +27,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core, serverless } = dependencies;
+  const { core, activeNodes$ } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
@@ -38,7 +38,7 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
     navigateToUrl,
     navIsOpen: true,
-    activeNodes$: serverless.getActiveNavigationNodes$(),
+    activeNodes$,
     isSideNavCollapsed,
   };
 

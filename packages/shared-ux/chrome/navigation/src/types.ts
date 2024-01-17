@@ -54,7 +54,5 @@ export interface NavigationKibanaDependencies {
       getLoadingCount$(): Observable<number>;
     };
   };
-  serverless: {
-    getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
-  };
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 }

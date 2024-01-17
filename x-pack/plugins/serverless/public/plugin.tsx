@@ -75,8 +75,9 @@ export class ServerlessPlugin
       project.setProjectUrl(cloud.deploymentUrl);
     }
 
-    const getActiveNavigationNodes$ = () =>
-      (core.chrome as InternalChromeStart).project.getActiveNavigationNodes$();
+    const activeNavigationNodes$ = (
+      core.chrome as InternalChromeStart
+    ).project.getActiveNavigationNodes$();
     const navigationTreeUi$ = project.getNavigationTreeUi$();
 
     return {
@@ -94,16 +95,13 @@ export class ServerlessPlugin
             }}
             deps={{
               core,
-              serverless: {
-                getActiveNavigationNodes$,
-              },
+              activeNodes$: activeNavigationNodes$,
             }}
           />
         ));
       },
       setBreadcrumbs: (breadcrumbs, params) => project.setBreadcrumbs(breadcrumbs, params),
       setProjectHome: (homeHref: string) => project.setHome(homeHref),
-      getActiveNavigationNodes$,
     };
   }
 
