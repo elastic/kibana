@@ -79,7 +79,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
-    this.useDefaultStrategyForPath = router.useDefaultStrategyForInternalPaths.has(path);
+    this.useDefaultStrategyForPath = router.useDefaultResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.router.router[this.method](

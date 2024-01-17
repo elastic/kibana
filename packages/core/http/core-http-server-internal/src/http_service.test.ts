@@ -450,7 +450,7 @@ test('passes versioned config to router', async () => {
     versioned: {
       versionResolution: 'newest',
       strictClientVersionCheck: false,
-      useDefaultStrategyForInternalPaths: [],
+      useDefaultResolutionStrategyForInternalPaths: [],
     },
   });
 

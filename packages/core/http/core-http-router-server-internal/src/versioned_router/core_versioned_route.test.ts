@@ -263,7 +263,7 @@ describe('Versioned route', () => {
     const versionedRouter = CoreVersionedRouter.from({
       router,
       isDev: true,
-      useDefaultStrategyForInternalPaths: ['/bypass_me/{id?}'],
+      useDefaultResolutionStrategyForInternalPaths: ['/bypass_me/{id?}'],
     });
 
     let bypassVersionHandler: RequestHandler;
