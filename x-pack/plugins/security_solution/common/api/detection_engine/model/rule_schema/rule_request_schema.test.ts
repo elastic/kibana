@@ -1261,9 +1261,7 @@ describe('rules schema', () => {
       );
     });
     // behaviour common for multiple rule types
-    const cases = [
-      { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
-    ];
+    const cases = [{ ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() }];
 
     cases.forEach(({ ruleType, ruleMock }) => {
       test(`should validate suppression fields for "${ruleType}" rule type`, () => {

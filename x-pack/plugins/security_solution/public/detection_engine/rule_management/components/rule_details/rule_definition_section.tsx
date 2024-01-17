@@ -427,9 +427,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  {
-    alertSuppressionForIndicatorMatchRuleEnabled,
-  }: Partial<ExperimentalFeatures> = {}
+  { alertSuppressionForIndicatorMatchRuleEnabled }: Partial<ExperimentalFeatures> = {}
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -748,7 +746,6 @@ export const RuleDefinitionSection = ({
   const alertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
-
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
