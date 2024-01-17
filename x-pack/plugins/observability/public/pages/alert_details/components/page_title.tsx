@@ -37,7 +37,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
-  alertStatus: string | undefined;
+  alertStatus: AlertStatus;
   dataTestSubj: string;
 }
 
@@ -70,7 +70,7 @@ export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) 
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
           <AlertLifecycleStatusBadge
-            alertStatus={alertStatus as AlertStatus}
+            alertStatus={alertStatus}
             flapping={alert.fields[ALERT_FLAPPING]}
           />
         </EuiFlexItem>

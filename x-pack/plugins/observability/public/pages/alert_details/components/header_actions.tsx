@@ -20,7 +20,12 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  AlertStatus,
+  ALERT_RULE_UUID,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
@@ -30,11 +35,11 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
-  alertStatus: string | undefined;
-  onAlertStatusChange: () => void;
+  alertStatus: AlertStatus;
+  onUntrackAlert: () => void;
 }
 
-export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: HeaderActionsProps) {
+export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActionsProps) {
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
@@ -61,9 +66,9 @@ export function HeaderActions({ alert, alertStatus, onAlertStatusChange }: Heade
         indices: ['.internal.alerts-observability.*'],
         alertUuids: [alert.fields[ALERT_UUID]],
       });
-      onAlertStatusChange();
+      onUntrackAlert();
     }
-  }, [alert, untrackAlerts, onAlertStatusChange]);
+  }, [alert, untrackAlerts, onUntrackAlert]);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);

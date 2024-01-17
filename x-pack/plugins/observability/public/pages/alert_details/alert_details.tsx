@@ -10,10 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import {
+  AlertStatus,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -88,8 +90,8 @@ export function AlertDetails() {
     },
   ]);
 
-  const onAlertStatusChange = () => {
-    setAlertStatus('untracked');
+  const onUntrackAlert = () => {
+    setAlertStatus(ALERT_STATUS_UNTRACKED);
   };
 
   if (isLoading) {
@@ -133,7 +135,7 @@ export function AlertDetails() {
         pageTitle: (
           <PageTitle
             alert={alert}
-            alertStatus={alertStatus}
+            alertStatus={alertStatus as AlertStatus}
             dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
           />
         ),
@@ -145,8 +147,8 @@ export function AlertDetails() {
           >
             <HeaderActions
               alert={alert}
-              alertStatus={alertStatus}
-              onAlertStatusChange={onAlertStatusChange}
+              alertStatus={alertStatus as AlertStatus}
+              onUntrackAlert={onUntrackAlert}
             />
           </CasesContext>,
         ],
