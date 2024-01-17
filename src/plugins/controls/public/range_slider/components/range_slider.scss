@@ -20,10 +20,13 @@
   background-color: transparent;
 
   &:invalid {
+    background-image: none; // hide the red bottom border
+  }
+
+  &.rangeSliderAnchor__fieldNumber--invalid {
     color: $euiTextSubduedColor;
     text-decoration: line-through;
     font-weight: $euiFontWeightRegular;
-    background-image: none; // hide the red bottom border
   }
 
   &:placeholder-shown, &::placeholder {

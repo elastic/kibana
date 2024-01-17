@@ -120,12 +120,15 @@ export const RangeSliderControl: FC = () => {
         isInvalid,
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        className: 'rangeSliderAnchor__fieldNumber',
+        className: `rangeSliderAnchor__fieldNumber ${
+          isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
+        }`,
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
+        title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
       };
     },
-    [isInvalid]
+    [isInvalid, step]
   );
 
   return error ? (
