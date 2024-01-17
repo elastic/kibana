@@ -71,7 +71,8 @@
     "@kbn/field-utils",
     "@kbn/visualization-utils",
     "@kbn/text-based-languages",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/es-types"
   ],
   "exclude": [
     "target/**/*",
