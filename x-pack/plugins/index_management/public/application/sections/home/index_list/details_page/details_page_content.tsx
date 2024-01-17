@@ -25,7 +25,6 @@ import {
   IndexDetailsSection,
   IndexDetailsTab,
   IndexDetailsTabId,
-  Section,
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
@@ -81,6 +80,7 @@ interface Props {
   history: RouteComponentProps['history'];
   search: string;
   fetchIndexDetails: () => Promise<void>;
+  navigateToIndicesList: () => void;
 }
 export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
@@ -88,6 +88,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   history,
   search,
   fetchIndexDetails,
+  navigateToIndicesList,
 }) => {
   const {
     config: { enableIndexStats },
@@ -118,14 +119,6 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     [history, index.name, search]
   );
 
-  const navigateToAllIndices = useCallback(() => {
-    const indicesListParams = qs.parse(search);
-    delete indicesListParams.indexName;
-    delete indicesListParams.tab;
-    const paramsString = qs.stringify(indicesListParams);
-    history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
-  }, [history, search]);
-
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({
       onClick: () => onSectionChange(tabConfig.id),
@@ -150,11 +143,11 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
-          onClick={navigateToAllIndices}
+          onClick={navigateToIndicesList}
         >
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-            defaultMessage="Back to all indices"
+            defaultMessage="Back to indices"
           />
         </EuiButton>
       </EuiPageSection>
@@ -168,7 +161,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           <ManageIndexButton
             index={index}
             reloadIndexDetails={fetchIndexDetails}
-            navigateToAllIndices={navigateToAllIndices}
+            navigateToIndicesList={navigateToIndicesList}
           />,
         ]}
         rightSideGroupProps={{

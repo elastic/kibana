@@ -306,6 +306,8 @@
                 "section": "def-common.TaskPayloadPNGV2",
                 "text": "TaskPayloadPNGV2"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -365,6 +367,21 @@
                 "id": "def-server.PngExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/png/png_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-png",
+                "id": "def-server.PngExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -383,7 +400,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-png",
-                "id": "def-server.PngExportType.runTask.$4",
+                "id": "def-server.PngExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
