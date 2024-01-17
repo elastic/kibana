@@ -291,3 +291,105 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "connector_token:601750d9-a82a-4344-ac5c-badfbe12a4ca",
+    "source": {
+      "connector_token": {
+        "connectorId": "connector-id",
+        "token": "ToodRP10TblHckqc9mIGKv4hWUN/rjhzP2OW4j41/z4V4HLSMGJGd6LknngRK7il+8nvMh2pvWJCA/6iIdM62+GAqJZlaHy4gOJnxb62J8ucolZxmmSX2AL1Fsn+6BaIVtegxDt82fdm4S94ANlpwzt9JvshB20vm32vkZrDl74/E9pwtHSsyz+b6s2iyLfELoo2feo=",
+        "expiresAt": "9999",
+        "tokenType": "access_token",
+        "createdAt": "2024-01-17T16:27:21.181Z",
+        "updatedAt": "2024-01-17T16:27:21.181Z"
+      },
+      "type": "connector_token",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T16:27:21.181Z",
+      "created_at": "2024-01-17T16:27:21.181Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_ingest",
+    "id": "ingest-outputs:8118481a-b91a-40e6-83f7-f9e1c08bb3ae",
+    "source": {
+      "ingest-outputs": {
+        "name": "test_kafka_output",
+        "type": "kafka",
+        "hosts": [
+          "localhost:9092"
+        ],
+        "is_default": false,
+        "is_default_monitoring": false,
+        "config_yaml": "",
+        "proxy_id": null,
+        "client_id": "Elastic",
+        "version": "1.0.0",
+        "key": "some-key",
+        "compression": "none",
+        "auth_type": "user_pass",
+        "username": "some-username",
+        "sasl": {
+          "mechanism": "PLAIN"
+        },
+        "partition": "random",
+        "random": {
+          "group_events": 1
+        },
+        "topics": [
+          {
+            "topic": "some topic"
+          }
+        ],
+        "headers": [
+          {
+            "key": "",
+            "value": ""
+          }
+        ],
+        "timeout": 30,
+        "broker_timeout": 30,
+        "required_acks": 1,
+        "ssl": "PFLHz9pywSov/p+PZUAPfioMJDQFNpQt0VrRNbPUIKrbj2Q1MiwWIQR8nlpVzocOJp7tjXVItnUzsbJZu30osfvtsbzixT8zp8QRPHFZC3sjDA9alchulj6eoj+mueyAQNKktL56Dwp16CNg/huLea//Xyp3nJ4AYVRCpGV5+avQtI1K+FiLpo17+W8dj7Y+VXpJqcL9nuTdi6KdiwCoTWzXeqmkk9YdY3ffbQ==",
+        "password": "vEd4zRVTh03N2lCOx5Y7BbURX1A8C6Di4l/X+YfTBW0EGEwFkLMa779oCVH9V2atbUGbubqGD6IVYIwylCO3sMhGFU8qBVHju0fNTvCddd9AFXj2DLC3opxfR95Xaa05Lnen6O3yrUPn9sE="
+      },
+      "type": "ingest-outputs",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "10.4.0",
+      "updated_at": "2024-01-17T17:21:06.427Z",
+      "created_at": "2024-01-17T17:18:40.441Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_ingest",
+    "id": "fleet-uninstall-tokens:1db22a8f-4cbb-415d-90d1-7608a6923ba1",
+    "source": {
+      "fleet-uninstall-tokens": {
+        "policy_id": "some-policy-id",
+        "token": "eIGQf+EuprdGJlLunhXdvPoDO1NCLG3RtsbhVjWLbRuG+/YmNa8GFyD6924nwNJOND8900YQjT1sGInpQI3rLTC6KX0fthjlBk2RWElyndlnE6jga140dGNf++cbrY1d2c1k6JYPb+SjGs9VEfHQlrM9RpAFx8ZRUGHEbzgGCsaGVcNUZdB0G4A0UFrLSkcme2ICNgxp/qS0xU+0",
+        "token_plain": "This token was encrypted prior to the AAD include list change."
+      },
+      "type": "fleet-uninstall-tokens",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T18:19:50.628Z",
+      "created_at": "2024-01-17T18:19:50.628Z"
+    }
+  }
+}

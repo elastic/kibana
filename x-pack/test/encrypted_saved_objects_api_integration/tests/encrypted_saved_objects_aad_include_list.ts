@@ -97,6 +97,48 @@ export default function ({ getService }: FtrProviderContext) {
           'ssl.key_passphrase': '',
         });
       });
+
+      it(`successfully decrypts 'connector_token' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/connector_token/601750d9-a82a-4344-ac5c-badfbe12a4ca`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.token).to.eql(
+          'Token value encrypted prior to AAD include list change.'
+        );
+      });
+
+      it(`successfully decrypts 'ingest-outputs' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/ingest-outputs/8118481a-b91a-40e6-83f7-f9e1c08bb3ae`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        const ssl = JSON.parse(decryptedObject.attributes.ssl);
+        expect(ssl).to.eql({
+          certificate_authorities: ['some SSL CA'],
+          verification_mode: 'full',
+        });
+        expect(decryptedObject.attributes.password).to.eql('some-password');
+      });
+
+      it(`successfully decrypts 'fleet-uninstall-tokens' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/fleet-uninstall-tokens/1db22a8f-4cbb-415d-90d1-7608a6923ba1`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.token).to.eql(
+          'This token was encrypted prior to the AAD include list change.'
+        );
+      });
     });
   });
 }

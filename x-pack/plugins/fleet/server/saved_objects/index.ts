@@ -688,7 +688,14 @@ export function registerEncryptedSavedObjects(
       { key: 'ssl', dangerouslyExposeValue: true },
       { key: 'password', dangerouslyExposeValue: true },
     ]),
-    attributesToIncludeInAAD: new Set(['ssl', 'shipper', 'allow_edit']),
+    attributesToIncludeInAAD: new Set([
+      'service_token',
+      'shipper',
+      'allow_edit',
+      'broker_ack_reliability',
+      'broker_buffer_size',
+      'channel_buffer_size',
+    ]),
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
@@ -699,6 +706,6 @@ export function registerEncryptedSavedObjects(
   encryptedSavedObjects.registerType({
     type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['token']),
-    attributesToIncludeInAAD: new Set(['created_at', 'policy_id', 'token_plain']),
+    attributesToIncludeInAAD: new Set(['policy_id', 'token_plain']),
   });
 }
