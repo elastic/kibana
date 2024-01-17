@@ -38,6 +38,8 @@ export type SaveModalContainerProps = {
   getAppNameFromId?: () => string | undefined;
   lensServices: LensAppServices;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  // is this visualization managed by the system?
+  managed: boolean;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -56,6 +58,7 @@ export function SaveModalContainer({
   lastKnownDoc: initLastKnownDoc,
   lensServices,
   initialContext,
+  managed,
 }: SaveModalContainerProps) {
   let title = '';
   let description;
@@ -168,6 +171,7 @@ export function SaveModalContainer({
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
       returnToOrigin={redirectToOrigin != null}
+      managed={managed}
     />
   );
 }
