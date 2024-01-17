@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { GetStartedWithContext } from './get_started/get_started_with_context';
+import { getSecurityGetStartedComponent } from './get_started';
 
 export const LandingPageComponent = memo(() => {
   const { indicesExist } = useSourcererDataView();
-  return <GetStartedWithContext indicesExist={indicesExist} />;
+  const GetStarted = useMemo(() => getSecurityGetStartedComponent(), []);
+  return <GetStarted indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';
