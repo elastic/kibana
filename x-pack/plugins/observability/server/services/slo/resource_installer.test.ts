@@ -16,6 +16,7 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SLO_RESOURCES_VERSION,
 } from '../../../common/slo/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
@@ -104,7 +105,7 @@ describe('resourceInstaller', () => {
           name: SLO_INDEX_TEMPLATE_NAME,
           component_template: {
             _meta: {
-              version: 3,
+              version: SLO_RESOURCES_VERSION,
             },
             template: {
               settings: {},
@@ -121,7 +122,7 @@ describe('resourceInstaller', () => {
             index_patterns: SLO_INDEX_TEMPLATE_NAME,
             composed_of: [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
             _meta: {
-              version: 3,
+              version: SLO_RESOURCES_VERSION,
             },
           },
         },
@@ -130,7 +131,7 @@ describe('resourceInstaller', () => {
     mockClusterClient.ingest.getPipeline.mockResponse({
       [SLO_INGEST_PIPELINE_NAME]: {
         _meta: {
-          version: 3,
+          version: SLO_RESOURCES_VERSION,
         },
       } as IngestPipeline,
     });
