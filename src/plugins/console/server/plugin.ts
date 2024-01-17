@@ -9,6 +9,7 @@
 import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { SemVer } from 'semver';
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
 import { ConsoleConfig, ConsoleConfig7x } from './config';
@@ -17,6 +18,10 @@ import { registerRoutes } from './routes';
 
 import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
+
+interface ConsoleSetupDependencies {
+  cloud: CloudSetup;
+}
 
 export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
   log: Logger;
@@ -29,7 +34,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
     this.log = this.ctx.logger.get();
   }
 
-  setup({ http, capabilities, elasticsearch }: CoreSetup) {
+  setup({ http, capabilities, elasticsearch }: CoreSetup, deps: ConsoleSetupDependencies) {
     capabilities.registerProvider(() => ({
       dev_tools: {
         show: true,
@@ -56,6 +61,7 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       router,
       log: this.log,
       services: {
+        cloud: deps.cloud,
         esLegacyConfigService: this.esLegacyConfigService,
         specDefinitionService: this.specDefinitionsService,
       },
