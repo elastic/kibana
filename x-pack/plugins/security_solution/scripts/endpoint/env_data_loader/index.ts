@@ -78,6 +78,7 @@ Loading data to: ${kbnClient.resolveUrl('')}`);
         --eventFiltersCount             How many Event Filters to create (Default: 10)
         --blocklistsCount               How many Blocklists to create (Default: 10)
         --hostIsolationExceptionsCount  How many Host Isolation Exceptions to create (Default: 10)
+        --endpointExceptionsCount       How many Endpoint Exceptions to create (Default: 10)
         --globalArtifactRatio           The percentage ratio of all artifacts that should be global
                                         rather than per-policy. (Default: 50)
         --concurrency                   The max number of request to process in parallel. (Default: 10)
