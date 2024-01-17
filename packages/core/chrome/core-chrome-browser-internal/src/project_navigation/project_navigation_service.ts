@@ -205,16 +205,6 @@ export class ProjectNavigationService {
 
     const cloudLinks = getCloudLinks(cloudUrls);
 
-    this.navigationTree$
-      .pipe(
-        takeUntil(this.stop$),
-        filter((navTree): navTree is ChromeProjectNavigationNode[] => Boolean(navTree))
-      )
-      .subscribe((navTree) => {
-        this.projectNavigationNavTreeFlattened = flattenNav(navTree);
-        this.setActiveProjectNavigationNodes();
-      });
-
     combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$])
       .pipe(
         map(([def, deepLinksMap]) => {
@@ -226,17 +216,16 @@ export class ProjectNavigationService {
       )
       .subscribe({
         next: ({ navigationTree, navigationTreeUI }) => {
-          this.setProjectNavigation(navigationTree);
+          this.navigationTree$.next(navigationTree);
           this.navigationTreeUi$.next(navigationTreeUI);
+
+          this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
+          this.setActiveProjectNavigationNodes();
         },
         error: (err) => {
           this.logger?.error(err);
         },
       });
-  }
-
-  private setProjectNavigation(navigationTree: ChromeProjectNavigationNode[]) {
-    this.navigationTree$.next(navigationTree);
   }
 
   private getNavigationTreeUi$(): Observable<NavigationTreeDefinitionUI> {
