@@ -79,14 +79,62 @@ interface DurationRange {
 }
 
 const commonDurationRanges: DurationRange[] = [
-  { start: 'now/d', end: 'now/d', label: 'Today' },
-  { start: 'now/w', end: 'now/w', label: 'This week' },
-  { start: 'now/M', end: 'now/M', label: 'This month' },
-  { start: 'now/y', end: 'now/y', label: 'This year' },
-  { start: 'now-1d/d', end: 'now-1d/d', label: 'Yesterday' },
-  { start: 'now/w', end: 'now', label: 'Week to date' },
-  { start: 'now/M', end: 'now', label: 'Month to date' },
-  { start: 'now/y', end: 'now', label: 'Year to date' },
+  {
+    start: 'now/d',
+    end: 'now/d',
+    label: i18n.translate('unifiedSearch.search.searchBar.savedQueryTodayLabel', {
+      defaultMessage: 'Today',
+    }),
+  },
+  {
+    start: 'now/w',
+    end: 'now/w',
+    label: i18n.translate('unifiedSearch.search.searchBar.savedQueryWeekLabel', {
+      defaultMessage: 'This week',
+    }),
+  },
+  {
+    start: 'now/M',
+    end: 'now/M',
+    label: i18n.translate('unifiedSearch.search.searchBar.savedQueryMonthLabel', {
+      defaultMessage: 'This month',
+    }),
+  },
+  {
+    start: 'now/y',
+    end: 'now/y',
+    label: i18n.translate('unifiedSearch.search.searchBar.savedQueryYearLabel', {
+      defaultMessage: 'This year',
+    }),
+  },
+  {
+    start: 'now-1d/d',
+    end: 'now-1d/d',
+    label: i18n.translate('unifiedSearch.searchBar.savedQueryYesterdayLabel', {
+      defaultMessage: 'Yesterday',
+    }),
+  },
+  {
+    start: 'now/w',
+    end: 'now',
+    label: i18n.translate('unifiedSearch.searchBar.savedQueryWeekToDateLabel', {
+      defaultMessage: 'Week to date',
+    }),
+  },
+  {
+    start: 'now/M',
+    end: 'now',
+    label: i18n.translate('unifiedSearch.searchBar.savedQueryMonthToDateLabel', {
+      defaultMessage: 'Month to date',
+    }),
+  },
+  {
+    start: 'now/y',
+    end: 'now',
+    label: i18n.translate('unifiedSearch.searchBar.savedQueryYearToDateLabel', {
+      defaultMessage: 'Year to date',
+    }),
+  },
 ];
 
 const itemTitle = (attributes: SavedQueryAttributes, format: string) => {
@@ -131,19 +179,14 @@ const itemLabel = (attributes: SavedQueryAttributes) => {
   return label;
 };
 
-const savedQueryDescriptionText = i18n.translate(
-  'unifiedSearch.search.searchBar.savedQueryDescriptionText',
-  {
-    defaultMessage: 'Save query text and filters that you want to use again.',
-  }
-);
-
-const noSavedQueriesDescriptionText =
+const noSavedQueriesDescriptionText = [
   i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
     defaultMessage: 'No saved queries.',
-  }) +
-  ' ' +
-  savedQueryDescriptionText;
+  }),
+  i18n.translate('unifiedSearch.search.searchBar.savedQueryDescriptionText', {
+    defaultMessage: 'Save query text and filters that you want to use again.',
+  }),
+].join(' ');
 
 const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
   'unifiedSearch.search.searchBar.savedQueryMultipleNamespacesDeleteWarning',
@@ -155,7 +198,7 @@ const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
 const SAVED_QUERY_PAGE_SIZE = 5;
 const SAVED_QUERY_SEARCH_DEBOUNCE = 500;
 
-export function SavedQueryManagementList({
+export const SavedQueryManagementList = ({
   showSaveQuery,
   loadedSavedQuery,
   savedQueryService,
@@ -163,7 +206,7 @@ export function SavedQueryManagementList({
   onLoad,
   onClearSavedQuery,
   onClose,
-}: SavedQueryManagementListProps) {
+}: SavedQueryManagementListProps) => {
   const { uiSettings } = useKibana<IUnifiedSearchPluginServices>().services;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
@@ -284,20 +327,42 @@ export function SavedQueryManagementList({
     });
   }, [currentPageQueries, format, selectedSavedQuery]);
 
-  const renderOption = (option: RenderOptionProps) => {
-    return (
-      <>
-        {option.attributes ? itemLabel(option.attributes) : option.label}
-        {option.value === loadedSavedQuery?.id && (
-          <EuiBadge color="hollow" css={{ marginLeft: euiThemeVars.euiSizeS }}>
-            {i18n.translate('unifiedSearch.search.searchBar.savedQueryActiveBadgeText', {
-              defaultMessage: 'Active',
-            })}
-          </EuiBadge>
-        )}
-      </>
-    );
-  };
+  const renderOption = useCallback(
+    (option: RenderOptionProps) => {
+      return (
+        <>
+          {option.attributes ? itemLabel(option.attributes) : option.label}
+          {option.value === loadedSavedQuery?.id && (
+            <EuiBadge color="hollow" css={{ marginLeft: euiThemeVars.euiSizeS }}>
+              {i18n.translate('unifiedSearch.search.searchBar.savedQueryActiveBadgeText', {
+                defaultMessage: 'Active',
+              })}
+            </EuiBadge>
+          )}
+        </>
+      );
+    },
+    [loadedSavedQuery?.id]
+  );
+
+  const countDisplay = useMemo(() => {
+    const parts = [
+      i18n.translate('unifiedSearch.search.searchBar.savedQueryTotalQueryCount', {
+        defaultMessage: '{totalQueryCount, plural, one {# query} other {# queries}}',
+        values: { totalQueryCount },
+      }),
+    ];
+
+    if (Boolean(selectedSavedQuery)) {
+      parts.push(
+        i18n.translate('unifiedSearch.search.searchBar.savedQuerySelectedQueryCount', {
+          defaultMessage: '1 selected',
+        })
+      );
+    }
+
+    return parts.join(' | ');
+  }, [selectedSavedQuery, totalQueryCount]);
 
   return (
     <>
@@ -370,17 +435,7 @@ export function SavedQueryManagementList({
                 </EuiPanel>
                 <EuiPanel color="transparent" paddingSize="s">
                   <EuiText size="xs" color="subdued">
-                    {i18n.translate('unifiedSearch.search.searchBar.savedQueryTotalQueryCount', {
-                      defaultMessage: '{totalQueryCount, plural, one {# query} other {# queries}}',
-                      values: { totalQueryCount },
-                    })}
-                    {Boolean(selectedSavedQuery) &&
-                      ` | ${i18n.translate(
-                        'unifiedSearch.search.searchBar.savedQuerySelectedQueryCount',
-                        {
-                          defaultMessage: '1 selected',
-                        }
-                      )}`}
+                    {countDisplay}
                   </EuiText>
                 </EuiPanel>
                 <EuiHorizontalRule margin="none" />
@@ -505,7 +560,7 @@ export function SavedQueryManagementList({
       )}
     </>
   );
-}
+};
 
 const ListTitle = ({ queryBarMenuRef }: { queryBarMenuRef: RefObject<EuiContextMenuClass> }) => {
   const { application, http } = useKibana<IUnifiedSearchPluginServices>().services;
