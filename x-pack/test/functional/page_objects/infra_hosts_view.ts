@@ -49,11 +49,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Table
 
     async getHostsTable() {
-      return testSubjects.find('hostsView-table');
+      return testSubjects.find('hostsView-table-loaded');
     },
 
-    async isHostTableLoading() {
-      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
+    async isHostTableLoaded() {
+      return !(await testSubjects.exists('hostsView-table-loading'));
     },
 
     async getHostsTableData() {

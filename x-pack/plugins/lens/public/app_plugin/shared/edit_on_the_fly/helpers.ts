@@ -7,12 +7,12 @@
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import { fetchFieldsFromESQL } from '../../../datasources/text_based/fetch_fields_from_esql';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
 export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginStartDependencies) => {

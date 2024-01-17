@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { BehaviorSubject, type Observable, combineLatest } from 'rxjs';
-import { map, distinctUntilChanged } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, type Observable } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
+import { ChangePointsTable } from '../components/change_point_detection/change_points_table';
+import { CHANGE_POINT_DETECTION_VIEW_TYPE } from '../../common/constants';
 import { ReloadContextProvider } from '../hooks/use_reload';
 import {
   type ChangePointAnnotation,
@@ -42,7 +44,7 @@ export interface EmbeddableInputTrackerProps {
   reload$: Observable<number>;
   onOutputChange: (output: Partial<EmbeddableChangePointChartOutput>) => void;
   onRenderComplete: () => void;
-  onLoading: () => void;
+  onLoading: (isLoading: boolean) => void;
   onError: (error: Error) => void;
 }
 
@@ -86,6 +88,7 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
         <ChangePointDetectionControlsContextProvider>
           <FilterQueryContextProvider timeRange={input.timeRange}>
             <ChartGridEmbeddableWrapper
+              viewType={input.viewType}
               timeRange={input.timeRange}
               fn={input.fn}
               metricField={input.metricField}
@@ -120,10 +123,11 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
 export const ChartGridEmbeddableWrapper: FC<
   EmbeddableChangePointChartProps & {
     onRenderComplete: () => void;
-    onLoading: () => void;
+    onLoading: (isLoading: boolean) => void;
     onError: (error: Error) => void;
   }
 > = ({
+  viewType = CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   fn,
   metricField,
   maxSeriesToPlot,
@@ -202,9 +206,7 @@ export const ChartGridEmbeddableWrapper: FC<
   );
 
   useEffect(() => {
-    if (isLoading) {
-      onLoading();
-    }
+    onLoading(isLoading);
   }, [onLoading, isLoading]);
 
   const changePoints = useMemo<ChangePointAnnotation[]>(() => {
@@ -235,16 +237,27 @@ export const ChartGridEmbeddableWrapper: FC<
       `}
     >
       {changePoints.length > 0 ? (
-        <ChartsGrid
-          changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
-          interval={requestParams.interval}
-          onRenderComplete={onRenderComplete}
-        />
-      ) : emptyState ? (
-        emptyState
-      ) : (
-        <NoChangePointsWarning onRenderComplete={onRenderComplete} />
-      )}
+        viewType === CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS ? (
+          <ChartsGrid
+            changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
+            interval={requestParams.interval}
+            onRenderComplete={onRenderComplete}
+          />
+        ) : viewType === CHANGE_POINT_DETECTION_VIEW_TYPE.TABLE ? (
+          <ChangePointsTable
+            isLoading={false}
+            annotations={changePoints}
+            fieldConfig={fieldConfig}
+            onRenderComplete={onRenderComplete}
+          />
+        ) : null
+      ) : !isLoading ? (
+        emptyState ? (
+          emptyState
+        ) : (
+          <NoChangePointsWarning onRenderComplete={onRenderComplete} />
+        )
+      ) : null}
     </div>
   );
 };
