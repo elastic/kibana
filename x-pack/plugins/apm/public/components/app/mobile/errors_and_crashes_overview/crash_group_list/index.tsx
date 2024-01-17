@@ -105,7 +105,7 @@ function MobileCrashGroupList({
         field: 'groupId',
         sortable: false,
         width: `${unit * 6}px`,
-        render: (_, item: ErrorGroupItem) => {
+        render: (_, item) => {
           return (
             <GroupIdLink
               serviceName={serviceName}
@@ -148,7 +148,7 @@ function MobileCrashGroupList({
         field: 'message',
         sortable: false,
         width: '30%',
-        render: (_, item: ErrorGroupItem) => {
+        render: (_, item) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip
