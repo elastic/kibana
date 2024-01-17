@@ -12,7 +12,6 @@ import React, { ReactNode, useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
-import { CurrentPage } from '../table_search_bar/table_search_bar';
 import {
   getItemsFilteredBySearchQuery,
   TableSearchBarV2,
@@ -31,6 +30,14 @@ export interface ITableColumn<T extends object> {
   render?: (value: any, item: T) => unknown;
 }
 
+export interface TableSearchBar {
+  isEnabled?: boolean;
+  fieldsToSearch: string[];
+  maxCountExceeded: boolean;
+  placeholder: string;
+  onChangeSearchQuery: (searchQuery: string) => void;
+}
+
 interface Props<T extends object> {
   items: T[];
   columns: Array<ITableColumn<T>>;
@@ -46,14 +53,7 @@ interface Props<T extends object> {
   isLoading?: boolean;
   error?: boolean;
   tableLayout?: 'auto' | 'fixed';
-  tableSearchBar?: {
-    isEnabled?: boolean;
-    fieldsToSearch: string[];
-    maxCountExceeded: boolean;
-    placeholder: string;
-    onChangeSearchQuery: (searchQuery: string) => void;
-    onChangeCurrentPage: (page: CurrentPage<T>) => void;
-  };
+  tableSearchBar?: TableSearchBar;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -96,7 +96,6 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
       maxCountExceeded: false,
       placeholder: 'Search...',
       onChangeSearchQuery: () => {},
-      onChangeCurrentPage: () => {},
     },
   } = props;
 

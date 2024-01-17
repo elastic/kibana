@@ -54,8 +54,8 @@ import {
   ITableColumn,
   ManagedTable,
   SortFunction,
+  TableSearchBar,
 } from '../../../shared/managed_table';
-import { CurrentPage } from '../../../shared/table_search_bar/table_search_bar';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -298,8 +298,6 @@ interface Props {
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
-
-  onChangeCurrentPage: (page: CurrentPage<ServiceListItem>) => void;
 }
 export function ServiceList({
   status,
@@ -316,7 +314,6 @@ export function ServiceList({
   serviceOverflowCount,
   maxCountExceeded,
   onChangeSearchQuery,
-  onChangeCurrentPage,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
@@ -356,18 +353,17 @@ export function ServiceList({
     serviceOverflowCount,
   ]);
 
-  const tableSearchBar = useMemo(() => {
+  const tableSearchBar: TableSearchBar = useMemo(() => {
     return {
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
       onChangeSearchQuery,
-      onChangeCurrentPage,
       placeholder: i18n.translate(
         'xpack.apm.servicesTable.filterServicesPlaceholder',
         { defaultMessage: 'Search services by name' }
       ),
     };
-  }, [maxCountExceeded, onChangeCurrentPage, onChangeSearchQuery]);
+  }, [maxCountExceeded, onChangeSearchQuery]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>

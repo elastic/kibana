@@ -26,8 +26,11 @@ import {
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { CurrentPage } from '../../../shared/table_search_bar/table_search_bar';
+import {
+  ITableColumn,
+  ManagedTable,
+  TableSearchBar,
+} from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 
@@ -67,13 +70,7 @@ interface Props {
   initialSortDirection: 'asc' | 'desc';
   comparisonEnabled?: boolean;
   isLoading: boolean;
-  tableSearchBar: {
-    fieldsToSearch: string[];
-    maxCountExceeded: boolean;
-    placeholder: string;
-    onChangeSearchQuery: (searchQuery: string) => void;
-    onChangeCurrentPage: (page: CurrentPage<ErrorGroupItem>) => void;
-  };
+  tableSearchBar: TableSearchBar;
 }
 
 function ErrorGroupList({

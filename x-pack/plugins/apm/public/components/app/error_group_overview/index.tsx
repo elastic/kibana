@@ -32,6 +32,7 @@ import { FailedTransactionRateChart } from '../../shared/charts/failed_transacti
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
+import { TableSearchBar } from '../../shared/managed_table';
 
 type ErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
@@ -91,12 +92,11 @@ export function ErrorGroupOverview() {
     maxCountExceeded,
   } = useErrorGroupListData(debouncedSearchQuery);
 
-  const tableSearchBar = useMemo(() => {
+  const tableSearchBar: TableSearchBar = useMemo(() => {
     return {
       fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as ErrorFields[],
       maxCountExceeded,
       onChangeSearchQuery: setDebouncedSearchQuery,
-      onChangeCurrentPage: () => {},
       placeholder: i18n.translate(
         'xpack.apm.errorsTable.filterErrorsPlaceholder',
         { defaultMessage: 'Search errors by message, type or culprit' }

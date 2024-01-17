@@ -205,11 +205,6 @@ function useServicesDetailedStatisticsFetcher({
 }
 
 export function ServiceInventory() {
-  const [currentPage, setCurrentPage] = useState<{
-    items: ServiceListItem[];
-    totalCount: number;
-  }>({ items: [], totalCount: 0 });
-
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useStateDebounced(
     '',
     200
@@ -315,7 +310,6 @@ export function ServiceInventory() {
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
-            onChangeCurrentPage={setCurrentPage}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
