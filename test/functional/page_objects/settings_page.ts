@@ -494,6 +494,25 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
+  async refreshDataViewFieldList(dataViewName?: string) {
+    if (dataViewName) {
+      await this.common.navigateToApp('management/kibana/dataViews');
+      await this.header.waitUntilLoadingHasFinished();
+      await this.testSubjects.click(`detail-link-${dataViewName}`);
+    }
+    await this.testSubjects.click('refreshDataViewButton');
+
+    // wait for refresh to start
+    await new Promise((r) => setTimeout(r, 500));
+
+    // wait for refresh to finish
+    await this.retry.try(async () => {
+      const btn = await this.testSubjects.find('refreshDataViewButton');
+      const disabled = await btn.getAttribute('disabled');
+      expect(disabled).to.be(null);
+    });
+  }
+
   async allowHiddenClick() {
     await this.testSubjects.click('toggleAdvancedSetting');
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');

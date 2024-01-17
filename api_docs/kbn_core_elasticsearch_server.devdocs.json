@@ -761,6 +761,10 @@
                 "path": "packages/core/plugins/core-plugins-server-internal/src/plugin_context.ts"
               },
               {
+                "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/plugin.ts"
+              },
+              {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/plugins/observability_onboarding/server/plugin.ts"
               },
