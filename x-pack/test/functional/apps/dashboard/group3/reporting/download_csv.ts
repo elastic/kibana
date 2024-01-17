@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.existOrFail('csvDownloadStarted'); // validate toast panel
   };
 
-  describe.skip('Download CSV', () => {
+  describe('Download CSV', () => {
     before('initialize tests', async () => {
       log.debug('ReportingPage:initTests');
       await browser.setWindowSize(1600, 850);
@@ -177,7 +177,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       before(async () => {
         await reporting.initLogs();
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata');
+        await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata', {
+          performance: {
+            highWaterMark: 5000,
+            concurrency: 4,
+          },
+        });
 
         await navigateToDashboardApp();
         await PageObjects.dashboard.loadSavedDashboard(dashboardWithScriptedFieldsSearch);

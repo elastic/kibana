@@ -53,7 +53,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce', {
       performance: {
         highWaterMark: 300,
-        concurrency: 5,
+        concurrency: 1,
       },
     });
     await kibanaServer.importExport.load(ecommerceSOPath);
