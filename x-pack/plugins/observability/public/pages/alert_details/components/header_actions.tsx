@@ -5,28 +5,47 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiPopover, EuiText } from '@elastic/eui';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiPopover,
+  EuiText,
+} from '@elastic/eui';
+import {
+  AlertStatus,
+  ALERT_RULE_UUID,
+  ALERT_STATUS_ACTIVE,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import type { TopAlert } from '../../../typings/alerts';
+import { paths } from '../../../../common/locators/paths';
+import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 
 export interface HeaderActionsProps {
   alert: TopAlert | null;
+  alertStatus?: AlertStatus;
+  onUntrackAlert: () => void;
 }
 
-export function HeaderActions({ alert }: HeaderActionsProps) {
+export function HeaderActions({ alert, alertStatus, onUntrackAlert }: HeaderActionsProps) {
   const {
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
+    http,
   } = useKibana().services;
 
   const { rule, refetch } = useFetchRule({
@@ -38,6 +57,18 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
+
+  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+
+  const handleUntrackAlert = useCallback(async () => {
+    if (alert) {
+      await untrackAlerts({
+        indices: ['.internal.alerts-observability.*'],
+        alertUuids: [alert.fields[ALERT_UUID]],
+      });
+      onUntrackAlert();
+    }
+  }, [alert, untrackAlerts, onUntrackAlert]);
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);
@@ -62,7 +93,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
     selectCaseModal.open({ getAttachments: () => attachments });
   };
 
-  const handleViewRuleDetails = () => {
+  const handleEditRuleDetails = () => {
     setIsPopoverOpen(false);
     setRuleConditionsFlyoutOpen(true);
   };
@@ -74,42 +105,13 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
 
   return (
     <>
-      <EuiPopover
-        isOpen={isPopoverOpen}
-        closePopover={handleClosePopover}
-        button={
+      <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            iconType="arrowDown"
-            iconSide="right"
-            onClick={handleTogglePopover}
-            data-test-subj="alert-details-header-actions-menu-button"
-          >
-            {i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
-              defaultMessage: 'Actions',
-            })}
-          </EuiButton>
-        }
-      >
-        <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
-            onClick={handleViewRuleDetails}
-            data-test-subj="view-rule-details-button"
-          >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
-                defaultMessage: 'View rule details',
-              })}
-            </EuiText>
-          </EuiButtonEmpty>
-
-          <EuiButtonEmpty
-            size="s"
-            color="text"
+            iconType="bellSlash"
             onClick={handleOpenSnoozeModal}
+            disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
             data-test-subj="snooze-rule-button"
           >
             <EuiText size="s">
@@ -117,23 +119,98 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
                 defaultMessage: 'Snooze the rule',
               })}
             </EuiText>
-          </EuiButtonEmpty>
-
-          <EuiButtonEmpty
-            size="s"
-            color="text"
-            onClick={handleAddToCase}
-            data-test-subj="add-to-case-button"
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            panelPaddingSize="none"
+            isOpen={isPopoverOpen}
+            closePopover={handleClosePopover}
+            button={
+              <EuiButtonIcon
+                display="base"
+                size="m"
+                iconType="boxesVertical"
+                data-test-subj="alert-details-header-actions-menu-button"
+                onClick={handleTogglePopover}
+                aria-label={i18n.translate('xpack.observability.alertDetails.actionsButtonLabel', {
+                  defaultMessage: 'Actions',
+                })}
+              />
+            }
           >
-            <EuiText size="s">
-              {i18n.translate('xpack.observability.alertDetails.addToCase', {
-                defaultMessage: 'Add to case',
-              })}
-            </EuiText>
-          </EuiButtonEmpty>
-        </EuiFlexGroup>
-      </EuiPopover>
+            <div style={{ width: '200px' }}>
+              <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="s">
+                <div />
 
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  iconType="plus"
+                  onClick={handleAddToCase}
+                  data-test-subj="add-to-case-button"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.alertDetails.addToCase', {
+                      defaultMessage: 'Add to case',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  iconType="pencil"
+                  onClick={handleEditRuleDetails}
+                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                  data-test-subj="edit-rule-button"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.alertDetails.editRule', {
+                      defaultMessage: 'Edit rule',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  iconType="eyeClosed"
+                  onClick={handleUntrackAlert}
+                  data-test-subj="untrack-alert-button"
+                  disabled={alertStatus !== ALERT_STATUS_ACTIVE}
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.alertDetails.untrackAlert', {
+                      defaultMessage: 'Mark as untracked',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+
+                <EuiHorizontalRule margin="none" />
+
+                <EuiButtonEmpty
+                  size="s"
+                  color="text"
+                  iconType="link"
+                  disabled={!alert?.fields[ALERT_RULE_UUID] || !rule}
+                  data-test-subj="view-rule-details-button"
+                  href={rule ? http.basePath.prepend(paths.observability.ruleDetails(rule.id)) : ''}
+                  target="_blank"
+                >
+                  <EuiText size="s">
+                    {i18n.translate('xpack.observability.alertDetails.viewRuleDetails', {
+                      defaultMessage: 'Go to rule details',
+                    })}
+                  </EuiText>
+                </EuiButtonEmpty>
+
+                <div />
+              </EuiFlexGroup>
+            </div>
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {rule && ruleConditionsFlyoutOpen ? (
         <EditRuleFlyout
           initialRule={rule}
