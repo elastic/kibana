@@ -10,10 +10,12 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { CheckBoxField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
+import { getTextFieldConfig } from './config';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
   const [{ required }] = useFormData<{ required: boolean }>();
+  const config = getTextFieldConfig({ required, label: i18n.DEFAULT_VALUE.toLocaleLowerCase() });
 
   return (
     <>
@@ -33,6 +35,7 @@ const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = ()
         <UseField
           path="defaultValue"
           component={TextField}
+          config={config}
           componentProps={{
             label: i18n.DEFAULT_VALUE,
             euiFieldProps: {

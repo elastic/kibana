@@ -54,7 +54,7 @@ describe('CustomFieldFlyout ', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(i18n.MAX_LENGTH_ERROR('field label', MAX_CUSTOM_FIELD_LABEL_LENGTH))
+        screen.getByText(i18n.MAX_LENGTH_ERROR('label', MAX_CUSTOM_FIELD_LABEL_LENGTH))
       ).toBeInTheDocument();
     });
   });
@@ -155,7 +155,7 @@ describe('CustomFieldFlyout ', () => {
       userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
-        expect(screen.getByText('Default value is required.')).toBeInTheDocument();
+        expect(screen.getByText('A default value is required.')).toBeInTheDocument();
       });
     });
 
@@ -172,7 +172,10 @@ describe('CustomFieldFlyout ', () => {
       await waitFor(() => {
         expect(
           screen.getByText(
-            i18n.MAX_LENGTH_ERROR('default value', MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH)
+            i18n.MAX_LENGTH_ERROR(
+              i18n.DEFAULT_VALUE.toLowerCase(),
+              MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH
+            )
           )
         ).toBeInTheDocument();
       });
