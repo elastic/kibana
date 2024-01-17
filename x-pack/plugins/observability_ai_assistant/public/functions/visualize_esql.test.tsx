@@ -9,12 +9,17 @@ import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
-import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks/lens_plugin_mock';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VisualizeESQL } from './visualize_esql';
 
 describe('VisualizeESQL', () => {
+  // const defaultLensService = {
+  //   stateHelperApi: jest.fn().mockResolvedValue({
+  //     suggestions: jest.fn().mockReturnValue(mockAllSuggestions),
+  //   })
+  // }
   function renderComponent(
     newInput?: unknown,
     newLensService?: LensPublicStart,
