@@ -79,6 +79,7 @@
     "@kbn/profiling-data-access-plugin",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/observability-get-padded-alert-time-range-util",
+    "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
     "@kbn/core-ui-settings-browser"
