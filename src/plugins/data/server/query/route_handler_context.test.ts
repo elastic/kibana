@@ -258,6 +258,14 @@ describe('saved query route handler context', () => {
 
       const response = await context.find();
 
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
+        page: 1,
+        perPage: 50,
+        search: '',
+        sortField: 'titleKeyword',
+        sortOrder: 'asc',
+      });
       expect(response.savedQueries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
 
@@ -291,10 +299,12 @@ describe('saved query route handler context', () => {
       const response = await context.find({ search: 'foo' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
         page: 1,
         perPage: 50,
         search: 'foo',
-        type: 'query',
+        sortField: undefined,
+        sortOrder: undefined,
       });
       expect(response.savedQueries).toEqual([{ id: 'foo', attributes: savedQueryAttributes }]);
     });
@@ -587,6 +597,11 @@ describe('saved query route handler context', () => {
 
       const response = await context.count();
 
+      expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'query',
+        page: 0,
+        perPage: 0,
+      });
       expect(response).toEqual(1);
     });
   });
