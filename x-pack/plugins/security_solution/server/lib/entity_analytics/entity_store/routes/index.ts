@@ -6,3 +6,5 @@
  */
 
 // 🚧 TODO: make the entity store
+
+export {};
