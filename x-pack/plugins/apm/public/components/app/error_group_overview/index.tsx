@@ -44,13 +44,11 @@ const INITIAL_STATE_MAIN_STATISTICS: {
   mainStatistics: ErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
   currentPageGroupIds: ErrorGroupMainStatistics['errorGroups'];
-  isSearchSideSearchQueryActive: boolean;
   maxCountExceeded: boolean;
 } = {
   mainStatistics: [],
   requestId: undefined,
   currentPageGroupIds: [],
-  isSearchSideSearchQueryActive: false,
   maxCountExceeded: false,
 };
 
@@ -90,7 +88,6 @@ export function ErrorGroupOverview() {
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-    isSearchSideSearchQueryActive,
     maxCountExceeded,
   } = useErrorGroupListData(debouncedSearchQuery);
 
@@ -98,7 +95,6 @@ export function ErrorGroupOverview() {
     return {
       fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as ErrorFields[],
       maxCountExceeded,
-      isSearchSideSearchQueryActive,
       onChangeSearchQuery: setDebouncedSearchQuery,
       onChangeCurrentPage: () => {},
       placeholder: i18n.translate(
@@ -106,11 +102,7 @@ export function ErrorGroupOverview() {
         { defaultMessage: 'Search errors by message, type or culprit' }
       ),
     };
-  }, [
-    isSearchSideSearchQueryActive,
-    maxCountExceeded,
-    setDebouncedSearchQuery,
-  ]);
+  }, [maxCountExceeded, setDebouncedSearchQuery]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -190,7 +182,6 @@ function useErrorGroupListData(searchQuery: string | undefined) {
       requestId,
       mainStatistics,
       currentPageGroupIds,
-      isSearchSideSearchQueryActive,
       maxCountExceeded,
     } = INITIAL_STATE_MAIN_STATISTICS,
     status: mainStatisticsStatus,
@@ -220,8 +211,6 @@ function useErrorGroupListData(searchQuery: string | undefined) {
             // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
             requestId: uuidv4(),
             mainStatistics: response.errorGroups,
-            isSearchSideSearchQueryActive:
-              response.isSearchSideSearchQueryActive,
             maxCountExceeded: response.maxCountExceeded,
             currentPageGroupIds: orderBy(
               response.errorGroups,
@@ -290,7 +279,6 @@ function useErrorGroupListData(searchQuery: string | undefined) {
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-    isSearchSideSearchQueryActive,
     maxCountExceeded,
   };
 }

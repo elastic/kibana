@@ -24,7 +24,6 @@ export interface CurrentPage<T> {
 export function TableSearchBar<T, P extends keyof T & string>(props: {
   items: T[];
   fieldsToSearch: P[];
-  isServerSideSearchQueryActive: boolean;
   maxCountExceeded: boolean;
   onChangeCurrentPage: (page: CurrentPage<T>) => void;
   onChangeSearchQuery: OnChangeSearchQuery;
@@ -37,7 +36,6 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
   const {
     items,
     fieldsToSearch,
-    isServerSideSearchQueryActive,
     maxCountExceeded,
     onChangeCurrentPage,
     onChangeSearchQuery,
@@ -96,9 +94,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
       value={searchQuery}
       onChange={(e) => {
         const shouldFetchServer =
-          maxCountExceeded ||
-          (isServerSideSearchQueryActive &&
-            !e.target.value.includes(searchQuery));
+          maxCountExceeded || !e.target.value.includes(searchQuery);
 
         setSearchQuery(e.target.value);
         onChangeSearchQuery({ searchQuery: e.target.value, shouldFetchServer });

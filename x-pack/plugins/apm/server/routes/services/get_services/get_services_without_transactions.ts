@@ -32,7 +32,6 @@ export interface ServicesWithoutTransactionsResponse {
     agentName: AgentName;
   }>;
   maxCountExceeded: boolean;
-  isSearchSideSearchQueryActive: boolean;
 }
 
 export async function getServicesWithoutTransactions({
@@ -139,6 +138,5 @@ export async function getServicesWithoutTransactions({
         };
       }) ?? [],
     maxCountExceeded,
-    isSearchSideSearchQueryActive: !!searchQuery,
   };
 }

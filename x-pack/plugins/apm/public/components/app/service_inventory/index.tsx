@@ -37,7 +37,6 @@ const INITIAL_DATA: MainStatisticsApiResponse = {
   items: [],
   serviceOverflowCount: 0,
   maxCountExceeded: false,
-  isSearchSideSearchQueryActive: false,
 };
 
 function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
@@ -279,9 +278,6 @@ export function ServiceInventory() {
             initialPageSize={INITIAL_PAGE_SIZE}
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
-            isSearchSideSearchQueryActive={
-              mainStatisticsData?.isSearchSideSearchQueryActive ?? false
-            }
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
             onChangeCurrentPage={setCurrentPage}
           />

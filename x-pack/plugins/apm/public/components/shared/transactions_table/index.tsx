@@ -49,7 +49,6 @@ const INITIAL_STATE: ApiResponse = {
   maxCountExceeded: false,
   transactionOverflowCount: 0,
   hasActiveAlerts: false,
-  isSearchSideSearchQueryActive: false,
 };
 
 type SortDirection = 'asc' | 'desc';
@@ -286,9 +285,6 @@ export function TransactionsTable({
           fieldsToSearch={['name']}
           maxCountExceeded={mainStatistics.maxCountExceeded}
           tableOptions={tableOptions}
-          isServerSideSearchQueryActive={
-            mainStatistics.isSearchSideSearchQueryActive
-          }
           onChangeCurrentPage={setCurrentPage}
           onChangeSearchQuery={onChangeSearchQuery}
           placeholder={i18n.translate(

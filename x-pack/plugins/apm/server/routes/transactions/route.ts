@@ -137,12 +137,8 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
         }),
       ]);
 
-    const {
-      transactionGroups,
-      maxCountExceeded,
-      transactionOverflowCount,
-      isSearchSideSearchQueryActive,
-    } = serviceTransactionGroups;
+    const { transactionGroups, maxCountExceeded, transactionOverflowCount } =
+      serviceTransactionGroups;
 
     const transactionGroupsWithAlerts = joinByKey(
       [...transactionGroups, ...serviceTransactionGroupsAlerts],
@@ -154,7 +150,6 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       maxCountExceeded,
       transactionOverflowCount,
       hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
-      isSearchSideSearchQueryActive,
     };
   },
 });

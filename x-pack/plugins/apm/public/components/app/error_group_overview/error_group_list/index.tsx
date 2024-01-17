@@ -70,7 +70,6 @@ interface Props {
   tableSearchBar: {
     fieldsToSearch: string[];
     maxCountExceeded: boolean;
-    isSearchSideSearchQueryActive: boolean;
     placeholder: string;
     onChangeSearchQuery: (searchQuery: string) => void;
     onChangeCurrentPage: (page: CurrentPage<ErrorGroupItem>) => void;

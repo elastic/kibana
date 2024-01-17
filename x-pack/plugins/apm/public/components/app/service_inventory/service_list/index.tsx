@@ -298,7 +298,7 @@ interface Props {
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
-  isSearchSideSearchQueryActive: boolean;
+
   onChangeCurrentPage: (page: CurrentPage<ServiceListItem>) => void;
 }
 export function ServiceList({
@@ -316,7 +316,6 @@ export function ServiceList({
   serviceOverflowCount,
   maxCountExceeded,
   onChangeSearchQuery,
-  isSearchSideSearchQueryActive,
   onChangeCurrentPage,
 }: Props) {
   const breakpoints = useBreakpoints();
@@ -361,7 +360,6 @@ export function ServiceList({
     return {
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
-      isSearchSideSearchQueryActive,
       onChangeSearchQuery,
       onChangeCurrentPage,
       placeholder: i18n.translate(
@@ -369,12 +367,7 @@ export function ServiceList({
         { defaultMessage: 'Search services by name' }
       ),
     };
-  }, [
-    isSearchSideSearchQueryActive,
-    maxCountExceeded,
-    onChangeCurrentPage,
-    onChangeSearchQuery,
-  ]);
+  }, [maxCountExceeded, onChangeCurrentPage, onChangeSearchQuery]);
 
   return (
     <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
