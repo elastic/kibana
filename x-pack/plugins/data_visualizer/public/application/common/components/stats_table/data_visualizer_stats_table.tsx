@@ -341,7 +341,6 @@ export const DataVisualizerTable = <T extends DataVisualizerTableItem>({
             return <TopValuesPreview config={item} />;
           }
 
-          // @TODO: fix so that for esql, type is number, secondary type is double, float, etc.
           if (
             item.type === SUPPORTED_FIELD_TYPES.NUMBER ||
             item.secondaryType === SUPPORTED_FIELD_TYPES.NUMBER

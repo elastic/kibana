@@ -345,11 +345,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   useEffect(
     function updateFieldStatFieldsToFetch() {
-      // If query returns 0 document, no need to do more work here
-      if (totalCount === undefined || totalCount === 0) {
-        setFieldStatFieldsToFetch(undefined);
-        return;
-      }
       const { sortField, sortDirection } = dataVisualizerListState;
 
       // Otherwise, sort the list of fields by the initial sort field and sort direction
@@ -384,7 +379,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       setFieldStatFieldsToFetch(pageOfConfigs);
     },
     [
-      totalCount,
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
       dataVisualizerListState.sortField,
@@ -648,6 +642,30 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
+  // Query that has been typed, but has not submitted with cmd + enter
+  const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: '' });
+
+  const onQueryUpdate = (q?: AggregateQuery) => {
+    // Reset field stats to fetch state
+    setFieldStatFieldsToFetch(undefined);
+    setMetricConfigs(defaults.metricConfigs);
+    setNonMetricConfigs(defaults.nonMetricConfigs);
+    if (q) {
+      setQuery(q);
+    }
+  };
+
+  useEffect(
+    function resetFieldStatsFieldToFetch() {
+      // If query returns 0 document, no need to do more work here
+      if (totalCount === undefined || totalCount === 0) {
+        setFieldStatFieldsToFetch(undefined);
+        return;
+      }
+    },
+    [totalCount]
+  );
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -697,18 +715,12 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         </EuiPageTemplate.Header>
         <EuiSpacer size="m" />
         <TextBasedLangEditor
-          query={query}
-          onTextLangQueryChange={() => {}}
-          onTextLangQuerySubmit={(q?: AggregateQuery) => {
-            // Reset field stats to fetch state
-            setFieldStatFieldsToFetch(undefined);
-            if (q) {
-              setQuery(q);
-            }
-          }}
+          query={localQuery}
+          onTextLangQueryChange={setLocalQuery}
+          onTextLangQuerySubmit={onQueryUpdate}
           expandCodeEditor={() => false}
           isCodeEditorExpanded={true}
-          detectTimestamp={false}
+          detectTimestamp={true}
           hideMinimizeButton={true}
           hideRunQueryText={false}
         />
@@ -742,6 +754,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 pageState={dataVisualizerListState}
                 updatePageState={setDataVisualizerListState}
                 getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
+                loading={overallStatsProgress.isRunning}
                 overallStatsRunning={overallStatsProgress.isRunning}
                 showPreviewByDefault={dataVisualizerListState.showDistributions ?? true}
                 onChange={setDataVisualizerListState}
