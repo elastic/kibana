@@ -5412,6 +5412,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/presentation-containers@link:packages/presentation/presentation_containers":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-library@link:packages/presentation/presentation_library":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-panel-plugin@link:src/plugins/presentation_panel":
+  version "0.0.0"
+  uid ""
+
+"@kbn/presentation-publishing@link:packages/presentation/presentation_publishing":
+  version "0.0.0"
+  uid ""
+
 "@kbn/presentation-util-plugin@link:src/plugins/presentation_util":
   version "0.0.0"
   uid ""
