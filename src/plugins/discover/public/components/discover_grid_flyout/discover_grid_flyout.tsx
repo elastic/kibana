@@ -23,6 +23,7 @@ import {
   EuiPagination,
   keys,
   EuiButtonEmpty,
+  useEuiTheme,
 } from '@elastic/eui';
 import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
@@ -73,6 +74,10 @@ export function DiscoverGridFlyout({
   onAddColumn,
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
+  const { euiTheme } = useEuiTheme();
+  const minWidth = euiTheme.base * 24;
+  const maxWidth = euiTheme.breakpoint.xl;
+
   const services = useDiscoverServices();
   const flyoutCustomization = useDiscoverCustomization('flyout');
 
@@ -211,7 +216,9 @@ export function DiscoverGridFlyout({
         pushMinBreakpoint="xl"
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
-        ownFocus={false}
+        ownFocus={true}
+        minWidth={minWidth}
+        maxWidth={maxWidth}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiFlexGroup
