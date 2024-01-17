@@ -15,6 +15,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
+import { EuiBetaBadge } from '@elastic/eui';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -189,6 +190,31 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
               id="xpack.ml.dataVisualizer.pageHeader"
               defaultMessage="Data Visualizer"
             />
+            {esql ? (
+              <>
+                {` (${i18n.translate('xpack.ml.dataVisualizer.esql', {
+                  defaultMessage: 'ES|QL',
+                })})`}
+                <EuiBetaBadge
+                  label={i18n.translate(
+                    'xpack.ml.datavisualizer.selector.technicalPreviewBadge.label',
+                    {
+                      defaultMessage: 'Technical preview',
+                    }
+                  )}
+                  size="m"
+                  color="hollow"
+                  tooltipContent={i18n.translate(
+                    'xpack.ml.datavisualizer.selector.technicalPreviewBadge.titleMsg',
+                    {
+                      defaultMessage:
+                        'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+                    }
+                  )}
+                  tooltipPosition={'right'}
+                />
+              </>
+            ) : null}
           </MlPageHeader>
           <IndexDataVisualizer
             getAdditionalLinks={getAdditionalLinks}
