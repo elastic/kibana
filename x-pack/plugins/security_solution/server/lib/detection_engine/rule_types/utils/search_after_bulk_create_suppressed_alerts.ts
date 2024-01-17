@@ -7,16 +7,10 @@
 
 import { identity } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  IRuleDataReader,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
-import { wrapSuppressedALerts } from './wrap_suppressed_alerts';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import {
   createSearchAfterReturnType,
@@ -27,16 +21,13 @@ import {
   mergeSearchResults,
   getSafeSortIds,
   addToSearchAfterReturn,
-  getMaxSignalsWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
-  RunOpts,
   WrapSuppressedHits,
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { createEnrichEventsFunction } from './enrichments';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
