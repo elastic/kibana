@@ -506,7 +506,7 @@ describe('Routing versioned requests', () => {
     });
   });
 
-  it('ignores version parameters for select internal paths', async () => {
+  it('defaults version parameters for select internal paths', async () => {
     await setupServer(
       {},
       { useVersionResolutionStrategyForInternalPaths: ['/my_path_to_bypass/{id?}'] }
