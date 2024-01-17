@@ -38,6 +38,18 @@ export class ToastsService extends FtrService {
     return { title, message };
   }
 
+  public async toastMessageByTestSubj(testSubj = 'csp:toast-success') {
+    const testSubjSvc = this.testSubjects;
+    return {
+      async getElement(): Promise<WebElementWrapper> {
+        return await testSubjSvc.find(testSubj);
+      },
+      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link'): Promise<void> {
+        (await (await this.getElement()).findByTestSubject(linkTestSubj)).click();
+      },
+    };
+  }
+
   /**
    * Dismiss a specific toast from the toast list. Since toasts usually should time out themselves,
    * you only need to call this for permanent toasts (e.g. error toasts).
@@ -104,15 +116,15 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async dismissAllToastsWithChecks() {
-    await this.retry.tryForTime(30 * 1000, async () => {
+  public async dismissAllToastsWithChecks(): Promise<void> {
+    await this.retry.tryForTime(30 * 1000, async (): Promise<void> => {
       await this.dismissAllToasts();
       await this.assertToastCount(0);
     });
   }
 
-  public async assertToastCount(expectedCount: number) {
-    await this.retry.tryForTime(5 * 1000, async () => {
+  public async assertToastCount(expectedCount: number): Promise<void> {
+    await this.retry.tryForTime(5 * 1000, async (): Promise<void> => {
       const toastCount = await this.getToastCount({ timeout: 1000 });
       expect(toastCount).to.eql(
         expectedCount,
@@ -146,11 +158,11 @@ export class ToastsService extends FtrService {
     return await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
   }
 
-  private async getGlobalToastList(options?: { timeout?: number }) {
+  private async getGlobalToastList(options?: { timeout?: number }): Promise<WebElementWrapper> {
     return await this.testSubjects.find('globalToastList', options?.timeout);
   }
 
-  public async getToastCount(options?: { timeout?: number }) {
+  public async getToastCount(options?: { timeout?: number }): Promise<number> {
     const list = await this.getGlobalToastList(options);
     const toasts = await list.findAllByCssSelector(`.euiToast`, options?.timeout);
     return toasts.length;
