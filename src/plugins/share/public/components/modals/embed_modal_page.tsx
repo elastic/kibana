@@ -553,7 +553,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                   <EuiFlexItem>
                     <EuiCopy textToCopy={this.state.url ?? ''}>
                       {(copy) => (
-                        <EuiButton fill onClick={copy}>
+                        <EuiButton fill onClick={copy} data-test-subj="copyShareUrlButton">
                           <FormattedMessage
                             id="share.embed.embedButton"
                             defaultMessage="Copy Embed"
