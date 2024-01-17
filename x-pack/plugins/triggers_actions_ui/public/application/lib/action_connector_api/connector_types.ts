@@ -43,11 +43,17 @@ export async function loadActionTypes({
         {
           query: {
             feature_id: featureId,
+            include_system_actions: true,
           },
         }
       )
     : await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-        `${BASE_ACTION_API_PATH}/connector_types`
+        `${BASE_ACTION_API_PATH}/connector_types`,
+        {
+          query: {
+            include_system_actions: true,
+          },
+        }
       );
   return rewriteResponseRes(res);
 }

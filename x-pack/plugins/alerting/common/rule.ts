@@ -142,6 +142,11 @@ export interface RuleSystemAction {
   params: RuleActionParams;
   type: typeof RuleActionTypes.SYSTEM;
   useAlertDataForTemplate?: boolean;
+  // Workaround for typescript issues where boolean types are only defined in one of the union type members
+  // Allow frequency and alertsFilter to be deemed present in a system action, but require them to be undefined
+  // This prevents code like action.frequency?.someProperty from throwing an error
+  frequency?: undefined;
+  alertsFilter?: undefined;
 }
 
 export type RuleAction = RuleDefaultAction | RuleSystemAction;

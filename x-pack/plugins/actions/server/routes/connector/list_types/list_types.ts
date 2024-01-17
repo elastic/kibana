@@ -35,7 +35,10 @@ export const listTypesRoute = (
         // Assert versioned inputs
         const query: ConnectorTypesRequestQueryV1 = req.query;
 
-        const connectorTypes = await actionsClient.listTypes({ featureId: query?.feature_id });
+        const connectorTypes = await actionsClient.listTypes({
+          featureId: query?.feature_id,
+          includeSystemActionTypes: query?.include_system_actions,
+        });
 
         const responseBody: ConnectorTypesResponseV1[] =
           transformListTypesResponseV1(connectorTypes);

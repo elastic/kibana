@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
+export const connectorsQuerySchema = schema.object({
   include_system_actions: schema.maybe(schema.boolean()),
 });

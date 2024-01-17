@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { PluginInitializer } from '@kbn/core/server';
 
-export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
-  include_system_actions: schema.maybe(schema.boolean()),
-});
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { TriggersActionsUiExamplePlugin } = await import('./plugin');
+  return new TriggersActionsUiExamplePlugin();
+};

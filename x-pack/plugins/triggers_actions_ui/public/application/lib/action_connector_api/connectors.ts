@@ -39,7 +39,12 @@ const transformConnector: RewriteRequestCase<
 
 export async function loadAllActions({ http }: { http: HttpSetup }): Promise<ActionConnector[]> {
   const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
-    `${BASE_ACTION_API_PATH}/connectors`
+    `${BASE_ACTION_API_PATH}/connectors`,
+    {
+      query: {
+        include_system_actions: true,
+      },
+    }
   );
 
   return rewriteResponseRes(res) as ActionConnector[];

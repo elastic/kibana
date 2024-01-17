@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { connectorsQuerySchemaV1 } from '..';
 
-export const connectorTypesQuerySchema = schema.object({
-  feature_id: schema.maybe(schema.string()),
-  include_system_actions: schema.maybe(schema.boolean()),
-});
+export type ConnectorsRequestQuery = TypeOf<typeof connectorsQuerySchemaV1>;

@@ -7,6 +7,10 @@
 
 import { IRouter } from '@kbn/core/server';
 import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
+import {
+  connectorsQuerySchemaV1,
+  ConnectorsRequestQueryV1,
+} from '../../../../common/routes/connector/apis/connectors';
 import { transformGetAllConnectorsResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
@@ -20,12 +24,18 @@ export const getAllConnectorsRoute = (
   router.get(
     {
       path: `${BASE_ACTION_API_PATH}/connectors`,
-      validate: {},
+      validate: {
+        query: connectorsQuerySchemaV1,
+      },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
+        const query: ConnectorsRequestQueryV1 = req.query;
+
         const actionsClient = (await context.actions).getActionsClient();
-        const result = await actionsClient.getAll();
+        const result = await actionsClient.getAll({
+          includeSystemActions: query?.include_system_actions,
+        });
 
         const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });

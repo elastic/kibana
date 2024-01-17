@@ -146,13 +146,15 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
-          const { isSystemAction } = (await context.actions).getActionsClient();
+          const actionsClient = (await context.actions).getActionsClient();
 
           const { id } = req.params;
           const rule = req.body;
           try {
             const alertRes = await rulesClient.update(
-              rewriteBodyReq({ id, data: rule }, isSystemAction)
+              rewriteBodyReq({ id, data: rule }, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              )
             );
             return res.ok({
               body: rewriteBodyRes(alertRes),

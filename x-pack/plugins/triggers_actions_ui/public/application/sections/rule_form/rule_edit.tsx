@@ -7,7 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
+import { RuleActionTypes, RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -73,10 +73,25 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action) => ({
-      ...action,
-      frequency,
-    }));
+    clonedRule.actions = clonedRule.actions.map((action) =>
+      action.type === RuleActionTypes.SYSTEM
+        ? action
+        : {
+            ...action,
+            frequency,
+          }
+    );
+  } else {
+    // Migrate untyped actions
+    clonedRule.actions = clonedRule.actions.map(
+      (action: SanitizedRuleAction | Omit<SanitizedRuleAction, 'type'>) =>
+        'type' in action
+          ? action
+          : ({
+              ...action,
+              type: action.frequency ? RuleActionTypes.DEFAULT : RuleActionTypes.SYSTEM,
+            } as SanitizedRuleAction)
+    );
   }
   return clonedRule;
 };

@@ -33,19 +33,23 @@ export const resolveRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = (await context.alerting).getRulesClient();
-        const params: ResolveRuleRequestParamsV1 = req.params;
-        const { id } = params;
-        // TODO (http-versioning): Remove this cast, this enables us to move forward
-        // without fixing all of other solution types
-        const rule = (await rulesClient.resolve({
-          id,
-          includeSnoozeData: true,
-        })) as ResolvedRule<RuleParamsV1>;
-        const response: ResolveRuleResponseV1<RuleParamsV1> = {
-          body: transformResolveResponseV1<RuleParamsV1>(rule),
-        };
-        return res.ok(response);
+        try {
+          const rulesClient = (await context.alerting).getRulesClient();
+          const params: ResolveRuleRequestParamsV1 = req.params;
+          const { id } = params;
+          // TODO (http-versioning): Remove this cast, this enables us to move forward
+          // without fixing all of other solution types
+          const rule = (await rulesClient.resolve({
+            id,
+            includeSnoozeData: true,
+          })) as ResolvedRule<RuleParamsV1>;
+          const response: ResolveRuleResponseV1<RuleParamsV1> = {
+            body: transformResolveResponseV1<RuleParamsV1>(rule),
+          };
+          return res.ok(response);
+        } catch (e) {
+          throw e;
+        }
       })
     )
   );
