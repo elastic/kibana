@@ -7,7 +7,7 @@
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
-import { TransformConfigUnion } from '../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 // Defining these sections is only necessary for options where a reset/deletion of that part of the
 // configuration is supported by the API. For example, this isn't suitable to use with `dest` since

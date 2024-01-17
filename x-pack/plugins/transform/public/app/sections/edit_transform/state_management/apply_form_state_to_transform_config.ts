@@ -7,8 +7,8 @@
 
 import { merge } from 'lodash';
 
-import { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
-import { TransformConfigUnion } from '../../../../../common/types/transform';
+import type { PostTransformsUpdateRequestSchema } from '../../../../../common/api_schemas/update_transforms';
+import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import { getUpdateValue } from './get_update_value';
 

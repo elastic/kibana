@@ -17,7 +17,7 @@ import { configureStore, createSlice } from '@reduxjs/toolkit';
 import { useDispatch, Provider } from 'react-redux';
 import { bindActionCreators } from 'redux';
 
-import { TransformConfigUnion } from '../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import { initialize, setApiError, setFormField, setFormSection } from './actions';
 import { type FormFieldsState } from './form_field';

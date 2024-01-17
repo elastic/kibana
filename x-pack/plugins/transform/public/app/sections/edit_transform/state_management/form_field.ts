@@ -7,7 +7,7 @@
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
 
-import { TransformConfigUnion } from '../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import type { FormSections } from './form_section';
 import type { ValidatorName } from './validators';

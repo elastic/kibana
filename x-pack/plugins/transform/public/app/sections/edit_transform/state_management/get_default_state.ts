@@ -9,7 +9,7 @@ import {
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../common/constants';
-import { TransformConfigUnion } from '../../../../../common/types/transform';
+import type { TransformConfigUnion } from '../../../../../common/types/transform';
 
 import { initializeFormField } from './form_field';
 import { initializeFormSection } from './form_section';
