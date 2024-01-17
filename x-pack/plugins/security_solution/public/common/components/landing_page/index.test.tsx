@@ -11,7 +11,7 @@ import { LandingPageComponent } from '.';
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
 }));
-jest.mock('./get_started/get_started_with_context');
+jest.mock('./get_started');
 
 describe('LandingPageComponent', () => {
   beforeEach(() => {
