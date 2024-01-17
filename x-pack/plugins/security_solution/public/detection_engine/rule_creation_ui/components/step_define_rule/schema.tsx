@@ -17,7 +17,6 @@ import {
   customValidators,
 } from '../../../../common/components/threat_match/helpers';
 import {
-  isEqlRule,
   isEsqlRule,
   isNewTermsRule,
   isQueryRule,
@@ -606,7 +605,6 @@ export const schema: FormSchema<DefineStepRule> = {
           const [{ formData }] = args;
           const needsValidation =
             isQueryRule(formData.ruleType) ||
-            isEqlRule(formData.ruleType) ||
             isThreatMatchRule(formData.ruleType);
           if (!needsValidation) {
             return;
