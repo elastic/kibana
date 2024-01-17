@@ -54,6 +54,7 @@ import {
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
+import { ensureFleetServerAgentPoliciesExists } from './agents';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -229,6 +230,8 @@ async function createSetupSideEffects(
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug('Setting up Fleet enrollment keys for preconfigured policies');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  logger.debug('Checking Fleet server policies are not out-of-sync');
+  await ensureFleetServerAgentPoliciesExists({ soClient, esClient, logger });
   stepSpan?.end();
 
   const nonFatalErrors = [

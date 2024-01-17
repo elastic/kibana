@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract, Logger } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
@@ -13,10 +13,15 @@ import { agentPolicyService } from '../agent_policy';
 /**
  * Ensure a .fleet-policy document exist for each agent policy so Fleet server can retrieve it
  */
-export async function ensureFleetServerAgentPoliciesExists(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient
-) {
+export async function ensureFleetServerAgentPoliciesExists({
+  soClient,
+  esClient,
+  logger,
+}: {
+  soClient: SavedObjectsClientContract;
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}) {
   const { items: agentPolicies } = await agentPolicyService.list(soClient, {
     perPage: SO_SEARCH_LIMIT,
   });
@@ -24,9 +29,12 @@ export async function ensureFleetServerAgentPoliciesExists(
   const outdatedAgentPolicyIds = agentPolicies
     .filter(
       async (agentPolicy) =>
-        !!(await agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id))
+        (await agentPolicyService.getLatestFleetPolicy(esClient, agentPolicy.id))?.revision_idx ===
+        agentPolicy.revision
     )
     .map((agentPolicy) => agentPolicy.id);
 
-  await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds);
+  await agentPolicyService.deployPolicies(soClient, outdatedAgentPolicyIds).catch((error) => {
+    logger.warn(`Error deploying policies: ${error.message}`, { error });
+  });
 }
