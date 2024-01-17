@@ -32,7 +32,7 @@ export const updateConnectorNameAndDescription = async (
   } catch (err) {
     if (isNotFoundException(err)) {
       throw new Error(
-        i18n.translate('searchConnectors.server.connectors.scheduling.error', {
+        i18n.translate('searchConnectors.server.connectors.nameAndDescription.error', {
           defaultMessage: 'Could not find document',
         })
       );
