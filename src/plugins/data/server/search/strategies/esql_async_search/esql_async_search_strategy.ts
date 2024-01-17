@@ -64,7 +64,7 @@ export const esqlAsyncSearchStrategyProvider = (
           };
       const { body, headers, meta } = id
         ? await client.transport.request(
-            { method: 'GET', path: `/_query/async/${id}`, body: { ...params, id } },
+            { method: 'GET', path: `/_query/async/${id}`, querystring: { ...params } },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
         : await client.transport.request(
