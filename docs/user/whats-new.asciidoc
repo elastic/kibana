@@ -126,28 +126,29 @@ image::images/alerts.png[A screenshot of details of the alerts]
 [discrete]
 === ResponseOps
 
-[discrete]
-==== Maintenance windows
-Schedule single or recurring maintenance windows to reduce alert noise and suppress notifications. For example, if you have a planned outage or event, a maintenance window prevents false alarms during this period.  WIth this release users will be able to create and define windows based on time and alert query. 
-For example, as a user I want to suppress alerts on each Monday morning 9am to 10am and just for alerts that match this query: 
+==== Maintenance window filters
 
-[source, bash]
-----
-App: “Billing” and cluster: “X123” and project: “Prod”.
-----
+In 8.12 you can add KQL filters to your <<maintenance-windows,maintenance windows>> to further refine their scope:
 
 [role="screenshot"]
-image::images/maintenance-window.png[A screenshot of the create maintenance window UI]
+image::images/maintenance-window-filter.png[A screenshot of the create maintenance window UI]
 
 [discrete]
-==== Case Improvements
+==== Case improvements
 The enhanced case view is now supported by any field filter and any change to the view is saved to local cache to ensure your data won't be lost.
 
 [role="screenshot"]
 image::images/cases.png[A screenshot of the enhanced case view]
 
+There is also a new {kib} <<setup-cases,sub-feature privilege>> that enables you to customize access to case settings.
+
+If you <<add-case-files,add files>> to cases, there is a new option to copy the file hash to your clipboard.
+File hashes are crucial for incident investigation and for verification of file integrity.
+The supported hash functions for case files are MD5, SHA-1, and SHA-256.
+
 [discrete]
-==== Connector Improvements
+==== Connector improvements
+
 PagerDuty alert action is now supported by 2 new fields `links` and `custom_details`. 
 ServiceNow ITSM alert action allows users to define incident resolution when alert is recovered to ensure bi-directional sync between the Elastic Alerts and ServiceNow Incidents. 
 
