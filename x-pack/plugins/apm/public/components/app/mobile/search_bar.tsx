@@ -62,7 +62,7 @@ export function MobileSearchBar({
           )}
         </EuiFlexGroup>
       </EuiFlexGroup>
-      <EuiSpacer size={isSmall ? 's' : 'm'} />
+      <EuiSpacer size="s" />
       <EuiFlexGroup
         justifyContent="spaceBetween"
         gutterSize={isMedium ? 's' : 'm'}
@@ -79,6 +79,7 @@ export function MobileSearchBar({
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
+      <EuiSpacer size="m" />
     </>
   );
 }

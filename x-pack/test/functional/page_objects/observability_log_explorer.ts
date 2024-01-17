@@ -11,7 +11,7 @@ import {
 } from '@kbn/observability-log-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export interface IntegrationPackage {
@@ -226,7 +226,12 @@ export function ObservabilityLogExplorerPageObject({
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
         'observabilityLogExplorer',
         '/',
-        queryStringParams
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
       );
     },
 
@@ -246,7 +251,12 @@ export function ObservabilityLogExplorerPageObject({
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
         'observabilityLogExplorer',
         '/',
-        queryStringParams
+        queryStringParams,
+        {
+          // the check sometimes is too slow for the page so it misses the point
+          // in time before the app rewrites the URL
+          ensureCurrentUrl: false,
+        }
       );
     },
 

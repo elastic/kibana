@@ -12,7 +12,7 @@ import {
   VIEW_CASE_TOASTER_LINK,
 } from '../../../../screens/expandable_flyout/common';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { ALERT_CHECKBOX } from '../../../../screens/alerts';
+import { ALERT_CHECKBOX, EMPTY_ALERT_TABLE } from '../../../../screens/alerts';
 import {
   DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON,
@@ -59,22 +59,9 @@ import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { TOASTER } from '../../../../screens/alerts_detection_rules';
-import { goToAcknowledgedAlerts, goToClosedAlerts, waitForAlerts } from '../../../../tasks/alerts';
-import {
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS,
-  DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE,
-} from '../../../../screens/expandable_flyout/alert_details_right_panel_overview_tab';
 
 describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
-
-  before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
-  });
-
-  after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
-  });
 
   beforeEach(() => {
     deleteAlertsAndRules();
@@ -162,45 +149,23 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
   });
 
   it('should mark as acknowledged', () => {
-    cy.get(ALERT_CHECKBOX).should('have.length', 5);
+    cy.get(ALERT_CHECKBOX).should('have.length', 1);
 
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
 
     cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
-
-    goToAcknowledgedAlerts();
-    waitForAlerts();
-    expandFirstAlertExpandableFlyout();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
-      'have.text',
-      'Last alert status change'
-    );
-    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
-      'contain.text',
-      'Alert status updated'
-    );
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 
   it('should mark as closed', () => {
-    cy.get(ALERT_CHECKBOX).should('have.length', 5);
+    cy.get(ALERT_CHECKBOX).should('have.length', 1);
 
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
 
     cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
-
-    goToClosedAlerts();
-    waitForAlerts();
-    expandFirstAlertExpandableFlyout();
-    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_TITLE).should(
-      'have.text',
-      'Last alert status change'
-    );
-    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_WORKFLOW_STATUS_DETAILS).should(
-      'contain.text',
-      'Alert status updated'
-    );
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 
   // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown

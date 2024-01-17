@@ -62,6 +62,22 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
     },
 
+    async cpuProfilingPromptExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async cpuProfilingPromptMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async profilingTabExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProfilingTab');
+    },
+
+    async profilingTabMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
+    },
+
     // Metadata
     async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');

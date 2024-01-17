@@ -20,6 +20,7 @@ import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
@@ -78,24 +79,6 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
     return extractTypeAndReason(attributes.error);
   }
   return {};
-}
-
-interface ESQLSearchParams {
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // time_zone?: string;
-  query: string;
-  filter?: unknown;
-  locale?: string;
-}
-
-interface ESQLSearchReponse {
-  columns?: Array<{
-    name: string;
-    type: string;
-  }>;
-  values: unknown[][];
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
@@ -208,10 +191,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             IKibanaSearchResponse<ESQLSearchReponse>
           >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = extractTypeAndReason(error.err.attributes);
+                const { type, reason } = extractTypeAndReason(error.attributes);
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {

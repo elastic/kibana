@@ -63,6 +63,8 @@ export async function fetchEsqlQuery({
         hits: toEsQueryHits(response),
       },
       resultLimit: alertLimit,
+      sourceFieldsParams: params.sourceFields,
+      generateSourceFieldsFromHits: true,
     }),
     index: null,
   };

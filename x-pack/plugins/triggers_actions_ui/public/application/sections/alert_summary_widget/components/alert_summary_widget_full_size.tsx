@@ -41,7 +41,7 @@ export const AlertSummaryWidgetFullSize = ({
   hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
-    theme,
+    ...(theme ? [theme] : []),
     {
       chartPaddings: {
         top: 7,
@@ -86,7 +86,7 @@ export const AlertSummaryWidgetFullSize = ({
                 visible: true,
               }}
               style={{
-                tickLine: { size: 0.0001, padding: 4 },
+                tickLine: { size: 0, padding: 4 },
                 tickLabel: { alignment: { horizontal: Position.Left, vertical: Position.Bottom } },
               }}
             />

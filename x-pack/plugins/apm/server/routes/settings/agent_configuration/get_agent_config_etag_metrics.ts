@@ -46,7 +46,7 @@ export async function getAgentConfigEtagMetrics(
   };
 
   const response = await apmEventClient.search(
-    'get_config_applied_to_agent_through_fleet',
+    'get_agent_config_etag_metrics',
     params
   );
 

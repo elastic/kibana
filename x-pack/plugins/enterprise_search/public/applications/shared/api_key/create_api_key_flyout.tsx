@@ -4,9 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 
 import { css } from '@emotion/react';
+
+import { useValues, useActions } from 'kea';
 
 import {
   useEuiTheme,
@@ -31,12 +33,14 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 
-import {
-  CreateAPIKeyArgs,
-  CreateApiKeyResponse,
-} from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
+import { Status } from '../../../../common/types/api';
+
+import { CreateApiKeyAPILogic } from '../../enterprise_search_overview/api/create_elasticsearch_api_key_logic';
+
+import { KibanaLogic } from '../kibana';
 
 import { BasicSetupForm, DEFAULT_EXPIRES_VALUE } from './basic_setup_form';
 import { MetadataForm } from './metadata_form';
@@ -57,12 +61,7 @@ const DEFAULT_METADATA = `{
 }`;
 
 interface CreateApiKeyFlyoutProps {
-  createdApiKey?: CreateApiKeyResponse;
-  error?: string;
-  isLoading: boolean;
   onClose: () => void;
-  setApiKey: (apiKey: CreateAPIKeyArgs) => void;
-  username: string;
 }
 
 export const CANCEL_LABEL: string = i18n.translate('xpack.enterpriseSearch.cancel', {
@@ -93,14 +92,7 @@ const INVALID_JSON_ERROR: string = i18n.translate('xpack.enterpriseSearch.invali
   defaultMessage: 'Invalid JSON',
 });
 
-export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
-  createdApiKey,
-  error,
-  isLoading,
-  onClose,
-  username,
-  setApiKey,
-}) => {
+export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({ onClose }) => {
   const { euiTheme } = useEuiTheme();
   const [name, setName] = useState('');
   const [expires, setExpires] = useState<string | null>(DEFAULT_EXPIRES_VALUE);
@@ -112,6 +104,14 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
   const [privilegesOpen, setPrivilegesOpen] = useState<'open' | 'closed'>('closed');
   const [metadataEnabled, setMetadataEnabled] = useState<boolean>(false);
   const [metadataOpen, setMetadataOpen] = useState<'open' | 'closed'>('closed');
+
+  const { user } = useValues(KibanaLogic);
+  const { makeRequest: saveApiKey, apiReset } = useActions(CreateApiKeyAPILogic);
+  const { data: createdApiKey, error, status } = useValues(CreateApiKeyAPILogic);
+
+  const isLoading = status === Status.LOADING;
+
+  const username = user?.full_name || user?.username || user?.email || '';
 
   const togglePrivileges = (e: EuiSwitchEvent) => {
     const enabled = e.target.checked;
@@ -151,7 +151,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
     if (metadataError) setMetadataError(undefined);
     const expiration = expires !== null ? `${expires}d` : undefined;
 
-    setApiKey({
+    saveApiKey({
       expiration,
       metadata: parsedMetadata,
       name,
@@ -159,9 +159,22 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
     });
   };
 
+  const apiKeyRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (createdApiKey && apiKeyRef) {
+      apiKeyRef.current?.scrollIntoView();
+    }
+  }, [createdApiKey, apiKeyRef]);
+
+  const closeFlyOut = () => {
+    apiReset();
+    onClose();
+  };
+
   return (
     <EuiFlyout
-      onClose={onClose}
+      onClose={closeFlyOut}
       css={css`
         max-width: calc(${euiTheme.size.xxxxl} * 10);
       `}
@@ -176,14 +189,11 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
+        <div ref={apiKeyRef} />
         {createdApiKey && (
           <>
-            <EuiPanel
-              css={css`
-                background-color: transparentize($euiColorSuccess, 0.9);
-              `}
-              data-test-subj="api-key-create-success-panel"
-            >
+            <EuiSpacer />
+            <EuiPanel color="success" data-test-subj="api-key-create-success-panel">
               <EuiStep
                 css={css`
                   .euiStep__content {
@@ -221,7 +231,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             })}
             data-test-subj="create-api-key-error-callout"
           >
-            {error}
+            {error.body?.message}
           </EuiCallOut>
         )}
         <EuiPanel hasBorder>
@@ -384,7 +394,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               isDisabled={isLoading}
-              onClick={onClose}
+              onClick={closeFlyOut}
               data-test-subj="create-api-key-cancel"
             >
               {CANCEL_LABEL}

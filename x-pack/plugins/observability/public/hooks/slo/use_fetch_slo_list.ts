@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
+import { DEFAULT_SLO_PAGE_SIZE } from '../../../common/slo/constants';
 import { SLO_LONG_REFETCH_INTERVAL, SLO_SHORT_REFETCH_INTERVAL } from '../../constants';
 
 import { useKibana } from '../../utils/kibana_react';
@@ -38,7 +39,7 @@ export function useFetchSloList({
   sortBy = 'status',
   sortDirection = 'desc',
   shouldRefetch,
-  perPage,
+  perPage = DEFAULT_SLO_PAGE_SIZE,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -50,7 +51,7 @@ export function useFetchSloList({
   );
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
-    queryKey: sloKeys.list({ kqlQuery, page, sortBy, sortDirection }),
+    queryKey: sloKeys.list({ kqlQuery, page, perPage, sortBy, sortDirection }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {

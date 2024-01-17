@@ -6,6 +6,7 @@
  */
 
 import { EuiFilterButton, EuiFilterGroup } from '@elastic/eui';
+import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesPopover } from '@kbn/user-profile-components';
 import { isEmpty } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -24,14 +25,17 @@ import { MAX_ASSIGNEES_FILTER_LENGTH } from '../../../common/constants';
 export const NO_ASSIGNEES_VALUE = null;
 
 export interface AssigneesFilterPopoverProps {
-  selectedAssignees: AssigneesFilteringSelection[];
+  selectedAssignees: Array<string | null>;
   currentUserProfile: CurrentUserProfile;
   isLoading: boolean;
-  onSelectionChange: (users: AssigneesFilteringSelection[]) => void;
+  onSelectionChange: (params: {
+    filterId: string;
+    selectedOptionKeys: Array<string | null>;
+  }) => void;
 }
 
 const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = ({
-  selectedAssignees,
+  selectedAssignees: selectedAssigneesUids,
   currentUserProfile,
   isLoading,
   onSelectionChange,
@@ -48,8 +52,10 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
   const onChange = useCallback(
     (users: AssigneesFilteringSelection[]) => {
       const sortedUsers = orderAssigneesIncludingNone(currentUserProfile, users);
-
-      onSelectionChange(sortedUsers);
+      onSelectionChange({
+        filterId: 'assignees',
+        selectedOptionKeys: sortedUsers.map((user) => user?.uid ?? null),
+      });
     },
     [currentUserProfile, onSelectionChange]
   );
@@ -88,6 +94,16 @@ const AssigneesFilterPopoverComponent: React.FC<AssigneesFilterPopoverProps> = (
     return sortedUsers;
   }, [currentUserProfile, userProfiles, searchTerm]);
 
+  const selectedAssignees = selectedAssigneesUids
+    .map((uuid) => {
+      // this is the "no assignees" option
+      if (uuid === null) return null;
+      const userProfile = searchResultProfiles.find((user) => user?.uid === uuid);
+      return userProfile;
+    })
+    .filter(
+      (userProfile): userProfile is UserProfileWithAvatar | null => userProfile !== undefined
+    ); // Filter out profiles that no longer exists
   const isLoadingData = isLoading || isLoadingSuggest;
 
   return (

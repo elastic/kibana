@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
@@ -31,13 +31,6 @@ interface EsSummaryDocument {
   isTempDoc: boolean;
 }
 
-export interface Paginated<T> {
-  total: number;
-  page: number;
-  perPage: number;
-  results: T[];
-}
-
 export interface SLOSummary {
   id: SLOId;
   instanceId: string;
@@ -50,17 +43,16 @@ export interface Sort {
   direction: 'asc' | 'desc';
 }
 
-export interface Pagination {
-  page: number;
-  perPage: number;
-}
-
 export interface SummarySearchClient {
   search(kqlQuery: string, sort: Sort, pagination: Pagination): Promise<Paginated<SLOSummary>>;
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private spaceId: string
+  ) {}
 
   async search(
     kqlQuery: string,
@@ -71,7 +63,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
         track_total_hits: true,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
+        query: {
+          bool: {
+            filter: [{ term: { spaceId: this.spaceId } }, getElastichsearchQueryOrThrow(kqlQuery)],
+          },
+        },
         sort: {
           // non-temp first, then temp documents
           isTempDoc: {

@@ -18,9 +18,15 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: 'number' }],
+        params: [
+          { name: 'field', type: 'number' },
+          { name: 'decimals', type: 'number', optional: true },
+        ],
         returnType: 'number',
-        examples: [`from index | eval round_value = round(field)`],
+        examples: [
+          `from index | eval round_value = round(field)`,
+          `from index | eval round_value = round(field, 2)`,
+        ],
       },
     ],
   },
@@ -34,6 +40,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'number' }],
         returnType: 'number',
         examples: [`from index | eval abs_value = abs(field)`],
+      },
+    ],
+  },
+  {
+    name: 'ceil',
+    description: i18n.translate('monaco.esql.definitions.ceilDoc', {
+      defaultMessage: 'Round a number up to the nearest integer.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'number' }],
+        returnType: 'number',
+        examples: [`from index | eval ceil_value = ceil(field)`],
       },
     ],
   },
@@ -210,6 +229,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_cartesianpoint',
+    description: i18n.translate('monaco.esql.definitions.toCartesianPointDoc', {
+      defaultMessage: 'Converts an input value to a `point` value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'cartesian_point',
+        examples: [`from index | EVAL point = to_cartesianpoint(field)`],
+      },
+    ],
+  },
+  {
     name: 'to_datetime',
     alias: ['to_dt'],
     description: i18n.translate('monaco.esql.definitions.toDateTimeDoc', {
@@ -247,6 +279,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'any' }],
         returnType: 'number',
         examples: [`from index | EVAL double = to_double(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_geopoint',
+    description: i18n.translate('monaco.esql.definitions.toGeopointDoc', {
+      defaultMessage: 'Converts to geo_point.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'geo_point',
+        examples: [`from index | EVAL geopoint = to_geopoint(field)`],
       },
     ],
   },
@@ -438,45 +483,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    name: 'is_finite',
-    description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_finite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_infinite',
-    description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_infinite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_nan',
-    description: i18n.translate('monaco.esql.definitions.isNanDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['row a = 1 | eval is_nan(a)'],
-      },
-    ],
-  },
-  {
     name: 'case',
     description: i18n.translate('monaco.esql.definitions.caseDoc', {
       defaultMessage:
@@ -629,6 +635,22 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         infiniteParams: true,
         returnType: 'number',
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
+      },
+    ],
+  },
+  {
+    name: 'least',
+    description: i18n.translate('monaco.esql.definitions.leastDoc', {
+      defaultMessage: 'Returns the minimum value from many columns.',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'first', type: 'number' },
+          { name: 'rest', type: 'number' },
+        ],
+        returnType: 'number',
+        examples: ['from index | eval l = least(a, b)'],
       },
     ],
   },

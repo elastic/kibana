@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
+  EuiText,
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
@@ -61,6 +62,11 @@ const CorrelationIdField: React.FunctionComponent<
             defaultMessage="Identifier for updating incidents"
           />
         </EuiLink>
+      }
+      labelAppend={
+        <EuiText size="xs" color="subdued">
+          {i18n.OPTIONAL_LABEL}
+        </EuiText>
       }
     >
       <TextFieldWithMessageVariables
@@ -294,7 +300,15 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   />
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiFormRow fullWidth label={i18n.CORRELATION_DISPLAY}>
+                  <EuiFormRow
+                    fullWidth
+                    label={i18n.CORRELATION_DISPLAY}
+                    labelAppend={
+                      <EuiText size="xs" color="subdued">
+                        {i18n.OPTIONAL_LABEL}
+                      </EuiText>
+                    }
+                  >
                     <TextFieldWithMessageVariables
                       index={index}
                       editAction={editSubActionProperty}
@@ -319,6 +333,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
                   incident.short_description !== undefined
                 }
                 label={i18n.SHORT_DESCRIPTION_LABEL}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {i18n.REQUIRED_LABEL}
+                  </EuiText>
+                }
               >
                 <TextFieldWithMessageVariables
                   index={index}

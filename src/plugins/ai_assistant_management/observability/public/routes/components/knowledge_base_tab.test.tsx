@@ -80,7 +80,7 @@ describe('KnowledgeBaseTab', () => {
 
       getByTestId('knowledgeBaseEditManualEntryFlyoutSaveButton').click();
 
-      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', doc_id: 'foo', text: '' } });
+      expect(createMock).toHaveBeenCalledWith({ entry: { id: 'foo', text: '' } });
     });
   });
 

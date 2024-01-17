@@ -21,6 +21,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://learn.microsoft.com/azure/storage/common/authorize-data-access',
     externalDocsUrl: 'https://learn.microsoft.com/azure/storage/blobs/',
     icon: CONNECTOR_ICONS.azure_blob_storage,
+    platinumOnly: true,
   },
   box: {
     docsUrl: docLinks.connectorsBox,
@@ -68,6 +69,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://cloud.google.com/storage/docs/authentication',
     externalDocsUrl: 'https://cloud.google.com/storage/docs',
     icon: CONNECTOR_ICONS.google_cloud_storage,
+    platinumOnly: true,
   },
   google_drive: {
     docsUrl: docLinks.connectorsGoogleDrive,
@@ -83,11 +85,19 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     icon: CONNECTOR_ICONS.jira_cloud,
     platinumOnly: true,
   },
+  microsoft_teams: {
+    docsUrl: docLinks.connectorsTeams,
+    externalAuthDocsUrl: '',
+    externalDocsUrl: '',
+    icon: CONNECTOR_ICONS.teams,
+    platinumOnly: true,
+  },
   mongodb: {
     docsUrl: docLinks.connectorsMongoDB,
     externalAuthDocsUrl: 'https://www.mongodb.com/docs/atlas/app-services/authentication/',
     externalDocsUrl: 'https://www.mongodb.com/docs/',
     icon: CONNECTOR_ICONS.mongodb,
+    platinumOnly: true,
   },
   mssql: {
     docsUrl: docLinks.connectorsMicrosoftSQL,
@@ -95,11 +105,13 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
       'https://learn.microsoft.com/sql/relational-databases/security/authentication-access/getting-started-with-database-engine-permissions',
     externalDocsUrl: 'https://learn.microsoft.com/sql/',
     icon: CONNECTOR_ICONS.microsoft_sql,
+    platinumOnly: true,
   },
   mysql: {
     docsUrl: docLinks.connectorsMySQL,
     externalDocsUrl: 'https://dev.mysql.com/doc/',
     icon: CONNECTOR_ICONS.mysql,
+    platinumOnly: true,
   },
   network_drive: {
     docsUrl: docLinks.connectorsNetworkDrive,
@@ -140,6 +152,7 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: 'https://docs.aws.amazon.com/s3/index.html',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.amazon_s3,
+    platinumOnly: true,
   },
   salesforce: {
     docsUrl: docLinks.connectorsSalesforce,
@@ -174,13 +187,6 @@ export const CONNECTORS_DICT: Record<string, ConnectorClientSideDefinition> = {
     externalAuthDocsUrl: '',
     externalDocsUrl: '',
     icon: CONNECTOR_ICONS.slack,
-    platinumOnly: true,
-  },
-  teams: {
-    docsUrl: docLinks.connectorsTeams,
-    externalAuthDocsUrl: '',
-    externalDocsUrl: '',
-    icon: CONNECTOR_ICONS.teams,
     platinumOnly: true,
   },
   zoom: {
