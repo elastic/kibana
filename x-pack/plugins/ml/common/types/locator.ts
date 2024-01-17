@@ -182,8 +182,8 @@ export interface TimeSeriesExplorerAppState {
 
 export interface TimeSeriesExplorerPageState
   extends TimeSeriesExplorerParams,
-  Pick<TimeSeriesExplorerAppState, 'query'>,
-  Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
+    Pick<TimeSeriesExplorerAppState, 'query'>,
+    Pick<TimeSeriesExplorerGlobalState, 'refreshInterval'> {
   jobIds?: JobId[];
   timeRange?: TimeRange;
   globalState?: MlCommonGlobalState;

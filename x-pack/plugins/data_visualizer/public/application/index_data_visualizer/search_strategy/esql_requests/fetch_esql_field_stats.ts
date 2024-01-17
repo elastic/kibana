@@ -7,7 +7,6 @@
 
 import { ESQL_SEARCH_STRATEGY, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import type { AggregateQuery } from '@kbn/es-query';
 import type { Column } from '../../hooks/use_esql_data';
 import { processDistributionData } from '../../utils/process_distribution_data';
 import { PERCENTILE_SPACING } from '../requests/constants';

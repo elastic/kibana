@@ -453,16 +453,16 @@ export const useESQLFieldStatsData = <T extends Column>({
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-      earliest: number | undefined;
-      latest: number | undefined;
-      aggInterval: TimeBucketsInterval;
-      intervalMs: number;
-      searchQuery: AggregateQuery;
-      indexPattern: string | undefined;
-      timeFieldName: string | undefined;
-      lastRefresh: number;
-      filter?: QueryDslQueryContainer;
-    }
+        earliest: number | undefined;
+        latest: number | undefined;
+        aggInterval: TimeBucketsInterval;
+        intervalMs: number;
+        searchQuery: AggregateQuery;
+        indexPattern: string | undefined;
+        timeFieldName: string | undefined;
+        lastRefresh: number;
+        filter?: QueryDslQueryContainer;
+      }
     | undefined
 ) => {
   const {
