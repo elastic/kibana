@@ -71,6 +71,12 @@ export interface ITelemetryEventsSender {
   sendAsync: (channel: TelemetryChannel, events: unknown[]) => void;
 
   /**
+   * Simulates sending events to a given telemetry channel asynchronously
+   * and returns the request that should be sent to the server
+   */
+  simulateSendAsync: (channel: TelemetryChannel, events: unknown[]) => string[];
+
+  /**
    * Updates the queue configuration for a given channel.
    */
   updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
@@ -396,6 +402,10 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
 
   public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
     this.getAsyncTelemetrySender().send(channel, events);
+  }
+
+  public simulateSendAsync(channel: TelemetryChannel, events: unknown[]): string[] {
+    return this.getAsyncTelemetrySender().simulateSend(channel, events);
   }
 
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {

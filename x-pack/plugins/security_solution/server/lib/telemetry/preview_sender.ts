@@ -16,7 +16,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { ITelemetryEventsSender } from './sender';
-import type { TelemetryChannel, TelemetryEvent } from './types';
+import { TelemetryChannel, type TelemetryEvent } from './types';
 import type { ITelemetryReceiver } from './receiver';
 import { tlog } from './helpers';
 import type { QueueConfig } from './async_sender.types';
@@ -29,7 +29,9 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   /** Inner composite telemetry events sender */
   private composite: ITelemetryEventsSender;
 
-  /** Axios local instance */
+  /**
+   * Axios local instance
+   * @deprecated `IAsyncTelemetryEventsSender` has a dedicated method for preview. */
   private axiosInstance = axios.create();
 
   /** Last sent message */
@@ -116,10 +118,9 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async queueTelemetryEvents(events: TelemetryEvent[]) {
-    // TODO(sebastian.zaffarano): use IAsyncTelemetryEventsSender#sendAsync()
-    const result = this.composite.queueTelemetryEvents(events);
-    await this.composite.sendIfDue(this.axiosInstance);
-    return result;
+    const result = this.composite.simulateSendAsync(TelemetryChannel.ENDPOINT_ALERTS, events);
+
+    this.sentMessages = [...this.sentMessages, ...result];
   }
 
   public getTelemetryUsageCluster(): UsageCounter | undefined {
@@ -143,8 +144,15 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
   }
 
   public async sendOnDemand(channel: string, toSend: unknown[]) {
-    const result = await this.composite.sendOnDemand(channel, toSend, this.axiosInstance);
-    return result;
+    const ch = Object.values(TelemetryChannel).find((c) => c === channel);
+    if (ch === undefined) {
+      throw new Error(`Channel ${channel} not found`);
+    }
+    const result = this.composite.simulateSendAsync(ch, toSend);
+
+    this.sentMessages = [...this.sentMessages, ...result];
+
+    return Promise.resolve();
   }
 
   public getV3UrlFromV2(v2url: string, channel: string): string {
@@ -153,6 +161,10 @@ export class PreviewTelemetryEventsSender implements ITelemetryEventsSender {
 
   public sendAsync(channel: TelemetryChannel, events: unknown[]): void {
     this.composite.sendAsync(channel, events);
+  }
+
+  public simulateSendAsync(channel: TelemetryChannel, events: unknown[]): string[] {
+    return this.composite.simulateSendAsync(channel, events);
   }
 
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {

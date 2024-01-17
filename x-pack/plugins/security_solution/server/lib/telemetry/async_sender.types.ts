@@ -25,6 +25,7 @@ export interface IAsyncTelemetryEventsSender {
   start: (telemetryStart?: TelemetryPluginStart) => void;
   stop: () => Promise<void>;
   send: (channel: TelemetryChannel, events: unknown[]) => void;
+  simulateSend: (channel: TelemetryChannel, events: unknown[]) => string[];
   updateQueueConfig: (channel: TelemetryChannel, config: QueueConfig) => void;
   updateDefaultQueueConfig: (config: QueueConfig) => void;
 }

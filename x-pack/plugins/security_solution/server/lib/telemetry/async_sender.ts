@@ -95,7 +95,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       .pipe(
         rx.connect((shared$) => {
           const queues$ = Object.values(TelemetryChannel).map((channel) =>
-            this.queue$(shared$, channel)
+            this.queue$(shared$, channel, this.sendEvents.bind(this))
           );
           return rx.merge(...queues$);
         })
@@ -154,6 +154,26 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
     });
   }
 
+  public simulateSend(channel: TelemetryChannel, events: unknown[]): string[] {
+    const payloads: string[] = [];
+
+    const localEvents$: rx.Observable<Event> = rx.of(
+      ...events.map((e) => {
+        return { channel, payload: e };
+      })
+    );
+
+    const localSubscription$ = this.queue$(localEvents$, channel, (_, p) => {
+      const result = { events: events.length, channel };
+      payloads.push(...p);
+      return Promise.resolve(result);
+    }).subscribe();
+
+    localSubscription$.unsubscribe();
+
+    return payloads;
+  }
+
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
     this.getQueues().set(channel, cloneDeep(config));
   }
@@ -165,7 +185,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   // internal methods
   private queue$(
     upstream$: rx.Observable<Event>,
-    channel: TelemetryChannel
+    channel: TelemetryChannel,
+    send: (channel: TelemetryChannel, events: string[]) => Promise<Result>
   ): rx.Observable<Result> {
     let inflightEventsCounter: number = 0;
     const inflightEvents$: rx.Subject<number> = new rx.Subject<number>();
@@ -195,6 +216,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
       // buffer events for a while
       rx.bufferWhen<Event>(() => rx.interval(this.getConfigFor(channel).bufferTimeSpanMillis)),
+      // rx.bufferCount(3),
 
       // exclude empty buffers
       rx.filter((n: Event[]) => n.length > 0),
@@ -218,7 +240,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         retryOnError$(
           this.getRetryConfig().retryCount,
           this.getRetryConfig().retryDelayMillis,
-          async () => this.sendEvents(channel, payloads)
+          async () => send(channel, payloads)
         )
       ),
 

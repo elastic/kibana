@@ -1026,4 +1026,24 @@ describe('AsyncTelemetryEventsSender', () => {
       expect(mockedAxiosPost).toHaveBeenCalledTimes(2);
     });
   });
+
+  describe('simulateSend', () => {
+    it('should send events using the async service', async () => {
+      jest.useRealTimers();
+      const events = ['a', 'b', 'c'];
+      const expectedResult = events.map((e) => JSON.stringify(e));
+
+      service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.start(telemetryPluginStart);
+
+      const result = service.simulateSend(ch1, events);
+
+      await service.stop();
+
+      // no events sent to the telemetry service
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(0);
+
+      expect(result).toEqual(expectedResult);
+    });
+  });
 });
