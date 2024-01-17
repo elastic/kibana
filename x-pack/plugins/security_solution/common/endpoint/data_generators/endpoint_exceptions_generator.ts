@@ -28,7 +28,7 @@ export class EndpointExceptionsGenerator extends BaseDataGenerator<ExceptionList
       item_id: this.seededUUIDv4(),
       list_id: ENDPOINT_LIST_ID,
       tags: [GLOBAL_ARTIFACT_TAG],
-      entries: this.randomEndpointExceptionEntries(),
+      entries: this.randomEndpointExceptionEntries(1),
       meta: undefined,
       namespace_type: 'agnostic',
       os_types: [this.randomOSFamily()] as ExceptionListItemSchema['os_types'],
@@ -66,12 +66,13 @@ export class EndpointExceptionsGenerator extends BaseDataGenerator<ExceptionList
           ] as ListOperatorType[]
         ).includes(item)
     );
+    const fieldList = ENDPOINT_EVENTS_LOG_INDEX_FIELDS.filter((field) => field.endsWith('.text'));
 
     return Array.from({ length: count || 1 }, () => {
       const operatorType = this.randomChoice(operatorTypes);
 
       return {
-        field: this.randomChoice(ENDPOINT_EVENTS_LOG_INDEX_FIELDS),
+        field: this.randomChoice(fieldList),
         operator: 'included',
         type: operatorType,
         value:

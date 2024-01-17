@@ -70,4 +70,10 @@ export class ExecutionThrottler {
       await Promise.all(Array.from(this.executing)).catch(() => {});
     }
   }
+
+  public getStats(): { pending: number } {
+    return {
+      pending: this.queue.length,
+    };
+  }
 }

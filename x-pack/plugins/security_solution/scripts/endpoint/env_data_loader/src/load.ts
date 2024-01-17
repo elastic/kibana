@@ -46,12 +46,15 @@ export const load = async ({
   globalArtifactRatio,
   concurrency,
 }: LoadOptions) => {
+  const throttler = new ExecutionThrottler({ log, concurrency });
   const reportProgress: ProgressReporterInterface = new ProgressReporter({
     reportStatus: (status) => {
-      log.info(status);
+      log.info(`
+---------------------------------------------------------------
+${status}\nRequests pending: ${throttler.getStats().pending}
+---------------------------------------------------------------`);
     },
   });
-  const throttler = new ExecutionThrottler({ log, concurrency });
   const policyReporter = reportProgress.addCategory('policies', policyCount);
   const trustedAppsReporter = reportProgress.addCategory('trusted apps', trustedAppsCount);
   const eventFiltersReporter = reportProgress.addCategory('event filters', eventFiltersCount);
