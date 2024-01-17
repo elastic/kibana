@@ -90,7 +90,7 @@ export const getRiskScoreSummaryAttributes: (
                     format: {
                       id: 'number',
                       params: {
-                        decimals: 0,
+                        decimals: 2,
                         compact: false,
                       },
                     },
