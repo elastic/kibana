@@ -31,6 +31,8 @@ import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
 } from './test_helpers';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -49,6 +51,7 @@ describe('CasesConnectorExecutor', () => {
 
   const getCasesClient = jest.fn();
   const casesClientMock = createCasesClientMock();
+  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
   let connectorExecutor: CasesConnectorExecutor;
   let oracleIdCounter = 0;
@@ -90,6 +93,7 @@ describe('CasesConnectorExecutor', () => {
     getCasesClient.mockReturnValue(casesClientMock);
 
     connectorExecutor = new CasesConnectorExecutor({
+      logger: mockLogger,
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
@@ -1160,6 +1164,7 @@ describe('CasesConnectorExecutor', () => {
       getCasesClient.mockReturnValue(casesClientMock);
 
       connectorExecutor = new CasesConnectorExecutor({
+        logger: mockLogger,
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,

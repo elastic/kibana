@@ -16,7 +16,10 @@ import type {
 
 export type CasesConnectorConfig = TypeOf<typeof CasesConnectorConfigSchema>;
 export type CasesConnectorSecrets = TypeOf<typeof CasesConnectorSecretsSchema>;
-export type CasesConnectorRunParams = TypeOf<typeof CasesConnectorRunParamsSchema>;
+export type CasesConnectorRunParams = Omit<
+  TypeOf<typeof CasesConnectorRunParamsSchema>,
+  'alerts'
+> & { alerts: Array<{ _id: string; _index: string; [x: string]: unknown }> };
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 

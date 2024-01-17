@@ -101,6 +101,7 @@ export class CasesConnector extends SubActionConnector<
       const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
 
       const connectorExecutor = new CasesConnectorExecutor({
+        logger: this.logger,
         casesOracleService: this.casesOracleService,
         casesService: this.casesService,
         casesClient,
