@@ -869,7 +869,7 @@
     "@opentelemetry/resources": "^1.4.0",
     "@opentelemetry/sdk-metrics-base": "^0.31.0",
     "@opentelemetry/semantic-conventions": "^1.4.0",
-    "@reduxjs/toolkit": "1.7.2",
+    "@reduxjs/toolkit": "1.9.7",
     "@slack/webhook": "^7.0.1",
     "@smithy/eventstream-codec": "^2.0.12",
     "@smithy/util-utf8": "^2.0.0",
