@@ -7,13 +7,16 @@
  */
 
 import { exporters } from '@kbn/data-plugin/public';
-import type { Adapters } from '@kbn/embeddable-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import {
+  apiHasInspectorAdapters,
+  HasInspectorAdapters,
+  type Adapters,
+} from '@kbn/inspector-plugin/public';
 import { EmbeddableApiContext, PublishesPanelTitle } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';

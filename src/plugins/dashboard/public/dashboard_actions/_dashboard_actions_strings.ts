@@ -98,6 +98,7 @@ export const dashboardUnlinkFromLibraryActionStrings = {
   getFailureMessage: (panelTitle: string) =>
     i18n.translate('dashboard.panel.unlinkFromLibrary.failureMessage', {
       defaultMessage: `An error occured while unlinking {panelTitle} from the library.`,
+      values: { panelTitle },
     }),
 };
 

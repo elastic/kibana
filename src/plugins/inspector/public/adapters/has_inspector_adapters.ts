@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RequestAdapter } from '../../common';
-
-/**
- * The interface that the adapters used to open an inspector have to fullfill.
- */
-export interface Adapters {
-  requests?: RequestAdapter;
-  [key: string]: any;
-}
+import { Adapters } from '../../common';
 
 export interface HasInspectorAdapters {
   getInspectorAdapters: () => Adapters | undefined;

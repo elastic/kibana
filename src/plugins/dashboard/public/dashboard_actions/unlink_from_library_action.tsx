@@ -59,16 +59,16 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
-    const panelTitle = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value ?? '';
+    const title = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
     try {
       await embeddable.unlinkFromLibrary();
       this.toastsService.addSuccess({
-        title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(panelTitle),
+        title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelSuccess',
       });
     } catch (e) {
       this.toastsService.addDanger({
-        title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(panelTitle),
+        title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(title ? `'${title}'` : ''),
         'data-test-subj': 'unlinkPanelFailure',
       });
     }

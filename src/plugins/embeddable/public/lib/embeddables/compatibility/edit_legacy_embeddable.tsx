@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Subscription } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { LegacyCompatibleEmbeddable } from '../../../embeddable_panel/types';
 import { core, embeddableStart } from '../../../kibana_services';
 import { Container } from '../../containers';
@@ -14,19 +14,6 @@ import { EmbeddableFactoryNotFoundError } from '../../errors';
 import { EmbeddableEditorState } from '../../state_transfer';
 import { isExplicitInputWithAttributes } from '../embeddable_factory';
 import { EmbeddableInput } from '../i_embeddable';
-
-const getLatestAppId = async (): Promise<string | undefined> => {
-  const subscription: Subscription = new Subscription();
-  const appId = new Promise<string | undefined>((resolve) => {
-    subscription.add(
-      core.application.currentAppId$.subscribe((currentAppId) => {
-        resolve(currentAppId);
-      })
-    );
-  });
-  subscription?.unsubscribe();
-  return appId;
-};
 
 const getExplicitInput = (embeddable: LegacyCompatibleEmbeddable) =>
   (embeddable.getRoot() as Container)?.getInput()?.panels?.[embeddable.id]?.explicitInput ??
@@ -37,7 +24,7 @@ const getAppTarget = async (embeddable: LegacyCompatibleEmbeddable) => {
   const path = embeddable ? embeddable.getOutput().editPath : undefined;
   if (!app || !path) return;
 
-  const currentAppId = await getLatestAppId();
+  const currentAppId = await firstValueFrom(core.application.currentAppId$);
   if (!currentAppId) return { app, path };
 
   const state: EmbeddableEditorState = {

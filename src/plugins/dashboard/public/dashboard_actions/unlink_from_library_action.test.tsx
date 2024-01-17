@@ -70,7 +70,7 @@ describe('Unlink from library action', () => {
     await action.execute(context);
     expect(pluginServices.getServices().notifications.toasts.addDanger).toHaveBeenCalledWith({
       'data-test-subj': 'unlinkPanelFailure',
-      title: 'An error occured while unlinking a panel from the library.',
+      title: "An error occured while unlinking 'A very compatible API' from the library.",
     });
   });
 });

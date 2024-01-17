@@ -9,7 +9,7 @@
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
 import * as Rx from 'rxjs';
-import { merge } from 'rxjs';
+import { lastValueFrom, merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import { Adapters } from '../types';
@@ -346,13 +346,7 @@ export abstract class Embeddable<
   }
 
   public async untilInitializationFinished(): Promise<void> {
-    return new Promise((resolve) => {
-      this.initializationFinished.subscribe({
-        complete: () => {
-          resolve();
-        },
-      });
-    });
+    return lastValueFrom(this.initializationFinished);
   }
 
   /**
