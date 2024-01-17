@@ -6,6 +6,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
+import { HORIZONTAL_LINE } from '../common/constants';
 import { createKbnClient } from '../common/stack_services';
 import { load } from './src/load';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
@@ -21,6 +22,7 @@ export const cli = () => {
         url: cliContext.flags.kibana as string,
         username: cliContext.flags.username as string,
         password: cliContext.flags.password as string,
+        noCertForSsl: true,
       });
 
       const options = {
@@ -34,18 +36,11 @@ export const cli = () => {
         concurrency: Number(cliContext.flags.concurrency),
       };
 
-      /*
-        load_env_data
-            [x] --policyCount=5000
-            --trustedAppsCount=1000
-            --eventFiltersCount=1000
-            --blocklists=10
-            --hostIsolationExceptions=10
-            --endpointExceptions=10
-            --globalArtifactRatio=50
-     */
+      log.info(`${HORIZONTAL_LINE}
+ Environment Data Loader
+${HORIZONTAL_LINE}
 
-      log.info(`Loading data to: ${kbnClient.resolveUrl('')}`);
+Loading data to: ${kbnClient.resolveUrl('')}`);
 
       await load({
         kbnClient,

@@ -20,6 +20,7 @@ import {
   createTrustedApp,
 } from '../../common/endpoint_artifact_services';
 import type { ReportProgressCallback } from './types';
+import { loop } from './utils';
 
 interface ArtifactCreationOptions {
   kbnClient: KbnClient;
@@ -30,19 +31,6 @@ interface ArtifactCreationOptions {
   globalArtifactRatio: number;
   throttler: ExecutionThrottler;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const loop = (count: number, callback: (instance: number) => any): void => {
-  let done = 1;
-
-  while (done <= count) {
-    try {
-      callback(done++);
-    } catch {
-      return;
-    }
-  }
-};
 
 export const createTrustedApps = async ({
   kbnClient,

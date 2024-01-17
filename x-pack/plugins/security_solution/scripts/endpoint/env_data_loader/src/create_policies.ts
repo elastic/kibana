@@ -7,6 +7,8 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { loop } from './utils';
+import type { ExecutionThrottler } from '../../common/execution_throttler';
 import {
   addEndpointIntegrationToAgentPolicy,
   copyAgentPolicy,
@@ -19,6 +21,7 @@ interface CreatePoliciesOptions {
   log: ToolingLog;
   count: number;
   reportProgress: ReportProgressCallback;
+  throttler: ExecutionThrottler;
 }
 
 export const createPolicies = async ({
@@ -26,6 +29,7 @@ export const createPolicies = async ({
   count,
   reportProgress,
   log,
+  throttler,
 }: CreatePoliciesOptions): Promise<string[]> => {
   const endpointIntegrationPolicyIds: string[] = [];
   let doneCount = 0;
@@ -45,12 +49,22 @@ export const createPolicies = async ({
   doneCount++;
   reportProgress({ doneCount });
 
-  while (doneCount < count) {
-    // TODO:PT maybe use ES bulk create and bypass fleet so that we speed this up?
-    endpointIntegrationPolicyIds.push((await copyAgentPolicy({ kbnClient, agentPolicyId })).id);
-    doneCount++;
-    reportProgress({ doneCount });
-  }
+  // TODO:PT maybe use ES bulk create and bypass fleet so that we speed this up?
+
+  loop(count - 1, () => {
+    throttler.addToQueue(async () => {
+      await copyAgentPolicy({ kbnClient, agentPolicyId })
+        .then((response) => {
+          endpointIntegrationPolicyIds.push(response.id);
+        })
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount });
+        });
+    });
+  });
+
+  await throttler.complete();
 
   return endpointIntegrationPolicyIds;
 };
