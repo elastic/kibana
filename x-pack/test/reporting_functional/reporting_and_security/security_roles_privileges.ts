@@ -15,6 +15,7 @@ const CANVAS_TITLE = 'The Very Cool Workpad for PDF Tests';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const reportingFunctional = getService('reportingFunctional');
+  const testSubjects = getService('testSubjects');
 
   describe('Security with `reporting_user` built-in role', () => {
     before(async () => {
@@ -90,13 +91,15 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not allow user that does not have reporting privileges', async () => {
         await reportingFunctional.loginDataAnalyst();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfNotAvailable();
+        await testSubjects.click('shareTopNavButton');
       });
 
       it('does allow user with reporting privileges', async () => {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
-        await reportingFunctional.tryGeneratePdfSuccess();
+        await testSubjects.click('shareTopNavButton');
+        await testSubjects.click('PDFReports');
+        await testSubjects.click('generateReportButton');
       });
     });
 

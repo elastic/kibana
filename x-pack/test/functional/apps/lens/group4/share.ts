@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'share']);
   const browser = getService('browser');
   const filterBarService = getService('filterBar');
   const queryBar = getService('queryBar');
@@ -17,6 +17,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('lens share tests', () => {
     before(async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
+    });
+    afterEach(async () => {
+      // modal blocks clicking outside the modal to close it
+      await PageObjects.share.closeShareModal();
     });
 
     after(async () => {
