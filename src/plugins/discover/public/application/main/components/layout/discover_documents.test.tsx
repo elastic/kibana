@@ -132,6 +132,8 @@ describe('Discover documents layout', () => {
     expect(discoverGridComponent.exists()).toBeTruthy();
 
     expect(discoverGridComponent.prop('externalCustomRenderers')).toEqual(customCellRenderer);
-    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(customGridColumnsConfiguration);
+    expect(discoverGridComponent.prop('customGridColumnsConfiguration')).toEqual(
+      customGridColumnsConfiguration
+    );
   });
 });
