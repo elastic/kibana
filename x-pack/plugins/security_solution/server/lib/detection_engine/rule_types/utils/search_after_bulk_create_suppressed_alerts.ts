@@ -5,18 +5,14 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import { identity } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  PersistenceServices,
-  IRuleDataClient,
-  IRuleDataReader,
-  SuppressedAlertService,
-} from '@kbn/rule-registry-plugin/server';
+import type { SuppressedAlertService } from '@kbn/rule-registry-plugin/server';
 import { singleSearchAfter } from './single_search_after';
 import { filterEventsAgainstList } from './large_list_filters/filter_events_against_list';
 import { sendAlertTelemetryEvents } from './send_telemetry_events';
-import { wrapSuppressedALerts } from './wrap_suppressed_alerts';
 import { bulkCreateWithSuppression } from './bulk_create_with_suppression';
 import {
   createSearchAfterReturnType,
@@ -27,18 +23,18 @@ import {
   mergeSearchResults,
   getSafeSortIds,
   addToSearchAfterReturn,
-  getMaxSignalsWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
-  RunOpts,
   WrapSuppressedHits,
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import { createEnrichEventsFunction } from './enrichments';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { AlertSuppressionCamel } from '../../../../../common/api/detection_engine/model/rule_schema';
-
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
+import { partitionMissingFieldsEvents } from './partition_missing_fields_events';
 interface SearchAfterAndBulkCreateSuppressedAlertsParams extends SearchAfterAndBulkCreateParams {
   wrapSuppressedHits: WrapSuppressedHits;
   alertTimestampOverride: Date | undefined;
@@ -63,6 +59,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
   trackTotalHits,
   tuple,
   wrapSuppressedHits,
+  wrapHits,
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
@@ -177,28 +174,42 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
-          const enrichedEvents = await enrichment(includedEvents);
-          // const wrappedDocs = wrapHits(enrichedEvents, buildReasonMessage);
-
-          const wrappedDocs = wrapSuppressedHits(enrichedEvents, buildReasonMessage);
-
-          // const bulkCreateResult = await bulkCreate(
-          //   wrappedDocs,
-          //   tuple.maxSignals - toReturn.createdSignalsCount,
-          //   createEnrichEventsFunction({
-          //     services,
-          //     logger: ruleExecutionLogger,
-          //   })
-          // );
-          //  console.log('wrappedDocs', JSON.stringify(wrappedDocs, null, 2));
+          let enrichedEvents = await enrichment(includedEvents);
 
           const suppressionDuration = alertSuppression?.duration;
-          let bulkCreateResult: Awaited<ReturnType<typeof bulkCreateWithSuppression>>;
           const suppressionWindow = suppressionDuration
             ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
             : `now`;
 
-          bulkCreateResult = await bulkCreateWithSuppression({
+          const suppressOnMissingFields =
+            (alertSuppression?.missingFieldsStrategy ??
+              DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY) ===
+            AlertSuppressionMissingFieldsStrategyEnum.suppress;
+
+          if (!suppressOnMissingFields) {
+            const partitionedEvents = partitionMissingFieldsEvents(
+              enrichedEvents,
+              alertSuppression?.groupBy || []
+            );
+
+            const wrappedDocs = wrapHits(partitionedEvents[1], buildReasonMessage);
+            enrichedEvents = partitionedEvents[0];
+
+            const unsuppressedResult = await bulkCreate(
+              wrappedDocs,
+              tuple.maxSignals - toReturn.createdSignalsCount,
+              createEnrichEventsFunction({
+                services,
+                logger: ruleExecutionLogger,
+              })
+            );
+
+            addToSearchAfterReturn({ current: toReturn, next: unsuppressedResult });
+          }
+
+          const wrappedDocs = wrapSuppressedHits(enrichedEvents, buildReasonMessage);
+
+          const bulkCreateResult = await bulkCreateWithSuppression({
             alertWithSuppression,
             ruleExecutionLogger,
             wrappedDocs,

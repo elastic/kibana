@@ -123,14 +123,17 @@ const suppressAlertsInMemory = <
     _id: string;
     _source: T;
   }>
-) => {
+): Array<{
+  _id: string;
+  _source: T;
+}> => {
   const idsMap: Record<string, number> = {};
 
   const filteredAlerts = alerts.filter((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
     const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
 
-    if (idsMap[instanceId] != null) {
+    if (instanceId && idsMap[instanceId] != null) {
       idsMap[instanceId] += suppressionDocsCount + 1;
       return false;
     } else {
@@ -141,7 +144,9 @@ const suppressAlertsInMemory = <
 
   return filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
-    alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId];
+    if (instanceId) {
+      alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId];
+    }
     return alert;
   });
 };
@@ -289,11 +294,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   forceNow: currentTimeOverride,
                 });
 
-                console.log(
-                  '......... suppressionWindowStart',
-                  suppressionWindowStart,
-                  suppressionWindowStart?.toISOString()
-                );
                 if (!suppressionWindowStart) {
                   throw new Error('Failed to parse suppression window');
                 }
@@ -305,11 +305,6 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 const filteredAlerts = suppressAlertsInMemory(filteredDuplicates);
-
-                console.log('alerts', alerts.length);
-                console.log('filteredDuplicates', filteredDuplicates.length);
-                console.log('filteredAlerts', filteredAlerts.length);
-                console.log('filteredAlerts', JSON.stringify(filteredAlerts, null, 2));
 
                 if (filteredAlerts.length === 0) {
                   return { createdAlerts: [], errors: {} };
@@ -372,19 +367,18 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
                   Record<string, estypes.SearchHit<AlertWithSuppressionFields870<{}>>>
                 >((acc, hit) => {
-                  acc[hit._source['kibana.alert.instance.id']] = hit;
+                  acc[hit._source[ALERT_INSTANCE_ID]] = hit;
                   return acc;
                 }, {});
 
                 const [duplicateAlerts, newAlerts] = partition(
                   filteredAlerts,
-                  (alert) =>
-                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']] != null
+                  (alert) => existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]] != null
                 );
 
                 const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
                   const existingAlert =
-                    existingAlertsByInstanceId[alert._source['kibana.alert.instance.id']];
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
                   return [

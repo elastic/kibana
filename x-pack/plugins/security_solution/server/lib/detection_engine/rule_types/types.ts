@@ -10,6 +10,7 @@ import type { Moment } from 'moment';
 import type { Logger } from '@kbn/logging';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 
 import type { QUERY_RULE_TYPE_ID, SAVED_QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
@@ -339,7 +340,7 @@ export type WrapHits = (
 export type WrapSuppressedHits = (
   hits: Array<estypes.SearchHit<SignalSource>>,
   buildReasonMessage: BuildReasonMessage
-) => Array<WrappedFieldsLatest<BaseFieldsLatest>>;
+) => Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>;
 
 export type WrapSequences = (
   sequences: Array<EqlSequence<SignalSource>>,
