@@ -6,21 +6,27 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RuleStateAttributes } from '../../../common/types/latest';
+import {
+  CspBenchmarkRulesBulkActionRequestSchema,
+  RuleStateAttributes,
+} from '../../../common/types/latest';
 import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/constants';
 
-export type RuleStateAttributesWithoutStatus = Omit<RuleStateAttributes, 'muted'>;
+export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
 export const useChangeCspRuleState = () => {
   const { http } = useKibana().services;
 
-  return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStatus[]) => {
+  return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStates[]) => {
     const query = {
       action: actionOnRule,
       rules: ruleIds,
     };
-    return await http?.post<any>(CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH, {
-      version: '1',
-      body: JSON.stringify(query),
-    });
+    return await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
+      CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
+      {
+        version: '1',
+        body: JSON.stringify(query),
+      }
+    );
   };
 };

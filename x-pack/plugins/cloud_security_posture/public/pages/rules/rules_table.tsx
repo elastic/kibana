@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
-import { useChangeCspRuleState } from './change_csp_rule_state';
+import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -33,20 +33,23 @@ type RulesTableProps = Pick<
   selectedRuleId: string | null;
   refetchRulesStates: () => void;
   selectedRules: CspBenchmarkRulesWithStates[];
-  setSelectedRules: (e: CspBenchmarkRulesWithStates[]) => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 };
 
 type GetColumnProps = Pick<
   RulesTableProps,
   'setSelectedRuleId' | 'refetchRulesStates' | 'selectedRules' | 'setSelectedRules'
 > & {
-  postRequestChangeRulesStatus: (actionOnRule: 'mute' | 'unmute', ruleIds: any[]) => void;
+  postRequestChangeRulesStates: (
+    actionOnRule: 'mute' | 'unmute',
+    ruleIds: RuleStateAttributesWithoutStates[]
+  ) => void;
   items: CspBenchmarkRulesWithStates[];
-  setSelectAllRulesThisPage: (e: boolean) => void;
-  selectAllRulesThisPage: boolean;
-  isArraySubset: (
-    smallArr: CspBenchmarkRulesWithStates[],
-    bigArr: CspBenchmarkRulesWithStates[]
+  setIsAllRulesSelectedThisPage: (isAllRulesSelected: boolean) => void;
+  isAllRulesSelectedThisPage: boolean;
+  isCurrentPageRulesASubset: (
+    currentPageRulesArray: CspBenchmarkRulesWithStates[],
+    selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => boolean;
 };
 
@@ -84,26 +87,28 @@ export const RulesTable = ({
     },
   });
 
-  const [selectAllRulesThisPage, setSelectAllRulesThisPage] = useState<boolean>(false);
-  const postRequestChangeRulesStatus = useChangeCspRuleState();
+  const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
+  const postRequestChangeRulesStates = useChangeCspRuleState();
 
-  const isArraySubset = (
-    smallArr: CspBenchmarkRulesWithStates[],
-    bigArr: CspBenchmarkRulesWithStates[]
+  const isCurrentPageRulesASubset = (
+    currentPageRulesArray: CspBenchmarkRulesWithStates[],
+    selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => {
     let i: number = 0;
-    const newSmallArr = smallArr.map((e) => e.metadata);
-    const newBigArr = bigArr.map((e) => e.metadata);
+    const newCurrentPageRulesArray = currentPageRulesArray.map((rule) => rule.metadata);
+    const newSelectedRulesArray = selectedRulesArray.map((rule) => rule.metadata);
 
-    while (i < newSmallArr.length) {
-      if (!newBigArr.includes(newSmallArr[i])) return false;
+    while (i < newCurrentPageRulesArray.length) {
+      if (!newSelectedRulesArray.includes(newCurrentPageRulesArray[i])) return false;
       i++;
     }
     return true;
   };
 
   useEffect(() => {
-    if (selectedRules.length >= items.length) setSelectAllRulesThisPage(true);
+    if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
+      setIsAllRulesSelectedThisPage(true);
+    else setIsAllRulesSelectedThisPage(false);
   }, [items.length, selectedRules.length]);
 
   const columns = useMemo(
@@ -111,23 +116,22 @@ export const RulesTable = ({
       getColumns({
         setSelectedRuleId,
         refetchRulesStates,
-        postRequestChangeRulesStatus,
+        postRequestChangeRulesStates,
         selectedRules,
         setSelectedRules,
         items,
-        setSelectAllRulesThisPage,
-        selectAllRulesThisPage,
-        isArraySubset,
+        setIsAllRulesSelectedThisPage,
+        isAllRulesSelectedThisPage,
+        isCurrentPageRulesASubset,
       }),
     [
       setSelectedRuleId,
       refetchRulesStates,
-      postRequestChangeRulesStatus,
+      postRequestChangeRulesStates,
       selectedRules,
       setSelectedRules,
       items,
-      setSelectAllRulesThisPage,
-      selectAllRulesThisPage,
+      isAllRulesSelectedThisPage,
     ]
   );
 
@@ -151,19 +155,19 @@ export const RulesTable = ({
 const getColumns = ({
   setSelectedRuleId,
   refetchRulesStates,
-  postRequestChangeRulesStatus,
+  postRequestChangeRulesStates,
   selectedRules,
   setSelectedRules,
   items,
-  selectAllRulesThisPage,
-  isArraySubset,
+  isAllRulesSelectedThisPage,
+  isCurrentPageRulesASubset,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
     name: (
       <EuiCheckbox
         id={RULES_ROW_SELECT_ALL_CURRENT_PAGE}
-        checked={isArraySubset(items, selectedRules) && selectAllRulesThisPage}
+        checked={isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage}
         onChange={(e) => {
           const uniqueSelectedRules = uniqBy([...selectedRules, ...items], 'metadata.id');
           const onChangeSelectAllThisPageFn = () => {
@@ -180,7 +184,7 @@ const getColumns = ({
               )
             );
           };
-          return isArraySubset(items, selectedRules) && selectAllRulesThisPage
+          return isCurrentPageRulesASubset(items, selectedRules) && isAllRulesSelectedThisPage
             ? onChangeDeselectAllThisPageFn()
             : onChangeSelectAllThisPageFn();
         }}
@@ -192,7 +196,7 @@ const getColumns = ({
       return (
         <EuiCheckbox
           checked={selectedRules.some(
-            (e: CspBenchmarkRulesWithStates) => e.metadata?.id === item.metadata?.id
+            (rule: CspBenchmarkRulesWithStates) => rule.metadata?.id === item.metadata?.id
           )}
           id={`cloud-security-fields-selector-item-${item.metadata?.id}`}
           data-test-subj={`cloud-security-fields-selector-item-${item.metadata?.id}`}
@@ -257,15 +261,16 @@ const getColumns = ({
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
-        rule_number: rule?.metadata.benchmark.rule_number,
+        /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+        rule_number: rule?.metadata.benchmark.rule_number!,
         rule_id: rule?.metadata.id,
       };
-      const isRuleMuted = rule?.status === 'muted';
-      const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
+      const isRuleMuted = rule?.state === 'muted';
+      const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
 
-      const useChangeCspRuleStatusFn = async () => {
+      const useChangeCspRuleStateFn = async () => {
         if (rule?.metadata.benchmark.rule_number) {
-          await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
+          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
           await refetchRulesStates();
         }
       };
@@ -273,7 +278,7 @@ const getColumns = ({
         <EuiSwitch
           className="eui-textTruncate"
           checked={!isRuleMuted}
-          onChange={useChangeCspRuleStatusFn}
+          onChange={useChangeCspRuleStateFn}
           data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
           label=""
         />

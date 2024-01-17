@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Rules Page - Bulk Action buttons', () => {
-      it('It should disable both option when there are no rules selected', async () => {
+      it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
         expect(
           (await rule.rulePage.isBulkActionOptionDisabled(RULES_BULK_ACTION_OPTION_ENABLE)) ===
@@ -98,8 +98,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.toggleBulkActionButton();
         await rule.rulePage.clickBulkActionOption(RULES_BULK_ACTION_OPTION_DISABLE);
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await rule.rulePage.clickClearAllRulesSelection();
-        await pageObjects.header.waitUntilLoadingHasFinished();
         await rule.rulePage.clickSelectAllRules();
         await rule.rulePage.toggleBulkActionButton();
         expect(
@@ -126,7 +124,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             'true'
         ).to.be(false);
       });
+    });
 
+    describe('Rules Page - Enable Rules and Disabled Rules Filter Toggle', () => {
       it('Should only display Enabled rules when Enabled Rules filter is ON', async () => {
         await rule.rulePage.clickFilterButton('enabled');
         await pageObjects.header.waitUntilLoadingHasFinished();

@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+import { CspBenchmarkRulesStates } from '../../../common/types/latest';
 import { CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH } from '../../../common/constants';
 import { useKibana } from '../../common/hooks/use_kibana';
 
@@ -17,7 +18,7 @@ export const useCspGetRulesStates = () => {
   return useQuery(
     [QUERY_KEY_V1],
     () =>
-      http.get<any>(CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH, {
+      http.get<CspBenchmarkRulesStates>(CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH, {
         version: '1',
       }),
     { keepPreviousData: true }

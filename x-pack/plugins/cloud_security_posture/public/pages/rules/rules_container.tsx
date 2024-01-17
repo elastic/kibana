@@ -25,7 +25,7 @@ import { useCspGetRulesStates } from './use_csp_rules_state';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
-  status: 'muted' | 'unmuted';
+  state: 'muted' | 'unmuted';
 }
 
 interface RulesPageData {
@@ -107,7 +107,7 @@ export const RulesContainer = () => {
       ruleState.benchmark_version === 'v' + params.benchmarkVersion
   );
 
-  const rulesWithStatus: CspBenchmarkRulesWithStates[] = useMemo(() => {
+  const rulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (!data) return [];
 
     return data.items
@@ -115,24 +115,25 @@ export const RulesContainer = () => {
       .map((rule: CspBenchmarkRule) => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
-          'v' + params.benchmarkVersion,
+          rule.metadata.benchmark.version,
+          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
           rule.metadata.benchmark.rule_number!
         );
 
         const match = rulesStates?.data?.[rulesKey];
-        const rulesStatus = match?.muted ? 'muted' : 'unmuted';
+        const rulesState = match?.muted ? 'muted' : 'unmuted';
 
-        return { ...rule, status: rulesStatus || 'unmuted' };
+        return { ...rule, state: rulesState || 'unmuted' };
       });
-  }, [data, params.benchmarkVersion, rulesStates?.data]);
+  }, [data, rulesStates?.data]);
 
-  const filteredRulesWithStatuses: CspBenchmarkRulesWithStates[] = useMemo(() => {
+  const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'disabled')
-      return rulesWithStatus?.filter((e) => e?.status === 'muted');
+      return rulesWithStates?.filter((rule) => rule?.state === 'muted');
     else if (enabledDisabledItemsFilter === 'enabled')
-      return rulesWithStatus?.filter((e) => e?.status === 'unmuted');
-    else return rulesWithStatus;
-  }, [rulesWithStatus, enabledDisabledItemsFilter]);
+      return rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
+    else return rulesWithStates;
+  }, [rulesWithStates, enabledDisabledItemsFilter]);
 
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
@@ -148,8 +149,8 @@ export const RulesContainer = () => {
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
 
   const rulesPageData = useMemo(
-    () => getRulesPage(filteredRulesWithStatuses, status, error, rulesQuery),
-    [filteredRulesWithStatuses, status, error, rulesQuery]
+    () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
+    [filteredRulesWithStates, status, error, rulesQuery]
   );
 
   const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStates[]>([]);
@@ -160,7 +161,7 @@ export const RulesContainer = () => {
 
   const rulesFlyoutData: CspBenchmarkRulesWithStates = {
     ...{
-      status:
+      state:
         filteredRulesStates.find(
           (filteredRuleState) => filteredRuleState.rule_id === selectedRuleId
         )?.muted === true

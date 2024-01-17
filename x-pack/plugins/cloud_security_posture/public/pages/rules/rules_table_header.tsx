@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { RuleStateAttributesWithoutStatus, useChangeCspRuleState } from './change_csp_rule_state';
+import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
@@ -277,10 +277,9 @@ const CurrentPageOfTotal = ({
     setIsPopoverOpen((e) => !e);
   };
 
-  const postRequestChangeRulesStatus = useChangeCspRuleState();
-  const closePopover = () => setIsPopoverOpen(false);
-  const changeRulesStatus = async (status: 'mute' | 'unmute') => {
-    const bulkSelectedRules: RuleStateAttributesWithoutStatus[] = selectedRules.map(
+  const postRequestChangeRulesState = useChangeCspRuleState();
+  const changeRulesState = async (state: 'mute' | 'unmute') => {
+    const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
       (e: CspBenchmarkRulesWithStates) => ({
         benchmark_id: e?.metadata.benchmark.id,
         benchmark_version: e?.metadata.benchmark.version,
@@ -289,23 +288,23 @@ const CurrentPageOfTotal = ({
       })
     );
     // Only do the API Call IF there are no undefined value for rule number in the selected rules
-    if (!bulkSelectedRules.some((e) => e.rule_number === undefined)) {
-      await postRequestChangeRulesStatus(status, bulkSelectedRules);
+    if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
+      await postRequestChangeRulesState(state, bulkSelectedRules);
       await refetchRulesStates();
-      await closePopover();
+      await setIsPopoverOpen(false);
     }
   };
-  const changeCspRuleStatusMute = async () => {
-    changeRulesStatus('mute');
-  };
-  const changeCspRuleStatusUnmute = async () => {
-    changeRulesStatus('unmute');
-  };
-  const clearSelectionFn = async () => {
+  const changeCspRuleStateMute = async () => {
+    await changeRulesState('mute');
     setSelectedRules([]);
   };
-  const areAllSelectedRulesMuted = selectedRules.find((e) => e?.status === 'muted');
-  const areAllSelectedRulesUnmuted = selectedRules.find((e) => e?.status === 'unmuted');
+  const changeCspRuleStateUnmute = async () => {
+    await changeRulesState('unmute');
+    setSelectedRules([]);
+  };
+
+  const areAllSelectedRulesMuted = selectedRules.every((rule) => rule?.state === 'muted');
+  const areAllSelectedRulesUnmuted = selectedRules.every((rule) => rule?.state === 'unmuted');
 
   const popoverButton = (
     <EuiButtonEmpty
@@ -323,8 +322,8 @@ const CurrentPageOfTotal = ({
   );
   const items = [
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 || !areAllSelectedRulesMuted ? true : false}
-      onClick={changeCspRuleStatusUnmute}
+      disabled={selectedRules.length === 0 || areAllSelectedRulesUnmuted}
+      onClick={changeCspRuleStateUnmute}
       data-test-subj={RULES_BULK_ACTION_OPTION_ENABLE}
     >
       <EuiText key="disabled">
@@ -332,8 +331,8 @@ const CurrentPageOfTotal = ({
       </EuiText>
     </EuiContextMenuItem>,
     <EuiContextMenuItem
-      disabled={selectedRules.length === 0 || !areAllSelectedRulesUnmuted ? true : false}
-      onClick={changeCspRuleStatusMute}
+      disabled={selectedRules.length === 0 || areAllSelectedRulesMuted}
+      onClick={changeCspRuleStateMute}
       data-test-subj={RULES_BULK_ACTION_OPTION_DISABLE}
     >
       <EuiText>
@@ -374,7 +373,7 @@ const CurrentPageOfTotal = ({
             </EuiButtonEmpty>
           ) : (
             <EuiButtonEmpty
-              onClick={clearSelectionFn}
+              onClick={() => setSelectedRules([])}
               size="xs"
               iconType="cross"
               css={css`
@@ -393,7 +392,7 @@ const CurrentPageOfTotal = ({
           <EuiPopover
             button={popoverButton}
             isOpen={isPopoverOpen}
-            closePopover={closePopover}
+            closePopover={() => setIsPopoverOpen(false)}
             anchorPosition="downLeft"
             panelPaddingSize="s"
           >

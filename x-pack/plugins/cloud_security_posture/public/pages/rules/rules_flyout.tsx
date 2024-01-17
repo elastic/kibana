@@ -55,10 +55,10 @@ type RuleTab = typeof tabs[number]['id'];
 
 export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
-  const postRequestChangeRulesStatus = useChangeCspRuleState();
-  const isRuleMuted = rule?.status === 'muted';
+  const postRequestChangeRulesStates = useChangeCspRuleState();
+  const isRuleMuted = rule?.state === 'muted';
 
-  const switchRuleStatus = async () => {
+  const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
         benchmark_id: rule.metadata.benchmark.id,
@@ -66,8 +66,8 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         rule_number: rule.metadata.benchmark.rule_number,
         rule_id: rule.metadata.id,
       };
-      const nextRuleStatus = isRuleMuted ? 'unmute' : 'mute';
-      await postRequestChangeRulesStatus(nextRuleStatus, [rulesObjectRequest]);
+      const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
+      await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
     }
   };
@@ -86,10 +86,10 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
         <EuiSwitch
           className="eui-textTruncate"
           checked={!isRuleMuted}
-          onChange={switchRuleStatus}
+          onChange={switchRuleStates}
           data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
           label={
-            rule.status === 'muted' ? (
+            rule.state === 'muted' ? (
               <FormattedMessage
                 id="xpack.csp.rules.ruleFlyout.ruleFlyoutDisabledText"
                 defaultMessage="Disabled"
