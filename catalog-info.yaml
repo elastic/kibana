@@ -240,10 +240,6 @@ spec:
       provider_settings:
         build_pull_requests: true
         trigger_mode: none
-      schedules:
-        daily:
-          branch: main
-          cronline: "@daily"
       pipeline_file: ".buildkite/pipelines/observability-ai-assistant.yml"
       teams:
         kibana-operations:
