@@ -72,7 +72,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       return Object.values(conversations).map((conversation) => ({
         value: { isDefault: conversation.isDefault ?? false },
         label: conversation.title,
-        id: conversation.id ?? '',
+        id: conversation.id ?? conversation.title,
         'data-test-subj': conversation.id,
       }));
     });
@@ -89,9 +89,9 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           conversationSelectorSettingsOption.length === 0
             ? undefined
             : Object.values(conversations).find(
-                (conversation) =>
-                  conversation.title === conversationSelectorSettingsOption[0]?.label
-              ) ?? conversationSelectorSettingsOption[0]?.label;
+                (conversation) => conversation.id === conversationSelectorSettingsOption[0]?.id
+              ) ?? conversationSelectorSettingsOption[0]?.id;
+
         onConversationSelectionChange(newConversation);
       },
       [onConversationSelectionChange, conversations]
@@ -114,6 +114,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
         const newOption = {
           value: searchValue,
           label: searchValue,
+          id: searchValue,
         };
 
         if (!optionExists) {

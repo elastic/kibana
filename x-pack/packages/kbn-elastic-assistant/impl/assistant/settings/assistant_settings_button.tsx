@@ -22,6 +22,7 @@ interface Props {
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isDisabled?: boolean;
+  conversations: Record<string, Conversation>;
 }
 
 /**
@@ -36,6 +37,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     setIsSettingsModalVisible,
     selectedConversation,
     setSelectedConversationId,
+    conversations,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -82,6 +84,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             setSelectedConversationId={setSelectedConversationId}
             onClose={handleCloseModal}
             onSave={handleSave}
+            conversations={conversations}
           />
         )}
       </>

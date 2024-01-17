@@ -124,10 +124,10 @@ export const bulkActionConversationsRoute = (
       },
       async (context, request, response): Promise<IKibanaResponse<PerformBulkActionResponse>> => {
         const { body } = request;
-        const siemResponse = buildResponse(response);
+        const assistantResponse = buildResponse(response);
 
         if (body?.update && body.update?.length > CONVERSATIONS_TABLE_MAX_PAGE_SIZE) {
-          return siemResponse.error({
+          return assistantResponse.error({
             body: `More than ${CONVERSATIONS_TABLE_MAX_PAGE_SIZE} ids sent for bulk edit action.`,
             statusCode: 400,
           });
@@ -143,7 +143,6 @@ export const bulkActionConversationsRoute = (
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const writer = await dataClient?.getWriter();
-
           const {
             errors,
             docs_created: docsCreated,
@@ -177,7 +176,7 @@ export const bulkActionConversationsRoute = (
           });
         } catch (err) {
           const error = transformError(err);
-          return siemResponse.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });

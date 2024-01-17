@@ -101,7 +101,8 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
-  const { amendMessage, getDefaultConversation, getConversation } = useConversation();
+  const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
+    useConversation();
   const { data: conversationsData, isLoading, refetch } = useFetchCurrentUserConversations();
   const { data: lastConversation, isLoading: isLoadingLast } = useLastConversation();
 
@@ -189,13 +190,16 @@ const AssistantComponent: React.FC<Props> = ({
     getDefaultConversation({ conversationId: selectedConversationId })
   );
 
-  const refetchCurrentConversation = useCallback(async () => {
-    const updatedConversation = await getConversation(selectedConversationId);
-    if (updatedConversation) {
-      setCurrentConversation(updatedConversation);
-    }
-    return updatedConversation;
-  }, [getConversation, selectedConversationId]);
+  const refetchCurrentConversation = useCallback(
+    async (cId?: string) => {
+      const updatedConversation = await getConversation(cId ?? selectedConversationId);
+      if (updatedConversation) {
+        setCurrentConversation(updatedConversation);
+      }
+      return updatedConversation;
+    },
+    [getConversation, selectedConversationId]
+  );
 
   useEffect(() => {
     if (!isLoadingLast && lastConversation && lastConversation.id) {
@@ -309,13 +313,34 @@ const AssistantComponent: React.FC<Props> = ({
         }
       } else if (cId) {
         setSelectedConversationId(cId);
-        setCurrentConversation(conversations[cId]);
+        const refetchedConversation = await refetchCurrentConversation(cId);
+        if (refetchedConversation) {
+          setCurrentConversation(refetchedConversation);
+        }
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation })?.id
         );
       }
     },
-    [allSystemPrompts, conversations, currentConversation, refetchResults]
+    [
+      allSystemPrompts,
+      conversations,
+      currentConversation,
+      refetchCurrentConversation,
+      refetchResults,
+    ]
+  );
+
+  const handleOnConversationDeleted = useCallback(
+    async (cId: string) => {
+      setTimeout(() => {
+        deleteConversation(cId);
+      }, 0);
+      const deletedConv = { ...conversations };
+      delete deletedConv[cId];
+      setConversations(deletedConv);
+    },
+    [conversations, deleteConversation]
   );
 
   const handleOnSystemPromptSelectionChange = useCallback((systemPromptId?: string) => {
@@ -534,6 +559,8 @@ const AssistantComponent: React.FC<Props> = ({
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
             title={currentTitle}
+            conversations={conversations}
+            onConversationDeleted={handleOnConversationDeleted}
           />
         )}
 

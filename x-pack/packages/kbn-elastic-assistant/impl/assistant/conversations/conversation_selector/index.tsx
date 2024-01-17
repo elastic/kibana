@@ -20,8 +20,7 @@ import useEvent from 'react-use/lib/useEvent';
 import { css } from '@emotion/react';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { merge } from 'lodash';
-import { Conversation, useFetchCurrentUserConversations } from '../../../..';
+import { Conversation } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
@@ -35,8 +34,10 @@ interface Props {
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
   onConversationSelected: (conversationId: string) => void;
+  onConversationDeleted: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
+  conversations: Record<string, Conversation>;
 }
 
 const getPreviousConversationId = (conversationIds: string[], selectedConversationId: string) => {
@@ -61,40 +62,14 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     defaultConnectorId,
     defaultProvider,
     onConversationSelected,
+    onConversationDeleted,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
+    conversations,
   }) => {
-    const [conversations, setConversations] = useState<Record<string, Conversation>>({});
-    const { allSystemPrompts, baseConversations } = useAssistantContext();
+    const { allSystemPrompts } = useAssistantContext();
 
-    const { deleteConversation, createConversation } = useConversation();
-
-    const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
-
-    useEffect(() => {
-      if (!isLoading) {
-        const userConversations = (conversationsData?.data ?? []).reduce<
-          Record<string, Conversation>
-        >((transformed, conversation) => {
-          transformed[conversation.id] = conversation;
-          return transformed;
-        }, {});
-        setConversations(
-          merge(
-            userConversations,
-            Object.keys(baseConversations)
-              .filter(
-                (baseId) =>
-                  (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-              )
-              .reduce<Record<string, Conversation>>((transformed, conversation) => {
-                transformed[conversation] = baseConversations[conversation];
-                return transformed;
-              }, {})
-          )
-        );
-      }
-    }, [baseConversations, conversationsData?.data, isLoading]);
+    const { createConversation } = useConversation();
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
@@ -157,28 +132,17 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (selectedConversationId === cId) {
           onConversationSelected(getPreviousConversationId(conversationIds, cId));
         }
-        setTimeout(() => {
-          deleteConversation(cId);
-        }, 0);
-        const deletedConv = { ...conversations };
-        delete deletedConv[cId];
-        setConversations(deletedConv);
+        onConversationDeleted(cId);
       },
-      [
-        selectedConversationId,
-        conversations,
-        onConversationSelected,
-        conversationIds,
-        deleteConversation,
-      ]
+      [selectedConversationId, onConversationDeleted, onConversationSelected, conversationIds]
     );
 
     const onChange = useCallback(
-      (newOptions: ConversationSelectorOption[]) => {
+      async (newOptions: ConversationSelectorOption[]) => {
         if (newOptions.length === 0 || !newOptions?.[0].id) {
           setSelectedOptions([]);
         } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          onConversationSelected(newOptions?.[0].id);
+          await onConversationSelected(newOptions?.[0].id);
         }
       },
       [conversationOptions, onConversationSelected]

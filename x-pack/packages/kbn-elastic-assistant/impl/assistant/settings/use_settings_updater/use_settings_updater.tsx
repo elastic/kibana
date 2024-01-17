@@ -6,14 +6,15 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { merge } from 'lodash';
-import { Conversation, Prompt, QuickPrompt, useFetchCurrentUserConversations } from '../../../..';
+import { Conversation, Prompt, QuickPrompt } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import { bulkConversationsChange } from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
   conversationSettings: Record<string, Conversation>;
+  createdConversationSettings: Record<string, Conversation>;
+  deletedConversationSettings: string[];
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   knowledgeBase: KnowledgeBaseConfig;
@@ -25,6 +26,9 @@ interface UseSettingsUpdater {
   setUpdatedConversationSettings: React.Dispatch<
     React.SetStateAction<Record<string, Conversation>>
   >;
+  setCreatedConversationSettings: React.Dispatch<
+    React.SetStateAction<Record<string, Conversation>>
+  >;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
@@ -32,7 +36,9 @@ interface UseSettingsUpdater {
   saveSettings: () => void;
 }
 
-export const useSettingsUpdater = (): UseSettingsUpdater => {
+export const useSettingsUpdater = (
+  conversations: Record<string, Conversation>
+): UseSettingsUpdater => {
   // Initial state from assistant context
   const {
     allQuickPrompts,
@@ -40,7 +46,6 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     assistantTelemetry,
     defaultAllow,
     defaultAllowReplacement,
-    baseConversations,
     knowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
@@ -50,25 +55,15 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     http,
   } = useAssistantContext();
 
-  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
-
-  const conversations = merge(
-    baseConversations,
-    (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
-      (transformed, conversation) => {
-        transformed[conversation.id] = conversation;
-        return transformed;
-      },
-      {}
-    )
-  );
-
   /**
    * Pending updating state
    */
   // Conversations
   const [updatedConversationSettings, setUpdatedConversationSettings] =
     useState<Record<string, Conversation>>(conversations);
+  const [createdConversationSettings, setCreatedConversationSettings] = useState<
+    Record<string, Conversation>
+  >({});
   const [deletedConversationSettings, setDeletedConversationSettings] = useState<string[]>([]);
   // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
@@ -90,6 +85,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const resetSettings = useCallback((): void => {
     setUpdatedConversationSettings(conversations);
     setDeletedConversationSettings([]);
+    setCreatedConversationSettings({});
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
@@ -111,25 +107,36 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
     bulkConversationsChange(http, {
-      conversationsToUpdate: Object.keys(updatedConversationSettings).reduce(
-        (conversationsToUpdate: Conversation[], conversationId: string) => {
-          if (!updatedConversationSettings[conversationId].isDefault) {
-            conversationsToUpdate.push(updatedConversationSettings[conversationId]);
+      update: Object.keys(updatedConversationSettings).reduce(
+        (
+          conversationsToUpdate: Array<Omit<Conversation, 'createdAt' | 'updatedAt' | 'user'>>,
+          conversationId: string
+        ) => {
+          if (updatedConversationSettings.updatedAt === undefined) {
+            conversationsToUpdate.push({
+              ...(updatedConversationSettings[conversationId] as Omit<
+                Conversation,
+                'createdAt' | 'updatedAt' | 'user'
+              >),
+            });
           }
           return conversationsToUpdate;
         },
         []
       ),
-      conversationsToCreate: Object.keys(updatedConversationSettings).reduce(
+      create: Object.keys(createdConversationSettings).reduce(
         (conversationsToCreate: Conversation[], conversationId: string) => {
-          if (updatedConversationSettings[conversationId].isDefault) {
-            conversationsToCreate.push(updatedConversationSettings[conversationId]);
-          }
+          conversationsToCreate.push(createdConversationSettings[conversationId]);
           return conversationsToCreate;
         },
         []
       ),
-      conversationsToDelete: deletedConversationSettings,
+      delete:
+        deletedConversationSettings.length > 0
+          ? {
+              ids: deletedConversationSettings,
+            }
+          : undefined,
     });
 
     const didUpdateKnowledgeBase =
@@ -156,6 +163,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     updatedSystemPromptSettings,
     http,
     updatedConversationSettings,
+    createdConversationSettings,
     deletedConversationSettings,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
@@ -170,6 +178,8 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
 
   return {
     conversationSettings: updatedConversationSettings,
+    createdConversationSettings,
+    deletedConversationSettings,
     defaultAllow: updatedDefaultAllow,
     defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
@@ -180,6 +190,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setUpdatedDefaultAllow,
     setUpdatedDefaultAllowReplacement,
     setUpdatedConversationSettings,
+    setCreatedConversationSettings,
     setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,

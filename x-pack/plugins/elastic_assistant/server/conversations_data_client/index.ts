@@ -66,8 +66,7 @@ export class AIAssistantConversationsDataClient {
     if (this.writerCache.get(spaceId)) {
       return this.writerCache.get(spaceId) as ConversationDataWriter;
     }
-    const indexPatterns = this.indexTemplateAndPattern;
-    await this.initializeWriter(spaceId, indexPatterns.alias);
+    await this.initializeWriter(spaceId, this.indexTemplateAndPattern.alias);
     return this.writerCache.get(spaceId) as ConversationDataWriter;
   }
 

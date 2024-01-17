@@ -69,11 +69,12 @@ export const createConversation = async (
     conversation
   );
 
-  const response = await esClient.create({
+  const response = await esClient.index({
     body,
     id: uuidv4(),
     index: conversationIndex,
     refresh: 'wait_for',
+    op_type: 'create',
   });
 
   return {

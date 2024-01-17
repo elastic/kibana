@@ -14,6 +14,7 @@ import {
 } from '../schemas/conversations/common_attributes.gen';
 import { transformToCreateScheme } from './create_conversation';
 import { transformToUpdateScheme } from './update_conversation';
+import { SearchEsConversationSchema } from './types';
 
 interface WriterBulkResponse {
   errors: string[];
@@ -55,7 +56,8 @@ export class ConversationDataWriter implements ConversationDataWriter {
       }
 
       const { errors, items, took } = await this.options.esClient.bulk({
-        operations: this.buildBulkOperations(params),
+        refresh: 'wait_for',
+        body: await this.buildBulkOperations(params),
       });
 
       return {
@@ -87,23 +89,45 @@ export class ConversationDataWriter implements ConversationDataWriter {
     }
   };
 
-  private buildBulkOperations = (params: BulkParams): BulkOperationContainer[] => {
+  private buildBulkOperations = async (params: BulkParams): Promise<BulkOperationContainer[]> => {
     const changedAt = new Date().toISOString();
     const conversationBody =
       params.conversationsToCreate?.flatMap((conversation) => [
-        { create: { _index: this.options.index } },
+        { create: { _index: this.options.index, op_type: 'create' } },
         transformToCreateScheme(changedAt, this.options.spaceId, this.options.user, conversation),
       ]) ?? [];
 
     const conversationUpdatedBody =
       params.conversationsToUpdate?.flatMap((conversation) => [
-        { create: { _id: conversation.id, _index: this.options.index } },
+        { update: { _id: conversation.id, _index: this.options.index } },
         transformToUpdateScheme(changedAt, conversation),
       ]) ?? [];
 
+    const response = params.conversationsToDelete
+      ? await this.options.esClient.search<SearchEsConversationSchema>({
+          body: {
+            query: {
+              ids: {
+                values: params.conversationsToDelete,
+              },
+            },
+          },
+          _source: false,
+          ignore_unavailable: true,
+          index: this.options.index,
+          seq_no_primary_term: true,
+          size: 1000,
+        })
+      : undefined;
+
     const conversationDeletedBody =
       params.conversationsToDelete?.flatMap((conversationId) => [
-        { create: { _id: conversationId, _index: this.options.index } },
+        {
+          delete: {
+            _id: conversationId,
+            _index: response?.hits.hits.find((c) => c._id === conversationId)?._index,
+          },
+        },
       ]) ?? [];
 
     return [

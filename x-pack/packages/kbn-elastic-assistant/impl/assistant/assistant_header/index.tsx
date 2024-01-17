@@ -32,6 +32,7 @@ interface OwnProps {
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
   onConversationSelected: (cId: string) => void;
+  onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
@@ -39,6 +40,7 @@ interface OwnProps {
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
   title: string | JSX.Element;
+  conversations: Record<string, Conversation>;
 }
 
 type Props = OwnProps;
@@ -55,6 +57,7 @@ export const AssistantHeader: React.FC<Props> = ({
   isDisabled,
   isSettingsModalVisible,
   onConversationSelected,
+  onConversationDeleted,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
   setSelectedConversationId,
@@ -62,6 +65,7 @@ export const AssistantHeader: React.FC<Props> = ({
   showAnonymizedValues,
   title,
   setCurrentConversation,
+  conversations,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -102,6 +106,8 @@ export const AssistantHeader: React.FC<Props> = ({
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}
+            conversations={conversations}
+            onConversationDeleted={onConversationDeleted}
           />
 
           <>
@@ -133,6 +139,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   selectedConversation={currentConversation}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   setSelectedConversationId={setSelectedConversationId}
+                  conversations={conversations}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

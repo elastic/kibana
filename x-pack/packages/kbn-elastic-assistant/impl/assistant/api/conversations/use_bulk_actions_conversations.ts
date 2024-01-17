@@ -7,9 +7,11 @@
 
 // import { AI_ASSISTANT_API_CURRENT_VERSION } from '../common/constants';
 import { HttpSetup } from '@kbn/core/public';
+import {
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+  ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+} from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
-
-export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_KEY = 'elastic_assistant_conversations';
 
 export interface BulkActionSummary {
   failed: number;
@@ -46,15 +48,17 @@ export interface BulkUpdateResponse {
 
 export const bulkConversationsChange = (
   http: HttpSetup,
-  conversations: {
-    conversationsToUpdate?: Conversation[];
-    conversationsToCreate?: Conversation[];
-    conversationsToDelete?: string[];
+  conversationsActions: {
+    update?: Array<Omit<Conversation, 'createdAt' | 'updatedAt' | 'user'>>;
+    create?: Conversation[];
+    delete?: {
+      ids: string[];
+    };
   }
 ) => {
-  return http.fetch<Conversation[]>(`/api/elastic_assistant/conversations/_bulk_action`, {
+  return http.fetch<Conversation[]>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
     method: 'POST',
-    version: '2023-10-31',
-    body: JSON.stringify(conversations),
+    version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+    body: JSON.stringify(conversationsActions),
   });
 };
