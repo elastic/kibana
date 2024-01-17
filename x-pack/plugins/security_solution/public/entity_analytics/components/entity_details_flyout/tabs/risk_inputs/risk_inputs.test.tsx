@@ -7,22 +7,22 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../../common/mock';
+import { TestProviders } from '../../../../../common/mock';
 import { times } from 'lodash/fp';
-import { RiskInputsTab } from './risk_inputs';
-import { alertDataMock } from '../mocks';
-import { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
+import { RiskInputsTab } from './risk_inputs_tab';
+import { alertDataMock } from '../../mocks';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 
 const mockUseRiskContributingAlerts = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../hooks/use_risk_contributing_alerts', () => ({
+jest.mock('../../../../hooks/use_risk_contributing_alerts', () => ({
   useRiskContributingAlerts: () => mockUseRiskContributingAlerts(),
 }));
 
 const mockUseRiskScore = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../../api/hooks/use_risk_score', () => ({
+jest.mock('../../../../api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockUseRiskScore(),
 }));
 
@@ -58,7 +58,7 @@ describe('RiskInputsTab', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('risk-input-tab-title')).toBeInTheDocument();
+    expect(getByTestId('risk-input-contexts-title')).toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
       'Risk inputRule Name'
     );
