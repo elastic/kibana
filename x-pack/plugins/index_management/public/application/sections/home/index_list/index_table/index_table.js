@@ -120,11 +120,11 @@ export class IndexTable extends Component {
 
   componentDidMount() {
     this.props.loadIndices();
-    
+
     const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
       this.props;
     const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
-    
+
     if (filter) {
       try {
         const parsedFilter = EuiSearchBar.Query.parse(filter);
