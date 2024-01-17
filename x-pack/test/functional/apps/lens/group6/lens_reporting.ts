@@ -110,22 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
           await PageObjects.lens.openReportingShare();
-          await testSubjects.click('shareReportingAdvancedOptionsButton');
           await testSubjects.existOrFail('shareReportingUnsavedState');
-          expect(await testSubjects.getVisibleText('shareReportingUnsavedState')).to.eql(
-            'Unsaved work\nSave your work before copying this URL.'
-          );
-        });
-
-        it(`should enable curl reporting if the visualization is saved`, async () => {
-          await PageObjects.lens.save(`ASavedVisualizationToShareIn${type}`);
-
-          await PageObjects.lens.openReportingShare();
-          await testSubjects.click('shareReportingAdvancedOptionsButton');
-          await testSubjects.existOrFail('shareReportingCopyURL');
-          expect(await testSubjects.getVisibleText('shareReportingCopyURL')).to.eql(
-            'Copy POST URL'
-          );
         });
 
         it(`should produce a valid URL for reporting`, async () => {

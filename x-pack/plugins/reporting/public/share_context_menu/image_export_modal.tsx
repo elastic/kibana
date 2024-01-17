@@ -222,7 +222,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       })
       .catch((error) => {
         toasts.addError(error, {
-          title: intl.formatMessage({
+          title: intl!.formatMessage({
             id: 'xpack.reporting.modalContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),

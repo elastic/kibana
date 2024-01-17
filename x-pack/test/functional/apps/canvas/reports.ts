@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const PageObjects = getPageObjects(['reporting', 'canvas']);
   const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/reports';
+  const testSubjects = getService('testSubjects');
 
   describe('Canvas PDF Report Generation', () => {
     before('initialize tests', async () => {
@@ -54,8 +55,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
-
-        await PageObjects.reporting.openImageReportingPanel();
+        await testSubjects.click('shareTopNavButton');
+        await testSubjects.click('sharePanel-PDFReports');
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
