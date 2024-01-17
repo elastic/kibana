@@ -15,7 +15,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { ChartConfigPanel } from './chart_config_panel';
-import type { LensAttributesContext } from './utils/get_lens_attributes';
+import type { LensAttributesContext } from '../types';
 
 describe('ChartConfigPanel', () => {
   it('should return a jsx element to edit the visualization', async () => {

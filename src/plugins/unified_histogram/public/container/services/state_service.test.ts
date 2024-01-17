@@ -53,6 +53,7 @@ describe('UnifiedHistogramStateService', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestion: undefined,
+    externalVisContext: undefined,
   };
 
   it('should initialize state with default values', () => {
