@@ -28,8 +28,6 @@ import {
   distinctUntilChanged,
   skipWhile,
   filter,
-  catchError,
-  throwError,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
@@ -224,9 +222,6 @@ export class ProjectNavigationService {
             deepLinks: deepLinksMap,
             cloudLinks,
           });
-        }),
-        catchError((e) => {
-          return throwError(() => e);
         })
       )
       .subscribe({
