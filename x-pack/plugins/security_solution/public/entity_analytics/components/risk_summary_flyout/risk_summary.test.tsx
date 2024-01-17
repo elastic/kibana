@@ -44,8 +44,18 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs1');
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+    );
   });
 
   it('renders risk summary table when riskScoreData is empty', () => {

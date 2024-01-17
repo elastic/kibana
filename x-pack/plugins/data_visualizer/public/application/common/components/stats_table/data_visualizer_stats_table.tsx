@@ -51,7 +51,7 @@ const FIELD_NAME = 'fieldName';
 export type ItemIdToExpandedRowMap = Record<string, JSX.Element>;
 
 type DataVisualizerTableItem = FieldVisConfig | FileBasedFieldVisConfig;
-interface DataVisualizerTableProps<T> {
+interface DataVisualizerTableProps<T extends object> {
   items: T[];
   pageState: DataVisualizerTableState;
   updatePageState: (update: DataVisualizerTableState) => void;

@@ -72,8 +72,26 @@ import { Mask } from './mask';
 
 const SUPPORTS_FEATURE_EDITING_REQUEST_ID = 'SUPPORTS_FEATURE_EDITING_REQUEST_ID';
 
-export function isVectorLayer(layer: ILayer) {
-  return (layer as IVectorLayer).canShowTooltip !== undefined;
+export function isVectorLayer(layer: ILayer): layer is IVectorLayer {
+  return (
+    typeof (layer as IVectorLayer).addFeature === 'function' &&
+    typeof (layer as IVectorLayer).canShowTooltip === 'function' &&
+    typeof (layer as IVectorLayer).deleteFeature === 'function' &&
+    typeof (layer as IVectorLayer).getFields === 'function' &&
+    typeof (layer as IVectorLayer).getJoins === 'function' &&
+    typeof (layer as IVectorLayer).getLeftJoinFields === 'function' &&
+    typeof (layer as IVectorLayer).getMbTooltipLayerIds === 'function' &&
+    typeof (layer as IVectorLayer).getValidJoins === 'function' &&
+    typeof (layer as IVectorLayer).hasJoins === 'function' &&
+    typeof (layer as IVectorLayer).supportsFeatureEditing === 'function'
+  );
+}
+
+export function hasVectorLayerMethod(
+  layer: ILayer,
+  methodName: keyof IVectorLayer
+): layer is Pick<IVectorLayer, typeof methodName> {
+  return typeof (layer as IVectorLayer)[methodName] === 'function';
 }
 
 export interface VectorLayerArguments {

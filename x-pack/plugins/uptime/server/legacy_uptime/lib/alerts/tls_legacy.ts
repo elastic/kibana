@@ -10,9 +10,12 @@ import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
-import { Alert, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { UptimeAlertTypeFactory } from './types';
+import {
+  AlertsClientError,
+  DEFAULT_AAD_CONFIG,
+  GetViewInAppRelativeUrlFnOpts,
+} from '@kbn/alerting-plugin/server';
+import { LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../common/constants';
@@ -28,8 +31,6 @@ import {
 } from '../../../../common/requests/get_certs_request_body';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof TLS_LEGACY>;
-
-type TLSAlertInstance = Alert<Record<string, any>, AlertInstanceContext, ActionGroupIds>;
 
 interface TlsAlertState {
   count: number;
@@ -94,7 +95,10 @@ export const getCertSummary = (
   };
 };
 
-export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_server, libs) => ({
+export const tlsLegacyRuleFactory: LegacyUptimeRuleTypeFactory<ActionGroupIds> = (
+  _server,
+  libs
+) => ({
   id: CLIENT_ALERT_TYPES.TLS_LEGACY,
   category: DEFAULT_APP_CATEGORIES.observability.id,
   producer: 'uptime',
@@ -115,7 +119,11 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
   },
   isExportable: true,
   minimumLicenseRequired: 'basic',
-  async executor({ services: { alertFactory, scopedClusterClient, savedObjectsClient }, state }) {
+  alerts: DEFAULT_AAD_CONFIG,
+  async executor({ services: { alertsClient, scopedClusterClient, savedObjectsClient }, state }) {
+    if (!alertsClient) {
+      throw new AlertsClientError();
+    }
     const dynamicSettings = await savedObjectsAdapter.getUptimeDynamicSettings(savedObjectsClient);
 
     const uptimeEsClient = new UptimeEsClient(
@@ -158,13 +166,15 @@ export const tlsLegacyAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (_s
           'd'
         )
         .valueOf();
-      const alertInstance: TLSAlertInstance = alertFactory.create(TLS_LEGACY.id);
       const summary = getCertSummary(certs, absoluteExpirationThreshold, absoluteAgeThreshold);
-      alertInstance.replaceState({
-        ...updateState(state, foundCerts),
-        ...summary,
+      alertsClient.report({
+        id: TLS_LEGACY.id,
+        actionGroup: TLS_LEGACY.id,
+        state: {
+          ...updateState(state, foundCerts),
+          ...summary,
+        },
       });
-      alertInstance.scheduleActions(TLS_LEGACY.id);
     }
 
     return { state: updateState(state, foundCerts) };
