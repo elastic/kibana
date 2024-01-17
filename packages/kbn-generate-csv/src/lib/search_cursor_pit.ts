@@ -112,7 +112,7 @@ export class SearchCursorPit extends SearchCursor {
 
     this.logger.debug(
       `Executing search request with PIT ID: [${this.formatCursorId(this.cursorId)}]` +
-      (searchAfter ? ` search_after: [${searchAfter}]` : '')
+        (searchAfter ? ` search_after: [${searchAfter}]` : '')
     );
 
     const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();

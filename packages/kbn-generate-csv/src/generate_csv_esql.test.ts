@@ -37,6 +37,8 @@ const createMockJob = (
   query: { esql: '' },
 });
 
+const mockTaskInstanceFields = { startedAt: null, retryAt: null };
+
 describe('CsvESQLGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
@@ -105,6 +107,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob({ columns: ['date', 'ip', 'message'] }),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -136,6 +139,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -163,6 +167,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -192,6 +197,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -225,6 +231,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob({ columns: ['message', 'date', 'something else'] }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -259,6 +266,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob({ query, filters }),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -318,6 +326,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -347,6 +356,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -385,6 +395,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
@@ -413,6 +424,7 @@ describe('CsvESQLGenerator', () => {
     const generateCsv = new CsvESQLGenerator(
       createMockJob(),
       mockConfig,
+      mockTaskInstanceFields,
       {
         es: mockEsClient,
         data: mockDataClient,
@@ -449,6 +461,7 @@ describe('CsvESQLGenerator', () => {
       const generateCsv = new CsvESQLGenerator(
         createMockJob(),
         mockConfig,
+        mockTaskInstanceFields,
         {
           es: mockEsClient,
           data: mockDataClient,
