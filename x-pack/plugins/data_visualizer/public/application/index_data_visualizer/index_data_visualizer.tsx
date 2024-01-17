@@ -82,7 +82,6 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-// @TODO: Consolidate url provi
 const DataVisualizerESQLStateContextProvider = () => {
   const { services } = useDataVisualizerKibana();
   const {

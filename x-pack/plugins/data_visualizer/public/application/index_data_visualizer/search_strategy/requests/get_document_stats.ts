@@ -40,7 +40,7 @@ export const getESQLDocumentCountStats = async (
   let latestMs = -Infinity;
 
   if (timeFieldName) {
-    const aggQuery = `| EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${escapeESQL(
+    const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${escapeESQL(
       timeFieldName
     )}))
     | stats rows = count(*) by _timestamp_
@@ -88,7 +88,7 @@ export const getESQLDocumentCountStats = async (
       search.search(
         {
           params: {
-            query: esqlBaseQuery + '| STATS _count_ = COUNT(*)  | LIMIT 1',
+            query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
           },
         },
         { ...searchOptions, strategy: 'esql' }

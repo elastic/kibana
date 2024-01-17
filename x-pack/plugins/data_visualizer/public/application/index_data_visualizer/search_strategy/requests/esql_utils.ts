@@ -30,7 +30,7 @@ const PERCENTS = Array.from(
   (_, i) => i * PERCENTILE_SPACING
 );
 
-export const getPercentileESQLQuery = (fieldName: string) =>
-  PERCENTS.map(
+export const getESQLPercentileQueryArray = (fieldName: string, percents = PERCENTS) =>
+  percents.map(
     (p) => `${escapeESQL(`${fieldName}_p${p}`)} = PERCENTILE(${escapeESQL(fieldName)}, ${p})`
   );

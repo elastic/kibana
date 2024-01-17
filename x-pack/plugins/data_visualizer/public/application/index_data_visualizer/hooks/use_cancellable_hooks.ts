@@ -10,6 +10,7 @@ import { type IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/
 import { tap } from 'rxjs/operators';
 import { useDataVisualizerKibana } from '../../kibana_context';
 
+// Similar to aiops/hooks/use_cancellable_search.ts
 export function useCancellableSearch() {
   const {
     services: { data },

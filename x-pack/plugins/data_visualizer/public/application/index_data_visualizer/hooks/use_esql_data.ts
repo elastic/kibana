@@ -30,7 +30,7 @@ import { getInitialProgress, getReducer } from '../progress_utils';
 import { PERCENTILE_SPACING } from '../search_strategy/requests/constants';
 import {
   escapeESQL,
-  getPercentileESQLQuery,
+  getESQLPercentileQueryArray,
   isESQLQuery,
 } from '../search_strategy/requests/esql_utils';
 import { getESQLDocumentCountStats } from '../search_strategy/requests/get_document_stats';
@@ -138,7 +138,7 @@ export const useESQLFieldStatsData = <T extends Column>({
             const numericFields = columns
               .filter((f) => f.secondaryType === 'number')
               .map((field, idx) => {
-                const percentiles = getPercentileESQLQuery(field.name);
+                const percentiles = getESQLPercentileQueryArray(field.name);
                 // idx * 23 + 0
                 /**
                  * 0 = min; 23
