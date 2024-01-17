@@ -212,6 +212,7 @@ export function Chart({
 
   const onSuggestionSelectorChange = useCallback(
     (s: Suggestion | undefined) => {
+      console.log('suggestion change detected, generating a new vis context');
       onSuggestionChange?.(s);
       onVisContextChanged?.(s ? getLensAttributesCallback(s, undefined) : undefined);
     },
@@ -279,6 +280,13 @@ export function Chart({
       onClick: () => setIsSaveModalVisible(true),
     });
   }
+
+  console.log(
+    'active suggestion',
+    currentSuggestion,
+    'active vis context',
+    externalVisContext?.attributes
+  );
 
   return (
     <EuiFlexGroup

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from 'react';
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
@@ -25,6 +25,7 @@ import {
   currentSuggestionSelector,
   externalVisContextSelector,
 } from './utils/state_selectors';
+import { getStableVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
   UnifiedHistogramLayoutProps,
@@ -89,7 +90,7 @@ export type UnifiedHistogramApi = {
 export const UnifiedHistogramContainer = forwardRef<
   UnifiedHistogramApi,
   UnifiedHistogramContainerProps
->((containerProps, ref) => {
+>(({ onVisContextChanged, ...containerProps }, ref) => {
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
   const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
@@ -144,6 +145,16 @@ export const UnifiedHistogramContainer = forwardRef<
     requestAdapter,
   });
 
+  const handleVisContextChange: typeof onVisContextChanged | undefined = useMemo(() => {
+    if (!onVisContextChanged) {
+      return undefined;
+    }
+
+    return (visContext) => {
+      onVisContextChanged(getStableVisContext(visContext));
+    };
+  }, [onVisContextChanged]);
+
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {
     return null;
@@ -156,6 +167,7 @@ export const UnifiedHistogramContainer = forwardRef<
       {...stateProps}
       currentSuggestion={currentSuggestion}
       externalVisContext={externalVisContext}
+      onVisContextChanged={handleVisContextChange}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}
       input$={input$}

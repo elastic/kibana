@@ -54,17 +54,15 @@ export const getLensAttributes = ({
 
   let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
 
-  if (externalVisContext) {
+  if (externalVisContext && suggestion) {
     if (
-      isEqual(
-        externalVisContext.attributes?.state?.query,
-        query
-        // TODO: check that's compatible based on suggestion deps
-      ) /* && isEqual(externalVisContext.requestData, requestData) */ &&
+      isEqual(externalVisContext.attributes?.state?.query, query) &&
       isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
     ) {
+      console.log('using the external lens attributes');
       return externalVisContext;
     } else {
+      console.log('external vis is not compatible with the current suggestion');
       shouldUpdateVisContextDueToIncompatibleSuggestion = true;
     }
   }

@@ -425,8 +425,14 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
         changes.chartHidden = curr.hideChart;
       }
 
-      if (!isEqual(prev?.visContext, curr.visContext)) {
-        console.log('noticed changes in discover vis context', curr.visContext);
+      if (!isEqual(prev?.visContext?.attributes, curr.visContext?.attributes)) {
+        console.log(
+          'noticed changes in discover vis context',
+          'prev:',
+          prev?.visContext?.attributes,
+          'next:',
+          curr.visContext?.attributes
+        );
         changes.externalVisContext = curr.visContext;
       }
 

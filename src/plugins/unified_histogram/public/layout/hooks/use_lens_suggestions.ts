@@ -68,12 +68,20 @@ export const useLensSuggestions = ({
   let currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
 
   if (externalVisContext) {
-    const matchingSuggestion = allSuggestions.find((suggestion) =>
+    const matchingSuggestion = suggestions.allSuggestions.find((suggestion) =>
       isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
     );
 
     currentSuggestion = matchingSuggestion || currentSuggestion;
   }
+
+  console.log(
+    'use_lens_suggestion',
+    'selected suggestion',
+    currentSuggestion,
+    'current vis context',
+    externalVisContext?.attributes
+  );
 
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
@@ -154,6 +162,10 @@ export const useLensSuggestions = ({
     suggestions.firstSuggestion,
     suggestions.allSuggestions,
   ]);
+
+  if (histogramSuggestion) {
+    console.log('using histogram suggestion');
+  }
 
   return {
     allSuggestions,

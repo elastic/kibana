@@ -49,10 +49,10 @@ export const useLensProps = ({
   const updateLensPropsContext = useStableCallback(() => setLensPropsContext(buildLensProps()));
 
   // TODO: find a better solution
-  // // Reverting saved search changes would change only attributesContext without a refetch
-  // useEffect(() => {
-  //   updateLensPropsContext();
-  // }, [attributesContext, updateLensPropsContext]);
+  // Reverting saved search changes would change only attributesContext without a refetch
+  useEffect(() => {
+    updateLensPropsContext();
+  }, [attributesContext, updateLensPropsContext]);
 
   useEffect(() => {
     const subscription = refetch$.subscribe(updateLensPropsContext);
