@@ -18,7 +18,7 @@ import {
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { ObservabilityApp } from '../../typings/common';
 
-function getFields({
+function getSettingsFields({
   settingsKeys,
   uiSettings,
 }: {
@@ -59,7 +59,7 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
 
   const fields = useMemo(
     () => {
-      return getFields({ settingsKeys, uiSettings: settings?.client });
+      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [settings, settingsKeys, forceReloadSettings]
