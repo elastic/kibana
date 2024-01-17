@@ -23,7 +23,7 @@ const CONFIG = {
   helpText: (
     <FormattedMessage
       id="xpack.securitySolution.responseActions.endpoint.config.commandDescription"
-      defaultMessage="TODO: SPECIFY SCRIPT  DESCRIPTION "
+      defaultMessage="A shell command to run on the host. The command must be supported by bash for Linux and macOS hosts, and cmd.exe for Windows."
     />
   ),
 };
@@ -39,6 +39,7 @@ const ExecuteCommandFieldComponent = ({
     config={CONFIG}
     isDisabled={disabled}
     component={TextField}
+    required={true}
   />
 );
 

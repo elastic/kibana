@@ -115,7 +115,7 @@ const useGetCommandText = (
         description: (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.getFileDescription"
-            defaultMessage="Retrieve a file from the host"
+            defaultMessage="Retrieve a file from a host. Files are downloaded in a password-protected .zip archive to prevent the file from running. "
           />
         ),
         tooltip: (

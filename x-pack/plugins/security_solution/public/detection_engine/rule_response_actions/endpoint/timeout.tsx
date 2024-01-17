@@ -18,19 +18,18 @@ interface ActionTypeFieldProps {
 }
 
 const CONFIG = {
-  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.config.script', {
+  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.config.timeout', {
     defaultMessage: 'Timeout',
   }),
   helpText: (
     <FormattedMessage
-      id="xpack.securitySolution.responseActions.endpoint.config.scriptDescription"
-      defaultMessage="TODO: SPECIFY TIMEOUT  DESCRIPTION "
+      id="xpack.securitySolution.responseActions.endpoint.config.timeoutDescription"
+      defaultMessage="How long the host should wait for the command to complete. Use h for hours, m for minutes, s for seconds (for example, 2s is two seconds). If no timeout is specified, it defaults to four hours."
     />
   ),
   formatters: [fieldFormatters.toInt],
 };
 
-// TODO: TC - change field to be number field
 const TimeoutFieldComponent = ({
   path,
   disabled,
@@ -42,7 +41,6 @@ const TimeoutFieldComponent = ({
     config={CONFIG}
     isDisabled={disabled}
     component={NumericField}
-    required={true}
   />
 );
 

@@ -81,7 +81,7 @@ export const endpointResponseAction = (
     });
   }
 
-  export const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
+  const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
     const createAction = async (alert: AlertsAction) => {
       const { hosts, parameters, error } = alert;
 
