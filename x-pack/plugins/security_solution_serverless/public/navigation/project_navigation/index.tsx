@@ -7,7 +7,9 @@
 
 import { type Services } from '../../common/services';
 
-export const initProjectNavigation = async (services: Services) => {
-  const { init } = await import('./project_navigation');
-  return init(services);
+export const initProjectNavigation = (services: Services) => {
+  import('./project_navigation').then(({ init }) => {
+    const { navigationTree$, panelContentProvider, dataTestSubj } = init(services);
+    services.serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
+  });
 };
