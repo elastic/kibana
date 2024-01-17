@@ -639,7 +639,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 });
                 // Delete serverless project
                 log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-                await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
+                // await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
               } catch (error) {
                 result = error;
               }

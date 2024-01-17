@@ -19,6 +19,14 @@ buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true
 mkdir .ftr
 vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
 
+file_path=".ftr/role_users.json"
+
+if [ -e "$file_path" ]; then
+    echo "File exists!"
+else
+    echo "File does not exist."
+fi
+
 cd x-pack/test/security_solution_cypress
 set +e
 
