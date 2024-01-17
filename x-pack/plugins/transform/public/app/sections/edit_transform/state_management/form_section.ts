@@ -13,7 +13,7 @@ import type { TransformConfigUnion } from '../../../../../common/types/transform
 // configuration is supported by the API. For example, this isn't suitable to use with `dest` since
 // this overall part of the configuration is not optional. However, `retention_policy` is optional,
 // so we need to support to recognize this based on the form state and be able to reset it by
-// created a request body containing `{ retention_policy: null }`.
+// creating a request body containing `{ retention_policy: null }`.
 export type FormSections = 'retentionPolicy';
 
 export interface FormSection {
