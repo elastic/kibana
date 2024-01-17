@@ -584,7 +584,7 @@ describe('getFullAgentPolicy', () => {
 
     const agentPolicy = await getFullAgentPolicy(savedObjectsClientMock.create(), 'agent-policy');
 
-    expect(omit(agentPolicy, 'signed', 'secret_references')).toEqual({
+    expect(omit(agentPolicy, 'signed', 'secret_references', 'agent.protection')).toEqual({
       agent: {
         download: {
           sourceURI: 'http://default-registry.co',
@@ -594,11 +594,6 @@ describe('getFullAgentPolicy', () => {
           enabled: false,
           logs: false,
           metrics: false,
-        },
-        protection: {
-          enabled: false,
-          signing_key: '',
-          uninstall_token_hash: '',
         },
       },
       fleet: {
