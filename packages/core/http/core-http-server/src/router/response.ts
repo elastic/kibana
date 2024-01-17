@@ -95,9 +95,7 @@ export interface FileHttpResponseOptions<T extends HttpResponsePayload | Respons
  * @public
  */
 export type RedirectResponseOptions = HttpResponseOptions & {
-  headers: {
-    location: string;
-  };
+  headers?: ResponseHeaders;
 };
 
 /**

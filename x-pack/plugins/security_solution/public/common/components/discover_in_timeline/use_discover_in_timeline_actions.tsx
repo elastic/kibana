@@ -48,7 +48,7 @@ export const useDiscoverInTimelineActions = (
   const timeline = useShallowEqualSelector(
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
-  const { savedSearchId } = timeline;
+  const { savedSearchId, version } = timeline;
 
   // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
   const timelineRef = useRef(timeline);
@@ -56,7 +56,7 @@ export const useDiscoverInTimelineActions = (
 
   const queryClient = useQueryClient();
 
-  const { mutateAsync: saveSavedSearch } = useMutation({
+  const { mutateAsync: saveSavedSearch, status } = useMutation({
     mutationFn: ({
       savedSearch,
       savedSearchOptions,
@@ -75,6 +75,7 @@ export const useDiscoverInTimelineActions = (
       }
       queryClient.invalidateQueries({ queryKey: ['savedSearchById', savedSearchId] });
     },
+    mutationKey: [version],
   });
 
   const getDefaultDiscoverAppState: () => Promise<DiscoverAppState> = useCallback(async () => {
@@ -204,6 +205,10 @@ export const useDiscoverInTimelineActions = (
       } else {
         // If no saved search exists. Create a new saved search instance and associate it with the timeline.
         try {
+          // Make sure we're not creating a saved search while a previous creation call is in progress
+          if (status !== 'idle') {
+            return;
+          }
           dispatch(
             timelineActions.startTimelineSaving({
               id: TimelineId.active,
@@ -236,7 +241,7 @@ export const useDiscoverInTimelineActions = (
         }
       }
     },
-    [persistSavedSearch, savedSearchId, dispatch, discoverDataService]
+    [persistSavedSearch, savedSearchId, dispatch, discoverDataService, status]
   );
 
   const initializeLocalSavedSearch = useCallback(

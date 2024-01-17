@@ -20,7 +20,7 @@ import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { buildEsQuery } from '@kbn/es-query';
-import type { ESQLSearchReponse } from '@kbn/es-types';
+import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
 import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
@@ -79,16 +79,6 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
     return extractTypeAndReason(attributes.error);
   }
   return {};
-}
-
-interface ESQLSearchParams {
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // time_zone?: string;
-  query: string;
-  filter?: unknown;
-  locale?: string;
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {

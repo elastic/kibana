@@ -9,19 +9,20 @@ import {
   useIsWithinMaxBreakpoint,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
+import { useMemo } from 'react';
 
 export type Breakpoints = Record<string, boolean>;
 
 export function useBreakpoints() {
-  const screenSizes = {
-    isXSmall: useIsWithinMaxBreakpoint('xs'),
-    isSmall: useIsWithinMaxBreakpoint('s'),
-    isMedium: useIsWithinMaxBreakpoint('m'),
-    isLarge: useIsWithinMaxBreakpoint('l'),
-    isXl: useIsWithinMaxBreakpoint('xl'),
-    isXXL: useIsWithinMaxBreakpoint('xxl'),
-    isXXXL: useIsWithinMinBreakpoint('xxxl'),
-  };
+  const isXSmall = useIsWithinMaxBreakpoint('xs');
+  const isSmall = useIsWithinMaxBreakpoint('s');
+  const isMedium = useIsWithinMaxBreakpoint('m');
+  const isLarge = useIsWithinMaxBreakpoint('l');
+  const isXl = useIsWithinMaxBreakpoint('xl');
+  const isXXL = useIsWithinMaxBreakpoint('xxl');
+  const isXXXL = useIsWithinMinBreakpoint('xxxl');
 
-  return screenSizes;
+  return useMemo(() => {
+    return { isXSmall, isSmall, isMedium, isLarge, isXl, isXXL, isXXXL };
+  }, [isXSmall, isSmall, isMedium, isLarge, isXl, isXXL, isXXXL]);
 }

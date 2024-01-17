@@ -616,6 +616,37 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
       });
+
+      it('should write correct agent version to action doc when upgrade agent with build version', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        const agentBuildVersion = '7.16.0+build20240116';
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: agentBuildVersion,
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+
+        const action: any = actionsRes.hits.hits[0]._source;
+        expect(action.data.version).to.equal(agentBuildVersion);
+      });
     });
 
     describe('multiple agents', () => {
@@ -668,6 +699,48 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
+      });
+
+      it('should create a .fleet-actions document with the correct version when bulk upgrade with build version', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        const agentBuildVersion = '7.16.0+build20240116';
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: agentBuildVersion,
+            agents: ['agent1', 'agent2'],
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+
+        const action: any = actionsRes.hits.hits[0]._source;
+        expect(action.data.version).to.equal(agentBuildVersion);
       });
 
       it('should respond 200 to bulk upgrade upgradeable agents and update the agent SOs', async () => {
