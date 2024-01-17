@@ -25,7 +25,7 @@ interface HighlightSectionProps {
 
 const CHILDREN_PER_SECTION: 3 | 6 | 9 = 6;
 
-export function HighlightSection({ title, children, columns }: HighlightSectionProps) {
+export function HighlightSection({ title, children, columns, ...props }: HighlightSectionProps) {
   const validChildren = React.Children.toArray(children).filter(Boolean);
   const childLength = validChildren.length;
   const shouldRenderSection = childLength > 0;
@@ -71,7 +71,7 @@ export function HighlightSection({ title, children, columns }: HighlightSectionP
         buttonContent={accordionTitle}
         paddingSize="m"
         initialIsOpen={true}
-        data-test-subj={`logExplorerFlyoutHighlightSection${title}`}
+        {...props}
       >
         <EuiFlexGrid columns={columns} alignItems="start" gutterSize="m">
           {flexChildren}

@@ -12,6 +12,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from './rule_type_registry.mock';
@@ -69,6 +70,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 // this suite consists of two suites running tests against mutable RulesClient APIs:
@@ -115,6 +117,8 @@ describe('rules_client_conflict_retries', () => {
 
 async function update(success: boolean) {
   try {
+    rulesClientParams.uiSettings.asScopedToClient =
+      uiSettingsServiceMock.createStartContract().asScopedToClient;
     await rulesClient.update({
       id: MockAlertId,
       data: {
