@@ -17,7 +17,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
-import qs from 'query-string';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
