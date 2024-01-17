@@ -69,6 +69,48 @@ describe('Saved query management list component', () => {
     return queries;
   };
 
+  const fooQuery = {
+    id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+    attributes: {
+      title: 'Foo',
+      description: '',
+      query: {
+        query: 'category.keyword : "Men\'s Shoes" ',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    namespaces: ['default'],
+  };
+
+  const barQuery = {
+    id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a8',
+    attributes: {
+      title: 'Bar',
+      description: '',
+      query: {
+        query: 'category.keyword : "Men\'s Shoes" ',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    namespaces: ['default'],
+  };
+
+  const testQuery = {
+    id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
+    attributes: {
+      title: 'Test',
+      description: '',
+      query: {
+        query: 'category.keyword : "Men\'s Shoes" ',
+        language: 'kuery',
+      },
+      filters: [],
+    },
+    namespaces: ['default'],
+  };
+
   let props: SavedQueryManagementListProps;
 
   beforeEach(() => {
@@ -81,21 +123,7 @@ describe('Saved query management list component', () => {
         ...dataMock.query.savedQueries,
         findSavedQueries: jest.fn().mockResolvedValue({
           total: 1,
-          queries: [
-            {
-              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-              attributes: {
-                title: 'Test',
-                description: '',
-                query: {
-                  query: 'category.keyword : "Men\'s Shoes" ',
-                  language: 'kuery',
-                },
-                filters: [],
-              },
-              namespaces: ['default'],
-            },
-          ],
+          queries: [testQuery],
         }),
         deleteSavedQuery: jest.fn(),
       },
@@ -225,21 +253,7 @@ describe('Saved query management list component', () => {
         ...props.savedQueryService,
         findSavedQueries: jest.fn().mockResolvedValue({
           total: 1,
-          queries: [
-            {
-              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-              attributes: {
-                title: 'Test',
-                description: '',
-                query: {
-                  query: 'category.keyword : "Men\'s Shoes" ',
-                  language: 'kuery',
-                },
-                filters: [],
-              },
-              namespaces: ['one', 'two'],
-            },
-          ],
+          queries: [{ ...testQuery, namespaces: ['one', 'two'] }],
         }),
         deleteSavedQuery: jest.fn(),
       },
@@ -258,19 +272,7 @@ describe('Saved query management list component', () => {
     const onClearSavedQuerySpy = jest.fn();
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Test',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: testQuery,
       savedQueryService: {
         ...props.savedQueryService,
         findSavedQueries: jest.fn().mockResolvedValue({
@@ -517,19 +519,7 @@ describe('Saved query management list component', () => {
   it('should display an "Active" badge for the currently loaded saved query', async () => {
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Test',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: testQuery,
     };
     render(wrapSavedQueriesListComponentInContext(newProps));
     expect(await screen.findByText(/Active/)).toBeInTheDocument();
@@ -538,51 +528,12 @@ describe('Saved query management list component', () => {
   it('should hoist the currently loaded saved query to the top of the list', async () => {
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Foo',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
         findSavedQueries: jest.fn().mockResolvedValue({
           total: 2,
-          queries: [
-            {
-              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a8',
-              attributes: {
-                title: 'Bar',
-                description: '',
-                query: {
-                  query: 'category.keyword : "Men\'s Shoes" ',
-                  language: 'kuery',
-                },
-                filters: [],
-              },
-              namespaces: ['default'],
-            },
-            {
-              id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-              attributes: {
-                title: 'Foo',
-                description: '',
-                query: {
-                  query: 'category.keyword : "Men\'s Shoes" ',
-                  language: 'kuery',
-                },
-                filters: [],
-              },
-              namespaces: ['default'],
-            },
-          ],
+          queries: [barQuery, fooQuery],
         }),
       },
     };
@@ -597,19 +548,7 @@ describe('Saved query management list component', () => {
   it('should hoist the currently loaded saved query to the top of the list even if it is not in the first page of results', async () => {
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Foo',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
         findSavedQueries: jest.fn().mockResolvedValue({
@@ -629,50 +568,11 @@ describe('Saved query management list component', () => {
   it('should not hoist the currently loaded saved query to the top of the list if there is a search term', async () => {
     const findSavedQueriesSpy = jest.fn().mockResolvedValue({
       total: 2,
-      queries: [
-        {
-          id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a8',
-          attributes: {
-            title: 'Bar',
-            description: '',
-            query: {
-              query: 'category.keyword : "Men\'s Shoes" ',
-              language: 'kuery',
-            },
-            filters: [],
-          },
-          namespaces: ['default'],
-        },
-        {
-          id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-          attributes: {
-            title: 'Foo',
-            description: '',
-            query: {
-              query: 'category.keyword : "Men\'s Shoes" ',
-              language: 'kuery',
-            },
-            filters: [],
-          },
-          namespaces: ['default'],
-        },
-      ],
+      queries: [barQuery, fooQuery],
     });
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Foo',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
         findSavedQueries: findSavedQueriesSpy,
@@ -698,19 +598,7 @@ describe('Saved query management list component', () => {
     });
     const newProps = {
       ...props,
-      loadedSavedQuery: {
-        id: '8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9',
-        attributes: {
-          title: 'Foo',
-          description: '',
-          query: {
-            query: 'category.keyword : "Men\'s Shoes" ',
-            language: 'kuery',
-          },
-          filters: [],
-        },
-        namespaces: ['default'],
-      },
+      loadedSavedQuery: fooQuery,
       savedQueryService: {
         ...props.savedQueryService,
         findSavedQueries: findSavedQueriesSpy,
