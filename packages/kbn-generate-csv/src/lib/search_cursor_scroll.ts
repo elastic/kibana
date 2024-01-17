@@ -32,13 +32,13 @@ export class SearchCursorScroll extends SearchCursor {
   public async initialize() {}
 
   private async scan(searchBody: SearchRequest) {
-    const { includeFrozen, maxConcurrentShardRequests, scroll } = this.settings;
+    const { includeFrozen, maxConcurrentShardRequests, scroll, taskInstanceFields } = this.settings;
 
     const searchParamsScan = {
       params: {
         body: searchBody,
         index: this.indexPatternTitle,
-        scroll: scroll.duration,
+        scroll: scroll.duration(taskInstanceFields),
         size: scroll.size,
         ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         max_concurrent_shard_requests: maxConcurrentShardRequests,
@@ -50,19 +50,19 @@ export class SearchCursorScroll extends SearchCursor {
         strategy: ES_SEARCH_STRATEGY,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-          requestTimeout: scroll.duration,
+          requestTimeout: scroll.duration(taskInstanceFields),
         },
       })
     );
   }
 
   private async scroll() {
-    const { duration } = this.settings.scroll;
+    const { scroll, taskInstanceFields } = this.settings;
     return await this.clients.es.asCurrentUser.scroll(
-      { scroll: duration, scroll_id: this.cursorId },
+      { scroll: scroll.duration(taskInstanceFields), scroll_id: this.cursorId },
       {
         maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-        requestTimeout: duration,
+        requestTimeout: scroll.duration(taskInstanceFields),
       }
     );
   }

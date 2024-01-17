@@ -14,6 +14,7 @@ import type {
   ISearchClient,
   ISearchSource,
 } from '@kbn/data-plugin/common';
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import type { CsvExportSettings } from './get_export_settings';
 
 export interface SearchCursorClients {
@@ -24,7 +25,9 @@ export interface SearchCursorClients {
 export type SearchCursorSettings = Pick<
   CsvExportSettings,
   'scroll' | 'includeFrozen' | 'maxConcurrentShardRequests'
->;
+> & {
+  taskInstanceFields: TaskInstanceFields;
+};
 
 export abstract class SearchCursor {
   protected cursorId: string | undefined;

@@ -10,7 +10,7 @@ import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -25,7 +25,10 @@ export interface CsvExportSettings {
   scroll: {
     strategy?: CsvPagingStrategy;
     size: number;
-    duration: string;
+    /**
+     * compute scroll duration, duration is returned in ms by default
+     */
+    duration: (args: TaskInstanceFields, format?: 'ms' | 's') => string;
   };
   bom: string;
   separator: string;
@@ -78,7 +81,19 @@ export const getExportSettings = async (
     scroll: {
       strategy: config.scroll.strategy as CsvPagingStrategy,
       size: config.scroll.size,
-      duration: config.scroll.duration,
+      duration: ({ retryAt }, format = 'ms') => {
+        if (config.scroll.duration !== 'auto') {
+          return config.scroll.duration;
+        }
+
+        if (retryAt) {
+          const _duration = new Date(retryAt!).getTime() - new Date(Date.now()).getTime();
+          return format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
+        }
+
+        // TODO: figure out if we'd ever have an instance where this value is null
+        return '0s';
+      },
     },
     bom,
     includeFrozen,

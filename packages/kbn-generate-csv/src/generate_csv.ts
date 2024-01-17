@@ -21,9 +21,9 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import {
   AuthenticationExpiredError,
+  byteSizeValueToNumber,
   CancellationToken,
   ReportingError,
-  byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
@@ -62,8 +62,7 @@ export class CsvGenerator {
     private cancellationToken: CancellationToken,
     private logger: Logger,
     private stream: Writable
-  ) {}
-
+  ) { }
   /*
    * Load field formats for each field in the list
    */
@@ -233,7 +232,7 @@ export class CsvGenerator {
     if (startedAt) {
       this.logger.debug(
         `Task started at: ${startedAt && moment(startedAt).format()}.` +
-          ` Can run until: ${retryAt && moment(retryAt).format()}`
+        ` Can run until: ${retryAt && moment(retryAt).format()}`
       );
     }
 
@@ -256,11 +255,21 @@ export class CsvGenerator {
     let cursor: SearchCursor;
     if (this.job.pagingStrategy === 'scroll') {
       // Optional strategy: scan-and-scroll
-      cursor = new SearchCursorScroll(indexPatternTitle, settings, this.clients, this.logger);
+      cursor = new SearchCursorScroll(
+        indexPatternTitle,
+        { ...settings, taskInstanceFields: this.taskInstanceFields },
+        this.clients,
+        this.logger
+      );
       logger.debug('Using search strategy: scroll');
     } else {
       // Default strategy: point-in-time
-      cursor = new SearchCursorPit(indexPatternTitle, settings, this.clients, this.logger);
+      cursor = new SearchCursorPit(
+        indexPatternTitle,
+        { ...settings, taskInstanceFields: this.taskInstanceFields },
+        this.clients,
+        this.logger
+      );
       logger.debug('Using search strategy: pit');
     }
     await cursor.initialize();
@@ -289,6 +298,7 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
+
         searchSource.setField('size', settings.scroll.size);
 
         let results: estypes.SearchResponse<unknown> | undefined;
@@ -388,7 +398,7 @@ export class CsvGenerator {
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
-          `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
+        `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
       );
       logger.warn(`Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`);
 
