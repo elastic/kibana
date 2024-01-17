@@ -19,6 +19,7 @@ export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
   list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
+  groups: () => [...sloKeys.all, 'groups'],
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,

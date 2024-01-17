@@ -27,6 +27,7 @@ export interface Props {
   cardsPerRow?: string;
   activeAlertsBySlo: ActiveAlerts;
   rulesBySlo?: UseFetchRulesForSloResponse['data'];
+  group: string;
 }
 
 const useColumns = (cardsPerRow: string | undefined) => {
@@ -55,6 +56,7 @@ export function SloListCardView({
   cardsPerRow,
   rulesBySlo,
   activeAlertsBySlo,
+  group,
 }: Props) {
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
@@ -72,7 +74,7 @@ export function SloListCardView({
       {sloList
         .filter((slo) => slo.summary)
         .map((slo) => (
-          <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
+          <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}-${group}`}>
             <SloCardItem
               slo={slo}
               loading={loading}

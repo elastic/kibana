@@ -20,6 +20,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   isCompact?: boolean;
+  group: string;
 }
 
 export function SloListItems({
@@ -29,6 +30,7 @@ export function SloListItems({
   loading,
   error,
   isCompact = true,
+  group,
 }: Props) {
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
@@ -41,7 +43,7 @@ export function SloListItems({
       {!isCompact && (
         <EuiFlexGroup direction="column" gutterSize="s">
           {sloList.map((slo) => (
-            <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}`}>
+            <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? ALL_VALUE}-${group}`}>
               <SloListItem
                 activeAlerts={activeAlertsBySlo.get(slo)}
                 rules={rulesBySlo?.[slo.id]}

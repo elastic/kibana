@@ -13,7 +13,8 @@ import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
 import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
 import { SLOView, ToggleSLOView } from './toggle_slo_view';
-
+import { GroupByField, SloGroupBy } from './slo_list_group_by';
+import { GroupView } from './grouped_slos/group_view';
 export interface Props {
   autoRefresh: boolean;
 }
@@ -27,7 +28,7 @@ export function SloList({ autoRefresh }: Props) {
   const [direction] = useState<SortDirection>(state.sort.direction);
   const [view, setView] = useState<SLOView>(state.view);
   const [isCompact, setCompact] = useState<boolean>(state.compact);
-
+  const [groupBy, setGroupBy] = useState(state.groupBy);
   const {
     isLoading,
     isRefetching,
@@ -41,7 +42,6 @@ export function SloList({ autoRefresh }: Props) {
     sortDirection: direction,
     shouldRefetch: autoRefresh,
   });
-
   const { results = [], total = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
@@ -77,6 +77,12 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ compact: newCompact });
   };
 
+  const handleChangeGroupBy = (newGroupBy: GroupByField) => {
+    setPage(0);
+    setGroupBy(newGroupBy);
+    storeState({ page: 0, groupBy: newGroupBy });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -87,21 +93,50 @@ export function SloList({ autoRefresh }: Props) {
           initialState={state}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ToggleSLOView
-          sloView={view}
-          onChangeView={handleChangeView}
-          onToggleCompactView={handleToggleCompactView}
-          isCompact={isCompact}
-        />
+      <EuiFlexItem>
+        <EuiFlexGroup direction="row">
+          <EuiFlexItem>
+            <SloGroupBy
+              onChangeGroupBy={handleChangeGroupBy}
+              initialState={state}
+              loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem grow={false}>
+            <ToggleSLOView
+              sloView={view}
+              onChangeView={handleChangeView}
+              onToggleCompactView={handleToggleCompactView}
+              isCompact={isCompact}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexItem>
-      <SlosView
-        sloList={results}
-        loading={isLoading || isRefetching}
-        error={isError}
-        isCompact={isCompact}
-        sloView={view}
-      />
+
+      {groupBy === 'ungrouped' && (
+        <SlosView
+          sloList={results}
+          loading={isLoading || isRefetching}
+          error={isError}
+          isCompact={isCompact}
+          sloView={view}
+          group="ungrouped"
+        />
+      )}
+
+      {groupBy !== 'ungrouped' && (
+        <>
+          <GroupView
+            sloView={view}
+            groupBy={groupBy}
+            isCompact={isCompact}
+            kqlQuery={query}
+            sort={sort}
+            direction={direction}
+          />
+        </>
+      )}
 
       {total > 0 ? (
         <EuiFlexItem>
