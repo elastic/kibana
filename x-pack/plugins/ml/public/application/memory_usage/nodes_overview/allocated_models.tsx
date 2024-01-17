@@ -118,6 +118,12 @@ export const AllocatedModels: FC<AllocatedModelsProps> = ({
       truncateText: false,
       'data-test-subj': 'mlAllocatedModelsTableAllocation',
       render: (v: AllocatedModel) => {
+        if (
+          v.node.number_of_allocations === undefined ||
+          v.node.threads_per_allocation === undefined
+        ) {
+          return '-';
+        }
         return `${v.node.number_of_allocations} * ${v.node.threads_per_allocation}`;
       },
     },
