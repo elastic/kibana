@@ -50,6 +50,7 @@ describe('getLensAttributes', () => {
         title: 'test',
         filters,
         query,
+        histogramQuery: undefined,
         dataView,
         timeInterval,
         breakdownField,
@@ -209,6 +210,7 @@ describe('getLensAttributes', () => {
         title: 'test',
         filters,
         query,
+        histogramQuery: undefined,
         dataView,
         timeInterval,
         breakdownField,
@@ -386,6 +388,7 @@ describe('getLensAttributes', () => {
         title: 'test',
         filters,
         query,
+        histogramQuery: undefined,
         dataView,
         timeInterval,
         breakdownField,
@@ -542,6 +545,7 @@ describe('getLensAttributes', () => {
         title: 'test',
         filters,
         query,
+        histogramQuery: undefined,
         dataView,
         timeInterval,
         breakdownField: undefined,
@@ -741,6 +745,7 @@ describe('getLensAttributes', () => {
       title: 'test',
       filters,
       query,
+      histogramQuery: undefined,
       dataView: adHocDataview,
       timeInterval,
       breakdownField: undefined,
@@ -775,11 +780,30 @@ describe('getLensAttributes', () => {
         title: undefined,
         filters,
         query,
+        histogramQuery: undefined,
         dataView,
         timeInterval,
         breakdownField: undefined,
         suggestion: currentSuggestionMock,
       }).attributes.title
     ).toBe(currentSuggestionMock.title);
+  });
+
+  it('should use the correct histogram query when no suggestion passed', () => {
+    const histogramQuery = {
+      esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp`',
+    };
+    expect(
+      getLensAttributes({
+        title: undefined,
+        filters,
+        query,
+        histogramQuery,
+        dataView,
+        timeInterval,
+        breakdownField: undefined,
+        suggestion: undefined,
+      }).attributes.state.query
+    ).toBe(histogramQuery);
   });
 });

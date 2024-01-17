@@ -28,6 +28,7 @@ export const getLensAttributes = ({
   title,
   filters,
   query,
+  histogramQuery,
   dataView,
   timeInterval,
   breakdownField,
@@ -38,6 +39,7 @@ export const getLensAttributes = ({
   title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
+  histogramQuery: Query | AggregateQuery | undefined;
   dataView: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
@@ -55,6 +57,8 @@ export const getLensAttributes = ({
   let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
 
   if (externalVisContext && suggestion) {
+    console.log('vis query', externalVisContext.attributes?.state?.query, 'local query', query);
+    console.log('suggestion', suggestion, 'external vis context', externalVisContext?.attributes);
     if (
       isEqual(externalVisContext.attributes?.state?.query, query) &&
       isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
@@ -225,7 +229,7 @@ export const getLensAttributes = ({
     state: {
       datasourceStates,
       filters,
-      query,
+      query: histogramQuery ?? query,
       visualization,
       ...(dataView &&
         dataView.id &&

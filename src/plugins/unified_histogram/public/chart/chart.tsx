@@ -185,7 +185,8 @@ export function Chart({
       getLensAttributes({
         title: chart?.title,
         filters,
-        query: histogramQuery ?? query,
+        query,
+        histogramQuery,
         dataView,
         timeInterval: chart?.timeInterval,
         breakdownField: breakdown?.field,
