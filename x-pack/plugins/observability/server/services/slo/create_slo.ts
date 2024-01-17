@@ -35,7 +35,6 @@ export class CreateSLO {
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
-    this.logger.error(`got to execute slo`);
     const slo = this.toSLO(params);
     validateSLO(slo);
 
