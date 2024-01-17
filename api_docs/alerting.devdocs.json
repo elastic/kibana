@@ -3587,10 +3587,6 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/tls_legacy.ts"
-              },
-              {
-                "plugin": "uptime",
                 "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
@@ -3815,7 +3811,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
