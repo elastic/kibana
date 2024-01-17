@@ -31,12 +31,13 @@ const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (
     <>
       {renderFieldPrefix && (
-        <EuiText
-          size="xs"
-          data-test-subj="logExplorerDataTableMessageKey"
-          style={{ display: 'inline', marginLeft: '5px' }}
-        >
-          <strong>{field}</strong> {value}
+        <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
+          <span data-test-subj="logExplorerDataTableMessageKey">
+            <strong>{field}</strong>
+          </span>
+          <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+            {value}
+          </span>
         </EuiText>
       )}
     </>
