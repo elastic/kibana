@@ -14,7 +14,7 @@ import { FormSchema, FIELD_TYPES, fieldValidators, fieldFormatters } from '../..
 
 const { emptyField, isJsonField, containsCharsField } = fieldValidators;
 const { toInt } = fieldFormatters;
-const DISALLOWED_CHARS = [','];
+const DISALLOWED_CHARS = [',', '*'];
 
 export const pipelineFormSchema: FormSchema = {
   name: {
