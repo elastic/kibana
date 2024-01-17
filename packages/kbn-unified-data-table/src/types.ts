@@ -46,7 +46,7 @@ export type CustomCellRenderer = Record<
   (props: DataGridCellValueElementProps) => React.ReactNode
 >;
 
-export type CustomColumn = Record<
+export type CustomGridColumnsConfiguration = Record<
   string,
   ({
     column,

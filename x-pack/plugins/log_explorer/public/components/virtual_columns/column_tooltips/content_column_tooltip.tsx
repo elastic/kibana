@@ -23,7 +23,7 @@ import { dynamic } from '../../../utils/dynamic';
 import { HoverPopover } from '../../common/hover_popover';
 
 const ColumnHeaderTruncateContainer = dynamic(
-  () => import('@kbn/unified-data-table/src/utils/column_header_truncate_container')
+  () => import('@kbn/unified-data-table/src/components/column_header_truncate_container')
 );
 
 export const ContentColumnTooltip = ({

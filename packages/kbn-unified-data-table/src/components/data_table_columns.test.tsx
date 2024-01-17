@@ -374,11 +374,11 @@ describe('Data table columns', function () {
 
       const extensionGridColumn = gridColumns[0];
       extensionGridColumn.display = <span>test</span>;
-      const customiseColumn = {
+      const customGridColumnsConfiguration = {
         extension: () => extensionGridColumn,
       };
 
-      const customisedGridColumns = getEuiGridColumns({
+      const customizedGridColumns = getEuiGridColumns({
         columns,
         settings: {},
         dataView: dataViewWithTimefieldMock,
@@ -394,10 +394,10 @@ describe('Data table columns', function () {
         hasEditDataViewPermission: () =>
           servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
         onFilter: () => {},
-        customiseColumn,
+        customGridColumnsConfiguration,
       });
 
-      expect(customisedGridColumns).toMatchSnapshot();
+      expect(customizedGridColumns).toMatchSnapshot();
     });
   });
 });

@@ -15,7 +15,7 @@ import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnTypes } from '../types';
-import ColumnHeaderTruncateContainer from '../utils/column_header_truncate_container';
+import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;

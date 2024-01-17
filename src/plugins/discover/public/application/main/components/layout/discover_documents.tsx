@@ -256,7 +256,8 @@ function DiscoverDocumentsComponent({
   );
 
   const externalCustomRenderers = useDiscoverCustomization('data_table')?.customCellRenderer;
-  const customiseColumn = useDiscoverCustomization('data_table')?.customiseColumn;
+  const customGridColumnsConfiguration =
+    useDiscoverCustomization('data_table')?.customGridColumnsConfiguration;
 
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
@@ -425,7 +426,7 @@ function DiscoverDocumentsComponent({
                   componentsTourSteps={TOUR_STEPS}
                   headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
-                  customiseColumn={customiseColumn}
+                  customGridColumnsConfiguration={customGridColumnsConfiguration}
                 />
               </CellActionsProvider>
             </div>

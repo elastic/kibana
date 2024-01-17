@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomColumn, UnifiedDataTableSettings } from '../types';
+import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -85,7 +85,7 @@ function buildEuiGridColumn({
   columnTypes,
   showColumnTokens,
   headerRowHeight,
-  customiseColumn,
+  customGridColumnsConfiguration,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -104,7 +104,7 @@ function buildEuiGridColumn({
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
-  customiseColumn?: CustomColumn;
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -196,8 +196,8 @@ function buildEuiGridColumn({
     column.initialWidth = Number(columnWidth);
   }
 
-  if (customiseColumn && customiseColumn[column.id]) {
-    return customiseColumn[column.id]({ column, headerRowHeight });
+  if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
+    return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
   }
   return column;
 }
@@ -220,7 +220,7 @@ export function getEuiGridColumns({
   columnTypes,
   showColumnTokens,
   headerRowHeight,
-  customiseColumn,
+  customGridColumnsConfiguration,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -242,7 +242,7 @@ export function getEuiGridColumns({
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
-  customiseColumn?: CustomColumn;
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -265,7 +265,7 @@ export function getEuiGridColumns({
       columnTypes,
       showColumnTokens,
       headerRowHeight,
-      customiseColumn,
+      customGridColumnsConfiguration,
     })
   );
 }

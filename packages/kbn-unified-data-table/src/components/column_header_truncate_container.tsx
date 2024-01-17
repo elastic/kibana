@@ -23,7 +23,6 @@ const ColumnHeaderTruncateContainer = ({
       lines={headerRowHeight}
       css={css`
         overflow-wrap: anywhere;
-        overflow: auto;
         white-space: normal;
         word-break: break-all;
         line-height: ${euiThemeVars.euiSize};
