@@ -11,14 +11,17 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
-import { ActionColumn } from '../components/action_column';
-import { RiskInputsUtilityBar } from '../components/utility_bar';
-import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
-import { useRiskScore } from '../../../api/hooks/use_risk_score';
-import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../../common/search_strategy';
-import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
-
+import { PreferenceFormattedDate } from '../../../../../common/components/formatted_date';
+import { ActionColumn } from '../../components/action_column';
+import { RiskInputsUtilityBar } from '../../components/utility_bar';
+import { useRiskContributingAlerts } from '../../../../hooks/use_risk_contributing_alerts';
+import { useRiskScore } from '../../../../api/hooks/use_risk_score';
+import {
+  buildHostNamesFilter,
+  buildUserNamesFilter,
+} from '../../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
+import { ContextsTable } from './contexts_table';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
@@ -46,7 +49,11 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     }
   }, [entityName, entityType]);
 
-  const { data: riskScoreData, error: riskScoreError } = useRiskScore({
+  const {
+    data: riskScoreData,
+    error: riskScoreError,
+    loading: loadingRiskScore,
+  } = useRiskScore({
     riskEntity: entityType,
     filterQuery: nameFilterQuery,
     onlyLatest: false,
@@ -56,7 +63,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
   const {
-    loading,
+    loading: loadingAlerts,
     data: alertsData,
     error: riskAlertsError,
   } = useRiskContributingAlerts({ riskScore });
@@ -160,8 +167,18 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
 
   return (
     <>
-      {/* Temporary label. It will be replaced by a filter */}
-      <EuiTitle size="xs" data-test-subj="risk-input-tab-title">
+      <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
+            defaultMessage="Contexts"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <ContextsTable riskScore={riskScore} loading={loadingRiskScore} />
+      <EuiSpacer size="m" />
+      <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.alertsTitle"
@@ -174,7 +191,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
         compressed={true}
-        loading={loading}
+        loading={loadingRiskScore || loadingAlerts}
         items={alertsData ?? []}
         columns={columns}
         pagination
