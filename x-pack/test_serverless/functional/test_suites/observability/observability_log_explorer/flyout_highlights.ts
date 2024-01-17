@@ -66,9 +66,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           NAMESPACE
         );
         await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
+        await PageObjects.svlCommonPage.login();
       });
 
       after('clean up DataStream', async () => {
+        await PageObjects.svlCommonPage.forceLogout();
         if (cleanupDataStreamSetup) {
           await cleanupDataStreamSetup();
         }
