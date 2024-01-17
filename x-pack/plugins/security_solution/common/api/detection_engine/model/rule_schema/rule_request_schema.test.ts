@@ -15,7 +15,6 @@ import {
   getCreateSavedQueryRulesSchemaMock,
   getCreateThreatMatchRulesSchemaMock,
   getCreateThresholdRulesSchemaMock,
-  getCreateEqlRuleSchemaMock,
 } from './rule_request_schema.mock';
 import type { SavedQueryRuleCreateProps } from './rule_schemas.gen';
 import { RuleCreateProps } from './rule_schemas.gen';
@@ -1262,10 +1261,7 @@ describe('rules schema', () => {
       );
     });
     // behaviour common for multiple rule types
-    const cases = [
-      { ruleType: 'eql', ruleMock: getCreateEqlRuleSchemaMock() },
-      { ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() },
-    ];
+    const cases = [{ ruleType: 'threat_match', ruleMock: getCreateThreatMatchRulesSchemaMock() }];
 
     cases.forEach(({ ruleType, ruleMock }) => {
       test(`should validate suppression fields for "${ruleType}" rule type`, () => {

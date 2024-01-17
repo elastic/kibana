@@ -60,7 +60,6 @@ import {
   isThresholdRule,
   isQueryRule,
   isThreatMatchRule,
-  isEqlRule,
 } from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -211,8 +210,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveGroupByFields =
-      isQueryRule(ruleType) || isThreatMatchRule(ruleType) || isEqlRule(ruleType);
+    const ruleCanHaveGroupByFields = isQueryRule(ruleType) || isThreatMatchRule(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
     }
@@ -225,8 +223,7 @@ export const getDescriptionItem = (
     const ruleCanHaveDuration =
       isQueryRule(ruleType) ||
       isThresholdRule(ruleType) ||
-      isThreatMatchRule(ruleType) ||
-      isEqlRule(ruleType);
+      isThreatMatchRule(ruleType);
     if (!ruleCanHaveDuration) {
       return [];
     }
@@ -249,8 +246,7 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields =
-      isQueryRule(ruleType) || isThreatMatchRule(ruleType) || isEqlRule(ruleType);
+    const ruleCanHaveSuppressionMissingFields = isQueryRule(ruleType) || isThreatMatchRule(ruleType);
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
