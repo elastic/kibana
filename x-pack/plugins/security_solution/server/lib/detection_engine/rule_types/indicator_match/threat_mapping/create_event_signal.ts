@@ -13,8 +13,6 @@ import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
 import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
-import type { GenericBulkCreateResponse } from '../../utils/bulk_create_with_suppression';
-import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { getSignalValueMap } from './utils';
