@@ -123,7 +123,7 @@ describe('Discover documents layout', () => {
     const customization: DiscoverCustomization = {
       id: 'data_table',
       customCellRenderer,
-      customiseColumn,
+      customGridColumnsConfiguration,
     };
 
     customisationService.set(customization);
