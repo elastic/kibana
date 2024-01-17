@@ -63,7 +63,7 @@ export const useLensSuggestions = ({
   }, [dataView, columns, query, table, isPlainRecord, lensSuggestionsApi]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
+  const currentSuggestion = suggestions.firstSuggestion ?? originalSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {

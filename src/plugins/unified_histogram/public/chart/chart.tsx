@@ -275,7 +275,7 @@ export function Chart({
       ...attributes,
       state: {
         ...attributes.state,
-        dataSourceStates: {
+        datasourceStates: {
           ...attributes.state.datasourceStates,
           textBased: {
             ...(attributes.state.datasourceStates.textBased || {}),
