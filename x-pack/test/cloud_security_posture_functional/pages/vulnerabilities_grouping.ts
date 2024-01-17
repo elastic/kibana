@@ -135,6 +135,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('SearchBar', () => {
       it('add filter', async () => {
+        const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('Resource');
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({
           field: 'Resource Name',
