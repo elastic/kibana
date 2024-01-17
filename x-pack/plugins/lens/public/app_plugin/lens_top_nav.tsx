@@ -15,6 +15,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
 import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
@@ -1062,11 +1063,18 @@ export const LensTopNavMenu = ({
           ? 'allowed_by_app_privilege'
           : 'globally_managed'
       }
-      badges={[
-        {
-          badgeText: managed ? 'Managed' : 'not managed',
-        },
-      ]}
+      badges={
+        managed
+          ? [
+              getManagedContentBadge(
+                i18n.translate('x-pack.lens.managedBadgeTooltip', {
+                  defaultMessage:
+                    'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
+                })
+              ),
+            ]
+          : undefined
+      }
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}
