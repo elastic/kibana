@@ -36,6 +36,7 @@ export function SourceDocument({
   isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
+  style,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -46,6 +47,7 @@ export function SourceDocument({
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
+  style?: React.CSSProperties;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -60,6 +62,7 @@ export function SourceDocument({
       compressed
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
       data-test-subj={dataTestSubj}
+      style={style}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to

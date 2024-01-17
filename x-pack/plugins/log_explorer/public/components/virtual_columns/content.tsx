@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
@@ -29,24 +29,17 @@ const DiscoverSourcePopoverContent = dynamic(
 const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   const renderFieldPrefix = field && field !== constants.MESSAGE_FIELD;
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <>
       {renderFieldPrefix && (
-        <EuiFlexItem grow={false}>
-          <EuiText
-            size="xs"
-            css={{ fontWeight: 700 }}
-            data-test-subj="logExplorerDataTableMessageKey"
-          >
-            {field}
-          </EuiText>
-        </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <EuiText size="xs" data-test-subj="logExplorerDataTableMessageValue">
-          {value}
+        <EuiText
+          size="xs"
+          data-test-subj="logExplorerDataTableMessageKey"
+          style={{ display: 'inline', marginLeft: '5px' }}
+        >
+          <strong>{field}</strong> {value}
         </EuiText>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      )}
+    </>
   );
 };
 
@@ -103,29 +96,26 @@ const Content = ({
   }
 
   return (
-    <EuiFlexGroup gutterSize="xs">
+    <span>
       {parsedDoc[constants.LOG_LEVEL_FIELD] && (
-        <EuiFlexItem grow={false} css={{ minWidth: '80px' }}>
-          <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
-        </EuiFlexItem>
+        <LogLevel level={parsedDoc[constants.LOG_LEVEL_FIELD]} />
       )}
-      <EuiFlexItem>
-        {renderLogMessage ? (
-          <LogMessage field={field} value={value} />
-        ) : (
-          <SourceDocument
-            useTopLevelObjectColumns={false}
-            row={row}
-            dataView={dataView}
-            columnId={columnId}
-            fieldFormats={fieldFormats}
-            shouldShowFieldHandler={shouldShowFieldHandler}
-            maxEntries={50}
-            dataTestSubj="logExplorerCellDescriptionList"
-          />
-        )}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      {renderLogMessage ? (
+        <LogMessage field={field} value={value} />
+      ) : (
+        <SourceDocument
+          useTopLevelObjectColumns={false}
+          row={row}
+          dataView={dataView}
+          columnId={columnId}
+          fieldFormats={fieldFormats}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          maxEntries={50}
+          dataTestSubj="logExplorerCellDescriptionList"
+          style={{ display: 'inline', marginLeft: '5px' }}
+        />
+      )}
+    </span>
   );
 };
 
