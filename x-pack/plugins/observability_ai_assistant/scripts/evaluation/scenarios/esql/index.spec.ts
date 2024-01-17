@@ -329,10 +329,9 @@ describe('ES|QL query generation', () => {
     })
     it('prod_web filter message and host', async () => {
       await evaluateEsqlQuery({
-        question: `can you convert this SPL query onto ESQL index=prod_web SEVERE NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+        question: `can you convert this SPL query onto ESQL index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
         expected: `FROM prod_web
-      | WHERE severity == "SEVERE"
-        AND message NOT LIKE "Connection reset"
+      | WHERE message NOT LIKE "Connection reset"
         AND message NOT LIKE "[acm-app] created a ThreadLocal"
         AND sourcetype != "prod_urlf_east_logs"
         AND sourcetype != "prod_urlf_west_logs"

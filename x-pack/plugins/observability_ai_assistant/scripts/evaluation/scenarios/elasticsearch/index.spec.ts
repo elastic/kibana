@@ -98,40 +98,41 @@ describe('elasticsearch functions', () => {
 
         expect(result.passed).to.be(true);
       });
-
-      describe('assistant created index', () => {
-        it('creates index, adds documents and deletes index', async () => {
-          let conversation = await chatClient.complete(
-            'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
-          );
-
-          conversation = await chatClient.complete(
-            conversation.conversationId!,
-            conversation.messages.concat({
-              content: 'What are the fields types for the index testing_ai_assistant?',
-              role: MessageRole.User
-            })
-          );
-
-          conversation = await chatClient.complete(
-            conversation.conversationId!,
-            conversation.messages.concat({
-              content: 'Delete the testing_ai_assistant index',
-              role: MessageRole.User
-            })
-          );
-
-          const result = await chatClient.evaluate(conversation, [
-            'Calls the Elasticsearch function to create the index testing_ai_assistant and add the documents to it',
-            'Successfully created index and adds two documents to it',
-            'Calls get_dataset_info and retrieves the field types of the index',
-            'Deletes the testing_ai_assistant index'
-          ]);
-
-          expect(result.passed).to.be(true);
-        });
-      })
     })
+
+    describe('assistant created index', () => {
+      it('creates index, adds documents and deletes index', async () => {
+        let conversation = await chatClient.complete(
+          'Create a new index called testing_ai_assistant what will have two documents, one for the test_suite alerts with message "This test is for alerts" and another one for the test_suite esql with the message "This test is for esql"'
+        );
+
+        conversation = await chatClient.complete(
+          conversation.conversationId!,
+          conversation.messages.concat({
+            content: 'What are the fields types for the index testing_ai_assistant?',
+            role: MessageRole.User
+          })
+        );
+
+        conversation = await chatClient.complete(
+          conversation.conversationId!,
+          conversation.messages.concat({
+            content: 'Delete the testing_ai_assistant index',
+            role: MessageRole.User
+          })
+        );
+
+        const result = await chatClient.evaluate(conversation, [
+          'Calls the Elasticsearch function to create the index testing_ai_assistant and add the documents to it',
+          'Successfully created index and adds two documents to it',
+          'Calls get_dataset_info and retrieves the field types of the index',
+          'Deletes the testing_ai_assistant index'
+        ]);
+
+        expect(result.passed).to.be(true);
+      });
+    })
+
   });
   describe('other', () => {
     it('returns clusters license', async () => {
