@@ -98,6 +98,9 @@ export const LensChart = React.memo(
         css={css`
           position: relative;
           min-height: ${height}px;
+          .embPanel-isLoading {
+            min-height: ${height}px;
+          }
         `}
       >
         {error ? <ChartLoadError /> : content}
