@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       let allToasts: WebElementWrapper[] = [];
       await retry.try(async () => {
         allToasts = await find.allByCssSelector(toastsSelector);
-        expect(toasts.length).to.be(2);
+        expect(allToasts.length).to.be(2);
       });
 
       // warnings tab
