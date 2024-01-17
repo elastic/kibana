@@ -84,14 +84,7 @@ export function TableSearchBar<T, P extends keyof T & string>(props: {
     onChangeCurrentPage(currentPage);
   }, [currentPage, onChangeCurrentPage]);
 
-  const MINIMUM_NUMBER_OF_ITEMS_FOR_SEARCH_BAR_TO_SHOW = 10;
-  if (
-    !isTableSearchBarEnabled ||
-    !isEnabled ||
-    (!isServerSideSearchQueryActive &&
-      !searchQuery &&
-      items.length < MINIMUM_NUMBER_OF_ITEMS_FOR_SEARCH_BAR_TO_SHOW)
-  ) {
+  if (!isTableSearchBarEnabled || !isEnabled) {
     return null;
   }
 
