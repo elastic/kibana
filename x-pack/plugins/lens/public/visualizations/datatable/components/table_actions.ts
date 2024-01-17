@@ -10,11 +10,7 @@ import type {
   EuiDataGridSchemaDetector,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnMeta,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
@@ -26,6 +22,7 @@ import type {
 } from '../../../../common/expressions';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
+import { buildColumnsMetaLookup } from './helpers';
 
 export const createGridResizeHandler =
   (
@@ -181,12 +178,8 @@ export const buildSchemaDetectors = (
   table: Datatable,
   formatters: Record<string, ReturnType<FormatFactory>>
 ): EuiDataGridSchemaDetector[] => {
-  const columnsReverseLookup = table.columns.reduce<
-    Record<string, { name: string; index: number; meta?: DatatableColumnMeta }>
-  >((memo, { id, name, meta }, i) => {
-    memo[id] = { name, index: i, meta };
-    return memo;
-  }, {});
+  const columnsReverseLookup = buildColumnsMetaLookup(table);
+
   return columns.map((column) => {
     const sortingHint = columnConfig.columns.find((col) => col.columnId === column.id)?.sortingHint;
     const sortingCriteria = getSortingCriteria(

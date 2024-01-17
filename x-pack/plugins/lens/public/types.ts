@@ -1320,6 +1320,10 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
    * A visualization can return custom dimensions for the reporting tool
    */
   getReportingLayout?: (state: T) => { height: number; width: number };
+  /**
+   * A visualization can share how columns are visually sorted
+   */
+  getSortedColumns?: (state: T, datasourceLayers?: DatasourceLayers) => string[];
 }
 
 // Use same technique as TriggerContext
