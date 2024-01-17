@@ -23,12 +23,15 @@ export const schema = {
     label: i18n.FIELD_LABEL,
     validations: [
       {
-        validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),
+        validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL.toLocaleLowerCase())),
       },
       {
         validator: maxLengthField({
           length: MAX_CUSTOM_FIELD_LABEL_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR(i18n.FIELD_LABEL, MAX_CUSTOM_FIELD_LABEL_LENGTH),
+          message: i18n.MAX_LENGTH_ERROR(
+            i18n.FIELD_LABEL.toLocaleLowerCase(),
+            MAX_CUSTOM_FIELD_LABEL_LENGTH
+          ),
         }),
       },
     ],
