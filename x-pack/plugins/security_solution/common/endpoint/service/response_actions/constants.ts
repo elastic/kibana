@@ -34,12 +34,16 @@ export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiCommandNames[] = [
   'isolate',
-  'get-file',
-  'execute',
 ];
 
 if (allowedExperimentalValues.automatedProcessActionsEnabled) {
   ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('kill-process', 'suspend-process');
+}
+if (allowedExperimentalValues.automatedExecuteActionEnabled) {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('execute');
+}
+if (allowedExperimentalValues.automatedGetFileActionEnabled) {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('get-file');
 }
 
 export type EnabledAutomatedResponseActionsCommands =

@@ -70,6 +70,20 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionUploadEnabled: true,
 
+  /*
+   * Enables Automated Endpoint Process actions
+   */
+  automatedProcessActionsEnabled: true,
+
+  /*
+   * Enables Automated Endpoint Execute action
+   */
+  automatedExecuteActionEnabled: true,
+  /*
+   * Enables Automated Endpoint GetFile action
+   */
+  automatedGetFileActionEnabled: true,
+
   /**
    * Enables the ability to send Response actions to SentinelOne
    */
@@ -168,12 +182,6 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
-
-  /*
-   * Enables Automated Endpoint Process actions
-   *
-   */
-  automatedProcessActionsEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
