@@ -66,12 +66,6 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
           console.log('result', result);
-          // response.header('Content-Type', 'text/plain');
-          // for await (const chunk of result.toReadableStream()) {
-          //   response.write(chunk);
-          // }
-          //
-          // response.end();
           return response.ok(result);
         }
 

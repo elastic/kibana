@@ -125,6 +125,7 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: true,
         }
       );
+      console.log('response?.response?', response?.response);
 
       const streamResponse = response?.response?.body;
       if (!streamResponse) {

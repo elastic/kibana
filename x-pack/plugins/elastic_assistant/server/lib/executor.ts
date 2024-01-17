@@ -55,11 +55,7 @@ export const executeAction = async ({
     };
   }
   const readable = get('data', actionResult) as StreamResponse;
-  console.log('readable', {
-    readable,
-    readableT: readable.iterator,
-    readableTy: typeof readable.iterator,
-  });
+  console.log('readable', readable);
 
   const {
     end: streamEnd,
