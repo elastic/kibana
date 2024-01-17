@@ -44,6 +44,7 @@ export function MultiPaneFlyout({
               ? { borderRight: `solid 1px ${euiThemeVars.euiBorderColor}` }
               : {}),
           }}
+          data-test-subj="observabilityAiAssistantFlyoutMainContentWrapper"
         >
           <MainContent content={mainContent} />
         </EuiFlexItem>
@@ -53,6 +54,7 @@ export function MultiPaneFlyout({
             flexBasis: flexBasisCol2,
             height: '100%',
           }}
+          data-test-subj="observabilityAiAssistantFlyoutSecondSlotWrapper"
         >
           <InlineEditingContent
             setContainer={setSecondSlotContainer}
@@ -95,6 +97,7 @@ function InlineEditingContent({
         direction="column"
         ref={containerRef}
         gutterSize="none"
+        data-test-subj="observabilityAiAssistantFlyoutSecondSlot"
       />
     </EuiPanel>
   );
@@ -105,6 +108,7 @@ function MainContent({ content }: { content: JSX.Element }) {
     padding-top: ${euiThemeVars.euiSizeM};
     padding-botton: ${euiThemeVars.euiSizeM};
     block-size: 100%;
+    pointer-events: auto;
    }
   `;
 

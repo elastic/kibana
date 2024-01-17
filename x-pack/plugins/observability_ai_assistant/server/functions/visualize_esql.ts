@@ -17,7 +17,7 @@ export function registerVisualizeESQLFunction({
   registerFunction(
     visualizeESQLFunction,
     async ({ arguments: { query }, connectorId, messages }, signal) => {
-      // With limit 0 I get only the columns
+      // With limit 0 I get only the columns, it is much more performant
       const performantQuery = `${query} | limit 0`;
       const coreContext = await resources.context.core;
 

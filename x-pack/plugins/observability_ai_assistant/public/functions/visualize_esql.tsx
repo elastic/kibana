@@ -42,11 +42,37 @@ import {
 interface VisualizeLensResponse {
   content: DatatableColumn[];
 }
+
+interface VisualizeESQLProps {
+  /** Lens start contract, get the ES|QL charts suggestions api */
+  lens: LensPublicStart;
+  /** Dataviews start contract, creates an adhoc dataview */
+  dataViews: DataViewsServicePublic;
+  /** UiActions start contract, triggers the inline editing flyout */
+  uiActions: UiActionsStart;
+  /** Datatable columns as returned from the ES|QL _query api, slightly processed to be kibana compliant */
+  columns: DatatableColumn[];
+  /** The ES|QL query */
+  query: string;
+  /** Actions handler */
+  onActionClick: ChatActionClickHandler;
+  /** Optional, initial ES|QL Lens chart attributes
+   * If not given, the embeddable gets them from the suggestions api
+   */
+  initialInput?: unknown;
+  /** Optional, should be passed if the embeddable is rendered in a flyout
+   * If not given, the inline editing push flyout won't open
+   * The code will be significantly improved,
+   * if this is addressed https://github.com/elastic/eui/issues/7443
+   */
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
+}
+
 function generateId() {
   return uuidv4();
 }
 
-function VisualizeESQL({
+export function VisualizeESQL({
   lens,
   dataViews,
   uiActions,
@@ -55,16 +81,7 @@ function VisualizeESQL({
   onActionClick,
   initialInput,
   chatFlyoutSecondSlotHandler,
-}: {
-  lens: LensPublicStart;
-  dataViews: DataViewsServicePublic;
-  uiActions: UiActionsStart;
-  columns: DatatableColumn[];
-  query: string;
-  onActionClick: ChatActionClickHandler;
-  initialInput?: unknown;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
-}) {
+}: VisualizeESQLProps) {
   // fetch the pattern from the query
   const indexPattern = getIndexPatternFromESQLQuery(query);
   const lensHelpersAsync = useAsync(() => {
@@ -136,6 +153,7 @@ function VisualizeESQL({
     }
   }, [columns, dataViewAsync.value, lensHelpersAsync.value, lensInput, query]);
 
+  // trigger options to open the inline editing flyout correctly
   const triggerOptions: InlineEditLensEmbeddableContext | undefined = useMemo(() => {
     if (lensLoadEvent && lensInput?.attributes) {
       return {
@@ -199,9 +217,9 @@ function VisualizeESQL({
                 size="xs"
                 iconType="pencil"
                 onClick={() => {
+                  chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                   if (triggerOptions) {
                     uiActions.getTrigger('IN_APP_EMBEDDABLE_EDIT_TRIGGER').exec(triggerOptions);
-                    chatFlyoutSecondSlotHandler?.setVisibility?.(true);
                   }
                 }}
                 data-test-subj="observabilityAiAssistantLensESQLEditButton"
@@ -232,7 +250,7 @@ function VisualizeESQL({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
+        <EuiFlexItem data-test-subj="observabilityAiAssistantESQLLensChart">
           <lens.EmbeddableComponent
             {...lensInput}
             style={{

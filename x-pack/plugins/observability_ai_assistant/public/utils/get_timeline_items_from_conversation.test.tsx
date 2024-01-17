@@ -231,6 +231,10 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
+        chatFlyoutSecondSlotHandler: {
+          container: null,
+          setVisibility: jest.fn(),
+        },
       });
     });
 
@@ -267,7 +271,7 @@ describe('getTimelineItemsFromConversation', () => {
         JSON.stringify({ foo: 'bar' }),
         { content: '[]', name: 'my_render_function', role: 'user' },
         expect.any(Function),
-        undefined
+        { container: null, setVisibility: expect.any(Function) }
       );
 
       expect(container.textContent).toEqual('Rendered');
