@@ -33,7 +33,6 @@ import { pluginServices } from '../../services';
 import { ControlGroupContainerContext } from '../embeddable/control_group_container';
 import { ControlGroupInput } from '../types';
 import { ControlEditor, EditControlProps } from './control_editor';
-import { SavedObjectsSecurityExtension } from '@kbn/security-plugin/server/saved_objects';
 
 describe('Data control editor', () => {
   interface MountOptions {
