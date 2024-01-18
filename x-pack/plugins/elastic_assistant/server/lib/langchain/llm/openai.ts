@@ -14,9 +14,9 @@ import { get } from 'lodash/fp';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { RequestBody } from '../types';
 
-const LLM_TYPE = 'ActionsClientLlm';
+const LLM_TYPE = 'ActionsClientChatOpenAI';
 
-interface ActionsClientLlmParams {
+interface ActionsClientChatOpenAIParams {
   actions: ActionsPluginStart;
   connectorId: string;
   llmType?: string;
@@ -26,7 +26,7 @@ interface ActionsClientLlmParams {
   traceId?: string;
 }
 
-export class ActionsClientLlm extends ChatOpenAI {
+export class ActionsClientChatOpenAI extends ChatOpenAI {
   // ChatOpenAI variables
   streaming = false;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
@@ -51,7 +51,7 @@ export class ActionsClientLlm extends ChatOpenAI {
     logger,
     request,
     streaming,
-  }: ActionsClientLlmParams) {
+  }: ActionsClientChatOpenAIParams) {
     super({
       azureOpenAIApiKey: 'nothing',
       azureOpenAIApiDeploymentName: 'nothing',
@@ -152,7 +152,9 @@ export class ActionsClientLlm extends ChatOpenAI {
       subAction: string;
     };
   } {
-    this.#logger.debug(`ActionsClientLlm#_call assistantMessage:\n${JSON.stringify('todo')} `);
+    this.#logger.debug(
+      `ActionsClientChatOpenAI#_call assistantMessage:\n${JSON.stringify('todo')} `
+    );
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,

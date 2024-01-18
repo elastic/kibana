@@ -12,7 +12,8 @@ import { Tool } from 'langchain/tools';
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { RunLogPatch } from '@langchain/core/dist/tracers/log_stream';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
-import { ActionsClientLlm } from '../llm/openai';
+import { ActionsClientChatOpenAI } from '../llm/openai';
+import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
@@ -48,7 +49,9 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  const llm = new ActionsClientLlm({
+  const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
+
+  const llm = new llmClass({
     actions,
     connectorId,
     request,
@@ -173,7 +176,7 @@ async function readStream(
     if (chunk.ops?.length > 0 && chunk.ops[0].op === 'add') {
       const addOp = chunk.ops[0];
       if (
-        addOp.path.startsWith('/logs/ActionsClientLlm') &&
+        addOp.path.startsWith('/logs/ActionsClientChatOpenAI') &&
         typeof addOp.value === 'string' &&
         addOp.value.length
       ) {

@@ -62,7 +62,7 @@ export const useStream = ({
             isEnabledLangChain,
           })
         : getPlaceholderObservable(),
-    [content, isError, reader, connectorTypeTitle]
+    [content, reader, connectorTypeTitle, isError, isEnabledLangChain]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();

@@ -117,18 +117,12 @@ export const postActionsConnectorExecuteRoute = (
           size: request.body.size,
           telemetry,
         });
-        return response.ok(langChainResponse);
 
         telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
         });
-        return response.ok({
-          body: {
-            ...langChainResponse,
-            replacements: latestReplacements,
-          },
-        });
+        return response.ok(langChainResponse);
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
