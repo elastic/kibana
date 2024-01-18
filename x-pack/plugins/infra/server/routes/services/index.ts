@@ -6,7 +6,6 @@
  */
 
 import Boom from '@hapi/boom';
-import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
   GetServicesRequestQueryRT,
   GetServicesRequestQuery,
@@ -16,24 +15,24 @@ import { InfraBackendLibs } from '../../lib/infra_types';
 import { getServices } from '../../lib/host_details/get_services';
 import { validateStringAssetFilters } from './lib/utils';
 import { createSearchClient } from '../../lib/create_search_client';
+import { buildRouteValidationWithExcess } from '../../utils/route_validation';
 
 export const initServicesRoute = (libs: InfraBackendLibs) => {
-  const validate = createRouteValidationFunction(GetServicesRequestQueryRT);
+  const validate = buildRouteValidationWithExcess(GetServicesRequestQueryRT);
 
   const { framework } = libs;
-
   framework.registerRoute<unknown, GetServicesRequestQuery, unknown>(
     {
       method: 'get',
       path: '/api/infra/services',
       validate: {
         query: (q, res) => {
-          const [invalidResponse, validatedFilters] = validateStringAssetFilters(q, res);
+          const [invalidResponse, parsedFilters] = validateStringAssetFilters(q, res);
           if (invalidResponse) {
             return invalidResponse;
           }
-          if (validatedFilters) {
-            q.validatedFilters = validatedFilters;
+          if (parsedFilters) {
+            q.validatedFilters = parsedFilters;
           }
           return validate(q, res);
         },

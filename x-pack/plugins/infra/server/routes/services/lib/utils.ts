@@ -5,10 +5,8 @@
  * 2.0.
  */
 import { RouteValidationError, RouteValidationResultFactory } from '@kbn/core/server';
-import { isLeft } from 'fp-ts/Either';
-import { servicesFiltersRT, ServicesFilter } from '../../../../common/http_api/host_details';
 
-type ValidateStringAssetFiltersReturn = [{ error: RouteValidationError }] | [null, ServicesFilter];
+type ValidateStringAssetFiltersReturn = [{ error: RouteValidationError }] | [null, any];
 
 export function validateStringAssetFilters(
   q: any,
@@ -17,12 +15,7 @@ export function validateStringAssetFilters(
   try {
     if (!q.filters) return [res.badRequest(new Error(`filters is required`))];
     const parsedFilters = JSON.parse(q.filters);
-    const validationResult = servicesFiltersRT.decode(parsedFilters);
-    if (isLeft(validationResult)) {
-      return [res.badRequest(new Error(`Invalid asset filters - ${q.filters}`))];
-    } else {
-      return [null, validationResult.right];
-    }
+    return [null, parsedFilters];
   } catch (err: any) {
     return [res.badRequest(err)];
   }

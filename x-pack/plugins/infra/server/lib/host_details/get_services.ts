@@ -73,13 +73,13 @@ export const getServices = async (
       },
     },
   };
-
   const result = await client<{}, ServicesAPIQueryAggregation>({
     body,
     index: [transaction, error, metric],
   });
 
-  const { buckets: servicesListBuckets } = result.aggregations!.services;
+  const servicesListBuckets = result.aggregations?.services?.buckets || [];
+
   const services = servicesListBuckets.reduce((acc: Service[], bucket) => {
     const serviceName = bucket.key;
     const agentName = bucket.latestAgent.top[0].metrics['agent.name'];
@@ -97,6 +97,5 @@ export const getServices = async (
 
     return acc;
   }, []);
-
   return { services };
 };
