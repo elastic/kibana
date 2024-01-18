@@ -8,10 +8,13 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('find', () => {
     describe('saved objects with hidden type', () => {
@@ -22,19 +25,28 @@ export default function ({ getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
+        await pageObjects.svlCommonPage.login();
+        await pageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-objects');
+        await pageObjects.savedObjects.waitTableIsLoaded();
       });
+
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
-        await kibanaServer.savedObjects.clean({
-          types: ['test-hidden-importable-exportable'],
-        });
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
+        await pageObjects.svlCommonPage.forceLogout();
       });
+
       it('returns saved objects with importableAndExportable types', async () =>
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=test-hidden-importable-exportable')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((resp) => {
             expect(
@@ -55,7 +67,8 @@ export default function ({ getService }: FtrProviderContext) {
           .get(
             '/api/kibana/management/saved_objects/_find?type=test-hidden-non-importable-exportable'
           )
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((resp) => {
             expect(resp.body.saved_objects).to.eql([]);

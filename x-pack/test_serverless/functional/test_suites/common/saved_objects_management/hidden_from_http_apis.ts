@@ -15,21 +15,25 @@ function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const kbnServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('types with `hiddenFromHttpApis` ', () => {
     before(async () => {
-      // `kbnServer.savedObjects.cleanStandardList` uses global saved objects `delete`.
-      // If there are any remaining saved objects registered as `hiddenFromHttpApis:true`,
-      // cleaning them up will fail.
       await kbnServer.savedObjects.cleanStandardList();
 
       await kbnServer.importExport.load(
-        'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis.json'
+        'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis'
       );
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.common.navigateToApp('management');
+      await testSubjects.click('app-card-objects');
+      await pageObjects.savedObjects.waitTableIsLoaded();
     });
 
     after(async () => {
@@ -39,6 +43,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis'
       );
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('APIS', () => {
@@ -59,7 +64,8 @@ export default function ({ getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([notHiddenFromHttpApisType])
-              .set('kbn-xsrf', 'true')
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .then((response: Response) => {
                 expect(response.body).to.have.length(1);
@@ -74,7 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([hiddenFromHttpApisType])
-              .set('kbn-xsrf', 'true')
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .then((response: Response) => {
                 expect(response.body).to.have.length(1);
@@ -89,7 +96,8 @@ export default function ({ getService }: FtrProviderContext) {
             await supertest
               .post(URL)
               .send([hiddenFromHttpApisType, notHiddenFromHttpApisType])
-              .set('kbn-xsrf', 'true')
+              .set(svlCommonApi.getCommonRequestHeader())
+              .set(svlCommonApi.getInternalRequestHeader())
               .expect(200)
               .expect(200)
               .then((response: Response) => {
@@ -107,7 +115,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('returns saved objects registered as hidden from the http Apis', async () => {
           await supertest
             .get(`/api/kibana/management/saved_objects/_find?type=${hiddenFromHttpApisType.type}`)
-            .set('kbn-xsrf', 'true')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((resp) => {
               expect(
@@ -133,7 +142,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('allows to export them directly by id', async () => {
           await supertest
             .post('/api/saved_objects/_export')
-            .set('kbn-xsrf', 'true')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .send({
               objects: [
                 {
@@ -153,7 +163,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('allows to export them directly by type', async () => {
           await supertest
             .post('/api/saved_objects/_export')
-            .set('kbn-xsrf', 'true')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .send({
               type: ['test-hidden-from-http-apis-importable-exportable'],
               excludeExportDetails: true,
@@ -173,7 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
         it('allows to import them', async () => {
           await supertest
             .post('/api/saved_objects/_import')
-            .set('kbn-xsrf', 'true')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .attach('file', join(__dirname, './exports/_import_hidden_from_http_apis.ndjson'))
             .expect(200)
             .then((resp) => {

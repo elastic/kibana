@@ -10,34 +10,43 @@ import expect from '@kbn/expect';
 import type { Response } from 'supertest';
 import { SavedObject } from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '@kbn/saved-objects-management-plugin/common/types';
-import type { PluginFunctionalProviderContext } from '../../services';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
 
-export default function ({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('types with `visibleInManagement` ', () => {
     before(async () => {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
+      await pageObjects.svlCommonPage.login();
+      await pageObjects.common.navigateToApp('management');
+      await testSubjects.click('app-card-objects');
+      await pageObjects.savedObjects.waitTableIsLoaded();
     });
 
     after(async () => {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management'
       );
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('export', () => {
       it('allows to export them directly by id', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -57,7 +66,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       it('allows to export them directly by type', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-not-visible-in-management'],
             excludeExportDetails: true,
@@ -74,7 +84,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       it('allows to import them', async () => {
         await supertest
           .post('/api/saved_objects/_import')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .attach('file', join(__dirname, './exports/_import_non_visible_in_management.ndjson'))
           .expect(200)
           .then((resp) => {
@@ -104,7 +115,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         before(async () => {
           await supertest
             .get('/api/kibana/management/saved_objects/_allowed_types')
-            .set('kbn-xsrf', 'true')
+            .set(svlCommonApi.getCommonRequestHeader())
+            .set(svlCommonApi.getInternalRequestHeader())
             .expect(200)
             .then((response: Response) => {
               types = response.body.types as SavedObjectManagementTypeInfo[];

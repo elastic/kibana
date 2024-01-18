@@ -7,31 +7,44 @@
 
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
-import type { PluginFunctionalProviderContext } from '../../services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }: PluginFunctionalProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
       before(async () => {
+        // await kibanaServer.savedObjects.cleanStandardList();
+
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
+        await pageObjects.svlCommonPage.login();
+        await pageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-objects');
+        await pageObjects.savedObjects.waitTableIsLoaded();
       });
+
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );
-        await kibanaServer.savedObjects.clean({
-          types: ['test-hidden-importable-exportable'],
-        });
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
+        );
+        await kibanaServer.savedObjects.cleanStandardList();
+        await pageObjects.svlCommonPage.forceLogout();
       });
+
       const URL = '/api/kibana/management/saved_objects/_bulk_get';
       const hiddenTypeExportableImportable = {
         type: 'test-hidden-importable-exportable',
@@ -65,7 +78,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeExportableImportable])
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(1);
@@ -76,7 +90,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeNonExportableImportable])
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(1);
@@ -87,7 +102,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         await supertest
           .post(URL)
           .send([hiddenTypeExportableImportable, hiddenTypeNonExportableImportable])
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((response: Response) => {
             expect(response.body).to.have.length(2);
