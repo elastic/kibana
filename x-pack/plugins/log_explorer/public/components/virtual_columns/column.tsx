@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { EuiDataGridColumn } from '@elastic/eui';
+import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { ContentColumnTooltip } from './column_tooltips/content_column_tooltip';
 import { CONTENT_FIELD } from '../../../common/constants';
 
 export const renderColumn =
   (field: string) =>
-  ({ column, headerRowHeight }: { column: EuiDataGridColumn; headerRowHeight?: number }) => {
+  ({ column, headerRowHeight }: CustomGridColumnProps) => {
     switch (field) {
       case CONTENT_FIELD:
         column.display = <ContentColumnTooltip column={column} headerRowHeight={headerRowHeight} />;

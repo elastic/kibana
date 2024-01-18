@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiDataGridColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiText,
-  EuiToken,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken } from '@elastic/eui';
 import React from 'react';
+import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import {
   contentHeaderTooltipParagraph1,
   contentHeaderTooltipParagraph2,
@@ -26,13 +20,7 @@ const ColumnHeaderTruncateContainer = dynamic(
   () => import('@kbn/unified-data-table/src/components/column_header_truncate_container')
 );
 
-export const ContentColumnTooltip = ({
-  column,
-  headerRowHeight,
-}: {
-  column: EuiDataGridColumn;
-  headerRowHeight?: number;
-}) => {
+export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const contentButtonComponent = (
     <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
       {column.displayAsText} <EuiIcon type="questionInCircle" />

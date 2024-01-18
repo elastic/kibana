@@ -27,7 +27,7 @@ const DiscoverSourcePopoverContent = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_popover_content')
 );
 
-const sourceDocumentStyles = css`
+const sourceDocumentCss = css`
   display: inline !important;
   margin-left: 5px;
 `;
@@ -115,7 +115,7 @@ const Content = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logExplorerCellDescriptionList"
-          customStyles={sourceDocumentStyles}
+          css={sourceDocumentCss}
         />
       )}
     </span>

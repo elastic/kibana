@@ -22,7 +22,7 @@ import {
   EuiDescriptionListTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import { css } from '@emotion/react';
+import { css as emotionCss } from '@emotion/react';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -37,7 +37,7 @@ export function SourceDocument({
   isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
-  customStyles,
+  css,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -48,7 +48,7 @@ export function SourceDocument({
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
-  customStyles?: ReturnType<typeof css>;
+  css?: ReturnType<typeof emotionCss>;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -63,7 +63,7 @@ export function SourceDocument({
       compressed
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
       data-test-subj={dataTestSubj}
-      css={customStyles}
+      css={css}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
@@ -84,6 +84,7 @@ export function SourceDocument({
     </EuiDescriptionList>
   );
 }
+
 /**
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
