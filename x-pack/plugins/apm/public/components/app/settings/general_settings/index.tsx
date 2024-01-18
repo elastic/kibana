@@ -126,6 +126,7 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
         />
       )}
     </>

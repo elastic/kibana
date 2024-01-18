@@ -23,6 +23,7 @@ interface Props {
   onDiscardChanges: () => void;
   onSave: () => void;
   saveLabel: string;
+  appTestSubj: string;
   areChangesInvalid?: boolean;
 }
 
@@ -32,6 +33,7 @@ export const BottomBarActions = ({
   onSave,
   unsavedChangesCount,
   saveLabel,
+  appTestSubj,
   areChangesInvalid = false,
 }: Props) => {
   return (
@@ -57,7 +59,7 @@ export const BottomBarActions = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="apmBottomBarActionsDiscardChangesButton"
+                data-test-subj={`${appTestSubj}BottomBarActionsDiscardChangesButton`}
                 color="text"
                 onClick={onDiscardChanges}
               >
@@ -77,7 +79,7 @@ export const BottomBarActions = ({
               >
                 <EuiButton
                   disabled={areChangesInvalid}
-                  data-test-subj="apmBottomBarActionsButton"
+                  data-test-subj={`${appTestSubj}BottomBarActionsButton`}
                   onClick={onSave}
                   fill
                   isLoading={isLoading}

@@ -185,6 +185,7 @@ export const SourceConfigurationSettings = ({
                   }
                 )}
                 unsavedChangesCount={unsavedFormChangesCount}
+                appTestSubj="infra"
               />
             )}
           </EuiFlexItem>

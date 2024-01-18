@@ -202,6 +202,7 @@ export function SettingsPage({
             { defaultMessage: 'Save configuration' }
           )}
           unsavedChangesCount={unsavedChangesCount}
+          appTestSubj="apm"
         />
       )}
     </>
