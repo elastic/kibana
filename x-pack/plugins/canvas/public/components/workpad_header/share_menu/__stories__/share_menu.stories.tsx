@@ -13,11 +13,10 @@ import { ShareMenu } from '../share_menu.component';
 
 storiesOf('components/WorkpadHeader/ShareMenu', module)
   .addDecorator(reduxDecorator())
-  .add('minimal', () => <ShareMenu onExport={action('onExport')} ReportingComponent={null} />);
+  .add('minimal', () => (
+    <ShareMenu onExport={action('onExport')} openReportingModal={() => null} />
+  ));
 
 storiesOf('components/WorkpadHeader/ShareMenu', module).add('with Reporting', () => (
-  <ShareMenu
-    onExport={action('onExport')}
-    ReportingComponent={() => <div>Provided Reporting Component</div>}
-  />
+  <ShareMenu onExport={action('onExport')} openReportingModal={() => {}} />
 ));
