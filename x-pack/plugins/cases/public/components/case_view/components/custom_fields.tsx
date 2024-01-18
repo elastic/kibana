@@ -97,11 +97,26 @@ const createMissingAndRemoveExtraCustomFields = (
       (customField) => customField.key === confCustomField.key
     );
 
+    let result;
     if (foundCustomField) {
-      return foundCustomField;
+      result = foundCustomField;
+    } else {
+      result = {
+        key: confCustomField.key,
+        type: confCustomField.type,
+        value: null,
+      };
     }
 
-    return { key: confCustomField.key, type: confCustomField.type, value: null };
+    if (
+      result.value === null &&
+      confCustomField.required &&
+      confCustomField?.defaultValue !== undefined
+    ) {
+      result.value = confCustomField.defaultValue;
+    }
+
+    return result as CaseUICustomField;
   });
 
   return createdCustomFields;

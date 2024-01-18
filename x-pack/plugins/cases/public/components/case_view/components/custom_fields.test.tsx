@@ -133,7 +133,11 @@ describe('Case View Page files tab', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
         customFieldsMock[2],
         customFieldsMock[3],
@@ -155,10 +159,82 @@ describe('Case View Page files tab', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
         customFieldsMock[2],
         customFieldsMock[3],
+      ]);
+    });
+  });
+
+  it('adds missing defaultValues to required custom fields without value', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[
+          { ...customFieldsMock[0], value: null },
+          { ...customFieldsMock[1], value: null },
+        ]}
+        customFieldsConfiguration={[
+          customFieldsConfigurationMock[0],
+          customFieldsConfigurationMock[1],
+        ]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
+        {
+          type: CustomFieldTypes.TOGGLE,
+          key: 'test_key_2',
+          value: customFieldsConfigurationMock[1].defaultValue,
+        },
+      ]);
+    });
+  });
+
+  it('does not overwrite existing text values with a configured defaultValue', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[
+          { key: customFieldsMock[0].key, type: CustomFieldTypes.TEXT, value: 'existing value' },
+          { ...customFieldsMock[1] },
+        ]}
+        customFieldsConfiguration={[
+          customFieldsConfigurationMock[0],
+          customFieldsConfigurationMock[1],
+        ]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: 'existing value',
+        },
+        {
+          type: CustomFieldTypes.TOGGLE,
+          key: 'test_key_2',
+          value: false,
+        },
       ]);
     });
   });
