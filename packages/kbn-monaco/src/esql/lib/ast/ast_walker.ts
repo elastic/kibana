@@ -73,6 +73,9 @@ import {
   computeLocationExtends,
   createColumnStar,
   wrapIdentifierAsArray,
+  createPolicy,
+  createSettingTuple,
+  createLiteralString,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -120,7 +123,23 @@ export function getPolicyName(ctx: EnrichCommandContext) {
   if (!ctx._policyName) {
     return [];
   }
-  return [createSource(ctx._policyName, 'policy')];
+  return [createPolicy(ctx._policyName)];
+}
+
+export function getPolicySettings(ctx: EnrichCommandContext) {
+  if (!ctx.setting() || !ctx.setting().length) {
+    return [];
+  }
+  return ctx
+    .setting()
+    .filter((setting) => {
+      return setting._name?.text && setting._value?.text;
+    })
+    .map((setting) => {
+      const node = createSettingTuple(setting);
+      node.args.push(createLiteralString(setting._value)!);
+      return node;
+    });
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {

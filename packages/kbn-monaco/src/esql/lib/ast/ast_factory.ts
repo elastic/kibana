@@ -43,6 +43,7 @@ import {
   getPolicyName,
   getMatchField,
   getEnrichClauses,
+  getPolicySettings,
 } from './ast_walker';
 import type { ESQLAst } from './types';
 
@@ -244,6 +245,11 @@ export class AstListener implements ESQLParserListener {
   exitEnrichCommand(ctx: EnrichCommandContext) {
     const command = createCommand('enrich', ctx);
     this.ast.push(command);
-    command.args.push(...getPolicyName(ctx), ...getMatchField(ctx), ...getEnrichClauses(ctx));
+    command.args.push(
+      ...getPolicySettings(ctx),
+      ...getPolicyName(ctx),
+      ...getMatchField(ctx),
+      ...getEnrichClauses(ctx)
+    );
   }
 }
