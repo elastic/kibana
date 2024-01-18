@@ -86,7 +86,8 @@ describe('SavedObjectsRepository', () => {
       await expect(repository.resolve('obj-type', 'obj-id')).resolves.toEqual(expectedResult);
       expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
       expect(mockInternalBulkResolve).toHaveBeenCalledWith(
-        expect.objectContaining({ objects: [{ type: 'obj-type', id: 'obj-id' }] })
+        expect.objectContaining({ objects: [{ type: 'obj-type', id: 'obj-id' }] }),
+        expect.any(Object)
       );
     });
 
