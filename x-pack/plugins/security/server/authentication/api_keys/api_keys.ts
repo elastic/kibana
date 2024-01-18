@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import type { IClusterClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
 import type {
@@ -18,13 +16,14 @@ import type {
   GrantAPIKeyResult,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
+  UpdateAPIKeyParams,
+  UpdateAPIKeyResult,
   ValidateAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
 import { getFakeKibanaRequest } from './fake_kibana_request';
 import type { SecurityLicense } from '../../../common';
 import { transformPrivilegesToElasticsearchPrivileges, validateKibanaPrivileges } from '../../lib';
-import type { UpdateAPIKeyParams, UpdateAPIKeyResult } from '../../routes/api_keys';
 import {
   BasicHTTPAuthorizationHeaderCredentials,
   HTTPAuthorizationHeader,

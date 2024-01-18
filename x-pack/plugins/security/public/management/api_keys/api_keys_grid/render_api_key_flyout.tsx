@@ -11,9 +11,11 @@ import React, { lazy, Suspense } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
+import type {
+  ApiKeyFlyoutProps,
+  AuthenticationServiceSetup,
+} from '@kbn/security-plugin-types-public';
 
-import type { ApiKeyFlyoutProps } from './api_key_flyout_types';
 import { AuthenticationProvider } from '../../../components';
 
 const ApiKeyFlyout = lazy(() => import('./api_key_flyout'));

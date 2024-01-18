@@ -31,12 +31,12 @@ import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CategorizedApiKey } from '@kbn/security-plugin-types-public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { Route } from '@kbn/shared-ux-router';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { ApiKeyFlyout } from './api_key_flyout';
-import type { CategorizedApiKey } from './api_key_flyout_types';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
 import type { ApiKey, AuthenticatedUser } from '../../../../common';
