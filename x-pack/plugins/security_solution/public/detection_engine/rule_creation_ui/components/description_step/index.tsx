@@ -211,6 +211,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
+
     const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
@@ -221,8 +222,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
 
+    const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
     if (!ruleCanHaveDuration) {
       return [];
     }
@@ -247,6 +248,7 @@ export const getDescriptionItem = (
     const ruleType: Type = get('ruleType', data);
     const ruleCanHaveSuppressionMissingFields =
       isSuppressionRuleConfiguredWithMissingFields(ruleType);
+
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }
