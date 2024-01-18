@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ISearchGeneric } from '@kbn/data-plugin/common';
 import type { CheckResult, DataStreamQualityCheckArguments } from '../../../../common';
 
@@ -17,6 +18,7 @@ export interface DataStreamQualityCheck {
 
 export interface DataStreamQualityCheckDependencies {
   search: ISearchGeneric;
+  elasticsearchClient: IScopedClusterClient;
 }
 
 export { DataStreamQualityCheckArguments };

@@ -48,12 +48,18 @@ export const registerDataStreamQualityChecksRoute = ({
           end: req.body.time_range.end,
         };
 
-        const checks = await (
-          await ctx.datasetQuality
-        ).dataStreamQualityService.getChecks({
-          dataStream,
-          timeRange,
-        });
+        const checks = (
+          await (
+            await ctx.datasetQuality
+          ).dataStreamQualityService.getChecks({
+            dataStream,
+            timeRange,
+          })
+        ).map((check) => ({
+          check_id: check.checkId,
+          data_stream: check.dataStream,
+          time_range: check.timeRange,
+        }));
 
         return res.ok<GetDatastreamChecksResponsePayload>({
           body: getDatastreamChecksResponsePayloadRT.encode({

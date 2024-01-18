@@ -5,24 +5,31 @@
  * 2.0.
  */
 
+import { concatMap, from } from 'rxjs';
 import { createMachine, assign, ActionTypes } from 'xstate';
-import { CheckPlan, CheckTimeRange, DataStreamQualityCheckExecution } from '../../../common';
+import {
+  CheckPlan,
+  CheckPlanStep,
+  CheckTimeRange,
+  DataStreamQualityCheckExecution,
+} from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 
 export const createPureDataStreamQualityChecksStateMachine = (
   initialContext: DataStreamQualityChecksContext
 ) =>
-  createMachine<
-    DataStreamQualityChecksContext,
-    DataStreamQualityChecksEvent,
-    DataStreamQualityChecksTypeState
-  >(
+  createMachine(
     {
       /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAwgBZgDGA1gHSkB2Vv6VSlQBekAMQBtAAwBdRKAAOAe1g0qS7vJAAPRAEYATAHYOBqQDYALHvMG71owE5LAGhC1EBgMx6OlywCsAV4AHI4h-gYBRgEAvrFuaJg4+ERkQnRMrJwKFKjcvNxQYhAaYBx8AG5KbOUw6FnsAAp53NJySCDKqgIaWroIRiY2Rl7BRvZ6Tq7uiIGWHEZSlo7mMebRPlJG8YkY2HgEJOTUmczsHLn5hcVguLhKuJd56ABmj4Qc9Y1sLfntWm6aj6nQGlikvj0XmW5ghQ0ceikBjcHgQXnRHER0McUgsMSc6N2ICSB1SxwyDHOOVa3HECju71whD+BUgP1gAM6QN6mlBiGipi8RjWej0IQMoomIRRiHMYQ4AXMYuizhCMSkISJJJSR3Sp0p2S43CurIgYhNnMUKmBvNAYICviRiPxQ2MDplCDsjg4ziC6OiAWsOPMWv2OrSJxoBouLCpfGKpVpFW41VqlwZHwAghQKOzLV1rTz+rKAhwIaKoWsIiE9IGPc4DGWAo4DCEIej0UY9KHkocIxSfhxY9l42I7g8nlc3h907hGYRs7mqRzZIDC+pbTpEKEQj6jEGomYJRKjB6243lsFHM5wbZHD3SbrI2dDcP2KO32wAGJ8KiwZgQPm3IbsWnryuYYyXhsXgGOYqz1lMHAhDBXabE4dghgkxJhn25L6oOn50hmTIsrSEB5quXLriCdqIAAtFMUimJYXg4terbhBY5j1uCCrNt4cHNpYVheA+4Z4VGBFUnSrRAdRm4DHRh4KiEEHGI4ATilEawes2vhyhsEqceCUJibheqSVSRqEWaFqUVaPQgXyCAbL4qm1gYjijDWaoBLpCIcAZARGW2JmiVh2rmc+0acDwNnmsRzI0myy5yY5NFbmibYKhxYptoGYSnrMLnyoqYreIYrGKveRLcEoEBwFokVkhZL7sGu6UKfR0JMZpalOJpdiKjMqJyqYqGVuYcH5QYZktdFg48L+AhCKIEAdTaoGIr46ItmY2wOp5UheB6talkMtaioEioahsc1PgOVkmjcG1Fs5egLJYUS1vCZVhKpHo+CY4qrEscpfXpmF7L282PYaz2QK9Tm0QgFamMEnmGJM0z+fpql+msPiOD4939vhVk8Aj61UZ1oFKt6iqjFMDodsTgPQkhnlTVMIQBFIOLdhFOGw+Tr5xkUSMZYp3qrIGlhqgiSoTF4I2IEYqmLF2XlKl9UTXqTEltZwNmS11qOiujMHOBs4qqUVqKIgKELXl5XkKwYlgG61MXWdJ1MOZtzlKuYPphGYRNeHKUh+cVTjeq6x1yi2VY7PEsRAA */
       context: initialContext,
       predictableActionArguments: true,
       id: 'DataStreamQualityCheck',
       initial: 'uninitialized',
+      schema: {
+        context: {} as DataStreamQualityChecksContext,
+        events: {} as DataStreamQualityChecksEvent,
+        services: {} as DataStreamQualityChecksServices,
+      },
       states: {
         uninitialized: {
           always: 'planning',
@@ -111,19 +118,22 @@ export const createPureDataStreamQualityChecksStateMachine = (
           }
 
           return {
-            checkProgress: context.plan.checks.map(
-              (checkId): DataStreamQualityCheckProgress => ({
+            checkProgress: (context.plan?.checks ?? []).map(
+              (check): DataStreamQualityCheckProgress => ({
                 progress: 'pending',
-                id: checkId,
+                check,
               })
             ),
           };
+        }),
+        clearPlan: assign({
+          plan: (_context) => null,
         }),
         clearPlanningError: assign({
           planningError: (_context) => '',
         }),
         storePlan: assign((_context, event) => {
-          return event.type === 'done.invoke.getCheckPlan' ? { plan: event.plan } : {};
+          return event.type === 'done.invoke.getCheckPlan' ? { plan: event.data } : {};
         }),
         storeCheckResults: assign((context, event) => {
           if (event.type !== 'checkFinished') {
@@ -134,10 +144,10 @@ export const createPureDataStreamQualityChecksStateMachine = (
             'checkProgress' in context ? context.checkProgress : [];
           const newCheckProgress: DataStreamQualityCheckProgress[] = previousCheckProgress.map(
             (previousCheckResult) =>
-              previousCheckResult.id === event.checkResult.id
+              previousCheckResult.check.check_id === event.checkResult.id
                 ? {
                     progress: 'finished',
-                    id: previousCheckResult.id,
+                    check: previousCheckResult.check,
                     execution: event.checkResult,
                   }
                 : previousCheckResult
@@ -152,7 +162,7 @@ export const createPureDataStreamQualityChecksStateMachine = (
   );
 
 export interface DataStreamQualityChecksStateMachineArguments {
-  initialParameters: WithParameters['parameters'];
+  initialParameters: Parameters;
   dependencies: {
     dataStreamQualityClient: IDataStreamQualityClient;
   };
@@ -164,64 +174,57 @@ export const createDataStreamQualityChecksStateMachine = ({
 }: DataStreamQualityChecksStateMachineArguments) =>
   createPureDataStreamQualityChecksStateMachine({
     parameters: initialParameters,
+    plan: null,
+    planningError: null,
+    checkProgress: [],
+    checkingError: null,
   }).withConfig({
     services: {
       getCheckPlan: async (context, event) => {
         return await dataStreamQualityClient.getCheckPlan(context.parameters);
       },
+      performAllChecks: (context, event) => {
+        return from(context.plan?.checks ?? []).pipe(
+          concatMap(async (check) => {
+            const checkResult = await dataStreamQualityClient.performCheck(check.check_id, {
+              dataStream: check.data_stream,
+              timeRange: check.time_range,
+            });
+
+            return {
+              type: 'checkFinished',
+              checkResult,
+            };
+          })
+        );
+      },
     },
   });
 
-type DataStreamQualityChecksTypeState =
-  | {
-      value: 'uninitialized';
-      context: WithParameters;
-    }
-  | {
-      value: 'planning';
-      context: WithParameters;
-    }
-  | {
-      value: 'planned';
-      context: WithParameters & WithPlan;
-    }
-  | {
-      value: 'unplanned';
-      context: WithParameters & WithPlanningError;
-    }
-  | {
-      value: 'checking';
-      context: WithParameters & WithPlan & WithCheckProgress;
-    }
-  | {
-      value: 'unchecked';
-      context: WithParameters & WithPlan & WithCheckingError;
-    };
+interface Parameters {
+  dataStream: string;
+  timeRange: CheckTimeRange;
+}
 
-interface WithParameters {
-  parameters: {
-    dataStream: string;
-    timeRange: CheckTimeRange;
+export interface DataStreamQualityChecksContext {
+  parameters: Parameters;
+  plan: CheckPlan | null;
+  planningError: string | null;
+  checkProgress: DataStreamQualityCheckProgress[];
+  checkingError: string | null;
+}
+
+export interface DataStreamQualityChecksServices {
+  [service: string]: {
+    data: any;
+  };
+  getCheckPlan: {
+    data: CheckPlan;
+  };
+  performAllChecks: {
+    data: undefined;
   };
 }
-
-interface WithPlan {
-  plan: CheckPlan;
-}
-
-interface WithPlanningError {
-  planningError: string;
-}
-
-interface WithCheckProgress {
-  checkProgress: DataStreamQualityCheckProgress[];
-}
-
-interface WithCheckingError {
-  checkingError: string;
-}
-
-export type DataStreamQualityChecksContext = DataStreamQualityChecksTypeState['context'];
 
 export type DataStreamQualityChecksEvent =
   | {
@@ -236,7 +239,7 @@ export type DataStreamQualityChecksEvent =
     }
   | {
       type: `${ActionTypes.DoneInvoke}.getCheckPlan`;
-      plan: CheckPlan;
+      data: DataStreamQualityChecksServices['getCheckPlan']['data'];
     }
   | {
       type: `${ActionTypes.DoneInvoke}.performAllChecks`;
@@ -245,10 +248,10 @@ export type DataStreamQualityChecksEvent =
 export type DataStreamQualityCheckProgress =
   | {
       progress: 'pending';
-      id: string;
+      check: CheckPlanStep;
     }
   | {
       progress: 'finished';
-      id: string;
+      check: CheckPlanStep;
       execution: DataStreamQualityCheckExecution;
     };

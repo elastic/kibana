@@ -18,7 +18,11 @@ export {
   hydrateDatasetSelection,
   UnresolvedDatasetSelection,
 } from './dataset_selection';
-export type { DatasetSelectionPlain, SingleDatasetSelectionPlain } from './dataset_selection';
+export type {
+  AllDatasetSelectionPlain,
+  DatasetSelectionPlain,
+  SingleDatasetSelectionPlain,
+} from './dataset_selection';
 export type {
   ChartDisplayOptions,
   DisplayOptions,

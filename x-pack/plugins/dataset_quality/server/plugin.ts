@@ -38,6 +38,7 @@ export class DatasetQualityServerPlugin implements Plugin {
 
         return {
           dataStreamQualityService: new DataStreamQualityService({
+            elasticsearchClient: (await context.core).elasticsearch.client,
             search: data.search.asScoped(req).search,
           }),
         };

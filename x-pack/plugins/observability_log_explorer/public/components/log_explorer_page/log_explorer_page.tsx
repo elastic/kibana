@@ -77,7 +77,7 @@ const InitializedContent = React.memo(
                 />
               </EuiResizablePanel>
               <EuiResizableButton />
-              <EuiResizablePanel initialSize={38.2} minSize="200px" color="subdued">
+              <EuiResizablePanel initialSize={38.2} minSize="200px" color="subdued" paddingSize="s">
                 <DatasetQualitySidebar />
               </EuiResizablePanel>
             </>

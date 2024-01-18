@@ -5,10 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { CheckTimeRange, DataStream } from '../../../common';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiPanel,
+  htmlIdGenerator,
+} from '@elastic/eui';
+import { useActor } from '@xstate/react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { CheckTimeRange } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
-import { DataStreamQualityChecksStateProvider } from './state_machine_provider';
+import {
+  DataStreamQualityChecksStateProvider,
+  useDataStreamQualityChecksStateContext,
+} from './state_machine_provider';
 
 export interface DataStreamQualityCheckerProps {
   dataStream: string;
@@ -30,15 +42,88 @@ export const createDataStreamQualityChecker = ({
       dataStreamQualityClient,
     }));
 
+    const [key, regenerateKey] = useRandomId(
+      `${initialParameters.dataStream}-${initialParameters.timeRange.start}-${initialParameters.timeRange.end}`
+    );
+
     return (
       <DataStreamQualityChecksStateProvider
-        key={`${initialParameters.dataStream}-${initialParameters.timeRange.start}-${initialParameters.timeRange.end}`}
+        key={key}
         initialParameters={initialParameters}
         dependencies={dependencies}
       >
-        <ConnectedDataStreamQualityCheckerContent />
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => regenerateKey()}>Reload</EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ConnectedDataStreamQualityCheckerContent />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </DataStreamQualityChecksStateProvider>
     );
   });
 
-const ConnectedDataStreamQualityCheckerContent = () => <>Content</>;
+const ConnectedDataStreamQualityCheckerContent = () => {
+  const [state] = useActor(useDataStreamQualityChecksStateContext());
+
+  if (state.matches('planning')) {
+    return <EuiLoadingSpinner />;
+  } else if (state.matches('planned')) {
+    return <ConnectedPlannedChecksList />;
+  } else if (state.matches('checking') || state.matches('checked')) {
+    return <ConnectedCheckProgressList />;
+  }
+
+  return <>Content</>;
+};
+
+const ConnectedPlannedChecksList = () => {
+  const [state, send] = useActor(useDataStreamQualityChecksStateContext());
+
+  const performChecks = useCallback(() => {
+    send({
+      type: 'performPlannedChecks',
+    });
+  }, [send]);
+
+  const checks = state.context.plan?.checks ?? [];
+
+  return (
+    <>
+      {checks.map(({ check_id: checkId, data_stream: dataStream }) => (
+        <EuiPanel key={`${checkId}-${dataStream}`}>{checkId}</EuiPanel>
+      ))}
+      <EuiButton onClick={performChecks}>Run checks</EuiButton>
+    </>
+  );
+};
+
+const ConnectedCheckProgressList = () => {
+  const [state, send] = useActor(useDataStreamQualityChecksStateContext());
+
+  const checkProgress = state.context.checkProgress;
+
+  return (
+    <>
+      {checkProgress.map(({ check: { check_id: checkId, data_stream: dataStream }, progress }) =>
+        progress === 'pending' ? (
+          <EuiPanel key={`${checkId}-${dataStream}`}>{checkId}</EuiPanel>
+        ) : (
+          <EuiPanel key={`${checkId}-${dataStream}`} color="success">
+            {checkId}
+          </EuiPanel>
+        )
+      )}
+    </>
+  );
+};
+
+const useRandomId = (prefix: string) => {
+  const generateId = useMemo(() => htmlIdGenerator(prefix), [prefix]);
+  const [randomId, setRandomId] = useState(generateId);
+  const regenerateId = useCallback(() => {
+    setRandomId(generateId());
+  }, [generateId]);
+  return [randomId, regenerateId] as const;
+};

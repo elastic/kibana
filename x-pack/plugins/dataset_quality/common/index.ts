@@ -12,6 +12,7 @@ export {
   checkFailedResultRT,
   checkPassedResultRT,
   checkPlanRT,
+  checkPlanStepRT,
   checkResultRT,
   checkSkippedResultRT,
   dataStreamQualityCheckArgumentsRT,
@@ -22,6 +23,7 @@ export {
 } from './data_stream_quality_checks';
 export type {
   CheckPlan,
+  CheckPlanStep,
   CheckResult,
   CheckTimeRange,
   DataStreamQualityCheckArguments,

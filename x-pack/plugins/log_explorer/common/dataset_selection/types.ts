@@ -12,6 +12,8 @@ export const allDatasetSelectionPlainRT = rt.type({
   selectionType: rt.literal('all'),
 });
 
+export type AllDatasetSelectionPlain = rt.TypeOf<typeof allDatasetSelectionPlainRT>;
+
 const integrationNameRT = rt.partial({
   name: rt.string,
 });

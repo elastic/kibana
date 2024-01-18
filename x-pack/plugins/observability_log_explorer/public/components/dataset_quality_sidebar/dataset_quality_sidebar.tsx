@@ -8,7 +8,6 @@
 import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { SingleDatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { useObservabilityLogExplorerPageStateContext } from '../../state_machines/observability_log_explorer/src';
@@ -21,10 +20,15 @@ export const DatasetQualitySidebar = React.memo(() => {
     const { datasetSelection, time } = pageState.context.logExplorerState;
     if (datasetSelection.selectionType === 'single' && time != null) {
       return (
-        <InitializedDatasetQualitySidebarContent datasetSelection={datasetSelection} time={time} />
+        <InitializedDatasetQualitySidebarContent
+          dataStream={datasetSelection.selection.dataset.name}
+          time={time}
+        />
       );
+    } else if (datasetSelection.selectionType === 'all' && time != null) {
+      return <InitializedDatasetQualitySidebarContent dataStream="logs-*-*" time={time} />;
     } else {
-      return <EuiCallOut>Please select a single dataset.</EuiCallOut>;
+      return <EuiCallOut>Please select a valid dataset.</EuiCallOut>;
     }
   } else {
     return <EuiLoadingSpinner />;
@@ -32,13 +36,7 @@ export const DatasetQualitySidebar = React.memo(() => {
 });
 
 const InitializedDatasetQualitySidebarContent = React.memo(
-  ({
-    datasetSelection,
-    time,
-  }: {
-    datasetSelection: SingleDatasetSelectionPlain;
-    time: TimeRange;
-  }) => {
+  ({ dataStream, time }: { dataStream: string; time: TimeRange }) => {
     const {
       services: {
         datasetQuality: { DataStreamQualityChecker },
@@ -53,11 +51,6 @@ const InitializedDatasetQualitySidebarContent = React.memo(
       };
     }, [time]);
 
-    return (
-      <DataStreamQualityChecker
-        dataStream={datasetSelection.selection.dataset.name}
-        timeRange={timeRange}
-      />
-    );
+    return <DataStreamQualityChecker dataStream={dataStream} timeRange={timeRange} />;
   }
 );

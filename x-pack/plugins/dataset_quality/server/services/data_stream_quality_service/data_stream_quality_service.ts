@@ -18,8 +18,20 @@ export class DataStreamQualityService {
 
   constructor(private readonly dependencies: DataStreamQualityCheckDependencies) {}
 
-  public async getChecks(args: DataStreamQualityCheckArguments) {
-    return this.checks.map((check) => check.id);
+  public async getChecks({ dataStream, timeRange }: DataStreamQualityCheckArguments) {
+    const { data_streams: dataStreamInfos } =
+      await this.dependencies.elasticsearchClient.asCurrentUser.indices.resolveIndex({
+        name: dataStream,
+        expand_wildcards: 'open',
+      });
+
+    return dataStreamInfos.flatMap(({ name }) =>
+      this.checks.map((check) => ({
+        checkId: check.id,
+        dataStream: name,
+        timeRange,
+      }))
+    );
   }
 
   public async performCheck(
