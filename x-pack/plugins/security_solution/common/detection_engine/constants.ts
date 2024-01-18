@@ -36,3 +36,10 @@ export const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 export const DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY = 'suppress' as const;
 
 export const MINIMUM_LICENSE_FOR_SUPPRESSION = 'platinum' as const;
+
+export enum SuppressibleAlertRules {
+  THRESHOLD = 'threshold',
+  SAVED_QUERY = 'saved_query',
+  QUERY = 'query',
+  THREAT_MATCH = 'threat_match',
+}

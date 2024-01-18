@@ -58,9 +58,8 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 import {
   isThresholdRule,
-  isQueryRule,
-  isThreatMatchRule,
-  isEqlRule,
+  isRuleSuppressionFullyConfigurable,
+  isSuppressibleAlertRule,
 } from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -211,8 +210,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveGroupByFields =
-      isQueryRule(ruleType) || isThreatMatchRule(ruleType) || isEqlRule(ruleType);
+    const ruleCanHaveGroupByFields = isRuleSuppressionFullyConfigurable(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
     }
@@ -222,11 +220,8 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveDuration =
-      isQueryRule(ruleType) ||
-      isThresholdRule(ruleType) ||
-      isThreatMatchRule(ruleType) ||
-      isEqlRule(ruleType);
+    const ruleCanHaveDuration = isSuppressibleAlertRule(ruleType);
+
     if (!ruleCanHaveDuration) {
       return [];
     }
@@ -249,8 +244,7 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields =
-      isQueryRule(ruleType) || isThreatMatchRule(ruleType) || isEqlRule(ruleType);
+    const ruleCanHaveSuppressionMissingFields = isRuleSuppressionFullyConfigurable(ruleType);
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }

@@ -54,8 +54,8 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import type { UseAlertSuppressionReturn } from './use_alert_suppression';
+import { useAlertSuppression } from './use_alert_suppression';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -427,10 +427,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  {
-    alertSuppressionForEqlRuleEnabled,
-    alertSuppressionForIndicatorMatchRuleEnabled,
-  }: Partial<ExperimentalFeatures> = {}
+  ruleSuppressionReturn: UseAlertSuppressionReturn
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -660,20 +657,15 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  const isSuppressionEnabled =
-    (rule.type === 'eql' && alertSuppressionForEqlRuleEnabled) ||
-    (rule.type === 'threat_match' && alertSuppressionForIndicatorMatchRuleEnabled) ||
-    (rule.type && (['query', 'saved_query', 'threshold'] as Type[]).includes(rule.type));
-
-  if ('alert_suppression' in rule && rule.alert_suppression && isSuppressionEnabled) {
-    if ('group_by' in rule.alert_suppression) {
+  if (ruleSuppressionReturn.isSuppressionEnabled) {
+    if (ruleSuppressionReturn.showGroupBy && ruleSuppressionReturn.groupByFields) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
             <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
           </span>
         ),
-        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
+        description: <SuppressAlertsByField fields={ruleSuppressionReturn.groupByFields} />,
       });
     }
 
@@ -683,10 +675,10 @@ const prepareDefinitionSectionListItems = (
           <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
         </span>
       ),
-      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
+      description: <SuppressAlertsDuration duration={ruleSuppressionReturn.duration} />,
     });
 
-    if ('missing_fields_strategy' in rule.alert_suppression) {
+    if (ruleSuppressionReturn.showMissingFieldsStrategy) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
@@ -695,7 +687,7 @@ const prepareDefinitionSectionListItems = (
         ),
         description: (
           <MissingFieldsStrategy
-            missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
+            missingFieldsStrategy={ruleSuppressionReturn.missingFieldsStrategy}
           />
         ),
       });
@@ -747,18 +739,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const alertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
-  );
-  const alertSuppressionForEqlRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForEqlRuleEnabled'
-  );
+  const ruleSuppressionReturn = useAlertSuppression(rule);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    { alertSuppressionForIndicatorMatchRuleEnabled, alertSuppressionForEqlRuleEnabled }
+    ruleSuppressionReturn
   );
 
   return (
