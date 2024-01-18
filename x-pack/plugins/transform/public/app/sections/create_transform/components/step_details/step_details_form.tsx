@@ -83,7 +83,7 @@ export const StepDetailsForm: FC = () => {
     setValid,
   } = useWizardActions();
 
-  const isFormValid = useIsFormValid(stepDetailsFormSlice.name);
+  const isFormValid = useIsFormValid(stepDetailsFormSlice);
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
   const destIndexAvailableTimeFields = useDestIndexAvailableTimeFields(previewRequest);

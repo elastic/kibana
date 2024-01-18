@@ -14,7 +14,7 @@ import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 import { useFormField } from '@kbn/ml-form-utils/use_form_field';
-import { useFormSections } from '@kbn/ml-form-utils/use_form_sections';
+import { useFormSection } from '@kbn/ml-form-utils/use_form_sections';
 import { type FormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
 import { useDataView } from '../../create_transform/components/wizard/wizard';
@@ -29,7 +29,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
   const dispatch = useDispatch();
   const dataView = useDataView();
   const dataViewId = dataView.id;
-  const formSections = useFormSections(slice.name);
+  const retentionPolicySection = useFormSection(slice, 'retentionPolicy' as FS);
   const retentionPolicyField = useFormField(slice, 'retentionPolicyField' as FF);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
@@ -56,7 +56,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
           label={i18n.translate('xpack.transform.retentionPolicySwitchLabel', {
             defaultMessage: 'Retention policy',
           })}
-          checked={formSections.retentionPolicy.enabled}
+          checked={retentionPolicySection.enabled}
           onChange={(e) =>
             dispatch(
               slice.actions.setFormSection({
@@ -69,7 +69,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
           data-test-subj="transformRetentionPolicySwitch"
         />
       </EuiFormRow>
-      {formSections.retentionPolicy.enabled && (
+      {retentionPolicySection.enabled && (
         <div data-test-subj="transformRetentionPolicyContent">
           <EuiSpacer size="m" />
           {

@@ -109,8 +109,8 @@ export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> =
   useMount(() => {
     reduxStore.dispatch(
       editTransformFlyoutSlice.actions.initialize({
-        formFieldsArr: getEditTransformFormFields(props.config),
-        formSectionsArr: getEditTransformFormSections(props.config),
+        formFields: getEditTransformFormFields(props.config),
+        formSections: getEditTransformFormSections(props.config),
       })
     );
   });

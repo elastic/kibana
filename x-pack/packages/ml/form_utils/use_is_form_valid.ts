@@ -11,30 +11,26 @@ import { useSelector } from 'react-redux';
 
 import type { FormField } from './form_field';
 
-import type { State } from './form_slice';
+import type { FormSlice, State } from './form_slice';
 
 // Checks each form field for error messages to return
 // if the overall form is valid or not.
-const isFormValid = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
-  formFields: S['formFields']
+const isFormValid = <FF extends string, FS extends string, VN extends string>(
+  formFields: State<FF, FS, VN>['formFields']
 ) =>
   Object.values(formFields).every((d) => (d as FormField<FF, FS, VN>).errorMessages.length === 0);
 
-const createSelectIsFormValid = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
-  stateAccessor: string
-) => createSelector((state: Record<string, S>) => state[stateAccessor].formFields, isFormValid);
+const createSelectIsFormValid = <FF extends string, FS extends string, VN extends string>(
+  slice: FormSlice<FF, FS, VN>
+) =>
+  createSelector(
+    (state: Record<string, State<FF, FS, VN>>) => state[slice.name].formFields,
+    isFormValid
+  );
 
-export const useIsFormValid = (stateAccessor: string) => {
-  const selectIsFormValid = useMemo(() => createSelectIsFormValid(stateAccessor), [stateAccessor]);
+export const useIsFormValid = <FF extends string, FS extends string, VN extends string>(
+  slice: FormSlice<FF, FS, VN>
+) => {
+  const selectIsFormValid = useMemo(() => createSelectIsFormValid(slice), [slice]);
   return useSelector(selectIsFormValid);
 };

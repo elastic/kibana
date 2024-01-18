@@ -32,12 +32,12 @@ interface EditTransformUpdateButtonProps {
 export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ closeFlyout }) => {
   const dispatch = useDispatch();
   const config = useTransformConfig();
-  const isFormValid = useIsFormValid(editTransformFlyoutSlice.name);
+  const isFormValid = useIsFormValid(editTransformFlyoutSlice);
   const isFormTouched = useIsFormTouched(editTransformFlyoutSlice.name, {
     formFieldsArr: getEditTransformFormFields(config),
     formSectionsArr: getEditTransformFormSections(config),
   });
-  const requestConfig = useUpdatedConfig(editTransformFlyoutSlice.name, config);
+  const requestConfig = useUpdatedConfig(editTransformFlyoutSlice, config);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);

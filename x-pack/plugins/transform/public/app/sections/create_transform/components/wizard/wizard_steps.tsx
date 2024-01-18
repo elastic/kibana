@@ -104,8 +104,8 @@ export const useInitializeTransformWizardState = () => {
 
     dispatch(
       stepDetailsFormSlice.actions.initialize({
-        formFieldsArr: getStepDetailsFormFields(config, transformIds),
-        formSectionsArr: getStepDetailsFormSections(config),
+        formFields: getStepDetailsFormFields(config, transformIds),
+        formSections: getStepDetailsFormSections(config),
       })
     );
 
