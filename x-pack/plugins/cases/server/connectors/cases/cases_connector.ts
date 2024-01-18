@@ -107,17 +107,62 @@ export class CasesConnector extends SubActionConnector<
         casesClient,
       });
 
+      this.logCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
+
       await connectorExecutor.execute(params);
+
+      this.logCurrentState(
+        'success',
+        '[CasesConnector][_run] Execution of case connector succeeded',
+        params
+      );
     } catch (error) {
+      let theError: CasesConnectorError;
+
       if (isCasesConnectorError(error)) {
-        throw error;
+        theError = error;
       }
 
       if (isCasesClientError(error)) {
-        throw new CasesConnectorError(error.message, error.boomify().output.statusCode);
+        theError = new CasesConnectorError(error.message, error.boomify().output.statusCode);
       }
 
-      throw new CasesConnectorError(error.message, 500);
+      theError = new CasesConnectorError(error.message, 500);
+
+      this.logger.error(
+        `[CasesConnector][_run] Execution of case connector failed. Message: ${theError.message}. Status code: ${theError.statusCode}`,
+        {
+          error: {
+            stack_trace: theError.stack,
+            code: theError.statusCode.toString(),
+            type: 'CasesConnectorError',
+          },
+        }
+      );
+
+      throw theError;
+    } finally {
+      this.logCurrentState(
+        'end',
+        '[CasesConnector][_run] Execution of case connector ended',
+        params
+      );
     }
+  }
+
+  private logCurrentState(state: string, message: string, params: CasesConnectorRunParams) {
+    const alertIds = params.alerts.map(({ _id }) => _id);
+
+    this.logger.debug(`[CasesConnector][_run] ${message}`, {
+      labels: {
+        ruleId: params.rule.id,
+        groupingBy: params.groupingBy,
+        totalAlerts: params.alerts.length,
+        timeWindow: params.timeWindow,
+        reopenClosedCases: params.reopenClosedCases,
+        owner: params.owner,
+      },
+      tags: [`cases-connector:${state}`, params.rule.id, ...alertIds],
+    });
   }
 }
