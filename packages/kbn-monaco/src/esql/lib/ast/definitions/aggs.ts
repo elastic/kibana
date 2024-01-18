@@ -100,7 +100,13 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
       signatures: [
         {
           params: [
-            { name: 'column', type: 'any', noNestingFunctions: true, supportsWildcard: true },
+            {
+              name: 'column',
+              type: 'any',
+              noNestingFunctions: true,
+              supportsWildcard: true,
+              optional: true,
+            },
           ],
           returnType: 'number',
           examples: [`from index | stats result = count(field)`, `from index | stats count(field)`],

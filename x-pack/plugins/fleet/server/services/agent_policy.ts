@@ -116,9 +116,10 @@ class AgentPolicyService {
     id: string,
     agentPolicy: Partial<AgentPolicySOAttributes>,
     user?: AuthenticatedUser,
-    options: { bumpRevision: boolean; removeProtection: boolean } = {
+    options: { bumpRevision: boolean; removeProtection: boolean; skipValidation: boolean } = {
       bumpRevision: true,
       removeProtection: false,
+      skipValidation: false,
     }
   ): Promise<AgentPolicy> {
     auditLoggingService.writeCustomSoAuditLog({
@@ -148,12 +149,14 @@ class AgentPolicyService {
       logger.warn(`Setting tamper protection for Agent Policy ${id} to false`);
     }
 
-    await validateOutputForPolicy(
-      soClient,
-      agentPolicy,
-      existingAgentPolicy,
-      getAllowedOutputTypeForPolicy(existingAgentPolicy)
-    );
+    if (!options.skipValidation) {
+      await validateOutputForPolicy(
+        soClient,
+        agentPolicy,
+        existingAgentPolicy,
+        getAllowedOutputTypeForPolicy(existingAgentPolicy)
+      );
+    }
     await soClient.update<AgentPolicySOAttributes>(SAVED_OBJECT_TYPE, id, {
       ...agentPolicy,
       ...(options.bumpRevision ? { revision: existingAgentPolicy.revision + 1 } : {}),
@@ -498,6 +501,7 @@ class AgentPolicyService {
       force?: boolean;
       spaceId?: string;
       authorizationHeader?: HTTPAuthorizationHeader | null;
+      skipValidation?: boolean;
     }
   ): Promise<AgentPolicy> {
     const logger = appContextService.getLogger();
@@ -551,7 +555,11 @@ class AgentPolicyService {
       });
     }
 
-    return this._update(soClient, esClient, id, agentPolicy, options?.user);
+    return this._update(soClient, esClient, id, agentPolicy, options?.user, {
+      bumpRevision: true,
+      removeProtection: false,
+      skipValidation: options?.skipValidation ?? false,
+    });
   }
 
   public async copy(
@@ -630,6 +638,7 @@ class AgentPolicyService {
         {
           bumpRevision: false,
           removeProtection: false,
+          skipValidation: false,
         }
       );
     }
@@ -654,6 +663,7 @@ class AgentPolicyService {
     const res = await this._update(soClient, esClient, id, {}, options?.user, {
       bumpRevision: true,
       removeProtection: options?.removeProtection ?? false,
+      skipValidation: false,
     });
 
     return res;
@@ -684,16 +694,37 @@ class AgentPolicyService {
     }));
 
     if (agentPolicies.length > 0) {
+      const getAgentPolicy = (agentPolicy: AgentPolicy) => ({
+        data_output_id: agentPolicy.data_output_id === outputId ? null : agentPolicy.data_output_id,
+        monitoring_output_id:
+          agentPolicy.monitoring_output_id === outputId ? null : agentPolicy.monitoring_output_id,
+      });
+      // Validate that the output is not used by any agent policy before updating any policy
+      await pMap(
+        agentPolicies,
+        async (agentPolicy) => {
+          const existingAgentPolicy = await this.get(soClient, agentPolicy.id, true);
+
+          if (!existingAgentPolicy) {
+            throw new AgentPolicyNotFoundError('Agent policy not found');
+          }
+
+          await validateOutputForPolicy(
+            soClient,
+            getAgentPolicy(agentPolicy),
+            existingAgentPolicy,
+            getAllowedOutputTypeForPolicy(existingAgentPolicy)
+          );
+        },
+        {
+          concurrency: 50,
+        }
+      );
       await pMap(
         agentPolicies,
         (agentPolicy) =>
-          this.update(soClient, esClient, agentPolicy.id, {
-            data_output_id:
-              agentPolicy.data_output_id === outputId ? null : agentPolicy.data_output_id,
-            monitoring_output_id:
-              agentPolicy.monitoring_output_id === outputId
-                ? null
-                : agentPolicy.monitoring_output_id,
+          this.update(soClient, esClient, agentPolicy.id, getAgentPolicy(agentPolicy), {
+            skipValidation: true,
           }),
         {
           concurrency: 50,

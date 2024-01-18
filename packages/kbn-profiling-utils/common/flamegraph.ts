@@ -155,7 +155,6 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
       FunctionOffset: graph.FunctionOffset[i],
       SourceFilename: graph.SourceFilename[i],
       SourceLine: graph.SourceLine[i],
-      SamplingRate: graph.SamplingRate,
     });
     graph.Label[i] = getCalleeLabel(metadata);
   }

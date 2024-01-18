@@ -20,7 +20,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
-import type { AlertRawData } from '../tabs/risk_inputs';
+import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
 interface Props {
   selectedAlerts: AlertRawData[];
