@@ -14,13 +14,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useMemo, useState } from 'react';
-import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useTimeRange } from '../../../../hooks/use_time_range';
+import { isPending } from '../../../../hooks/use_fetcher';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { asBigNumber } from '../../../../../common/utils/formatters';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { truncate, unit } from '../../../../utils/style';
 import {
   ChartType,
@@ -36,7 +33,10 @@ import {
 } from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { useStateDebounced } from '../../../../hooks/use_debounce';
+import {
+  ErrorGroupItem,
+  useErrorGroupListData,
+} from './use_error_group_list_data';
 
 const GroupIdLink = euiStyled(ErrorDetailLink)`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
@@ -58,24 +58,6 @@ const MessageLink = euiStyled(ErrorDetailLink)`
 const Culprit = euiStyled.div`
   font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
 `;
-
-type MainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
-type DetailedStatistics =
-  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
-
-type ErrorGroupItem = MainStatistics['errorGroups'][0];
-type ErrorFields = keyof ErrorGroupItem;
-
-const INITIAL_MAIN_STATISTICS: MainStatistics = {
-  errorGroups: [],
-  maxCountExceeded: false,
-};
-
-const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
-  currentPeriod: {},
-  previousPeriod: {},
-};
 
 interface Props {
   serviceName: string;
@@ -113,10 +95,7 @@ function ErrorGroupList({
     mainStatisticsStatus,
     detailedStatistics,
     detailedStatisticsStatus,
-  } = useErrorGroupListData({
-    currentPageItems: renderedItems,
-    sorting,
-  });
+  } = useErrorGroupListData({ renderedItems, sorting });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
   const isDetailedStatsLoading = isPending(detailedStatisticsStatus);
@@ -313,7 +292,9 @@ function ErrorGroupList({
 
   const tableSearchBar = useMemo(() => {
     return {
-      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as ErrorFields[],
+      fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as Array<
+        keyof ErrorGroupItem
+      >,
       maxCountExceeded: mainStatistics.maxCountExceeded,
       onChangeSearchQuery: setDebouncedSearchQuery,
       placeholder: i18n.translate(
@@ -347,119 +328,6 @@ function ErrorGroupList({
       saveTableOptionsToUrl={saveTableOptionsToUrl}
     />
   );
-}
-
-function useErrorGroupListData({
-  currentPageItems,
-  sorting,
-}: {
-  currentPageItems: ErrorGroupItem[];
-  sorting: TableOptions<ErrorGroupItem>['sort'];
-}) {
-  const { serviceName } = useApmServiceContext();
-  const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('', 200);
-
-  const {
-    query: {
-      environment,
-      kuery,
-      rangeFrom,
-      rangeTo,
-      offset,
-      comparisonEnabled,
-    },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/overview',
-    '/services/{serviceName}/errors'
-  );
-
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const {
-    data: mainStatistics = INITIAL_MAIN_STATISTICS,
-    status: mainStatisticsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      const normalizedSortDirection =
-        sorting.direction === 'asc' ? 'asc' : 'desc';
-
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                sortField: sorting.field,
-                sortDirection: normalizedSortDirection,
-                searchQuery,
-              },
-            },
-          }
-        );
-      }
-    },
-    [
-      sorting.direction,
-      sorting.field,
-      start,
-      end,
-      serviceName,
-      environment,
-      kuery,
-      searchQuery,
-    ]
-  );
-
-  const {
-    data: detailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: detailedStatisticsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (currentPageItems.length && start && end) {
-        return callApmApi(
-          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
-              body: {
-                groupIds: JSON.stringify(
-                  currentPageItems.map(({ groupId }) => groupId).sort()
-                ),
-              },
-            },
-          }
-        );
-      }
-    },
-    // only fetches agg results when currentPageGroupIds changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [currentPageItems],
-    { preservePreviousData: false }
-  );
-
-  return {
-    setDebouncedSearchQuery,
-    mainStatistics,
-    mainStatisticsStatus,
-    detailedStatistics,
-    detailedStatisticsStatus,
-  };
 }
 
 export { ErrorGroupList };
