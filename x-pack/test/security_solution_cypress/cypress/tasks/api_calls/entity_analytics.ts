@@ -7,9 +7,6 @@
 
 import { rootRequest } from './common';
 
-/**
- * Deletes all existing Fleet packages, package policies and agent policies.
- */
 export const deleteCriticality = (params: { idValue: string; idField: string }) => {
   return rootRequest({
     method: 'DELETE',
