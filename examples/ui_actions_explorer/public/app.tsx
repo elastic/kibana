@@ -11,21 +11,14 @@ import ReactDOM from 'react-dom';
 
 import {
   EuiPage,
-  EuiButton,
   EuiPageBody,
   EuiPageTemplate,
   EuiPageSection,
   EuiSpacer,
-  EuiText,
-  EuiFieldText,
-  EuiCallOut,
   EuiPageHeader,
-  EuiModalBody,
 } from '@elastic/eui';
-import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { AppMountParameters, OverlayStart } from '@kbn/core/public';
-import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 import { TriggerContextExample } from './trigger_context_example';
 import { ContextMenuExamples } from './context_menu_examples';
 import { Overview } from './overview';
@@ -49,7 +42,10 @@ const ActionsExplorer = ({ uiActionsStartService, openModal }: Props) => {
 
             <EuiSpacer />
 
-            <HelloWorldExample uiActionsStartService={uiActionsStartService} openModal={openModal}/>
+            <HelloWorldExample
+              uiActionsStartService={uiActionsStartService}
+              openModal={openModal}
+            />
 
             <EuiSpacer />
 

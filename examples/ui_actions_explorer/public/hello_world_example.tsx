@@ -8,14 +8,7 @@
 
 import React, { useState } from 'react';
 
-import {
-  EuiButton,
-  EuiSpacer,
-  EuiText,
-  EuiModalBody,
-  EuiLink,
-  EuiSwitch,
-} from '@elastic/eui';
+import { EuiButton, EuiSpacer, EuiText, EuiModalBody, EuiLink, EuiSwitch } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
 import { OverlayStart } from '@kbn/core/public';
@@ -31,21 +24,23 @@ interface Props {
 export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) => {
   const [isChecked, setIsChecked] = useState(false);
 
-  const actionsMessage = isChecked
-    ? '2 actions attached'
-    : '1 action attached';
+  const actionsMessage = isChecked ? '2 actions attached' : '1 action attached';
 
   return (
     <>
       <EuiText>
         <h1>Hello world example</h1>
         <p>
-          The {' '}
-          <EuiLink href="https://github.com/elastic/kibana/tree/main/examples/ui_action_examples" target="_blank">
+          The{' '}
+          <EuiLink
+            href="https://github.com/elastic/kibana/tree/main/examples/ui_action_examples"
+            target="_blank"
+          >
             ui_action_example plugin
           </EuiLink>{' '}
-          registers the <em>HELLO_WORLD_TRIGGER_ID</em> trigger and attaches the <em>ACTION_HELLO_WORLD</em> action to the trigger.
-          The <em>ACTION_HELLO_WORLD</em> opens a modal when executed. Fire the "Hello world" event by clicking the button below.
+          registers the <em>HELLO_WORLD_TRIGGER_ID</em> trigger and attaches the{' '}
+          <em>ACTION_HELLO_WORLD</em> action to the trigger. The <em>ACTION_HELLO_WORLD</em> opens a
+          modal when executed. Fire the "Hello world" event by clicking the button below.
         </p>
       </EuiText>
       <EuiButton
@@ -59,9 +54,9 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
 
       <EuiText>
         <p>
-          You can dynamically add a new action to a trigger.
-          Click the switch below to attach a second action to <em>HELLO_WORLD_TRIGGER_ID</em> trigger.
-          What do you think will happen when you click the button and the trigger has multiple actions?
+          You can dynamically add a new action to a trigger. Click the switch below to attach a
+          second action to <em>HELLO_WORLD_TRIGGER_ID</em> trigger. What do you think will happen
+          when you click the button and the trigger has multiple actions?
         </p>
         <EuiSwitch
           label={'Attach second action to "Hello world" event'}
@@ -77,9 +72,7 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
                   const overlay = openModal(
                     toMountPoint(
                       <EuiModalBody>
-                        <EuiText data-test-subj="dynamicHelloWorldActionText">
-                          Hello waldo
-                        </EuiText>{' '}
+                        <EuiText data-test-subj="dynamicHelloWorldActionText">Hello waldo</EuiText>{' '}
                         <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
                           Close
                         </EuiButton>
@@ -90,7 +83,7 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
               });
               uiActionsStartService.addTriggerAction(HELLO_WORLD_TRIGGER_ID, dynamicAction);
             } else {
-              uiActionsStartService.detachAction(HELLO_WORLD_TRIGGER_ID, DYNAMIC_ACTION_ID)
+              uiActionsStartService.detachAction(HELLO_WORLD_TRIGGER_ID, DYNAMIC_ACTION_ID);
             }
           }}
         />
