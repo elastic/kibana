@@ -11,6 +11,7 @@ import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({
@@ -34,7 +35,9 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
   runtimeMappings,
+  runOpts,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
@@ -98,26 +101,59 @@ export const createThreatSignal = async ({
       threatIndexFields,
     });
 
-    const result = await searchAfterAndBulkCreate({
-      buildReasonMessage: buildReasonMessageForThreatMatchAlert,
-      bulkCreate,
-      enrichment: threatEnrichment,
-      eventsTelemetry,
-      exceptionsList: unprocessedExceptions,
-      filter: esFilter,
-      inputIndexPattern: inputIndex,
-      listClient,
-      pageSize: searchAfterSize,
-      ruleExecutionLogger,
-      services,
-      sortOrder: 'desc',
-      trackTotalHits: false,
-      tuple,
-      wrapHits,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-    });
+    const isAlertSuppressionEnabled = Boolean(
+      completeRule.ruleParams.alertSuppression?.groupBy?.length
+    );
+
+    let result: SearchAfterAndBulkCreateReturnType;
+
+    if (isAlertSuppressionEnabled) {
+      result = await searchAfterAndBulkCreateSuppressedAlerts({
+        buildReasonMessage: buildReasonMessageForThreatMatchAlert,
+        bulkCreate,
+        enrichment: threatEnrichment,
+        eventsTelemetry,
+        exceptionsList: unprocessedExceptions,
+        filter: esFilter,
+        inputIndexPattern: inputIndex,
+        listClient,
+        pageSize: searchAfterSize,
+        ruleExecutionLogger,
+        services,
+        sortOrder: 'desc',
+        trackTotalHits: false,
+        tuple,
+        wrapHits,
+        wrapSuppressedHits,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        alertTimestampOverride: runOpts.alertTimestampOverride,
+        alertWithSuppression: runOpts.alertWithSuppression,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+      });
+    } else {
+      result = await searchAfterAndBulkCreate({
+        buildReasonMessage: buildReasonMessageForThreatMatchAlert,
+        bulkCreate,
+        enrichment: threatEnrichment,
+        eventsTelemetry,
+        exceptionsList: unprocessedExceptions,
+        filter: esFilter,
+        inputIndexPattern: inputIndex,
+        listClient,
+        pageSize: searchAfterSize,
+        ruleExecutionLogger,
+        services,
+        sortOrder: 'desc',
+        trackTotalHits: false,
+        tuple,
+        wrapHits,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+      });
+    }
 
     ruleExecutionLogger.debug(
       `${

@@ -139,12 +139,11 @@ export default ({ getService }: FtrProviderContext) => {
   });
 
   const cases = [
-    // TODO: fix second code execution branch
-    // {
-    //   eventsCount: 10,
-    //   threatsCount: 0,
-    //   title: `events count is greater than threats count`,
-    // },
+    {
+      eventsCount: 10,
+      threatsCount: 0,
+      title: `events count is greater than threats count`,
+    },
 
     {
       eventsCount: 0,
@@ -153,7 +152,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe.only('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -1734,6 +1733,93 @@ export default ({ getService }: FtrProviderContext) => {
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_END);
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_TERMS);
               expect(source).not.toHaveProperty(ALERT_SUPPRESSION_DOCS_COUNT);
+            });
+          });
+
+          // could happen when number of documents matching condition is more than 100
+          // and most of them suppressed
+          // when number of suppressed alerts could many thousands, search could
+          // iterate through them search exhaustion
+          // TODO: fix test
+          it.skip('should not suppress more than max_signals alerts', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-b' },
+            };
+
+            await eventsFiller({ id, count: 20 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 20 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 150,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await indexListOfSourceDocuments([doc1, doc1, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(2);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: 'agent-a',
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 96,
+            });
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: 'agent-b',
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
             });
           });
         });
