@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      if(indexedData) {
+      if (indexedData) {
         await endpointTestResources.unloadEndpointData(indexedData);
       }
     });
