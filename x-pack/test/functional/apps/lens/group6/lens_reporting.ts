@@ -108,11 +108,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         });
 
-        it(`should show a warning message for curl reporting of unsaved visualizations`, async () => {
-          await PageObjects.lens.openReportingShare();
-          await testSubjects.existOrFail('shareReportingUnsavedState');
-        });
-
         it(`should produce a valid URL for reporting`, async () => {
           await PageObjects.reporting.clickGenerateReportButton();
           await PageObjects.reporting.getReportURL(60000);

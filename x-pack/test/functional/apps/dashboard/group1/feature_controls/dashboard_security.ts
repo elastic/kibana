@@ -429,6 +429,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`Permalinks shows create short-url button`, async () => {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
+        await PageObjects.share.closeShareModal();
       });
 
       it('allows loading a saved query via the saved query management component', async () => {
