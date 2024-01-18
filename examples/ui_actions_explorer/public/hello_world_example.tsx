@@ -59,6 +59,7 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
           when you click the button and the trigger has multiple actions?
         </p>
         <EuiSwitch
+          data-test-subj="addDynamicAction"
           label={'Attach second action to "Hello world" event'}
           checked={isChecked}
           onChange={(e) => {
