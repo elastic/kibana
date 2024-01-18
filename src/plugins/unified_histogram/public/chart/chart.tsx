@@ -21,6 +21,7 @@ import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
 import { LensAttributes } from '@kbn/lens-embeddable-utils';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { Histogram } from './histogram';
 import type {
   UnifiedHistogramBreakdownContext,
@@ -279,7 +280,7 @@ export function Chart({
           ...attributes.state.datasourceStates,
           textBased: {
             ...(attributes.state.datasourceStates.textBased || {}),
-            layers: {},
+            layers: {} as TextBasedPersistedState['layers'],
           },
         },
       },
