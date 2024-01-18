@@ -368,6 +368,9 @@ export class ExecutionHandler<
           try {
             enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
           } catch (e) {
+            if (e.statusCode === 404) {
+              throw createTaskRunError(e, TaskErrorSource.USER);
+            }
             throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
           }
           if (enqueueResponse.errors) {

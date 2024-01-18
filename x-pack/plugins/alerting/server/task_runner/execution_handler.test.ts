@@ -27,7 +27,7 @@ import {
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import { TaskRunnerContext } from './task_runner_factory';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { Alert } from '../alert';
 import { AlertInstanceState, AlertInstanceContext, RuleNotifyWhen } from '../../common';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
@@ -37,6 +37,7 @@ import { schema } from '@kbn/config-schema';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -423,6 +424,48 @@ describe('Execution Handler', () => {
 
     await executionHandlerForPreconfiguredAction.run(generateAlert({ id: 2 }));
     expect(actionsClient.bulkEnqueueExecution).toHaveBeenCalledTimes(1);
+  });
+
+  test('should throw a USER error when a connector is not found', async () => {
+    actionsClient.bulkEnqueueExecution.mockRejectedValue({
+      statusCode: 404,
+      message: 'Not Found',
+    });
+    const actions = [
+      {
+        id: '1',
+        group: 'default',
+        actionTypeId: 'test2',
+        params: {
+          foo: true,
+          contextVal: 'My other {{context.value}} goes here',
+          stateVal: 'My other {{state.value}} goes here',
+        },
+      },
+    ];
+    const executionHandler = new ExecutionHandler(
+      generateExecutionParams({
+        ...defaultExecutionParams,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          actionsConfigMap: {
+            default: {
+              max: 2,
+            },
+          },
+        },
+        rule: {
+          ...defaultExecutionParams.rule,
+          actions,
+        },
+      })
+    );
+
+    try {
+      await executionHandler.run(generateAlert({ id: 2, state: { value: 'state-val' } }));
+    } catch (err) {
+      expect(getErrorSource(err)).toBe(TaskErrorSource.USER);
+    }
   });
 
   test('limits actionsPlugin.execute per action group', async () => {
