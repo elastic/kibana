@@ -31,7 +31,6 @@ import {
 } from '../../../common/constants';
 import { statusColors } from '../../common/constants';
 import { useCspBenchmarkIntegrationsV2 } from '../benchmarks/use_csp_benchmark_integrations';
-import { DASHBOARD_COUNTER_CARDS } from '../compliance_dashboard/test_subjects';
 import { CspCounterCard } from '../../components/csp_counter_card';
 import { useKibana } from '../../common/hooks/use_kibana';
 
@@ -46,7 +45,6 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
         theme={[
           {
             partition: {
-              linkLabel: { maximumSection: Infinity, maxCount: 0 },
               outerSizeRatio: 0.75,
               emptySizeRatio: 0.7,
             },
@@ -75,6 +73,7 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
         layout={PartitionLayout.sunburst}
         layers={[
           {
+            // grouping the pie chart by data labels and coloring the group by the label value
             groupByRollup: (d: { label: string }) => d.label,
             shape: {
               fillColor: (label) =>
@@ -158,7 +157,16 @@ export const RulesCounters = () => {
     return (
       <EuiEmptyPrompt
         color="plain"
-        icon={<EuiImage size="fullWidth" src={noDataIllustration} alt="no_data_illustration" />}
+        icon={
+          <EuiImage
+            size="fullWidth"
+            src={noDataIllustration}
+            alt={i18n.translate(
+              'xpack.csp.rulesPage.rulesCounterEmptyState.noDataIllustrationAlt',
+              { defaultMessage: 'No data illustration' }
+            )}
+          />
+        }
         title={
           <h2>
             <FormattedMessage
@@ -219,18 +227,19 @@ export const RulesCounters = () => {
 
   const counters = [
     {
-      id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
       description: i18n.translate('xpack.csp.rulesCounters.postureScoreTitle', {
         defaultMessage: 'Posture Score',
       }),
       title: (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
-          <EvaluationPieChart
-            failed={benchmarkRulesStats.score.totalFailed}
-            passed={benchmarkRulesStats.score.totalPassed}
-          />
-          {`${benchmarkRulesStats.score.postureScore}%`}
-        </div>
+        <EuiFlexGroup alignItems="center" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <EvaluationPieChart
+              failed={benchmarkRulesStats.score.totalFailed}
+              passed={benchmarkRulesStats.score.totalPassed}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>{`${benchmarkRulesStats.score.postureScore}%`}</EuiFlexItem>
+        </EuiFlexGroup>
       ),
       button: (
         <EuiButtonEmpty
@@ -244,7 +253,6 @@ export const RulesCounters = () => {
       ),
     },
     {
-      id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
       description: i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedTitle', {
         defaultMessage: '{resourceName} Evaluated',
         values: {
@@ -268,7 +276,6 @@ export const RulesCounters = () => {
       ),
     },
     {
-      id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
       description: i18n.translate('xpack.csp.rulesCounters.failedFindingsTitle', {
         defaultMessage: 'Failed Findings',
       }),
@@ -292,7 +299,6 @@ export const RulesCounters = () => {
       ),
     },
     {
-      id: DASHBOARD_COUNTER_CARDS.CLUSTERS_EVALUATED,
       description: i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterTitle', {
         defaultMessage: 'Disabled Rules',
       }),
