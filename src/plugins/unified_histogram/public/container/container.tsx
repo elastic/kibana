@@ -147,15 +147,31 @@ export const UnifiedHistogramContainer = forwardRef<
   if (
     currentSuggestion &&
     currentSuggestion.datasourceId === 'textBased' &&
+    currentSuggestion.datasourceState &&
     (currentSuggestion.datasourceState as TextBasedPersistedState).layers &&
-    containerProps.table
+    containerProps.table &&
+    Object.values((currentSuggestion.datasourceState as TextBasedPersistedState).layers).some(
+      (l) => l.table !== containerProps.table
+    )
   ) {
     const layerIds = Object.keys(
       (currentSuggestion.datasourceState as TextBasedPersistedState).layers
     );
+
+    const newLayers: TextBasedPersistedState['layers'] = {};
     layerIds.forEach((layerId) => {
-      (currentSuggestion.datasourceState as TextBasedPersistedState).layers[layerId].table =
-        containerProps.table;
+      newLayers[layerId] = {
+        ...(currentSuggestion!.datasourceState as TextBasedPersistedState).layers[layerId],
+        table: containerProps.table,
+      };
+    });
+
+    stateService?.setCurrentSuggestion({
+      ...currentSuggestion,
+      datasourceState: {
+        ...(currentSuggestion.datasourceState as TextBasedPersistedState),
+        layers: newLayers,
+      },
     });
   }
 
