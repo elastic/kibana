@@ -428,8 +428,7 @@ export const ActionTypeForm = ({
     setActionGroupIdByIndex &&
     !actionItem.frequency?.summary;
 
-  const showActionAlertsFilter =
-    hasFieldsForAAD || producerId === AlertConsumers.SIEM
+  const showActionAlertsFilter = hasFieldsForAAD || producerId === AlertConsumers.SIEM;
 
   const accordionContent = checkEnabledResult.isEnabled ? (
     <>
