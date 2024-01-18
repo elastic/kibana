@@ -14,32 +14,26 @@ import { ControlEditorProps } from '../../types';
 
 import { RangeSliderStrings } from './range_slider_strings';
 
-interface RangeSliderEditorState {
-  step: number;
-}
-
 export const RangeSliderEditorOptions = ({
   initialInput,
   onChange,
   setControlEditorValid,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
-  const [state, setState] = useState<RangeSliderEditorState>({
-    step: initialInput?.step || 1,
-  });
+  const [step, setStep] = useState<number>(initialInput?.step ?? 1);
 
   return (
     <>
       <EuiFormRow fullWidth label={RangeSliderStrings.editor.getStepTitle()}>
         <EuiFieldNumber
-          value={state.step}
+          value={step}
           onChange={(event) => {
-            const step = event.target.valueAsNumber;
-            onChange({ step });
-            setState((s) => ({ ...s, step }));
-            setControlEditorValid(step > 0);
+            const newStep = event.target.valueAsNumber;
+            onChange({ step: newStep });
+            setStep(newStep);
+            setControlEditorValid(newStep > 0);
           }}
           min={0}
-          isInvalid={state.step <= 0}
+          isInvalid={step <= 0}
           data-test-subj="rangeSliderControl__stepAdditionalSetting"
         />
       </EuiFormRow>
