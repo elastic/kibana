@@ -1349,23 +1349,18 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings(`from a | enrich [`, [
       'SyntaxError: expected {SETTING} but found "<EOF>"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
     testErrorsAndWarnings(`from a | enrich [ccq.mode`, [
       'SyntaxError: expected {COLON} but found "<EOF>"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
     testErrorsAndWarnings(`from a | enrich [ccq.mode:`, [
       'SyntaxError: expected {SETTING} but found "<EOF>"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
     testErrorsAndWarnings(`from a | enrich [ccq.mode:any`, [
       'SyntaxError: expected {CLOSING_BRACKET} but found "<EOF>"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
     testErrorsAndWarnings(`from a | enrich [ccq.mode:any] `, [
       "SyntaxError: extraneous input '<EOF>' expecting {OPENING_BRACKET, ENRICH_POLICY_NAME}",
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
     testErrorsAndWarnings(`from a | enrich [ccq.mode:value] policy `, [
@@ -1379,17 +1374,14 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich [setting:value policy`, [
       'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
       'Unsupported setting [setting], expected [ccq.mode]',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
 
     testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
       'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
 
     testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
       'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-      'Unknown policy [<missing ENRICH_POLICY_NAME>]',
     ]);
 
     testErrorsAndWarnings(`from a | enrich [setting:value] policy`, [

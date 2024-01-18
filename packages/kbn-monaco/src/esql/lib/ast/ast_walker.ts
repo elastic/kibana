@@ -120,7 +120,7 @@ export function collectAllColumnIdentifiers(
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName) {
+  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
     return [];
   }
   return [createPolicy(ctx._policyName)];
@@ -130,16 +130,15 @@ export function getPolicySettings(ctx: EnrichCommandContext) {
   if (!ctx.setting() || !ctx.setting().length) {
     return [];
   }
-  return ctx
-    .setting()
-    .filter((setting) => {
-      return setting._name?.text && setting._value?.text;
-    })
-    .map((setting) => {
-      const node = createSettingTuple(setting);
+  return ctx.setting().map((setting) => {
+    const node = createSettingTuple(setting);
+    if (setting._name?.text && setting._value?.text) {
       node.args.push(createLiteralString(setting._value)!);
       return node;
-    });
+    }
+    // incomplete setting
+    return node;
+  });
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {

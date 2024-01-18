@@ -100,6 +100,10 @@ export function createLiteralString(token: Token): ESQLLiteral {
   };
 }
 
+function isMissingText(text: string) {
+  return /<missing /.test(text);
+}
+
 export function createLiteral(
   type: ESQLLiteral['literalType'],
   node: TerminalNode | undefined
@@ -115,7 +119,7 @@ export function createLiteral(
     name: text,
     value: type === 'number' ? Number(text) : text,
     location: getPosition(node.symbol),
-    incomplete: /<missing /.test(node.text),
+    incomplete: isMissingText(node.text),
   };
 }
 
@@ -223,10 +227,12 @@ export function wrapIdentifierAsArray<T extends ParserRuleContext>(identifierCtx
 export function createSettingTuple(ctx: SettingContext): ESQLCommandMode {
   return {
     type: 'mode',
-    name: ctx._name.text!,
+    name: ctx._name?.text || '',
     text: ctx.text!,
     location: getPosition(ctx.start, ctx.stop),
-    incomplete: !(ctx._name.text || ctx._value.text),
+    incomplete:
+      (ctx._name?.text ? isMissingText(ctx._name.text) : true) ||
+      (ctx._value?.text ? isMissingText(ctx._value.text) : true),
     args: [],
   };
 }
