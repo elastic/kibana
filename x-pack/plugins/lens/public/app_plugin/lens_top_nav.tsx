@@ -1067,7 +1067,7 @@ export const LensTopNavMenu = ({
         managed
           ? [
               getManagedContentBadge(
-                i18n.translate('x-pack.lens.managedBadgeTooltip', {
+                i18n.translate('xpack.lens.managedBadgeTooltip', {
                   defaultMessage:
                     'This visualization is managed by Elastic. Changes made here must be saved in a new visualization.',
                 })
