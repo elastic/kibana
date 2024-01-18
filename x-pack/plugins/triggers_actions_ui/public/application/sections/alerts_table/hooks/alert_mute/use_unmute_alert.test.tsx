@@ -18,7 +18,8 @@ jest.mock('../../../../../common/lib/kibana');
 
 const params = { ruleId: '', alertInstanceId: '' };
 
-describe('useUnmuteAlert', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174900
+describe.skip('useUnmuteAlert', () => {
   const addErrorMock = useKibana().services.notifications.toasts.addError as jest.Mock;
 
   let appMockRender: AppMockRenderer;
