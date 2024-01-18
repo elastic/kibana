@@ -104,7 +104,7 @@ export function setupSavedObjects(
       'params',
       'executionId',
       'relatedSavedObjects',
-      'source',
+      // 'source',
     ]),
   });
 

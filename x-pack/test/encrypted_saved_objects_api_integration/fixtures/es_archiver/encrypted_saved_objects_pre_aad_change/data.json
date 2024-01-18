@@ -393,3 +393,115 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana",
+    "id": "uptime-synthetics-api-key:b448dffe-6e9c-4032-aa9a-5d9446531b83",
+    "source": {
+      "uptime-synthetics-api-key": {
+        "id": "some-id",
+        "name": "some-name",
+        "apiKey": "iqDazOl7MJ5ZAMFGm5p8palEp72ZYIEdNVfmd+WPVfpak61HiOZZx3HmeNaFZa6yviAWm+ES6e2PNKAOPRKmvPWbnQfSXI2Eww2zC+st7RrzNEEGiU7j2w4h+tgCfvGco8CiQZIGZ9dhViOW32p6nsKiuo8P9dRIEdYJA7zPU3oilA4oAz87DTAO3rmdn2dCQqqyOUuEDPL+ytpCyMY="
+      },
+      "type": "uptime-synthetics-api-key",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T22:27:14.580Z",
+      "created_at": "2024-01-17T22:27:14.580Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "api_key_pending_invalidation:a6b5125f-7e8b-491e-b389-14276d631d76",
+    "source": {
+      "api_key_pending_invalidation": {
+        "createdAt": "2024-01-17T22:46:44.927Z",
+        "apiKeyId": "cAnKjDD2SGfhkDTqr90lPzX1QaVCDt77DgiqaFKELR/++kD/GDnVMM2at4E7K7UVcX3GdIfJt+MvqkF0RVEEd9Zgt6IUBDYdSudgB79l5z26w9zWcrO6qVDMB1sRI1+ztYjKz8eLOtT2VQ4FXQG27CA+oBMXICwcSPueRTRGjkNoFMGS7C2iLxvuArZ/VMW0UALDI7D4PvvANjfKNjmbxGk="
+      },
+      "type": "api_key_pending_invalidation",
+      "references": [],
+      "managed": false,
+      "coreMigrationVersion": "8.8.0",
+      "updated_at": "2024-01-17T22:46:44.927Z",
+      "created_at": "2024-01-17T22:46:44.927Z"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action_task_params:de958a84-0c3f-4745-9cc2-8bfedbad9de9",
+    "source": {
+      "action_task_params": {
+        "apiKey": "cykZR9eNJTgMn2kSHWTQx2MvJtxdBZzHJnol/oNkblpIZd8zxJmzP7ov5mspipQ0cUmblkjwlqm7NWSR9P/2Na9Eb8d4llc+ePjCXFbTQoEBl80P5hxDyf8rW/SkZiUsXEAhixTwjavqT8mSFGgikzHnM4fHoHxIFSEp+v7BHWdll66hX6ESY2eZ2XVG1lKt42e533FIzQeXHJ5Olh0=",
+        "actionId": "some-action-id",
+        "actionExecutionId": "some-action-exe-id",
+        "isEphemeral": false,
+        "consumer": "some-consumer",
+        "params": {
+          "param1": "a",
+          "param2": "b",
+          "param3": "c"
+        },
+        "executionId": "some-exe-id",
+        "relatedSavedObjects": [
+          {
+            "namespace": "default",
+            "id": "obj1-id",
+            "type": "obj1-type"
+          },
+          {
+            "namespace": "default",
+            "id": "obj2-id",
+            "type": "obj2-type",
+            "typeId": "some-type-id"
+          },
+          {
+            "namespace": "default",
+            "id": "obj3-id",
+            "type": "obj3-type"
+          }
+        ],
+        "source": "some-source",
+        "taskInfo": {
+          "scheduled": "2024-01-17T23:09:25.993Z",
+          "attempts": 2,
+          "numSkippedRuns": 1
+        },
+        "actionInfo": {
+          "actionTypeId": "some-action-type-id",
+          "name": "some-action-name",
+          "config": {
+            "option1": "1",
+            "option2": "2"
+          },
+          "secrets": {
+            "secret1": "shhh",
+            "secret2": "not to be seen"
+          },
+          "actionId": "some-action-id",
+          "isInMemory": false
+        }
+      },
+      "type": "action_task_params",
+      "references": [],
+      "managed": false,
+      "namespaces": [
+        "default"
+      ],
+      "coreMigrationVersion": "8.8.0",
+      "typeMigrationVersion": "8.0.0",
+      "updated_at": "2024-01-17T23:09:25.993Z",
+      "created_at": "2024-01-17T23:09:25.993Z"
+    }
+  }
+}

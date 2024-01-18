@@ -139,6 +139,46 @@ export default function ({ getService }: FtrProviderContext) {
           'This token was encrypted prior to the AAD include list change.'
         );
       });
+
+      it(`successfully decrypts 'uptime-synthetics-api-key' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/uptime-synthetics-api-key/b448dffe-6e9c-4032-aa9a-5d9446531b83`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.apiKey).to.eql(
+          'This api key was encrypted prior to the AAD include list change.'
+        );
+      });
+
+      // Still working on these two, not passing...
+      // it(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
+      //   const decryptResponse = await supertest
+      //     .get(
+      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/a6b5125f-7e8b-491e-b389-14276d631d76`
+      //     )
+      //     .expect(200);
+
+      //   const decryptedObject = JSON.parse(decryptResponse.text);
+      //   expect(decryptedObject.attributes.apiKeyId).to.eql(
+      //     'This api key id was encrypted prior to the AAD include list change.'
+      //   );
+      // });
+
+      // it(`successfully decrypts 'action_task_params' objects`, async () => {
+      //   const decryptResponse = await supertest
+      //     .get(
+      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/action_task_params/de958a84-0c3f-4745-9cc2-8bfedbad9de9`
+      //     )
+      //     .expect(200);
+
+      //   const decryptedObject = JSON.parse(decryptResponse.text);
+      //   expect(decryptedObject.attributes.apiKey).to.eql(
+      //     'This api key was encrypted prior to the AAD include list change.'
+      //   );
+      // });
     });
   });
 }
