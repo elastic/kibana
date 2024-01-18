@@ -33,6 +33,8 @@ export const SCHEMA_QUERY_BASE = schema.object({
 
 export const SCHEMA_QUERY_V8_8_0 = SCHEMA_QUERY_BASE;
 
-export const SCHEMA_QUERY_MODEL_VERSION_1 = SCHEMA_QUERY_BASE.extends({
+export const SCHEMA_QUERY_MODEL_VERSION_1 = SCHEMA_QUERY_BASE;
+
+export const SCHEMA_QUERY_MODEL_VERSION_2 = SCHEMA_QUERY_BASE.extends({
   titleKeyword: schema.string(),
 });
