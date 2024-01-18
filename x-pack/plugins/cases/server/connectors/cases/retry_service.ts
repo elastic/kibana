@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { CasesConnectorError } from './cases_connector_error';
 import type { BackoffStrategy, BackoffFactory } from './types';
 
 export class CaseConnectorRetryService {
+  private logger: Logger;
   private maxAttempts: number;
   /**
    * 409 - Conflict
@@ -23,14 +25,32 @@ export class CaseConnectorRetryService {
   private timer: NodeJS.Timeout | null = null;
   private attempt: number = 0;
 
-  constructor(backOffFactory: BackoffFactory, maxAttempts: number = 10) {
+  constructor(logger: Logger, backOffFactory: BackoffFactory, maxAttempts: number = 10) {
+    this.logger = logger;
     this.backOffStrategy = backOffFactory.create();
     this.maxAttempts = maxAttempts;
   }
 
   public async retryWithBackoff<T>(cb: () => Promise<T>): Promise<T> {
     try {
+      this.logger.debug(
+        `[CasesConnector][retryWithBackoff] Running case connector. Attempt: ${this.attempt}`,
+        {
+          labels: { attempt: this.attempt },
+          tags: ['case-connector:retry-start'],
+        }
+      );
+
       const res = await cb();
+
+      this.logger.debug(
+        `[CasesConnector][retryWithBackoff] Case connector run successfully after ${this.attempt} attempts`,
+        {
+          labels: { attempt: this.attempt },
+          tags: ['case-connector:retry-success'],
+        }
+      );
+
       return res;
     } catch (error) {
       if (this.shouldRetry() && this.isRetryableError(error)) {
@@ -38,10 +58,23 @@ export class CaseConnectorRetryService {
         this.attempt++;
 
         await this.delay();
+
+        this.logger.warn(
+          `[CaseConnector] Case connector with status code ${error.statusCode} failed. Attempt for retry.`
+        );
+
         return this.retryWithBackoff(cb);
       }
 
       throw error;
+    } finally {
+      this.logger.debug(
+        `[CasesConnector][retryWithBackoff] Case connector run ended after ${this.attempt} attempts`,
+        {
+          labels: { attempt: this.attempt },
+          tags: ['case-connector:retry-end'],
+        }
+      );
     }
   }
 
@@ -56,6 +89,10 @@ export class CaseConnectorRetryService {
     ) {
       return true;
     }
+
+    this.logger.debug(`[CasesConnector][isRetryableError] Error is not retryable`, {
+      tags: ['case-connector:retry-error'],
+    });
 
     return false;
   }
