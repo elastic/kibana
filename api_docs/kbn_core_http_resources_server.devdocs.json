@@ -247,7 +247,7 @@
             "tags": [],
             "label": "renderAnonymousCoreApp",
             "description": [
-              "To respond with HTML page bootstrapping Kibana application without retrieving user-specific information."
+              "\nTo respond with HTML page bootstrapping Kibana application without retrieving user-specific information.\n**Note:**\n- Your client-side JavaScript bundle will only be loaded on an anonymous page if `plugin.enabledOnAnonymousPages` is enabled in your plugin's `kibana.jsonc` manifest file.\n- You will also need to register the route serving your anonymous app with the `coreSetup.http.anonymousPaths` service in your plugin's client-side `setup` method."
             ],
             "signature": [
               "(options?: ",
@@ -504,6 +504,14 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-common.KibanaRedirectionResponseFactory",
             "text": "KibanaRedirectionResponseFactory"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaNotModifiedResponseFactory",
+            "text": "KibanaNotModifiedResponseFactory"
           },
           " & ",
           {
