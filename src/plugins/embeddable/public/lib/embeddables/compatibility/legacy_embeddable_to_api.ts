@@ -144,8 +144,8 @@ export const legacyEmbeddableToApi = (
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
 
     const isImage = embeddable.type === 'image';
-    const isNavigation = embeddable.type === 'navigation';
-    return !isInputControl && !isMarkdown && !isImage && !isNavigation;
+    const isLinks = embeddable.type === 'links';
+    return !isInputControl && !isMarkdown && !isImage && !isLinks;
   };
 
   return {
