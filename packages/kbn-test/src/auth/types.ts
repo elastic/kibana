@@ -38,3 +38,12 @@ export interface User {
 }
 
 export type Role = string;
+
+export interface UserProfile {
+  username: string;
+  roles: string[];
+  full_name: string;
+  email: string;
+  enabled: boolean;
+  elastic_cloud_user: boolean;
+}

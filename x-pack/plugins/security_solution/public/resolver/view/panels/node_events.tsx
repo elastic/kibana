@@ -8,9 +8,10 @@
 import React, { memo, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSpacer, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useSelector } from 'react-redux';
+import { FormattedCount } from '../../../common/components/formatted_number';
 import { Breadcrumbs } from './breadcrumbs';
 import * as event from '../../../../common/endpoint/models/event';
 import type { EventStats } from '../../../../common/endpoint/types';
@@ -94,15 +95,22 @@ const EventCategoryLinks = memo(function ({
           defaultMessage: 'Count',
         }),
         'data-test-subj': 'resolver:panel:node-events:event-type-count',
-        width: '20%',
+        width: '25%',
         sortable: true,
+        render(count: number) {
+          return (
+            <EuiToolTip position="top" content={count}>
+              <FormattedCount count={count} />
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'eventType',
         name: i18n.translate('xpack.securitySolution.endpoint.resolver.panel.table.row.eventType', {
           defaultMessage: 'Event Type',
         }),
-        width: '80%',
+        width: '75%',
         sortable: true,
         render(eventType: string) {
           return (
