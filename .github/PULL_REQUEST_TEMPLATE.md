@@ -4,10 +4,10 @@
 ## How to test
 <!-- Include steps for testing your PR and screenshots (if applicable). -->
 
-## Risk matrix
+## Risks
 <!--
-Provide a matrix or statement of known risks and how they are mitigated.
-See risk examples: https://github.com/elastic/kibana/blob/main/RISK_MATRIX.mdx
+Provide a matrix OR statements of known risks and how they are mitigated.
+See risk matrix examples: https://github.com/elastic/kibana/blob/main/RISK_MATRIX.mdx
 -->
 
 | Risk                      | Probability | Severity | Mitigation/Notes        |
