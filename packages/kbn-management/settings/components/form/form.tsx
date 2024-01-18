@@ -8,7 +8,7 @@
 
 import React, { Fragment } from 'react';
 
-import type { FieldDefinition } from '@kbn/management-settings-types';
+import type { FieldDefinition, CategoryCounts } from '@kbn/management-settings-types';
 import { FieldCategories } from '@kbn/management-settings-components-field-category';
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
@@ -26,7 +26,7 @@ export interface FormProps {
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
   /** Contains the number of registered settings in each category. */
-  categoryCounts: { [category: string]: number };
+  categoryCounts: CategoryCounts;
   /** Handler for the "clear search" link. */
   onClearQuery: () => void;
   /** {@link UiSettingsScope} of the settings in this form. */

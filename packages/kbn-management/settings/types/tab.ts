@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { CategoryCounts } from './category';
 import { FieldDefinition } from '.';
 
 export interface SettingsTabs {
   [id: string]: {
     name: string;
     fields: FieldDefinition[];
-    categoryCounts: { [category: string]: number };
+    categoryCounts: CategoryCounts;
     callOutTitle: string;
     callOutText: string;
   };

@@ -16,14 +16,13 @@ import {
   EuiTabs,
   EuiCallOut,
 } from '@elastic/eui';
-import { categorizeFields } from '@kbn/management-settings-utilities';
-import { FieldDefinition } from '@kbn/management-settings-types';
+import { getCategoryCounts } from '@kbn/management-settings-utilities';
 import { Form } from '@kbn/management-settings-components-form';
 import { SettingsTabs } from '@kbn/management-settings-types/tab';
 import { EmptyState } from './empty_state';
 import { i18nTexts } from './i18n_texts';
 import { Tab } from './tab';
-import { useFields } from './hooks/use_fields';
+import { useScopeFields } from './hooks/use_scope_fields';
 import { QueryInput, QueryInputProps } from './query_input';
 import { useServices } from './services';
 
@@ -50,15 +49,6 @@ function getQueryParam(url: string) {
   return '';
 }
 
-function getCategoryCounts(fields: FieldDefinition[]) {
-  const categorizedFields = categorizeFields(fields);
-  const categoryCounts: { [category: string]: number } = {};
-  Object.entries(categorizedFields).forEach(
-    ([category, value]) => (categoryCounts[category] = value.count)
-  );
-  return categoryCounts;
-}
-
 /**
  * Component for displaying the {@link SettingsApplication} component.
  */
@@ -75,11 +65,8 @@ export const SettingsApplication = () => {
     addUrlToHistory(search);
   };
 
-  const spaceAllFields = useFields('namespace');
-  const spaceFilteredFields = useFields('namespace', query);
-
-  const globalAllFields = useFields('global');
-  const globalFilteredFields = useFields('global', query);
+  const [spaceAllFields, globalAllFields] = useScopeFields();
+  const [spaceFilteredFields, globalFilteredFields] = useScopeFields(query);
 
   const globalSettingsEnabled = globalAllFields.length > 0;
 
