@@ -21,10 +21,10 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import classnames from 'classnames';
 import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/project_navigation';
 
-import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
-import { useNavigation } from './navigation';
 import { isAbsoluteLink, isActiveFromUrl } from '../../utils';
+import type { NavigateToUrlFn } from '../../types';
+import { useNavigation } from '../navigation';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
