@@ -46,6 +46,7 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
   );
 
   const cloudProvider = firstNonNullValue(bucket.cloudProvider?.buckets?.[0]?.key);
+  const description = firstNonNullValue(bucket.description?.buckets?.[0]?.key);
   const cloudProviderName = cloudProvider
     ? getCloudProviderNameFromAbbreviation(cloudProvider)
     : '';
@@ -117,6 +118,20 @@ export const groupPanelRenderer: GroupPanelRenderer<VulnerabilitiesGroupingAggre
                   <strong>{bucket.key_as_string}</strong>
                 </EuiText>
               </EuiFlexItem>
+              {description && (
+                <EuiFlexItem>
+                  <EuiText size="xs" color="subdued">
+                    <EuiTextBlockTruncate
+                      lines={1}
+                      css={css`
+                        word-break: break-all;
+                      `}
+                    >
+                      {description}
+                    </EuiTextBlockTruncate>
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>
