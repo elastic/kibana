@@ -17,6 +17,11 @@ export type {
   CreateAPIKeyParams,
   CreateAPIKeyResult,
   CreateRestAPIKeyParams,
+  UpdateAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
+  UpdateAPIKeyResult,
   GrantAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
@@ -70,5 +75,8 @@ export {
   restApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
   crossClusterApiKeySchema,
+  updateRestApiKeySchema,
+  updateCrossClusterApiKeySchema,
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
 } from './src/authentication';
 export { GLOBAL_RESOURCE, elasticsearchRoleSchema, getKibanaRoleSchema } from './src/authorization';

@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import type { ApiKey, RestApiKey, SecurityLicense } from '@kbn/security-plugin-types-common';
+import type { SecurityLicense } from '@kbn/security-plugin-types-common';
 import { ReactElement } from 'react';
-import type { ExclusiveUnion } from '@elastic/eui';
-import type {
-  SecurityCreateApiKeyResponse,
-  SecurityUpdateApiKeyResponse,
-} from '@elastic/elasticsearch/lib/api/types';
 import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
 import type { SecurityNavControlServiceStart } from './nav_control';
 import type { UserProfileAPIClient } from './user_profile';
+import { ApiKeyFlyoutProps } from './api_key_flyout';
 
 export interface SecurityPluginSetup {
   /**
@@ -47,53 +43,3 @@ export interface SecurityPluginStart {
 
   renderApiKeyFlyout: (props: ApiKeyFlyoutProps) => ReactElement | null;
 }
-
-/**
- * Re-defining these here because we can't import from public here
- * we could move this to this public but that feels nasty
- */
-
-export interface ApiKeyFormValues {
-  name: string;
-  type: string;
-  expiration: string;
-  customExpiration: boolean;
-  customPrivileges: boolean;
-  includeMetadata: boolean;
-  access: string;
-  role_descriptors: string;
-  metadata: string;
-}
-
-interface CommonApiKeyFlyoutProps {
-  initialValues?: ApiKeyFormValues;
-  onCancel(): void;
-  canManageCrossClusterApiKeys?: boolean;
-  readOnly?: boolean;
-}
-
-interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
-  onSuccess?: (createApiKeyResponse: SecurityCreateApiKeyResponse) => void;
-}
-
-interface UpdateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
-  onSuccess?: (updateApiKeyResponse: SecurityUpdateApiKeyResponse) => void;
-  apiKey: CategorizedApiKey;
-}
-
-/**
- * Interface representing a REST API key that is managed by Kibana.
- */
-export interface ManagedApiKey extends Omit<RestApiKey, 'type'> {
-  type: 'managed';
-}
-
-/**
- * Interface representing an API key the way it is presented in the Kibana UI  (with Kibana system
- * API keys given its own dedicated `managed` type).
- */
-export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
-  expired: boolean;
-};
-
-export type ApiKeyFlyoutProps = ExclusiveUnion<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps>;

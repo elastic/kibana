@@ -11,15 +11,23 @@ export type {
   CreateRestAPIKeyParams,
   CreateRestAPIKeyWithKibanaPrivilegesParams,
   CreateCrossClusterAPIKeyParams,
+  UpdateAPIKeyParams,
+  UpdateRestAPIKeyParams,
+  UpdateCrossClusterAPIKeyParams,
+  UpdateRestAPIKeyWithKibanaPrivilegesParams,
   InvalidateAPIKeyResult,
   InvalidateAPIKeysParams,
   ValidateAPIKeyParams,
   APIKeys,
   GrantAPIKeyResult,
+  UpdateAPIKeyResult,
 } from './api_keys';
 export type { AuthenticationServiceStart } from './authentication_service';
 export {
   restApiKeySchema,
   getRestApiKeyWithKibanaPrivilegesSchema,
   crossClusterApiKeySchema,
+  updateRestApiKeySchema,
+  updateCrossClusterApiKeySchema,
+  getUpdateRestApiKeyWithKibanaPrivilegesSchema,
 } from './api_keys';

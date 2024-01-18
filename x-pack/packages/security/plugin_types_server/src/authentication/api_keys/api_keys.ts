@@ -199,3 +199,75 @@ export const crossClusterApiKeySchema = restApiKeySchema.extends({
     { unknowns: 'allow' }
   ),
 });
+
+/**
+ * Request body of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyParams =
+  | UpdateRestAPIKeyParams
+  | UpdateCrossClusterAPIKeyParams
+  | UpdateRestAPIKeyWithKibanaPrivilegesParams;
+
+export type UpdateRestAPIKeyParams = TypeOf<typeof updateRestApiKeySchema>;
+export type UpdateCrossClusterAPIKeyParams = TypeOf<typeof updateCrossClusterApiKeySchema>;
+export type UpdateRestAPIKeyWithKibanaPrivilegesParams = TypeOf<
+  ReturnType<typeof getUpdateRestApiKeyWithKibanaPrivilegesSchema>
+>;
+
+/**
+ * Response of Kibana Update API key endpoint.
+ */
+export type UpdateAPIKeyResult = estypes.SecurityUpdateApiKeyResponse;
+
+export const updateRestApiKeySchema = schema.object({
+  type: schema.maybe(schema.literal('rest')),
+  id: schema.string(),
+  role_descriptors: schema.recordOf(schema.string(), schema.object({}, { unknowns: 'allow' }), {
+    defaultValue: {},
+  }),
+  metadata: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+});
+
+export const updateCrossClusterApiKeySchema = restApiKeySchema.extends({
+  type: schema.literal('cross_cluster'),
+  role_descriptors: null,
+  access: schema.object(
+    {
+      search: schema.maybe(
+        schema.arrayOf(
+          schema.object(
+            {
+              names: schema.arrayOf(schema.string()),
+            },
+            { unknowns: 'allow' }
+          )
+        )
+      ),
+      replication: schema.maybe(
+        schema.arrayOf(
+          schema.object(
+            {
+              names: schema.arrayOf(schema.string()),
+            },
+            { unknowns: 'allow' }
+          )
+        )
+      ),
+    },
+    { unknowns: 'allow' }
+  ),
+});
+
+export const getUpdateRestApiKeyWithKibanaPrivilegesSchema = (
+  getBasePrivilegeNames: Parameters<typeof getKibanaRoleSchema>[0]
+) =>
+  restApiKeySchema.extends({
+    role_descriptors: null,
+    kibana_role_descriptors: schema.recordOf(
+      schema.string(),
+      schema.object({
+        elasticsearch: elasticsearchRoleSchema.extends({}, { unknowns: 'allow' }),
+        kibana: getKibanaRoleSchema(getBasePrivilegeNames),
+      })
+    ),
+  });

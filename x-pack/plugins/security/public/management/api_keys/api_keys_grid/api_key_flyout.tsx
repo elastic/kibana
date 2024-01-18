@@ -39,12 +39,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-
 import type {
   ApiKeyFlyoutProps,
   ApiKeyFormValues,
   CategorizedApiKey,
-} from './api_key_flyout_types';
+} from '@kbn/security-plugin-types-public';
+import type { CreateAPIKeyParams, UpdateAPIKeyParams } from '@kbn/security-plugin-types-server';
+
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_grid_page';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
@@ -55,7 +56,6 @@ import { useHtmlId } from '../../../components/use_html_id';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import type { CreateAPIKeyParams, UpdateAPIKeyParams } from '../api_keys_api_client';
 
 const TypeLabel = () => (
   <FormattedMessage

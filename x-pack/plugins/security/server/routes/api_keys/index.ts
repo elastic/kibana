@@ -13,13 +13,6 @@ import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { defineUpdateApiKeyRoutes } from './update';
 import type { RouteDefinitionParams } from '..';
 
-export type {
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-  UpdateRestAPIKeyParams,
-  UpdateCrossClusterAPIKeyParams,
-  UpdateRestAPIKeyWithKibanaPrivilegesParams,
-} from './update';
 export type { GetAPIKeysResult } from './get';
 
 export function defineApiKeysRoutes(params: RouteDefinitionParams) {

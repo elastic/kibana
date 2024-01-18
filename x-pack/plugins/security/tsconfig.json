@@ -8,7 +8,6 @@
     "public/**/*",
     "server/**/*",
     "__mocks__/**/*",
-    "../../packages/security/plugin_types_common/src/model/api_key.ts"
   ],
   "kbn_references": [
     "@kbn/cloud-plugin",

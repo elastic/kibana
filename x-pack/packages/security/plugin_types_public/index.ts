@@ -15,3 +15,4 @@ export type {
   UserProfileSuggestParams,
   UserProfileAPIClient,
 } from './src/user_profile';
+export type { ApiKeyFlyoutProps, ApiKeyFormValues, CategorizedApiKey } from './src/api_key_flyout';

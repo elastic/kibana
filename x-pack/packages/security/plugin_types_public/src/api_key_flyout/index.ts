@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type {
+import {
   SecurityCreateApiKeyResponse,
   SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { ExclusiveUnion } from '@elastic/eui';
-
-import type { ApiKey, RestApiKey } from '../../../../common';
+import { ExclusiveUnion } from '@elastic/eui';
+import { ApiKey, RestApiKey } from '@kbn/security-plugin-types-common';
 
 /**
- * The component types are in a separate file so we don't drag in the whole plugin in the bundle
- * when lazy loading
+ * Re-defining these here because we can't import from public here
+ * we could move this to this public but that feels nasty
  */
 
 export interface ApiKeyFormValues {
