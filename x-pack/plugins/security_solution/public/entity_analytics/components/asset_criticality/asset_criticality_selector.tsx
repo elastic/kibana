@@ -51,6 +51,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   return (
     <>
       <EuiAccordion
+        initialIsOpen
         id="asset-criticality-selector"
         buttonContent={
           <EuiTitle size="xs">
