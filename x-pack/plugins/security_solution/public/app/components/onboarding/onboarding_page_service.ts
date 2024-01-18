@@ -34,7 +34,7 @@ export class OnboardingPageService {
   }
 
   getProductTypesObservable() {
-    return this.productTypesSubject$.asObservable();
+    return this.productTypes$;
   }
 
   getProjectsUrlObservable() {
@@ -46,7 +46,7 @@ export class OnboardingPageService {
   }
 
   getAvailableStepsObservable() {
-    return this.availableStepsSubject$.asObservable();
+    return this.availableSteps$;
   }
 
   setProductTypes(productTypes: SecurityProductTypes) {
