@@ -91,7 +91,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
-      triggerCharacters: [',', '(', '=', ' ', ''],
+      triggerCharacters: [',', '(', '=', ' ', '[', ''],
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position,

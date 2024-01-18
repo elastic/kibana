@@ -45,6 +45,7 @@ export interface CommandBaseDefinition {
       optional?: boolean;
       innerType?: string;
       values?: string[];
+      valueDescriptions?: string[];
       literalOnly?: boolean;
       wildcards?: boolean;
     }>;

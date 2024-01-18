@@ -13,9 +13,18 @@ import { commandDefinitions } from '../definitions/commands';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { byOption, metadataOption, asOption, onOption, withOption } from '../definitions/options';
+import {
+  byOption,
+  metadataOption,
+  asOption,
+  onOption,
+  withOption,
+  appendSeparatorOption,
+} from '../definitions/options';
+import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
+  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -159,21 +168,14 @@ export function getAllCommands() {
   return Array.from(buildCommandLookup().values());
 }
 
-export function getCommandOption(name: CommandOptionsDefinition['name']) {
-  switch (name) {
-    case 'by':
-      return byOption;
-    case 'metadata':
-      return metadataOption;
-    case 'as':
-      return asOption;
-    case 'on':
-      return onOption;
-    case 'with':
-      return withOption;
-    default:
-      return;
-  }
+export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
+  return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
+    ({ name }) => name === optionName
+  );
+}
+
+export function getCommandMode(settingName: CommandModeDefinition['name']) {
+  return [ccqMode].find(({ name }) => name === settingName);
 }
 
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {

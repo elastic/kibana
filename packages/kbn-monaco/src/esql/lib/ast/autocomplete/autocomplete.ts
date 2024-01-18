@@ -14,8 +14,10 @@ import {
   columnExists,
   getColumnHit,
   getCommandDefinition,
+  getCommandMode,
   getCommandOption,
   getFunctionDefinition,
+  getLastCharFromTrimmed,
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
@@ -24,6 +26,7 @@ import {
   isLiteralItem,
   isOptionItem,
   isRestartingExpression,
+  isSettingItem,
   isSourceItem,
   isTimeIntervalItem,
   monacoPositionToOffset,
@@ -34,6 +37,7 @@ import type {
   ESQLAst,
   ESQLAstItem,
   ESQLCommand,
+  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
@@ -60,6 +64,8 @@ import {
   buildVariablesDefinitions,
   buildOptionDefinition,
   TRIGGER_SUGGESTION_COMMAND,
+  buildSettingDefinitions,
+  buildSettingValueDefinitions,
 } from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -159,21 +165,31 @@ export async function suggest(
   let finalText = innerText;
 
   // check if all brackets are closed, otherwise close them
-  const unclosedBrackets = countBracketsUnclosed('(', finalText);
+  const unclosedRoundBrackets = countBracketsUnclosed('(', finalText);
+  const unclosedSquaredBrackets = countBracketsUnclosed('[', finalText);
+  const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
   if (
     context.triggerCharacter === ',' ||
-    (context.triggerKind === 0 && unclosedBrackets === 0) ||
+    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
     (context.triggerCharacter === ' ' &&
       // make this more robust
       (isMathFunction(innerText[offset - 2]) || isComma(innerText[offset - 2])))
   ) {
     finalText = `${innerText.substring(0, offset)}${EDITOR_MARKER}${innerText.substring(offset)}`;
   }
-  if (unclosedBrackets > 0) {
-    // inject the closing brackets
-    finalText += Array(unclosedBrackets).fill(')').join('');
+  // if there are unclosed brackets, close them
+  if (unclosedBrackets) {
+    for (const [char, count] of [
+      [')', unclosedRoundBrackets],
+      [']', unclosedSquaredBrackets],
+    ]) {
+      if (count) {
+        // inject the closing brackets
+        finalText += Array(count).fill(char).join('');
+      }
+    }
   }
 
   const { ast } = await astProvider(finalText);
@@ -211,6 +227,20 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata
     );
+  }
+  if (astContext.type === 'setting') {
+    // need this wrap/unwrap thing to make TS happy
+    const { setting, ...rest } = astContext;
+    if (setting && isSettingItem(setting)) {
+      return getSettingArgsSuggestions(
+        innerText,
+        ast,
+        { setting, ...rest },
+        getFieldsByType,
+        getFieldsMap,
+        getPolicyMetadata
+      );
+    }
   }
   if (astContext.type === 'option') {
     // need this wrap/unwrap thing to make TS happy
@@ -674,7 +704,7 @@ async function getExpressionSuggestionsByType(
   }
 
   const nonOptionArgs = command.args.filter(
-    (arg) => !isOptionItem(arg) && !Array.isArray(arg) && !arg.incomplete
+    (arg) => !isOptionItem(arg) && !isSettingItem(arg) && !Array.isArray(arg) && !arg.incomplete
   );
   // Perform some checks on mandatory arguments
   const mandatoryArgsAlreadyPresent =
@@ -953,6 +983,47 @@ async function getFunctionArgsSuggestions(
     }));
   }
   return mathCommandDefinition;
+}
+
+async function getSettingArgsSuggestions(
+  innerText: string,
+  commands: ESQLCommand[],
+  {
+    command,
+    node,
+    setting,
+  }: {
+    command: ESQLCommand;
+    setting: ESQLCommandMode;
+    node: ESQLSingleAstItem | undefined;
+  },
+  getFieldsByType: GetFieldsByTypeFn,
+  getFieldsMaps: GetFieldsMapFn,
+  getPolicyMetadata: GetPolicyMetadataFn
+) {
+  const suggestions = [];
+  const existingSettingArgs = new Set(
+    command.args
+      .filter((item) => isSettingItem(item) && !item.incomplete)
+      .map((item) => (isSettingItem(item) ? item.name : undefined))
+  );
+
+  const settingDef =
+    setting.name && setting.incomplete
+      ? getCommandMode(setting.name)
+      : getCommandDefinition(command.name).modes.find(({ name }) => !existingSettingArgs.has(name));
+
+  if (settingDef) {
+    const lastChar = getLastCharFromTrimmed(innerText);
+    if (lastChar === '[') {
+      // COMMAND [<here>
+      suggestions.push(...buildSettingDefinitions(settingDef));
+    } else if (lastChar === ':') {
+      // COMMAND [setting: <here>
+      suggestions.push(...buildSettingValueDefinitions(settingDef));
+    }
+  }
+  return suggestions;
 }
 
 async function getOptionArgsSuggestions(

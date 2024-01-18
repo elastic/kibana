@@ -16,6 +16,23 @@ export const ccqMode: CommandModeDefinition = {
   }),
   signature: {
     multipleParams: false,
-    params: [{ name: 'mode', type: 'string', values: ['any', 'coordinator', 'remote'] }],
+    params: [
+      {
+        name: 'mode',
+        type: 'string',
+        values: ['any', 'coordinator', 'remote'],
+        valueDescriptions: [
+          i18n.translate('monaco.esql.definitions.ccqAnyDoc', {
+            defaultMessage: 'Enrich takes place on any cluster',
+          }),
+          i18n.translate('monaco.esql.definitions.ccqCoordinatorDoc', {
+            defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
+          }),
+          i18n.translate('monaco.esql.definitions.ccqRemoteDoc', {
+            defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
+          }),
+        ],
+      },
+    ],
   },
 };

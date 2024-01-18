@@ -480,6 +480,7 @@ describe('autocomplete', () => {
   });
 
   describe('enrich', () => {
+    const modes = ['any', 'coordinator', 'remote'];
     for (const prevCommand of [
       '',
       '| enrich other-policy ',
@@ -488,6 +489,18 @@ describe('autocomplete', () => {
     ]) {
       testSuggestions(
         `from a ${prevCommand}| enrich `,
+        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+      );
+      testSuggestions(
+        `from a ${prevCommand}| enrich [`,
+        modes.map((mode) => `ccq.mode:${mode}`),
+        '['
+      );
+      // Not suggesting duplicate setting
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:any] [`, [], '[');
+      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:`, modes, ':');
+      testSuggestions(
+        `from a ${prevCommand}| enrich [ccq.mode:any] `,
         policies.map(({ name, suggestedAs }) => suggestedAs || name)
       );
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
