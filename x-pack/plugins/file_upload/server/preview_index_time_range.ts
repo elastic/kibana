@@ -28,16 +28,6 @@ export async function previewIndexTimeRange(
   pipeline: IngestPipeline,
   docs: Doc[]
 ): Promise<{ start: number | null; end: number | null }> {
-  for (const doc of docs) {
-    if (doc.event === undefined) {
-      doc.event = {
-        timezone: 'UTC',
-      };
-    } else if (doc.event.timezone === undefined) {
-      doc.event.timezone = 'UTC';
-    }
-  }
-
   const resp = await client.asInternalUser.ingest.simulate({
     pipeline,
     docs: docs.map((doc, i) => ({
