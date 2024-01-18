@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
+import { isSuppressibleAlertRule } from '../../../../../common/detection_engine/utils';
 import { SuppressibleAlertRules } from '../../../../../common/detection_engine/constants';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
@@ -24,7 +25,7 @@ export const useAlertSuppression = (rule: Partial<RuleResponse>): UseAlertSuppre
     if (rule.type === SuppressibleAlertRules.THREAT_MATCH)
       return IsRuleFeatureFlagEnabled('alertSuppressionForIndicatorMatchRuleEnabled');
 
-    return rule.type in SuppressibleAlertRules;
+    return isSuppressibleAlertRule(rule.type);
   }, [rule.type]);
 
   return {

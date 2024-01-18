@@ -70,8 +70,10 @@ export const normalizeThresholdObject = (threshold: Threshold): ThresholdNormali
 export const normalizeMachineLearningJobIds = (value: string | string[]): string[] =>
   Array.isArray(value) ? value : [value];
 
-export const isSuppressibleAlertRule = (ruleType: Type) => ruleType in SuppressibleAlertRules;
-
+export const isSuppressibleAlertRule = (ruleType: Type): boolean => {
+  const suppressibleRules: string[] = Object.values(SuppressibleAlertRules);
+  return suppressibleRules.includes(ruleType);
+};
 export const isSuppressionRuleConfiguredWithDuration = (ruleType: Type) =>
   isSuppressibleAlertRule(ruleType);
 

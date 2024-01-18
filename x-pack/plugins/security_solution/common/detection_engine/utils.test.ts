@@ -13,11 +13,17 @@ import {
   normalizeThresholdField,
   isMlRule,
   isEsqlRule,
+  isSuppressibleAlertRule,
+  isSuppressionRuleConfiguredWithDuration,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithMissingFields,
 } from './utils';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { hasLargeValueList } from '@kbn/securitysolution-list-utils';
 
 import type { EntriesArray } from '@kbn/securitysolution-io-ts-list-types';
+import { SuppressibleAlertRules } from './constants';
 
 describe('#hasLargeValueList', () => {
   test('it returns false if empty array', () => {
@@ -215,5 +221,74 @@ describe('normalizeMachineLearningJobIds', () => {
       'ml_job_id',
       'other_ml_job_id',
     ]);
+  });
+});
+describe('Alert Suppression Rules', () => {
+  describe('isSuppressibleAlertRule', () => {
+    test('should return true for a suppressible rule type', () => {
+      const suppressibleRules: Type[] = Object.values(SuppressibleAlertRules);
+      suppressibleRules.forEach((rule) => {
+        const result = isSuppressibleAlertRule(rule);
+        expect(result).toBe(true);
+      });
+    });
+
+    test('should return false for a non-suppressible rule type', () => {
+      const ruleType = '123' as Type;
+      const result = isSuppressibleAlertRule(ruleType);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isSuppressionRuleConfiguredWithDuration', () => {
+    test('should return true for a suppressible rule type', () => {
+      const suppressibleRules: Type[] = Object.values(SuppressibleAlertRules);
+      suppressibleRules.forEach((rule) => {
+        const result = isSuppressionRuleConfiguredWithDuration(rule);
+        expect(result).toBe(true);
+      });
+    });
+
+    test('should return false for a non-suppressible rule type', () => {
+      const ruleType = '123' as Type;
+      const result = isSuppressionRuleConfiguredWithDuration(ruleType);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isSuppressionRuleConfiguredWithGroupBy', () => {
+    test('should return true for a suppressible rule type with groupBy', () => {
+      const result = isSuppressionRuleConfiguredWithGroupBy('saved_query');
+      expect(result).toBe(true);
+    });
+
+    test('should return false for a threshold rule type', () => {
+      const result = isSuppressionRuleConfiguredWithGroupBy('threshold');
+      expect(result).toBe(false);
+    });
+
+    test('should return false for a non-suppressible rule type', () => {
+      const ruleType = '123' as Type;
+      const result = isSuppressionRuleConfiguredWithGroupBy(ruleType);
+      expect(result).toBe(false);
+    });
+  });
+
+  describe('isSuppressionRuleConfiguredWithMissingFields', () => {
+    test('should return true for a suppressible rule type with missing fields', () => {
+      const result = isSuppressionRuleConfiguredWithMissingFields('query');
+      expect(result).toBe(true);
+    });
+
+    test('should return false for a threshold rule type', () => {
+      const result = isSuppressionRuleConfiguredWithMissingFields('threshold');
+      expect(result).toBe(false);
+    });
+
+    test('should return false for a non-suppressible rule type', () => {
+      const ruleType = '123' as Type;
+      const result = isSuppressionRuleConfiguredWithMissingFields(ruleType);
+      expect(result).toBe(false);
+    });
   });
 });
