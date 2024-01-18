@@ -23,6 +23,7 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -73,6 +74,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   licensing: LicensingPluginStart;
   expressions: ExpressionsStart;
   isServerless: boolean;
+  lens: LensPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
