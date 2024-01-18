@@ -19,6 +19,11 @@ export interface IndexContent {
   }) => ReturnType<FunctionComponent>;
 }
 
+export interface IndexToggle {
+  matchIndex: (index: Index) => boolean;
+  label: string;
+  name: string;
+}
 export interface IndexBadge {
   matchIndex: (index: Index) => boolean;
   label: string;
@@ -51,7 +56,7 @@ export interface ExtensionsSetup {
   // adds a badge to the index name
   addBadge(badge: IndexBadge): void;
   // adds a toggle to the indices list
-  addToggle(toggle: any): void;
+  addToggle(toggle: IndexToggle): void;
   // adds a column to display additional information added via a data enricher
   addColumn(column: IndicesListColumn): void;
   // set the content to render when the indices list is empty
@@ -70,7 +75,7 @@ export class ExtensionsService {
   private _filters: any[] = [];
   private _badges: IndexBadge[] = [
     {
-      matchIndex: (index: { isFrozen: boolean }) => {
+      matchIndex: (index) => {
         return index.isFrozen;
       },
       label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
@@ -80,7 +85,17 @@ export class ExtensionsService {
       color: 'primary',
     },
   ];
-  private _toggles: any[] = [];
+  private _toggles: IndexToggle[] = [
+    {
+      matchIndex: (index) => {
+        return index.hidden;
+      },
+      label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
+        defaultMessage: 'Include hidden indices',
+      }),
+      name: 'includeHiddenIndices',
+    },
+  ];
   private _columns: IndicesListColumn[] = [];
   private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
