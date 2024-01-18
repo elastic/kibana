@@ -67,6 +67,16 @@ export type SortFunction<T> = (
   sortDirection: SortDirection
 ) => T[];
 
+export const shouldfetchServer = ({
+  maxCountExceeded,
+  newSearchQuery,
+  oldSearchQuery,
+}: {
+  maxCountExceeded: boolean;
+  newSearchQuery: string;
+  oldSearchQuery: string;
+}) => maxCountExceeded || !newSearchQuery.includes(oldSearchQuery);
+
 function UnoptimizedManagedTable<T extends object>(props: {
   items: T[];
   columns: Array<ITableColumn<T>>;
@@ -245,9 +255,13 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const onChangeSearchQuery = useCallback(
     (value: string) => {
       setSearchQuery(value);
-      const shouldFetchServer =
-        tableSearchBar.maxCountExceeded || !value.includes(searchQuery);
-      if (shouldFetchServer) {
+      if (
+        shouldfetchServer({
+          maxCountExceeded: tableSearchBar.maxCountExceeded,
+          newSearchQuery: value,
+          oldSearchQuery: searchQuery,
+        })
+      ) {
         tableSearchBar.onChangeSearchQuery(value);
       }
     },
