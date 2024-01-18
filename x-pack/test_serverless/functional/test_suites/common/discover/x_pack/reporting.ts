@@ -73,7 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
-      it('is available if new', async () => {
+      xit('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();

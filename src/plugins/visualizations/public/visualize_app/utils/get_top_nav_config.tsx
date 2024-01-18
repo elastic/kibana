@@ -392,7 +392,7 @@ export const getTopNavConfig = (
           share.toggleShareContextMenu({
             anchorElement,
             allowEmbed: true,
-            allowShortUrl: Boolean(visualizeCapabilities.createShortUrl),
+            allowShortUrl: true,
             shareableUrl: unhashUrl(window.location.href),
             objectId: savedVis?.id,
             objectType: 'visualization',

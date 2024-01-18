@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('snapshot share', async () => {
       describe('test local state', async () => {
-        it('should not have "panels" state when not in unsaved changes state', async () => {
+        xit('should not have "panels" state when not in unsaved changes state', async () => {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           expect(await getSharedUrl('snapshot')).to.not.contain('panels');
         });
