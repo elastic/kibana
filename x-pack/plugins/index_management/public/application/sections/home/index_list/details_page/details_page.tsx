@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
+import qs from 'query-string';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
@@ -34,8 +35,12 @@ export const DetailsPage: FunctionComponent<
   const [index, setIndex] = useState<Index | null>();
 
   const navigateToIndicesList = useCallback(() => {
-    history.push(`/${Section.Indices}`);
-  }, [history]);
+    const indicesListParams = qs.parse(search);
+    delete indicesListParams.indexName;
+    delete indicesListParams.tab;
+    const paramsString = qs.stringify(indicesListParams);
+    history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
+  }, [history, search]);
 
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
@@ -109,6 +114,7 @@ export const DetailsPage: FunctionComponent<
       tab={tab}
       fetchIndexDetails={fetchIndexDetails}
       history={history}
+      search={search}
       navigateToIndicesList={navigateToIndicesList}
     />
   );
