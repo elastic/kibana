@@ -98,7 +98,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
       await PageObjects.lens.switchToVisualization('lnsDatatable');
       expect(await PageObjects.lens.getDatatableHeaderText()).to.eql('Maximum of bytes');
-      await PageObjects.common.sleep(50000);
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('19,986');
       await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
       await PageObjects.lens.assertLegacyMetric('Maximum of bytes', '19,986');
