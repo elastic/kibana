@@ -62,8 +62,6 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'setup',
   'note',
   // Other fields
-  'actions',
   'throttle',
-  'exceptions_list',
   'max_signals',
 ];

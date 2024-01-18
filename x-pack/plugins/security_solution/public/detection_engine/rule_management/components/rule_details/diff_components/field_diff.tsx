@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import stringify from 'json-stable-stringify';
+import { EuiFlexGroup, EuiHorizontalRule, EuiTitle } from '@elastic/eui';
+import { camelCase, startCase } from 'lodash';
 import React from 'react';
 import { DiffView } from '../json_diff/diff_view';
 import { DiffMethod } from '../json_diff/mark_edits';
@@ -17,37 +18,47 @@ export interface FieldDiffComponentProps {
   fieldName: string;
 }
 
-export const FieldDiffComponent = ({ ruleDiffs, fieldName }: FieldDiffComponentProps) => {
-  const { euiTheme } = useEuiTheme();
+const sortAndStringifyJson = (jsObject: unknown): string => {
+  if (typeof jsObject === 'string') {
+    return jsObject;
+  }
+  return stringify(jsObject, { space: 2 });
+};
 
+export const FieldDiffComponent = ({ ruleDiffs, fieldName }: FieldDiffComponentProps) => {
+  console.log('here: ', ruleDiffs);
   return (
     <RuleDiffPanelWrapper fieldName={fieldName}>
       {ruleDiffs.length === 1 ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <DiffView
-            oldSource={ruleDiffs[0].currentVersion}
-            newSource={ruleDiffs[0].targetVersion}
+            oldSource={sortAndStringifyJson(ruleDiffs[0].currentVersion)}
+            newSource={sortAndStringifyJson(ruleDiffs[0].targetVersion)}
             diffMethod={DiffMethod.WORDS}
           />
         </EuiFlexGroup>
       ) : (
-        ruleDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }) => (
-          <EuiFlexGroup key={specificFieldName} justifyContent="spaceBetween">
-            {currentVersion !== targetVersion ? (
-              <EuiFlexGroup direction="column">
-                <EuiTitle size="xxxs">
-                  <h4>{specificFieldName}</h4>
-                </EuiTitle>
-                <DiffView
-                  oldSource={currentVersion}
-                  newSource={targetVersion}
-                  diffMethod={DiffMethod.WORDS}
-                />
-                <EuiHorizontalRule margin="s" size="full" />
-              </EuiFlexGroup>
-            ) : null}
-          </EuiFlexGroup>
-        ))
+        ruleDiffs.map(({ currentVersion, targetVersion, fieldName: specificFieldName }) => {
+          const formattedCurrentVersion = sortAndStringifyJson(currentVersion);
+          const formattedTargetVersion = sortAndStringifyJson(targetVersion);
+          return (
+            <EuiFlexGroup key={specificFieldName} justifyContent="spaceBetween">
+              {formattedCurrentVersion !== formattedTargetVersion ? (
+                <EuiFlexGroup direction="column">
+                  <EuiTitle size="xxxs">
+                    <h4>{startCase(camelCase(specificFieldName))}</h4>
+                  </EuiTitle>
+                  <DiffView
+                    oldSource={formattedCurrentVersion}
+                    newSource={formattedTargetVersion}
+                    diffMethod={DiffMethod.WORDS}
+                  />
+                  <EuiHorizontalRule margin="s" size="full" />
+                </EuiFlexGroup>
+              ) : null}
+            </EuiFlexGroup>
+          );
+        })
       )}
     </RuleDiffPanelWrapper>
   );

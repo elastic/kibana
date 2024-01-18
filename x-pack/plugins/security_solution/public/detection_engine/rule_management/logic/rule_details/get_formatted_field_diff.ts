@@ -5,71 +5,58 @@
  * 2.0.
  */
 
-import stringify from 'json-stable-stringify';
 import type { AllFieldsDiff } from '../../../../../common/api/detection_engine';
-
-const sortAndStringifyJson = (jsObject: unknown): string => stringify(jsObject, { space: 2 });
 
 export const getFormattedFieldDiff = (
   fieldName: keyof AllFieldsDiff,
   fields: AllFieldsDiff
-): Array<{ currentVersion: string; targetVersion: string; fieldName: string }> => {
+): Array<{ currentVersion: unknown; targetVersion: unknown; fieldName: string }> => {
   switch (fieldName) {
-    case 'name':
-    case 'description':
-    case 'license':
-    case 'note':
-    case 'setup':
-    case 'event_category_override':
-    case 'timestamp_field':
-    case 'tiebreaker_field':
-    case 'threat_indicator_path':
-    case 'history_window_start':
-    case 'type':
-      return [
-        {
-          fieldName,
-          currentVersion: fields[fieldName].current_version,
-          targetVersion: fields[fieldName].target_version,
-        },
-      ];
     case 'data_source':
       const dataSourceObj = fields[fieldName];
       return [
         {
-          fieldName: 'Type',
+          fieldName: 'type',
           currentVersion: fields[fieldName].current_version?.type,
           targetVersion: fields[fieldName].target_version?.type,
         },
         {
-          fieldName: 'Index Patterns',
-          currentVersion: sortAndStringifyJson(
-            dataSourceObj.current_version.index_patterns ?? undefined
-          ),
-          targetVersion: sortAndStringifyJson(
-            dataSourceObj.target_version.index_patterns ?? undefined
-          ),
+          fieldName: 'index_patterns',
+          currentVersion:
+            dataSourceObj.current_version?.type === 'index_patterns'
+              ? dataSourceObj.current_version?.index_patterns
+              : '',
+          targetVersion:
+            dataSourceObj.target_version?.type === 'index_patterns'
+              ? dataSourceObj.target_version?.index_patterns
+              : '',
         },
         {
-          fieldName: 'Data View ID',
-          currentVersion: dataSourceObj.current_version.data_view_id ?? undefined,
-          targetVersion: dataSourceObj.target_version.data_view_id ?? undefined,
+          fieldName: 'data_view_id',
+          currentVersion:
+            dataSourceObj.current_version?.type === 'data_view'
+              ? dataSourceObj.current_version?.data_view_id
+              : '',
+          targetVersion:
+            dataSourceObj.target_version?.type === 'data_view'
+              ? dataSourceObj.target_version?.data_view_id
+              : '',
         },
       ];
     case 'eql_query':
       return [
         {
-          fieldName: 'Query',
+          fieldName: 'query',
           currentVersion: fields[fieldName].current_version.query,
           targetVersion: fields[fieldName].target_version.query,
         },
         {
-          fieldName: 'Filters',
-          currentVersion: sortAndStringifyJson(fields[fieldName].current_version.filters),
-          targetVersion: sortAndStringifyJson(fields[fieldName].target_version.filters),
+          fieldName: 'filters',
+          currentVersion: fields[fieldName].current_version.filters,
+          targetVersion: fields[fieldName].target_version.filters,
         },
         {
-          fieldName: 'Language',
+          fieldName: 'language',
           currentVersion: fields[fieldName].current_version.language,
           targetVersion: fields[fieldName].target_version.language,
         },
@@ -77,33 +64,46 @@ export const getFormattedFieldDiff = (
     case 'kql_query':
       return [
         {
-          fieldName: 'Query',
+          fieldName: 'query',
           currentVersion: fields[fieldName].current_version.query,
           targetVersion: fields[fieldName].target_version.query,
         },
         {
-          fieldName: 'Filters',
-          currentVersion: sortAndStringifyJson(fields[fieldName].current_version.filters),
-          targetVersion: sortAndStringifyJson(fields[fieldName].target_version.filters),
+          fieldName: 'filters',
+          currentVersion: fields[fieldName].current_version.filters,
+          targetVersion: fields[fieldName].target_version.filters,
         },
         {
-          fieldName: 'Language',
+          fieldName: 'language',
           currentVersion: fields[fieldName].current_version.language,
           targetVersion: fields[fieldName].target_version.language,
         },
         {
-          fieldName: 'Type',
+          fieldName: 'type',
           currentVersion: fields[fieldName].current_version.type,
           targetVersion: fields[fieldName].target_version.type,
         },
       ];
-
+    case 'threshold':
+    case 'threat_query':
+    case 'esql_query':
+      const currentVersionSubfields = Object.keys(fields[fieldName].current_version);
+      const subfieldsToReturn = [];
+      for (let i = 0; i < currentVersionSubfields.length; i++) {
+        const subfieldName = currentVersionSubfields[i];
+        subfieldsToReturn.push({
+          fieldName: subfieldName,
+          currentVersion: fields[fieldName].current_version[subfieldName],
+          targetVersion: fields[fieldName].target_version[subfieldName],
+        });
+      }
+      return subfieldsToReturn;
     default:
       return [
         {
           fieldName,
-          currentVersion: sortAndStringifyJson(fields[fieldName].current_version),
-          targetVersion: sortAndStringifyJson(fields[fieldName].target_version),
+          currentVersion: fields[fieldName].current_version,
+          targetVersion: fields[fieldName].target_version,
         },
       ];
   }

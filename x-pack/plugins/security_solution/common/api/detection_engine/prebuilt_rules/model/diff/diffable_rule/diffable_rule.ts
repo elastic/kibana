@@ -262,6 +262,7 @@ export type DiffableAllFields = DiffableCommonFields &
   Omit<DiffableCustomQueryFields, 'type'> &
   Omit<DiffableSavedQueryFields, 'type'> &
   Omit<DiffableEqlFields, 'type'> &
+  Omit<DiffableEsqlFields, 'type'> &
   Omit<DiffableThreatMatchFields, 'type'> &
   Omit<DiffableThresholdFields, 'type'> &
   Omit<DiffableMachineLearningFields, 'type'> &
