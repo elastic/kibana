@@ -14,13 +14,17 @@ import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test
 import { SlackActionFieldsComponents as SlackActionFields } from './slack_connectors';
 import { useValidChannels } from './use_valid_channels';
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('./use_valid_channels');
 
-const mockUseKibanaReturnValue = createStartServicesMock();
 (useKibana as jest.Mock).mockImplementation(() => ({
   services: {
-    ...mockUseKibanaReturnValue,
     docLinks: {
       links: {
         alerting: { slackApiAction: 'url' },
