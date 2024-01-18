@@ -5,24 +5,29 @@
  * 2.0.
  */
 
+import React from 'react';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
+import {
+  AlertsTableConfigurationRegistry,
+  RenderCustomActionsRowArgs,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { RULE_DETAILS_ALERTS_TABLE_CONFIG_ID } from '../../../constants';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
-import { getRenderCellValue } from '../common/render_cell_value';
-import { columns } from './default_columns';
+import { AlertActions } from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../../../plugin';
-import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../../embeddable/slo/constants';
+import { getRenderCellValue } from '../common/render_cell_value';
+import { getColumns } from '../common/get_columns';
 
-export const getSloAlertsTableConfiguration = (
+export const getRuleDetailsTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
 ): AlertsTableConfigurationRegistry => ({
-  id: SLO_ALERTS_TABLE_CONFIG_ID,
+  id: RULE_DETAILS_ALERTS_TABLE_CONFIG_ID,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
-  columns,
+  columns: getColumns(),
   getRenderCellValue: ({ setFlyoutAlert }) =>
     getRenderCellValue({
       observabilityRuleTypeRegistry,
@@ -35,9 +40,20 @@ export const getSloAlertsTableConfiguration = (
       },
     },
   ],
-
+  useActionsColumn: () => ({
+    renderCustomActionsRow: (props: RenderCustomActionsRowArgs) => {
+      return (
+        <AlertActions
+          {...props}
+          config={config}
+          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
+        />
+      );
+    },
+  }),
   useInternalFlyout: () => {
     const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
     return { header, body, footer };
   },
+  ruleTypeIds: observabilityRuleTypeRegistry.list(),
 });

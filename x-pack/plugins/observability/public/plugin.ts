@@ -175,6 +175,17 @@ export class Plugin
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
 
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
+      './components/alerts_table/register_alerts_table_configuration'
+    );
+  }
+
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
   private readonly deepLinks: AppDeepLink[] = [
@@ -260,7 +271,6 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
@@ -435,35 +445,19 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
+      return registerAlertsTableConfiguration(
+        alertsTableConfigurationRegistry,
+        this.observabilityRuleTypeRegistry,
+        config
+      );
+    });
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
-    });
-
-    const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
-      );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-
-    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
-    });
-
-    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
-      const { getSloAlertsTableConfiguration } = await import(
-        './components/alerts_table/slo/get_slo_alerts_table_configuration'
-      );
-      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {

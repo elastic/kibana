@@ -11,7 +11,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import type { SloItem } from '../types';
-import { SLO_ALERTS_TABLE_CONFID } from '../../constants';
+import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
@@ -86,7 +86,7 @@ export function SloAlertsTable({ slos, deps, timeRange, onLoaded, lastReloadRequ
     <AlertsStateTable
       query={useSloAlertsQuery(slos, timeRange)}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-      configurationId={SLO_ALERTS_TABLE_CONFID}
+      configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}

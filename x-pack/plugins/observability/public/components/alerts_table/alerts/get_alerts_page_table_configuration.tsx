@@ -12,21 +12,21 @@ import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { casesFeatureId, observabilityFeatureId } from '../../../common';
-import { getRenderCellValue } from './render_cell_value';
-import { columns } from './default_columns';
-import { AlertActions } from '../../pages/alerts/components/alert_actions';
-import { useGetAlertFlyoutComponents } from '../alerts_flyout/use_get_alert_flyout_components';
-import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
-import type { ConfigSchema } from '../../plugin';
+import { casesFeatureId, observabilityFeatureId } from '../../../../common';
+import { AlertActions } from '../../../pages/alerts/components/alert_actions';
+import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
+import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import type { ConfigSchema } from '../../../plugin';
+import { getRenderCellValue } from '../common/render_cell_value';
+import { getColumns } from '../common/get_columns';
 
-export const getAlertsTableConfiguration = (
+export const getAlertsPageTableConfiguration = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
   config: ConfigSchema
 ): AlertsTableConfigurationRegistry => ({
   id: observabilityFeatureId,
   cases: { featureId: casesFeatureId, owner: [observabilityFeatureId] },
-  columns,
+  columns: getColumns({ showRuleName: true }),
   getRenderCellValue: ({ setFlyoutAlert }) =>
     getRenderCellValue({
       observabilityRuleTypeRegistry,
