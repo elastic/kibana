@@ -7,7 +7,7 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
-import { UrlStateProvider } from './context/url_state_provider';
+import { ExpandableFlyoutContext } from './context';
 import { MemoryStateProvider } from './context/memory_state_provider';
 
 interface ExpandableFlyoutProviderProps {
@@ -22,16 +22,16 @@ interface ExpandableFlyoutProviderProps {
  * Wrap your plugin with this context for the ExpandableFlyout React component.
  * Storage property allows you to specify how the flyout state works internally.
  * With "url", it will be persisted into url and thus allow for deep linking & will survive webpage reloads.
- * "memory" is based on useReducer hook. The state is saved internally to the package. which means it will not be
+ * "memory" is based on an isolated redux context. The state is saved internally to the package, which means it will not be
  * persisted when sharing url or reloading browser pages.
  */
 export const ExpandableFlyoutProvider: FC<PropsWithChildren<ExpandableFlyoutProviderProps>> = ({
   children,
   storage = 'url',
 }) => {
-  if (storage === 'memory') {
-    return <MemoryStateProvider>{children}</MemoryStateProvider>;
-  }
-
-  return <UrlStateProvider>{children}</UrlStateProvider>;
+  return (
+    <ExpandableFlyoutContext.Provider value={storage}>
+      <MemoryStateProvider>{children}</MemoryStateProvider>
+    </ExpandableFlyoutContext.Provider>
+  );
 };

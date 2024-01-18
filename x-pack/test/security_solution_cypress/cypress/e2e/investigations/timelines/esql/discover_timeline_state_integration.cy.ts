@@ -114,16 +114,17 @@ describe(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId);
-            cy.get(LOADING_INDICATOR).should('not.exist');
-            goToEsqlTab();
-            verifyDiscoverEsqlQuery(esqlQuery);
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
-            cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
-            cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
-              'have.text',
-              INITIAL_START_DATE
-            );
+            openTimelineById(timelineId).then(() => {
+              cy.get(LOADING_INDICATOR).should('not.exist');
+              goToEsqlTab();
+              verifyDiscoverEsqlQuery(esqlQuery);
+              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column1)).should('exist');
+              cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER(column2)).should('exist');
+              cy.get(GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON(DISCOVER_CONTAINER)).should(
+                'have.text',
+                INITIAL_START_DATE
+              );
+            });
           });
       });
       it('should save/restore esql tab dataview/timerange/filter/query/columns when timeline is opened via url', () => {
@@ -164,10 +165,11 @@ describe(
             createNewTimeline();
             // switch to old timeline
             openTimelineFromSettings();
-            openTimelineById(timelineId);
-            cy.get(LOADING_INDICATOR).should('not.exist');
-            goToEsqlTab();
-            cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
+            openTimelineById(timelineId).then(() => {
+              cy.get(LOADING_INDICATOR).should('not.exist');
+              goToEsqlTab();
+              cy.get(DISCOVER_DATA_VIEW_SWITCHER.BTN).should('not.exist');
+            });
           });
       });
     });

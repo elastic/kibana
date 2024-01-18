@@ -6,63 +6,68 @@
  * Side Public License, v 1.
  */
 
+import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { Subject, Subscription } from 'rxjs';
-import React, { createContext, useContext } from 'react';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
-import {
-  ViewMode,
-  Container,
-  type IEmbeddable,
-  type EmbeddableInput,
-  type EmbeddableOutput,
-  type EmbeddableFactory,
-} from '@kbn/embeddable-plugin/public';
 import {
   getDefaultControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { I18nProvider } from '@kbn/i18n-react';
-import { RefreshInterval } from '@kbn/data-plugin/public';
-import type { Filter, TimeRange, Query } from '@kbn/es-query';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import {
+  Container,
+  ViewMode,
+  type EmbeddableFactory,
+  type EmbeddableInput,
+  type EmbeddableOutput,
+  type IEmbeddable,
+} from '@kbn/embeddable-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-full-screen';
-import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 
-import {
-  runClone,
-  runSaveAs,
-  showSettings,
-  runQuickSave,
-  replacePanel,
-  addFromLibrary,
-  addOrUpdateEmbeddable,
-} from './api';
-
+import { PanelPackage } from '@kbn/presentation-containers';
+import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
+import { DashboardContainerInput, DashboardPanelState } from '../../../common';
+import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import { DashboardAnalyticsService } from '../../services/analytics/types';
+import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
+import { pluginServices } from '../../services/plugin_services';
+import { placePanel } from '../component/panel_placement';
+import { DashboardViewport } from '../component/viewport/dashboard_viewport';
+import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
+import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
+import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
 import {
   DashboardPublicState,
   DashboardReduxState,
   DashboardRenderPerformanceStats,
 } from '../types';
-import { placePanel } from '../component/panel_placement';
-import { pluginServices } from '../../services/plugin_services';
-import { initializeDashboard } from './create/create_dashboard';
-import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
-import { DashboardCreationOptions } from './dashboard_container_factory';
-import { DashboardAnalyticsService } from '../../services/analytics/types';
-import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
-import { DashboardViewport } from '../component/viewport/dashboard_viewport';
-import { DashboardPanelState, DashboardContainerInput } from '../../../common';
-import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
-import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
+import {
+  addFromLibrary,
+  addOrUpdateEmbeddable,
+  runClone,
+  runQuickSave,
+  runSaveAs,
+  showSettings,
+} from './api';
+import { duplicateDashboardPanel } from './api/duplicate_dashboard_panel';
 import { combineDashboardFiltersWithControlGroupFilters } from './create/controls/dashboard_control_group_integration';
-import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
+import { initializeDashboard } from './create/create_dashboard';
+import {
+  DashboardCreationOptions,
+  dashboardTypeDisplayLowercase,
+  dashboardTypeDisplayName,
+} from './dashboard_container_factory';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -94,7 +99,10 @@ export const useDashboardContainer = (): DashboardContainer => {
   return dashboard!;
 };
 
-export class DashboardContainer extends Container<InheritedChildInput, DashboardContainerInput> {
+export class DashboardContainer
+  extends Container<InheritedChildInput, DashboardContainerInput>
+  implements DashboardExternallyAccessibleApi
+{
   public readonly type = DASHBOARD_CONTAINER_TYPE;
 
   // state management
@@ -104,6 +112,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
 
   public integrationSubscriptions: Subscription = new Subscription();
+  public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
@@ -185,6 +194,22 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.getState = reduxTools.getState;
     this.dispatch = reduxTools.dispatch;
     this.select = reduxTools.select;
+
+    this.savedObjectId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.publishingSubscription.add(
+      this.onStateChange(() => {
+        if (this.savedObjectId.value === this.getDashboardSavedObjectId()) return;
+        this.savedObjectId.next(this.getDashboardSavedObjectId());
+      })
+    );
+
+    this.expandedPanelId = new BehaviorSubject(this.getDashboardSavedObjectId());
+    this.publishingSubscription.add(
+      this.onStateChange(() => {
+        if (this.expandedPanelId.value === this.getExpandedPanelId()) return;
+        this.expandedPanelId.next(this.getExpandedPanelId());
+      })
+    );
   }
 
   public getAppContext() {
@@ -319,6 +344,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     this.cleanupStateTools();
     this.controlGroup?.destroy();
     this.diffingSubscription.unsubscribe();
+    this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
@@ -335,7 +361,42 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   public showSettings = showSettings;
   public addFromLibrary = addFromLibrary;
 
-  public replacePanel = replacePanel;
+  public duplicatePanel(id: string) {
+    duplicateDashboardPanel.bind(this)(id);
+  }
+
+  public canRemovePanels = () => !this.getExpandedPanelId();
+
+  public getTypeDisplayName = () => dashboardTypeDisplayName;
+  public getTypeDisplayNameLowerCase = () => dashboardTypeDisplayLowercase;
+
+  public savedObjectId: BehaviorSubject<string | undefined>;
+  public expandedPanelId: BehaviorSubject<string | undefined>;
+
+  public async replacePanel(idToRemove: string, { panelType, initialState }: PanelPackage) {
+    const newId = await this.replaceEmbeddable(
+      idToRemove,
+      initialState as Partial<EmbeddableInput>,
+      panelType,
+      true
+    );
+    if (this.getExpandedPanelId() !== undefined) {
+      this.setExpandedPanelId(newId);
+    }
+    this.setHighlightPanelId(newId);
+    return newId;
+  }
+
+  public getDashboardPanelFromId = (panelId: string) => this.getInput().panels[panelId];
+
+  public expandPanel = (panelId?: string) => {
+    this.setExpandedPanelId(panelId);
+
+    if (!panelId) {
+      this.setScrollToPanelId(panelId);
+    }
+  };
+
   public addOrUpdateEmbeddable = addOrUpdateEmbeddable;
 
   public forceRefresh(refreshControlGroup: boolean = true) {
