@@ -23,6 +23,7 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { validatePolicyAgainstAppFeatures } from './handlers/validate_policy_against_app_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
@@ -104,6 +105,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     if (newPackagePolicy?.inputs) {
+      validatePolicyAgainstAppFeatures(newPackagePolicy.inputs, appFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
     // Optional endpoint integration configuration
@@ -208,6 +210,9 @@ export const getPackagePolicyUpdateCallback = (
       licenseService,
       logger
     );
+
+    // Validate that Endpoint Security policy uses only enabled App Features
+    validatePolicyAgainstAppFeatures(endpointIntegrationData.inputs, appFeatures);
 
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 

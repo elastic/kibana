@@ -443,6 +443,28 @@ describe('ingest_integration tests ', () => {
 
     const validDateYesterday = moment.utc().subtract(1, 'day');
 
+    it('should throw if endpointProtectionUpdates appFeature is disabled and user modifies global_manifest_version', () => {
+      appFeaturesService = createAppFeaturesServiceMock(
+        ALL_APP_FEATURE_KEYS.filter((key) => key !== 'endpoint_protection_updates')
+      );
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextMock.logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService,
+        cloudService,
+        esClient,
+        appFeaturesService
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+      policyConfig.inputs[0]!.config!.policy.value.global_manifest_version = '2023-01-01';
+      expect(() =>
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow(
+        'To modify protection updates, you must add at least Endpoint Complete to your project.'
+      );
+    });
+
     it.each([
       {
         date: 'invalid',
