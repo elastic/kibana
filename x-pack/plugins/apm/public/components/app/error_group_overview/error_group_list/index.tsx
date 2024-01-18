@@ -94,10 +94,7 @@ function ErrorGroupList({
   );
   const { offset } = query;
 
-  const [currentPage, setCurrentPage] = useState<{
-    items: ErrorGroupItem[];
-    totalCount: number;
-  }>({ items: [], totalCount: 0 });
+  const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
 
   const {
     setDebouncedSearchQuery,
@@ -106,7 +103,7 @@ function ErrorGroupList({
     detailedStatistics,
     detailedStatisticsStatus,
   } = useErrorGroupListData({
-    currentPageItems: currentPage.items,
+    currentPageItems: renderedItems,
     sortField: 'lastSeen', // TODO: make this configurable
     sortDirection: 'desc', // TODO: make this configurable
   });
@@ -309,7 +306,6 @@ function ErrorGroupList({
       fieldsToSearch: ['name', 'groupId', 'culprit', 'type'] as ErrorFields[],
       maxCountExceeded: mainStatistics.maxCountExceeded,
       onChangeSearchQuery: setDebouncedSearchQuery,
-      onChangeCurrentPage: setCurrentPage,
       placeholder: i18n.translate(
         'xpack.apm.errorsTable.filterErrorsPlaceholder',
         { defaultMessage: 'Search errors by message, type or culprit' }
@@ -336,6 +332,7 @@ function ErrorGroupList({
       initialPageSize={pageSize}
       isLoading={isMainStatsLoading}
       tableSearchBar={tableSearchBar}
+      onChangeRenderedItems={setRenderedItems}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
     />
   );

@@ -81,6 +81,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   initialSortField?: string;
   initialSortDirection?: SortDirection;
   showPerPageOptions?: boolean;
+  onChangeRenderedItems?: (renderedItems: T[]) => void;
 
   // sorting
   sortItems?: boolean;
@@ -111,6 +112,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
     sortItems = true,
     sortFn = defaultSortFn,
 
+    onChangeRenderedItems = () => {},
     saveTableOptionsToUrl = true,
     tableLayout,
     tableSearchBar = {
@@ -203,6 +205,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
     tableOptions.page.index,
     tableOptions.page.size,
   ]);
+
+  useEffect(() => {
+    onChangeRenderedItems(renderedItems);
+  }, [onChangeRenderedItems, renderedItems]);
 
   const sorting = useMemo(
     () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
