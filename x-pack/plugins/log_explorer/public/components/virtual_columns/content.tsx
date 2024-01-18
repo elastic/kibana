@@ -115,7 +115,7 @@ const Content = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logExplorerCellDescriptionList"
-          css={sourceDocumentCss}
+          customCss={sourceDocumentCss}
         />
       )}
     </span>
