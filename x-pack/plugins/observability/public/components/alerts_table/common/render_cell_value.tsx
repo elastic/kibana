@@ -18,6 +18,8 @@ import {
   ALERT_UUID,
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_VALUES,
+  ALERT_RULE_NAME,
+  ALERT_RULE_CATEGORY,
 } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash';
 import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
@@ -27,6 +29,7 @@ import { AlertSeverityBadge } from '../../alert_severity_badge';
 import { AlertStatusIndicator } from '../../alert_status_indicator';
 import { parseAlert } from '../../../pages/alerts/helpers/parse_alert';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import { CellTooltip } from './cell_tooltip';
 import { TimestampTooltip } from './timestamp_tooltip';
 
 export const getMappedNonEcsValue = ({
@@ -115,6 +118,13 @@ export const getRenderCellValue = ({
             {alert.reason}
           </EuiLink>
         );
+      case ALERT_RULE_NAME:
+        const ruleCategory = getMappedNonEcsValue({
+          data,
+          fieldName: ALERT_RULE_CATEGORY,
+        });
+        const tooltipContent = getRenderValue(ruleCategory);
+        return <CellTooltip value={value} tooltipContent={tooltipContent} />;
       default:
         return <>{value}</>;
     }
