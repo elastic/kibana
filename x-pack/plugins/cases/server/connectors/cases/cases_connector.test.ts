@@ -25,6 +25,7 @@ const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
 
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
+  const logger = loggingSystemMock.createLogger();
 
   const groupingBy = ['host.name', 'dest.ip'];
   const rule = {
@@ -68,7 +69,7 @@ describe('CasesConnector', () => {
         config: {},
         secrets: {},
         connector: { id: '1', type: CASES_CONNECTOR_ID },
-        logger: loggingSystemMock.createLogger(),
+        logger,
         services,
       },
     });
@@ -85,6 +86,7 @@ describe('CasesConnector', () => {
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
+      logger,
       casesClient: { foo: 'bar' },
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
@@ -137,6 +139,10 @@ describe('CasesConnector', () => {
         reopenClosedCases,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad request"`);
+
+    expect(logger.error.mock.calls[0][0]).toBe(
+      '[CasesConnector][_run] Execution of case connector failed. Message: Bad request. Status code: 400'
+    );
   });
 
   it('throws a CasesConnectorError when the executor throws an CaseError error', async () => {
@@ -152,6 +158,10 @@ describe('CasesConnector', () => {
         reopenClosedCases,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden"`);
+
+    expect(logger.error.mock.calls[0][0]).toBe(
+      '[CasesConnector][_run] Execution of case connector failed. Message: Forbidden. Status code: 500'
+    );
   });
 
   it('throws a CasesConnectorError when the executor throws an Error', async () => {
@@ -167,6 +177,10 @@ describe('CasesConnector', () => {
         reopenClosedCases,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
+
+    expect(logger.error.mock.calls[0][0]).toBe(
+      '[CasesConnector][_run] Execution of case connector failed. Message: Server error. Status code: 500'
+    );
   });
 
   it('retries correctly', async () => {

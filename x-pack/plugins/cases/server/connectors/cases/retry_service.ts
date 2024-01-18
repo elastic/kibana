@@ -60,7 +60,7 @@ export class CaseConnectorRetryService {
         await this.delay();
 
         this.logger.warn(
-          `[CaseConnector] Case connector with status code ${error.statusCode} failed. Attempt for retry.`
+          `[CaseConnector] Case connector failed with status code ${error.statusCode}. Attempt for retry: ${this.attempt}`
         );
 
         return this.retryWithBackoff(cb);

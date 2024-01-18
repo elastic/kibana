@@ -107,42 +107,37 @@ export class CasesConnector extends SubActionConnector<
         casesClient,
       });
 
-      this.logCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
+      this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
 
       await connectorExecutor.execute(params);
 
-      this.logCurrentState(
+      this.logDebugCurrentState(
         'success',
         '[CasesConnector][_run] Execution of case connector succeeded',
         params
       );
     } catch (error) {
-      let theError: CasesConnectorError;
-
       if (isCasesConnectorError(error)) {
-        theError = error;
+        this.logError(error);
+        throw error;
       }
 
       if (isCasesClientError(error)) {
-        theError = new CasesConnectorError(error.message, error.boomify().output.statusCode);
+        const caseConnectorError = new CasesConnectorError(
+          error.message,
+          error.boomify().output.statusCode
+        );
+
+        this.logError(caseConnectorError);
+        throw caseConnectorError;
       }
 
-      theError = new CasesConnectorError(error.message, 500);
+      const caseConnectorError = new CasesConnectorError(error.message, 500);
+      this.logError(caseConnectorError);
 
-      this.logger.error(
-        `[CasesConnector][_run] Execution of case connector failed. Message: ${theError.message}. Status code: ${theError.statusCode}`,
-        {
-          error: {
-            stack_trace: theError.stack,
-            code: theError.statusCode.toString(),
-            type: 'CasesConnectorError',
-          },
-        }
-      );
-
-      throw theError;
+      throw caseConnectorError;
     } finally {
-      this.logCurrentState(
+      this.logDebugCurrentState(
         'end',
         '[CasesConnector][_run] Execution of case connector ended',
         params
@@ -150,7 +145,7 @@ export class CasesConnector extends SubActionConnector<
     }
   }
 
-  private logCurrentState(state: string, message: string, params: CasesConnectorRunParams) {
+  private logDebugCurrentState(state: string, message: string, params: CasesConnectorRunParams) {
     const alertIds = params.alerts.map(({ _id }) => _id);
 
     this.logger.debug(`[CasesConnector][_run] ${message}`, {
@@ -164,5 +159,18 @@ export class CasesConnector extends SubActionConnector<
       },
       tags: [`cases-connector:${state}`, params.rule.id, ...alertIds],
     });
+  }
+
+  private logError(error: CasesConnectorError) {
+    this.logger.error(
+      `[CasesConnector][_run] Execution of case connector failed. Message: ${error.message}. Status code: ${error.statusCode}`,
+      {
+        error: {
+          stack_trace: error.stack,
+          code: error.statusCode.toString(),
+          type: 'CasesConnectorError',
+        },
+      }
+    );
   }
 }

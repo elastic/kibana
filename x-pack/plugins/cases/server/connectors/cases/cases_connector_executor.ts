@@ -431,7 +431,7 @@ export class CasesConnectorExecutor {
      */
     if (!parsedDate || !parsedDate.isValid()) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing ${timeWindow} error`
+        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "${timeWindow}"`
       );
 
       return false;
@@ -444,7 +444,7 @@ export class CasesConnectorExecutor {
      */
     if (isNaN(counterLastUpdatedAtAsDate.getTime())) {
       this.logger.warn(
-        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp ${counterLastUpdatedAt} is not a valid date`
+        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "${counterLastUpdatedAt}" is not a valid date`
       );
 
       return false;

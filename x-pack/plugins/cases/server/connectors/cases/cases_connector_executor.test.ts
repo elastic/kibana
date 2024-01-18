@@ -2088,4 +2088,41 @@ describe('CasesConnectorExecutor', () => {
       });
     });
   });
+
+  describe('Logging', () => {
+    it('logs a warning when parsing the time window results to error', async () => {
+      mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+      dateMathMock.parse.mockImplementation(() => undefined);
+
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow: 'invalid',
+        reopenClosedCases,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"'
+      );
+    });
+
+    it('logs a warning when the last updated date of the oracle record is not valid', async () => {
+      mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], updatedAt: 'invalid' }]);
+
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
+      );
+    });
+  });
 });
