@@ -51,7 +51,7 @@ export type SaveModalContainerProps = {
   >;
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   // is this visualization managed by the system?
-  managed: boolean;
+  managed?: boolean;
 } & ExtraProps;
 
 export function SaveModalContainer({
@@ -183,7 +183,7 @@ export function SaveModalContainer({
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
       returnToOrigin={redirectToOrigin != null}
-      managed={managed}
+      managed={Boolean(managed)}
     />
   );
 }
