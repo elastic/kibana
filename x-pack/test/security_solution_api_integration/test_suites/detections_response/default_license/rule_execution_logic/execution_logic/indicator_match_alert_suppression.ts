@@ -936,7 +936,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
           await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
 
-          // 4 alert should be suppressed
+          // 3 alerts should be suppressed
           await indexListOfSourceDocuments([doc1, doc2, doc2, doc2]);
 
           await addThreatDocuments({
@@ -1274,7 +1274,7 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          it('should suppress alerts with missing fields during rule execution only fro  multiple suppress by fields', async () => {
+          it('should suppress alerts with missing fields during rule execution only for multiple suppress by fields', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
             const noMissingFieldsDoc = {
