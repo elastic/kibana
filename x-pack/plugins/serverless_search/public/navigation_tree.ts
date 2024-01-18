@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import {
-  DefaultNavigation,
-  NavigationKibanaProvider,
-  type NavigationTreeDefinition,
-} from '@kbn/shared-ux-chrome-navigation';
-import React from 'react';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { CONNECTORS_LABEL } from '../../common/i18n_string';
+import { CONNECTORS_LABEL } from '../common/i18n_string';
 
-const navigationTree: NavigationTreeDefinition = {
+export const navigationTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
     {
@@ -140,16 +132,3 @@ const navigationTree: NavigationTreeDefinition = {
     },
   ],
 };
-
-export const createServerlessSearchSideNavComponent =
-  (
-    core: CoreStart,
-    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
-  ) =>
-  () => {
-    return (
-      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlSearchSideNav" />
-      </NavigationKibanaProvider>
-    );
-  };

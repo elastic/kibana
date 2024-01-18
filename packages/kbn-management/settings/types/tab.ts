@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { type FC } from 'react';
+import { CategoryCounts } from './category';
+import { FieldDefinition } from '.';
 
-export interface Props {
-  children?: JSX.Element[];
+export interface SettingsTabs {
+  [id: string]: {
+    name: string;
+    fields: FieldDefinition[];
+    categoryCounts: CategoryCounts;
+    callOutTitle: string;
+    callOutText: string;
+  };
 }
-
-// Note: this component is only used to detect which children are part of the body and which
-// are part of the footer. See the "childrenParsed" value of the <Navigation /> component.
-export const NavigationFooter: FC<Props> = () => {
-  return null;
-};

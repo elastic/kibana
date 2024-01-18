@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type { CoreStart } from '@kbn/core/public';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
-import {
-  DefaultNavigation,
-  NavigationKibanaProvider,
-  NavigationTreeDefinition,
-} from '@kbn/shared-ux-chrome-navigation';
-import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
-const navigationTree: NavigationTreeDefinition = {
+export const navigationTree: NavigationTreeDefinition = {
   body: [
     { type: 'recentlyAccessed' },
     {
@@ -240,16 +232,3 @@ const navigationTree: NavigationTreeDefinition = {
     },
   ],
 };
-
-export const getObservabilitySideNavComponent =
-  (
-    core: CoreStart,
-    { serverless, cloud }: { serverless: ServerlessPluginStart; cloud: CloudStart }
-  ) =>
-  () => {
-    return (
-      <NavigationKibanaProvider core={core} serverless={serverless} cloud={cloud}>
-        <DefaultNavigation navigationTree={navigationTree} dataTestSubj="svlObservabilitySideNav" />
-      </NavigationKibanaProvider>
-    );
-  };

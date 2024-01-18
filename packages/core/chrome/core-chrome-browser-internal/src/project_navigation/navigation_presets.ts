@@ -8,6 +8,7 @@
 
 import { cloneDeep } from 'lodash';
 
+import type { NavigationGroupPreset } from '@kbn/core-chrome-browser';
 import {
   defaultNavigation as analytics,
   type AnalyticsNodeDefinition,
@@ -21,8 +22,6 @@ import {
   defaultNavigation as management,
   type ManagementNodeDefinition,
 } from '@kbn/default-nav-management';
-
-import type { NavigationGroupPreset } from './types';
 
 export function getPresets(preset: 'devtools'): DevToolsNodeDefinition;
 export function getPresets(preset: 'management'): ManagementNodeDefinition;

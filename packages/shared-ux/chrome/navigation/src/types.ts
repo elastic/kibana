@@ -7,15 +7,22 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 
 import type {
   ChromeNavLink,
-  ChromeProjectNavigation,
   ChromeProjectNavigationNode,
+  ChromeRecentlyAccessedHistoryItem,
 } from '@kbn/core-chrome-browser';
-import type { BasePathService, NavigateToUrlFn, RecentItem } from './internal';
-import type { CloudLinks } from '../src/cloud_links';
+
+type BasePathService = Pick<IBasePath, 'prepend'>;
+
+/**
+ * @internal
+ */
+
+export type NavigateToUrlFn = ApplicationStart['navigateToUrl'];
 
 /**
  * A list of services that are consumed by this component.
@@ -23,13 +30,10 @@ import type { CloudLinks } from '../src/cloud_links';
  */
 export interface NavigationServices {
   basePath: BasePathService;
-  recentlyAccessed$: Observable<RecentItem[]>;
-  deepLinks$: Observable<Readonly<Record<string, ChromeNavLink>>>;
+  recentlyAccessed$: Observable<ChromeRecentlyAccessedHistoryItem[]>;
   navIsOpen: boolean;
   navigateToUrl: NavigateToUrlFn;
-  onProjectNavigationChange: (chromeProjectNavigation: ChromeProjectNavigation) => void;
   activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
-  cloudLinks: CloudLinks;
   isSideNavCollapsed: boolean;
 }
 
@@ -42,7 +46,7 @@ export interface NavigationKibanaDependencies {
   core: {
     application: { navigateToUrl: NavigateToUrlFn };
     chrome: {
-      recentlyAccessed: { get$: () => Observable<RecentItem[]> };
+      recentlyAccessed: { get$: () => Observable<ChromeRecentlyAccessedHistoryItem[]> };
       navLinks: {
         getNavLinks$: () => Observable<Readonly<ChromeNavLink[]>>;
       };
@@ -53,12 +57,5 @@ export interface NavigationKibanaDependencies {
       getLoadingCount$(): Observable<number>;
     };
   };
-  serverless: {
-    setNavigation: (
-      projectNavigation: ChromeProjectNavigation,
-      navigationTreeFlattened?: Record<string, ChromeProjectNavigationNode>
-    ) => void;
-    getActiveNavigationNodes$: () => Observable<ChromeProjectNavigationNode[][]>;
-  };
-  cloud: CloudStart;
+  activeNodes$: Observable<ChromeProjectNavigationNode[][]>;
 }
