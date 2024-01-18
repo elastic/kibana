@@ -159,6 +159,12 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
     : 'info';
 };
 
+/**
+ * Get human readable string of time elapsed between to dates. Return value will be in the format
+ * of `hh:mm:ss.ms`
+ * @param startDate
+ * @param endTime
+ */
 export const getElapsedTime = (
   startDate: string | Date,
   endTime: string | Date = new Date()
