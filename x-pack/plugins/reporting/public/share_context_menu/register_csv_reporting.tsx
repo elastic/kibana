@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
-import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
@@ -30,6 +30,10 @@ export const reportingCsvShareProvider = ({
       return [];
     }
 
+    // only csv v2 supports esql (isTextBased) reports
+    // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
+    const reportType = sharingData.isTextBased ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
+
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
       absoluteTime,
@@ -41,12 +45,21 @@ export const reportingCsvShareProvider = ({
     const jobParams = {
       title: sharingData.title as string,
       objectType,
-      columns: sharingData.columns as string[] | undefined,
     };
 
     const getJobParams = (forShareUrl?: boolean) => {
+      if (reportType === CSV_JOB_TYPE_V2) {
+        // csv v2 uses locator params
+        return {
+          ...jobParams,
+          locatorParams: sharingData.locatorParams as [Record<string, unknown>],
+        };
+      }
+
+      // csv v1 uses search source and columns
       return {
         ...jobParams,
+        columns: sharingData.columns as string[] | undefined,
         searchSource: getSearchSource({
           addGlobalTimeFilter: true,
           absoluteTime: !forShareUrl,
@@ -92,7 +105,7 @@ export const reportingCsvShareProvider = ({
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
-              reportType={CSV_JOB_TYPE}
+              reportType={reportType}
               layoutId={undefined}
               objectId={objectId}
               getJobParams={getJobParams}
