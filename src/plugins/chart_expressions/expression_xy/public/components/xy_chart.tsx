@@ -52,7 +52,11 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import { PersistedState } from '@kbn/visualizations-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  useSizeTransitionVeil,
+  getOverridesFor,
+  ChartSizeSpec,
+} from '@kbn/chart-expressions-common';
 import type {
   FilterEvent,
   BrushEvent,
@@ -144,8 +148,11 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   syncCursor: boolean;
   eventAnnotationService: EventAnnotationServiceType;
   renderComplete: () => void;
+  shouldUseVeil: boolean;
   uiState?: PersistedState;
   timeFormat: string;
+  setChartSize: (chartSizeSpec: ChartSizeSpec) => void;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -199,12 +206,16 @@ export function XYChart({
   onClickMultiValue,
   layerCellValueActions,
   onSelectRange,
+  setChartSize,
   interactive = true,
   syncColors,
   syncTooltips,
   syncCursor,
+  shouldUseVeil,
+
   useLegacyTimeAxis,
   renderComplete,
+
   uiState,
   timeFormat,
   overrides,
@@ -293,6 +304,34 @@ export function XYChart({
   );
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
+
+  const isTimeViz = isTimeChart(dataLayers);
+
+  const chartSizeSpec: ChartSizeSpec =
+    isTimeViz && !isHorizontalChart(dataLayers)
+      ? {
+          aspectRatio: {
+            x: 16,
+            y: 9,
+          },
+          minDimensions: {
+            y: { value: 300, unit: 'pixels' },
+            x: { value: 100, unit: 'percentage' },
+          },
+        }
+      : {
+          maxDimensions: {
+            x: { value: 100, unit: 'percentage' },
+            y: { value: 100, unit: 'percentage' },
+          },
+        };
+
+  const { veil, onResize, containerRef } = useSizeTransitionVeil(
+    chartSizeSpec,
+    setChartSize,
+    shouldUseVeil
+  );
+
   const formattedDatatables = useMemo(
     () =>
       getFormattedTablesByLayers(dataLayers, formatFactory, splitColumnAccessor, splitRowAccessor),
@@ -370,8 +409,6 @@ export function XYChart({
     filteredBarLayers.some(
       (layer) => isDataLayer(layer) && layer.splitAccessors && layer.splitAccessors.length
     );
-
-  const isTimeViz = isTimeChart(dataLayers);
 
   const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
 
@@ -711,7 +748,8 @@ export function XYChart({
   );
 
   return (
-    <div css={chartContainerStyle}>
+    <div ref={containerRef} css={chartContainerStyle}>
+      {veil}
       {showLegend !== undefined && uiState && (
         <LegendToggle
           onClick={toggleLegend}
@@ -785,6 +823,7 @@ export function XYChart({
               />
             }
             onRenderChange={onRenderChange}
+            onResize={onResize}
             onPointerUpdate={syncCursor ? handleCursorUpdate : undefined}
             externalPointerEvents={{
               tooltip: { visible: syncTooltips, placement: Placement.Right },
