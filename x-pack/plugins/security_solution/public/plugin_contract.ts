@@ -15,19 +15,19 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import { navLinks$ } from './common/links/nav_links';
 import { breadcrumbsNav$ } from './common/breadcrumbs';
 import { ContractComponentsService } from './contract_components';
-import { GetStartedPageService } from './contract_get_started_page';
+import { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
-  public getStartedPageService: GetStartedPageService;
+  public getStartedPageService: OnboardingPageService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.getStartedPageService = new GetStartedPageService();
+    this.getStartedPageService = new OnboardingPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;

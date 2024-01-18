@@ -7,10 +7,10 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { SecurityProductTypes } from './common/components/landing_page/get_started/configs';
-import type { StepId } from './common/components/landing_page/get_started/types';
+import type { SecurityProductTypes } from '../../../common/components/landing_page/get_started/configs';
+import type { StepId } from '../../../common/components/landing_page/get_started/types';
 
-export class GetStartedPageService {
+export class OnboardingPageService {
   private productTypesSubject$: BehaviorSubject<SecurityProductTypes | undefined>;
   private projectsUrlSubject$: BehaviorSubject<string | undefined>;
   private projectFeaturesUrlSubject$: BehaviorSubject<string | undefined>;
