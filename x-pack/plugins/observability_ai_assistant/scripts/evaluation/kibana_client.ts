@@ -9,6 +9,8 @@ import axios, { AxiosInstance, AxiosResponse } from 'axios';
 import { pick, remove } from 'lodash';
 import { filter, lastValueFrom, map, tap, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
+import { ToolingLog } from '@kbn/tooling-log';
+import pRetry from 'p-retry';
 import { Message, MessageRole } from '../../common';
 import {
   ChatCompletionErrorCode,
@@ -39,7 +41,7 @@ export interface ChatClient {
   ) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
 
   evaluate: (
-    { }: { conversationId?: string; messages: InnerMessage[] },
+    {}: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
@@ -48,7 +50,11 @@ export interface ChatClient {
 
 export class KibanaClient {
   axios: AxiosInstance;
-  constructor(private readonly url: string, private readonly spaceId?: string) {
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly url: string,
+    private readonly spaceId?: string
+  ) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
@@ -74,17 +80,54 @@ export class KibanaClient {
     return url;
   }
 
-  callKibana(method: string, props: { query?: UrlObject['query']; pathname: string }, data?: any) {
+  callKibana<T>(
+    method: string,
+    props: { query?: UrlObject['query']; pathname: string },
+    data?: any
+  ) {
     const url = this.getUrl(props);
-    return axios({
-      method: method,
-      url: url,
+    return axios<T>({
+      method,
+      url,
       data: data || {},
       headers: {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'foo',
       },
+      timeout: 60000,
     });
+  }
+
+  async installKnowledgeBase() {
+    this.log.debug('Checking to see whether knowledge base is installed');
+
+    const {
+      data: { ready },
+    } = await this.callKibana<{ ready: boolean }>('GET', {
+      pathname: '/internal/observability_ai_assistant/kb/status',
+    });
+
+    if (ready) {
+      this.log.info('Knowledge base is installed');
+      return;
+    }
+
+    if (!ready) {
+      this.log.info('Installing knowledge base');
+    }
+
+    await pRetry(
+      async () => {
+        const response = await this.callKibana<{}>('POST', {
+          pathname: '/internal/observability_ai_assistant/kb/setup',
+        });
+        this.log.info('Knowledge base is ready');
+        return response.data;
+      },
+      { retries: 10 }
+    );
+
+    this.log.info('Knowledge base installed');
   }
 
   createChatClient({
@@ -154,12 +197,12 @@ export class KibanaClient {
       functionCall?: string;
     }) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
-      {
-        messages,
-        connectorId,
-        functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
-        functionCall,
-      };
+        {
+          messages,
+          connectorId,
+          functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
+          functionCall,
+        };
       const stream$ = streamIntoObservable(
         (
           await that.axios.post(

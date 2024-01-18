@@ -37,7 +37,7 @@ function runEvaluations() {
             kibana: argv.kibana,
           });
 
-          const kibanaClient = new KibanaClient(serviceUrls.kibanaUrl, argv.spaceId);
+          const kibanaClient = new KibanaClient(log, serviceUrls.kibanaUrl, argv.spaceId);
           const esClient = new Client({
             node: serviceUrls.esUrl,
           });
@@ -69,6 +69,8 @@ function runEvaluations() {
           }
 
           log.info(`Using connector ${connector.id}`);
+
+          await kibanaClient.installKnowledgeBase();
 
           const scenarios =
             (argv.files !== undefined &&
@@ -136,7 +138,10 @@ function runEvaluations() {
           };
 
           const results: EvaluationResult[] = [];
-          let failedScenarios: string[][] = [["Failed Tests", "", ""], ["Scenario, Scores, Reasoning", "", ""]]
+          const failedScenarios: string[][] = [
+            ['Failed Tests', '', ''],
+            ['Scenario, Scores, Reasoning', '', ''],
+          ];
 
           chatClient.onResult((result) => {
             results.push(result);
@@ -149,11 +154,12 @@ function runEvaluations() {
               ],
               result.conversationId
                 ? [
-                  `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${argv.spaceId ? `s/${argv.spaceId}/` : ''
-                  }app/observabilityAIAssistant/conversations/${result.conversationId}`,
-                  '',
-                  '',
-                ]
+                    `${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                      argv.spaceId ? `s/${argv.spaceId}/` : ''
+                    }app/observabilityAIAssistant/conversations/${result.conversationId}`,
+                    '',
+                    '',
+                  ]
                 : ['', '', ''],
               ...header,
             ];
@@ -167,17 +173,21 @@ function runEvaluations() {
             });
             log.write(table.table(output, tableConfig));
 
-            let totalResults = result.scores.length;
-            let failedResults = result.scores.filter((score) => score.score < 1).length;
+            const totalResults = result.scores.length;
+            const failedResults = result.scores.filter((score) => score.score < 1).length;
 
             if (failedResults / totalResults > 0) {
-              let reasoningConcat = result.scores.map(score => score.reasoning).join(' ');
+              const reasoningConcat = result.scores.map((score) => score.reasoning).join(' ');
               failedScenarios.push([
-                `${result.name} : ${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${argv.spaceId ? `s/${argv.spaceId}/` : ''
+                `${result.name} : ${format(omit(parse(serviceUrls.kibanaUrl), 'auth'))}/${
+                  argv.spaceId ? `s/${argv.spaceId}/` : ''
                 }app/observabilityAIAssistant/conversations/${result.conversationId}`,
-                `Average score ${Math.round(result.scores.reduce((total, next) => total + next.score, 0) * 100 / totalResults)}. Failed ${failedResults} tests out of ${totalResults}`,
-                `Reasoning: ${reasoningConcat}`
-              ])
+                `Average score ${Math.round(
+                  (result.scores.reduce((total, next) => total + next.score, 0) * 100) /
+                    totalResults
+                )}. Failed ${failedResults} tests out of ${totalResults}`,
+                `Reasoning: ${reasoningConcat}`,
+              ]);
             }
           });
 
@@ -208,7 +218,7 @@ function runEvaluations() {
           return new Promise((resolve, reject) => {
             mocha.run((failures: any) => {
               if (failures) {
-                log.write(table.table(failedScenarios, tableConfig)) //.sort((a, b) => a[1].localeCompare(b[1]))
+                log.write(table.table(failedScenarios, tableConfig)); // .sort((a, b) => a[1].localeCompare(b[1]))
                 reject(new Error(`Some tests failed`));
                 return;
               }
