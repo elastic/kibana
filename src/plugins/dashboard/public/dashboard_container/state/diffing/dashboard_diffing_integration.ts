@@ -52,6 +52,7 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
  */
 export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
+  'controlGroupInput',
   'executionContext',
   'timeslice',
   'viewMode',
@@ -99,8 +100,12 @@ export function startDiffingDashboardState(
               .bind(this)(lastSavedInput, currentInput)
               .then((unsavedChanges) => {
                 if (observer.closed) return;
+                // console.log('UNSAVEDCHANGES dashboard', unsavedChanges);
+                // dispatch has unsaved changes to behaviour subject
+                const hasChanges =
+                  Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
+                this.hasUnsavedChanges.next(hasChanges);
 
-                updateUnsavedChangesState.bind(this)(unsavedChanges);
                 if (creationOptions?.useSessionStorageIntegration) {
                   backupUnsavedChanges.bind(this)(unsavedChanges);
                 }
@@ -142,7 +147,6 @@ export async function getUnsavedChanges(
         if (input[key] === undefined && lastInput[key] === undefined) {
           resolve({ key, isEqual: true });
         }
-
         isKeyEqualAsync(
           key,
           {
@@ -196,19 +200,11 @@ export function getShouldRefresh(
   return false;
 }
 
-function updateUnsavedChangesState(
-  this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerInput>
-) {
-  // dispatch has unsaved changes state
-  const hasChanges = Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
-  this.hasUnsavedChanges.next(hasChanges);
-}
-
 function backupUnsavedChanges(
   this: DashboardContainer,
   unsavedChanges: Partial<DashboardContainerInput>
 ) {
+  // console.log('BACKIP CHANGES', unsavedChanges);
   const { dashboardBackup } = pluginServices.getServices();
   dashboardBackup.setState(
     this.getDashboardSavedObjectId(),

@@ -5,38 +5,38 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { v4 } from 'uuid';
-import { Subject } from 'rxjs';
 import { cloneDeep, identity, pickBy } from 'lodash';
+import { BehaviorSubject, combineLatestWith, distinctUntilChanged, Subject } from 'rxjs';
+import { v4 } from 'uuid';
 
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import { ControlGroupOutput, type ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/es-query';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { DashboardContainer } from '../dashboard_container';
-import { pluginServices } from '../../../services/plugin_services';
-import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
-import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
-import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
-import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
 import {
   DEFAULT_DASHBOARD_INPUT,
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
   GLOBAL_STATE_STORAGE_KEY,
 } from '../../../dashboard_constants';
-import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
-import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
+import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
+import { pluginServices } from '../../../services/plugin_services';
+import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
 import { DashboardPublicState } from '../../types';
+import { DashboardContainer } from '../dashboard_container';
+import { DashboardCreationOptions } from '../dashboard_container_factory';
+import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
+import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
+import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
+import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -382,6 +382,10 @@ export const initializeDashboard = async ({
       ControlGroupContainer
     >(CONTROL_GROUP_TYPE);
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
+    // const controlGroupInput = {
+    //   ...(loadDashboardReturn?.dashboardInput.controlGroupInput ?? {}),
+    //   ...(sessionStorageInput?.controlGroupInput ?? {}),
+    // };
     const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
@@ -391,6 +395,12 @@ export const initializeDashboard = async ({
       filters,
       query,
     };
+    // console.log(
+    //   'controlGroupInput',
+    //   controlGroupInput,
+    //   'fullControlGroupInput',
+    //   fullControlGroupInput
+    // );
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
@@ -399,6 +409,12 @@ export const initializeDashboard = async ({
         throw new Error('Error in control group startup');
       }
       controlGroup = newControlGroup;
+      if (sessionStorageInput?.controlGroupInput) {
+        controlGroup.dispatch.setLastSavedInput({
+          ...fullControlGroupInput,
+          ...sessionStorageInput.controlGroupInput,
+        });
+      }
     }
 
     untilDashboardReady().then((dashboardContainer) => {
@@ -423,6 +439,22 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
+
+  // --------------------------------------------------------------------------------------
+  // Start diffing subscription to keep track of unsaved changes
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboard) => {
+    dashboard.integrationSubscriptions.add(
+      dashboard.hasUnsavedChanges
+        .pipe(
+          distinctUntilChanged(),
+          combineLatestWith(dashboard.controlGroup?.hasUnsavedChanges ?? new BehaviorSubject(false))
+        )
+        .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
+          dashboard.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
+        })
+    );
+  });
 
   return { input: initialInput, searchSessionId: initialSearchSessionId };
 };

@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, distinctUntilChanged, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import React, { createContext, useContext } from 'react';
 
 import {
   getDefaultControlGroupInput,
@@ -117,7 +117,7 @@ export class DashboardContainer
   public controlGroup?: ControlGroupContainer;
 
   public hasUnsavedChanges: BehaviorSubject<boolean>;
-  private hasUnsavedChangesSubscription: Subscription;
+  private hasUnsavedChangesSubscription: Subscription | undefined;
 
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
@@ -192,7 +192,7 @@ export class DashboardContainer
       additionalMiddleware: [diffingMiddleware],
       initialComponentState,
     });
-
+    // console.log('initialComponentState', initialComponentState);
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
     this.getState = reduxTools.getState;
@@ -220,6 +220,27 @@ export class DashboardContainer
       .subscribe((hasChanges) => {
         this.dispatch.setHasUnsavedChanges(hasChanges);
       });
+
+    // this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
+    //   .pipe(
+    //     distinctUntilChanged(),
+    //     combineLatestWith(this.controlGroup?.hasUnsavedChanges ?? new BehaviorSubject(false))
+    //   )
+    //   .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
+    //     console.log(
+    //       'dashboardHasChanges',
+    //       dashboardHasChanges,
+    //       'controlGroupHasChanges',
+    //       controlGroupHasChanges
+    //     );
+    //     this.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
+    //   });
+
+    // this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
+    //   .pipe(distinctUntilChanged(), merge(this.controlGroup?.hasUnsavedChanges))
+    // .subscribe((hasChanges) => {
+    //   this.dispatch.setHasUnsavedChanges(hasChanges);
+    // });
   }
 
   public getAppContext() {
@@ -356,7 +377,7 @@ export class DashboardContainer
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
-    this.hasUnsavedChangesSubscription.unsubscribe();
+    this.hasUnsavedChangesSubscription?.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }
@@ -457,7 +478,6 @@ export class DashboardContainer
     this.integrationSubscriptions.unsubscribe();
     this.integrationSubscriptions = new Subscription();
     this.stopSyncingWithUnifiedSearch?.();
-
     const {
       dashboardContentManagement: { loadDashboardState },
     } = pluginServices.getServices();
@@ -489,6 +509,10 @@ export class DashboardContainer
     batch(() => {
       this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
       this.dispatch.setManaged(loadDashboardReturn?.managed);
+      // console.log('LAST SAVED INPUT', loadDashboardReturn?.dashboardInput.controlGroupInput);
+      // this.controlGroup?.dispatch.setLastSavedInput(
+      //   loadDashboardReturn?.dashboardInput.controlGroupInput
+      // );
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
     });

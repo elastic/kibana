@@ -8,17 +8,16 @@
 
 import fastIsEqual from 'fast-deep-equal';
 
-import { persistableControlGroupInputIsEqual } from '@kbn/controls-plugin/common';
+import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   isFilterPinned,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
 
-import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInput } from '../../../../common';
+import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
 import { areTimesEqual, getPanelLayoutsAreEqual } from './dashboard_diffing_utils';
 
@@ -132,8 +131,8 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     return fastIsEqual(currentValue, lastValue);
   },
 
-  controlGroupInput: ({ currentValue, lastValue }) =>
-    persistableControlGroupInputIsEqual(currentValue, lastValue),
+  // controlGroupInput: ({ currentValue, lastValue }) =>
+  //   persistableControlGroupInputIsEqual(currentValue, lastValue),
 
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
 };

@@ -32,6 +32,7 @@ import {
   type AddOptionsListControlProps,
   type AddRangeSliderControlProps,
 } from '../external_api/control_group_input_builder';
+import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
   ControlGroupInput,
@@ -85,6 +86,7 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  public diffingSubscription: Subscription = new Subscription();
 
   // state management
   public select: ControlGroupReduxEmbeddableTools['select'];
@@ -98,6 +100,7 @@ export class ControlGroupContainer extends Container<
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
+  public hasUnsavedChanges: BehaviorSubject<boolean>;
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
@@ -120,6 +123,10 @@ export class ControlGroupContainer extends Container<
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
 
+    // start diffing dashboard state
+    this.hasUnsavedChanges = new BehaviorSubject(false);
+    const diffingMiddleware = startDiffingControlGroupState.bind(this)();
+
     // build redux embeddable tools
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       ControlGroupReduxState,
@@ -127,7 +134,8 @@ export class ControlGroupContainer extends Container<
     >({
       embeddable: this,
       reducers: controlGroupReducers,
-      initialComponentState: settings,
+      additionalMiddleware: [diffingMiddleware],
+      initialComponentState: { ...settings, lastSavedInput: initialInput }, // TODO: fix this
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -143,6 +151,7 @@ export class ControlGroupContainer extends Container<
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
+      // this.dispatch.setLastSavedInput(initialInput);
       this.initialized$.next(true);
     });
 
@@ -187,6 +196,13 @@ export class ControlGroupContainer extends Container<
      */
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+    );
+
+    this.subscriptions.add(
+      this.hasUnsavedChanges.pipe(distinctUntilChanged()).subscribe((controlGroupHasChanges) => {
+        console.log('controlGroupHasChanges 1', controlGroupHasChanges);
+        // this.dispatch.setHasUnsavedChanges(controlGroupHasChanges);
+      })
     );
   };
 

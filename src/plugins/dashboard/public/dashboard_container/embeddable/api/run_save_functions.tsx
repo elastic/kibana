@@ -101,6 +101,9 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
+          if (this.controlGroup) {
+            this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getInput());
+          }
         });
       }
       resolve(saveResult);
@@ -143,7 +146,11 @@ export async function runQuickSave(this: DashboardContainer) {
     currentState,
     saveOptions: {},
   });
+
   this.dispatch.setLastSavedInput(currentState);
+  if (this.controlGroup) {
+    this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getInput());
+  }
 
   return saveResult;
 }
