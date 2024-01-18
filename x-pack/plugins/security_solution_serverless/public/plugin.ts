@@ -7,14 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import {
-  AddIntegrationsSteps,
-  CreateProjectSteps,
-  EnablePrebuiltRulesSteps,
-  OverviewSteps,
-  ViewAlertsSteps,
-  ViewDashboardSteps,
-} from '@kbn/security-solution-plugin/public';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -31,7 +23,8 @@ import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
-import { getProjectFeaturesUrl } from './navigation/links/util';
+import { getCloudUrl, getProjectFeaturesUrl } from './navigation/links/util';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -79,18 +72,14 @@ export class SecuritySolutionServerlessPlugin
     securitySolution.setComponents({
       DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
-    securitySolution.setGetStartedPageSettings.setProductTypes(productTypes);
-    securitySolution.setGetStartedPageSettings.setProjectFeaturesUrl(
+    securitySolution.setOnboardingPageSettings.setProductTypes(productTypes);
+    securitySolution.setOnboardingPageSettings.setProjectFeaturesUrl(
       getProjectFeaturesUrl(services.cloud)
     );
-    securitySolution.setGetStartedPageSettings.setAvailableSteps([
-      CreateProjectSteps.createFirstProject,
-      OverviewSteps.getToKnowElasticSecurity,
-      AddIntegrationsSteps.connectToDataSources,
-      ViewDashboardSteps.analyzeData,
-      EnablePrebuiltRulesSteps.enablePrebuiltRules,
-      ViewAlertsSteps.viewAlerts,
-    ]);
+    securitySolution.setOnboardingPageSettings.setProjectsUrl(
+      getCloudUrl('projects', services.cloud)
+    );
+    setOnboardingSettings(services);
     startNavigation(services);
     setRoutes(services);
 

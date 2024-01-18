@@ -150,7 +150,7 @@ export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
-  getStartedPageSettings: OnboardingPageService['getSettings'];
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
@@ -190,7 +190,7 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-  setGetStartedPageSettings: OnboardingPageService;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export interface AppObservableLibs {

@@ -6,13 +6,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import {
-  AddIntegrationsSteps,
-  EnablePrebuiltRulesSteps,
-  OverviewSteps,
-  ViewAlertsSteps,
-  ViewDashboardSteps,
-} from '@kbn/security-solution-plugin/public';
 import { subscribeBreadcrumbs } from './breadcrumbs';
 import { createServices } from './common/services';
 import { registerUpsellings } from './upselling/register_upsellings';
@@ -22,6 +15,7 @@ import type {
   SecuritySolutionEssPluginSetupDeps,
   SecuritySolutionEssPluginStartDeps,
 } from './types';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionEssPlugin
   implements
@@ -50,13 +44,7 @@ export class SecuritySolutionEssPlugin
       registerUpsellings(securitySolution.getUpselling(), license, services);
     });
 
-    securitySolution.setGetStartedPageSettings.setAvailableSteps([
-      OverviewSteps.getToKnowElasticSecurity,
-      AddIntegrationsSteps.connectToDataSources,
-      ViewDashboardSteps.analyzeData,
-      EnablePrebuiltRulesSteps.enablePrebuiltRules,
-      ViewAlertsSteps.viewAlerts,
-    ]);
+    setOnboardingSettings(services);
 
     subscribeBreadcrumbs(services);
 

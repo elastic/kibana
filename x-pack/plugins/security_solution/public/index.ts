@@ -24,4 +24,4 @@ export {
   ViewDashboardSteps,
   EnablePrebuiltRulesSteps,
   ViewAlertsSteps,
-} from './common/components/landing_page/get_started/types';
+} from './common/components/landing_page/onboarding/types';

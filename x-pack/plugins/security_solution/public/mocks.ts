@@ -38,7 +38,7 @@ const startMock = (): PluginStart => ({
   ),
   setExtraRoutes: jest.fn(),
   getUpselling: () => upselling,
-  setGetStartedPageSettings: getStartedPageService,
+  setOnboardingPageSettings: getStartedPageService,
 });
 
 export const securitySolutionMock = {

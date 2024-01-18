@@ -7,8 +7,8 @@
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import type { SecurityProductTypes } from '../../../common/components/landing_page/get_started/configs';
-import type { StepId } from '../../../common/components/landing_page/get_started/types';
+import type { SecurityProductTypes } from '../../../common/components/landing_page/onboarding/configs';
+import type { StepId } from '../../../common/components/landing_page/onboarding/types';
 
 export class OnboardingPageService {
   private productTypesSubject$: BehaviorSubject<SecurityProductTypes | undefined>;
@@ -33,17 +33,20 @@ export class OnboardingPageService {
     this.availableSteps$ = this.availableStepsSubject$.asObservable();
   }
 
-  getSettings() {
-    return {
-      productTypes: this.productTypesSubject$.getValue(),
-      projectsUrl: this.projectsUrlSubject$.getValue(),
-      projectFeaturesUrl: this.projectFeaturesUrlSubject$.getValue(),
-      availableSteps: this.availableStepsSubject$.getValue(),
-    };
+  getProductTypesObservable() {
+    return this.productTypesSubject$.asObservable();
   }
 
-  getProductTypes() {
-    return this.productTypesSubject$.getValue();
+  getProjectsUrlObservable() {
+    return this.projectsUrl$;
+  }
+
+  getProjectFeaturesUrlObservable() {
+    return this.projectFeaturesUrl$;
+  }
+
+  getAvailableStepsObservable() {
+    return this.availableStepsSubject$.asObservable();
   }
 
   setProductTypes(productTypes: SecurityProductTypes) {

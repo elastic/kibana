@@ -20,14 +20,14 @@ import { OnboardingPageService } from './app/components/onboarding/onboarding_pa
 export class PluginContract {
   public componentsService: ContractComponentsService;
   public upsellingService: UpsellingService;
-  public getStartedPageService: OnboardingPageService;
+  public onboardingPageService: OnboardingPageService;
   public extraRoutes$: BehaviorSubject<RouteProps[]>;
   public appLinksSwitcher: AppLinksSwitcher;
   public deepLinksFormatter?: DeepLinksFormatter;
 
   constructor(private readonly experimentalFeatures: ExperimentalFeatures) {
     this.extraRoutes$ = new BehaviorSubject<RouteProps[]>([]);
-    this.getStartedPageService = new OnboardingPageService();
+    this.onboardingPageService = new OnboardingPageService();
     this.componentsService = new ContractComponentsService();
     this.upsellingService = new UpsellingService();
     this.appLinksSwitcher = (appLinks) => appLinks;
@@ -38,9 +38,7 @@ export class PluginContract {
       extraRoutes$: this.extraRoutes$.asObservable(),
       getComponents$: this.componentsService.getComponents$.bind(this.componentsService),
       upselling: this.upsellingService,
-      getStartedPageSettings: this.getStartedPageService.getSettings.bind(
-        this.getStartedPageService
-      ),
+      onboarding: this.onboardingPageService,
     };
   }
 
@@ -59,7 +57,7 @@ export class PluginContract {
 
   public getStartContract(): PluginStart {
     return {
-      setGetStartedPageSettings: this.getStartedPageService,
+      setOnboardingPageSettings: this.onboardingPageService,
       getNavLinks$: () => navLinks$,
       setExtraRoutes: (extraRoutes) => this.extraRoutes$.next(extraRoutes),
       setComponents: (components) => {

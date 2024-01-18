@@ -7,12 +7,12 @@
 
 import React, { memo, useMemo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { getSecurityGetStartedComponent } from './get_started';
+import { getOnboardingComponent } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
   const { indicesExist } = useSourcererDataView();
-  const GetStarted = useMemo(() => getSecurityGetStartedComponent(), []);
-  return <GetStarted indicesExist={indicesExist} />;
+  const OnBoarding = useMemo(() => getOnboardingComponent(), []);
+  return <OnBoarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';
