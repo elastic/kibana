@@ -28,7 +28,7 @@ describe('CasesConnectorRunParamsSchema', () => {
         "groupingBy": Array [
           "host.name",
         ],
-        "maxOpenCases": 5,
+        "maximumCasesToOpen": 5,
         "owner": "cases",
         "reopenClosedCases": false,
         "rule": Object {
@@ -181,20 +181,37 @@ describe('CasesConnectorRunParamsSchema', () => {
     });
   });
 
-  describe('maxOpenCases', () => {
-    it('defaults the maxOpenCases to 5', () => {
-      expect(CasesConnectorRunParamsSchema.validate(getParams()).maxOpenCases).toBe(5);
+  describe('maximumCasesToOpen', () => {
+    it('defaults the maximumCasesToOpen to 5', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).maximumCasesToOpen).toBe(5);
     });
 
-    it('throws if the maxOpenCases > 10', () => {
+    it('sets the maximumCasesToOpen correctly', () => {
+      expect(
+        CasesConnectorRunParamsSchema.validate(getParams({ maximumCasesToOpen: 3 }))
+          .maximumCasesToOpen
+      ).toBe(3);
+    });
+
+    it('does not accept maximumCasesToOpen to be zero', () => {
+      const params = getParams();
+
       expect(() =>
-        CasesConnectorRunParamsSchema.validate(getParams({ maxOpenCases: 11 }))
+        CasesConnectorRunParamsSchema.validate({
+          ...params,
+          maximumCasesToOpen: 0,
+        })
       ).toThrow();
     });
 
-    it('throws if the maxOpenCases < 1', () => {
+    it('does not accept maximumCasesToOpen to be more than 10', () => {
+      const params = getParams();
+
       expect(() =>
-        CasesConnectorRunParamsSchema.validate(getParams({ maxOpenCases: 0 }))
+        CasesConnectorRunParamsSchema.validate({
+          ...params,
+          maximumCasesToOpen: 11,
+        })
       ).toThrow();
     });
   });
