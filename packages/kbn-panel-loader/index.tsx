@@ -8,14 +8,25 @@
 
 import React from 'react';
 import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 export const PanelLoader = (props: { showShadow?: boolean; dataTestSubj?: string }) => {
   return (
     <EuiPanel
+      css={css`
+        z-index: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        min-height: $euiSizeL + 2px;
+        position: relative;
+        justify-content: center;
+        align-items: center;
+      `}
       role="figure"
       paddingSize="none"
       hasShadow={props.showShadow ?? false}
-      className={'embPanel embPanel--loading embPanel-isLoading'}
       data-test-subj={props.dataTestSubj}
     >
       <EuiLoadingChart size="l" mono />
