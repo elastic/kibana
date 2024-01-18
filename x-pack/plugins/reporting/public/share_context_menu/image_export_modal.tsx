@@ -408,7 +408,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         <EuiFlexGroup>
           <EuiFlexItem grow={0}>
-            <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
                 <EuiButtonEmpty onClick={onClose}>
                   <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
