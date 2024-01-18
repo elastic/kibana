@@ -130,4 +130,34 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
     expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), ['policy2']);
   });
+
+  it('handle errors when deploying policies', async () => {
+    const logger = loggingSystemMock.createLogger();
+    const esClient = elasticsearchServiceMock.createInternalClient();
+    const soClient = savedObjectsClientMock.create();
+    mockedAgentPolicyService.getLatestFleetPolicy.mockImplementation(async (_, agentPolicyId) => {
+      if (agentPolicyId === 'policy1') {
+        return {
+          revision_idx: 1,
+        } as any;
+      }
+
+      return null;
+    });
+    mockedAgentPolicyService.deployPolicies.mockRejectedValue(new Error('test rejection'));
+
+    await ensureAgentPoliciesFleetServerKeysAndPolicies({
+      logger,
+      esClient,
+      soClient,
+    });
+
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedAgentPolicyService.deployPolicies).toBeCalledWith(expect.anything(), ['policy2']);
+
+    expect(logger.warn).toBeCalledWith(
+      'Error deploying policies: test rejection',
+      expect.anything()
+    );
+  });
 });
