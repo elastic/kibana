@@ -7,21 +7,55 @@
 
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
+import dateMath from '@kbn/datemath';
 import { parseDuration, RulesSettingsQueryDelayProperties } from '../../common';
 
-export function getTimeRange(
-  logger: Logger,
-  queryDelaySettings: RulesSettingsQueryDelayProperties,
-  window?: string
-) {
-  let timeWindow: number = 0;
-  if (window) {
-    try {
-      timeWindow = parseDuration(window);
-    } catch (err) {
+const NOW_STRING = 'now';
+
+interface GetTimeRangeOpts {
+  logger: Logger;
+  queryDelaySettings?: RulesSettingsQueryDelayProperties;
+  window?: string;
+  forceNow?: string;
+}
+
+export interface GetTimeRangeResult {
+  dateStart: string;
+  dateEnd: string;
+}
+
+const isDate = (d: string | Date) => Object.prototype.toString.call(d) === '[object Date]';
+const isValidDate = (d: string | Date) => isDate(d) && !isNaN((d as Date).valueOf());
+
+export function convertToEsDateMath(nowDate: Date, window?: string) {
+  if (!window) {
+    return NOW_STRING;
+  }
+
+  if (window.substring(0, 3) === NOW_STRING) {
+    // already in ES datemath format
+    return window;
+  }
+
+  // check that window is valid duration
+  try {
+    parseDuration(window);
+    return `${NOW_STRING}-${window}`;
+  } catch (err) {
+    // check whether the string is a valid date
+    const windowDate = new Date(window);
+
+    if (isValidDate(windowDate)) {
+      const diffInMs = nowDate.getTime() - windowDate.getTime();
+      const diffInMsString = diffInMs >= 0 ? `${diffInMs}` : `${diffInMs}`.substring(1);
+      return diffInMs >= 0
+        ? `${NOW_STRING}-${diffInMsString}ms`
+        : `${NOW_STRING}+${diffInMsString}ms`;
+    } else {
       throw new Error(
-        i18n.translate('xpack.alerting.invalidWindowSizeErrorMessage', {
-          defaultMessage: 'Invalid format for windowSize: "{window}"',
+        i18n.translate('xpack.alerting.invalidWindowErrorMessage', {
+          defaultMessage:
+            'Invalid format for window: "{window}" - must be valid duration, valid date, or valid ES date math',
           values: {
             window,
           },
@@ -29,12 +63,43 @@ export function getTimeRange(
       );
     }
   }
-  logger.debug(`Adjusting rule query time range by ${queryDelaySettings.delay} seconds`);
+}
 
-  const queryDelay = queryDelaySettings.delay * 1000;
-  const date = Date.now();
-  const dateStart = new Date(date - (timeWindow + queryDelay)).toISOString();
-  const dateEnd = new Date(date - queryDelay).toISOString();
+function parseDateMath(date: string, nowDate: Date) {
+  const parsedDate = dateMath.parse(date, {
+    forceNow: nowDate,
+  });
+  if (parsedDate == null) {
+    throw new Error(
+      i18n.translate('xpack.alerting.invalidDateErrorMessage', {
+        defaultMessage: 'Failed to parse date math for date: "{date}"',
+        values: {
+          date,
+        },
+      })
+    );
+  }
 
-  return { dateStart, dateEnd };
+  return parsedDate;
+}
+
+export function getTimeRange({
+  logger,
+  queryDelaySettings,
+  forceNow,
+  window,
+}: GetTimeRangeOpts): GetTimeRangeResult {
+  const nowDate = forceNow ? new Date(forceNow) : new Date();
+  const esDateMathString: string = convertToEsDateMath(nowDate, window);
+
+  if (queryDelaySettings) {
+    logger.debug(`Adjusting rule query time range by ${queryDelaySettings.delay} seconds`);
+  }
+
+  const queryDelayString = queryDelaySettings ? `${queryDelaySettings.delay}s` : `0s`;
+
+  const dateStart = parseDateMath(`${esDateMathString}-${queryDelayString}`, nowDate);
+  const dateEnd = parseDateMath(`now-${queryDelayString}`, nowDate);
+
+  return { dateStart: dateStart.utc().toISOString(), dateEnd: dateEnd.utc().toISOString() };
 }

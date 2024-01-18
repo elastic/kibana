@@ -65,6 +65,8 @@ import type { ShardError } from '../../../types';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { GenericBulkCreateResponse } from '../factories';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
+import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('utils', () => {
   const anchor = '2020-01-01T06:06:06.666Z';
@@ -442,6 +444,14 @@ describe('utils', () => {
   });
 
   describe('getRuleRangeTuples', () => {
+    const logger: ReturnType<typeof loggingSystemMock.createLogger> =
+      loggingSystemMock.createLogger();
+    const getTimeRangeExecutorService = (timeWindow?: string, nowString?: string) =>
+      getTimeRange({
+        logger,
+        window: timeWindow,
+        ...(nowString ? { forceNow: nowString } : {}),
+      });
     test('should return a single tuple if no gap', () => {
       const { tuples, remainingGap } = getRuleRangeTuples({
         previousStartedAt: moment().subtract(30, 's').toDate(),
@@ -451,11 +461,14 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        getTimeRange: getTimeRangeExecutorService,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
       expect(tuples.length).toEqual(1);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(someTuple.to.utc().format()).toEqual('2020-01-01T06:05:36Z');
+      expect(someTuple.from.utc().format()).toEqual('2020-01-01T06:05:06Z');
     });
 
     test('should return a single tuple if malformed interval prevents gap calculation', () => {
@@ -467,6 +480,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        getTimeRange: getTimeRangeExecutorService,
       });
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(30);
@@ -483,10 +497,16 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        getTimeRange: getTimeRangeExecutorService,
       });
+      expect(tuples.length).toEqual(2);
       const someTuple = tuples[1];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(55);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(tuples[0].to.utc().format()).toEqual('2020-01-01T06:05:16Z');
+      expect(tuples[0].from.utc().format()).toEqual('2020-01-01T06:04:21Z');
+      expect(tuples[1].to.utc().format()).toEqual('2020-01-01T06:06:06Z');
+      expect(tuples[1].from.utc().format()).toEqual('2020-01-01T06:05:11Z');
     });
 
     test('should return five tuples when give long gap', () => {
@@ -498,6 +518,7 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        getTimeRange: getTimeRangeExecutorService,
       });
       expect(tuples.length).toEqual(5);
       tuples.forEach((item, index) => {
@@ -509,6 +530,16 @@ describe('utils', () => {
         expect(item.from.diff(tuples[index - 1].from, 's')).toEqual(10);
       });
       expect(remainingGap.asMilliseconds()).toEqual(12000);
+      expect(tuples[0].to.utc().format()).toEqual('2020-01-01T06:05:26Z');
+      expect(tuples[0].from.utc().format()).toEqual('2020-01-01T06:05:13Z');
+      expect(tuples[1].to.utc().format()).toEqual('2020-01-01T06:05:36Z');
+      expect(tuples[1].from.utc().format()).toEqual('2020-01-01T06:05:23Z');
+      expect(tuples[2].to.utc().format()).toEqual('2020-01-01T06:05:46Z');
+      expect(tuples[2].from.utc().format()).toEqual('2020-01-01T06:05:33Z');
+      expect(tuples[3].to.utc().format()).toEqual('2020-01-01T06:05:56Z');
+      expect(tuples[3].from.utc().format()).toEqual('2020-01-01T06:05:43Z');
+      expect(tuples[4].to.utc().format()).toEqual('2020-01-01T06:06:06Z');
+      expect(tuples[4].from.utc().format()).toEqual('2020-01-01T06:05:53Z');
     });
 
     test('should return a single tuple when give a negative gap (rule ran sooner than expected)', () => {
@@ -520,11 +551,14 @@ describe('utils', () => {
         to: 'now',
         maxSignals: 20,
         ruleExecutionLogger,
+        getTimeRange: getTimeRangeExecutorService,
       });
       expect(tuples.length).toEqual(1);
       const someTuple = tuples[0];
       expect(moment(someTuple.to).diff(moment(someTuple.from), 's')).toEqual(13);
       expect(remainingGap.asMilliseconds()).toEqual(0);
+      expect(tuples[0].to.utc().format()).toEqual('2020-01-01T06:06:21Z');
+      expect(tuples[0].from.utc().format()).toEqual('2020-01-01T06:06:08Z');
     });
   });
 

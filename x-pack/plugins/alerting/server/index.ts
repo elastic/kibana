@@ -33,6 +33,7 @@ export type {
   IRuleTypeAlerts,
   GetViewInAppRelativeUrlFnOpts,
   DataStreamAdapter,
+  GetTimeRangeFn,
 } from './types';
 export { DEFAULT_AAD_CONFIG } from './types';
 export { RULE_SAVED_OBJECT_TYPE } from './saved_objects';

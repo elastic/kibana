@@ -93,6 +93,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
           injectReferences({ logger, params, savedObjectReferences }),
       },
       autoRecoverAlerts: false,
+      usesQueryDelaySettings: false,
       getViewInAppRelativeUrl: ({ rule, start, end }) => {
         let startTime = null;
         let endTime = null;
@@ -129,6 +130,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             spaceId,
             state,
             rule,
+            getTimeRange,
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
@@ -313,6 +315,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             interval,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
+            getTimeRange,
           });
 
           if (remainingGap.asMilliseconds() > 0) {

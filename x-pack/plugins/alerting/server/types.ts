@@ -64,6 +64,7 @@ import {
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 import { PublicAlertsClient } from './alerts_client/types';
+import type { GetTimeRangeResult } from './lib';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
 export type { RuleTypeParams };
@@ -78,6 +79,8 @@ export interface AlertingApiRequestHandlerContext {
   getFrameworkHealth: () => Promise<AlertsHealth>;
   areApiKeysEnabled: () => Promise<boolean>;
 }
+
+export type GetTimeRangeFn = (timeWindow?: string, nowString?: string) => GetTimeRangeResult;
 
 /**
  * @internal
@@ -139,7 +142,7 @@ export interface RuleExecutorOptions<
   namespace?: string;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds?: string[];
-  getTimeRange: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+  getTimeRange: GetTimeRangeFn;
 }
 
 export interface RuleParamsAndRefs<Params extends RuleTypeParams> {
@@ -324,6 +327,7 @@ export interface RuleType<
    * automatically make recovery determination. Defaults to true.
    */
   autoRecoverAlerts?: boolean;
+  usesQueryDelaySettings?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
   fieldsForAAD?: string[];
 }

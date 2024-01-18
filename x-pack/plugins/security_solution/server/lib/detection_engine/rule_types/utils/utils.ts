@@ -8,7 +8,6 @@ import { createHash } from 'crypto';
 import { chunk, get, invert, isEmpty, partition } from 'lodash';
 import moment from 'moment';
 
-import dateMath from '@kbn/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { ALERT_UUID, ALERT_RULE_UUID, ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
@@ -26,6 +25,7 @@ import type {
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  GetTimeRangeFn,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
@@ -418,6 +418,7 @@ export const getRuleRangeTuples = ({
   interval,
   maxSignals,
   ruleExecutionLogger,
+  getTimeRange,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
@@ -426,17 +427,18 @@ export const getRuleRangeTuples = ({
   interval: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  getTimeRange: GetTimeRangeFn;
 }) => {
-  const originalFrom = dateMath.parse(from, { forceNow: startedAt });
-  const originalTo = dateMath.parse(to, { forceNow: startedAt });
-  if (originalFrom == null || originalTo == null) {
-    throw new Error('Failed to parse date math of rule.from or rule.to');
-  }
+  const startedAtString = new Date(startedAt).toISOString();
+
+  const { dateStart, dateEnd } = getTimeRange(from, startedAtString);
+  const momentDateStart = moment(dateStart);
+  const momentDateEnd = moment(dateEnd);
 
   const tuples = [
     {
-      to: originalTo,
-      from: originalFrom,
+      to: momentDateEnd,
+      from: momentDateStart,
       maxSignals,
     },
   ];
@@ -453,8 +455,9 @@ export const getRuleRangeTuples = ({
 
   const gap = getGapBetweenRuns({
     previousStartedAt,
-    originalTo,
-    originalFrom,
+
+    originalTo: momentDateEnd,
+    originalFrom: momentDateStart,
     startedAt,
   });
   const catchup = getNumCatchupIntervals({
@@ -462,8 +465,8 @@ export const getRuleRangeTuples = ({
     intervalDuration,
   });
   const catchupTuples = getCatchupTuples({
-    originalTo,
-    originalFrom,
+    originalTo: momentDateEnd,
+    originalFrom: momentDateStart,
     ruleParamsMaxSignals: maxSignals,
     catchup,
     intervalDuration,

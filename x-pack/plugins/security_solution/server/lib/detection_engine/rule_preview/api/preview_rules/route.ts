@@ -20,6 +20,7 @@ import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/c
 import type { ExecutorType } from '@kbn/alerting-plugin/server/types';
 import type { Alert } from '@kbn/alerting-plugin/server';
 
+import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
 import {
   DEFAULT_PREVIEW_INDEX,
   DETECTION_ENGINE_RULES_PREVIEW,
@@ -289,10 +290,12 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
-                getTimeRange: () => {
-                  const date = startedAt.toISOString();
-                  return { dateStart: date, dateEnd: date };
-                },
+                getTimeRange: (timeWindow?: string, nowString?: string) =>
+                  getTimeRange({
+                    logger,
+                    window: timeWindow,
+                    ...(nowString ? { forceNow: nowString } : {}),
+                  }),
               })) as { state: TState });
 
               const errors = loggedStatusChanges

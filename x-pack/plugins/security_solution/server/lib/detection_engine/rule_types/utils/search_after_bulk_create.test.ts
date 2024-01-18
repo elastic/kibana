@@ -49,6 +49,8 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import type { BuildReasonMessage } from './reason_formatters';
 import type { QueryRuleParams } from '../../rule_schema';
 import { SERVER_APP_ID } from '../../../../../common/constants';
+import { getTimeRange } from '@kbn/alerting-plugin/server/lib';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 describe('searchAfterAndBulkCreate', () => {
   let mockService: RuleExecutorServicesMock;
@@ -82,6 +84,14 @@ describe('searchAfterAndBulkCreate', () => {
   sampleParams.maxSignals = 30;
   let tuple: RuleRangeTuple;
 
+  const logger: ReturnType<typeof loggingSystemMock.createLogger> =
+    loggingSystemMock.createLogger();
+  const getTimeRangeExecutorService = (timeWindow?: string, nowString?: string) =>
+    getTimeRange({
+      logger,
+      window: timeWindow,
+      ...(nowString ? { forceNow: nowString } : {}),
+    });
   beforeEach(() => {
     jest.clearAllMocks();
     buildReasonMessage = jest.fn().mockResolvedValue('some alert reason message');
@@ -97,6 +107,7 @@ describe('searchAfterAndBulkCreate', () => {
       interval: '5m',
       maxSignals: sampleParams.maxSignals,
       ruleExecutionLogger,
+      getTimeRange: getTimeRangeExecutorService,
     }).tuples[0];
     mockPersistenceServices = createPersistenceServicesMock();
     bulkCreate = bulkCreateFactory(

@@ -531,8 +531,13 @@ export class TaskRunner<
               ...(maintenanceWindowsWithoutScopedQueryIds.length
                 ? { maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds }
                 : {}),
-              getTimeRange: (timeWindow) =>
-                getTimeRange(this.logger, queryDelaySettings, timeWindow),
+              getTimeRange: (timeWindow?: string, nowString?: string) =>
+                getTimeRange({
+                  logger: this.logger,
+                  window: timeWindow,
+                  ...(nowString ? { forceNow: nowString } : {}),
+                  ...(this.ruleType.usesQueryDelaySettings ? { queryDelaySettings } : {}),
+                }),
             })
           );
 
