@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { useInactiveAgentsCalloutHasBeenDismissed, useLastSeenInactiveAgentsCount } from '../hooks';
@@ -155,8 +155,8 @@ export const AgentStatusFilter: React.FC<{
     setIsStatusFilterOpen(isOpen);
   };
 
-  const [options, setOptions] = useState<EuiSelectableOption[]>(
-    statusFilters.map(({ label, status }) => {
+  const getOptions = useCallback((): EuiSelectableOption[] => {
+    return statusFilters.map(({ label, status }) => {
       return {
         label,
         checked: selectedStatus.includes(status) ? 'on' : undefined,
@@ -166,8 +166,14 @@ export const AgentStatusFilter: React.FC<{
             <LeftpaddedNotificationBadge>{newlyInactiveAgentsCount}</LeftpaddedNotificationBadge>
           ) : undefined,
       };
-    })
-  );
+    });
+  }, [selectedStatus, newlyInactiveAgentsCount]);
+
+  const [options, setOptions] = useState<EuiSelectableOption[]>(getOptions());
+
+  useEffect(() => {
+    setOptions(getOptions());
+  }, [getOptions, newlyInactiveAgentsCount]);
 
   const onOptionsChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {
