@@ -412,6 +412,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : undefined
               }
               navigateToDiscover={additionalFilter !== undefined}
+              dataView={dataView}
             />
           </>
         ) : null}

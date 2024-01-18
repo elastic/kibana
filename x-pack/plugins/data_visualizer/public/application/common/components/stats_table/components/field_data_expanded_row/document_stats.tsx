@@ -19,7 +19,7 @@ const metaTableColumns = [
     field: 'function',
     name: '',
     render: (_: string, metaItem: { display: ReactNode }) => metaItem.display,
-    width: '25px',
+    width: '200px',
     align: LEFT_ALIGNMENT as HorizontalAlignment,
   },
   {

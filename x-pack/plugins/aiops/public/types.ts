@@ -15,6 +15,8 @@ import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -39,6 +41,8 @@ export interface AiopsPluginStartDeps {
   storage: IStorageWrapper;
   licensing: LicensingPluginStart;
   executionContext: ExecutionContextStart;
+  fileUpload: FileUploadPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   embeddable: EmbeddableStart;
   usageCollection: UsageCollectionSetup;
 }

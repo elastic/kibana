@@ -7,7 +7,7 @@
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,10 +17,13 @@ import {
   EuiTitle,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiTab,
+  EuiTabs,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { FindFileStructureResponse, InputOverrides } from '@kbn/file-upload-plugin/common';
 
 import { FileContents } from '../file_contents';
+import { AnalysisMarkup } from '../analysis_markup';
 import { AnalysisSummary } from '../analysis_summary';
 import { FieldsStatsGrid } from '../../../common/components/fields_stats_grid';
 import { MODE as DATAVISUALIZER_MODE } from '../file_data_visualizer_view/constants';
@@ -32,6 +35,13 @@ interface Props {
   showEditFlyout(): void;
   showExplanationFlyout(): void;
   disableButtons: boolean;
+  setOverrides(overrides: InputOverrides): void;
+  overrides: InputOverrides;
+  originalSettings: InputOverrides;
+  analyzeFile(
+    data: string,
+    overrides: InputOverrides
+  ): Promise<{ results: FindFileStructureResponse }>;
   onChangeMode: (mode: DATAVISUALIZER_MODE) => void;
   onCancel: () => void;
   disableImport?: boolean;
@@ -44,10 +54,15 @@ export const ResultsView: FC<Props> = ({
   showEditFlyout,
   showExplanationFlyout,
   disableButtons,
+  setOverrides,
+  overrides,
+  originalSettings,
+  analyzeFile,
   onChangeMode,
   onCancel,
   disableImport,
 }) => {
+  const [selectedTab, setSelectedTab] = useState(0);
   return (
     <EuiPageBody data-test-subj="dataVisualizerPageFileResults">
       <EuiFlexGroup>
@@ -73,11 +88,31 @@ export const ResultsView: FC<Props> = ({
       <EuiSpacer size="m" />
       <div className="results">
         <EuiPanel data-test-subj="dataVisualizerFileFileContentPanel" hasShadow={false} hasBorder>
-          <FileContents
-            data={data}
-            format={results.format}
-            numberOfLines={results.num_lines_analyzed}
-          />
+          <EuiTabs>
+            <EuiTab isSelected={selectedTab === 0} onClick={() => setSelectedTab(0)}>
+              File contents
+            </EuiTab>
+            <EuiTab isSelected={selectedTab === 1} onClick={() => setSelectedTab(1)}>
+              File contents raw
+            </EuiTab>
+          </EuiTabs>
+          {selectedTab === 0 && (
+            <AnalysisMarkup
+              results={results}
+              data={data}
+              setOverrides={setOverrides}
+              overrides={overrides}
+              originalSettings={originalSettings}
+              analyzeFile={analyzeFile}
+            />
+          )}
+          {selectedTab === 1 && (
+            <FileContents
+              data={data}
+              format={results.format}
+              numberOfLines={results.num_lines_analyzed}
+            />
+          )}
         </EuiPanel>
 
         <EuiSpacer size="m" />

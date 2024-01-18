@@ -20,7 +20,14 @@ function splitGrok(grokPattern: string, filter: boolean = false) {
   return filter === true ? grokList.filter((d) => d[0] === '%' && d[1] === '{') : grokList;
 }
 
-function getGrokField(field: string) {
+export function splitGrok2(grokPattern: string, filter: boolean = false) {
+  const grokList = grokPattern
+    .split(/(%{\w*?:\w*?})|(\.\*\?)|(\.\*)/)
+    .filter((d) => d !== undefined);
+  return filter === true ? grokList.filter((d) => d[0] === '%' && d[1] === '{') : grokList;
+}
+
+export function getGrokField(field: string) {
   if (field[0] !== '%' && field[1] !== '{') {
     return { valid: false, type: '', name: '' };
   }

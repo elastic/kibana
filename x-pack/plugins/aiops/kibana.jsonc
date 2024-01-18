@@ -13,6 +13,8 @@
       "lens",
       "licensing",
       "uiActions",
+      "fileUpload",
+      "dataViews",
       "embeddable",
       "presentationUtil",
       "dashboard",
