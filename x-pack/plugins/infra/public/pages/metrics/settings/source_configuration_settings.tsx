@@ -178,12 +178,9 @@ export const SourceConfigurationSettings = ({
                 isLoading={infraUiSettings.isSaving}
                 onDiscardChanges={resetAllUnsavedChanges}
                 onSave={persistUpdates}
-                saveLabel={i18n.translate(
-                  'xpack.infra.sourceConfiguration.applySettingsButtonLabel',
-                  {
-                    defaultMessage: 'Apply',
-                  }
-                )}
+                saveLabel={i18n.translate('xpack.infra.sourceConfiguration.saveButton', {
+                  defaultMessage: 'Save changes',
+                })}
                 unsavedChangesCount={unsavedFormChangesCount}
                 appTestSubj="infra"
               />
