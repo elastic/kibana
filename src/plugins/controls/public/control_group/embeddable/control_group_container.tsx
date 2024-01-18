@@ -35,10 +35,10 @@ import {
 import { startDiffingControlGroupState } from '../state/control_group_diffing_integration';
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
+  ControlGroupComponentState,
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
-  ControlGroupSettings,
   ControlPanelState,
   ControlsPanels,
   CONTROL_GROUP_TYPE,
@@ -108,7 +108,7 @@ export class ControlGroupContainer extends Container<
     reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
-    settings?: ControlGroupSettings,
+    initialComponentState?: ControlGroupComponentState,
     fieldFilterPredicate?: FieldFilterPredicate
   ) {
     super(
@@ -135,7 +135,7 @@ export class ControlGroupContainer extends Container<
       embeddable: this,
       reducers: controlGroupReducers,
       additionalMiddleware: [diffingMiddleware],
-      initialComponentState: { ...settings, lastSavedInput: initialInput }, // TODO: fix this
+      initialComponentState,
     });
 
     this.select = reduxEmbeddableTools.select;
@@ -201,7 +201,6 @@ export class ControlGroupContainer extends Container<
     this.subscriptions.add(
       this.hasUnsavedChanges.pipe(distinctUntilChanged()).subscribe((controlGroupHasChanges) => {
         console.log('controlGroupHasChanges 1', controlGroupHasChanges);
-        // this.dispatch.setHasUnsavedChanges(controlGroupHasChanges);
       })
     );
   };

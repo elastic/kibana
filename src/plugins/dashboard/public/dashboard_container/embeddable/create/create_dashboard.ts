@@ -14,9 +14,13 @@ import {
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
 } from '@kbn/controls-plugin/common';
-import { ControlGroupOutput, type ControlGroupContainer } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupContainerFactory,
+  ControlGroupOutput,
+  type ControlGroupContainer,
+} from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
@@ -380,12 +384,14 @@ export const initializeDashboard = async ({
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer
-    >(CONTROL_GROUP_TYPE);
+    >(CONTROL_GROUP_TYPE) as EmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    > & {
+      create: ControlGroupContainerFactory['create'];
+    };
     const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
-    // const controlGroupInput = {
-    //   ...(loadDashboardReturn?.dashboardInput.controlGroupInput ?? {}),
-    //   ...(sessionStorageInput?.controlGroupInput ?? {}),
-    // };
     const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
@@ -395,26 +401,21 @@ export const initializeDashboard = async ({
       filters,
       query,
     };
-    // console.log(
-    //   'controlGroupInput',
-    //   controlGroupInput,
-    //   'fullControlGroupInput',
-    //   fullControlGroupInput
-    // );
+
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
-      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
+      console.log(initialComponentState);
+      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
+        lastSavedInput: {
+          ...fullControlGroupInput,
+          ...loadDashboardReturn?.dashboardInput.controlGroupInput,
+        },
+      });
       if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
         throw new Error('Error in control group startup');
       }
       controlGroup = newControlGroup;
-      if (sessionStorageInput?.controlGroupInput) {
-        controlGroup.dispatch.setLastSavedInput({
-          ...fullControlGroupInput,
-          ...sessionStorageInput.controlGroupInput,
-        });
-      }
     }
 
     untilDashboardReady().then((dashboardContainer) => {
