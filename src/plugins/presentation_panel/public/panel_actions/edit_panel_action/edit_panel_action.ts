@@ -55,7 +55,7 @@ export class EditPanelAction
     onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
   ) {
     if (!isApiCompatible(embeddable)) return;
-    return getViewModeSubject(embeddable).subscribe((viewMode) => {
+    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
       if (viewMode === 'edit' && isApiCompatible(embeddable) && embeddable.isEditingEnabled()) {
         onChange(true, this);
         return;

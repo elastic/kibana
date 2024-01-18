@@ -164,9 +164,10 @@ describe('Presentation panel', () => {
     });
 
     it('renders a placeholder title when in edit mode and the provided title is blank', async () => {
-      const api: DefaultPresentationPanelApi & PublishesViewMode = {
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>(''),
         viewMode: new BehaviorSubject<ViewMode>('edit'),
+        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {

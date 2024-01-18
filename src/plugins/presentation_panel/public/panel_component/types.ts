@@ -16,6 +16,7 @@ import {
   PublishesPanelDescription,
   PublishesPanelTitle,
   HasParentApi,
+  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -62,7 +63,10 @@ export type DefaultPresentationPanelApi = Partial<
     PublishesBlockingError &
     PublishesPanelDescription &
     PublishesDisabledActionIds &
-    HasParentApi<PresentationContainer & Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'>>>
+    HasParentApi<
+      PresentationContainer &
+        Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'> & PublishesViewMode>
+    >
 >;
 
 export type PresentationPanelProps<

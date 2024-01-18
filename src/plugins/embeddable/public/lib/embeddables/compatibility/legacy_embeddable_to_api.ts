@@ -93,8 +93,7 @@ export const legacyEmbeddableToApi = (
     })
   );
 
-  // legacy embeddables don't support ID changing or parent changing, so we don't need to subscribe to anything.
-  const uuid = new BehaviorSubject<string>(embeddable.id);
+  const uuid = embeddable.id;
   const parentApi = embeddable.parent;
 
   /**
@@ -150,8 +149,8 @@ export const legacyEmbeddableToApi = (
 
   return {
     api: {
+      parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
-      parentApi,
       viewMode,
       dataLoading,
       blockingError,

@@ -47,7 +47,7 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
      * TODO: Upgrade this action by subscribing to changes in the existance of a saved object id. Currently,
      *  this is unnecessary because a link or unlink operation will cause the panel to unmount and remount.
      */
-    return getViewModeSubject(embeddable).subscribe((viewMode) => {
+    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
       embeddable.canUnlinkFromLibrary().then((canUnlink) => {
         onChange(viewMode === 'edit' && canUnlink, this);
       });
