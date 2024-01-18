@@ -25,7 +25,7 @@ type FilterStoreProps = Pick<
 >;
 const RULES_LIST_FILTERS_KEY = 'triggersActionsUi_rulesList';
 
-interface FilterAttributes {
+interface FilterParameters {
   actionTypes?: string[];
   lastResponse?: string[];
   params?: Record<string, string | number | object>;
@@ -37,7 +37,7 @@ interface FilterAttributes {
 
 export const convertRulesListFiltersToFilterAttributes = (
   rulesListFilter: RulesListFilters
-): FilterAttributes => {
+): FilterParameters => {
   return {
     actionTypes: rulesListFilter.actionTypes,
     lastResponse: rulesListFilter.ruleLastRunOutcomes,
@@ -70,24 +70,37 @@ export const useRulesListFilterStore = ({
     useHashQuery: false,
   });
 
-  const [rulesListFilterLocal, setRulesListFilterLocal] = useLocalStorage<FilterAttributes>(
+  const [rulesListFilterLocal, setRulesListFilterLocal] = useLocalStorage<FilterParameters>(
     `${RULES_LIST_FILTERS_KEY}_filters`,
     {}
   );
-  const hasFilterFromLocalStorage = rulesListFilterLocal
-    ? !Object.values(rulesListFilterLocal).every((filters) => isEmpty(filters))
-    : false;
+  const hasFilterFromLocalStorage = useMemo(
+    () =>
+      rulesListFilterLocal
+        ? !Object.values(rulesListFilterLocal).every((filters) => isEmpty(filters))
+        : false,
+    [rulesListFilterLocal]
+  );
 
-  const rulesListFilterUrl = urlStateStorage.get<FilterAttributes>('_a') ?? {};
-  const hasFilterFromUrl = rulesListFilterLocal
-    ? !Object.values(rulesListFilterUrl).every((filters) => isEmpty(filters))
-    : false;
+  const rulesListFilterUrl = useMemo(
+    () => urlStateStorage.get<FilterParameters>('_a') ?? {},
+    [urlStateStorage]
+  );
 
-  const filtersStore = hasFilterFromUrl
-    ? rulesListFilterLocal
-    : hasFilterFromLocalStorage
-    ? rulesListFilterLocal
-    : {};
+  const hasFilterFromUrl = useMemo(
+    () =>
+      rulesListFilterUrl
+        ? !Object.values(rulesListFilterUrl).every((filters) => isEmpty(filters))
+        : false,
+    [rulesListFilterUrl]
+  );
+
+  const getFilterStore = useCallback(
+    () =>
+      hasFilterFromUrl ? rulesListFilterUrl : hasFilterFromLocalStorage ? rulesListFilterLocal : {},
+    [hasFilterFromLocalStorage, hasFilterFromUrl, rulesListFilterLocal, rulesListFilterUrl]
+  );
+  const filtersStore = getFilterStore();
   const [filters, setFilters] = useState<RulesListFilters>({
     actionTypes: filtersStore?.actionTypes ?? [],
     ruleExecutionStatuses: lastResponseFilter ?? [],
@@ -153,11 +166,7 @@ export const useRulesListFilterStore = ({
 
   useEffect(() => {
     if (hasFilterFromUrl || hasFilterFromLocalStorage) {
-      const updatedFiltersStore = hasFilterFromUrl
-        ? rulesListFilterLocal
-        : hasFilterFromLocalStorage
-        ? rulesListFilterLocal
-        : {};
+      const updatedFiltersStore = getFilterStore();
       setFilters({
         actionTypes: updatedFiltersStore?.actionTypes ?? [],
         ruleExecutionStatuses: lastResponseFilter ?? [],
