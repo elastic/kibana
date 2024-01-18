@@ -38,7 +38,7 @@ import {
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
-import { memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
+import { focusMainFlyout, memoizedGetOrderedLinkList } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { LinksLayoutInfo } from '../../embeddable/types';
 import { coreServices } from '../../services/kibana_services';
@@ -154,8 +154,9 @@ const LinksEditor = ({
           return link.id !== linkId;
         })
       );
+      focusMainFlyout(flyoutId);
     },
-    [orderedLinks]
+    [orderedLinks, flyoutId]
   );
 
   return (

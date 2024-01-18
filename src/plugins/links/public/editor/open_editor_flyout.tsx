@@ -139,7 +139,6 @@ export async function openEditorFlyout(
         { theme: coreServices.theme, i18n: coreServices.i18n }
       ),
       {
-        tabIndex: 1,
         id: flyoutId,
         maxWidth: 720,
         ownFocus: true,

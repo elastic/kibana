@@ -15,6 +15,7 @@ import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_conta
 import { coreServices } from '../services/kibana_services';
 import { Link } from '../../common/content_management';
 import { LinkEditor } from '../components/editor/link_editor';
+import { focusMainFlyout } from './links_editor_tools';
 
 export interface LinksEditorProps {
   link?: Link;
@@ -46,12 +47,7 @@ export async function openLinkEditorFlyout({
       // wait for close animation before unmounting
       setTimeout(() => {
         if (ref.current) ReactDOM.unmountComponentAtNode(ref.current);
-
-        // return focus to the main flyout div to align with a11y standards
-        const flyoutElement = document.getElementById(mainFlyoutId);
-        if (flyoutElement) {
-          flyoutElement.focus();
-        }
+        focusMainFlyout(mainFlyoutId);
       }, 180);
     });
   };
