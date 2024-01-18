@@ -158,13 +158,10 @@ describe('Create ', () => {
     userEvent.click(await screen.findByText('Submit'));
 
     expect(
-      await screen.findByText(`${customFieldConfiguration.label} is required.`)
+      await screen.findByText(`A ${customFieldConfiguration.label} is required.`)
     ).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(
-        screen.getByText(`A ${customFieldConfiguration.label} is required.`)
-      ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
   });

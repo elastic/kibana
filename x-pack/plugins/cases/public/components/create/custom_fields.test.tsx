@@ -83,8 +83,8 @@ describe('CustomFields', () => {
       </FormTestComponent>
     );
 
-    const textField = customFieldsConfigurationMock[0];
-    const toggleField = customFieldsConfigurationMock[1];
+    const textField = customFieldsConfigurationMock[2];
+    const toggleField = customFieldsConfigurationMock[3];
 
     userEvent.type(
       await screen.findByTestId(`${textField.key}-${textField.type}-create-custom-field`),
@@ -101,9 +101,10 @@ describe('CustomFields', () => {
       expect(onSubmit).toHaveBeenCalledWith(
         {
           customFields: {
+            [customFieldsConfigurationMock[0].key]: customFieldsConfigurationMock[0].defaultValue,
+            [customFieldsConfigurationMock[1].key]: customFieldsConfigurationMock[1].defaultValue,
             [textField.key]: 'hello',
             [toggleField.key]: true,
-            [customFieldsConfigurationMock[3].key]: false,
           },
         },
         true
