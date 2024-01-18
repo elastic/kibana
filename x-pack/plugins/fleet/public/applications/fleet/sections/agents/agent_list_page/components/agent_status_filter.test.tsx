@@ -93,7 +93,7 @@ describe('AgentStatusFilter', () => {
 
     const { getByText, getByTestId } = renderComponent({
       selectedStatus: [],
-      onSelectedStatusChange: (change) => {},
+      onSelectedStatusChange: () => {},
       totalInactiveAgents: 999,
     });
 
