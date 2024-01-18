@@ -750,7 +750,7 @@ describe('update', () => {
       });
 
       await expect(
-        update(
+        bulkUpdate(
           {
             cases: [
               {
