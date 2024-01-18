@@ -31,7 +31,7 @@ import * as sectionsConfigs from './sections';
 import { ProductLine } from './configs';
 const mockSections = jest.spyOn(sectionsConfigs, 'getSections');
 
-const getStartedSteps = [
+const onboardingSteps = [
   CreateProjectSteps.createFirstProject,
   OverviewSteps.getToKnowElasticSecurity,
   AddIntegrationsSteps.connectToDataSources,
@@ -141,7 +141,7 @@ describe('setupActiveSections', () => {
   it('should set up active steps based on active products', () => {
     const finishedSteps = {} as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.cloud]);
-    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, getStartedSteps);
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
 
     expect(
       getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
@@ -194,7 +194,7 @@ describe('setupActiveSections', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts = new Set([ProductLine.security]);
 
-    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, getStartedSteps);
+    const { activeSections } = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
 
     expect(
       getCard(QuickStartSectionCardsId.createFirstProject, SectionId.quickStart, activeSections)
@@ -211,7 +211,7 @@ describe('setupActiveSections', () => {
 
     const activeProducts: Set<ProductLine> = new Set();
 
-    const activeSections = setupActiveSections(finishedSteps, activeProducts, getStartedSteps);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
 
     expect(activeSections).toEqual({
       activeSections: null,
@@ -234,7 +234,7 @@ describe('setupActiveSections', () => {
     } as unknown as Record<CardId, Set<StepId>>;
     const activeProducts: Set<ProductLine> = new Set([ProductLine.security]);
 
-    const activeSections = setupActiveSections(finishedSteps, activeProducts, getStartedSteps);
+    const activeSections = setupActiveSections(finishedSteps, activeProducts, onboardingSteps);
 
     expect(activeSections).toEqual({
       activeSections: {},
@@ -283,7 +283,7 @@ describe('updateActiveSections', () => {
       activeSections: testActiveSections,
       cardId,
       finishedSteps,
-      getStartedSteps,
+      onboardingSteps,
       sectionId,
     });
 
@@ -313,7 +313,7 @@ describe('updateActiveSections', () => {
     const updatedSections = updateActiveSections({
       activeProducts,
       finishedSteps,
-      getStartedSteps,
+      onboardingSteps,
       activeSections: null,
       sectionId,
       cardId,
@@ -334,7 +334,7 @@ describe('updateActiveSections', () => {
     const updatedSections = updateActiveSections({
       activeProducts,
       finishedSteps,
-      getStartedSteps,
+      onboardingSteps,
       activeSections,
       sectionId,
       cardId,

@@ -11,16 +11,16 @@ import { LandingPageComponent } from '.';
 jest.mock('../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
 }));
-jest.mock('./get_started');
+jest.mock('./onboarding');
 
 describe('LandingPageComponent', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders the get started component', () => {
+  it('renders the onboarding component', () => {
     const { queryByTestId } = render(<LandingPageComponent />);
 
-    expect(queryByTestId('get-started-with-context')).toBeInTheDocument();
+    expect(queryByTestId('onboarding-with-settings')).toBeInTheDocument();
   });
 });

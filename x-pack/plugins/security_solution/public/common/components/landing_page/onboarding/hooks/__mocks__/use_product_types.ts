@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import { ProductLine, ProductTier } from '../../configs';
 
-export const getOnboardingComponent = jest
-  .fn()
-  .mockReturnValue(() => <div data-test-subj="onboarding-with-settings" />);
+export const useProductTypes = jest.fn(() => [
+  { product_line: ProductLine.security, product_tier: ProductTier.complete },
+]);

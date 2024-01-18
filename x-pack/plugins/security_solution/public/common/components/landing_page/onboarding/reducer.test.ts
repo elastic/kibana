@@ -25,7 +25,7 @@ import {
   AddIntegrationsSteps,
   CreateProjectSteps,
   EnablePrebuiltRulesSteps,
-  GetStartedPageActions,
+  OnboardingActions,
   GetStartedWithAlertsCardsId,
   OverviewSteps,
   QuickStartSectionCardsId,
@@ -33,7 +33,7 @@ import {
   ViewAlertsSteps,
   ViewDashboardSteps,
 } from './types';
-const getStartedSteps = [
+const onboardingSteps = [
   CreateProjectSteps.createFirstProject,
   OverviewSteps.getToKnowElasticSecurity,
   AddIntegrationsSteps.connectToDataSources,
@@ -62,11 +62,11 @@ describe('reducer', () => {
       totalStepsLeft,
       totalActiveSteps,
       expandedCardSteps: {} as ExpandedCardSteps,
-      getStartedSteps,
+      onboardingSteps,
     };
 
     const action: ToggleProductAction = {
-      type: GetStartedPageActions.ToggleProduct,
+      type: OnboardingActions.ToggleProduct,
       payload: { section: ProductLine.security },
     };
 
@@ -86,7 +86,7 @@ describe('reducer', () => {
     const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
       finishedSteps,
       activeProducts,
-      getStartedSteps
+      onboardingSteps
     );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
@@ -95,11 +95,11 @@ describe('reducer', () => {
       totalStepsLeft,
       totalActiveSteps,
       expandedCardSteps: {} as ExpandedCardSteps,
-      getStartedSteps,
+      onboardingSteps,
     };
 
     const action: AddFinishedStepAction = {
-      type: GetStartedPageActions.AddFinishedStep,
+      type: OnboardingActions.AddFinishedStep,
       payload: {
         cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
         stepId: OverviewSteps.getToKnowElasticSecurity,
@@ -201,7 +201,7 @@ describe('getActiveSectionsInitialStates', () => {
     } = getActiveSectionsInitialStates({
       activeProducts,
       finishedSteps,
-      getStartedSteps,
+      onboardingSteps,
     });
 
     expect(initialStates).toEqual({

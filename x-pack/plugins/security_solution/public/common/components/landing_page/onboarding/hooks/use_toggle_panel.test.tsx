@@ -6,7 +6,7 @@
  */
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useTogglePanel } from './use_toggle_panel';
-import { getStartedStorage } from '../storage';
+import { onboardingStorage } from '../storage';
 
 import type { StepId } from '../types';
 import {
@@ -42,7 +42,7 @@ describe('useTogglePanel', () => {
     { product_line: 'endpoint', product_tier: 'complete' },
   ] as SecurityProductTypes;
 
-  const getStartedSteps: StepId[] = [
+  const onboardingSteps: StepId[] = [
     CreateProjectSteps.createFirstProject,
     OverviewSteps.getToKnowElasticSecurity,
     AddIntegrationsSteps.connectToDataSources,
@@ -54,12 +54,12 @@ describe('useTogglePanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
 
-    (getStartedStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
+    (onboardingStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
       [QuickStartSectionCardsId.createFirstProject]: new Set([
         CreateProjectSteps.createFirstProject,
       ]),
     });
-    (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
+    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
       ProductLine.cloud,
       ProductLine.endpoint,
@@ -67,9 +67,9 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when no active products from local storage', () => {
-    (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
+    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
 
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { state } = result.current;
 
@@ -129,7 +129,7 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when all products active', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { state } = result.current;
 
@@ -191,10 +191,10 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when security product active', () => {
-    (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
+    (onboardingStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
     ]);
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { state } = result.current;
 
@@ -254,7 +254,7 @@ describe('useTogglePanel', () => {
   });
 
   test('should reset all the card steps in storage when a step is expanded. (As it allows only one step open at a time)', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { onStepClicked } = result.current;
 
@@ -267,11 +267,11 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.resetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.resetAllExpandedCardStepsToStorage).toHaveBeenCalledTimes(1);
   });
 
   test('should add the current step to storage when it is expanded', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { onStepClicked } = result.current;
 
@@ -284,15 +284,15 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
+    expect(onboardingStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
 
   test('should remove the current step from storage when it is collapsed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { onStepClicked } = result.current;
 
@@ -305,15 +305,15 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
+    expect(onboardingStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
 
   test('should call addFinishedStepToStorage when toggleTaskCompleteStatus is executed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { toggleTaskCompleteStatus } = result.current;
 
@@ -325,15 +325,15 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
+    expect(onboardingStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity
     );
   });
 
   test('should call removeFinishedStepToStorage when toggleTaskCompleteStatus is executed with undo equals to true', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { toggleTaskCompleteStatus } = result.current;
 
@@ -346,16 +346,16 @@ describe('useTogglePanel', () => {
       });
     });
 
-    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
+    expect(onboardingStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
       QuickStartSectionCardsId.watchTheOverviewVideo,
       OverviewSteps.getToKnowElasticSecurity,
-      getStartedSteps
+      onboardingSteps
     );
   });
 
   test('should call toggleActiveProductsInStorage when onProductSwitchChanged is executed', () => {
-    const { result } = renderHook(() => useTogglePanel({ productTypes, getStartedSteps }));
+    const { result } = renderHook(() => useTogglePanel({ productTypes, onboardingSteps }));
 
     const { onProductSwitchChanged } = result.current;
 
@@ -363,8 +363,8 @@ describe('useTogglePanel', () => {
       onProductSwitchChanged({ id: ProductLine.security, label: 'Analytics' });
     });
 
-    expect(getStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
-    expect(getStartedStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith(
+    expect(onboardingStorage.toggleActiveProductsInStorage).toHaveBeenCalledTimes(1);
+    expect(onboardingStorage.toggleActiveProductsInStorage).toHaveBeenCalledWith(
       ProductLine.security
     );
   });

@@ -7,4 +7,6 @@
 
 import React from 'react';
 
-export const OnboardingWithContext = () => <div data-test-subj="get-started-with-context" />;
+export const OnboardingWithSettingsComponent = () => (
+  <div data-test-subj="onboarding-with-settings" />
+);

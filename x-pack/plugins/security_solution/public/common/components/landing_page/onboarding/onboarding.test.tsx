@@ -7,8 +7,17 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { OnboardingComponent } from './onboarding';
-jest.mock('./context/get_started_context');
+import {
+  AddIntegrationsSteps,
+  EnablePrebuiltRulesSteps,
+  OverviewSteps,
+  ViewAlertsSteps,
+  ViewDashboardSteps,
+} from './types';
+import { ProductLine, ProductTier } from './configs';
 jest.mock('./toggle_panel');
+jest.mock('./hooks/use_project_features_url');
+jest.mock('./hooks/use_projects_url');
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
@@ -28,7 +37,6 @@ jest.mock('@elastic/eui', () => {
 jest.mock('react-router-dom', () => ({
   useLocation: jest.fn().mockReturnValue({ hash: '#watch_the_overview_video' }),
 }));
-jest.mock('./hooks/use_user_name');
 jest.mock('@kbn/security-solution-navigation', () => ({
   useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
   SecurityPageName: {
@@ -37,10 +45,21 @@ jest.mock('@kbn/security-solution-navigation', () => ({
 }));
 
 describe('OnboardingComponent', () => {
+  const props = {
+    indicesExist: true,
+    productTypes: [{ product_line: ProductLine.security, product_tier: ProductTier.complete }],
+    onboardingSteps: [
+      OverviewSteps.getToKnowElasticSecurity,
+      AddIntegrationsSteps.connectToDataSources,
+      ViewDashboardSteps.analyzeData,
+      EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      ViewAlertsSteps.viewAlerts,
+    ],
+  };
   it('should render page title, subtitle, and description', () => {
-    const { getByText } = render(<OnboardingComponent indicesExist={true} />);
+    const { getByText } = render(<OnboardingComponent {...props} />);
 
-    const pageTitle = getByText('Hi mocked_user_name!');
+    const pageTitle = getByText('Hi Unknown!');
     const subtitle = getByText(`Get started with Security`);
     const description = getByText(
       `This area shows you everything you need to know. Feel free to explore all content. You can always come back later at any time.`
@@ -52,7 +71,7 @@ describe('OnboardingComponent', () => {
   });
 
   it('should render welcomeHeader and TogglePanel', () => {
-    const { getByTestId } = render(<OnboardingComponent indicesExist={true} />);
+    const { getByTestId } = render(<OnboardingComponent {...props} />);
 
     const welcomeHeader = getByTestId('welcome-header');
     const togglePanel = getByTestId('toggle-panel');

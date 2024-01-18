@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const useUserName = jest.fn().mockReturnValue('mocked_user_name');
+export const useProjectsUrl = jest.fn(() => 'mock_projects_url');
