@@ -10,7 +10,6 @@ import type { Timeline, TimelineFilter } from '../objects/timeline';
 
 import { ALL_CASES_CREATE_NEW_CASE_TABLE_BTN } from '../screens/all_cases';
 import { FIELDS_BROWSER_CHECKBOX } from '../screens/fields_browser';
-import { LOADING_INDICATOR } from '../screens/security_header';
 import { EQL_QUERY_VALIDATION_SPINNER } from '../screens/create_new_rule';
 
 import {
@@ -65,7 +64,6 @@ import {
   TIMELINE_COLLAPSED_ITEMS_BTN,
   TIMELINE_TAB_CONTENT_EQL,
   TIMESTAMP_HOVER_ACTION_OVERFLOW_BTN,
-  TIMELINE_DATA_PROVIDER_FIELD_INPUT,
   ACTIVE_TIMELINE_BOTTOM_BAR,
   EMPTY_DATA_PROVIDER_AREA,
   EMPTY_DROPPABLE_DATA_PROVIDER_GROUP,
@@ -84,6 +82,8 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
   TIMELINE_KQLMODE_FILTER,
   TIMELINE_KQLMODE_SEARCH,
+  TIMELINE_DATA_PROVIDERS_CONTAINER,
+  ROW_ADD_NOTES_BUTTON,
   TIMELINE_PANEL,
 } from '../screens/timeline';
 
@@ -173,7 +173,6 @@ export const addNotesToTimeline = (notes: string) => {
     .then((notesCount) => {
       cy.get(NOTES_TEXT_AREA).type(notes, {
         parseSpecialCharSequences: false,
-        force: true,
       });
 
       cy.get(ADD_NOTE_BUTTON).click();
@@ -181,6 +180,15 @@ export const addNotesToTimeline = (notes: string) => {
 
       cy.get(`${NOTES_TAB_BUTTON} .euiBadge`).should('have.text', `${notesCount + 1}`);
     });
+};
+
+export const addNoteToFirstRowEvent = (notes: string) => {
+  cy.get(ROW_ADD_NOTES_BUTTON).first().click();
+  cy.get(NOTES_TEXT_AREA).type(notes, {
+    parseSpecialCharSequences: false,
+  });
+
+  cy.get(ADD_NOTE_BUTTON).click();
 };
 
 export const addEqlToTimeline = (eql: string) => {
@@ -217,19 +225,21 @@ export const changeTimelineQueryLanguage = (language: 'kuery' | 'lucene') => {
 };
 
 export const addDataProvider = (filter: TimelineFilter): Cypress.Chainable<JQuery<HTMLElement>> => {
+  cy.get(TOGGLE_DATA_PROVIDER_BTN).click();
+  cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible'); // Cypress doesn't properly wait for the data provider to finish expanding, so we wait for the animation to finish.
   cy.get(TIMELINE_ADD_FIELD_BUTTON).click();
-  cy.get(LOADING_INDICATOR).should('not.exist');
-  cy.get('[data-popover-open]').should('exist');
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD).click();
-  cy.get(TIMELINE_DATA_PROVIDER_FIELD)
-    .find(TIMELINE_DATA_PROVIDER_FIELD_INPUT)
-    .should('have.focus'); // make sure the focus is ready before start typing
   cy.get(TIMELINE_DATA_PROVIDER_FIELD)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.field}{downarrow}{enter}`);
+
+  cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
+    .find(`${COMBO_BOX_INPUT} input`)
+    .type(`{selectall}{backspace}{selectall}{backspace}`);
+
   cy.get(TIMELINE_DATA_PROVIDER_OPERATOR)
     .find(COMBO_BOX_INPUT)
     .type(`${filter.operator}{downarrow}{enter}`);
+
   if (filter.operator !== 'exists') {
     cy.get(TIMELINE_DATA_PROVIDER_VALUE).type(`${filter.value}{enter}`);
   }
@@ -260,7 +270,7 @@ export const updateDataProviderbyDraggingField = (fieldName: string, rowNumber: 
 
 export const updateDataProviderByFieldHoverAction = (fieldName: string, rowNumber: number) => {
   const fieldSelector = GET_TIMELINE_GRID_CELL(fieldName);
-  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover', { force: true });
+  cy.get(fieldSelector).eq(rowNumber).trigger('mouseover');
   cy.get(HOVER_ACTIONS.ADD_TO_TIMELINE).should('be.visible');
   recurse(
     () => {
@@ -295,9 +305,7 @@ export const clickIdToggleField = () => {
   clickIdHoverActionOverflowButton();
   cy.get(ID_HEADER_FIELD).should('not.exist');
 
-  cy.get(ID_TOGGLE_FIELD).click({
-    force: true,
-  });
+  cy.get(ID_TOGGLE_FIELD).click();
 };
 
 export const closeTimeline = () => {
@@ -307,7 +315,7 @@ export const closeTimeline = () => {
 
 export const createNewTimeline = () => {
   cy.get(NEW_TIMELINE_ACTION).click();
-  cy.get(CREATE_NEW_TIMELINE).first().click();
+  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {

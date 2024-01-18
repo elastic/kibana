@@ -62,6 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.opsgenie',
         'actions:.pagerduty',
         'actions:.resilient',
+        `actions:.sentinelone`,
         'actions:.server-log',
         'actions:.servicenow',
         'actions:.servicenow-itom',
