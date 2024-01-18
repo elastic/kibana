@@ -6,7 +6,6 @@
  */
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-import { first } from 'lodash';
 
 export async function getDataViewByIndexPattern(
   dataViews: DataViewsContract,
@@ -16,7 +15,11 @@ export async function getDataViewByIndexPattern(
   if (indexPatternFromQuery) {
     const matched = await dataViews.find(indexPatternFromQuery);
 
-    if (matched.length > 0) return first(matched);
+    // Only returns persisted data view if it matches index pattern exactly
+    // Because * in pattern can result in misleading matches (i.e. "kibana*" will return data view with pattern "kibana_1")
+    // which is not neccessarily the one we want to use
+    if (matched.length > 0 && matched[0].getIndexPattern() === indexPatternFromQuery)
+      return matched[0];
   }
 
   if (
