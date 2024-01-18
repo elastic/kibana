@@ -176,14 +176,17 @@ export class JourneyFtrHarness {
 
   private async tearDownBrowserAndPage() {
     if (this.page) {
+      console.log('telemetryTracker start');
       const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
       this.telemetryTrackerSubs.delete(this.page);
 
       if (telemetryTracker && !telemetryTracker.closed) {
+        console.log('telemetryTracker is not closed');
         this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
         this.pageTeardown$.next(this.page);
         await new Promise<void>((resolve) => telemetryTracker.add(resolve));
       }
+      console.log('telemetryTracker closed');
 
       this.log.info('destroying page');
       await this.client?.detach();
@@ -192,7 +195,7 @@ export class JourneyFtrHarness {
     }
 
     if (this.browser) {
-      this.log.info('closing browser');
+      console.log('closing browser');
       await this.browser.close();
     }
   }
@@ -226,14 +229,14 @@ export class JourneyFtrHarness {
   }
 
   private async onTeardown() {
-    this.log.info('--tearDownBrowserAndPage');
+    console.log('--tearDownBrowserAndPage');
     await this.tearDownBrowserAndPage();
     // It is important that we complete the APM transaction after we close the browser and before we start
     // unloading the test data so that the scalability data extractor can focus on just the APM data produced
     // by Kibana running under test.
-    this.log.info('--teardownApm');
+    console.log('--teardownApm');
     await this.teardownApm();
-    this.log.info('--deleteArchives');
+    console.log('--deleteArchives');
     await Promise.all([
       asyncForEach(this.journeyConfig.getEsArchives(), async (esArchive) => {
         await this.esArchiver.unload(esArchive);
