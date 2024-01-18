@@ -40,18 +40,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Flyout highlight customization', () => {
     let cleanupDataStreamSetup: () => Promise<void>;
 
-    describe('Service container', () => {
-      const { serviceName, traceId, ...rest } = sharedDoc;
-      const docWithoutServiceName = { ...rest, traceId, time: NOW - 1000 };
-      const docWithoutTraceId = { ...rest, serviceName, time: NOW - 2000 };
-      const docWithoutServiceContainer = { ...rest, time: NOW - 4000 };
+    describe('Service & Infrastructure container', () => {
+      const {
+        serviceName,
+        traceId,
+        hostName,
+        orchestratorClusterName,
+        orchestratorResourceId,
+        ...rest
+      } = sharedDoc;
+      const docWithoutServiceName = {
+        ...rest,
+        traceId,
+        hostName,
+        orchestratorClusterName,
+        orchestratorResourceId,
+        time: NOW - 1000,
+      };
+      const docWithoutServiceInfraContainer = { ...rest, time: NOW - 4000 };
 
-      const docs = [
-        sharedDoc,
-        docWithoutServiceName,
-        docWithoutTraceId,
-        docWithoutServiceContainer,
-      ];
+      const docs = [sharedDoc, docWithoutServiceName, docWithoutServiceInfraContainer];
       before('setup DataStream', async () => {
         cleanupDataStreamSetup = await PageObjects.observabilityLogExplorer.setupDataStream(
           DATASET_NAME,
@@ -82,92 +90,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should load the service container with all fields', async () => {
         await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionService');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionServiceInfra');
         await testSubjects.existOrFail('logExplorerFlyoutService');
         await testSubjects.existOrFail('logExplorerFlyoutTrace');
-        await dataGrid.closeFlyout();
-      });
-
-      it('should load the service container even when 1 field is missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionService');
-        await testSubjects.missingOrFail('logExplorerFlyoutService');
-        await testSubjects.existOrFail('logExplorerFlyoutTrace');
-        await dataGrid.closeFlyout();
-      });
-
-      it('should not load the service container if all fields are missing', async () => {
-        await dataGrid.clickRowToggle({ rowIndex: 3 });
-        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionService');
-        await testSubjects.missingOrFail('logExplorerFlyoutService');
-        await testSubjects.missingOrFail('logExplorerFlyoutTrace');
-        await dataGrid.closeFlyout();
-      });
-    });
-
-    describe('Infrastructure container', () => {
-      const { hostName, orchestratorClusterName, orchestratorResourceId, ...rest } = sharedDoc;
-      const docWithoutHostName = {
-        ...rest,
-        orchestratorClusterName,
-        orchestratorResourceId,
-        time: NOW - 1000,
-      };
-      const docWithoutInfrastructureContainer = { ...rest, time: NOW - 2000 };
-
-      const docs = [sharedDoc, docWithoutHostName, docWithoutInfrastructureContainer];
-      before('setup DataStream', async () => {
-        cleanupDataStreamSetup = await PageObjects.observabilityLogExplorer.setupDataStream(
-          DATASET_NAME,
-          NAMESPACE
-        );
-        await PageObjects.observabilityLogExplorer.ingestLogEntries(DATA_STREAM_NAME, docs);
-        await PageObjects.svlCommonPage.login();
-      });
-
-      after('clean up DataStream', async () => {
-        await PageObjects.svlCommonPage.forceLogout();
-        if (cleanupDataStreamSetup) {
-          await cleanupDataStreamSetup();
-        }
-      });
-
-      beforeEach(async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
-          pageState: {
-            time: {
-              from: new Date(NOW - 60_000).toISOString(),
-              to: new Date(NOW + 60_000).toISOString(),
-              mode: 'absolute',
-            },
-          },
-        });
-      });
-
-      it('should load the infrastructure container with all fields', async () => {
-        await dataGrid.clickRowToggle();
-        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
         await testSubjects.existOrFail('logExplorerFlyoutHostName');
         await testSubjects.existOrFail('logExplorerFlyoutClusterName');
         await testSubjects.existOrFail('logExplorerFlyoutResourceId');
         await dataGrid.closeFlyout();
       });
 
-      it('should load the infrastructure container even when 1 field is missing', async () => {
+      it('should load the service container even when 1 field is missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 1 });
-        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
-        await testSubjects.missingOrFail('logExplorerFlyoutHostName');
+        await testSubjects.existOrFail('logExplorerFlyoutHighlightSectionServiceInfra');
+        await testSubjects.missingOrFail('logExplorerFlyoutService');
+        await testSubjects.existOrFail('logExplorerFlyoutTrace');
+        await testSubjects.existOrFail('logExplorerFlyoutHostName');
         await testSubjects.existOrFail('logExplorerFlyoutClusterName');
         await testSubjects.existOrFail('logExplorerFlyoutResourceId');
         await dataGrid.closeFlyout();
       });
 
-      it('should not load the infrastructure container if all fields are missing', async () => {
+      it('should not load the service container if all fields are missing', async () => {
         await dataGrid.clickRowToggle({ rowIndex: 2 });
-        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionInfrastructure');
-        await testSubjects.missingOrFail('logExplorerFlyoutHostName');
-        await testSubjects.missingOrFail('logExplorerFlyoutClusterName');
-        await testSubjects.missingOrFail('logExplorerFlyoutResourceId');
+        await testSubjects.missingOrFail('logExplorerFlyoutHighlightSectionServiceInfra');
         await dataGrid.closeFlyout();
       });
     });
