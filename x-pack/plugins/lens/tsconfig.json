@@ -103,7 +103,8 @@
     "@kbn/lens-formula-docs",
     "@kbn/visualization-utils",
     "@kbn/test-eui-helpers",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/text-based-editor"
   ],
   "exclude": [
     "target/**/*"

@@ -1441,7 +1441,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -1734,7 +1734,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
