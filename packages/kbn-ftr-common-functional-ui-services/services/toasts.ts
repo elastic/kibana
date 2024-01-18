@@ -44,8 +44,10 @@ export class ToastsService extends FtrService {
       async getElement(): Promise<WebElementWrapper> {
         return await testSubjSvc.find(testSubj);
       },
-      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link'): Promise<void> {
-        (await (await this.getElement()).findByTestSubject(linkTestSubj)).click();
+      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
+        const element = await this.getElement();
+        const link = await element.findByTestSubject(linkTestSubj);
+        await link.click();
       },
     };
   }
