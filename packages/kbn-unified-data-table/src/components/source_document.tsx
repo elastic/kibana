@@ -22,7 +22,6 @@ import {
   EuiDescriptionListTitle,
 } from '@elastic/eui';
 import classnames from 'classnames';
-import { css } from '@emotion/react';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
@@ -37,7 +36,6 @@ export function SourceDocument({
   isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
-  customCss,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -48,7 +46,6 @@ export function SourceDocument({
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
-  customCss?: ReturnType<typeof css>;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -63,7 +60,6 @@ export function SourceDocument({
       compressed
       className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
       data-test-subj={dataTestSubj}
-      css={customCss}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
         // temporary solution for text based mode. As there are a lot of unsupported fields we want to
