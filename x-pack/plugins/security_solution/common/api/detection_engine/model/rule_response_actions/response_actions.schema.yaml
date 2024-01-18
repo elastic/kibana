@@ -120,7 +120,6 @@ components:
           type: string
           enum:
             - isolate
-            - get-file
         comment:
           type: string
       required:
@@ -150,6 +149,7 @@ components:
               default: true
       required:
         - command
+        - config
 
     EndpointResponseAction:
       type: object

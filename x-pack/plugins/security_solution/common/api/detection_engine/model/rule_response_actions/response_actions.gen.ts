@@ -79,7 +79,7 @@ export const RuleResponseOsqueryAction = z.object({
 
 export type DefaultParams = z.infer<typeof DefaultParams>;
 export const DefaultParams = z.object({
-  command: z.enum(['isolate', 'get-file']),
+  command: z.literal('isolate'),
   comment: z.string().optional(),
 });
 
@@ -87,18 +87,16 @@ export type ProcessesParams = z.infer<typeof ProcessesParams>;
 export const ProcessesParams = z.object({
   command: z.enum(['kill-process', 'suspend-process']),
   comment: z.string().optional(),
-  config: z
-    .object({
-      /**
-       * Field to use instead of process.pid
-       */
-      field: z.string(),
-      /**
-       * Whether to overwrite field with process.pid
-       */
-      overwrite: z.boolean().optional().default(true),
-    })
-    .optional(),
+  config: z.object({
+    /**
+     * Field to use instead of process.pid
+     */
+    field: z.string(),
+    /**
+     * Whether to overwrite field with process.pid
+     */
+    overwrite: z.boolean().optional().default(true),
+  }),
 });
 
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
