@@ -73,6 +73,7 @@ export const createFilterLensAction = ({
     execute: async ({ data }) => {
       const field = data[0]?.columnMeta?.field;
       const rawValue = data[0]?.value;
+      const dataViewId = data[0]?.dataViewId;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (!isValueSupportedByDefaultActions(value)) {
@@ -93,7 +94,7 @@ export const createFilterLensAction = ({
         ? timeline.filterManager
         : dataService.query.filterManager;
 
-      addFilter({ filterManager, fieldName: field, value });
+      addFilter({ filterManager, fieldName: field, value, dataViewId });
     },
   });
 };

@@ -49,10 +49,11 @@ export const createFilterInActionFactory = createCellActionFactory(
     execute: async ({ data }) => {
       const field = data[0]?.field;
       const rawValue = data[0]?.value;
+      const dataViewId = data[0]?.dataViewId;
       const value = filterOutNullableValues(valueToArray(rawValue));
 
       if (isValueSupportedByDefaultActions(value)) {
-        addFilterIn({ filterManager, fieldName: field.name, value });
+        addFilterIn({ filterManager, fieldName: field.name, value, dataViewId });
       } else {
         toasts.addWarning({
           title: ACTION_INCOMPATIBLE_VALUE_WARNING,
@@ -66,16 +67,19 @@ export const addFilterIn = ({
   filterManager,
   fieldName,
   value,
+  dataViewId,
 }: {
   filterManager: FilterManager | undefined;
   fieldName: string;
   value: DefaultActionsSupportedValue;
+  dataViewId: string | null;
 }) => {
   if (filterManager != null) {
     const filter = createFilter({
       key: fieldName,
       value,
       negate: isEmptyFilterValue(value),
+      dataViewId,
     });
     filterManager.addFilters(filter);
   }

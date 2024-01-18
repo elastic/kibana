@@ -22,11 +22,13 @@ export const getAdditionalScreenReaderOnlyContext = ({
 };
 
 export const createFilter = (
+  dataViewId: string | null,
   key: string,
   value: string[] | string | null | undefined,
   negate: boolean = false
 ): Filter => {
   const queryValue = value != null ? (Array.isArray(value) ? value[0] : value) : null;
+  const index = dataViewId ?? undefined;
   return queryValue != null
     ? {
         meta: {
@@ -39,6 +41,7 @@ export const createFilter = (
           params: {
             query: queryValue,
           },
+          index,
         },
         query: {
           match: {
@@ -60,6 +63,7 @@ export const createFilter = (
           negate: value === undefined,
           type: 'exists',
           value: 'exists',
+          index,
         },
       } as Filter);
 };

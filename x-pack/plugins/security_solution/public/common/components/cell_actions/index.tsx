@@ -17,6 +17,7 @@ import type { SecurityMetadata } from '../../../actions/types';
 import { SecurityCellActionsTrigger, SecurityCellActionType } from '../../../actions/constants';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { useGetFieldSpec } from '../../hooks/use_get_field_spec';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 // bridge exports for convenience
 export * from '@kbn/cell-actions';
@@ -61,13 +62,14 @@ export const SecurityCellActions: React.FC<SecurityCellActionsProps> = ({
   // Make a dependency key to prevent unnecessary re-renders when data object is defined inline
   // It is necessary because the data object is an array or an object and useMemo would always re-render
   const dependencyKey = JSON.stringify(data);
-
+  const { dataViewId } = useSourcererDataView(sourcererScopeId);
   const fieldData: CellActionsData[] = useMemo(
     () =>
       (Array.isArray(data) ? data : [data])
         .map(({ field, value }) => ({
           field: getFieldSpec(field),
           value,
+          dataViewId,
         }))
         .filter((item): item is CellActionsData => !!item.field),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- Use the dependencyKey to prevent unnecessary re-renders

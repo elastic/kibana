@@ -44,6 +44,8 @@ export interface CellActionsData {
    * Common set of properties used by most actions.
    */
   value: CellActionFieldValue;
+
+  dataViewId: string | null;
 }
 
 export interface CellActionsProps {
