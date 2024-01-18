@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// eslint-disable-file react/no-unescaped-entities
 
 import React, { useState } from 'react';
 
@@ -41,14 +40,14 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
           </EuiLink>{' '}
           registers the <em>HELLO_WORLD_TRIGGER_ID</em> trigger and attaches the{' '}
           <em>ACTION_HELLO_WORLD</em> action to the trigger. The <em>ACTION_HELLO_WORLD</em> opens a
-          modal when executed. Fire the "Hello world" event by clicking the button below.
+          modal when executed. Fire the &quot;Hello world&quot; event by clicking the button below.
         </p>
       </EuiText>
       <EuiButton
         data-test-subj="emitHelloWorldTrigger"
         onClick={() => uiActionsStartService.getTrigger(HELLO_WORLD_TRIGGER_ID).exec({})}
       >
-        Click me to fire "Hello world" event ({actionsMessage})
+        Click me to fire &quot;Hello world&quot; event ({actionsMessage})
       </EuiButton>
 
       <EuiSpacer />

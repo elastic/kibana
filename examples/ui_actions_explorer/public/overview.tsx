@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-// eslint-disable-file react/no-unescaped-entities
 
 import React from 'react';
 
@@ -23,7 +22,7 @@ export const Overview = () => {
       <ul>
         <li>
           <strong>Trigger</strong> is an id that represents an event type, for example
-          'PANEL_CLICK'.
+          <em>PANEL_CLICK</em>.
         </li>
         <li>
           <strong>Action</strong> is a{' '}
