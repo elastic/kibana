@@ -92,6 +92,44 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         const unitCount = await grouping.getUnitCount();
         expect(unitCount).to.be('2 vulnerabilities');
       });
+      it('groups vulnerabilities by CVE and sort by number of vulnerabilities desc', async () => {
+        const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('CVE');
+
+        const grouping = await findings.findingsGrouping();
+
+        const order = [
+          {
+            name: vulnerabilitiesLatestMock[0].vulnerability.id,
+            description: vulnerabilitiesLatestMock[0].vulnerability.description,
+            findingsCount: '1',
+          },
+          {
+            name: vulnerabilitiesLatestMock[1].vulnerability.id,
+            description: vulnerabilitiesLatestMock[1].vulnerability.description,
+            findingsCount: '1',
+          },
+        ];
+
+        await asyncForEach(order, async ({ name, description, findingsCount }, index) => {
+          const groupRow = await grouping.getRowAtIndex(index);
+          expect(await groupRow.getVisibleText()).to.contain(name);
+          expect(await groupRow.getVisibleText()).to.contain(description);
+
+          expect(
+            await (
+              await groupRow.findByTestSubject('vulnerabilities_grouping_counter')
+            ).getVisibleText()
+          ).to.be(findingsCount);
+        });
+
+        const groupCount = await grouping.getGroupCount();
+        expect(groupCount).to.be('2 groups');
+
+        const unitCount = await grouping.getUnitCount();
+        expect(unitCount).to.be('2 vulnerabilities');
+      });
       it('groups vulnerabilities by resource and sort by number of vulnerabilities desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
