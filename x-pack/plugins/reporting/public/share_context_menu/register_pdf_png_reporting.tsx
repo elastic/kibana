@@ -115,7 +115,7 @@ export const reportingScreenshotShareProvider = ({
     const imageModal = {
       shareMenuItem: {
         name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
-          defaultMessage: 'Exports',
+          defaultMessage: 'Reports',
         }),
         icon: 'document',
         toolTipContent: licenseToolTipContent,
@@ -127,7 +127,7 @@ export const reportingScreenshotShareProvider = ({
       panel: {
         id: 'reportingImageModal',
         title: i18n.translate('xpack.reporting.shareContextMenu.ReportsButtonLabel', {
-          defaultMessage: 'Exports',
+          defaultMessage: 'Reports',
         }),
         content: openImageModal,
       },

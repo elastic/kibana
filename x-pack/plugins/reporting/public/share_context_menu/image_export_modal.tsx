@@ -351,7 +351,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         >
           <FormattedMessage
             id="xpack.reporting.modalContent.generateButtonLabel"
-            defaultMessage="Generate export"
+            defaultMessage="Generate report"
           />
         </EuiButton>
       </EuiFormRow>
@@ -372,7 +372,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Export</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{`Export this ${objectType}`}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         {objectType === 'dashboard' && (
