@@ -15,11 +15,6 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { VisualizeESQL } from './visualize_esql';
 
 describe('VisualizeESQL', () => {
-  // const defaultLensService = {
-  //   stateHelperApi: jest.fn().mockResolvedValue({
-  //     suggestions: jest.fn().mockReturnValue(mockAllSuggestions),
-  //   })
-  // }
   function renderComponent(
     newInput?: unknown,
     newLensService?: LensPublicStart,
