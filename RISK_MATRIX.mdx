@@ -4,6 +4,15 @@ When merging a new feature of considerable size or modifying an existing one,
 consider adding a *Risk Matrix* section to your PR in collaboration with other
 developers on your team and the QA team.
 
+When forming the risk matrix, consider some of the following examples and how they may potentially impact the change:
+
+| Risk                      | Probability | Severity | Mitigation/Notes        |
+|---------------------------|-------------|----------|-------------------------|
+| Multiple Spaces&mdash;unexpected behavior in non-default Kibana Space. | Low | High | Integration tests will verify that all features are still supported in non-default Kibana Space and when user switches between spaces. |
+| Multiple nodes&mdash;Elasticsearch polling might have race conditions when multiple Kibana nodes are polling for the same tasks. | High | Low | Tasks are idempotent, so executing them multiple times will not result in logical error, but will degrade performance. To test for this case we add plenty of unit tests around this logic and document manual testing procedure. |
+| Code should gracefully handle cases when feature X or plugin Y are disabled. | Medium | High | Unit tests will verify that any feature flag or plugin combination still results in our service operational. |
+| [See more potential risk examples](https://github.com/elastic/kibana/blob/main/RISK_MATRIX.mdx) |
+
 Below are some general themes to consider for the *Risk Matrix*. (Feel free to
 add to this list.)
 
