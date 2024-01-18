@@ -7,8 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
-import { isEmpty, orderBy } from 'lodash';
-import React, { ReactNode, useCallback, useMemo, useState } from 'react';
+import { isEmpty, merge, orderBy } from 'lodash';
+import React, {
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { useHistory } from 'react-router-dom';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { fromQuery, toQuery } from '../links/url_helpers';
@@ -16,6 +22,13 @@ import {
   getItemsFilteredBySearchQuery,
   TableSearchBarV2,
 } from '../table_search_bar/table_search_bar_v2';
+
+type SortDirection = 'asc' | 'desc';
+
+interface TableOptions<T> {
+  page: { index: number; size: number };
+  sort: { direction: SortDirection; field: keyof T };
+}
 
 // TODO: this should really be imported from EUI
 export interface ITableColumn<T extends object> {
@@ -30,65 +43,77 @@ export interface ITableColumn<T extends object> {
   render?: (value: any, item: T) => unknown;
 }
 
-export interface TableSearchBar {
+export interface TableSearchBar<T> {
   isEnabled?: boolean;
-  fieldsToSearch: string[];
+  fieldsToSearch: Array<keyof T>;
   maxCountExceeded: boolean;
   placeholder: string;
   onChangeSearchQuery: (searchQuery: string) => void;
-}
-
-interface Props<T extends object> {
-  items: T[];
-  columns: Array<ITableColumn<T>>;
-  initialPageSize: number;
-  initialPageIndex?: number;
-  initialSortField?: ITableColumn<T>['field'];
-  initialSortDirection?: 'asc' | 'desc';
-  showPerPageOptions?: boolean;
-  noItemsMessage?: React.ReactNode;
-  sortItems?: boolean;
-  sortFn?: SortFunction<T>;
-  pagination?: boolean;
-  isLoading?: boolean;
-  error?: boolean;
-  tableLayout?: 'auto' | 'fixed';
-  tableSearchBar?: TableSearchBar;
 }
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
 
 function defaultSortFn<T>(
   items: T[],
-  sortField: string,
-  sortDirection: 'asc' | 'desc'
+  sortField: keyof T,
+  sortDirection: SortDirection
 ) {
   return orderBy(items, sortField, sortDirection) as T[];
 }
 
 export type SortFunction<T> = (
   items: T[],
-  sortField: string,
-  sortDirection: 'asc' | 'desc'
+  sortField: keyof T,
+  sortDirection: SortDirection
 ) => T[];
 
-function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
+function UnoptimizedManagedTable<T extends object>(props: {
+  items: T[];
+  columns: Array<ITableColumn<T>>;
+  noItemsMessage?: React.ReactNode;
+  isLoading?: boolean;
+  error?: boolean;
+
+  // pagination
+  pagination?: boolean;
+  initialPageSize: number;
+  initialPageIndex?: number;
+  initialSortField?: string;
+  initialSortDirection?: SortDirection;
+  showPerPageOptions?: boolean;
+  onChangeRenderedItems?: (renderedItems: T[]) => void;
+
+  // sorting
+  sortItems?: boolean;
+  sortFn?: SortFunction<T>;
+
+  tableLayout?: 'auto' | 'fixed';
+  tableSearchBar?: TableSearchBar<T>;
+  saveTableOptionsToUrl?: boolean;
+}) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
   const {
     items,
     columns,
+    noItemsMessage,
+    isLoading = false,
+    error = false,
+
+    // pagination
+    pagination = true,
     initialPageIndex = 0,
-    initialPageSize,
+    initialPageSize = 25,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     showPerPageOptions = true,
-    noItemsMessage,
+
+    // sorting
     sortItems = true,
     sortFn = defaultSortFn,
-    pagination = true,
-    isLoading = false,
-    error = false,
+
+    onChangeRenderedItems = () => {},
+    saveTableOptionsToUrl = true,
     tableLayout,
     tableSearchBar = {
       isEnabled: false,
@@ -101,67 +126,93 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
 
   const {
     urlParams: {
-      page: pageIndex = initialPageIndex,
-      pageSize = initialPageSize,
-      sortField = initialSortField,
-      sortDirection = initialSortDirection,
+      page: urlPageIndex = initialPageIndex,
+      pageSize: urlPageSize = initialPageSize,
+      sortField: urlSortField = initialSortField,
+      sortDirection: urlSortDirection = initialSortDirection,
     },
   } = useLegacyUrlParams();
+
+  const getStateFromUrl = useCallback(
+    (): TableOptions<T> => ({
+      page: { index: urlPageIndex, size: urlPageSize },
+      sort: {
+        field: urlSortField as keyof T,
+        direction: urlSortDirection as SortDirection,
+      },
+    }),
+    [urlPageIndex, urlPageSize, urlSortField, urlSortDirection]
+  );
+
+  // initialise table options state from url params
+  const [tableOptions, setTableOptions] = useState(getStateFromUrl());
+
+  // update table options state when url params change
+  useEffect(() => setTableOptions(getStateFromUrl()), [getStateFromUrl]);
+
+  // update table options state when `onTableChange` is invoked and persist to url
+  const onTableChange = useCallback(
+    (newTableOptions: Partial<TableOptions<T>>) => {
+      setTableOptions((oldTableOptions) =>
+        merge({}, oldTableOptions, newTableOptions)
+      );
+
+      if (saveTableOptionsToUrl) {
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(history.location.search),
+            page: newTableOptions.page?.index,
+            pageSize: newTableOptions.page?.size,
+            sortField: newTableOptions.sort?.field,
+            sortDirection: newTableOptions.sort?.direction,
+          }),
+        });
+      }
+    },
+    [history, saveTableOptionsToUrl, setTableOptions]
+  );
 
   const filteredItems = useMemo(() => {
     return isEmpty(searchQuery)
       ? items
       : getItemsFilteredBySearchQuery({
           items,
-          fieldsToSearch: tableSearchBar.fieldsToSearch as Array<
-            keyof T & string
-          >,
+          fieldsToSearch: tableSearchBar.fieldsToSearch,
           searchQuery,
         });
   }, [items, searchQuery, tableSearchBar.fieldsToSearch]);
 
   const renderedItems = useMemo(() => {
     const sortedItems = sortItems
-      ? sortFn(filteredItems, sortField, sortDirection as 'asc' | 'desc')
+      ? sortFn(
+          filteredItems,
+          tableOptions.sort.field as keyof T,
+          tableOptions.sort.direction
+        )
       : filteredItems;
 
-    return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
+    return sortedItems.slice(
+      tableOptions.page.index * tableOptions.page.size,
+      (tableOptions.page.index + 1) * tableOptions.page.size
+    );
   }, [
     sortItems,
     sortFn,
     filteredItems,
-    sortField,
-    sortDirection,
-    pageIndex,
-    pageSize,
+    tableOptions.sort.field,
+    tableOptions.sort.direction,
+    tableOptions.page.index,
+    tableOptions.page.size,
   ]);
 
-  const sorting = useMemo(() => {
-    return {
-      sort: {
-        field: sortField as keyof T,
-        direction: sortDirection as 'asc' | 'desc',
-      },
-    };
-  }, [sortField, sortDirection]);
+  useEffect(() => {
+    onChangeRenderedItems(renderedItems);
+  }, [onChangeRenderedItems, renderedItems]);
 
-  const onTableChange = useCallback(
-    (options: {
-      page: { index: number; size: number };
-      sort?: { field: keyof T; direction: 'asc' | 'desc' };
-    }) => {
-      history.push({
-        ...history.location,
-        search: fromQuery({
-          ...toQuery(history.location.search),
-          page: options.page.index,
-          pageSize: options.page.size,
-          sortField: options.sort?.field,
-          sortDirection: options.sort?.direction,
-        }),
-      });
-    },
-    [history]
+  const sorting = useMemo(
+    () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
+    [tableOptions.sort]
   );
 
   const paginationProps = useMemo(() => {
@@ -171,11 +222,17 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
     return {
       showPerPageOptions,
       totalItemCount: filteredItems.length,
-      pageIndex,
-      pageSize,
+      pageIndex: tableOptions.page.index,
+      pageSize: tableOptions.page.size,
       pageSizeOptions: PAGE_SIZE_OPTIONS,
     };
-  }, [pagination, showPerPageOptions, filteredItems, pageIndex, pageSize]);
+  }, [
+    pagination,
+    showPerPageOptions,
+    filteredItems.length,
+    tableOptions.page.index,
+    tableOptions.page.size,
+  ]);
 
   const onChangeSearchQuery = useCallback(
     (value: string) => {
@@ -201,7 +258,6 @@ function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
         />
       ) : null}
 
-      {/* @ts-expect-error TS thinks pagination should be non-nullable, but it's not */}
       <EuiBasicTable<T>
         loading={isLoading}
         tableLayout={tableLayout}

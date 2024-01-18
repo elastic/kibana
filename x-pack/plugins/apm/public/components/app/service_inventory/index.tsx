@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { compact } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
