@@ -88,14 +88,27 @@ export const RangeSliderControl: FC = () => {
   }, [displayedMin, displayedMax, fieldFormatter]);
 
   const levels = useMemo(() => {
+    if (!step || min === undefined || max === undefined) {
+      return [
+        {
+          min: min ?? -Infinity,
+          max: max ?? Infinity,
+          color: 'success',
+        },
+      ];
+    }
+
+    const minTick = Math.floor(min / step) * step;
+    const maxTick = Math.ceil(max / step) * step;
+
     return [
       {
-        min: min ?? -Infinity,
-        max: max ?? Infinity,
+        min: minTick,
+        max: maxTick,
         color: 'success',
       },
     ];
-  }, [min, max]);
+  }, [step, min, max]);
 
   const disablePopover = useMemo(
     () =>
