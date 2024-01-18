@@ -59,6 +59,9 @@ describe('updateRuleRoute', () => {
       },
     ],
     notifyWhen: RuleNotifyWhen.CHANGE,
+    notificationDelay: {
+      active: 10,
+    },
   };
 
   const updateRequest: AsApiContract<UpdateOptions<{ otherField: boolean }>['data']> = {
@@ -73,6 +76,9 @@ describe('updateRuleRoute', () => {
         alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
+    notification_delay: {
+      active: 10,
+    },
   };
 
   const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
@@ -86,6 +92,7 @@ describe('updateRuleRoute', () => {
       connector_type_id: actionTypeId,
       alerts_filter: alertsFilter,
     })),
+    notification_delay: mockedAlert.notificationDelay,
   };
 
   it('updates a rule with proper parameters', async () => {
@@ -136,6 +143,9 @@ describe('updateRuleRoute', () => {
               },
             ],
             "name": "abc",
+            "notificationDelay": Object {
+              "active": 10,
+            },
             "notifyWhen": "onActionGroupChange",
             "params": Object {
               "otherField": false,

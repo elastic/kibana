@@ -375,6 +375,9 @@ describe('rule_form', () => {
         enabled: false,
         mutedInstanceIds: [],
         ...(!showRulesList ? { ruleTypeId: ruleType.id } : {}),
+        notificationDelay: {
+          active: 1,
+        },
       } as unknown as Rule;
 
       wrapper = mountWithIntl(
@@ -1033,6 +1036,24 @@ describe('rule_form', () => {
       });
 
       expect(wrapper.find(ActionForm).props().hasFieldsForAAD).toEqual(true);
+    });
+
+    it('renders rule notification delay', async () => {
+      const getNotificationDelayInput = () => {
+        return wrapper.find('[data-test-subj="notificationDelayInput"] input').first();
+      };
+
+      await setup();
+      expect(getNotificationDelayInput().props().value).toEqual(1);
+
+      getNotificationDelayInput().simulate('change', { target: { value: '2' } });
+      expect(getNotificationDelayInput().props().value).toEqual(2);
+
+      getNotificationDelayInput().simulate('change', { target: { value: '20' } });
+      expect(getNotificationDelayInput().props().value).toEqual(20);
+
+      getNotificationDelayInput().simulate('change', { target: { value: '999' } });
+      expect(getNotificationDelayInput().props().value).toEqual(999);
     });
   });
 

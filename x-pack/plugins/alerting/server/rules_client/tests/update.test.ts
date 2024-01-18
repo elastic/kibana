@@ -277,6 +277,9 @@ describe('update()', () => {
         scheduledTaskId: 'task-123',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
+        notificationDelay: {
+          active: 5,
+        },
       },
       references: [
         {
@@ -332,6 +335,9 @@ describe('update()', () => {
             },
           },
         ],
+        notificationDelay: {
+          active: 10,
+        },
       },
     });
     expect(result).toMatchInlineSnapshot(`
@@ -365,6 +371,9 @@ describe('update()', () => {
         "createdAt": 2019-02-12T21:01:22.479Z,
         "enabled": true,
         "id": "1",
+        "notificationDelay": Object {
+          "active": 5,
+        },
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,
@@ -434,6 +443,9 @@ describe('update()', () => {
           "versionApiKeyLastmodified": "v7.10.0",
         },
         "name": "abc",
+        "notificationDelay": Object {
+          "active": 10,
+        },
         "notifyWhen": "onActiveAlert",
         "params": Object {
           "bar": true,

@@ -21,6 +21,9 @@ describe('rule reducer', () => {
       actions: [],
       tags: [],
       notifyWhen: 'onActionGroupChange',
+      notificationDelay: {
+        active: 5,
+      },
     } as unknown as Rule;
   });
 
@@ -210,5 +213,19 @@ describe('rule reducer', () => {
       }
     );
     expect(updatedRule.rule.actions[0].frequency?.notifyWhen).toBe('onThrottleInterval');
+  });
+
+  test('if initial notification delay property was updated', () => {
+    const updatedRule = ruleReducer(
+      { rule: initialRule },
+      {
+        command: { type: 'setNotificationDelayProperty' },
+        payload: {
+          key: 'active',
+          value: 10,
+        },
+      }
+    );
+    expect(updatedRule.rule.notificationDelay?.active).toBe(10);
   });
 });

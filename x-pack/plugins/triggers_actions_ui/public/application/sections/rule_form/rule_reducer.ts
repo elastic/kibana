@@ -64,6 +64,12 @@ interface RuleSchedulePayload<Key extends keyof IntervalSchedule> {
   index?: number;
 }
 
+interface NotificationDelayPayload<Key extends keyof NotificationDelay> {
+  key: Key;
+  value: NotificationDelay[Key] | null;
+  index?: number;
+}
+
 export type RuleReducerAction =
   | {
       command: CommandType<'setRule'>;
@@ -99,7 +105,7 @@ export type RuleReducerAction =
     }
   | {
       command: CommandType<'setNotificationDelayProperty'>;
-      payload: Payload<string, NotificationDelay>;
+      payload: NotificationDelayPayload<keyof NotificationDelay>;
     };
 
 export type InitialRuleReducer = Reducer<{ rule: InitialRule }, RuleReducerAction>;
