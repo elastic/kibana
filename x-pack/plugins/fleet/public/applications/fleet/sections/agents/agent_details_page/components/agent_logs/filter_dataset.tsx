@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useState, useEffect, useCallback } from 'react';
-import styled from 'styled-components';
 import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiPopover, EuiFilterButton, EuiSelectable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,10 +14,6 @@ import type { DataViewField, FieldSpec } from '@kbn/data-views-plugin/public';
 import { useStartServices } from '../../../../../hooks';
 
 import { AGENT_LOG_INDEX_PATTERN, DATASET_FIELD, AGENT_DATASET } from './constants';
-
-const StyledEuiSelectable = styled(EuiSelectable)`
-  width: 220px;
-`;
 
 export const DatasetFilter: React.FunctionComponent<{
   selectedDatasets: string[];
@@ -102,7 +97,7 @@ export const DatasetFilter: React.FunctionComponent<{
       closePopover={closePopover}
       panelPaddingSize="none"
     >
-      <StyledEuiSelectable
+      <EuiSelectable
         options={options}
         onChange={(newOptions) => {
           setOptions(newOptions);
@@ -115,9 +110,15 @@ export const DatasetFilter: React.FunctionComponent<{
         }}
         data-test-subj="agentList.datasetFilterOptions"
         isLoading={isLoading}
+        listProps={{
+          paddingSize: 's',
+          style: {
+            minWidth: 220,
+          },
+        }}
       >
         {(list) => list}
-      </StyledEuiSelectable>
+      </EuiSelectable>
     </EuiPopover>
   );
 });

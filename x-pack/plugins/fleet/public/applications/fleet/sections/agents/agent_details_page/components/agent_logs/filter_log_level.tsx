@@ -64,6 +64,9 @@ export const LogLevelFilter: React.FunctionComponent<{
           });
         }}
         data-test-subj="agentList.logLevelFilterOptions"
+        listProps={{
+          paddingSize: 's',
+        }}
       >
         {(list) => list}
       </EuiSelectable>
