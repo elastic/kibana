@@ -71,6 +71,12 @@ const calculateGlobalAndPerPolicyCounts = (
   };
 
   response.global = Math.floor(total * (globalRatio / 100));
+
+  // If a ratio was defined, then ensure at least one is created
+  if (globalRatio > 0 && response.global === 0) {
+    response.global = 1;
+  }
+
   response.perPolicy = total - response.global;
 
   return response;

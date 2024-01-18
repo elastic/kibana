@@ -6,6 +6,7 @@
  */
 
 import { once } from 'lodash';
+import { HORIZONTAL_LINE } from '../../common/constants';
 import { getElapsedTime } from '../../../../common/endpoint/data_loaders/utils';
 import type {
   ProgressReporterInterface,
@@ -138,13 +139,15 @@ export class ProgressReporter implements ProgressReporterInterface {
         return Math.max(acc, categoryName.length);
       }, 10) + 4;
 
-    return `
+    return `${HORIZONTAL_LINE}
+${'Overall Progress: '.padEnd(categoryNamesMaxChr + 4)}${state.prctDone}%
+${HORIZONTAL_LINE}
 ${
   'Elapsed Time (hh:mm:ss.ms):'.padEnd(categoryNamesMaxChr + 4) +
   getElapsedTime(this.getStartedTime())
 }
 ${'Error Count:'.padEnd(categoryNamesMaxChr + 4) + state.errorCount}
-${'Overall Progress: '.padEnd(categoryNamesMaxChr + 4)}[    ${state.prctDone}%    ]
+Details:
   ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
     let updatedOutput = acc;
 
