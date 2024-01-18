@@ -14,7 +14,7 @@ export const NavigateToPageButton = ({
   title,
 }: {
   nextStepPath: string;
-  title: string;
+  title: string | React.ReactNode;
 }) => {
   const navigateToPath = useNavigateToPath();
   const onClick = useCallback(() => {

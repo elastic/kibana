@@ -34,7 +34,7 @@ import {
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';

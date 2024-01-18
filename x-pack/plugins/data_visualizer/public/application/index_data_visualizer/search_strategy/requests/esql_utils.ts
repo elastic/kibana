@@ -13,7 +13,7 @@ export interface ESQLQuery {
 }
 
 /**
- * Helper function to escape special characters for field names used in ESQL queries.
+ * Helper function to escape special characters for field names used in ES|QL queries.
  * https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-syntax.html#esql-identifiers
  * @param str
  * @returns "`str`"

@@ -27,6 +27,7 @@ import { isFullLicense } from '../license';
 import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
+import { ML_PAGES } from '../../locator';
 
 function startTrialDescription() {
   return (
@@ -193,7 +194,7 @@ export const DatavisualizerSelector: FC = () => {
               footer={
                 <EuiButton
                   target="_self"
-                  onClick={() => navigateToPath('/datavisualizer/esql')}
+                  onClick={() => navigateToPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
                   data-test-subj="mlDataVisualizerSelectESQLButton"
                 >
                   <FormattedMessage

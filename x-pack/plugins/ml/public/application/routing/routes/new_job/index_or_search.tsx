@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -110,7 +111,12 @@ export const dataVizIndexOrSearchRouteFactory = (
     const button = (
       <NavigateToPageButton
         nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
-        title="Use ES|QL"
+        title={
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+            defaultMessage="Use ES|QL"
+          />
+        }
       />
     );
     return (
