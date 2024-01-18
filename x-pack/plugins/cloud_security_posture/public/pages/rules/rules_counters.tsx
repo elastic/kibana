@@ -184,7 +184,7 @@ export const RulesCounters = () => {
         body={
           <p>
             <FormattedMessage
-              id="xpack.csp.rulesPage.rulesCounterEmptyState.emptyStateTitle"
+              id="xpack.csp.rulesPage.rulesCounterEmptyState.emptyStateDescription"
               defaultMessage="Add your {resourceName} in {integrationType} to begin detecing misconfigurations"
               values={{
                 resourceName:
