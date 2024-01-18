@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldSpec } from '@kbn/data-plugin/common';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 import { isNoSuchRemoteClusterMessage, NoSuchRemoteClusterError } from '../../sources/errors';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';

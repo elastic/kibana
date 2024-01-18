@@ -11,12 +11,9 @@ import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useKibanaIndexPatternService = () => {
   const {
-    services: {
-      data: { indexPatterns },
-    },
+    services: { dataViews },
   } = useKibanaContextForPlugin();
-
-  return indexPatterns;
+  return dataViews;
 };
 
 interface IndexPatternDescriptor {
