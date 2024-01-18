@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export type ReportProgressCallback = (options: { doneCount: number }) => void;
+export type ReportProgressCallback = (options: { doneCount: number; errorCount: number }) => void;
 
 interface ProgressReporterStateProperties {
   prctDone: number;
   totalCount: number;
   doneCount: number;
+  errorCount: number;
 }
 
 export interface ProgressReporterState extends ProgressReporterStateProperties {

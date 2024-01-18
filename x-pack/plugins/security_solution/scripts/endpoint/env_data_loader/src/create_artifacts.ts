@@ -33,9 +33,9 @@ interface ArtifactCreationOptions {
   throttler: ExecutionThrottler;
 }
 
-const getCatchErrorHandling = (log: ToolingLog, artifactType: string) => (e: Error) => {
-  log.error(`[${artifactType}] error: ${e.message}`);
-  log.verbose(stringify(e));
+const logError = (log: ToolingLog, artifactType: string, error: Error) => {
+  log.error(`[${artifactType}] error: ${error.message}`);
+  log.verbose(stringify(error));
 };
 
 export const createTrustedApps = async ({
@@ -47,6 +47,7 @@ export const createTrustedApps = async ({
 }: ArtifactCreationOptions): Promise<void> => {
   const generator = new TrustedAppGenerator();
   let doneCount = 0;
+  let errorCount = 0;
 
   loop(count, () => {
     throttler.addToQueue(async () => {
@@ -56,10 +57,13 @@ export const createTrustedApps = async ({
           effectScope: { type: 'global' },
         })
       )
-        .catch(getCatchErrorHandling(log, 'Trusted Application'))
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Trusted Application', e);
+        })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount });
         });
     });
   });
@@ -74,14 +78,18 @@ export const createEventFilters = async ({
 }: ArtifactCreationOptions): Promise<void> => {
   const eventGenerator = new EventFiltersGenerator();
   let doneCount = 0;
+  let errorCount = 0;
 
   loop(count, () => {
     throttler.addToQueue(async () => {
       await createEventFilter(kbnClient, eventGenerator.generateEventFilterForCreate())
-        .catch(getCatchErrorHandling(log, 'Event Filters'))
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Event Filter', e);
+        })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount });
         });
     });
   });
@@ -96,6 +104,7 @@ export const createBlocklists = async ({
 }: ArtifactCreationOptions): Promise<void> => {
   const generate = new ExceptionsListItemGenerator();
   let doneCount = 0;
+  let errorCount = 0;
 
   loop(count, () => {
     throttler.addToQueue(async () => {
@@ -103,10 +112,13 @@ export const createBlocklists = async ({
         kbnClient,
         generate.generateBlocklistForCreate({ tags: [GLOBAL_ARTIFACT_TAG] })
       )
-        .catch(getCatchErrorHandling(log, 'Blocklist'))
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'BLocklist', e);
+        })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount });
         });
     });
   });
@@ -121,6 +133,7 @@ export const createHostIsolationExceptions = async ({
 }: ArtifactCreationOptions): Promise<void> => {
   const generate = new ExceptionsListItemGenerator();
   let doneCount = 0;
+  let errorCount = 0;
 
   loop(count, () => {
     throttler.addToQueue(async () => {
@@ -128,10 +141,13 @@ export const createHostIsolationExceptions = async ({
         kbnClient,
         generate.generateHostIsolationExceptionForCreate({ tags: [GLOBAL_ARTIFACT_TAG] })
       )
-        .catch(getCatchErrorHandling(log, 'Host Isolation Exception'))
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Host Isolation Exception', e);
+        })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount });
         });
     });
   });
@@ -146,14 +162,18 @@ export const createEndpointExceptions = async ({
 }: ArtifactCreationOptions): Promise<void> => {
   const generate = new EndpointExceptionsGenerator();
   let doneCount = 0;
+  let errorCount = 0;
 
   loop(count, () => {
     throttler.addToQueue(async () => {
       await createHostIsolationException(kbnClient, generate.generateEndpointExceptionForCreate())
-        .catch(getCatchErrorHandling(log, 'Endpoint Exception'))
+        .catch((e) => {
+          errorCount++;
+          logError(log, 'Endpoint Exception', e);
+        })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount });
         });
     });
   });

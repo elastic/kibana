@@ -27,7 +27,10 @@ interface ProgressReporterOptions {
 export class ProgressReporter implements ProgressReporterInterface {
   private readonly reportIntervalMs = 20000;
   private readonly startedAt: Date = new Date();
-  private categories: Record<string, { totalCount: number; doneCount: number }> = {};
+  private categories: Record<
+    string,
+    { totalCount: number; doneCount: number; errorCount: number }
+  > = {};
   private stopReportingLoop: () => void = NOOP;
 
   constructor(private readonly options: ProgressReporterOptions = {}) {
@@ -75,6 +78,7 @@ export class ProgressReporter implements ProgressReporterInterface {
     this.categories[name] = {
       totalCount,
       doneCount: 0,
+      errorCount: 0,
     };
 
     this.startReporting();
@@ -96,19 +100,27 @@ export class ProgressReporter implements ProgressReporterInterface {
       prctDone: 0,
       totalCount: 0,
       doneCount: 0,
+      errorCount: 0,
       categories: {},
     };
 
     Object.entries(this.categories).forEach(
       ([
         categoryName,
-        { totalCount: thisCategoryTotalCount, doneCount: thisCategoryDoneCount },
+        {
+          totalCount: thisCategoryTotalCount,
+          doneCount: thisCategoryDoneCount,
+          errorCount: thisCategoryErrorCount,
+        },
       ]) => {
         state.totalCount += thisCategoryTotalCount;
         state.doneCount += thisCategoryDoneCount;
+        state.errorCount += thisCategoryErrorCount;
+
         state.categories[categoryName] = {
           totalCount: thisCategoryTotalCount,
           doneCount: thisCategoryDoneCount,
+          errorCount: thisCategoryErrorCount,
           prctDone: calculatePercentage(thisCategoryTotalCount, thisCategoryDoneCount),
         };
       }
@@ -131,7 +143,8 @@ ${
   'Elapsed Time (hh:mm:ss.ms):'.padEnd(categoryNamesMaxChr + 4) +
   getElapsedTime(this.getStartedTime())
 }
-${'Overall progress: '.padEnd(categoryNamesMaxChr + 4)}[    ${state.prctDone}%    ]
+${'Error Count:'.padEnd(categoryNamesMaxChr + 4) + state.errorCount}
+${'Overall Progress: '.padEnd(categoryNamesMaxChr + 4)}[    ${state.prctDone}%    ]
   ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
     let updatedOutput = acc;
 
@@ -143,7 +156,9 @@ ${'Overall progress: '.padEnd(categoryNamesMaxChr + 4)}[    ${state.prctDone}%  
       .concat(' '.repeat(categoryNamesMaxChr))
       .substring(0, categoryNamesMaxChr)}  ${categoryState.prctDone}%`.padEnd(
       categoryNamesMaxChr + 10
-    )}(${categoryState.doneCount} / ${categoryState.totalCount})`;
+    )}(${categoryState.doneCount} / ${categoryState.totalCount}, ${
+      categoryState.errorCount
+    } errors)`;
 
     return updatedOutput;
   }, '')}`;

@@ -48,7 +48,7 @@ export const createPolicies = async ({
 
   endpointIntegrationPolicyIds.push(endpointPolicy.id);
   doneCount++;
-  reportProgress({ doneCount });
+  reportProgress({ doneCount, errorCount: errors.length });
 
   // TODO:PT maybe use ES bulk create and bypass fleet so that we speed this up?
 
@@ -63,7 +63,7 @@ export const createPolicies = async ({
         })
         .finally(() => {
           doneCount++;
-          reportProgress({ doneCount });
+          reportProgress({ doneCount, errorCount: errors.length });
         });
     });
   });
@@ -72,9 +72,7 @@ export const createPolicies = async ({
 
   if (errors.length) {
     log.error(
-      `[${
-        errors.length
-      }] errors encountered while trying to create policies. First error: ${errors[0].toString()}`
+      `${errors.length} errors encountered while trying to create policies. First error: ${errors[0].message}`
     );
     log.verbose(...errors);
   }
