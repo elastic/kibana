@@ -5,16 +5,12 @@
  * 2.0.
  */
 import { createContext, useContext } from 'react';
-import { DatasetQualityController } from '../../controller';
 import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityControllerStateMachine } from '../../state_machines/dataset_quality_controller';
-
-type StoreContext = Omit<Omit<DatasetQualityController, 'state$'>, 'stateMachine'>;
+import { DatasetQualityControllerStateService } from '../../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityContextValue {
   dataStreamsStatsServiceClient: IDataStreamsStatsClient;
-  store: StoreContext;
-  stateMachine: DatasetQualityControllerStateMachine;
+  service: DatasetQualityControllerStateService;
 }
 
 export const DatasetQualityContext = createContext({} as DatasetQualityContextValue);

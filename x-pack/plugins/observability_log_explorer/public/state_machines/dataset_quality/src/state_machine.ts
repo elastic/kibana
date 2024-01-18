@@ -60,7 +60,6 @@ export const createPureObservabilityDatasetQualityStateMachine = (
           invoke: {
             src: 'subscribeToDatasetQualityState',
           },
-
           states: {
             unknownDatasetQualityState: {
               on: {
@@ -70,7 +69,6 @@ export const createPureObservabilityDatasetQualityStateMachine = (
                 },
               },
             },
-
             validDatasetQualityState: {
               on: {
                 DATASET_QUALITY_STATE_CHANGED: {
@@ -81,7 +79,6 @@ export const createPureObservabilityDatasetQualityStateMachine = (
               },
             },
           },
-
           initial: 'unknownDatasetQualityState',
         },
       },
@@ -111,7 +108,6 @@ export const createPureObservabilityDatasetQualityStateMachine = (
             : {};
         }),
       },
-      guards: {},
     }
   );
 

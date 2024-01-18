@@ -6,14 +6,10 @@
  */
 
 import { Observable } from 'rxjs';
-import {
-  DatasetQualityControllerStateMachine,
-  DatasetQualityControllerStateService,
-} from '../state_machines/dataset_quality_controller';
+import { DatasetQualityControllerStateService } from '../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
   state$: Observable<DatasetQualityPublicState>;
-  stateMachine: DatasetQualityControllerStateMachine;
   service: DatasetQualityControllerStateService;
 }
 

@@ -18,96 +18,15 @@ export interface DatasetQualityControllerTypeState {
   value: 'uninitialized';
   context: DefaultDatasetQualityControllerState;
 }
-/* 
-  | {
-      value: 'initializingDataView';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initializingControlPanels';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initializingStateContainer';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initialized';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.validatingSelection';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.idle';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.updatingDataView';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.updatingStateContainer';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.controlGroups.uninitialized';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.controlGroups.idle';
-      context: WithDatasetSelection &
-        WithControlPanelGroupAPI &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.controlGroups.updatingControlPanels';
-      context: WithDatasetSelection &
-        WithControlPanelGroupAPI &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }; */
 
 export type DatasetQualityControllerContext = DatasetQualityControllerTypeState['context'];
 
-export interface DatasetQualityControllerEvent {
-  type: 'CHANGE_PAGE';
-  page: number;
-}
-/*
-  | DoneInvokeEvent<DatasetSelection>
-  | DoneInvokeEvent<ControlPanels>
-  | DoneInvokeEvent<ControlGroupAPI>
-  | DoneInvokeEvent<DatasetEncodingError>
-  | DoneInvokeEvent<Error>;
-   */
+export type DatasetQualityControllerEvent =
+  | {
+      type: 'CHANGE_PAGE';
+      page: number;
+    }
+  | {
+      type: 'CHANGE_ROWS_PER_PAGE';
+      rowsPerPage: number;
+    };

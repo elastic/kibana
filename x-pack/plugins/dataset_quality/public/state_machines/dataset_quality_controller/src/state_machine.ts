@@ -33,7 +33,11 @@ export const createPureDatasetQualityControllerStateMachine = (
           on: {
             CHANGE_PAGE: {
               target: 'initialized',
-              actions: ['consoleLogTodos'],
+              actions: ['storeTablePage'],
+            },
+            CHANGE_ROWS_PER_PAGE: {
+              target: 'initialized',
+              actions: ['storeTableRowsPerPage'],
             },
           },
         },
@@ -41,12 +45,22 @@ export const createPureDatasetQualityControllerStateMachine = (
     },
     {
       actions: {
-        consoleLogTodos: assign((context, event) => {
+        storeTablePage: assign((context, event) => {
           return 'page' in event
             ? {
                 table: {
                   ...context.table,
                   page: event.page,
+                },
+              }
+            : {};
+        }),
+        storeTableRowsPerPage: assign((context, event) => {
+          return 'rowsPerPage' in event
+            ? {
+                table: {
+                  ...context.table,
+                  rowsPerPage: event.rowsPerPage,
                 },
               }
             : {};

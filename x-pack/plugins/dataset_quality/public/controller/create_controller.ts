@@ -8,21 +8,17 @@
 import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
-import { distinctUntilChanged, from, map, shareReplay } from 'rxjs';
+import { distinctUntilChanged, from, map } from 'rxjs';
 import { interpret } from 'xstate';
-import { createDatasetQualityControllerStateMachine } from '../state_machines/dataset_quality_controller';
+import {
+  createDatasetQualityControllerStateMachine,
+  DEFAULT_CONTEXT,
+} from '../state_machines/dataset_quality_controller';
 import { DatasetQualityStartDeps } from '../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';
 
 type InitialState = DatasetQualityPublicStateUpdate;
-
-const state = {
-  table: {
-    page: 0,
-    rowsPerPage: 10,
-  },
-};
 
 interface Dependencies {
   core: CoreStart;
@@ -32,7 +28,7 @@ interface Dependencies {
 export const createDatasetQualityControllerFactory =
   ({ core }: Dependencies) =>
   async ({
-    initialState = state,
+    initialState = DEFAULT_CONTEXT,
   }: {
     initialState?: InitialState;
   }): Promise<DatasetQualityController> => {
@@ -47,53 +43,15 @@ export const createDatasetQualityControllerFactory =
       devTools: getDevToolsOptions(),
     });
 
-    /* service.onTransition((t) => {
-      console.log('New transition', t);
-    }); */
-
     const state$ = from(service).pipe(
       map(({ context }) => getPublicStateFromContext(context)),
-      // distinctUntilChanged(equal),
-      shareReplay(1)
+      distinctUntilChanged(equal)
     );
 
     return {
       state$,
       service,
-      stateMachine: machine,
     };
-
-    /* const datasetQualityState = new BehaviorSubject({
-      ...state,
-      ...initialState,
-    }); */
-
-    /* return {
-      actions: {
-        setPage: (page: number) => {
-          datasetQualityState.next({
-            ...datasetQualityState.getValue(),
-            table: {
-              ...datasetQualityState.getValue().table,
-              page,
-            },
-          });
-        },
-        setRowsPerPage: (rowsPerPage: number) => {
-          datasetQualityState.next({
-            ...datasetQualityState.getValue(),
-            table: {
-              ...datasetQualityState.getValue().table,
-              rowsPerPage,
-            },
-          });
-        },
-      },x
-      get state() {
-        return datasetQualityState.getValue();
-      },
-      state$: datasetQualityState.asObservable().pipe(distinctUntilChanged(equal)),
-    }; */
   };
 
 export type CreateDatasetQualityControllerFactory = typeof createDatasetQualityControllerFactory;

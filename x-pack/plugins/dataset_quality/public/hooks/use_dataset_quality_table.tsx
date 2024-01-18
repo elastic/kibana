@@ -70,6 +70,10 @@ export const useDatasetQualityTable = () => {
         type: 'CHANGE_PAGE',
         page: options.page.index,
       });
+      service.send({
+        type: 'CHANGE_ROWS_PER_PAGE',
+        rowsPerPage: options.page.size,
+      });
       setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
       setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
     },

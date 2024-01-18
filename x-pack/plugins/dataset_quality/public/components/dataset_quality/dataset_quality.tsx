@@ -35,10 +35,9 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
     const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
       () => ({
         dataStreamsStatsServiceClient,
-        stateMachine: controller.stateMachine,
         service: controller.service,
       }),
-      [controller.service, controller.stateMachine, dataStreamsStatsServiceClient]
+      [controller.service, dataStreamsStatsServiceClient]
     );
 
     return (
