@@ -7,12 +7,16 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core-notifications-browser';
-import { AssistantProvider as ElasticAssistantProvider } from '@kbn/elastic-assistant';
+import type { Conversation } from '@kbn/elastic-assistant';
+import {
+  AssistantProvider as ElasticAssistantProvider,
+  bulkConversationsChange,
+} from '@kbn/elastic-assistant';
 
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
-import { augmentMessageCodeBlocks } from './helpers';
+import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
 import { useBaseConversations } from './use_conversation_store';
 import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
@@ -22,6 +26,7 @@ import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
+import { useLocalStorage } from '../common/components/local_storage';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -33,6 +38,7 @@ const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title',
 export const AssistantProvider: React.FC = ({ children }) => {
   const {
     http,
+    storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
   } = useKibana().services;
@@ -48,6 +54,29 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const { signalIndexName } = useSignalIndex();
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
+
+  // migrate used conversations from the local storage
+  const [conversations, setConversations] = useLocalStorage<
+    Record<string, Conversation> | undefined
+  >({
+    defaultValue: undefined,
+    key: LOCAL_STORAGE_KEY,
+  });
+
+  if (conversations && Object.keys(conversations).length > 0) {
+    const conversationsToCreate = Object.values(conversations).filter(
+      (c) => c.messages && c.messages.length > 0
+    );
+    // post bulk create
+    bulkConversationsChange(http, {
+      create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
+        res[c.id] = c;
+        return res;
+      }, {}),
+    });
+    setConversations(undefined);
+    storage.remove(LOCAL_STORAGE_KEY);
+  }
 
   return (
     <ElasticAssistantProvider
