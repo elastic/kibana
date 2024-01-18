@@ -7,9 +7,9 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { createOrUpdateComponentTemplate } from './create_or_update_component_template';
-import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const randomDelayMultiplier = 0.01;
 const logger = loggingSystemMock.createLogger();
@@ -107,39 +107,9 @@ describe('createOrUpdateComponentTemplate', () => {
 
   it(`should update index template field limit and retry if putTemplate throws error with field limit error`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
-      new EsErrors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          statusCode: 400,
-          body: {
-            error: {
-              root_cause: [
-                {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-                },
-              ],
-              type: 'illegal_argument_exception',
-              reason:
-                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-              caused_by: {
-                type: 'illegal_argument_exception',
-                reason:
-                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
-                caused_by: {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
-                  caused_by: {
-                    type: 'illegal_argument_exception',
-                    reason: 'Limit of total fields [1900] has been exceeded',
-                  },
-                },
-              },
-            },
-          },
-        })
-      )
+      new EsErrors.ResponseError({
+        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+      } as DiagnosticResult)
     );
     const existingIndexTemplate = {
       name: 'test-template',
@@ -193,39 +163,9 @@ describe('createOrUpdateComponentTemplate', () => {
 
   it(`should update index template field limit and retry if putTemplate throws error with field limit error when there are malformed index templates`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
-      new EsErrors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          statusCode: 400,
-          body: {
-            error: {
-              root_cause: [
-                {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-                },
-              ],
-              type: 'illegal_argument_exception',
-              reason:
-                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-              caused_by: {
-                type: 'illegal_argument_exception',
-                reason:
-                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
-                caused_by: {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
-                  caused_by: {
-                    type: 'illegal_argument_exception',
-                    reason: 'Limit of total fields [1900] has been exceeded',
-                  },
-                },
-              },
-            },
-          },
-        })
-      )
+      new EsErrors.ResponseError({
+        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+      } as DiagnosticResult)
     );
     const existingIndexTemplate = {
       name: 'test-template',
@@ -299,39 +239,9 @@ describe('createOrUpdateComponentTemplate', () => {
 
   it(`should retry getIndexTemplate and putIndexTemplate on transient ES errors`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
-      new EsErrors.ResponseError(
-        elasticsearchClientMock.createApiResponse({
-          statusCode: 400,
-          body: {
-            error: {
-              root_cause: [
-                {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-                },
-              ],
-              type: 'illegal_argument_exception',
-              reason:
-                'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
-              caused_by: {
-                type: 'illegal_argument_exception',
-                reason:
-                  'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
-                caused_by: {
-                  type: 'illegal_argument_exception',
-                  reason:
-                    'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
-                  caused_by: {
-                    type: 'illegal_argument_exception',
-                    reason: 'Limit of total fields [1900] has been exceeded',
-                  },
-                },
-              },
-            },
-          },
-        })
-      )
+      new EsErrors.ResponseError({
+        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+      } as DiagnosticResult)
     );
     const existingIndexTemplate = {
       name: 'test-template',

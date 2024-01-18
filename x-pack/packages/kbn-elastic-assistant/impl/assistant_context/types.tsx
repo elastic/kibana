@@ -67,7 +67,6 @@ export interface Conversation {
   messages: Message[];
   updatedAt?: string;
   replacements?: Record<string, string>;
-  theme?: ConversationTheme;
   isDefault?: boolean;
   excludeFromLastConversationStorage?: boolean;
 }

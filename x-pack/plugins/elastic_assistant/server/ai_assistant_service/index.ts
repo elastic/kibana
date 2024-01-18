@@ -101,24 +101,20 @@ export class AIAssistantService {
       this.options.logger.debug(`Initializing resources for AIAssistantService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
-      const installationResult = await this.conversationsDataStream.install({
+      await this.conversationsDataStream.install({
         esClient,
         logger: this.options.logger,
         pluginStop$: this.options.pluginStop$,
       });
-
-      if (installationResult.error !== undefined) {
-        throw installationResult.error;
-      }
-      this.initialized = true;
-      this.isInitializing = false;
-      return successResult();
     } catch (error) {
       this.options.logger.error(`Error initializing AI assistant resources: ${error.message}`);
       this.initialized = false;
       this.isInitializing = false;
       return errorResult(error.message);
     }
+    this.initialized = true;
+    this.isInitializing = false;
+    return successResult();
   }
 
   private readonly resourceNames: AssistantResourceNames = {
@@ -222,7 +218,7 @@ export class AIAssistantService {
   ) {
     try {
       this.options.logger.debug(`Initializing spaceId level resources for AIAssistantService`);
-      let indexName = await this.conversationsDataStream.getSpaceIndexName(spaceId);
+      let indexName = await this.conversationsDataStream.getInstalledSpaceName(spaceId);
       if (!indexName) {
         indexName = await this.conversationsDataStream.installSpace(spaceId);
       }

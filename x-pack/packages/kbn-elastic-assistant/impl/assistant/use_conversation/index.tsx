@@ -11,7 +11,6 @@ import { IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
-import { ELASTIC_AI_ASSISTANT, ELASTIC_AI_ASSISTANT_TITLE } from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
   createConversationApi,
@@ -19,25 +18,13 @@ import {
   getConversationById,
   updateConversationApi,
 } from '../api/conversations';
+import { WELCOME_CONVERSATION } from './sample_conversations';
 
 export const DEFAULT_CONVERSATION_STATE: Conversation = {
   id: i18n.DEFAULT_CONVERSATION_TITLE,
   messages: [],
   apiConfig: {},
   title: i18n.DEFAULT_CONVERSATION_TITLE,
-  theme: {
-    title: ELASTIC_AI_ASSISTANT_TITLE,
-    titleIcon: 'logoSecurity',
-    assistant: {
-      name: ELASTIC_AI_ASSISTANT,
-      icon: 'logoSecurity',
-    },
-    system: {
-      icon: 'logoElastic',
-    },
-    user: {},
-  },
-  user: {},
 };
 
 interface AppendMessageProps {
@@ -83,6 +70,8 @@ interface UseConversation {
   setApiConfig: ({
     conversationId,
     apiConfig,
+    title,
+    isDefault,
   }: SetApiConfigProps) => Promise<Conversation | IHttpFetchError<unknown>>;
   createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
@@ -247,15 +236,18 @@ export const useConversation = (): UseConversation => {
         conversation: undefined,
       })?.id;
 
-      const newConversation: Conversation = {
-        ...DEFAULT_CONVERSATION_STATE,
-        apiConfig: {
-          ...DEFAULT_CONVERSATION_STATE.apiConfig,
-          defaultSystemPromptId,
-        },
-        id: conversationId,
-        messages: messages != null ? messages : [],
-      };
+      const newConversation: Conversation =
+        conversationId === i18n.WELCOME_CONVERSATION_TITLE
+          ? WELCOME_CONVERSATION
+          : {
+              ...DEFAULT_CONVERSATION_STATE,
+              apiConfig: {
+                ...DEFAULT_CONVERSATION_STATE.apiConfig,
+                defaultSystemPromptId,
+              },
+              id: conversationId,
+              messages: messages != null ? messages : [],
+            };
       return newConversation;
     },
     [allSystemPrompts]
@@ -285,11 +277,11 @@ export const useConversation = (): UseConversation => {
   );
 
   /**
-   * Update the apiConfig for a given conversationId
+   * Create/Update the apiConfig for a given conversationId
    */
   const setApiConfig = useCallback(
     async ({ conversationId, apiConfig, title, isDefault }: SetApiConfigProps) => {
-      if (isDefault && title === conversationId) {
+      if (title === conversationId) {
         return createConversationApi({
           http,
           conversation: {

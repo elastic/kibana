@@ -35,18 +35,6 @@ export const emptyWelcomeConvo: Conversation = {
   id: 'Welcome',
   title: 'Welcome',
   isDefault: true,
-  theme: {
-    title: 'Elastic AI Assistant',
-    titleIcon: 'logoSecurity',
-    assistant: {
-      name: 'Elastic AI Assistant',
-      icon: 'logoSecurity',
-    },
-    system: {
-      icon: 'logoElastic',
-    },
-    user: {},
-  },
   messages: [],
   apiConfig: {
     connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',

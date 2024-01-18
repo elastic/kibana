@@ -230,10 +230,9 @@ const AssistantComponent: React.FC<Props> = ({
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,
+    conversations,
+    setConversations,
   });
-
-  const currentTitle: string | JSX.Element =
-    isWelcomeSetup && blockBotConversation.theme?.title ? blockBotConversation.theme?.title : title;
 
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
@@ -301,7 +300,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const handleOnConversationSelected = useCallback(
-    async (cId: string) => {
+    async (cId: string, cTitle?: string) => {
       if (conversations[cId] === undefined && cId) {
         const updatedConv = await refetchResults();
         if (updatedConv) {
@@ -311,24 +310,24 @@ const AssistantComponent: React.FC<Props> = ({
             getDefaultSystemPrompt({ allSystemPrompts, conversation: updatedConv[cId] })?.id
           );
         }
-      } else if (cId) {
+      } else if (cId && cId !== cTitle) {
         setSelectedConversationId(cId);
         const refetchedConversation = await refetchCurrentConversation(cId);
         if (refetchedConversation) {
           setCurrentConversation(refetchedConversation);
         }
         setEditingSystemPromptId(
-          getDefaultSystemPrompt({ allSystemPrompts, conversation: currentConversation })?.id
+          getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
+        );
+      } else {
+        setSelectedConversationId(cId);
+        setCurrentConversation(conversations[cId]);
+        setEditingSystemPromptId(
+          getDefaultSystemPrompt({ allSystemPrompts, conversation: conversations[cId] })?.id
         );
       }
     },
-    [
-      allSystemPrompts,
-      conversations,
-      currentConversation,
-      refetchCurrentConversation,
-      refetchResults,
-    ]
+    [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
   );
 
   const handleOnConversationDeleted = useCallback(
@@ -558,7 +557,7 @@ const AssistantComponent: React.FC<Props> = ({
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
-            title={currentTitle}
+            title={title}
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
           />

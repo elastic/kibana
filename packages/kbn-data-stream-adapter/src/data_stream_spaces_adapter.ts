@@ -10,11 +10,8 @@ import { createDataStream, updateDataStreams } from './create_or_update_data_str
 import { createOrUpdateIndexTemplate } from './create_or_update_index_template';
 import {
   DataStreamAdapter,
-  InstallationPromise,
   type DataStreamAdapterParams,
   type InstallParams,
-  successResult,
-  errorResult,
 } from './data_stream_adapter';
 
 export class DataStreamSpacesAdapter extends DataStreamAdapter {
@@ -28,76 +25,66 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
 
   public async install({
     logger,
-    esClient,
+    esClient: esClientToResolve,
     pluginStop$,
     tasksTimeoutMs,
-  }: InstallParams): Promise<InstallationPromise> {
-    if (this.installed) {
-      throw new Error('Cannot re-install data stream');
-    }
+  }: InstallParams) {
+    this.installed = true;
 
-    try {
-      const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
+    const esClient = await esClientToResolve;
+    const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
 
-      // Install component templates in parallel
-      await Promise.all(
-        this.componentTemplates.map((componentTemplate) =>
-          installFn(
-            createOrUpdateComponentTemplate({
-              template: componentTemplate,
-              esClient,
-              logger,
-              totalFieldsLimit: this.totalFieldsLimit,
-            }),
-            `create or update ${componentTemplate.name} component template`
-          )
+    // Install component templates in parallel
+    await Promise.all(
+      this.componentTemplates.map((componentTemplate) =>
+        installFn(
+          createOrUpdateComponentTemplate({
+            template: componentTemplate,
+            esClient,
+            logger,
+            totalFieldsLimit: this.totalFieldsLimit,
+          }),
+          `create or update ${componentTemplate.name} component template`
         )
-      );
+      )
+    );
 
-      // Install index templates in parallel
-      await Promise.all(
-        this.indexTemplates.map((indexTemplate) =>
-          installFn(
-            createOrUpdateIndexTemplate({ template: indexTemplate, esClient, logger }),
-            `create or update ${indexTemplate.name} index template`
-          )
+    // Install index templates in parallel
+    await Promise.all(
+      this.indexTemplates.map((indexTemplate) =>
+        installFn(
+          createOrUpdateIndexTemplate({ template: indexTemplate, esClient, logger }),
+          `create or update ${indexTemplate.name} index template`
         )
-      );
+      )
+    );
 
-      // Update existing space data streams
-      await installFn(
-        updateDataStreams({
-          name: `${this.prefix}-*`,
-          esClient,
-          logger,
-          totalFieldsLimit: this.totalFieldsLimit,
-        }),
-        `update space data streams`
-      );
+    // Update existing space data streams
+    await installFn(
+      updateDataStreams({
+        name: `${this.prefix}-*`,
+        esClient,
+        logger,
+        totalFieldsLimit: this.totalFieldsLimit,
+      }),
+      `update space data streams`
+    );
 
-      // define function to install data stream for spaces on demand
-      this._installSpace = async (spaceId: string) => {
-        const existingInstallPromise = this.installedSpaceDataStreamName.get(spaceId);
-        if (existingInstallPromise) {
-          return existingInstallPromise;
-        }
-        const name = `${this.prefix}-${spaceId}`;
-        const installPromise = installFn(
-          createDataStream({ name, esClient, logger }),
-          `create ${name} data stream`
-        ).then(() => name);
+    // define function to install data stream for spaces on demand
+    this._installSpace = async (spaceId: string) => {
+      const existingInstallPromise = this.installedSpaceDataStreamName.get(spaceId);
+      if (existingInstallPromise) {
+        return existingInstallPromise;
+      }
+      const name = `${this.prefix}-${spaceId}`;
+      const installPromise = installFn(
+        createDataStream({ name, esClient, logger }),
+        `create ${name} data stream`
+      ).then(() => name);
 
-        this.installedSpaceDataStreamName.set(spaceId, installPromise);
-        return installPromise;
-      };
-
-      this.installed = true;
-      return successResult();
-    } catch (error) {
-      logger.error(`Error initializing data stream resources: ${error.message}`);
-      this.installed = false;
-      return errorResult(error.message);
-    }
+      this.installedSpaceDataStreamName.set(spaceId, installPromise);
+      return installPromise;
+    };
   }
 
   public async installSpace(spaceId: string): Promise<string> {
@@ -107,7 +94,7 @@ export class DataStreamSpacesAdapter extends DataStreamAdapter {
     return this._installSpace(spaceId);
   }
 
-  public async getSpaceIndexName(spaceId: string): Promise<string | undefined> {
+  public async getInstalledSpaceName(spaceId: string): Promise<string | undefined> {
     return this.installedSpaceDataStreamName.get(spaceId);
   }
 }

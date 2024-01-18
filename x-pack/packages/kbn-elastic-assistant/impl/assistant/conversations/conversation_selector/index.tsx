@@ -33,7 +33,7 @@ interface Props {
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  onConversationSelected: (conversationId: string) => void;
+  onConversationSelected: (conversationId: string, title?: string) => void;
   onConversationDeleted: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
@@ -70,7 +70,6 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const { allSystemPrompts } = useAssistantContext();
 
     const { createConversation } = useConversation();
-
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
@@ -130,11 +129,20 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     const onDelete = useCallback(
       (cId: string) => {
         if (selectedConversationId === cId) {
-          onConversationSelected(getPreviousConversationId(conversationIds, cId));
+          onConversationSelected(
+            getPreviousConversationId(conversationIds, cId),
+            conversations[cId].title
+          );
         }
         onConversationDeleted(cId);
       },
-      [selectedConversationId, onConversationDeleted, onConversationSelected, conversationIds]
+      [
+        selectedConversationId,
+        onConversationDeleted,
+        onConversationSelected,
+        conversationIds,
+        conversations,
+      ]
     );
 
     const onChange = useCallback(
@@ -142,7 +150,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         if (newOptions.length === 0 || !newOptions?.[0].id) {
           setSelectedOptions([]);
         } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          await onConversationSelected(newOptions?.[0].id);
+          await onConversationSelected(newOptions?.[0].id, newOptions?.[0].label);
         }
       },
       [conversationOptions, onConversationSelected]
@@ -150,12 +158,12 @@ export const ConversationSelector: React.FC<Props> = React.memo(
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(prevId);
-    }, [conversationIds, selectedConversationId, onConversationSelected]);
+      onConversationSelected(prevId, conversations[prevId].title);
+    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      onConversationSelected(nextId);
-    }, [conversationIds, selectedConversationId, onConversationSelected]);
+      onConversationSelected(nextId, conversations[nextId].title);
+    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(

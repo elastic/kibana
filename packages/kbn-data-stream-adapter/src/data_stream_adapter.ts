@@ -46,18 +46,10 @@ export interface GetInstallFnParams {
 }
 export interface InstallParams {
   logger: Logger;
-  esClient: ElasticsearchClient;
+  esClient: ElasticsearchClient | Promise<ElasticsearchClient>;
   pluginStop$: Subject<void>;
   tasksTimeoutMs?: number;
 }
-
-export interface InstallationPromise {
-  result: boolean;
-  error?: string;
-}
-
-export const successResult = () => ({ result: true });
-export const errorResult = (error?: string) => ({ result: false, error });
 
 const DEFAULT_FIELDS_LIMIT = 2500;
 
@@ -114,58 +106,55 @@ export class DataStreamAdapter {
     };
   }
 
-  public async install({ logger, esClient, pluginStop$, tasksTimeoutMs }: InstallParams) {
-    if (this.installed) {
-      throw new Error('Cannot re-install data stream');
-    }
-    try {
-      const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
+  public async install({
+    logger,
+    esClient: esClientToResolve,
+    pluginStop$,
+    tasksTimeoutMs,
+  }: InstallParams) {
+    this.installed = true;
 
-      // Install component templates in parallel
-      await Promise.all(
-        this.componentTemplates.map((componentTemplate) =>
-          installFn(
-            createOrUpdateComponentTemplate({
-              template: componentTemplate,
-              esClient,
-              logger,
-              totalFieldsLimit: this.totalFieldsLimit,
-            }),
-            `${componentTemplate.name} component template`
-          )
+    const esClient = await esClientToResolve;
+    const installFn = this.getInstallFn({ logger, pluginStop$, tasksTimeoutMs });
+
+    // Install component templates in parallel
+    await Promise.all(
+      this.componentTemplates.map((componentTemplate) =>
+        installFn(
+          createOrUpdateComponentTemplate({
+            template: componentTemplate,
+            esClient,
+            logger,
+            totalFieldsLimit: this.totalFieldsLimit,
+          }),
+          `${componentTemplate.name} component template`
         )
-      );
+      )
+    );
 
-      // Install index templates in parallel
-      await Promise.all(
-        this.indexTemplates.map((indexTemplate) =>
-          installFn(
-            createOrUpdateIndexTemplate({
-              template: indexTemplate,
-              esClient,
-              logger,
-            }),
-            `${indexTemplate.name} index template`
-          )
+    // Install index templates in parallel
+    await Promise.all(
+      this.indexTemplates.map((indexTemplate) =>
+        installFn(
+          createOrUpdateIndexTemplate({
+            template: indexTemplate,
+            esClient,
+            logger,
+          }),
+          `${indexTemplate.name} index template`
         )
-      );
+      )
+    );
 
-      // create data stream when everything is ready
-      await installFn(
-        createOrUpdateDataStream({
-          name: this.name,
-          esClient,
-          logger,
-          totalFieldsLimit: this.totalFieldsLimit,
-        }),
-        `${this.name} data stream`
-      );
-      this.installed = true;
-      return successResult();
-    } catch (error) {
-      logger.error(`Error initializing data stream resources: ${error.message}`);
-      this.installed = false;
-      return errorResult(error.message);
-    }
+    // create data stream when everything is ready
+    await installFn(
+      createOrUpdateDataStream({
+        name: this.name,
+        esClient,
+        logger,
+        totalFieldsLimit: this.totalFieldsLimit,
+      }),
+      `${this.name} data stream`
+    );
   }
 }
