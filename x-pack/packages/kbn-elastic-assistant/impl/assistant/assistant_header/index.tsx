@@ -138,7 +138,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   isSettingsModalVisible={isSettingsModalVisible}
                   selectedConversation={currentConversation}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
-                  setSelectedConversationId={setSelectedConversationId}
+                  onConversationSelected={onConversationSelected}
                   conversations={conversations}
                 />
               </EuiFlexItem>

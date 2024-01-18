@@ -23,23 +23,20 @@ import { ConversationSelectorSettings } from '../conversation_selector_settings'
 import { getDefaultSystemPrompt } from '../../use_conversation/helpers';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
+import { ConversationsBulkActions } from '../../api';
 
 export interface ConversationSettingsProps {
   allSystemPrompts: Prompt[];
   conversationSettings: Record<string, Conversation>;
-  createdConversationSettings: Record<string, Conversation>;
-  deletedConversationSettings: string[];
+  conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultConnectorId?: string;
   defaultProvider?: OpenAiProviderType;
   http: HttpSetup;
   onSelectedConversationChange: (conversation?: Conversation) => void;
   selectedConversation: Conversation | undefined;
-  setUpdatedConversationSettings: React.Dispatch<
-    React.SetStateAction<Record<string, Conversation>>
-  >;
-  setDeletedConversationSettings: React.Dispatch<React.SetStateAction<string[]>>;
-  setCreatedConversationSettings: React.Dispatch<
-    React.SetStateAction<Record<string, Conversation>>
+  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions: React.Dispatch<
+    React.SetStateAction<ConversationsBulkActions>
   >;
   isDisabled?: boolean;
 }
@@ -55,13 +52,11 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     selectedConversation,
     onSelectedConversationChange,
     conversationSettings,
-    createdConversationSettings,
-    deletedConversationSettings,
     http,
-    setUpdatedConversationSettings,
     isDisabled = false,
-    setCreatedConversationSettings,
-    setDeletedConversationSettings,
+    setConversationSettings,
+    conversationsSettingsBulkActions,
+    setConversationsSettingsBulkActions,
   }) => {
     const defaultSystemPrompt = useMemo(() => {
       return getDefaultSystemPrompt({ allSystemPrompts, conversation: undefined });
@@ -95,12 +90,19 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           newSelectedConversation &&
           (isNew || newSelectedConversation.id === newSelectedConversation.title)
         ) {
-          setCreatedConversationSettings({
-            ...createdConversationSettings,
+          setConversationSettings({
+            ...conversationSettings,
             [isNew ? c : newSelectedConversation.id]: newSelectedConversation,
           });
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            create: {
+              ...(conversationsSettingsBulkActions.create ?? {}),
+              [newSelectedConversation.id]: newSelectedConversation,
+            },
+          });
         } else if (newSelectedConversation != null) {
-          setUpdatedConversationSettings((prev) => {
+          setConversationSettings((prev) => {
             return {
               ...prev,
               [newSelectedConversation.id]: newSelectedConversation,
@@ -111,57 +113,88 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         onSelectedConversationChange(newSelectedConversation);
       },
       [
-        createdConversationSettings,
+        conversationSettings,
+        conversationsSettingsBulkActions,
         defaultConnectorId,
         defaultProvider,
         defaultSystemPrompt?.id,
         onSelectedConversationChange,
-        setCreatedConversationSettings,
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
       ]
     );
 
     const onConversationDeleted = useCallback(
       (conversationId: string) => {
-        setDeletedConversationSettings([...deletedConversationSettings, conversationId]);
+        const updatedConverationSettings = { ...conversationSettings };
+        delete updatedConverationSettings[conversationId];
+        setConversationSettings(updatedConverationSettings);
+
+        setConversationsSettingsBulkActions({
+          ...conversationsSettingsBulkActions,
+          delete: {
+            ids: [...(conversationsSettingsBulkActions.delete?.ids ?? []), conversationId],
+          },
+        });
       },
-      [deletedConversationSettings, setDeletedConversationSettings]
+      [
+        conversationSettings,
+        conversationsSettingsBulkActions,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
+      ]
     );
 
     const handleOnSystemPromptSelectionChange = useCallback(
       (systemPromptId?: string | undefined) => {
         if (selectedConversation != null) {
-          if (conversationSettings[selectedConversation.id]) {
-            setUpdatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  defaultSystemPromptId: systemPromptId,
+          const updatedConversation = {
+            ...selectedConversation,
+            apiConfig: {
+              ...selectedConversation.apiConfig,
+              defaultSystemPromptId: systemPromptId,
+            },
+          };
+          setConversationSettings({
+            ...conversationSettings,
+            [updatedConversation.id]: updatedConversation,
+          });
+          if (selectedConversation.id !== selectedConversation.title) {
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              update: {
+                ...(conversationsSettingsBulkActions.update ?? {}),
+                [updatedConversation.id]: {
+                  ...(conversationsSettingsBulkActions.update
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    : {}),
+                  apiConfig: {
+                    ...((conversationsSettingsBulkActions.update
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      : {}
+                    ).apiConfig ?? {}),
+                    defaultSystemPromptId: systemPromptId,
+                  },
                 },
-                updatedAt: undefined,
               },
-            }));
+            });
           } else {
-            setCreatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  defaultSystemPromptId: systemPromptId,
-                },
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              create: {
+                ...(conversationsSettingsBulkActions.create ?? {}),
+                [updatedConversation.id]: updatedConversation,
               },
-            }));
+            });
           }
         }
       },
       [
         conversationSettings,
+        conversationsSettingsBulkActions,
         selectedConversation,
-        setCreatedConversationSettings,
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
       ]
     );
 
@@ -182,42 +215,56 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
       (connector) => {
         if (selectedConversation != null) {
           const config = getGenAiConfig(connector);
-
-          if (conversationSettings[selectedConversation.id]) {
-            setUpdatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  connectorId: connector?.id,
-                  provider: config?.apiProvider,
-                  model: config?.defaultModel,
+          const updatedConversation = {
+            ...selectedConversation,
+            apiConfig: {
+              ...selectedConversation.apiConfig,
+              connectorId: connector?.id,
+              provider: config?.apiProvider,
+              model: config?.defaultModel,
+            },
+          };
+          setConversationSettings((prev) => ({
+            ...prev,
+            [selectedConversation.id]: updatedConversation,
+          }));
+          if (selectedConversation.id !== selectedConversation.title) {
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              update: {
+                ...(conversationsSettingsBulkActions.update ?? {}),
+                [updatedConversation.id]: {
+                  ...(conversationsSettingsBulkActions.update
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    : {}),
+                  apiConfig: {
+                    ...((conversationsSettingsBulkActions.update
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      : {}
+                    ).apiConfig ?? {}),
+                    connectorId: connector?.id,
+                    provider: config?.apiProvider,
+                    model: config?.defaultModel,
+                  },
                 },
-                updatedAt: undefined,
               },
-            }));
+            });
           } else {
-            setCreatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  connectorId: connector?.id,
-                  provider: config?.apiProvider,
-                  model: config?.defaultModel,
-                },
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              create: {
+                ...(conversationsSettingsBulkActions.create ?? {}),
+                [updatedConversation.id]: updatedConversation,
               },
-            }));
+            });
           }
         }
       },
       [
-        conversationSettings,
+        conversationsSettingsBulkActions,
         selectedConversation,
-        setCreatedConversationSettings,
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
       ]
     );
 
@@ -230,37 +277,53 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     const handleOnModelSelectionChange = useCallback(
       (model?: string) => {
         if (selectedConversation != null) {
-          if (conversationSettings[selectedConversation.id]) {
-            setUpdatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  model,
+          const updatedConversation = {
+            ...selectedConversation,
+            apiConfig: {
+              ...selectedConversation.apiConfig,
+              model,
+            },
+          };
+          setConversationSettings({
+            ...conversationSettings,
+            [updatedConversation.id]: updatedConversation,
+          });
+          if (selectedConversation.id !== selectedConversation.title) {
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              update: {
+                ...(conversationsSettingsBulkActions.update ?? {}),
+                [updatedConversation.id]: {
+                  ...(conversationsSettingsBulkActions.update
+                    ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                    : {}),
+                  apiConfig: {
+                    ...((conversationsSettingsBulkActions.update
+                      ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                      : {}
+                    ).apiConfig ?? {}),
+                    model,
+                  },
                 },
-                updatedAt: undefined,
               },
-            }));
+            });
           } else {
-            setCreatedConversationSettings((prev) => ({
-              ...prev,
-              [selectedConversation.id]: {
-                ...selectedConversation,
-                apiConfig: {
-                  ...selectedConversation.apiConfig,
-                  model,
-                },
+            setConversationsSettingsBulkActions({
+              ...conversationsSettingsBulkActions,
+              create: {
+                ...(conversationsSettingsBulkActions.create ?? {}),
+                [updatedConversation.id]: updatedConversation,
               },
-            }));
+            });
           }
         }
       },
       [
         conversationSettings,
+        conversationsSettingsBulkActions,
         selectedConversation,
-        setCreatedConversationSettings,
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
       ]
     );
 
@@ -275,7 +338,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
         <ConversationSelectorSettings
           selectedConversationId={selectedConversation?.id}
-          conversations={{ ...conversationSettings, ...createdConversationSettings }}
+          conversations={conversationSettings}
           onConversationDeleted={onConversationDeleted}
           onConversationSelectionChange={onConversationSelectionChange}
         />

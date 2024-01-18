@@ -9,12 +9,14 @@ import React, { useCallback, useState } from 'react';
 import { Conversation, Prompt, QuickPrompt } from '../../../..';
 import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
-import { bulkConversationsChange } from '../../api/conversations/use_bulk_actions_conversations';
+import {
+  ConversationsBulkActions,
+  bulkConversationsChange,
+} from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
   conversationSettings: Record<string, Conversation>;
-  createdConversationSettings: Record<string, Conversation>;
-  deletedConversationSettings: string[];
+  conversationsSettingsBulkActions: ConversationsBulkActions;
   defaultAllow: string[];
   defaultAllowReplacement: string[];
   knowledgeBase: KnowledgeBaseConfig;
@@ -23,16 +25,13 @@ interface UseSettingsUpdater {
   systemPromptSettings: Prompt[];
   setUpdatedDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setUpdatedDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
-  setUpdatedConversationSettings: React.Dispatch<
-    React.SetStateAction<Record<string, Conversation>>
-  >;
-  setCreatedConversationSettings: React.Dispatch<
-    React.SetStateAction<Record<string, Conversation>>
+  setConversationSettings: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  setConversationsSettingsBulkActions: React.Dispatch<
+    React.SetStateAction<ConversationsBulkActions>
   >;
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
-  setDeletedConversationSettings: React.Dispatch<React.SetStateAction<string[]>>;
   saveSettings: () => void;
 }
 
@@ -59,12 +58,10 @@ export const useSettingsUpdater = (
    * Pending updating state
    */
   // Conversations
-  const [updatedConversationSettings, setUpdatedConversationSettings] =
+  const [conversationSettings, setConversationSettings] =
     useState<Record<string, Conversation>>(conversations);
-  const [createdConversationSettings, setCreatedConversationSettings] = useState<
-    Record<string, Conversation>
-  >({});
-  const [deletedConversationSettings, setDeletedConversationSettings] = useState<string[]>([]);
+  const [conversationsSettingsBulkActions, setConversationsSettingsBulkActions] =
+    useState<ConversationsBulkActions>({});
   // Quick Prompts
   const [updatedQuickPromptSettings, setUpdatedQuickPromptSettings] =
     useState<QuickPrompt[]>(allQuickPrompts);
@@ -83,9 +80,8 @@ export const useSettingsUpdater = (
    * Reset all pending settings
    */
   const resetSettings = useCallback((): void => {
-    setUpdatedConversationSettings(conversations);
-    setDeletedConversationSettings([]);
-    setCreatedConversationSettings({});
+    setConversationSettings(conversations);
+    setConversationsSettingsBulkActions({});
     setUpdatedQuickPromptSettings(allQuickPrompts);
     setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
@@ -106,38 +102,7 @@ export const useSettingsUpdater = (
   const saveSettings = useCallback((): void => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    bulkConversationsChange(http, {
-      update: Object.keys(updatedConversationSettings).reduce(
-        (
-          conversationsToUpdate: Array<Omit<Conversation, 'createdAt' | 'updatedAt' | 'user'>>,
-          conversationId: string
-        ) => {
-          if (updatedConversationSettings.updatedAt === undefined) {
-            conversationsToUpdate.push({
-              ...(updatedConversationSettings[conversationId] as Omit<
-                Conversation,
-                'createdAt' | 'updatedAt' | 'user'
-              >),
-            });
-          }
-          return conversationsToUpdate;
-        },
-        []
-      ),
-      create: Object.keys(createdConversationSettings).reduce(
-        (conversationsToCreate: Conversation[], conversationId: string) => {
-          conversationsToCreate.push(createdConversationSettings[conversationId]);
-          return conversationsToCreate;
-        },
-        []
-      ),
-      delete:
-        deletedConversationSettings.length > 0
-          ? {
-              ids: deletedConversationSettings,
-            }
-          : undefined,
-    });
+    bulkConversationsChange(http, conversationsSettingsBulkActions);
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
@@ -162,9 +127,7 @@ export const useSettingsUpdater = (
     setAllSystemPrompts,
     updatedSystemPromptSettings,
     http,
-    updatedConversationSettings,
-    createdConversationSettings,
-    deletedConversationSettings,
+    conversationsSettingsBulkActions,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
     updatedKnowledgeBaseSettings,
@@ -177,9 +140,8 @@ export const useSettingsUpdater = (
   ]);
 
   return {
-    conversationSettings: updatedConversationSettings,
-    createdConversationSettings,
-    deletedConversationSettings,
+    conversationSettings,
+    conversationsSettingsBulkActions,
     defaultAllow: updatedDefaultAllow,
     defaultAllowReplacement: updatedDefaultAllowReplacement,
     knowledgeBase: updatedKnowledgeBaseSettings,
@@ -189,11 +151,10 @@ export const useSettingsUpdater = (
     saveSettings,
     setUpdatedDefaultAllow,
     setUpdatedDefaultAllowReplacement,
-    setUpdatedConversationSettings,
-    setCreatedConversationSettings,
     setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
-    setDeletedConversationSettings,
+    setConversationSettings,
+    setConversationsSettingsBulkActions,
   };
 };

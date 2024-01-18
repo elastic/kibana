@@ -65,7 +65,7 @@ interface Props {
   ) => void;
   onSave: () => void;
   selectedConversation: Conversation;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
+  onConversationSelected: (cId: string) => void;
   conversations: Record<string, Conversation>;
 }
 
@@ -80,7 +80,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     onClose,
     onSave,
     selectedConversation: defaultSelectedConversation,
-    setSelectedConversationId,
+    onConversationSelected,
     conversations,
   }) => {
     const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
@@ -88,22 +88,20 @@ export const AssistantSettings: React.FC<Props> = React.memo(
 
     const {
       conversationSettings,
+      setConversationSettings,
       defaultAllow,
       defaultAllowReplacement,
-      deletedConversationSettings,
       knowledgeBase,
       quickPromptSettings,
       systemPromptSettings,
-      setUpdatedConversationSettings,
       setUpdatedDefaultAllow,
       setUpdatedDefaultAllowReplacement,
       setUpdatedKnowledgeBaseSettings,
       setUpdatedQuickPromptSettings,
       setUpdatedSystemPromptSettings,
       saveSettings,
-      createdConversationSettings,
-      setCreatedConversationSettings,
-      setDeletedConversationSettings,
+      conversationsSettingsBulkActions,
+      setConversationsSettingsBulkActions,
     } = useSettingsUpdater(conversations);
 
     // Local state for saving previously selected items so tab switching is friendlier
@@ -118,10 +116,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     }, []);
     useEffect(() => {
       if (selectedConversation != null) {
-        const v = conversationSettings[selectedConversation.id];
-        setSelectedConversation(v ? v : createdConversationSettings[selectedConversation.id]);
+        setSelectedConversation(conversationSettings[selectedConversation.id]);
       }
-    }, [conversationSettings, createdConversationSettings, selectedConversation]);
+    }, [conversationSettings, selectedConversation]);
 
     // Quick Prompt Selection State
     const [selectedQuickPrompt, setSelectedQuickPrompt] = useState<QuickPrompt | undefined>();
@@ -153,16 +150,16 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         conversationSettings[defaultSelectedConversation.id] == null;
       const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
       if (isSelectedConversationDeleted && newSelectedConversationId != null) {
-        setSelectedConversationId(conversationSettings[newSelectedConversationId].id);
+        onConversationSelected(newSelectedConversationId);
       }
       saveSettings();
       onSave();
     }, [
       conversationSettings,
       defaultSelectedConversation.id,
+      onConversationSelected,
       onSave,
       saveSettings,
-      setSelectedConversationId,
     ]);
 
     return (
@@ -289,11 +286,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     defaultConnectorId={defaultConnectorId}
                     defaultProvider={defaultProvider}
                     conversationSettings={conversationSettings}
-                    createdConversationSettings={createdConversationSettings}
-                    deletedConversationSettings={deletedConversationSettings}
-                    setUpdatedConversationSettings={setUpdatedConversationSettings}
-                    setCreatedConversationSettings={setCreatedConversationSettings}
-                    setDeletedConversationSettings={setDeletedConversationSettings}
+                    setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+                    conversationsSettingsBulkActions={conversationsSettingsBulkActions}
+                    setConversationSettings={setConversationSettings}
                     allSystemPrompts={systemPromptSettings}
                     selectedConversation={selectedConversation}
                     isDisabled={selectedConversation == null}
@@ -315,7 +310,9 @@ export const AssistantSettings: React.FC<Props> = React.memo(
                     systemPromptSettings={systemPromptSettings}
                     onSelectedSystemPromptChange={onHandleSelectedSystemPromptChange}
                     selectedSystemPrompt={selectedSystemPrompt}
-                    setUpdatedConversationSettings={setUpdatedConversationSettings}
+                    setConversationSettings={setConversationSettings}
+                    setConversationsSettingsBulkActions={setConversationsSettingsBulkActions}
+                    conversationsSettingsBulkActions={conversationsSettingsBulkActions}
                     setUpdatedSystemPromptSettings={setUpdatedSystemPromptSettings}
                   />
                 )}
