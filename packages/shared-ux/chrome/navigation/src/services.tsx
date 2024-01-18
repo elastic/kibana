@@ -6,51 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useContext, useMemo } from 'react';
+import React, { FC, useContext } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { map } from 'rxjs';
-import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 
-import { NavigationKibanaDependencies, NavigationServices } from '../types';
-import { CloudLink, CloudLinks, getCloudLinks } from './cloud_links';
+import { NavigationKibanaDependencies, NavigationServices } from './types';
 
 const Context = React.createContext<NavigationServices | null>(null);
-
-const stripTrailingForwardSlash = (str: string) => {
-  return str[str.length - 1] === '/' ? str.substring(0, str.length - 1) : str;
-};
-
-const parseCloudURLs = (cloudLinks: CloudLinks): CloudLinks => {
-  const { userAndRoles, billingAndSub, deployment, performance } = cloudLinks;
-
-  // We remove potential trailing forward slash ("/") at the end of the URL
-  // because it breaks future navigation in Cloud console once we navigate there.
-  const parseLink = (link?: CloudLink): CloudLink | undefined => {
-    if (!link) return undefined;
-    return { ...link, href: stripTrailingForwardSlash(link.href) };
-  };
-
-  return {
-    ...cloudLinks,
-    userAndRoles: parseLink(userAndRoles),
-    billingAndSub: parseLink(billingAndSub),
-    deployment: parseLink(deployment),
-    performance: parseLink(performance),
-  };
-};
 
 /**
  * A Context Provider that provides services to the component and its dependencies.
  */
 export const NavigationProvider: FC<NavigationServices> = ({ children, ...services }) => {
-  const servicesParsed = useMemo<NavigationServices>(() => {
-    return {
-      ...services,
-      cloudLinks: parseCloudURLs(services.cloudLinks),
-    };
-  }, [services]);
-
-  return <Context.Provider value={servicesParsed}>{children}</Context.Provider>;
+  return <Context.Provider value={services}>{children}</Context.Provider>;
 };
 
 /**
@@ -60,40 +27,18 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   children,
   ...dependencies
 }) => {
-  const { core, serverless, cloud } = dependencies;
+  const { core, activeNodes$ } = dependencies;
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
-  const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
-
-  const cloudLinks: CloudLinks = useMemo(() => {
-    return parseCloudURLs(
-      getCloudLinks({ billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl })
-    );
-  }, [billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl]);
   const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
-
-  const navLinks$ = useMemo(() => chrome.navLinks.getNavLinks$(), [chrome.navLinks]);
-  const deepLinks$ = useMemo<NavigationServices['deepLinks$']>(() => {
-    return navLinks$.pipe(
-      map((navLinks) => {
-        return navLinks.reduce((acc, navLink) => {
-          acc[navLink.id] = navLink;
-          return acc;
-        }, {} as Record<string, ChromeNavLink>);
-      })
-    );
-  }, [navLinks$]);
 
   const value: NavigationServices = {
     basePath,
     recentlyAccessed$: chrome.recentlyAccessed.get$(),
-    deepLinks$,
     navigateToUrl,
     navIsOpen: true,
-    onProjectNavigationChange: serverless.setNavigation,
-    activeNodes$: serverless.getActiveNavigationNodes$(),
-    cloudLinks,
+    activeNodes$,
     isSideNavCollapsed,
   };
 
