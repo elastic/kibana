@@ -219,7 +219,8 @@ export class SecurityPlugin
         ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
       },
-      renderApiKeyFlyout: (props: ApiKeyFlyoutProps | undefined) => renderApiKeyFlyout(props, {}),
+      renderApiKeyFlyout: (props: ApiKeyFlyoutProps | undefined) =>
+        renderApiKeyFlyout(props, { authc: this.authc, services: core }),
     };
   }
 

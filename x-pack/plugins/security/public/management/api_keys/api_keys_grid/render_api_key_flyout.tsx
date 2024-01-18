@@ -8,17 +8,29 @@
 import type { ReactElement } from 'react';
 import React, { lazy, Suspense } from 'react';
 
+import { I18nProvider } from '@kbn/i18n-react';
+import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { AuthenticationServiceSetup } from '@kbn/security-plugin-types-public';
+
 import type { ApiKeyFlyoutProps } from './api_key_flyout_types';
+import { AuthenticationProvider } from '../../../components';
 
 const ApiKeyFlyout = lazy(() => import('./api_key_flyout'));
 
 export function renderApiKeyFlyout(
   props: ApiKeyFlyoutProps | undefined,
-  deps: {}
+  deps: { authc: AuthenticationServiceSetup; services: KibanaServices }
 ): ReactElement | null {
   return props ? (
     <Suspense fallback={<></>}>
-      <ApiKeyFlyout {...props} {...deps} />
+      <KibanaContextProvider services={deps.services}>
+        <AuthenticationProvider authc={deps.authc}>
+          <I18nProvider>
+            <ApiKeyFlyout {...props} {...deps} />
+          </I18nProvider>
+        </AuthenticationProvider>
+      </KibanaContextProvider>
     </Suspense>
   ) : null;
 }

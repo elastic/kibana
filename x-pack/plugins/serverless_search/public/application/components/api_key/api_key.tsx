@@ -44,6 +44,7 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
       value ? { ...value, beats_logstash_format: `${value.id}:${value.api_key}` } : undefined
     );
     if (value.encoded) setClientApiKey(value.encoded);
+    setIsFlyoutOpen(false);
   };
 
   return (
