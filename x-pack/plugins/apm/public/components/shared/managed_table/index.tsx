@@ -25,7 +25,7 @@ import {
 
 type SortDirection = 'asc' | 'desc';
 
-interface TableOptions<T> {
+export interface TableOptions<T> {
   page: { index: number; size: number };
   sort: { direction: SortDirection; field: keyof T };
 }
@@ -81,7 +81,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   initialSortField?: string;
   initialSortDirection?: SortDirection;
   showPerPageOptions?: boolean;
+
+  // onChange handlers
   onChangeRenderedItems?: (renderedItems: T[]) => void;
+  onChangeSorting?: (sorting: TableOptions<T>['sort']) => void;
 
   // sorting
   sortItems?: boolean;
@@ -103,16 +106,19 @@ function UnoptimizedManagedTable<T extends object>(props: {
     // pagination
     pagination = true,
     initialPageIndex = 0,
-    initialPageSize = 25,
+    initialPageSize = 10,
     initialSortField = props.columns[0]?.field || '',
     initialSortDirection = 'asc',
     showPerPageOptions = true,
+
+    // onChange handlers
+    onChangeRenderedItems = () => {},
+    onChangeSorting = () => {},
 
     // sorting
     sortItems = true,
     sortFn = defaultSortFn,
 
-    onChangeRenderedItems = () => {},
     saveTableOptionsToUrl = true,
     tableLayout,
     tableSearchBar = {
@@ -214,6 +220,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
     () => ({ sort: tableOptions.sort as TableOptions<T>['sort'] }),
     [tableOptions.sort]
   );
+
+  useEffect(() => onChangeSorting(sorting.sort), [onChangeSorting, sorting]);
 
   const paginationProps = useMemo(() => {
     if (!pagination) {

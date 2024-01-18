@@ -91,7 +91,7 @@ export function TransactionOverview() {
       <EuiPanel hasBorder={true}>
         <TransactionsTable
           hideViewTransactionsLink
-          numberOfTransactionsPerPage={25}
+          numberOfTransactionsPerPage={10}
           showMaxTransactionGroupsExceededWarning
           environment={environment}
           kuery={kuery}

@@ -139,6 +139,7 @@ export function ServiceOverview() {
                     start={start}
                     end={end}
                     showPerPageOptions={false}
+                    numberOfTransactionsPerPage={5}
                   />
                 </EuiPanel>
               </EuiFlexItem>

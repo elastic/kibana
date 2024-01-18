@@ -29,7 +29,11 @@ import {
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ErrorDetailLink } from '../../../shared/links/apm/error_detail_link';
 import { ErrorOverviewLink } from '../../../shared/links/apm/error_overview_link';
-import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
+import {
+  ITableColumn,
+  ManagedTable,
+  TableOptions,
+} from '../../../shared/managed_table';
 import { TimestampTooltip } from '../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { useStateDebounced } from '../../../../hooks/use_debounce';
@@ -76,7 +80,7 @@ const INITIAL_STATE_DETAILED_STATISTICS: DetailedStatistics = {
 interface Props {
   serviceName: string;
   isCompactMode?: boolean;
-  pageSize?: number;
+  initialPageSize: number;
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
 }
@@ -84,7 +88,7 @@ interface Props {
 function ErrorGroupList({
   serviceName,
   isCompactMode = false,
-  pageSize = 25,
+  initialPageSize,
   comparisonEnabled,
   saveTableOptionsToUrl,
 }: Props) {
@@ -96,6 +100,13 @@ function ErrorGroupList({
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
 
+  const defaultSorting = {
+    field: 'occurrences' as const,
+    direction: 'desc' as const,
+  };
+  const [sorting, setSorting] =
+    useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
+
   const {
     setDebouncedSearchQuery,
     mainStatistics,
@@ -104,8 +115,7 @@ function ErrorGroupList({
     detailedStatisticsStatus,
   } = useErrorGroupListData({
     currentPageItems: renderedItems,
-    sortField: 'lastSeen', // TODO: make this configurable
-    sortDirection: 'desc', // TODO: make this configurable
+    sorting,
   });
 
   const isMainStatsLoading = isPending(mainStatisticsStatus);
@@ -326,13 +336,14 @@ function ErrorGroupList({
       }
       items={mainStatistics.errorGroups}
       columns={columns}
-      initialSortField="occurrences"
-      initialSortDirection="desc"
+      initialSortField={defaultSorting.field}
+      initialSortDirection={defaultSorting.direction}
       sortItems={false}
-      initialPageSize={pageSize}
+      initialPageSize={initialPageSize}
       isLoading={isMainStatsLoading}
       tableSearchBar={tableSearchBar}
       onChangeRenderedItems={setRenderedItems}
+      onChangeSorting={setSorting}
       saveTableOptionsToUrl={saveTableOptionsToUrl}
     />
   );
@@ -340,12 +351,10 @@ function ErrorGroupList({
 
 function useErrorGroupListData({
   currentPageItems,
-  sortField,
-  sortDirection,
+  sorting,
 }: {
   currentPageItems: ErrorGroupItem[];
-  sortField: string;
-  sortDirection: 'asc' | 'desc';
+  sorting: TableOptions<ErrorGroupItem>['sort'];
 }) {
   const { serviceName } = useApmServiceContext();
   const [searchQuery, setDebouncedSearchQuery] = useStateDebounced('', 200);
@@ -371,7 +380,8 @@ function useErrorGroupListData({
     status: mainStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
+      const normalizedSortDirection =
+        sorting.direction === 'asc' ? 'asc' : 'desc';
 
       if (start && end) {
         return callApmApi(
@@ -384,7 +394,7 @@ function useErrorGroupListData({
                 kuery,
                 start,
                 end,
-                sortField,
+                sortField: sorting.field,
                 sortDirection: normalizedSortDirection,
                 searchQuery,
               },
@@ -394,13 +404,13 @@ function useErrorGroupListData({
       }
     },
     [
-      environment,
-      kuery,
-      serviceName,
+      sorting.direction,
+      sorting.field,
       start,
       end,
-      sortField,
-      sortDirection,
+      serviceName,
+      environment,
+      kuery,
       searchQuery,
     ]
   );

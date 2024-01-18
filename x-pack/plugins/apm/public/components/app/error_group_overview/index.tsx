@@ -82,6 +82,7 @@ export function ErrorGroupOverview() {
           <ErrorGroupList
             serviceName={serviceName}
             comparisonEnabled={comparisonEnabled}
+            initialPageSize={10}
           />
         </EuiPanel>
       </EuiFlexItem>

@@ -48,7 +48,7 @@ export function ServiceOverviewErrorsTable({ serviceName }: Props) {
       <EuiFlexItem>
         <ErrorGroupList
           serviceName={serviceName}
-          pageSize={5}
+          initialPageSize={5}
           isCompactMode={true}
           saveTableOptionsToUrl={false}
         />

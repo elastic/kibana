@@ -63,7 +63,7 @@ export function TransactionsTable({
   hideViewTransactionsLink = false,
   hideTitle = false,
   isSingleColumn = true,
-  numberOfTransactionsPerPage = 5,
+  numberOfTransactionsPerPage = 10,
   showPerPageOptions = true,
   showMaxTransactionGroupsExceededWarning = false,
   environment,
