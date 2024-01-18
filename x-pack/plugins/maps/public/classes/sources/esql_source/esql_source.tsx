@@ -31,7 +31,12 @@ import type { IField } from '../../fields/field';
 import { InlineField } from '../../fields/inline_field';
 import { getData, getUiSettings } from '../../../kibana_services';
 import { convertToGeoJson } from './convert_to_geojson';
-import { getFieldType, getGeometryColumnIndex, ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
+import {
+  getFieldType,
+  getGeometryColumnIndex,
+  ESQL_GEO_POINT_TYPE,
+  ESQL_GEO_SHAPE_TYPE,
+} from './esql_utils';
 import { UpdateSourceEditor } from './update_source_editor';
 
 type ESQLSourceSyncMeta = Pick<
@@ -120,7 +125,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       if (index > -1) {
         geomtryColumnType = this._descriptor.columns[index].type;
       }
-    } catch(error) {
+    } catch (error) {
       // errors for missing geometry columns surfaced in UI by data loading
     }
     return geomtryColumnType === ESQL_GEO_SHAPE_TYPE

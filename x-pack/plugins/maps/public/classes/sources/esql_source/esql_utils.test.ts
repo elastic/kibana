@@ -7,16 +7,16 @@
 
 import { isGeometryColumn } from './esql_utils';
 
-describe('isGeometryColumn', () => { 
+describe('isGeometryColumn', () => {
   test('should return true for geo_point columns', () => {
-  	expect(isGeometryColumn({ name: 'myColumn', type: 'geo_point' })).toBe(true);
+    expect(isGeometryColumn({ name: 'myColumn', type: 'geo_point' })).toBe(true);
   });
 
   test('should return true for geo_shape columns', () => {
-  	expect(isGeometryColumn({ name: 'myColumn', type: 'geo_shape' })).toBe(true);
+    expect(isGeometryColumn({ name: 'myColumn', type: 'geo_shape' })).toBe(true);
   });
 
   test('should return false for non-geometry columns', () => {
-  	expect(isGeometryColumn({ name: 'myColumn', type: 'string' })).toBe(false);
-  })
+    expect(isGeometryColumn({ name: 'myColumn', type: 'string' })).toBe(false);
+  });
 });
