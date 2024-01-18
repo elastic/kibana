@@ -19,12 +19,13 @@ import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { Subscription } from 'rxjs';
 import { ScopedHistory } from '@kbn/core-application-browser';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 
 export interface Services {
-  getAllowlistedSettings: () => Record<string, UiSettingMetadata>;
-  subscribeToUpdates: (fn: () => void) => Subscription;
-  isCustomSetting: (key: string) => boolean;
-  isOverriddenSetting: (key: string) => boolean;
+  getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
+  subscribeToUpdates: (fn: () => void, scope: UiSettingsScope) => Subscription;
+  isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
+  isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
   addUrlToHistory: (url: string) => void;
 }
 
@@ -33,6 +34,10 @@ export type SettingsApplicationServices = Services & FormServices;
 export interface KibanaDependencies {
   settings: {
     client: Pick<
+      IUiSettingsClient,
+      'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
+    >;
+    globalClient: Pick<
       IUiSettingsClient,
       'getAll' | 'isCustom' | 'isOverridden' | 'getUpdate$' | 'validateValue'
     >;
@@ -93,23 +98,42 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   ...dependencies
 }) => {
   const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
-  const { client } = settings;
+  const { client, globalClient } = settings;
 
-  const getAllowlistedSettings = () => {
+  const getScopeClient = (scope: UiSettingsScope) => {
+    return scope === 'namespace' ? client : globalClient;
+  };
+
+  const getAllowlistedSettings = (scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
     const rawSettings = Object.fromEntries(
-      Object.entries(client.getAll()).filter(
+      Object.entries(scopeClient.getAll()).filter(
         ([settingId, settingDef]) => !settingDef.readonly && !client.isCustom(settingId)
       )
     );
-
     return normalizeSettings(rawSettings);
+  };
+
+  const isCustomSetting = (key: string, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.isCustom(key);
+  };
+
+  const isOverriddenSetting = (key: string, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.isOverridden(key);
+  };
+
+  const subscribeToUpdates = (fn: () => void, scope: UiSettingsScope) => {
+    const scopeClient = getScopeClient(scope);
+    return scopeClient.getUpdate$().subscribe(fn);
   };
 
   const services: Services = {
     getAllowlistedSettings,
-    isCustomSetting: (key: string) => client.isCustom(key),
-    isOverriddenSetting: (key: string) => client.isOverridden(key),
-    subscribeToUpdates: (fn: () => void) => client.getUpdate$().subscribe(fn),
+    isCustomSetting,
+    isOverriddenSetting,
+    subscribeToUpdates,
     addUrlToHistory: (url: string) => history.push({ pathname: '', search: url }),
   };
 
