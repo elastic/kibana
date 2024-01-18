@@ -13,13 +13,15 @@ import { validators } from '../../edit_transform/state_management/validators';
 
 import {
   getDefaultStepDetailsState,
-  getDefaultStepDetailsFormState,
+  getStepDetailsFormFields,
+  getStepDetailsFormSections,
   type StepDetailsState,
 } from '../components/step_details';
 
 export const stepDetailsFormSlice = createFormSlice(
   'stepDetailsForm',
-  getDefaultStepDetailsFormState,
+  getStepDetailsFormFields(),
+  getStepDetailsFormSections(),
   validators
 );
 

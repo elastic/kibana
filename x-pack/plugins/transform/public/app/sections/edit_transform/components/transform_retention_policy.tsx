@@ -15,27 +15,22 @@ import { i18n } from '@kbn/i18n';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 import { useFormSections } from '@kbn/ml-form-utils/use_form_sections';
-import { createFormSlice, type State } from '@kbn/ml-form-utils/form_slice';
+import { type FormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
 import { useDataView } from '../../create_transform/components/wizard/wizard';
 
-export const TransformRetentionPolicy = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->({
+export const TransformRetentionPolicy = <FF extends string, FS extends string, VN extends string>({
   slice,
   destIndexAvailableTimeFields,
 }: {
-  slice: ReturnType<typeof createFormSlice<FF, FS, VN, S>>;
+  slice: FormSlice<FF, FS, VN>;
   destIndexAvailableTimeFields: string[];
 }) => {
   const dispatch = useDispatch();
   const dataView = useDataView();
   const dataViewId = dataView.id;
   const formSections = useFormSections(slice.name);
-  const retentionPolicyField = useFormField(slice.name, 'retentionPolicyField');
+  const retentionPolicyField = useFormField(slice, 'retentionPolicyField' as FF);
 
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
   const retentionDateFieldOptions = useMemo(() => {
@@ -65,7 +60,7 @@ export const TransformRetentionPolicy = <
           onChange={(e) =>
             dispatch(
               slice.actions.setFormSection({
-                section: 'retentionPolicy' as keyof Draft<S>['formSections'],
+                section: 'retentionPolicy' as keyof Draft<State<FF, FS, VN>>['formSections'],
                 enabled: e.target.checked,
               })
             )
@@ -105,7 +100,9 @@ export const TransformRetentionPolicy = <
                   onChange={(e) =>
                     dispatch(
                       slice.actions.setFormField({
-                        field: 'retentionPolicyField' as keyof Draft<S>['formFields'],
+                        field: 'retentionPolicyField' as keyof Draft<
+                          State<FF, FS, VN>
+                        >['formFields'],
                         value: e.target.value,
                       })
                     )
@@ -120,7 +117,7 @@ export const TransformRetentionPolicy = <
             ) : (
               <FormTextInput
                 slice={slice}
-                field={'retentionPolicyField' as keyof S['formFields']}
+                field={'retentionPolicyField' as FF}
                 label={i18n.translate('xpack.transform.retentionPolicyFieldLabel', {
                   defaultMessage: 'Date field to set retention policy',
                 })}
@@ -129,7 +126,7 @@ export const TransformRetentionPolicy = <
           }
           <FormTextInput
             slice={slice}
-            field={'retentionPolicyMaxAge' as keyof S['formFields']}
+            field={'retentionPolicyMaxAge' as FF}
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
               {

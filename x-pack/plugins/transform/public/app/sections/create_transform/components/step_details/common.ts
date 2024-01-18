@@ -7,7 +7,6 @@
 
 import { initializeFormField } from '@kbn/ml-form-utils/form_field';
 import { initializeFormSection } from '@kbn/ml-form-utils/form_section';
-import type { State } from '@kbn/ml-form-utils/form_slice';
 
 import {
   DEFAULT_CONTINUOUS_MODE_DELAY,
@@ -16,8 +15,6 @@ import {
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
 } from '../../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
-
-import type { ValidatorName } from '../../../edit_transform/state_management/validators';
 
 export type EsIndexName = string;
 export type EsIngestPipelineName = string;
@@ -36,74 +33,51 @@ export interface StepDetailsState {
   _meta?: Record<string, unknown>;
 }
 
-export type StepDetailsFormState = State<
-  | 'description'
-  | 'destinationIndex'
-  | 'transformId'
-  | 'dataViewTimeField'
-  | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge',
-  'createDataView' | 'retentionPolicy',
-  ValidatorName
->;
-export function getDefaultStepDetailsFormState(
+export const getStepDetailsFormFields = (
   config?: TransformConfigUnion,
   existingTransforms: string[] = []
-): StepDetailsFormState {
-  return {
-    formFields: {
-      // top level attributes
-      description: initializeFormField('description', 'description', config),
-      transformId: initializeFormField('transformId', undefined, undefined, {
-        isOptional: false,
-        validator: 'transformIdValidator',
-        reservedValues: existingTransforms,
-      }),
+) => [
+  // top level attributes
+  initializeFormField('description', 'description', config),
+  initializeFormField('transformId', undefined, undefined, {
+    isOptional: false,
+    validator: 'transformIdValidator',
+    reservedValues: existingTransforms,
+  }),
 
-      // destination index
-      destinationIndex: initializeFormField('destinationIndex', 'dest.index', undefined, {
-        isOptional: false,
-        validator: 'indexNameValidator',
-      }),
-      dataViewTimeField: initializeFormField('dataViewTimeField', undefined, config, {
-        validator: 'stringValidator',
-        section: 'createDataView',
-      }),
-      // retention_policy.*
-      retentionPolicyField: initializeFormField(
-        'retentionPolicyField',
-        'retention_policy.time.field',
-        config,
-        {
-          dependsOn: ['retentionPolicyMaxAge'],
-          isNullable: false,
-          isOptional: true,
-          isOptionalInSection: false,
-          section: 'retentionPolicy',
-        }
-      ),
-      retentionPolicyMaxAge: initializeFormField(
-        'retentionPolicyMaxAge',
-        'retention_policy.time.max_age',
-        config,
-        {
-          dependsOn: ['retentionPolicyField'],
-          isNullable: false,
-          isOptional: true,
-          isOptionalInSection: false,
-          section: 'retentionPolicy',
-          validator: 'retentionPolicyMaxAgeValidator',
-        }
-      ),
-    },
-    formSections: {
-      createDataView: initializeFormSection('createDataView', undefined, undefined, {
-        defaultEnabled: true,
-      }),
-      retentionPolicy: initializeFormSection('retentionPolicy', 'retention_policy', config),
-    },
-  };
-}
+  // destination index
+  initializeFormField('destinationIndex', 'dest.index', undefined, {
+    isOptional: false,
+    validator: 'indexNameValidator',
+  }),
+  initializeFormField('dataViewTimeField', undefined, config, {
+    validator: 'stringValidator',
+    section: 'createDataView',
+  }),
+  // retention_policy.*
+  initializeFormField('retentionPolicyField', 'retention_policy.time.field', config, {
+    dependsOn: ['retentionPolicyMaxAge'],
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'retentionPolicy',
+  }),
+  initializeFormField('retentionPolicyMaxAge', 'retention_policy.time.max_age', config, {
+    dependsOn: ['retentionPolicyField'],
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'retentionPolicy',
+    validator: 'retentionPolicyMaxAgeValidator',
+  }),
+];
+
+export const getStepDetailsFormSections = (config?: TransformConfigUnion) => [
+  initializeFormSection('createDataView', undefined, undefined, {
+    defaultEnabled: true,
+  }),
+  initializeFormSection('retentionPolicy', 'retention_policy', config),
+];
 
 export function getDefaultStepDetailsState(): StepDetailsState {
   return {

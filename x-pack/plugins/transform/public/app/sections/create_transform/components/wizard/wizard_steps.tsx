@@ -33,7 +33,8 @@ import { euiStepCreate } from '../step_create';
 import {
   applyTransformConfigToDetailsState,
   getDefaultStepDetailsState,
-  getDefaultStepDetailsFormState,
+  getStepDetailsFormFields,
+  getStepDetailsFormSections,
   euiStepDetails,
 } from '../step_details';
 import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
@@ -102,7 +103,10 @@ export const useInitializeTransformWizardState = () => {
     setStepDetailsState(applyTransformConfigToDetailsState(getDefaultStepDetailsState(), config));
 
     dispatch(
-      stepDetailsFormSlice.actions.initialize(getDefaultStepDetailsFormState(config, transformIds))
+      stepDetailsFormSlice.actions.initialize({
+        formFieldsArr: getStepDetailsFormFields(config, transformIds),
+        formSectionsArr: getStepDetailsFormSections(config),
+      })
     );
 
     // custom comparison

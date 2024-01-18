@@ -11,8 +11,8 @@ import { useMemo } from 'react';
 import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
-import type { FormField } from './form_field';
-import type { FormSection } from './form_section';
+import { createFormFieldsMap, type FormField } from './form_field';
+import { createFormSectionsMap, type FormSection } from './form_section';
 
 import type { State } from './form_slice';
 
@@ -65,17 +65,19 @@ const createSelectIsFormTouched = <
     (formFields, formSections) => isFormTouched(defaultState, formFields, formSections)
   );
 
-export const useIsFormTouched = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
+export const useIsFormTouched = <FF extends string, FS extends string, VN extends string>(
   stateAccessor: string,
-  defaultState: S
+  defaultState: {
+    formFieldsArr: Array<FormField<FF, FS, VN>>;
+    formSectionsArr: Array<FormSection<FS>>;
+  }
 ) => {
   const selectIsFormTouched = useMemo(
-    () => createSelectIsFormTouched(stateAccessor, defaultState),
+    () =>
+      createSelectIsFormTouched(stateAccessor, {
+        formFields: createFormFieldsMap(defaultState.formFieldsArr),
+        formSections: createFormSectionsMap(defaultState.formSectionsArr),
+      } as State<FF, FS, VN>),
     [stateAccessor, defaultState]
   );
   return useSelector(selectIsFormTouched);

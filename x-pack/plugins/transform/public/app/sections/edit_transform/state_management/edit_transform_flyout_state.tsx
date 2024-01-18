@@ -22,7 +22,7 @@ import { useSearchItems } from '../../../hooks/use_search_items';
 import type { FormFields } from './form_field';
 import { validators, type ValidatorName } from './validators';
 import type { FormSections } from './form_section';
-import { getDefaultState } from './get_default_state';
+import { getEditTransformFormFields, getEditTransformFormSections } from './get_default_state';
 
 import { WizardContext } from '../../create_transform/components/wizard/wizard';
 
@@ -40,7 +40,8 @@ export interface ProviderProps {
 export type EditTransformFlyoutState = State<FormFields, FormSections, ValidatorName>;
 export const editTransformFlyoutSlice = createFormSlice(
   'editTransformFlyout',
-  getDefaultState,
+  getEditTransformFormFields(),
+  getEditTransformFormSections(),
   validators
 );
 
@@ -106,7 +107,12 @@ export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> =
 
   // Apply original transform config to redux form state.
   useMount(() => {
-    reduxStore.dispatch(editTransformFlyoutSlice.actions.initialize(getDefaultState(props.config)));
+    reduxStore.dispatch(
+      editTransformFlyoutSlice.actions.initialize({
+        formFieldsArr: getEditTransformFormFields(props.config),
+        formSectionsArr: getEditTransformFormSections(props.config),
+      })
+    );
   });
 
   if (errorMessage) {
