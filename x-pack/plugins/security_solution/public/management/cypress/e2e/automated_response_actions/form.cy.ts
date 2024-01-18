@@ -246,9 +246,9 @@ describe(
           cleanupRule(ruleId);
         });
 
-      it('All response action controls are disabled', () => {
-        visitRuleActions(ruleId);
-        cy.getByTestSubj('edit-rule-actions-tab').click();
+        it('All response action controls are disabled', () => {
+          visitRuleActions(ruleId);
+          cy.getByTestSubj('edit-rule-actions-tab').click();
 
           cy.getByTestSubj('response-actions-wrapper').within(() => {
             cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
