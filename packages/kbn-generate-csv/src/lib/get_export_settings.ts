@@ -86,13 +86,15 @@ export const getExportSettings = async (
           return config.scroll.duration;
         }
 
-        if (retryAt) {
-          const _duration = new Date(retryAt!).getTime() - new Date(Date.now()).getTime();
-          return format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
+        const now = new Date(Date.now()).getTime();
+        const timeTillRetry = new Date(retryAt!).getTime();
+
+        if (now > timeTillRetry) {
+          return `0${format}`;
         }
 
-        // TODO: figure out if we'd ever have an instance where this value is null
-        return '0s';
+        const _duration = timeTillRetry - now;
+        return format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
       },
     },
     bom,

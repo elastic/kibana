@@ -13,6 +13,8 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { ReportingConfigType } from '@kbn/reporting-server';
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
+import { sub, add, type Duration } from 'date-fns';
 
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -121,5 +123,77 @@ describe('getExportSettings', () => {
     expect(
       await getExportSettings(uiSettingsClient, config, '', logger).then(({ timezone }) => timezone)
     ).toBe(`America/Aruba`);
+  });
+
+  describe('scroll duration function', () => {
+    let spiedDateNow: jest.Spied<typeof Date.now>;
+    let mockedTaskInstanceFields: TaskInstanceFields;
+    const durationApart: Duration = { minutes: 5 };
+
+    beforeEach(() => {
+      const now = Date.now();
+
+      // freeze time for test
+      spiedDateNow = jest.spyOn(Date, 'now').mockReturnValue(now);
+
+      mockedTaskInstanceFields = {
+        startedAt: sub(new Date(Date.now()), durationApart),
+        retryAt: add(new Date(Date.now()), durationApart),
+      };
+    });
+
+    afterEach(() => {
+      spiedDateNow.mockRestore();
+    });
+
+    it('returns its specified value when value is not auto', async () => {
+      const { scroll } = await getExportSettings(uiSettingsClient, config, '', logger);
+
+      expect(scroll.duration(mockedTaskInstanceFields)).toBe(config.scroll.duration);
+    });
+
+    it('returns a value that is the difference of the current time from the value of retryAt provided in the passed taskInstanceFields', async () => {
+      const configWithScrollAutoDuration = {
+        ...config,
+        scroll: {
+          ...config.scroll,
+          duration: 'auto',
+        },
+      };
+
+      const { scroll } = await getExportSettings(
+        uiSettingsClient,
+        configWithScrollAutoDuration,
+        '',
+        logger
+      );
+
+      expect(scroll.duration(mockedTaskInstanceFields)).toBe(
+        `${durationApart.minutes! * 60 * 1000}ms`
+      );
+    });
+
+    it('returns 0 if current time exceeds the value of retryAt provided in the passed taskInstanceFields', async () => {
+      const configWithScrollAutoDuration = {
+        ...config,
+        scroll: {
+          ...config.scroll,
+          duration: 'auto',
+        },
+      };
+
+      spiedDateNow.mockReturnValue(
+        add(mockedTaskInstanceFields.retryAt!, { minutes: 5 }).getTime()
+      );
+
+      const { scroll } = await getExportSettings(
+        uiSettingsClient,
+        configWithScrollAutoDuration,
+        '',
+        logger
+      );
+
+      expect(scroll.duration(mockedTaskInstanceFields)).toBe('0ms');
+    });
   });
 });
