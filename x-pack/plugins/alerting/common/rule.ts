@@ -141,7 +141,7 @@ export interface MappedParamsProperties {
 
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
-export interface NotificationDelay {
+export interface NotificationDelay extends SavedObjectAttributes {
   active: number;
 }
 

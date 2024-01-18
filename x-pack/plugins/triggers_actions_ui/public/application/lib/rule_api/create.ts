@@ -23,6 +23,7 @@ type RuleCreateBody = Omit<
 const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ruleTypeId,
   actions,
+  notificationDelay,
   ...res
 }): any => ({
   ...res,
@@ -43,6 +44,7 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
         : {}),
     })
   ),
+  ...(notificationDelay ? { notification_delay: notificationDelay } : {}),
 });
 
 export async function createRule({

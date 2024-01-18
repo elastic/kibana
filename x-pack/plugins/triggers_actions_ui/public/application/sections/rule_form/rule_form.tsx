@@ -215,6 +215,9 @@ export const RuleForm = ({
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
   );
+  const [notificationDelay, setNotificationDelay] = useState<number | undefined>(
+    rule.notificationDelay?.active
+  );
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
@@ -329,6 +332,12 @@ export const RuleForm = ({
   }, [rule.schedule.interval, defaultScheduleInterval, defaultScheduleIntervalUnit]);
 
   useEffect(() => {
+    if (rule.notificationDelay) {
+      setNotificationDelay(rule.notificationDelay.active);
+    }
+  }, [rule.notificationDelay]);
+
+  useEffect(() => {
     if (!flyoutBodyOverflowRef.current) {
       // We're using this as a reliable way to reset the scroll position
       // of the flyout independently of the selected rule type
@@ -392,6 +401,10 @@ export const RuleForm = ({
     },
     [dispatch]
   );
+
+  const setNotificationDelayProperty = (key: string, value: any) => {
+    dispatch({ command: { type: 'setNotificationDelayProperty' }, payload: { key, value } });
+  };
 
   useEffect(() => {
     const searchValue = searchText ? searchText.trim().toLocaleLowerCase() : null;
@@ -766,51 +779,94 @@ export const RuleForm = ({
         </EuiErrorBoundary>
       ) : null}
       {hideInterval !== true && (
-        <EuiFlexItem>
-          <EuiFormRow
-            fullWidth
-            data-test-subj="intervalFormRow"
-            display="rowCompressed"
-            helpText={getHelpTextForInterval()}
-            isInvalid={errors['schedule.interval'].length > 0}
-            error={errors['schedule.interval']}
-          >
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={2}>
-                <EuiFieldNumber
-                  prepend={labelForRuleChecked}
-                  fullWidth
-                  min={1}
-                  isInvalid={errors['schedule.interval'].length > 0}
-                  value={ruleInterval || ''}
-                  name="interval"
-                  data-test-subj="intervalInput"
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '' || INTEGER_REGEX.test(value)) {
-                      const parsedValue = value === '' ? '' : parseInt(value, 10);
-                      setRuleInterval(parsedValue || undefined);
-                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                    }
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={3}>
-                <EuiSelect
-                  fullWidth
-                  value={ruleIntervalUnit}
-                  options={getTimeOptions(ruleInterval ?? 1)}
-                  onChange={(e) => {
-                    setRuleIntervalUnit(e.target.value);
-                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                  }}
-                  data-test-subj="intervalInputUnit"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFormRow>
-        </EuiFlexItem>
+        <>
+          <EuiFlexItem>
+            <EuiFormRow
+              fullWidth
+              data-test-subj="intervalFormRow"
+              display="rowCompressed"
+              helpText={getHelpTextForInterval()}
+              isInvalid={errors['schedule.interval'].length > 0}
+              error={errors['schedule.interval']}
+            >
+              <EuiFlexGroup gutterSize="s">
+                <EuiFlexItem grow={2}>
+                  <EuiFieldNumber
+                    prepend={labelForRuleChecked}
+                    fullWidth
+                    min={1}
+                    isInvalid={errors['schedule.interval'].length > 0}
+                    value={ruleInterval || ''}
+                    name="interval"
+                    data-test-subj="intervalInput"
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value === '' || INTEGER_REGEX.test(value)) {
+                        const parsedValue = value === '' ? '' : parseInt(value, 10);
+                        setRuleInterval(parsedValue || undefined);
+                        setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                      }
+                    }}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={3}>
+                  <EuiSelect
+                    fullWidth
+                    value={ruleIntervalUnit}
+                    options={getTimeOptions(ruleInterval ?? 1)}
+                    onChange={(e) => {
+                      setRuleIntervalUnit(e.target.value);
+                      setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                    }}
+                    data-test-subj="intervalInputUnit"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFormRow>
+          </EuiFlexItem>
+          <EuiSpacer size="m" />
+        </>
       )}
+
+      <EuiFlexItem>
+        <EuiFormRow
+          fullWidth
+          data-test-subj="notificationDelayFormRow"
+          display="rowCompressed"
+          label={[
+            <FormattedMessage
+              id="xpack.triggersActionsUI.sections.ruleForm.notificationDelayFieldLabel"
+              defaultMessage="Alert notification delay"
+            />,
+            <EuiIconTip
+              position="right"
+              type="questionInCircle"
+              content={
+                <FormattedMessage
+                  id="xpack.triggersActionsUI.sections.ruleForm.notificationDelayFieldHelp"
+                  defaultMessage="Define how many consecutive active alerts should be reported before triggering an action."
+                />
+              }
+            />,
+          ]}
+        >
+          <EuiFieldNumber
+            fullWidth
+            min={0}
+            value={notificationDelay}
+            name="notificationDelay"
+            data-test-subj="notificationDelayInput"
+            onChange={(e) => {
+              const value = e.target.value;
+              if (value === '' || INTEGER_REGEX.test(value)) {
+                const parsedValue = value === '' ? '' : parseInt(value, 10);
+                setNotificationDelayProperty('active', parsedValue || 0);
+                setNotificationDelay(parsedValue || undefined);
+              }
+            }}
+          />
+        </EuiFormRow>
+      </EuiFlexItem>
       {shouldShowConsumerSelect && (
         <>
           <EuiSpacer size="m" />

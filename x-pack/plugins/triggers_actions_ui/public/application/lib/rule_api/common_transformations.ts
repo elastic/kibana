@@ -77,6 +77,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   active_snoozes: activeSnoozes,
   last_run: lastRun,
   next_run: nextRun,
+  notification_delay: notificationDelay,
   ...rest
 }: any) => ({
   ruleTypeId,
@@ -99,6 +100,7 @@ export const transformRule: RewriteRequestCase<Rule> = ({
   ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),
   ...(nextRun ? { nextRun } : {}),
   ...(apiKeyCreatedByUser !== undefined ? { apiKeyCreatedByUser } : {}),
+  ...(notificationDelay ? { notificationDelay } : {}),
   ...rest,
 });
 
