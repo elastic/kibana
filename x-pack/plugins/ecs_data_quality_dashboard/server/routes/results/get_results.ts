@@ -24,7 +24,7 @@ const getQuery = (patterns: string) => ({
   },
   aggs: {
     latest: {
-      terms: { field: 'rollup.pattern', size: 1000000 }, // big enough to get all patterns
+      terms: { field: 'rollup.pattern', size: 10000 }, // big enough to get all patterns, but under `index.max_terms_count` (default 65536)
       aggs: { latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } } },
     },
   },
