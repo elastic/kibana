@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
@@ -32,6 +31,5 @@ export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   management: ManagementStart;
-  cloud: CloudStart;
   data: DataPublicPluginStart;
 }
