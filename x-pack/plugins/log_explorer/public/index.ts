@@ -24,6 +24,18 @@ export {
   getDiscoverFiltersFromState,
 } from './utils/convert_discover_app_state';
 
+export { createLogExplorer } from './components/log_explorer';
+export { useKibanaContextForPluginProvider } from './utils/use_kibana';
+
+export { DatasetSelector } from './components/dataset_selector';
+export { DatasetsProvider, useDatasetsContext } from './hooks/use_datasets';
+export { useDatasetSelection } from './hooks/use_dataset_selection';
+export { DataViewsProvider, useDataViewsContext } from './hooks/use_data_views';
+export { useEsql } from './hooks/use_esql';
+export { IntegrationsProvider, useIntegrationsContext } from './hooks/use_integrations';
+export type { IDatasetsClient } from './services/datasets';
+export { DatasetsService } from './services/datasets';
+
 export function plugin(context: PluginInitializerContext<LogExplorerConfig>) {
   return new LogExplorerPlugin(context);
 }

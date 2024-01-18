@@ -43,6 +43,7 @@ export function DatasetSelector({
   dataViews,
   dataViewsError,
   discoverEsqlUrlProps,
+  hideDataViews,
   integrations,
   integrationsError,
   isEsqlEnabled,
@@ -186,15 +187,19 @@ export function DatasetSelector({
       },
       'data-test-subj': 'datasetSelectorUncategorizedTab',
     },
-    {
-      id: DATA_VIEWS_TAB_ID,
-      name: dataViewsLabel,
-      onClick: () => {
-        onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
-        switchToDataViewsTab();
-      },
-      'data-test-subj': 'datasetSelectorDataViewsTab',
-    },
+    ...(hideDataViews
+      ? []
+      : [
+          {
+            id: DATA_VIEWS_TAB_ID,
+            name: dataViewsLabel,
+            onClick: () => {
+              onDataViewsTabClick(); // Lazy-load data views only when accessing the Data Views tab
+              switchToDataViewsTab();
+            },
+            'data-test-subj': 'datasetSelectorDataViewsTab',
+          },
+        ]),
   ];
 
   const tabEntries = tabs.map((tab) => (

@@ -50,8 +50,16 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   useLegacyAlerts: false,
 };
 
+export const datasetSourceSchema = schema.object({
+  selectionType: schema.string(),
+  selection: schema.object({
+    integration: schema.string(),
+    dataset: schema.string(),
+  }),
+});
+
 export const searchConfigurationSchema = schema.object({
-  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
+  index: schema.oneOf([schema.string(), datasetSourceSchema, dataViewSpecSchema]),
   query: schema.object({
     language: schema.string({
       validate: validateKQLStringFilter,

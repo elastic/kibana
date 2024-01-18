@@ -42,6 +42,8 @@ export interface DatasetSelectorProps {
   dataViewsError: Error | null;
   /* url props to navigate to discover ES|QL */
   discoverEsqlUrlProps: DiscoverEsqlUrlProps;
+  /* Flag for hiding data views tab */
+  hideDataViews?: boolean;
   /* The integrations list, each integration includes its data streams */
   integrations: Integration[] | null;
   /* Any error occurred to show when the user preview the integrations */
