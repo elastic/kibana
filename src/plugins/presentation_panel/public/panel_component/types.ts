@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { PresentationContainer } from '@kbn/presentation-containers';
 import {
   PhaseEvent,
   PublishesDataLoading,
   PublishesDisabledActionIds,
   PublishesBlockingError,
-  PublishesUniqueId,
+  HasUniqueId,
   PublishesPanelDescription,
   PublishesPanelTitle,
-  PublishesParentApi,
-  PublishesViewMode,
+  HasParentApi,
 } from '@kbn/presentation-publishing';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { MaybePromise } from '@kbn/utility-types';
@@ -56,14 +56,13 @@ export interface PresentationPanelInternalProps<
 }
 
 export type DefaultPresentationPanelApi = Partial<
-  PublishesUniqueId &
-    PublishesParentApi &
-    PublishesDataLoading &
-    PublishesViewMode &
-    PublishesBlockingError &
+  HasUniqueId &
     PublishesPanelTitle &
+    PublishesDataLoading &
+    PublishesBlockingError &
     PublishesPanelDescription &
-    PublishesDisabledActionIds
+    PublishesDisabledActionIds &
+    HasParentApi<PresentationContainer & Partial<Pick<PublishesPanelTitle, 'hidePanelTitle'>>>
 >;
 
 export type PresentationPanelProps<

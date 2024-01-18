@@ -95,7 +95,7 @@ export const legacyEmbeddableToApi = (
 
   // legacy embeddables don't support ID changing or parent changing, so we don't need to subscribe to anything.
   const uuid = new BehaviorSubject<string>(embeddable.id);
-  const parentApi = new BehaviorSubject<unknown>(embeddable.parent ?? undefined);
+  const parentApi = embeddable.parent;
 
   /**
    * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
