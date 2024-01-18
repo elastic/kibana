@@ -55,11 +55,11 @@ export const SourceConfigurationSettings = ({
     indicesConfigurationProps,
     errors,
     resetForm,
-    isFormDirty,
     isFormValid,
     formState,
     formStateChanges,
-  } = useSourceConfigurationFormState(source && source.configuration);
+    getUnsavedChanges,
+  } = useSourceConfigurationFormState(source?.configuration);
   const infraUiSettings = useEditableSettings('infra_metrics', [
     enableInfrastructureHostsView,
     enableInfrastructureProfilingIntegration,
@@ -88,11 +88,12 @@ export const SourceConfigurationSettings = ({
     formState,
   ]);
 
-  const unsavedChangesFromStateCount: number = Object.keys(formStateChanges)
-    .filter((key) => formStateChanges[key as keyof typeof formStateChanges])
-    .filter(Boolean).length;
+  const unsavedChangesCount = Object.keys(getUnsavedChanges()).length;
+  const infraUiSettingsUnsavedChangesCount = Object.keys(infraUiSettings.unsavedChanges).length;
+  // Count changes from the feature section settings and general infra settings
+  const unsavedFormChangesCount = infraUiSettingsUnsavedChangesCount + unsavedChangesCount;
 
-  const hasUnsavedChanges = isFormDirty || Object.keys(infraUiSettings.unsavedChanges).length > 0;
+  const isFormDirty = infraUiSettingsUnsavedChangesCount > 0 || unsavedChangesCount > 0;
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
@@ -171,8 +172,9 @@ export const SourceConfigurationSettings = ({
       <EuiFlexGroup>
         {isWriteable && (
           <EuiFlexItem>
-            {hasUnsavedChanges && isFormValid && (
+            {isFormDirty && (
               <BottomBarActions
+                areChangesInvalid={!isFormValid}
                 isLoading={infraUiSettings.isSaving}
                 onDiscardChanges={resetAllUnsavedChanges}
                 onSave={persistUpdates}
@@ -182,9 +184,7 @@ export const SourceConfigurationSettings = ({
                     defaultMessage: 'Apply',
                   }
                 )}
-                unsavedChangesCount={
-                  Object.keys(infraUiSettings.unsavedChanges).length + unsavedChangesFromStateCount
-                }
+                unsavedChangesCount={unsavedFormChangesCount}
               />
             )}
           </EuiFlexItem>
