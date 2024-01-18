@@ -225,6 +225,20 @@ describe('Create rule route', () => {
         'User is not authorized to change isolate response actions'
       );
     });
+    test('pass when provided with process action', async () => {
+      const processAction = getResponseAction('kill-process', { overwrite: true, field: '' });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [processAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).not.toHaveBeenCalled();
+    });
     test('fails when provided with an unsupported command', async () => {
       const wrongAction = getResponseAction('execute');
 
