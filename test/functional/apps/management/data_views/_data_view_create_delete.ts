@@ -149,7 +149,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('edit index pattern', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/174066
+    describe.skip('edit index pattern', () => {
       it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
