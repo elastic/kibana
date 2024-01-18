@@ -13,11 +13,29 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   type EuiComboBoxOptionOption,
+  EuiPopover,
+  EuiButtonEmpty,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopoverTitle,
+  EuiFilterGroup,
+  EuiFilterButton,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
+import { CspBenchmarkRulesWithStates } from './rules_container';
+
+export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
+export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
+export const RULES_BULK_ACTION_OPTION_DISABLE = 'bulk-action-option-disable';
+export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
+export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
+export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
+export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -29,11 +47,21 @@ interface RulesTableToolbarProps {
   searchValue: string;
   isSearching: boolean;
   pageSize: number;
+  selectedRules: CspBenchmarkRulesWithStates[];
+  refetchRulesStates: () => void;
+  setEnabledDisabledItemsFilter: (filterState: string) => void;
+  currentEnabledDisabledItemsFilterState: string;
+  setSelectAllRules: () => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
 
 interface RuleTableCount {
   pageSize: number;
   total: number;
+  selectedRules: CspBenchmarkRulesWithStates[];
+  refetchRulesStates: () => void;
+  setSelectAllRules: () => void;
+  setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
 
 export const RulesTableHeader = ({
@@ -46,10 +74,15 @@ export const RulesTableHeader = ({
   onRuleNumberChange,
   sectionSelectOptions,
   ruleNumberSelectOptions,
+  selectedRules,
+  refetchRulesStates,
+  setEnabledDisabledItemsFilter,
+  currentEnabledDisabledItemsFilterState,
+  setSelectAllRules,
+  setSelectedRules,
 }: RulesTableToolbarProps) => {
   const [selectedSection, setSelectedSection] = useState<EuiComboBoxOptionOption[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<EuiComboBoxOptionOption[]>([]);
-
   const sectionOptions = sectionSelectOptions.map((option) => ({
     label: option,
   }));
@@ -57,6 +90,29 @@ export const RulesTableHeader = ({
   const ruleNumberOptions = ruleNumberSelectOptions.map((option) => ({
     label: option,
   }));
+
+  const [isEnabledRulesFilterOn, setIsEnabledRulesFilterOn] = useState(false);
+  const [isDisabledRulesFilterOn, setisDisabledRulesFilterOn] = useState(false);
+
+  const toggleEnabledRulesFilter = () => {
+    setIsEnabledRulesFilterOn(!isEnabledRulesFilterOn);
+    setisDisabledRulesFilterOn(
+      isDisabledRulesFilterOn && !isEnabledRulesFilterOn ? false : isDisabledRulesFilterOn
+    );
+    if (currentEnabledDisabledItemsFilterState === 'enabled')
+      setEnabledDisabledItemsFilter('no-filter');
+    else setEnabledDisabledItemsFilter('enabled');
+  };
+
+  const toggleDisabledRulesFilter = () => {
+    setisDisabledRulesFilterOn(!isDisabledRulesFilterOn);
+    setIsEnabledRulesFilterOn(
+      isEnabledRulesFilterOn && !isDisabledRulesFilterOn ? false : isEnabledRulesFilterOn
+    );
+    if (currentEnabledDisabledItemsFilterState === 'disabled')
+      setEnabledDisabledItemsFilter('no-filter');
+    else setEnabledDisabledItemsFilter('disabled');
+  };
 
   return (
     <EuiFlexGroup>
@@ -67,10 +123,14 @@ export const RulesTableHeader = ({
           search={search}
           totalRulesCount={totalRulesCount}
           pageSize={pageSize}
+          selectedRules={selectedRules}
+          refetchRulesStates={refetchRulesStates}
+          setSelectAllRules={setSelectAllRules}
+          setSelectedRules={setSelectedRules}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
-        <EuiFlexGroup gutterSize="xs" direction="row">
+        <EuiFlexGroup gutterSize="none" direction="row">
           <EuiFlexItem
             css={css`
               min-width: 160px;
@@ -115,6 +175,35 @@ export const RulesTableHeader = ({
               }}
             />
           </EuiFlexItem>
+          <EuiFlexItem
+            css={css`
+              min-width: 220px;
+            `}
+          >
+            <EuiFilterGroup>
+              <EuiFilterButton
+                withNext
+                hasActiveFilters={isEnabledRulesFilterOn}
+                onClick={toggleEnabledRulesFilter}
+                data-test-subj={RULES_ENABLED_FILTER}
+              >
+                <FormattedMessage
+                  id="xpack.csp.rules.rulesTable.enabledRuleFilterButton"
+                  defaultMessage="Enabled rules"
+                />
+              </EuiFilterButton>
+              <EuiFilterButton
+                hasActiveFilters={isDisabledRulesFilterOn}
+                onClick={toggleDisabledRulesFilter}
+                data-test-subj={RULES_DISABLED_FILTER}
+              >
+                <FormattedMessage
+                  id="xpack.csp.rules.rulesTable.disabledRuleFilterButton"
+                  defaultMessage="Disabled rules"
+                />
+              </EuiFilterButton>
+            </EuiFilterGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -129,9 +218,21 @@ const SearchField = ({
   searchValue,
   totalRulesCount,
   pageSize,
+  selectedRules,
+  refetchRulesStates,
+  setSelectAllRules,
+  setSelectedRules,
 }: Pick<
   RulesTableToolbarProps,
-  'isSearching' | 'searchValue' | 'search' | 'totalRulesCount' | 'pageSize'
+  | 'isSearching'
+  | 'searchValue'
+  | 'search'
+  | 'totalRulesCount'
+  | 'pageSize'
+  | 'selectedRules'
+  | 'refetchRulesStates'
+  | 'setSelectAllRules'
+  | 'setSelectedRules'
 >) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
@@ -151,20 +252,170 @@ const SearchField = ({
           fullWidth
         />
       </EuiFlexItem>
-      <CurrentPageOfTotal pageSize={pageSize} total={totalRulesCount} />
+      <CurrentPageOfTotal
+        pageSize={pageSize}
+        total={totalRulesCount}
+        selectedRules={selectedRules}
+        refetchRulesStates={refetchRulesStates}
+        setSelectAllRules={setSelectAllRules}
+        setSelectedRules={setSelectedRules}
+      />
     </div>
   );
 };
 
-const CurrentPageOfTotal = ({ pageSize, total }: RuleTableCount) => (
-  <EuiFlexItem grow={true}>
-    <EuiSpacer size="xl" />
-    <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
-      <FormattedMessage
-        id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
-        defaultMessage="Showing {pageSize} of of {total, plural, one {# rule} other {# rules}}"
-        values={{ pageSize, total }}
-      />
-    </EuiText>
-  </EuiFlexItem>
-);
+const CurrentPageOfTotal = ({
+  pageSize,
+  total,
+  selectedRules,
+  refetchRulesStates,
+  setSelectAllRules,
+  setSelectedRules,
+}: RuleTableCount) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onPopoverClick = () => {
+    setIsPopoverOpen((e) => !e);
+  };
+
+  const postRequestChangeRulesState = useChangeCspRuleState();
+  const changeRulesState = async (state: 'mute' | 'unmute') => {
+    const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
+      (e: CspBenchmarkRulesWithStates) => ({
+        benchmark_id: e?.metadata.benchmark.id,
+        benchmark_version: e?.metadata.benchmark.version,
+        rule_number: e?.metadata.benchmark.rule_number!,
+        rule_id: e?.metadata.id,
+      })
+    );
+    // Only do the API Call IF there are no undefined value for rule number in the selected rules
+    if (!bulkSelectedRules.some((rule) => rule.rule_number === undefined)) {
+      await postRequestChangeRulesState(state, bulkSelectedRules);
+      await refetchRulesStates();
+      await setIsPopoverOpen(false);
+    }
+  };
+  const changeCspRuleStateMute = async () => {
+    await changeRulesState('mute');
+    setSelectedRules([]);
+  };
+  const changeCspRuleStateUnmute = async () => {
+    await changeRulesState('unmute');
+    setSelectedRules([]);
+  };
+
+  const areAllSelectedRulesMuted = selectedRules.every((rule) => rule?.state === 'muted');
+  const areAllSelectedRulesUnmuted = selectedRules.every((rule) => rule?.state === 'unmuted');
+
+  const popoverButton = (
+    <EuiButtonEmpty
+      onClick={onPopoverClick}
+      size="xs"
+      iconType="arrowDown"
+      iconSide="right"
+      css={css`
+        padding-bottom: ${euiThemeVars.euiSizeS};
+      `}
+      data-test-subj={RULES_BULK_ACTION_BUTTON}
+    >
+      Bulk actions
+    </EuiButtonEmpty>
+  );
+  const items = [
+    <EuiContextMenuItem
+      disabled={selectedRules.length === 0 || areAllSelectedRulesUnmuted}
+      onClick={changeCspRuleStateUnmute}
+      data-test-subj={RULES_BULK_ACTION_OPTION_ENABLE}
+    >
+      <EuiText key="disabled">
+        <FormattedMessage id="xpack.csp.rules.rulesTable.optionEnable" defaultMessage="Enable" />
+      </EuiText>
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem
+      disabled={selectedRules.length === 0 || areAllSelectedRulesMuted}
+      onClick={changeCspRuleStateMute}
+      data-test-subj={RULES_BULK_ACTION_OPTION_DISABLE}
+    >
+      <EuiText>
+        <FormattedMessage id="xpack.csp.rules.rulesTable.optionDisable" defaultMessage="Disable" />
+      </EuiText>
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiSpacer size="xl" />
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+            <FormattedMessage
+              id="xpack.csp.rules.rulesTable.showingPageOfTotalLabel"
+              defaultMessage="Showing {pageSize} of {total, plural, one {# rule} other {# rules}} \u2000|\u2000 Selected {selectedRulesAmount, plural, one {# rule} other {# rules}}"
+              values={{ pageSize, total, selectedRulesAmount: selectedRules.length || 0 }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {selectedRules.length !== total ? (
+            <EuiButtonEmpty
+              onClick={setSelectAllRules}
+              size="xs"
+              iconType="pagesSelect"
+              css={css`
+                padding-bottom: ${euiThemeVars.euiSizeS};
+              `}
+              data-test-subj={RULES_SELECT_ALL_RULES}
+            >
+              <FormattedMessage
+                id="xpack.csp.rules.rulesTable.selectAllRulesOption"
+                defaultMessage="Select All {total, plural, one {# rule} other {# rules}}"
+                values={{ total }}
+              />
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              onClick={() => setSelectedRules([])}
+              size="xs"
+              iconType="cross"
+              css={css`
+                padding-bottom: ${euiThemeVars.euiSizeS};
+              `}
+              data-test-subj={RULES_CLEAR_ALL_RULES_SELECTION}
+            >
+              <FormattedMessage
+                id="xpack.csp.rules.rulesTable.clearSelectionOption"
+                defaultMessage="Clear selection"
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPopover
+            button={popoverButton}
+            isOpen={isPopoverOpen}
+            closePopover={() => setIsPopoverOpen(false)}
+            anchorPosition="downLeft"
+            panelPaddingSize="s"
+          >
+            <EuiPopoverTitle style={{ minWidth: 240 }}>
+              <EuiText size="s" textAlign="left" color="subdued" style={{ marginLeft: '8px' }}>
+                <b>
+                  <FormattedMessage
+                    id="xpack.csp.rules.rulesTable.bulkActionsOptionTitle"
+                    defaultMessage="Options"
+                  />
+                </b>
+              </EuiText>
+            </EuiPopoverTitle>
+            <EuiContextMenuPanel
+              size="s"
+              items={items}
+              css={css`
+                mid-width: 540px;
+              `}
+            />
+          </EuiPopover>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
