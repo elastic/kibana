@@ -78,12 +78,14 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
 }
 export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
 }) => {
   const {
@@ -110,9 +112,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(getIndexDetailsLink(index.name, search, newSection));
     },
-    [history, index]
+    [history, index.name, search]
   );
 
   const navigateToAllIndices = useCallback(() => {

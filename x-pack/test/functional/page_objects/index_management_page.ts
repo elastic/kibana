@@ -26,7 +26,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await testSubjects.click('checkboxToggles-rollupToggle');
     },
     async toggleHiddenIndices() {
-      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+      await testSubjects.click('checkboxToggles-includeHiddenIndices');
     },
 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
