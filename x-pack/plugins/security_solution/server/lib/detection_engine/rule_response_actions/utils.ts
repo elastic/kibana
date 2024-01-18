@@ -15,7 +15,7 @@ export const getProcessAlerts = (alerts: AlertWithAgent[], config: ProcessesPara
   }
   const { overwrite, field } = config;
 
-  return alerts.reduce((acc: Record<string, AlertsAction>, alert) => {
+  return alerts.reduce((acc: Record<string, Record<string, AlertsAction>>, alert) => {
     const valueFromAlert: number = overwrite ? alert.process?.pid : get(alert, field);
 
     if (valueFromAlert) {
@@ -25,17 +25,22 @@ export const getProcessAlerts = (alerts: AlertWithAgent[], config: ProcessesPara
       const { id: agentId, name } = agent as AlertAgent;
       const hostName = alert.host?.name;
 
-      const currentValue = acc[valueFromAlert];
+      const currentAgent = acc[agentId];
+      const currentValue = currentAgent?.[valueFromAlert];
 
       return {
         ...acc,
-        [valueFromAlert]: {
-          alert_ids: [...(currentValue?.alert_ids || []), _id],
-          parameters: { [paramKey]: valueFromAlert },
-          endpoint_ids: [...new Set([...(currentValue?.endpoint_ids || []), agentId])],
-          hosts: {
-            ...currentValue?.hosts,
-            [agentId]: { name: name || hostName, id: agentId },
+        [agentId]: {
+          ...(currentAgent || {}),
+          [valueFromAlert]: {
+            ...(currentValue || {}),
+            alert_ids: [...(currentValue?.alert_ids || []), _id],
+            parameters: { [paramKey]: valueFromAlert },
+            endpoint_ids: [agentId],
+            hosts: {
+              ...currentValue?.hosts,
+              [agentId]: { name: name || hostName, id: agentId },
+            },
           },
         },
       };
@@ -53,7 +58,7 @@ export const getErrorProcessAlerts = (
   }
   const { overwrite, field } = config;
 
-  return alerts.reduce((acc: Record<string, AlertsAction>, alert) => {
+  return alerts.reduce((acc: Record<string, Record<string, AlertsAction>>, alert) => {
     const valueFromAlert: number = overwrite ? alert.process?.pid : get(alert, field);
 
     if (!valueFromAlert) {
@@ -64,19 +69,24 @@ export const getErrorProcessAlerts = (
       const hostName = alert.host?.name;
 
       const errorField = overwrite ? 'process.pid' : field;
-      const currentValue = acc[errorField];
+      const currentAgent = acc[agentId];
+      const currentValue = currentAgent?.[errorField];
 
       return {
         ...acc,
-        [errorField]: {
-          alert_ids: [...(currentValue?.alert_ids || []), _id],
-          parameters: { [paramKey]: `${field || 'process.pid'} not found` },
-          endpoint_ids: [...new Set([...(currentValue?.endpoint_ids || []), agentId])],
-          hosts: {
-            ...currentValue?.hosts,
-            [agentId]: { name: name || hostName, id: agentId },
+        [agentId]: {
+          ...(currentAgent || {}),
+          [errorField]: {
+            ...(currentValue || {}),
+            alert_ids: [...(currentValue?.alert_ids || []), _id],
+            parameters: { [paramKey]: `${field || 'process.pid'} not found` },
+            endpoint_ids: [agentId],
+            hosts: {
+              ...currentValue?.hosts,
+              [agentId]: { name: name || hostName, id: agentId },
+            },
+            error: errorField,
           },
-          error: errorField,
         },
       };
     }
@@ -89,19 +99,23 @@ export const getIsolateAlerts = (alerts: AlertWithAgent[]) =>
     const { id: agentId, name: agentName } = alert.agent || {};
 
     const hostName = alert.host?.name;
+
     return {
       ...acc,
-      hosts: {
-        ...(acc.hosts || {}),
-        [agentId]: {
-          name: agentName || hostName || '',
-          id: agentId,
+      [agentId]: {
+        ...(acc?.[agentId] || {}),
+        hosts: {
+          ...(acc[agentId]?.hosts || {}),
+          [agentId]: {
+            name: agentName || hostName || '',
+            id: agentId,
+          },
         },
+        endpoint_ids: [agentId],
+        alert_ids: [...(acc[agentId]?.alert_ids || []), alert._id],
       },
-      endpoint_ids: [...new Set([...(acc.endpoint_ids || []), agentId])],
-      alert_ids: [...(acc.alert_ids || []), alert._id],
     };
-  }, {} as AlertsAction);
+  }, {} as Record<string, AlertsAction>);
 
 export const getExecuteAlerts = (
   alerts: AlertWithAgent[],
@@ -115,6 +129,7 @@ export const getExecuteAlerts = (
     return {
       ...acc,
       [agentId]: {
+        ...(acc?.[agentId] || {}),
         hosts: {
           ...(acc?.[agentId]?.hosts || {}),
           [agentId]: {
@@ -132,6 +147,7 @@ export const getExecuteAlerts = (
     };
   }, {} as Record<string, AlertsAction>);
 
+// TODO TC: double check how we want to call actions: prossibly 1 action per agent and per path === many actions
 export const getGetFileAlerts = (alerts: AlertWithAgent[]) =>
   alerts.reduce((acc, alert) => {
     const { id: agentId, name: agentName } = alert.agent || {};

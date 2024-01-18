@@ -41,16 +41,16 @@ export const endpointResponseAction = (
   };
 
   if (isIsolateAction(responseAction.params)) {
-    const actionPayload = getIsolateAlerts(alerts);
-    return Promise.all([
-      endpointAppContextService.getActionCreateService().createActionFromAlert(
+    const alertsPerAgent = getIsolateAlerts(alerts);
+    each(alertsPerAgent, (actionPayload) => {
+      return endpointAppContextService.getActionCreateService().createActionFromAlert(
         {
           ...actionPayload,
           ...commonData,
         },
         actionPayload.endpoint_ids
-      ),
-    ]);
+      );
+    });
   }
 
   if (isExecuteAction(responseAction.params)) {
@@ -81,7 +81,9 @@ export const endpointResponseAction = (
     });
   }
 
-  const createProcessActionFromAlerts = (actionAlerts: Record<string, AlertsAction>) => {
+  const createProcessActionFromAlerts = (
+    actionAlerts: Record<string, Record<string, AlertsAction>>
+  ) => {
     const createAction = async (alert: AlertsAction) => {
       const { hosts, parameters, error } = alert;
 
@@ -98,7 +100,9 @@ export const endpointResponseAction = (
         .getActionCreateService()
         .createActionFromAlert(actionData, alert.endpoint_ids);
     };
-    return each(actionAlerts, createAction);
+    return each(actionAlerts, (actionPerAgent) => {
+      return each(actionPerAgent, createAction);
+    });
   };
 
   if (isProcessesAction(responseAction.params)) {
