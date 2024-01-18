@@ -30,6 +30,15 @@
                 "category_1_score": {
                   "type": "float"
                 },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
+                },
                 "id_field": {
                   "type": "keyword"
                 },
@@ -86,6 +95,15 @@
                 },
                 "category_1_score": {
                   "type": "float"
+                },
+                "category_2_count": {
+                  "type": "long"
+                },
+                "category_2_score": {
+                  "type": "float"
+                },
+                "criticality_level": {
+                  "type": "keyword"
                 },
                 "id_field": {
                   "type": "keyword"

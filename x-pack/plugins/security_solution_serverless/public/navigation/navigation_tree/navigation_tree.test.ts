@@ -7,10 +7,10 @@
 import type { ChromeNavLink } from '@kbn/core/public';
 import { APP_UI_ID } from '@kbn/security-solution-plugin/common';
 import { SecurityPageName, LinkCategoryType } from '@kbn/security-solution-navigation';
+import type { GroupDefinition } from '@kbn/core-chrome-browser';
 import { formatNavigationTree } from './navigation_tree';
 import type { ProjectNavigationLink } from '../links/types';
 import type { ExternalPageName } from '../links/constants';
-import type { GroupDefinition } from '@kbn/shared-ux-chrome-navigation';
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
