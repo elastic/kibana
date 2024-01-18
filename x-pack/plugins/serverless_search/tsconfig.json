@@ -18,7 +18,6 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/management-plugin",
-    "@kbn/shared-ux-chrome-navigation",
     "@kbn/doc-links",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
@@ -42,5 +41,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/es-types",
     "@kbn/code-editor",
+    "@kbn/console-plugin",
+    "@kbn/core-chrome-browser",
   ]
 }

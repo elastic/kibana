@@ -9553,7 +9553,11 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tls 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tls 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tlsCertificate 1`] = `
 Object {
