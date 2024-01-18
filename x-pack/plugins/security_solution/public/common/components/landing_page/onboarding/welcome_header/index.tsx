@@ -43,12 +43,7 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
   } = useWelcomeHeaderStyles();
 
   return (
-    <EuiFlexGroup
-      css={css`
-        ${headerStyles}
-      `}
-      data-test-subj="welcome-header"
-    >
+    <EuiFlexGroup css={headerStyles} data-test-subj="welcome-header">
       <EuiFlexItem
         grow={false}
         css={css`
@@ -56,43 +51,23 @@ const WelcomeHeaderComponent: React.FC<{ productTier?: ProductTier }> = ({ produ
         `}
       >
         {userName?.username && (
-          <EuiTitle
-            size="l"
-            css={css`
-              ${headerTitleStyles}
-            `}
-          >
+          <EuiTitle size="l" css={headerTitleStyles}>
             <span>{GET_STARTED_PAGE_TITLE(userName.username)}</span>
           </EuiTitle>
         )}
         <EuiSpacer size="s" />
-        <span
-          css={css`
-            ${headerSubtitleStyles}
-          `}
-          className="eui-displayBlock"
-        >
+        <span css={headerSubtitleStyles} className="eui-displayBlock">
           {GET_STARTED_PAGE_SUBTITLE}
         </span>
         <EuiSpacer size="s" />
-        <span
-          className="eui-displayBlock"
-          css={css`
-            ${headerDescriptionStyles}
-          `}
-        >
+        <span className="eui-displayBlock" css={headerDescriptionStyles}>
           {GET_STARTED_PAGE_DESCRIPTION}
         </span>
         {productTier && projectFeaturesUrl && (
           <>
             <EuiSpacer size="l" />
             <div>
-              <div
-                className="eui-displayInlineBlock"
-                css={css`
-                  ${currentPlanWrapperStyles}
-                `}
-              >
+              <div className="eui-displayInlineBlock" css={currentPlanWrapperStyles}>
                 <span css={currentPlanTextStyles}>{CURRENT_PLAN_LABEL}</span>
                 <ProductTierBadge productTier={productTier} />
 

@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/css';
 
 import { PROGRESS_TRACKER_LABEL } from './translations';
 import { useProgressBarStyles } from './styles/progress_bar.style';
@@ -32,23 +31,11 @@ const ProgressComponent: React.FC<{
             size="m"
             label={
               <span>
-                <span
-                  css={css`
-                    ${textStyle}
-                  `}
-                >
-                  {PROGRESS_TRACKER_LABEL}
-                </span>
+                <span css={textStyle}>{PROGRESS_TRACKER_LABEL}</span>
                 <EuiSpacer size="s" />
               </span>
             }
-            valueText={
-              <span
-                css={css`
-                  ${textStyle}
-                `}
-              >{`${stepsDone}/${totalActiveSteps}`}</span>
-            }
+            valueText={<span css={textStyle}>{`${stepsDone}/${totalActiveSteps}`}</span>}
           />
         </EuiFlexItem>
       )}

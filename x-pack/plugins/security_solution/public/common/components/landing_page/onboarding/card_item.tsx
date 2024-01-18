@@ -8,7 +8,6 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import React, { useMemo, useCallback } from 'react';
-import { css } from '@emotion/css';
 
 import classnames from 'classnames';
 import type {
@@ -96,9 +95,7 @@ const CardItemComponent: React.FC<{
       className={cardClassNames}
       hasBorder
       paddingSize="none"
-      css={css`
-        ${cardItemPanelStyle}
-      `}
+      css={cardItemPanelStyle}
       borderRadius="none"
       data-test-subj={cardId}
     >

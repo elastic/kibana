@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
 
 import { useFooterStyles } from '../styles/footer.styles';
 import { getFooter } from './footer';
@@ -20,37 +19,16 @@ const FooterComponent = () => {
       alignItems="center"
       justifyContent="spaceBetween"
       gutterSize="none"
-      css={css`
-        ${wrapperStyle}
-      `}
+      css={wrapperStyle}
     >
       {footer.map((item) => (
         <EuiFlexItem key={`footer-${item.key}`}>
           <img src={item.icon} alt={item.title} height="64" width="64" />
           <EuiSpacer size="m" />
-          <p
-            css={css`
-              ${titleStyle}
-            `}
-          >
-            {item.title}
-          </p>
-          <p
-            css={css`
-              ${descriptionStyle}
-            `}
-          >
-            {item.description}
-          </p>
+          <p css={titleStyle}>{item.title}</p>
+          <p css={descriptionStyle}>{item.description}</p>
           <EuiSpacer size="m" />
-          <EuiLink
-            href={item.link.href}
-            external={true}
-            target="_blank"
-            css={css`
-              ${linkStyle}
-            `}
-          >
+          <EuiLink href={item.link.href} external={true} target="_blank" css={linkStyle}>
             {item.link.title}
           </EuiLink>
         </EuiFlexItem>

@@ -7,7 +7,6 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import React from 'react';
-import { css } from '@emotion/react';
 
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
 import { useStepContentStyles } from '../styles/step_content.styles';
@@ -57,30 +56,20 @@ const StepContentComponent = ({
     <EuiFlexGroup
       color="plain"
       className="step-content-group"
-      css={css`
-        ${stepContentGroupStyles}
-      `}
+      css={stepContentGroupStyles}
       data-test-subj={`${stepId}-content`}
       direction="row"
       gutterSize="none"
     >
       {step.description && (
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            ${leftContentStyles}
-          `}
-          className="left-panel"
-        >
+        <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
           <EuiText size="s">
             {step.description.map((desc, index) => (
               <div
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}
                 className="eui-displayBlock step-content-description"
-                css={css`
-                  ${descriptionStyles}
-                `}
+                css={descriptionStyles}
               >
                 {desc}
               </div>
@@ -93,17 +82,10 @@ const StepContentComponent = ({
           grow={false}
           data-test-subj="split-panel"
           className="right-panel"
-          css={css`
-            ${rightPanelStyles}
-          `}
+          css={rightPanelStyles}
         >
           {splitPanel && (
-            <div
-              className="right-panel-wrapper"
-              css={css`
-                ${rightPanelContentStyles}
-              `}
-            >
+            <div className="right-panel-wrapper" css={rightPanelContentStyles}>
               {splitPanel}
             </div>
           )}

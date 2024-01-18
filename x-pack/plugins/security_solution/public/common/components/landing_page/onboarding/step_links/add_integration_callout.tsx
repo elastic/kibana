@@ -7,7 +7,6 @@
 import React, { useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
 
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 
@@ -45,20 +44,9 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
               defaultMessage="To {stepName} add integrations first {addIntegration}"
               values={{
                 addIntegration: (
-                  <EuiLink
-                    onClick={toggleStep}
-                    css={css`
-                      ${calloutAnchorStyles}
-                    `}
-                  >
+                  <EuiLink onClick={toggleStep} css={calloutAnchorStyles}>
                     {ADD_INTEGRATIONS_STEP}
-                    <EuiIcon
-                      type="arrowRight"
-                      size="s"
-                      css={css`
-                        ${calloutAnchorStyles}
-                      `}
-                    />
+                    <EuiIcon type="arrowRight" size="s" css={calloutAnchorStyles} />
                   </EuiLink>
                 ),
                 stepName: stepName ?? (
@@ -73,9 +61,7 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
         </>
       }
       size="s"
-      css={css`
-        ${calloutWrapperStyles}
-      `}
+      css={calloutWrapperStyles}
     />
   );
 };

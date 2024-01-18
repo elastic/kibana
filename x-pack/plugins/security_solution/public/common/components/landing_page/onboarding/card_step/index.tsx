@@ -14,7 +14,6 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { css } from '@emotion/css';
 
 import classnames from 'classnames';
 import { useNavigateTo, SecurityPageName } from '@kbn/security-solution-navigation';
@@ -121,63 +120,23 @@ const CardStepComponent: React.FC<{
       paddingSize="none"
       className={panelClassNames}
       id={stepId}
-      css={css`
-        ${stepPanelStyles}
-      `}
+      css={stepPanelStyles}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        css={css`
-          ${stepGroundStyles}
-        `}
-      >
-        <EuiFlexItem
-          grow={false}
-          onClick={toggleStep}
-          css={css`
-            ${stepItemStyles}
-          `}
-        >
-          <span
-            className={stepIconClassNames}
-            css={css`
-              ${stepIconStyles}
-            `}
-          >
+      <EuiFlexGroup gutterSize="none" css={stepGroundStyles}>
+        <EuiFlexItem grow={false} onClick={toggleStep} css={stepItemStyles}>
+          <span className={stepIconClassNames} css={stepIconStyles}>
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={1}
-          onClick={toggleStep}
-          css={css`
-            ${stepItemStyles}
-          `}
-        >
-          <span
-            className="step-title"
-            css={css`
-              ${stepTitleStyles}
-            `}
-          >
+        <EuiFlexItem grow={1} onClick={toggleStep} css={stepItemStyles}>
+          <span className="step-title" css={stepTitleStyles}>
             {title}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            ${stepItemStyles}
-          `}
-        >
+        <EuiFlexItem grow={false} css={stepItemStyles}>
           <div>
             {isDone && (
-              <EuiBadge
-                className="all-done-badge"
-                css={css`
-                  ${allDoneTextStyles}
-                `}
-                color="success"
-              >
+              <EuiBadge className="all-done-badge" css={allDoneTextStyles} color="success">
                 {ALL_DONE_TEXT}
               </EuiBadge>
             )}
@@ -188,9 +147,7 @@ const CardStepComponent: React.FC<{
               iconType={isExpandedStep ? 'arrowUp' : 'arrowDown'}
               aria-label={isExpandedStep ? COLLAPSE_STEP_BUTTON_LABEL : EXPAND_STEP_BUTTON_LABEL}
               size="xs"
-              css={css`
-                ${toggleButtonStyles}
-              `}
+              css={toggleButtonStyles}
               isDisabled={!hasStepContent}
             />
           </div>
