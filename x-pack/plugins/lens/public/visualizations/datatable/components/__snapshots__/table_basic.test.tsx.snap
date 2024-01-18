@@ -252,6 +252,11 @@ exports[`DatatableComponent it renders actions column when there are row actions
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -259,6 +264,37 @@ exports[`DatatableComponent it renders actions column when there are row actions
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+        ]
       }
       sorting={
         Object {
@@ -530,6 +566,11 @@ exports[`DatatableComponent it renders custom row height if set to another value
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -539,6 +580,37 @@ exports[`DatatableComponent it renders custom row height if set to another value
             "lineCount": 5,
           },
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+        ]
       }
       sorting={
         Object {
@@ -801,6 +873,11 @@ exports[`DatatableComponent it renders the title and value 1`] = `
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -808,6 +885,37 @@ exports[`DatatableComponent it renders the title and value 1`] = `
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+        ]
       }
       sorting={
         Object {
@@ -1074,6 +1182,11 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
           "header": "underline",
         }
       }
+      inMemory={
+        Object {
+          "level": "sorting",
+        }
+      }
       onColumnResize={[Function]}
       renderCellValue={[Function]}
       rowCount={1}
@@ -1081,6 +1194,37 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
         Object {
           "defaultHeight": undefined,
         }
+      }
+      schemaDetectors={
+        Array [
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+          Object {
+            "comparator": [Function],
+            "defaultSortDirection": undefined,
+            "detector": [Function],
+            "icon": "",
+            "sortTextAsc": "Sort Ascending",
+            "sortTextDesc": "Sort Descending",
+            "type": "",
+          },
+        ]
       }
       sorting={
         Object {
