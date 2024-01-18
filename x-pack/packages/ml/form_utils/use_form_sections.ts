@@ -19,10 +19,10 @@ export const createSelectFormSections =
 const createSelectFormSection =
   <FF extends string, FS extends string, VN extends string>(
     slice: FormSlice<FF, FS, VN>,
-    section: keyof ReturnType<FormSlice<FF, FS, VN>['getInitialState']>['formSections']
+    section: keyof State<FF, FS, VN>['formSections']
   ) =>
   (s: Record<string, State<FF, FS, VN>>) => {
-    return s[slice.name].formSections[section as FS];
+    return s[slice.name].formSections[section];
   };
 
 export const useFormSections = <FF extends string, FS extends string, VN extends string>(
@@ -34,7 +34,7 @@ export const useFormSections = <FF extends string, FS extends string, VN extends
 
 export const useFormSection = <FF extends string, FS extends string, VN extends string>(
   slice: FormSlice<FF, FS, VN>,
-  section: keyof ReturnType<FormSlice<FF, FS, VN>['getInitialState']>['formSections']
+  section: keyof State<FF, FS, VN>['formSections']
 ) => {
   const selectFormSection = useMemo(
     () => createSelectFormSection(slice, section),

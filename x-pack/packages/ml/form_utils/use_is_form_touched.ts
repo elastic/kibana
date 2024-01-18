@@ -13,8 +13,10 @@ import { useSelector } from 'react-redux';
 
 import { createFormFieldsMap, type FormField } from './form_field';
 import { createFormSectionsMap, type FormSection } from './form_section';
+import { createSelectFormFields } from './use_form_field';
+import { createSelectFormSections } from './use_form_sections';
 
-import type { State } from './form_slice';
+import type { FormSlice, State } from './form_slice';
 
 const getFieldValues = <
   FF extends string,
@@ -34,15 +36,10 @@ const getSectionValues = <
   sections: S['formSections']
 ) => Object.values(sections).map((s) => (s as FormSection<FS>).enabled);
 
-const isFormTouched = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
-  defaultState: S,
-  formFields: S['formFields'],
-  formSections: S['formSections']
+const isFormTouched = <FF extends string, FS extends string, VN extends string>(
+  defaultState: State<FF, FS, VN>,
+  formFields: State<FF, FS, VN>['formFields'],
+  formSections: State<FF, FS, VN>['formSections']
 ) => {
   return (
     !isEqual(getFieldValues(defaultState.formFields), getFieldValues(formFields)) ||
@@ -50,23 +47,18 @@ const isFormTouched = <
   );
 };
 
-const createSelectIsFormTouched = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
-  stateAccessor: string,
-  defaultState: S
+const createSelectIsFormTouched = <FF extends string, FS extends string, VN extends string>(
+  slice: FormSlice<FF, FS, VN>,
+  defaultState: State<FF, FS, VN>
 ) =>
   createSelector(
-    (state: Record<string, S>) => state[stateAccessor].formFields,
-    (state: Record<string, S>) => state[stateAccessor].formSections,
+    createSelectFormFields<FF, FS, VN>(slice),
+    createSelectFormSections<FF, FS, VN>(slice),
     (formFields, formSections) => isFormTouched(defaultState, formFields, formSections)
   );
 
 export const useIsFormTouched = <FF extends string, FS extends string, VN extends string>(
-  stateAccessor: string,
+  slice: FormSlice<FF, FS, VN>,
   defaultState: {
     formFieldsArr: Array<FormField<FF, FS, VN>>;
     formSectionsArr: Array<FormSection<FS>>;
@@ -74,11 +66,11 @@ export const useIsFormTouched = <FF extends string, FS extends string, VN extend
 ) => {
   const selectIsFormTouched = useMemo(
     () =>
-      createSelectIsFormTouched(stateAccessor, {
+      createSelectIsFormTouched(slice, {
         formFields: createFormFieldsMap(defaultState.formFieldsArr),
         formSections: createFormSectionsMap(defaultState.formSectionsArr),
       } as State<FF, FS, VN>),
-    [stateAccessor, defaultState]
+    [slice, defaultState]
   );
   return useSelector(selectIsFormTouched);
 };
