@@ -33,10 +33,11 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const dispatch = useDispatch();
   const config = useTransformConfig();
   const isFormValid = useIsFormValid(editTransformFlyoutSlice);
-  const isFormTouched = useIsFormTouched(editTransformFlyoutSlice, {
-    formFieldsArr: getEditTransformFormFields(config),
-    formSectionsArr: getEditTransformFormSections(config),
-  });
+  const isFormTouched = useIsFormTouched(
+    editTransformFlyoutSlice,
+    getEditTransformFormFields(config),
+    getEditTransformFormSections(config)
+  );
   const requestConfig = useUpdatedConfig(editTransformFlyoutSlice, config);
   const isUpdateButtonDisabled = !isFormValid || !isFormTouched;
 
