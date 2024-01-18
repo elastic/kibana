@@ -19,7 +19,6 @@ import {
 import { PRIVATE_LOCATIONS_SAVED_OBJECT_TYPE } from './private_locations';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 import { DynamicSettingsAttributes } from '../runtime_types/settings';
-import { ConfigKey } from '../../common/runtime_types';
 import { UptimeConfig } from '../../common/config';
 import { settingsObjectId, settingsObjectType } from './uptime_settings';
 import {
