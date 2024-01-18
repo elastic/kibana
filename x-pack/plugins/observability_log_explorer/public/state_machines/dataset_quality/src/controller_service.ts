@@ -43,7 +43,10 @@ export const subscribeToDatasetQualityState: InvokeCreator<
     },
   });
 
+  controller.service.start();
+
   return () => {
     subscription.unsubscribe();
+    controller.service.stop();
   };
 };

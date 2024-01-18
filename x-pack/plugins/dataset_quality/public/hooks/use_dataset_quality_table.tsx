@@ -6,6 +6,7 @@
  */
 
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useSelector } from '@xstate/react';
 import { find, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
@@ -33,7 +34,10 @@ export const useDatasetQualityTable = () => {
 
   const defaultTimeRange = getDefaultTimeRange();
 
-  const { dataStreamsStatsServiceClient: client, store } = useDatasetQualityContext();
+  const { dataStreamsStatsServiceClient: client, service } = useDatasetQualityContext();
+  const table = useSelector(service, (state) => {
+    return state.context.table;
+  });
 
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
   const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
@@ -51,8 +55,8 @@ export const useDatasetQualityTable = () => {
   );
 
   const pagination = {
-    pageIndex: store.state.table.page,
-    pageSize: store.state.table.rowsPerPage,
+    pageIndex: table.page,
+    pageSize: table.rowsPerPage,
     totalItemCount: data.length,
     hidePerPageOptions: true,
   };
@@ -62,12 +66,14 @@ export const useDatasetQualityTable = () => {
       page: { index: number; size: number };
       sort?: { field: SORT_FIELD; direction: DIRECTION };
     }) => {
-      store.actions.setPage(options.page.index);
-      store.actions.setRowsPerPage(options.page.size);
+      service.send({
+        type: 'CHANGE_PAGE',
+        page: options.page.index,
+      });
       setSortField(options.sort?.field || DEFAULT_SORT_FIELD);
       setSortDirection(options.sort?.direction || DEFAULT_SORT_DIRECTION);
     },
-    [store.actions]
+    [service]
   );
 
   const sort = {
@@ -87,26 +93,15 @@ export const useDatasetQualityTable = () => {
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
-    return sortedItems.slice(
-      store.state.table.page * store.state.table.rowsPerPage,
-      (store.state.table.page + 1) * store.state.table.rowsPerPage
-    );
-  }, [
-    sortField,
-    data,
-    sortDirection,
-    store.state.table.page,
-    store.state.table.rowsPerPage,
-    degradedStats,
-  ]);
+    return sortedItems.slice(table.page * table.rowsPerPage, (table.page + 1) * table.rowsPerPage);
+  }, [sortField, data, sortDirection, table.page, table.rowsPerPage, degradedStats]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage =
-      store.state.table.rowsPerPage * store.state.table.page + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage =
-      store.state.table.rowsPerPage * store.state.table.page + renderedItems.length;
+      table.rowsPerPage ?? 1 * table.page ?? 0 + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = table.rowsPerPage * table.page + renderedItems.length;
 
-    return store.state.table.rowsPerPage === 0 ? (
+    return table.rowsPerPage === 0 ? (
       <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
@@ -116,7 +111,7 @@ export const useDatasetQualityTable = () => {
         {tableSummaryOfText} {data.length}
       </>
     );
-  }, [data.length, store.state.table.page, store.state.table.rowsPerPage, renderedItems.length]);
+  }, [data.length, renderedItems.length, table.page, table.rowsPerPage]);
 
   return {
     sort,

@@ -8,8 +8,8 @@
 import type { CreateDatasetQualityControllerFactory } from './create_controller';
 
 export const createDatasetQualityControllerLazyFactory: CreateDatasetQualityControllerFactory =
-  () => async (args) => {
+  (dependencies) => async (args) => {
     const { createDatasetQualityControllerFactory } = await import('./create_controller');
 
-    return createDatasetQualityControllerFactory()(args);
+    return createDatasetQualityControllerFactory(dependencies)(args);
   };

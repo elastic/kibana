@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { distinctUntilChanged } from 'rxjs';
 import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
@@ -33,27 +32,13 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
       http: core.http,
     }).client;
 
-    const [state, setState] = useState(controller.state);
-
-    useEffect(() => {
-      const sub = controller.state$.pipe(distinctUntilChanged()).subscribe((s) => setState(s));
-
-      return () => {
-        sub.unsubscribe();
-      };
-    }, [controller.state$]);
-
     const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
       () => ({
         dataStreamsStatsServiceClient,
-        store: {
-          actions: {
-            ...controller.actions,
-          },
-          state,
-        },
+        stateMachine: controller.stateMachine,
+        service: controller.service,
       }),
-      [controller.actions, dataStreamsStatsServiceClient, state]
+      [controller.service, controller.stateMachine, dataStreamsStatsServiceClient]
     );
 
     return (

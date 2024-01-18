@@ -6,14 +6,15 @@
  */
 
 import { Observable } from 'rxjs';
+import {
+  DatasetQualityControllerStateMachine,
+  DatasetQualityControllerStateService,
+} from '../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
-  actions: {
-    setPage: (page: number) => void;
-    setRowsPerPage: (rowsPerPage: number) => void;
-  };
-  state: DatasetQualityPublicState;
   state$: Observable<DatasetQualityPublicState>;
+  stateMachine: DatasetQualityControllerStateMachine;
+  service: DatasetQualityControllerStateService;
 }
 
 export interface DatasetQualityTableOptions {

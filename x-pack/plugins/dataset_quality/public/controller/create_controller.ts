@@ -5,8 +5,14 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
+import { getDevToolsOptions } from '@kbn/xstate-utils';
 import equal from 'fast-deep-equal';
-import { BehaviorSubject, distinctUntilChanged } from 'rxjs';
+import { distinctUntilChanged, from, map, shareReplay } from 'rxjs';
+import { interpret } from 'xstate';
+import { createDatasetQualityControllerStateMachine } from '../state_machines/dataset_quality_controller';
+import { DatasetQualityStartDeps } from '../types';
+import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import { DatasetQualityController, DatasetQualityPublicStateUpdate } from './types';
 
 type InitialState = DatasetQualityPublicStateUpdate;
@@ -18,19 +24,51 @@ const state = {
   },
 };
 
+interface Dependencies {
+  core: CoreStart;
+  plugins: DatasetQualityStartDeps;
+}
+
 export const createDatasetQualityControllerFactory =
-  () =>
+  ({ core }: Dependencies) =>
   async ({
     initialState = state,
   }: {
     initialState?: InitialState;
   }): Promise<DatasetQualityController> => {
-    const datasetQualityState = new BehaviorSubject({
-      ...state,
-      ...initialState,
+    const initialContext = getContextFromPublicState(initialState ?? {});
+
+    const machine = createDatasetQualityControllerStateMachine({
+      initialContext,
+      toasts: core.notifications.toasts,
     });
 
+    const service = interpret(machine, {
+      devTools: getDevToolsOptions(),
+    });
+
+    /* service.onTransition((t) => {
+      console.log('New transition', t);
+    }); */
+
+    const state$ = from(service).pipe(
+      map(({ context }) => getPublicStateFromContext(context)),
+      // distinctUntilChanged(equal),
+      shareReplay(1)
+    );
+
     return {
+      state$,
+      service,
+      stateMachine: machine,
+    };
+
+    /* const datasetQualityState = new BehaviorSubject({
+      ...state,
+      ...initialState,
+    }); */
+
+    /* return {
       actions: {
         setPage: (page: number) => {
           datasetQualityState.next({
@@ -50,12 +88,12 @@ export const createDatasetQualityControllerFactory =
             },
           });
         },
-      },
+      },x
       get state() {
         return datasetQualityState.getValue();
       },
       state$: datasetQualityState.asObservable().pipe(distinctUntilChanged(equal)),
-    };
+    }; */
   };
 
 export type CreateDatasetQualityControllerFactory = typeof createDatasetQualityControllerFactory;

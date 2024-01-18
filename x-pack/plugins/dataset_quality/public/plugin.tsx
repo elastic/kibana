@@ -30,7 +30,10 @@ export class DatasetQualityPlugin
       plugins,
     });
 
-    const createDatasetQualityController = createDatasetQualityControllerLazyFactory();
+    const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
+      core,
+      plugins,
+    });
 
     return { DatasetQuality, createDatasetQualityController };
   }
