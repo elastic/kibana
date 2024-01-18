@@ -753,7 +753,7 @@ export default function ({ getService }: FtrProviderContext) {
                   match: 'check if title is present',
                 },
                 id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
+                locations: ['dev'],
                 name: 'check if title is present',
                 params: {},
                 playwrightOptions: {
