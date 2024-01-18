@@ -321,7 +321,7 @@ describe('Edit ', () => {
     userEvent.clear(screen.getByTestId('case-text-custom-field-form-field-test_key_1'));
 
     await waitFor(() => {
-      expect(screen.getByText('My test label 1 is required.')).toBeInTheDocument();
+      expect(screen.getByText('A My test label 1 is required.')).toBeInTheDocument();
     });
   });
 

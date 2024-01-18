@@ -7,19 +7,9 @@
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as i18n from './translations';
-import type { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 
 const { emptyField, maxLengthField } = fieldValidators;
-
-export interface CustomFieldsConfigurationFormProps {
-  key: string;
-  label: string;
-  type: CustomFieldTypes;
-  options?: {
-    required?: boolean;
-  };
-}
 
 export const schema = {
   key: {
@@ -33,12 +23,15 @@ export const schema = {
     label: i18n.FIELD_LABEL,
     validations: [
       {
-        validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),
+        validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL.toLocaleLowerCase())),
       },
       {
         validator: maxLengthField({
           length: MAX_CUSTOM_FIELD_LABEL_LENGTH,
-          message: i18n.MAX_LENGTH_ERROR('field label', MAX_CUSTOM_FIELD_LABEL_LENGTH),
+          message: i18n.MAX_LENGTH_ERROR(
+            i18n.FIELD_LABEL.toLocaleLowerCase(),
+            MAX_CUSTOM_FIELD_LABEL_LENGTH
+          ),
         }),
       },
     ],
@@ -48,6 +41,14 @@ export const schema = {
     validations: [
       {
         validator: emptyField(i18n.REQUIRED_FIELD(i18n.FIELD_LABEL)),
+      },
+    ],
+  },
+  defaultValue: {
+    label: i18n.DEFAULT_VALUE,
+    validations: [
+      {
+        validator: emptyField(i18n.REQUIRED_FIELD(i18n.DEFAULT_VALUE)),
       },
     ],
   },

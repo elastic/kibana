@@ -159,7 +159,7 @@ describe('Create ', () => {
 
     await waitFor(() => {
       expect(
-        screen.getByText(`${customFieldConfiguration.label} is required.`)
+        screen.getByText(`A ${customFieldConfiguration.label} is required.`)
       ).toBeInTheDocument();
       expect(onSubmit).toHaveBeenCalledWith({}, false);
     });

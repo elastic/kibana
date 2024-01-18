@@ -49,14 +49,14 @@ const basicConfigFields = {
       key: 'toggle_custom_field',
       label: 'Toggle',
       required: true,
-      default_value: true,
+      defaultValue: true,
     },
     {
       type: CustomFieldTypes.TEXT as const,
       key: 'text_custom_field',
       label: 'Text',
       required: true,
-      default_value: 'foobar',
+      defaultValue: 'foobar',
     },
   ],
 };
@@ -189,14 +189,14 @@ describe('CaseConfigureService', () => {
             },
             "customFields": Array [
               Object {
-                "default_value": true,
+                "defaultValue": true,
                 "key": "toggle_custom_field",
                 "label": "Toggle",
                 "required": true,
                 "type": "toggle",
               },
               Object {
-                "default_value": "foobar",
+                "defaultValue": "foobar",
                 "key": "text_custom_field",
                 "label": "Text",
                 "required": true,
@@ -475,14 +475,14 @@ describe('CaseConfigureService', () => {
             },
             "customFields": Array [
               Object {
-                "default_value": true,
+                "defaultValue": true,
                 "key": "toggle_custom_field",
                 "label": "Toggle",
                 "required": true,
                 "type": "toggle",
               },
               Object {
-                "default_value": "foobar",
+                "defaultValue": "foobar",
                 "key": "text_custom_field",
                 "label": "Text",
                 "required": true,

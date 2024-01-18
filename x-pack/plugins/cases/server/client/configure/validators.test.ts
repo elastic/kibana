@@ -88,26 +88,26 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, default_value: false },
-            { key: '2', required: true, default_value: 'foobar' },
+            { key: '1', required: true, defaultValue: false },
+            { key: '2', required: true, defaultValue: 'foobar' },
           ],
         })
       ).not.toThrow();
     });
 
-    it('does not throw an error for other falsy default_values (0)', () => {
+    it('does not throw an error for other falsy defaultValues (0)', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           // @ts-ignore intended
-          requestCustomFields: [{ key: '1', required: true, default_value: 0 }],
+          requestCustomFields: [{ key: '1', required: true, defaultValue: 0 }],
         })
       ).not.toThrow();
     });
 
-    it('does not throw an error for other falsy default_values (empty string)', () => {
+    it('does not throw an error for other falsy defaultValues (empty string)', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: true, default_value: '' }],
+          requestCustomFields: [{ key: '1', required: true, defaultValue: '' }],
         })
       ).not.toThrow();
     });
@@ -116,7 +116,7 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, default_value: null },
+            { key: '1', required: true, defaultValue: null },
             { key: '2', required: true },
             { key: '3', required: false },
           ],
@@ -143,8 +143,8 @@ describe('validators', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, default_value: false },
-            { key: '2', required: true, default_value: 'foobar' },
+            { key: '1', required: true, defaultValue: false },
+            { key: '2', required: true, defaultValue: 'foobar' },
           ],
         })
       ).not.toThrow();
@@ -154,8 +154,8 @@ describe('validators', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: false, default_value: false },
-            { key: '2', required: false, default_value: 'foobar' },
+            { key: '1', required: false, defaultValue: false },
+            { key: '2', required: false, defaultValue: 'foobar' },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
@@ -163,30 +163,30 @@ describe('validators', () => {
       );
     });
 
-    it('throws an error for other falsy default_values (null)', () => {
+    it('throws an error for other falsy defaultValues (null)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, default_value: null }],
+          requestCustomFields: [{ key: '1', required: false, defaultValue: null }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"The following optional custom fields try to define a default value: 1"`
       );
     });
 
-    it('throws an error for other falsy default_values (0)', () => {
+    it('throws an error for other falsy defaultValues (0)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, default_value: 0 }],
+          requestCustomFields: [{ key: '1', required: false, defaultValue: 0 }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"The following optional custom fields try to define a default value: 1"`
       );
     });
 
-    it('throws an error for other falsy default_values (empty string)', () => {
+    it('throws an error for other falsy defaultValues (empty string)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, default_value: '' }],
+          requestCustomFields: [{ key: '1', required: false, defaultValue: '' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"The following optional custom fields try to define a default value: 1"`

@@ -38,8 +38,8 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
   });
 
   it('should render the custom fields types when the custom fields are empty', async () => {
@@ -52,11 +52,11 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
-    expect(screen.getByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
   });
 
-  it('should not show the custom fields if the configuration is empty', async () => {
+  it('should not show the custom fields if the configuration is empty', () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -82,12 +82,24 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    const customFields = screen.getAllByTestId('case-custom-field-wrapper', { exact: false });
+    const customFields = await screen.findAllByTestId('case-custom-field-wrapper', {
+      exact: false,
+    });
 
-    expect(customFields.length).toBe(2);
+    expect(customFields.length).toBe(4);
 
-    expect(within(customFields[0]).getByRole('heading')).toHaveTextContent('My test label 1');
-    expect(within(customFields[1]).getByRole('heading')).toHaveTextContent('My test label 2');
+    expect(await within(customFields[0]).findByRole('heading')).toHaveTextContent(
+      'My test label 1'
+    );
+    expect(await within(customFields[1]).findByRole('heading')).toHaveTextContent(
+      'My test label 2'
+    );
+    expect(await within(customFields[2]).findByRole('heading')).toHaveTextContent(
+      'My test label 3'
+    );
+    expect(await within(customFields[3]).findByRole('heading')).toHaveTextContent(
+      'My test label 4'
+    );
   });
 
   it('pass the permissions to custom fields correctly', async () => {
@@ -117,16 +129,14 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        {
-          type: CustomFieldTypes.TEXT,
-          key: 'test_key_1',
-          value: null,
-        },
+        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+        customFieldsMock[2],
+        customFieldsMock[3],
       ]);
     });
   });
@@ -141,16 +151,14 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        {
-          type: CustomFieldTypes.TEXT,
-          key: 'test_key_1',
-          value: null,
-        },
+        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
+        customFieldsMock[2],
+        customFieldsMock[3],
       ]);
     });
   });
@@ -172,7 +180,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    userEvent.click(await screen.findByRole('switch'));
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
@@ -191,12 +199,14 @@ describe('Case View Page files tab', () => {
       />
     );
 
-    userEvent.click(screen.getByRole('switch'));
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
         customFieldsMock[0],
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
+        customFieldsMock[2],
+        customFieldsMock[3],
       ]);
     });
   });

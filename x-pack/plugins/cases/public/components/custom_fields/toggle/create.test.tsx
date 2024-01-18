@@ -29,11 +29,11 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByText(customFieldConfiguration.label)).toBeInTheDocument();
+    expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
     expect(
-      screen.getByTestId(`${customFieldConfiguration.key}-toggle-create-custom-field`)
+      await screen.findByTestId(`${customFieldConfiguration.key}-toggle-create-custom-field`)
     ).toBeInTheDocument();
-    expect(screen.getByRole('switch')).not.toBeChecked();
+    expect(await screen.findByRole('switch')).not.toBeChecked();
   });
 
   it('updates the value correctly', async () => {
@@ -43,9 +43,8 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByRole('switch'));
-
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByRole('switch'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -70,7 +69,7 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       expect(onSubmit).toHaveBeenCalledWith(
@@ -91,6 +90,6 @@ describe('Create ', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByRole('switch')).toBeDisabled();
+    expect(await screen.findByRole('switch')).toBeDisabled();
   });
 });

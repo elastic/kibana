@@ -69,7 +69,7 @@ export default ({ getService }: FtrProviderContext): void => {
             label: 'toggle',
             type: CustomFieldTypes.TOGGLE,
             required: true,
-            default_value: false,
+            defaultValue: false,
           },
         ],
       };

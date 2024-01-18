@@ -48,7 +48,7 @@ export const validateRequiredCustomFieldsInRequest = ({
   requestCustomFields?: Array<{
     key: string;
     required: boolean;
-    default_value?: string | boolean | null;
+    defaultValue?: string | boolean | null;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -60,7 +60,7 @@ export const validateRequiredCustomFieldsInRequest = ({
   requestCustomFields.forEach((requestField) => {
     if (
       requestField.required &&
-      (requestField.default_value === undefined || requestField.default_value === null)
+      (requestField.defaultValue === undefined || requestField.defaultValue === null)
     ) {
       invalidFields.push(requestField.key);
     }
@@ -82,7 +82,7 @@ export const validateOptionalCustomFieldsInRequest = ({
   requestCustomFields?: Array<{
     key: string;
     required: boolean;
-    default_value?: unknown;
+    defaultValue?: unknown;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -92,7 +92,7 @@ export const validateOptionalCustomFieldsInRequest = ({
   const invalidFields: string[] = [];
 
   requestCustomFields.forEach((requestField) => {
-    if (!requestField.required && requestField.default_value !== undefined) {
+    if (!requestField.required && requestField.defaultValue !== undefined) {
       invalidFields.push(requestField.key);
     }
   });

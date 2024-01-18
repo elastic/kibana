@@ -301,7 +301,7 @@ describe('configure', () => {
       label: 'Text Custom Field',
       type: CustomFieldTypes.TEXT,
       required: true,
-      default_value: 'foobar',
+      defaultValue: 'foobar',
     };
 
     it('has expected attributes in request', () => {
@@ -327,18 +327,7 @@ describe('configure', () => {
         PathReporter.report(
           TextCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            default_value: false,
-          })
-        )[0]
-      ).toContain('Invalid value false supplied');
-    });
-
-    it('limits the default_value to ', () => {
-      expect(
-        PathReporter.report(
-          TextCustomFieldConfigurationRt.decode({
-            ...defaultRequest,
-            default_value: false,
+            defaultValue: false,
           })
         )[0]
       ).toContain('Invalid value false supplied');
@@ -349,7 +338,7 @@ describe('configure', () => {
         PathReporter.report(
           TextCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            default_value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
+            defaultValue: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
           })
         )[0]
       ).toContain(
@@ -362,7 +351,7 @@ describe('configure', () => {
         PathReporter.report(
           TextCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            default_value: '',
+            defaultValue: '',
           })
         )[0]
       ).toContain('The value field cannot be an empty string.');
@@ -375,7 +364,7 @@ describe('configure', () => {
       label: 'Toggle Custom Field',
       type: CustomFieldTypes.TOGGLE,
       required: true,
-      default_value: false,
+      defaultValue: false,
     };
 
     it('has expected attributes in request', () => {
@@ -401,7 +390,7 @@ describe('configure', () => {
         PathReporter.report(
           ToggleCustomFieldConfigurationRt.decode({
             ...defaultRequest,
-            default_value: 'foobar',
+            defaultValue: 'foobar',
           })
         )[0]
       ).toContain('Invalid value "foobar" supplied');

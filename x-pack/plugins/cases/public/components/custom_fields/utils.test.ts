@@ -37,6 +37,16 @@ describe('addOrReplaceCustomField ', () => {
           "value": true,
         },
         Object {
+          "key": "test_key_3",
+          "type": "text",
+          "value": null,
+        },
+        Object {
+          "key": "test_key_4",
+          "type": "toggle",
+          "value": null,
+        },
+        Object {
           "key": "my_test_key",
           "type": "text",
           "value": "my_test_value",
@@ -54,7 +64,12 @@ describe('addOrReplaceCustomField ', () => {
 
     const res = addOrReplaceCustomField(customFieldsMock, fieldToUpdate as CaseUICustomField);
     expect(res).toMatchInlineSnapshot(
-      [{ ...fieldToUpdate }, { ...customFieldsMock[1] }],
+      [
+        { ...fieldToUpdate },
+        { ...customFieldsMock[1] },
+        { ...customFieldsMock[2] },
+        { ...customFieldsMock[3] },
+      ],
       `
       Array [
         Object {
@@ -71,6 +86,16 @@ describe('addOrReplaceCustomField ', () => {
           "key": "test_key_2",
           "type": "toggle",
           "value": true,
+        },
+        Object {
+          "key": "test_key_3",
+          "type": "text",
+          "value": null,
+        },
+        Object {
+          "key": "test_key_4",
+          "type": "toggle",
+          "value": null,
         },
       ]
     `
@@ -90,14 +115,28 @@ describe('addOrReplaceCustomField ', () => {
       `
       Array [
         Object {
+          "defaultValue": "My default value",
           "key": "test_key_1",
           "label": "My test label 1",
           "required": true,
           "type": "text",
         },
         Object {
+          "defaultValue": true,
           "key": "test_key_2",
           "label": "My test label 2",
+          "required": true,
+          "type": "toggle",
+        },
+        Object {
+          "key": "test_key_3",
+          "label": "My test label 3",
+          "required": false,
+          "type": "text",
+        },
+        Object {
+          "key": "test_key_4",
+          "label": "My test label 4",
           "required": false,
           "type": "toggle",
         },
@@ -120,18 +159,37 @@ describe('addOrReplaceCustomField ', () => {
 
     const res = addOrReplaceCustomField(customFieldsConfigurationMock, fieldToUpdate);
     expect(res).toMatchInlineSnapshot(
-      [{ ...fieldToUpdate }, { ...customFieldsConfigurationMock[1] }],
+      [
+        { ...fieldToUpdate },
+        { ...customFieldsConfigurationMock[1] },
+        { ...customFieldsConfigurationMock[2] },
+        { ...customFieldsConfigurationMock[3] },
+      ],
       `
       Array [
         Object {
+          "defaultValue": "My default value",
           "key": "test_key_1",
           "label": "My test label 1!!!",
           "required": true,
           "type": "text",
         },
         Object {
+          "defaultValue": true,
           "key": "test_key_2",
           "label": "My test label 2",
+          "required": true,
+          "type": "toggle",
+        },
+        Object {
+          "key": "test_key_3",
+          "label": "My test label 3",
+          "required": false,
+          "type": "text",
+        },
+        Object {
+          "key": "test_key_4",
+          "label": "My test label 4",
           "required": false,
           "type": "toggle",
         },
