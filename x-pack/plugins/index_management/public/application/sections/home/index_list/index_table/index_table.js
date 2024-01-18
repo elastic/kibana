@@ -52,7 +52,13 @@ import { CreateIndexButton } from '../create_index/create_index_button';
 
 const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
-const getColumnConfigs = ({ showIndexStats, history, filterChanged, extensionsService, location }) => {
+const getColumnConfigs = ({
+  showIndexStats,
+  history,
+  filterChanged,
+  extensionsService,
+  location,
+}) => {
   const columns = [
     {
       fieldName: 'name',
