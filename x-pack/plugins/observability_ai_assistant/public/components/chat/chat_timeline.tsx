@@ -120,9 +120,9 @@ export function ChatTimeline({
             key={index}
             consolidatedItem={item}
             onActionClick={onActionClick}
+            onEditSubmit={onEdit}
             onFeedback={onFeedback}
             onRegenerate={onRegenerate}
-            onEditSubmit={onEdit}
             onSendTelemetry={onSendTelemetry}
             onStopGenerating={onStopGenerating}
           />

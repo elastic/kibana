@@ -429,6 +429,16 @@ export class TagManagementPageObject extends FtrService {
   }
 
   /**
+   * Select all checkboxes
+   */
+  async selectAllTagRows() {
+    const checkbox = await this.testSubjects.find(
+      'tagsManagementTable table-is-ready > checkboxSelectAll'
+    );
+    await checkbox.click();
+  }
+
+  /**
    * Returns true if the tag bulk action menu is displayed, false otherwise.
    */
   async isActionMenuButtonDisplayed() {
