@@ -7,6 +7,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
+import { fetchAllEndpointIntegrationPolicyListIds } from '../../common/fleet_services';
 import { ExecutionThrottler } from '../../common/execution_throttler';
 import {
   createBlocklists,
@@ -82,7 +83,9 @@ ${status}\nRequests pending: ${throttler.getStats().pending}
         reportProgress: policyReporter,
         throttler,
       })
-    : [];
+    : await fetchAllEndpointIntegrationPolicyListIds(kbnClient);
+
+  log?.verbose(`Policy IDs:\n${endpointPolicyIds.join('\n')}`);
 
   await Promise.all([
     trustedAppsCount &&

@@ -39,8 +39,8 @@ export const cli = () => {
       log.info(`${HORIZONTAL_LINE}
  Environment Data Loader
 ${HORIZONTAL_LINE}
-
-Loading data to: ${kbnClient.resolveUrl('')}`);
+`);
+      log.info(`Loading data to: ${kbnClient.resolveUrl('')}`);
 
       await load({
         kbnClient,

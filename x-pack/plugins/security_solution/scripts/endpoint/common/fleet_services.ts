@@ -38,6 +38,7 @@ import {
   epmRouteService,
   PACKAGE_POLICY_API_ROUTES,
   SETUP_API_ROUTE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
 } from '@kbn/fleet-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
@@ -1275,3 +1276,45 @@ export const ensureFleetSetup = memoize(
     return setupResponse.data;
   }
 );
+
+/**
+ * Fetches a list of Endpoint Integration policies from fleet
+ * @param kbnClient
+ * @param kuery
+ * @param options
+ */
+export const fetchEndpointIntegrationPolicyList = async (
+  kbnClient: KbnClient,
+  { kuery, ...options }: GetPackagePoliciesRequest['query'] = {}
+) => {
+  const endpointPackageMatchValue = `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: endpoint`;
+
+  return fetchIntegrationPolicyList(kbnClient, {
+    ...options,
+    kuery: kuery ? `${kuery} AND ${endpointPackageMatchValue}` : endpointPackageMatchValue,
+  });
+};
+
+/**
+ * Retrieves all Endpoint Integration policy IDs - but only up to 10k
+ * @param kbnClient
+ */
+export const fetchAllEndpointIntegrationPolicyListIds = async (
+  kbnClient: KbnClient
+): Promise<string[]> => {
+  const perPage = 1000;
+  const policyIds = [];
+  let hasMoreData = true;
+
+  do {
+    const result = await fetchEndpointIntegrationPolicyList(kbnClient, { perPage });
+    policyIds.push(...result.items.map((policy) => policy.id));
+
+    // If no more results or the next page of content goes over 10k, then end loop here.
+    if (!result.items.length || policyIds.length + perPage < 10000) {
+      hasMoreData = false;
+    }
+  } while (hasMoreData);
+
+  return policyIds;
+};
