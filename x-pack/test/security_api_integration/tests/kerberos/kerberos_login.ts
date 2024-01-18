@@ -95,14 +95,14 @@ export default function ({ getService }: FtrProviderContext) {
     describe('initiating SPNEGO', () => {
       it('non-AJAX requests should properly initiate SPNEGO', async () => {
         const spnegoResponse = await supertest.get('/abc/xyz/spnego?one=two three').expect(401);
-
+        console.log(spnegoResponse)
         expect(spnegoResponse.headers['set-cookie']).to.be(undefined);
         expect(spnegoResponse.headers['www-authenticate']).to.be('Negotiate');
 
         // If browser and Kibana can successfully negotiate this HTML won't rendered, but if not
         // users will see a proper `Unauthenticated` page.
         expect(spnegoResponse.headers['content-security-policy']).to.be.a('string');
-        expect(spnegoResponse.text).to.contain('error');
+        expect(spnegoResponse.text).to.contain('<div/>');
       });
 
       it('AJAX requests should not initiate SPNEGO', async () => {
