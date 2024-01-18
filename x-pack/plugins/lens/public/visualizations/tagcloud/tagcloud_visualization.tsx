@@ -27,6 +27,7 @@ import { getSuggestions } from './suggestions';
 import { TagcloudToolbar } from './tagcloud_toolbar';
 import { TagsDimensionEditor } from './tags_dimension_editor';
 import { DEFAULT_STATE, TAGCLOUD_LABEL } from './constants';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const TAG_GROUP_ID = 'tags';
 const METRIC_GROUP_ID = 'metric';
@@ -312,5 +313,8 @@ export const getTagcloudVisualization = ({
 
   ToolbarComponent(props) {
     return <TagcloudToolbar {...props} />;
+  },
+  getTelemetryEventsOnSave(state, prevState) {
+    return getColorMappingTelemetryEvents(state?.colorMapping, prevState?.colorMapping);
   },
 });
