@@ -51,21 +51,21 @@ describe('alert function', () => {
             .outcome('success')
         ));
 
-    let response_apm_rule = await kibanaClient.callKibana("post",
+    let responseApmRule = await kibanaClient.callKibana<{ id: string }>("post",
       { pathname: "/api/alerting/rule" },
       apm_transaction_rate_AIAssistant.ruleParams,
     )
-    rule_ids.push(response_apm_rule.data.id)
+    rule_ids.push(responseApmRule.data.id)
 
     await kibanaClient.callKibana("post",
       { pathname: "/api/content_management/rpc/create" },
       custom_threshold_AIAssistant_log_count.dataViewParams,
     )
-    let response_logs_rule = await kibanaClient.callKibana("post",
+    let responseLogsRule = await kibanaClient.callKibana<{ id: string }>("post",
       { pathname: "/api/alerting/rule" },
       custom_threshold_AIAssistant_log_count.ruleParams,
     )
-    rule_ids.push(response_logs_rule.data.id)
+    rule_ids.push(responseLogsRule.data.id)
 
   });
 
