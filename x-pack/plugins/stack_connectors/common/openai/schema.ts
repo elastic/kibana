@@ -28,15 +28,57 @@ export const RunActionParamsSchema = schema.object({
   body: schema.string(),
 });
 
-// Run action schema
-export const InvokeAIActionParamsSchema = schema.object({
-  messages: schema.arrayOf(
+const AIMessage = schema.object({
+  role: schema.string(),
+  content: schema.string(),
+  name: schema.maybe(schema.string()),
+  function_call: schema.maybe(
     schema.object({
-      role: schema.string(),
-      content: schema.string(),
+      arguments: schema.string(),
+      name: schema.string(),
     })
   ),
+  tool_calls: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        id: schema.string(),
+        function: schema.object({
+          arguments: schema.string(),
+          name: schema.string(),
+        }),
+        type: schema.string(),
+      })
+    )
+  ),
+  tool_call_id: schema.maybe(schema.string()),
+});
+
+// Run action schema
+export const InvokeAIActionParamsSchema = schema.object({
+  messages: schema.arrayOf(AIMessage),
   model: schema.maybe(schema.string()),
+  functions: schema.maybe(
+    schema.arrayOf(
+      schema.object(
+        {
+          name: schema.string(),
+          description: schema.string(),
+          parameters: schema.object({
+            type: schema.string(),
+            properties: schema.object({
+              input: schema.object({
+                type: schema.string(),
+              }),
+            }),
+            additionalProperties: schema.boolean(),
+            $schema: schema.string(),
+          }),
+        },
+        // Not sure if this will include other properties, we should pass them if it does
+        { unknowns: 'allow' }
+      )
+    )
+  ),
   n: schema.maybe(schema.number()),
   stop: schema.maybe(
     schema.nullable(schema.oneOf([schema.string(), schema.arrayOf(schema.string())]))
