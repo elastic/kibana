@@ -12,7 +12,12 @@ import type { ExternalVisContext, LensAttributesContext } from '../types';
 export const toExternalVisContextJSONString = (
   visContext: ExternalVisContext | undefined
 ): string | undefined => {
-  if (!visContext || !visContext.requestData || !visContext.attributes) {
+  if (
+    !visContext ||
+    !visContext.requestData ||
+    !visContext.attributes ||
+    !visContext.suggestionType
+  ) {
     return undefined;
   }
 
@@ -31,7 +36,7 @@ export const fromExternalVisContextJSONString = (
   try {
     visContext = JSON.parse(visContextJSON);
 
-    if (!visContext?.requestData || !visContext.attributes) {
+    if (!visContext?.requestData || !visContext.attributes || !visContext.suggestionType) {
       visContext = undefined;
       throw new Error('visContextJSON is invalid');
     }

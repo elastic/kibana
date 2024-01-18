@@ -7,7 +7,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { unifiedHistogramServicesMock } from '../../__mocks__/services';
+import { unifiedHistogramServicesMock } from '../__mocks__/services';
 
 const getUseRequestParams = async () => {
   jest.doMock('@kbn/data-plugin/common', () => {

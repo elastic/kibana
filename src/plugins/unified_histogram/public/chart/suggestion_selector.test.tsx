@@ -14,12 +14,12 @@ import { SuggestionSelector } from './suggestion_selector';
 
 describe('SuggestionSelector', () => {
   it('should pass the suggestions charts titles to the EuiComboBox', () => {
-    const onSuggestionChange = jest.fn();
+    const onSuggestionContextChange = jest.fn();
     const wrapper = mountWithIntl(
       <SuggestionSelector
         suggestions={allSuggestionsMock}
         activeSuggestion={currentSuggestionMock}
-        onSuggestionChange={onSuggestionChange}
+        onSuggestionContextChange={onSuggestionContextChange}
       />
     );
     const comboBox = wrapper.find(EuiComboBox);
@@ -34,12 +34,12 @@ describe('SuggestionSelector', () => {
   });
 
   it('should pass the current suggestion as selectedProps to the EuiComboBox', () => {
-    const onSuggestionChange = jest.fn();
+    const onSuggestionContextChange = jest.fn();
     const wrapper = mountWithIntl(
       <SuggestionSelector
         suggestions={allSuggestionsMock}
         activeSuggestion={currentSuggestionMock}
-        onSuggestionChange={onSuggestionChange}
+        onSuggestionContextChange={onSuggestionContextChange}
       />
     );
     const comboBox = wrapper.find(EuiComboBox);
@@ -48,13 +48,13 @@ describe('SuggestionSelector', () => {
     ]);
   });
 
-  it('should call onSuggestionChange when the user selects another suggestion', () => {
-    const onSuggestionChange = jest.fn();
+  it('should call onSuggestionContextChange when the user selects another suggestion', () => {
+    const onSuggestionContextChange = jest.fn();
     const wrapper = mountWithIntl(
       <SuggestionSelector
         suggestions={allSuggestionsMock}
         activeSuggestion={currentSuggestionMock}
-        onSuggestionChange={onSuggestionChange}
+        onSuggestionContextChange={onSuggestionContextChange}
       />
     );
     const comboBox = wrapper.find(EuiComboBox);
@@ -62,6 +62,6 @@ describe('SuggestionSelector', () => {
     comboBox.prop('onChange')!([
       { label: selectedSuggestion.title, value: selectedSuggestion.title },
     ]);
-    expect(onSuggestionChange).toHaveBeenCalledWith(selectedSuggestion);
+    expect(onSuggestionContextChange).toHaveBeenCalledWith(selectedSuggestion);
   });
 });

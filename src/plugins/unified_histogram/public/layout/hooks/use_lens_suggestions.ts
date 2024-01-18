@@ -34,7 +34,7 @@ export const useLensSuggestions = ({
   data,
   timeRange,
   lensSuggestionsApi,
-  onSuggestionChange,
+  onSuggestionContextChange,
   externalVisContext,
 }: {
   dataView: DataView;
@@ -45,7 +45,7 @@ export const useLensSuggestions = ({
   data: DataPublicPluginStart;
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextChange?: (suggestion: Suggestion | undefined) => void;
   externalVisContext?: ExternalVisContext;
 }) => {
   const suggestions = useMemo(() => {
@@ -150,14 +150,14 @@ export const useLensSuggestions = ({
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
       console.log('deps change triggers a new suggestion');
-      onSuggestionChange?.(suggestions.firstSuggestion);
+      onSuggestionContextChange?.(suggestions.firstSuggestion);
 
       suggestionDeps.current = newSuggestionsDeps;
     }
   }, [
     columns,
     dataView,
-    onSuggestionChange,
+    onSuggestionContextChange,
     query,
     suggestions.firstSuggestion,
     suggestions.allSuggestions,

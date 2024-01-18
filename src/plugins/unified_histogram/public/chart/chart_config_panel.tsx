@@ -16,6 +16,7 @@ import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
   LensAttributesContext,
+  CurrentSuggestionContext,
 } from '../types';
 
 export function ChartConfigPanel({
@@ -23,12 +24,12 @@ export function ChartConfigPanel({
   lensAttributesContext,
   lensAdapters,
   lensEmbeddableOutput$,
-  currentSuggestion,
+  currentSuggestionContext,
   isFlyoutVisible,
   setIsFlyoutVisible,
   isPlainRecord,
   query,
-  onSuggestionChange,
+  onSuggestionContextChange,
 }: {
   services: UnifiedHistogramServices;
   lensAttributesContext: LensAttributesContext;
@@ -36,10 +37,10 @@ export function ChartConfigPanel({
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
-  currentSuggestion?: Suggestion;
+  currentSuggestionContext: CurrentSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextChange?: (suggestion: CurrentSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);
@@ -48,14 +49,19 @@ export function ChartConfigPanel({
   const updateSuggestion = useCallback(
     (datasourceState, visualizationState) => {
       const updatedSuggestion: Suggestion = {
-        ...currentSuggestion,
+        ...currentSuggestionContext?.suggestion,
         ...(datasourceState && { datasourceState }),
         ...(visualizationState && { visualizationState }),
       };
-      onSuggestionChange?.(updatedSuggestion);
+      onSuggestionContextChange?.({
+        ...currentSuggestionContext,
+        suggestion: updatedSuggestion,
+      });
     },
-    [currentSuggestion, onSuggestionChange]
+    [currentSuggestionContext, onSuggestionContextChange]
   );
+
+  const currentSuggestion = currentSuggestionContext.suggestion;
 
   useEffect(() => {
     const tablesAdapters = lensAdapters?.tables?.tables;

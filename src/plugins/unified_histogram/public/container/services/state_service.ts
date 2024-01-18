@@ -7,7 +7,7 @@
  */
 
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { LensEmbeddableOutput, Suggestion } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
 import type {
@@ -23,6 +23,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { CurrentSuggestionContext } from '../../types';
 
 /**
  * The current state of the container
@@ -35,7 +36,7 @@ export interface UnifiedHistogramState {
   /**
    * The current Lens suggestion
    */
-  currentSuggestion: Suggestion | undefined;
+  currentSuggestionContext: CurrentSuggestionContext | undefined;
   /**
    * Lens vis which can be stored externally
    */
@@ -107,7 +108,7 @@ export interface UnifiedHistogramStateService {
   /**
    * Sets current Lens suggestion
    */
-  setCurrentSuggestion: (suggestion: Suggestion | undefined) => void;
+  setCurrentSuggestionContext: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   /**
    * Sets external custom Lens vis
    */
@@ -163,7 +164,7 @@ export const createStateService = (
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
     externalVisContext: undefined,
-    currentSuggestion: undefined,
+    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
@@ -206,8 +207,8 @@ export const createStateService = (
       updateState({ breakdownField });
     },
 
-    setCurrentSuggestion: (suggestion: Suggestion | undefined) => {
-      updateState({ currentSuggestion: suggestion });
+    setCurrentSuggestionContext: (suggestionContext: CurrentSuggestionContext | undefined) => {
+      updateState({ currentSuggestionContext: suggestionContext });
     },
 
     setExternalVisContext: (externalVisContext: ExternalVisContext | undefined) => {

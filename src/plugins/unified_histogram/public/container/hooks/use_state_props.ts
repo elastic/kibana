@@ -158,9 +158,9 @@ export const useStateProps = ({
     [stateService]
   );
 
-  const onSuggestionChange = useCallback(
+  const onSuggestionContextChange = useCallback(
     (suggestion) => {
-      stateService?.setCurrentSuggestion(suggestion);
+      stateService?.setCurrentSuggestionContext(suggestion);
     },
     [stateService]
   );
@@ -190,6 +190,6 @@ export const useStateProps = ({
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
-    onSuggestionChange,
+    onSuggestionContextChange,
   };
 };

@@ -23,6 +23,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Histogram } from './histogram';
 import type {
+  CurrentSuggestionContext,
   ExternalVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -74,7 +75,7 @@ export interface ChartProps {
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -108,7 +109,8 @@ export function Chart({
   isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
-  onSuggestionChange,
+  onSuggestionContextChange,
+  onVisContextChanged,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -116,12 +118,12 @@ export function Chart({
   onBrushEnd,
   withDefaultActions,
 }: ChartProps) {
-  const lensVisServiceCurrentSuggestionState = useObservable(
-    lensVisService.currentSuggestionState$
+  const lensVisServiceCurrentSuggestionContext = useObservable(
+    lensVisService.currentSuggestionContext$
   );
   const lensAttributesContext = useObservable(lensVisService.lensAttributesContext$);
   const allSuggestions = useObservable(lensVisService.allSuggestions$);
-  const currentSuggestion = lensVisServiceCurrentSuggestionState?.suggestion;
+  const currentSuggestion = lensVisServiceCurrentSuggestionContext?.suggestion;
 
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -154,7 +156,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion: lensVisServiceCurrentSuggestionState?.suggestion,
+    currentSuggestion: lensVisServiceCurrentSuggestionContext?.suggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,
@@ -176,12 +178,28 @@ export function Chart({
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
-  const onSuggestionSelectorChange = useCallback(
-    (s: Suggestion | undefined) => {
-      console.log('suggestion change detected, generating a new vis context');
-      onSuggestionChange?.(s);
+  const onSuggestionContextEdit = useCallback(
+    (editedSuggestionContext: CurrentSuggestionContext | undefined) => {
+      console.log('suggestion context was edited', editedSuggestionContext);
+      onSuggestionContextChange?.(editedSuggestionContext);
+      onVisContextChanged?.(
+        lensVisService.getLensAttributesContextForEditedSuggestion({
+          editedSuggestionContext,
+        })
+      );
     },
-    [onSuggestionChange]
+    [onSuggestionContextChange, onVisContextChanged, lensVisService]
+  );
+
+  const onSuggestionSelectorChange = useCallback(
+    (suggestion: Suggestion | undefined) => {
+      onSuggestionContextEdit({
+        suggestion,
+        suggestionDeps: lensVisServiceCurrentSuggestionContext?.suggestionDeps,
+        type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+      });
+    },
+    [onSuggestionContextEdit, lensVisServiceCurrentSuggestionContext]
   );
 
   useEffect(() => {
@@ -365,7 +383,7 @@ export function Chart({
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
               hasLensSuggestions={
-                lensVisServiceCurrentSuggestionState?.type ===
+                lensVisServiceCurrentSuggestionContext?.type ===
                 UnifiedHistogramSuggestionType.supportedLensSuggestion
               }
               onChartLoad={onChartLoad}
@@ -385,19 +403,19 @@ export function Chart({
           isSaveable={false}
         />
       )}
-      {isFlyoutVisible && !!lensAttributesContext && (
+      {isFlyoutVisible && !!lensAttributesContext && !!lensVisServiceCurrentSuggestionContext && (
         <ChartConfigPanel
           {...{
             services,
             lensAttributesContext,
             lensAdapters,
             lensEmbeddableOutput$,
-            currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,
             isPlainRecord,
             query,
-            onSuggestionChange: onSuggestionSelectorChange,
+            currentSuggestionContext: lensVisServiceCurrentSuggestionContext,
+            onSuggestionContextChange: onSuggestionContextEdit,
           }}
         />
       )}

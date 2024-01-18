@@ -13,6 +13,7 @@ import type {
   LensEmbeddableOutput,
   LensPublicStart,
   TypedLensByValueInput,
+  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
@@ -21,6 +22,8 @@ import type { Observable, Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -153,6 +156,14 @@ export enum UnifiedHistogramSuggestionType {
   supportedLensSuggestion = 'supportedLensSuggestion',
   localHistogramSuggestionForESQL = 'localHistogramSuggestionForESQL',
   localHistogramDefault = 'localHistogramDefault',
+}
+
+export interface CurrentSuggestionContext {
+  suggestion: Suggestion | undefined;
+  type: UnifiedHistogramSuggestionType;
+  suggestionDeps:
+    | [string | undefined, DatatableColumn[] | undefined, Query | AggregateQuery | undefined]
+    | undefined;
 }
 
 export interface LensRequestData {

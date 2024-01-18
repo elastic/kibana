@@ -19,7 +19,6 @@ import type {
   LensEmbeddableInput,
   LensEmbeddableOutput,
   LensSuggestionsApi,
-  Suggestion,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import {
@@ -38,12 +37,10 @@ import type {
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  CurrentSuggestionContext,
 } from '../types';
-import {
-  type CurrentSuggestionState,
-  LensVisService,
-  UnifiedHistogramSuggestionType,
-} from '../services/lens_vis_service';
+import { UnifiedHistogramSuggestionType } from '../types';
+import { LensVisService } from '../services/lens_vis_service';
 import { useRequestParams } from '../hooks/use_request_params';
 
 const ChartMemoized = React.memo(Chart);
@@ -74,7 +71,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current Lens suggestion
    */
-  currentSuggestion?: Suggestion;
+  currentSuggestionContext?: CurrentSuggestionContext;
   /**
    * The external custom Lens vis
    */
@@ -168,7 +165,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * Callback to update the suggested chart
    */
-  onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   /**
    * Callback to notify about the change in Lens attributes
    */
@@ -202,7 +199,7 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query: originalQuery,
   filters: originalFilters,
-  currentSuggestion: originalSuggestion,
+  currentSuggestionContext: originalSuggestionContext,
   externalVisContext,
   isChartLoading,
   isPlainRecord,
@@ -227,7 +224,7 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
-  onSuggestionChange,
+  onSuggestionContextChange,
   onVisContextChanged,
   onTotalHitsChange,
   onChartLoad,
@@ -244,17 +241,13 @@ export const UnifiedHistogramLayout = ({
   });
 
   const [lensVisService] = useState(() => new LensVisService({ services, lensSuggestionsApi }));
-  const lensVisServiceCurrentSuggestionState: CurrentSuggestionState = useObservable(
-    lensVisService.currentSuggestionState$,
-    {
-      status: UnifiedHistogramSuggestionType.unsupported,
-      suggestion: undefined,
-    }
+  const lensVisServiceCurrentSuggestionContext = useObservable(
+    lensVisService.currentSuggestionContext$
   );
 
   useEffect(() => {
     lensVisService.update({
-      suggestionSelectedByUser: originalSuggestion,
+      suggestionContextSelectedPreviously: originalSuggestionContext,
       externalVisContext,
       queryParams: {
         dataView,
@@ -268,6 +261,7 @@ export const UnifiedHistogramLayout = ({
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
       onVisContextChanged,
+      onSuggestionContextChange,
     });
   }, [
     lensVisService,
@@ -275,19 +269,21 @@ export const UnifiedHistogramLayout = ({
     requestParams.query,
     requestParams.filters,
     originalTimeRange,
-    originalSuggestion,
+    originalSuggestionContext,
     originalChart,
     isPlainRecord,
     columns,
     breakdown,
     externalVisContext,
     onVisContextChanged,
+    onSuggestionContextChange,
   ]);
 
-  console.log(lensVisServiceCurrentSuggestionState);
+  console.log(lensVisServiceCurrentSuggestionContext);
 
   const chart =
-    lensVisServiceCurrentSuggestionState.status === UnifiedHistogramSuggestionType.unsupported
+    !lensVisServiceCurrentSuggestionContext?.type ||
+    lensVisServiceCurrentSuggestionContext.type === UnifiedHistogramSuggestionType.unsupported
       ? undefined
       : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
@@ -347,7 +343,7 @@ export const UnifiedHistogramLayout = ({
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
-          onSuggestionChange={onSuggestionChange}
+          onSuggestionContextChange={onSuggestionContextChange}
           onVisContextChanged={onVisContextChanged}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
