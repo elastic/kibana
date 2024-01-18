@@ -1192,7 +1192,9 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('from a | stats count(*)', []);
+    testErrorsAndWarnings('from a | stats count()', []);
     testErrorsAndWarnings('from a | stats var0 = count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = count()', []);
     testErrorsAndWarnings('from a | stats var0 = avg(numberField), count(*)', []);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
