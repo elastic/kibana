@@ -81,57 +81,57 @@ export function SloList() {
             loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           />
         </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <ToggleSLOView
-            sloList={sloList}
-            sloView={view}
-            onChangeView={(newView) => onStateChange({ view: newView })}
-            onToggleCompactView={() => onStateChange({ compact: !isCompact })}
-            isCompact={isCompact}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
-      {groupBy === 'ungrouped' && (
-        <SlosView
-          sloList={results}
-          loading={isLoading || isRefetching}
-          error={isError}
-          isCompact={isCompact}
-          sloView={view}
-          group="ungrouped"
-        />
-      )}
 
+      <EuiFlexItem grow={false}>
+        <ToggleSLOView
+          sloList={sloList}
+          sloView={view}
+          onChangeView={(newView) => onStateChange({ view: newView })}
+          onToggleCompactView={() => onStateChange({ compact: !isCompact })}
+          isCompact={isCompact}
+        />
+      </EuiFlexItem>
+      {groupBy === 'ungrouped' && (
+        <>
+          <SlosView
+            sloList={results}
+            loading={isLoading || isRefetching}
+            error={isError}
+            isCompact={isCompact}
+            sloView={view}
+            group="ungrouped"
+          />
+          {total > 0 ? (
+            <EuiFlexItem>
+              <EuiTablePagination
+                pageCount={Math.ceil(total / perPage)}
+                activePage={page}
+                onChangePage={(newPage) => {
+                  onStateChange({ page: newPage });
+                }}
+                itemsPerPage={perPage}
+                itemsPerPageOptions={[10, 25, 50, 100]}
+                onChangeItemsPerPage={(newPerPage) => {
+                  storeState({ perPage: newPerPage, page: 0 });
+                }}
+              />
+            </EuiFlexItem>
+          ) : null}
+        </>
+      )}
       {groupBy !== 'ungrouped' && (
         <>
           <GroupView
             sloView={view}
             groupBy={groupBy}
             isCompact={isCompact}
-            kqlQuery={state.kqlQuery}
+            kqlQuery={kqlQuery}
             sort={state.sort.by}
             direction={state.sort.direction}
           />
         </>
       )}
-
-      {total > 0 ? (
-        <EuiFlexItem>
-          <EuiTablePagination
-            pageCount={Math.ceil(total / perPage)}
-            activePage={page}
-            onChangePage={(newPage) => {
-              onStateChange({ page: newPage });
-            }}
-            itemsPerPage={perPage}
-            itemsPerPageOptions={[10, 25, 50, 100]}
-            onChangeItemsPerPage={(newPerPage) => {
-              storeState({ perPage: newPerPage, page: 0 });
-            }}
-          />
-        </EuiFlexItem>
-      ) : null}
     </EuiFlexGroup>
   );
 }

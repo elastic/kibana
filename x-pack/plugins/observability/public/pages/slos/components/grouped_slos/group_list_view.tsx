@@ -46,7 +46,7 @@ export function GroupListView({ isCompact, group, kqlQuery, sloView, sort, direc
 
   return (
     <EuiPanel>
-      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={true}>
+      <MemoEuiAccordion buttonContent={group} id={group} initialIsOpen={false}>
         <>
           <SlosView
             sloList={results}

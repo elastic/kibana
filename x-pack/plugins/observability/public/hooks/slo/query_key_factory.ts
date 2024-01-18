@@ -17,11 +17,16 @@ interface SloListFilter {
   lastRefresh?: number;
 }
 
+interface SloGroupListFilter {
+  page: number;
+  perPage: number;
+}
+
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
   list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
-  groups: () => [...sloKeys.all, 'groups'],
+  groups: (filters: SloGroupListFilter) => [...sloKeys.all, filters] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,

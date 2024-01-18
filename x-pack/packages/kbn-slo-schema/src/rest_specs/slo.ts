@@ -96,6 +96,16 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
+const groupBySchema = t.literal('tags'); // TODO add t.union when the rest options will be added
+
+const findSLOGroupsParamsSchema = t.partial({
+  query: t.partial({
+    page: t.string,
+    perPage: t.string,
+    groupBy: groupBySchema,
+  }),
+});
+
 const sloResponseSchema = t.intersection([
   t.type({
     id: sloIdSchema,
@@ -123,6 +133,8 @@ const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
   t.type({ summary: summarySchema }),
 ]);
+
+const sloGroupsResponseSchema = t.record(t.string, t.number);
 
 const getSLOQuerySchema = t.partial({
   query: t.partial({
@@ -174,6 +186,13 @@ const findSLOResponseSchema = t.type({
   perPage: t.number,
   total: t.number,
   results: t.array(sloWithSummaryResponseSchema),
+});
+
+const findSLOGroupsResponseSchema = t.type({
+  page: t.number,
+  perPage: t.number,
+  total: t.number,
+  results: sloGroupsResponseSchema,
 });
 
 const deleteSLOInstancesParamsSchema = t.type({
@@ -262,6 +281,9 @@ type UpdateSLOResponse = t.OutputOf<typeof updateSLOResponseSchema>;
 type FindSLOParams = t.TypeOf<typeof findSLOParamsSchema.props.query>;
 type FindSLOResponse = t.OutputOf<typeof findSLOResponseSchema>;
 
+type FindSLOGroupsParams = t.TypeOf<typeof findSLOGroupsParamsSchema.props.query>;
+type FindSLOGroupsResponse = t.OutputOf<typeof findSLOGroupsResponseSchema>;
+
 type DeleteSLOInstancesInput = t.OutputOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 type DeleteSLOInstancesParams = t.TypeOf<typeof deleteSLOInstancesParamsSchema.props.body>;
 
@@ -298,6 +320,8 @@ export {
   deleteSLOInstancesParamsSchema,
   findSLOParamsSchema,
   findSLOResponseSchema,
+  findSLOGroupsParamsSchema,
+  findSLOGroupsResponseSchema,
   getPreviewDataParamsSchema,
   getPreviewDataResponseSchema,
   getSLOParamsSchema,
@@ -327,6 +351,8 @@ export type {
   DeleteSLOInstancesParams,
   FindSLOParams,
   FindSLOResponse,
+  FindSLOGroupsParams,
+  FindSLOGroupsResponse,
   GetPreviewDataParams,
   GetPreviewDataResponse,
   GetSLOParams,
