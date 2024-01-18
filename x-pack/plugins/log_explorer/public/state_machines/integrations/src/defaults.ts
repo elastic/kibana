@@ -8,7 +8,7 @@
 import { HashedCache } from '../../../../common/hashed_cache';
 import { DefaultIntegrationsContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
+export const createDefaultContext = (): DefaultIntegrationsContext => ({
   cache: new HashedCache(),
   integrationsSource: null,
   integrations: null,
@@ -17,4 +17,4 @@ export const DEFAULT_CONTEXT: DefaultIntegrationsContext = {
     nameQuery: '',
     sortOrder: 'asc',
   },
-};
+});
