@@ -4933,8 +4933,8 @@ components:
         namespace:
           type: string
           description: >-
-            package policy namespace. It can be left blank to inherit agent
-            policy's one
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
           example: customnamespace
         policy_id:
           type: string
