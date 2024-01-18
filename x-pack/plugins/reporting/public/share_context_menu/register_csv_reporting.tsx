@@ -112,7 +112,7 @@ export const reportingCsvShareProvider = ({
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'Exports',
+        defaultMessage: 'CSV Download',
       });
 
       shareActions.push({

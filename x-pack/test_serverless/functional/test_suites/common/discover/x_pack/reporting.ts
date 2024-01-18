@@ -76,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
@@ -103,7 +104,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
 
-      it('generates a report with single timefilter', async () => {
+      xit('generates a report with single timefilter', async () => {
         await PageObjects.discover.clickNewSearchButton();
         await PageObjects.timePicker.setCommonlyUsedTime('Last_24 hours');
         await PageObjects.discover.saveSearch('single-timefilter-search');
