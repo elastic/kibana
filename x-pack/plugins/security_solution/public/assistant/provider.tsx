@@ -26,7 +26,6 @@ import { useAnonymizationStore } from './use_anonymization_store';
 import { useAssistantAvailability } from './use_assistant_availability';
 import { useAppToasts } from '../common/hooks/use_app_toasts';
 import { useSignalIndex } from '../detections/containers/detection_engine/alerts/use_signal_index';
-import { useLocalStorage } from '../common/components/local_storage';
 
 const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title', {
   defaultMessage: 'Elastic AI Assistant',
@@ -55,27 +54,21 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
-  // migrate used conversations from the local storage
-  const [conversations, setConversations] = useLocalStorage<
-    Record<string, Conversation> | undefined
-  >({
-    defaultValue: undefined,
-    key: LOCAL_STORAGE_KEY,
-  });
+  // migrate conversations from the local storage if its have messages
+  const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
 
   if (conversations && Object.keys(conversations).length > 0) {
-    const conversationsToCreate = Object.values(conversations).filter(
-      (c) => c.messages && c.messages.length > 0
-    );
+    const conversationsToCreate = Object.values(
+      conversations as Record<string, Conversation>
+    ).filter((c) => c.messages && c.messages.length > 0);
     // post bulk create
     bulkConversationsChange(http, {
       create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
-        res[c.id] = c;
+        res[c.id] = { ...c, title: c.id };
         return res;
       }, {}),
     });
-    setConversations(undefined);
-    storage.remove(LOCAL_STORAGE_KEY);
+    storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
   }
 
   return (
