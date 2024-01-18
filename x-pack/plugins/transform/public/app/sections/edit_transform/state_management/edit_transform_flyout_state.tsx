@@ -26,7 +26,7 @@ import { getEditTransformFormFields, getEditTransformFormSections } from './get_
 
 import { WizardContext } from '../../create_transform/components/wizard/wizard';
 
-// The edit transform flyout uses a redux-toolkit to manage its form state with
+// The edit transform flyout uses redux-toolkit to manage its form state with
 // support for applying its state to a nested configuration object suitable for passing on
 // directly to the API call. For now this is only used for the transform edit form.
 // Once we apply the functionality to other places, e.g. the transform creation wizard,
@@ -44,6 +44,9 @@ export const editTransformFlyoutSlice = createFormSlice(
   getEditTransformFormSections(),
   validators
 );
+
+export const { initialize, setFormField, setFormSection, setSubmitErrorMessage } =
+  editTransformFlyoutSlice.actions;
 
 const getReduxStore = () =>
   configureStore({
@@ -108,7 +111,7 @@ export const EditTransformFlyoutProvider: FC<PropsWithChildren<ProviderProps>> =
   // Apply original transform config to redux form state.
   useMount(() => {
     reduxStore.dispatch(
-      editTransformFlyoutSlice.actions.initialize({
+      initialize({
         formFields: getEditTransformFormFields(props.config),
         formSections: getEditTransformFormSections(props.config),
       })

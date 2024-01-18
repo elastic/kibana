@@ -20,7 +20,7 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { ToastNotificationText } from '../../../../components';
 
 import { useWizardSelector } from '../../state_management/create_transform_store';
-import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
+import { setFormField } from '../../state_management/step_details_slice';
 
 export const TransformDestinationIndexForm: FC = () => {
   const dispatch = useDispatch();
@@ -65,8 +65,7 @@ export const TransformDestinationIndexForm: FC = () => {
   );
 
   const setDestinationIndex = useCallback(
-    (value: string) =>
-      dispatch(stepDetailsFormSlice.actions.setFormField({ field: 'destinationIndex', value })),
+    (value: string) => dispatch(setFormField({ field: 'destinationIndex', value })),
     [dispatch]
   );
 

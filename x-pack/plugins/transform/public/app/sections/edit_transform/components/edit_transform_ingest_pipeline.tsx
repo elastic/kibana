@@ -6,6 +6,7 @@
  */
 
 import React, { type FC } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
@@ -15,7 +16,10 @@ import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 
 import { useGetEsIngestPipelines } from '../../../hooks';
 
-import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
+import {
+  editTransformFlyoutSlice,
+  setFormField,
+} from '../state_management/edit_transform_flyout_state';
 
 const ingestPipelineLabel = i18n.translate(
   'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
@@ -25,6 +29,7 @@ const ingestPipelineLabel = i18n.translate(
 );
 
 export const EditTransformIngestPipeline: FC = () => {
+  const dispatch = useDispatch();
   const { euiTheme } = useEuiTheme();
   const { errorMessages, value } = useFormField(
     editTransformFlyoutSlice,
@@ -69,10 +74,12 @@ export const EditTransformIngestPipeline: FC = () => {
                 options={ingestPipelineNames.map((label: string) => ({ label }))}
                 selectedOptions={[{ label: value }]}
                 onChange={(o) =>
-                  editTransformFlyoutSlice.actions.setFormField({
-                    field: 'destinationIngestPipeline',
-                    value: o[0]?.label ?? '',
-                  })
+                  dispatch(
+                    setFormField({
+                      field: 'destinationIngestPipeline',
+                      value: o[0]?.label ?? '',
+                    })
+                  )
                 }
               />
             </EuiSkeletonRectangle>

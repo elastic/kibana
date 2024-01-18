@@ -22,7 +22,7 @@ import { useWizardSelector } from '../../state_management/create_transform_store
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
 
 import { useDataView } from '../wizard/wizard';
-import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
+import { setFormField, setFormSection } from '../../state_management/step_details_slice';
 
 export const TransformCreateDataViewForm: FC = () => {
   const dispatch = useDispatch();
@@ -61,7 +61,7 @@ export const TransformCreateDataViewForm: FC = () => {
   useEffect(
     function resetDataViewTimeField() {
       dispatch(
-        stepDetailsFormSlice.actions.setFormField({
+        setFormField({
           field: 'dataViewTimeField',
           value: destIndexAvailableTimeFields[0],
         })
@@ -98,7 +98,7 @@ export const TransformCreateDataViewForm: FC = () => {
       const timeField = destIndexAvailableTimeFields.find((col) => col === value);
 
       dispatch(
-        stepDetailsFormSlice.actions.setFormField({
+        setFormField({
           field: 'dataViewTimeField',
           value: timeField ?? '',
         })
@@ -116,7 +116,7 @@ export const TransformCreateDataViewForm: FC = () => {
 
   const setCreateDataView = useCallback(
     (enabled: boolean) => {
-      dispatch(stepDetailsFormSlice.actions.setFormSection({ section: 'createDataView', enabled }));
+      dispatch(setFormSection({ section: 'createDataView', enabled }));
     },
     [dispatch]
   );

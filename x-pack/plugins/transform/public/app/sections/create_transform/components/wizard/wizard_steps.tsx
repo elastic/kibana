@@ -37,7 +37,7 @@ import {
   getStepDetailsFormSections,
   euiStepDetails,
 } from '../step_details';
-import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
+import { initialize } from '../../state_management/step_details_slice';
 
 import { useWizardContext } from './wizard';
 
@@ -103,7 +103,7 @@ export const useInitializeTransformWizardState = () => {
     setStepDetailsState(applyTransformConfigToDetailsState(getDefaultStepDetailsState(), config));
 
     dispatch(
-      stepDetailsFormSlice.actions.initialize({
+      initialize({
         formFields: getStepDetailsFormFields(config, transformIds),
         formSections: getStepDetailsFormSections(config),
       })

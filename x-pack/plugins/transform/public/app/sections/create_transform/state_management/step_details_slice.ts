@@ -25,6 +25,9 @@ export const stepDetailsFormSlice = createFormSlice(
   validators
 );
 
+export const { initialize, setFormField, setFormSection, setSubmitErrorMessage } =
+  stepDetailsFormSlice.actions;
+
 export const stepDetailsSlice = createSlice({
   name: 'stepDetails',
   initialState: getDefaultStepDetailsState(),

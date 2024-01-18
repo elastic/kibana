@@ -42,7 +42,7 @@ import {
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
-import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
+import { stepDetailsFormSlice, setFormField } from '../../state_management/step_details_slice';
 
 import { useDataView } from '../wizard/wizard';
 
@@ -125,9 +125,7 @@ export const StepDetailsForm: FC = () => {
   const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
   useEffect(() => {
     if (!isRetentionPolicyAvailable) {
-      dispatch(
-        stepDetailsFormSlice.actions.setFormField({ field: 'retentionPolicyField', value: '' })
-      );
+      dispatch(setFormField({ field: 'retentionPolicyField', value: '' }));
     }
   }, []);
 

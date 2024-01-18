@@ -20,11 +20,15 @@ import { getErrorMessage } from '../../../../../common/utils/errors';
 import { useUpdateTransform } from '../../../hooks';
 
 import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
-import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
+import {
+  editTransformFlyoutSlice,
+  setSubmitErrorMessage,
+} from '../state_management/edit_transform_flyout_state';
 import {
   getEditTransformFormFields,
   getEditTransformFormSections,
 } from '../state_management/get_default_state';
+
 interface EditTransformUpdateButtonProps {
   closeFlyout: () => void;
 }
@@ -44,11 +48,10 @@ export const EditTransformUpdateButton: FC<EditTransformUpdateButtonProps> = ({ 
   const updateTransfrom = useUpdateTransform(config.id, requestConfig);
 
   async function submitFormHandler() {
-    dispatch(editTransformFlyoutSlice.actions.setSubmitErrorMessage(undefined));
+    dispatch(setSubmitErrorMessage(undefined));
 
     updateTransfrom(undefined, {
-      onError: (error) =>
-        dispatch(editTransformFlyoutSlice.actions.setSubmitErrorMessage(getErrorMessage(error))),
+      onError: (error) => dispatch(setSubmitErrorMessage(getErrorMessage(error))),
       onSuccess: () => closeFlyout(),
     });
   }
