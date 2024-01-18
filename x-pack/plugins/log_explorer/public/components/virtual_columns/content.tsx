@@ -17,7 +17,7 @@ import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
 import { dynamic } from '../../utils/dynamic';
 import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
-import './vistual_column.scss';
+import './virtual_column.scss';
 
 const SourceDocument = dynamic(
   () => import('@kbn/unified-data-table/src/components/source_document')
@@ -110,6 +110,7 @@ const Content = ({
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
           dataTestSubj="logExplorerCellDescriptionList"
+          className="logsExplorerVirtualColumn__sourceDocument"
         />
       )}
     </span>
