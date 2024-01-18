@@ -12,10 +12,6 @@ import type { ValueParserName } from './value_parsers';
 // The form state defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final config object will be nested.
 
-export type FormFieldsState<FF extends string, FS extends string, VN extends string> = {
-  [key in FF]: FormField<FF, FS, VN>;
-};
-
 export interface FormField<FF extends string, FS extends string, VN extends string> {
   formFieldName: FF;
   configFieldName: string | undefined;
@@ -30,6 +26,18 @@ export interface FormField<FF extends string, FS extends string, VN extends stri
   validator: VN;
   value: string;
   valueParser: ValueParserName;
+}
+
+export function createFormFieldsMap<
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  T extends Record<FF, FormField<FF, FS, VN>>
+>(formFields: Array<FormField<FF, FS, VN>>) {
+  return formFields.reduce<T>((acc, curr) => {
+    acc[curr.formFieldName as FF] = curr as T[FF];
+    return acc;
+  }, {} as T);
 }
 
 export const initializeFormField = <FF extends string, FS extends string, VN extends string, C>(

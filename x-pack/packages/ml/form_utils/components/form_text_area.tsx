@@ -15,25 +15,20 @@ import { i18n } from '@kbn/i18n';
 import { useFormField } from '../use_form_field';
 
 import { capitalizeFirstLetter } from '../utils/capitalize_first_letter';
-import type { State } from '../form_slice';
+import type { FormSlice, State } from '../form_slice';
 
 import type { FormTextProps } from './types';
 
-export const FormTextArea = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->({
+export const FormTextArea = <FF extends string, FS extends string, VN extends string>({
   slice,
   field,
   label,
   ariaLabel,
   helpText,
   placeHolder = false,
-}: FormTextProps<FF, FS, VN, S>) => {
+}: FormTextProps<FF, FS, VN, FormSlice<FF, FS, VN>>) => {
   const dispatch = useDispatch();
-  const { defaultValue, errorMessages, value } = useFormField(slice.name, field);
+  const { defaultValue, errorMessages, value } = useFormField(slice, field);
   const upperCaseField = capitalizeFirstLetter(field as string);
 
   return (
@@ -60,7 +55,7 @@ export const FormTextArea = <
         onChange={(e) =>
           dispatch(
             slice.actions.setFormField({
-              field: field as keyof Draft<S>['formFields'],
+              field: field as keyof Draft<State<FF, FS, VN>>['formFields'],
               value: e.target.value,
             })
           )

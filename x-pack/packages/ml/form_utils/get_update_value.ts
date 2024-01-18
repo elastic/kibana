@@ -8,10 +8,10 @@
 import { merge } from 'lodash';
 
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
+
 import { valueParsers } from './value_parsers';
 
-import type { FormFieldsState } from './form_field';
-import type { FormSectionsState } from './form_section';
+import type { State } from './form_slice';
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
@@ -25,8 +25,8 @@ export const getUpdateValue = <
 >(
   attribute: FF,
   config: C,
-  formFields: FormFieldsState<FF, FS, VN>,
-  formSections: FormSectionsState<FS>,
+  formFields: State<FF, FS, VN>['formFields'],
+  formSections: State<FF, FS, VN>['formSections'],
   enforceFormValue = false
 ) => {
   const formStateAttribute = formFields[attribute];

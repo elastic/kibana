@@ -8,9 +8,7 @@
 import { merge } from 'lodash';
 
 import { getUpdateValue } from './get_update_value';
-
-import type { FormFieldsState } from './form_field';
-import type { FormSectionsState } from './form_section';
+import type { State } from './form_slice';
 
 // Takes in the form configuration and returns a request object suitable to be sent to the
 // transform update API endpoint by iterating over `getUpdateValue()`.
@@ -22,8 +20,8 @@ import type { FormSectionsState } from './form_section';
 // field part of the request, otherwise the update would fail.
 export const applyFormStateToConfig = <FF extends string, FS extends string, VN extends string, C>(
   config: C,
-  formFields: FormFieldsState<FF, FS, VN>,
-  formSections: FormSectionsState<FS>,
+  formFields: State<FF, FS, VN>['formFields'],
+  formSections: State<FF, FS, VN>['formSections'],
   extendOriginalConfig = false
 ) =>
   // Iterates over all form fields and only if necessary applies them to

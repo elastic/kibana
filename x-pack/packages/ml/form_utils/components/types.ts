@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { createFormSlice } from '../form_slice';
-import type { State } from '../form_slice';
+import type { FormSlice } from '../form_slice';
 
 export interface FormTextProps<
   FF extends string,
   FS extends string,
   VN extends string,
-  S extends State<FF, FS, VN>
+  S extends FormSlice<FF, FS, VN>
 > {
-  slice: ReturnType<typeof createFormSlice<FF, FS, VN, S>>;
-  field: keyof S['formFields'];
+  slice: S;
+  field: keyof ReturnType<S['getInitialState']>['formFields'];
   label: string;
   ariaLabel?: string;
   helpText?: string;

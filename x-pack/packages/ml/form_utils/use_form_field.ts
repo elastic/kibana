@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { useSelector } from 'react-redux';
 
-import type { State } from './form_slice';
+import type { FormSlice, State } from './form_slice';
 
 export const createSelectFormFields =
   <FF extends string, FS extends string, VN extends string, S extends State<FF, FS, VN>>(
@@ -26,18 +26,13 @@ const createSelectFormField =
     return s[stateAccessor].formFields[field as FF];
   };
 
-export const useFormField = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(
-  stateAccessor: string,
-  field: keyof S['formFields']
+export const useFormField = <FF extends string, FS extends string, VN extends string>(
+  slice: FormSlice<FF, FS, VN>,
+  field: keyof ReturnType<FormSlice<FF, FS, VN>['getInitialState']>['formFields']
 ) => {
   const selectFormField = useMemo(
-    () => createSelectFormField(stateAccessor, field),
-    [stateAccessor, field]
+    () => createSelectFormField(slice.name, field),
+    [slice.name, field]
   );
   return useSelector(selectFormField);
 };

@@ -9,29 +9,35 @@ import { createSlice, type PayloadAction } from '@reduxjs/toolkit';
 
 import type { Draft } from '@reduxjs/toolkit';
 
-import type { FormField, FormFieldsState } from './form_field';
-import type { FormSection, FormSectionsState } from './form_section';
+import { createFormFieldsMap, type FormField } from './form_field';
+import { createFormSectionsMap, type FormSection } from './form_section';
 import type { Validator } from './validator';
 
-export interface State<FF extends string, FS extends string, VN extends string> {
-  formFields: FormFieldsState<FF, FS, VN>;
-  formSections: FormSectionsState<FS>;
-  submitErrorMessage?: string;
-}
+export function createFormSlice<FF extends string, FS extends string, VN extends string>(
+  name: string,
+  formFieldsArr: Array<FormField<FF, FS, VN>>,
+  formSectionsArr: Array<FormSection<FS>>,
+  validators: Record<VN, Validator>
+) {
+  const formFields = createFormFieldsMap(formFieldsArr);
+  const formSections = createFormSectionsMap(formSectionsArr);
 
-export function createFormSlice<
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>
->(name: string, getDefaultState: () => S, validators: Record<VN, Validator>) {
-  function isFormFieldOptional(state: Draft<S>, field: keyof Draft<S>['formFields']): boolean {
+  const initialState = {
+    formFields,
+    formSections,
+    submitErrorMessage: undefined as string | undefined,
+  };
+
+  function isFormFieldOptional(
+    state: Draft<typeof initialState>,
+    field: keyof Draft<typeof initialState>['formFields']
+  ): boolean {
     const formField = state.formFields[field] as FormField<FF, FS, VN>;
 
     let isOptional = formField.isOptional;
     if (formField.section) {
       const section = state.formSections[
-        formField.section as keyof Draft<S>['formSections']
+        formField.section as keyof Draft<typeof initialState>['formSections']
       ] as FormSection<FS>;
       if (section.enabled && formField.isOptionalInSection === false) {
         isOptional = false;
@@ -54,14 +60,28 @@ export function createFormSlice<
 
   return createSlice({
     name,
-    initialState: getDefaultState(),
+    initialState,
     reducers: {
-      initialize: (state, action: PayloadAction<Draft<S>>) => {
-        return (state = action.payload);
+      initialize: (
+        state,
+        action: PayloadAction<{
+          formFieldsArr: Array<FormField<FF, FS, VN>>;
+          formSectionsArr: Array<FormSection<FS>>;
+        }>
+      ) => {
+        state.formFields = createFormFieldsMap(action.payload.formFieldsArr) as Draft<
+          Record<FF, FormField<FF, FS, VN>>
+        >;
+        state.formSections = createFormSectionsMap(action.payload.formSectionsArr) as Draft<
+          Record<FS, FormSection<FS>>
+        >;
       },
       setFormField: (
         state,
-        action: PayloadAction<{ field: keyof Draft<S>['formFields']; value: string }>
+        action: PayloadAction<{
+          field: keyof Draft<typeof initialState>['formFields'];
+          value: string;
+        }>
       ) => {
         const formField = state.formFields[action.payload.field] as FormField<FF, FS, VN>;
         const isOptional = isFormFieldOptional(state, action.payload.field);
@@ -77,7 +97,10 @@ export function createFormSlice<
       },
       setFormSection: (
         state,
-        action: PayloadAction<{ section: keyof Draft<S>['formSections']; enabled: boolean }>
+        action: PayloadAction<{
+          section: keyof Draft<typeof initialState>['formSections'];
+          enabled: boolean;
+        }>
       ) => {
         (state.formSections[action.payload.section] as FormSection<FS>).enabled =
           action.payload.enabled;
@@ -88,7 +111,7 @@ export function createFormSlice<
           ([formFieldName, formField]) => {
             const isOptional = isFormFieldOptional(
               state,
-              formFieldName as keyof Draft<S>['formFields']
+              formFieldName as keyof Draft<typeof initialState>['formFields']
             );
             formField.errorMessages = getFormFieldErrorMessages(
               formField.value,
@@ -105,3 +128,11 @@ export function createFormSlice<
     },
   });
 }
+
+export type FormSlice<FF extends string, FS extends string, VN extends string> = ReturnType<
+  typeof createFormSlice<FF, FS, VN>
+>;
+
+export type State<FF extends string, FS extends string, VN extends string> = ReturnType<
+  FormSlice<FF, FS, VN>['getInitialState']
+>;
