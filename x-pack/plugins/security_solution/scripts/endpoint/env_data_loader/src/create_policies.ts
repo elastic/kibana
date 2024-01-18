@@ -32,6 +32,7 @@ export const createPolicies = async ({
   throttler,
 }: CreatePoliciesOptions): Promise<string[]> => {
   const endpointIntegrationPolicyIds: string[] = [];
+  const errors: Error[] = [];
   let doneCount = 0;
 
   log.verbose(`creating [${count}] policies in fleet`);
@@ -57,6 +58,9 @@ export const createPolicies = async ({
         .then((response) => {
           endpointIntegrationPolicyIds.push(response.id);
         })
+        .catch((e) => {
+          errors.push(e);
+        })
         .finally(() => {
           doneCount++;
           reportProgress({ doneCount });
@@ -65,6 +69,15 @@ export const createPolicies = async ({
   });
 
   await throttler.complete();
+
+  if (errors.length) {
+    log.error(
+      `[${
+        errors.length
+      }] errors encountered while trying to create policies. First error: ${errors[0].toString()}`
+    );
+    log.verbose(...errors);
+  }
 
   return endpointIntegrationPolicyIds;
 };

@@ -7,6 +7,7 @@
 
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { stringify } from '../../../../server/endpoint/utils/stringify';
 import { EndpointExceptionsGenerator } from '../../../../common/endpoint/data_generators/endpoint_exceptions_generator';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
@@ -32,6 +33,11 @@ interface ArtifactCreationOptions {
   throttler: ExecutionThrottler;
 }
 
+const getCatchErrorHandling = (log: ToolingLog, artifactType: string) => (e: Error) => {
+  log.error(`[${artifactType}] error: ${e.message}`);
+  log.verbose(stringify(e));
+};
+
 export const createTrustedApps = async ({
   kbnClient,
   log,
@@ -49,10 +55,12 @@ export const createTrustedApps = async ({
         generator.generateTrustedAppForCreate({
           effectScope: { type: 'global' },
         })
-      ).finally(() => {
-        doneCount++;
-        reportProgress({ doneCount });
-      });
+      )
+        .catch(getCatchErrorHandling(log, 'Trusted Application'))
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount });
+        });
     });
   });
 };
@@ -69,12 +77,12 @@ export const createEventFilters = async ({
 
   loop(count, () => {
     throttler.addToQueue(async () => {
-      await createEventFilter(kbnClient, eventGenerator.generateEventFilterForCreate()).finally(
-        () => {
+      await createEventFilter(kbnClient, eventGenerator.generateEventFilterForCreate())
+        .catch(getCatchErrorHandling(log, 'Event Filters'))
+        .finally(() => {
           doneCount++;
           reportProgress({ doneCount });
-        }
-      );
+        });
     });
   });
 };
@@ -94,10 +102,12 @@ export const createBlocklists = async ({
       await createBlocklist(
         kbnClient,
         generate.generateBlocklistForCreate({ tags: [GLOBAL_ARTIFACT_TAG] })
-      ).finally(() => {
-        doneCount++;
-        reportProgress({ doneCount });
-      });
+      )
+        .catch(getCatchErrorHandling(log, 'Blocklist'))
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount });
+        });
     });
   });
 };
@@ -117,10 +127,12 @@ export const createHostIsolationExceptions = async ({
       await createHostIsolationException(
         kbnClient,
         generate.generateHostIsolationExceptionForCreate({ tags: [GLOBAL_ARTIFACT_TAG] })
-      ).finally(() => {
-        doneCount++;
-        reportProgress({ doneCount });
-      });
+      )
+        .catch(getCatchErrorHandling(log, 'Host Isolation Exception'))
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount });
+        });
     });
   });
 };
@@ -137,13 +149,12 @@ export const createEndpointExceptions = async ({
 
   loop(count, () => {
     throttler.addToQueue(async () => {
-      await createHostIsolationException(
-        kbnClient,
-        generate.generateEndpointExceptionForCreate()
-      ).finally(() => {
-        doneCount++;
-        reportProgress({ doneCount });
-      });
+      await createHostIsolationException(kbnClient, generate.generateEndpointExceptionForCreate())
+        .catch(getCatchErrorHandling(log, 'Endpoint Exception'))
+        .finally(() => {
+          doneCount++;
+          reportProgress({ doneCount });
+        });
     });
   });
 };

@@ -48,11 +48,11 @@ export const load = async ({
 }: LoadOptions) => {
   const throttler = new ExecutionThrottler({ log, concurrency });
   const reportProgress: ProgressReporterInterface = new ProgressReporter({
-    // FIXME:PT implement elapsed time below
     reportStatus: (status) => {
+      const now = new Date();
+
       log.info(`__
-Status at: ${new Date().toString()}
-Elapsed Time: tbd...
+Status at: ${now.toString()}
 ${status}\nRequests pending: ${throttler.getStats().pending}
 
 `);

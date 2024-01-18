@@ -9,6 +9,7 @@ import { mergeWith } from 'lodash';
 import type { ToolingLogTextWriterConfig } from '@kbn/tooling-log';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { Flags } from '@kbn/dev-cli-runner';
+import moment from 'moment/moment';
 
 export const RETRYABLE_TRANSIENT_ERRORS: Readonly<Array<string | RegExp>> = [
   'no_shard_available_action_exception',
@@ -156,4 +157,21 @@ createToolingLogger.setDefaultLogLevelFromCliFlags = (flags) => {
     : flags.quiet
     ? 'error'
     : 'info';
+};
+
+export const getElapsedTime = (
+  startDate: string | Date,
+  endTime: string | Date = new Date()
+): string => {
+  const durationObj = moment.duration(moment(endTime).diff(startDate));
+  const pad = (num: number, max = 2): string => {
+    return String(num).padStart(max, '0');
+  };
+
+  const hours = pad(durationObj.hours());
+  const minutes = pad(durationObj.minutes());
+  const seconds = pad(durationObj.seconds());
+  const milliseconds = pad(durationObj.milliseconds(), 3);
+
+  return `${hours}:${minutes}:${seconds}.${milliseconds}`;
 };

@@ -6,6 +6,7 @@
  */
 
 import { once } from 'lodash';
+import { getElapsedTime } from '../../../../common/endpoint/data_loaders/utils';
 import type {
   ProgressReporterInterface,
   ProgressReporterState,
@@ -25,6 +26,7 @@ interface ProgressReporterOptions {
 
 export class ProgressReporter implements ProgressReporterInterface {
   private readonly reportIntervalMs = 20000;
+  private readonly startedAt: Date = new Date();
   private categories: Record<string, { totalCount: number; doneCount: number }> = {};
   private stopReportingLoop: () => void = NOOP;
 
@@ -119,11 +121,17 @@ export class ProgressReporter implements ProgressReporterInterface {
 
   getStatus(): string {
     const state = this.getState();
-    const categoryNamesMaxChr = Object.keys(state.categories).reduce((acc, categoryName) => {
-      return Math.max(acc, categoryName.length);
-    }, 10);
+    const categoryNamesMaxChr =
+      Object.keys(state.categories).reduce((acc, categoryName) => {
+        return Math.max(acc, categoryName.length);
+      }, 10) + 4;
 
-    return `Overall progress: [ ${state.prctDone}% ]
+    return `
+${
+  'Elapsed Time (hh:mm:ss.ms):'.padEnd(categoryNamesMaxChr + 4) +
+  getElapsedTime(this.getStartedTime())
+}
+${'Overall progress: '.padEnd(categoryNamesMaxChr + 4)}[    ${state.prctDone}%    ]
   ${Object.entries(state.categories).reduce((acc, [categoryName, categoryState]) => {
     let updatedOutput = acc;
 
@@ -131,12 +139,18 @@ export class ProgressReporter implements ProgressReporterInterface {
       updatedOutput += `\n  `;
     }
 
-    updatedOutput += `${`${categoryName}:`
+    updatedOutput += `${`${`${categoryName}:`
       .concat(' '.repeat(categoryNamesMaxChr))
-      .substring(0, categoryNamesMaxChr + 1)}  ${categoryState.prctDone}%`;
+      .substring(0, categoryNamesMaxChr)}  ${categoryState.prctDone}%`.padEnd(
+      categoryNamesMaxChr + 10
+    )}(${categoryState.doneCount} / ${categoryState.totalCount})`;
 
     return updatedOutput;
   }, '')}`;
+  }
+
+  getStartedTime(): Date {
+    return new Date(this.startedAt);
   }
 }
 

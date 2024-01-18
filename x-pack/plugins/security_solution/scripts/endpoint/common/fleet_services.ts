@@ -81,9 +81,13 @@ const DEFAULT_AGENT_POLICY_NAME = `${CURRENT_USERNAME} test policy`;
 /** A Fleet agent policy that includes integrations that don't actually require an agent to run on a host. Example: SenttinelOne */
 export const DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME = `${CURRENT_USERNAME} - agentless integrations`;
 
-const randomAgentPolicyName = (): string => {
-  return `agent policy - ${fleetGenerator.randomString(10)}`;
-};
+const randomAgentPolicyName = (() => {
+  let counter = fleetGenerator.randomN(100);
+
+  return (): string => {
+    return `agent policy - ${fleetGenerator.randomString(10)}_${counter++}`;
+  };
+})();
 
 export const checkInFleetAgent = async (
   esClient: Client,
