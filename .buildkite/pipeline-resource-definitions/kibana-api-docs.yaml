@@ -1,0 +1,38 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: api_docs_daily
+  description: Builds api_docs daily and creates a PR with the changes
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / api-docs / daily
+      description: Builds api_docs daily and creates a PR with the changes
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/build_api_docs.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build:
+          cronline: 0 0 * * * America/New_York
+          message: Daily build
+          branch: main

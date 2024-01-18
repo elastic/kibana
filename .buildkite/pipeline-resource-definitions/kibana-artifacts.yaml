@@ -1,0 +1,128 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana_artifacts_container_image
+  description: Kibana container image artifact builds
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / artifacts container image
+      description: Kibana container image artifact builds
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-serverless-test-alerts'
+      branch_configuration: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/artifacts_container_image.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana_artifacts_snapshot
+  description: Kibana snapshot artifact builds
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / artifacts snapshot
+      description: Kibana snapshot artifact builds
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main 8.12 8.11 7.17
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/artifacts.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build (main):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: main
+        Daily build (8.12):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '8.12'
+        Daily build (8.11):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '8.11'
+        Daily build (7.17):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '7.17'
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana_artifacts_staging
+  description: Kibana staging artifact builds
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / artifacts staging
+      description: Kibana staging artifact builds
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+        RELEASE_BUILD: 'true'
+      branch_configuration: 8.12 8.11 7.17
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/artifacts.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build (8.12):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '8.12'
+        Daily build (8.11):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '8.11'
+        Daily build (7.17):
+          cronline: 0 7 * * * America/New_York
+          message: Daily build
+          branch: '7.17'

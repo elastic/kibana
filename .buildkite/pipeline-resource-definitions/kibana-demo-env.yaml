@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: demo-env
+  description: Creates/updates demo environment for kibana with example plugins
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / demo-environment
+      description: Creates/updates demo environment for kibana with example plugins
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main 8.12 8.11 7.17
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/update_demo_env.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ

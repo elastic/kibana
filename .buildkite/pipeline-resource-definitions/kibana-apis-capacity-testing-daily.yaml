@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana_apis_capacity_testing
+  description: Runs capacity tests for Kibana apis
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / apis-capacity-testing
+      description: Runs capacity tests for Kibana apis
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-performance-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+        BAZEL_CACHE_MODE: none
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/scalability/api_capacity_testing_daily.yml
+      provider_settings: {}
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Capacity every 3h testing:
+          cronline: 0 1/3 * * * Europe/Berlin
+          message: Capacity every 3h testing
+          branch: main

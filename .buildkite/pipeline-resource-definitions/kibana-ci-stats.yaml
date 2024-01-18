@@ -1,0 +1,74 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-ci-stats-main
+  description: Runs CI on each commit to kibana-ci-stats repo
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-ci-stats / main
+      description: Runs CI on each commit to kibana-ci-stats repo
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: ci
+        GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana-ci-stats
+      pipeline_file: .buildkite/pipeline.yml
+      provider_settings:
+        build_branches: true
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-ci-stats-pull-request
+  description: Runs manually for pull requests
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-ci-stats / pull request
+      description: Runs manually for pull requests
+    spec:
+      env:
+        PR_COMMENTS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
+        GITHUB_BUILD_COMMIT_STATUS_CONTEXT: ci
+        GITHUB_STEP_COMMIT_STATUS_ENABLED: 'true'
+      branch_configuration: ''
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana-ci-stats
+      pipeline_file: .buildkite/pipeline.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: true
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ

@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-buildkite-pipelines-deploy
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-buildkite / pipelines / deploy
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana-buildkite
+      pipeline_file: pipelines/.buildkite/deploy.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: code
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: kibana-buildkite-trigger
+  description: Triggers pipelines on commit based on the changed files in the commit
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana-buildkite / trigger
+      description: Triggers pipelines on commit based on the changed files in the commit
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana-buildkite
+      pipeline_file: .buildkite/pipeline.yml
+      provider_settings:
+        build_branches: true
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: code
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ

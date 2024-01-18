@@ -1,0 +1,47 @@
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: kibana-buildkite-pipelines
+  description: This file points out individual buildkite pipeline definition files
+spec:
+  type: url
+  targets:
+    - ./.buildkite/pipeline-resource-definitions/kibana-api-docs.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-apis-capacity-testing-daily.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-artifacts-trigger.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-artifacts.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-buildkite.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-ci-stats.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-custom-node-build.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-daily.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-demo-env.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-es-snapshots.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-flaky.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-fleet-packages-daily.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-hourly.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-on-merge-unsupported-ftrs.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-on-merge.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-packer.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-performance-daily.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-performance-data-set-extraction-daily.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-pr.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployment.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-purge-cloud-deployments.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-remote-dev-packer.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-serverless-release-testing.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-serverless-release.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-serverless-security-solution-quality-gate-api-integration.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-serverless-security-solution-quality-gate-edr-workflows.yaml
+    - >-
+      ./.buildkite/pipeline-resource-definitions/kibana-serverless-security-solution-quality-gate.yaml
+    - ./.buildkite/pipeline-resource-definitions/kibana-serverless.yaml
+    - ./.buildkite/pipeline-resource-definitions/scalability_testing-daily.yaml

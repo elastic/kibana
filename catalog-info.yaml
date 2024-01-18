@@ -216,3 +216,13 @@ spec:
          access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
+
+---
+apiVersion: backstage.io/v1alpha1
+kind: Location
+metadata:
+  name: kibana-buildkite-pipelines
+  description: A location re-routing file, pointing to individual buildkite pipeline definition files
+spec:
+  type: url
+  location: .buildkite/pipeline-resource-definitions/locations.yml # Auto-updated by a generation script

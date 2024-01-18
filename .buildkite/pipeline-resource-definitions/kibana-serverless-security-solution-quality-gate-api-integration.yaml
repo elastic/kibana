@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: security-quality-gate-api-integrations
+  description: Runs the serverless security solution api integration tests for the Quality Gate
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / serverless / security-solution-quality-gate / api-integration
+      description: Runs the serverless security solution api integration tests for the Quality Gate
+    spec:
+      env: null
+      branch_configuration: ''
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/security_solution/api_integration.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+        build_tags: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ

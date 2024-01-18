@@ -1,0 +1,28 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: flaky_test_suite_runner
+  description: ':warning: Trigger a new build here: https://ci-stats.kibana.dev/trigger_flaky_test_runner :warning:'
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / flaky-test-suite-runner
+      description: ':warning: Trigger a new build here: https://ci-stats.kibana.dev/trigger_flaky_test_runner :warning:'
+    spec:
+      env: null
+      default_branch: refs/pull/INSERT_PR_NUMBER/head
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/flaky_tests/pipeline.sh
+      provider_settings:
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ

@@ -1,0 +1,34 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: fleet_packages
+  description: Installs all fleet packages into Kibana to ensure the install step works
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / fleet-packages
+      description: Installs all fleet packages into Kibana to ensure the install step works
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#fleet-team'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/fleet/packages_daily.yml
+      provider_settings:
+        publish_commit_status: false
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Single user daily test:
+          cronline: 0 9 * * * America/New_York
+          message: Single user daily test
+          env: {}
+          branch: main

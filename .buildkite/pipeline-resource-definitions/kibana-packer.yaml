@@ -1,0 +1,70 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: agent_packer
+  description: 'Runs packer builds for Buildkite agent images, base and cache'
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / agent / packer / full
+      description: 'Runs packer builds for Buildkite agent images, base and cache'
+    spec:
+      env:
+        GITHUB_COMMIT_STATUS_ENABLED: 'true'
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana-buildkite
+      pipeline_file: agents/.buildkite/pipeline.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build:
+          cronline: 0 11 * * * America/New_York
+          message: Daily build
+          branch: main
+---
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: agent_packer_cache
+  description: Runs packer build for Buildkite agent cache image
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / agent / packer / cache
+      description: Runs packer build for Buildkite agent cache image
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_ENABLED: 'true'
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana-buildkite
+      pipeline_file: agents/.buildkite/cache.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        skip_pull_request_builds_for_existing_commits: false
+        trigger_mode: none
+      teams:
+        everyone:
+          access_level: MANAGE_BUILD_AND_READ
