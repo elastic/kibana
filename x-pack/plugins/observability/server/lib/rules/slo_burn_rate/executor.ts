@@ -61,6 +61,7 @@ export const getRuleExecutor = ({
   async function executor({
     services,
     params,
+    logger,
     startedAt,
     spaceId,
     getTimeRange,
@@ -82,7 +83,7 @@ export const getRuleExecutor = ({
       getAlertUuid,
     } = services;
 
-    const sloRepository = new KibanaSavedObjectsSLORepository(soClient);
+    const sloRepository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const slo = await sloRepository.findById(params.sloId);
 
     if (!slo.enabled) {

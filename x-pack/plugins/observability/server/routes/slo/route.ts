@@ -481,7 +481,7 @@ const getSloBurnRates = createObservabilityServerRoute({
     access: 'internal',
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -493,6 +493,7 @@ const getSloBurnRates = createObservabilityServerRoute({
       {
         soClient,
         esClient,
+        logger,
       }
     );
     return { burnRates };
