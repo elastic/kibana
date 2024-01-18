@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import React, { ComponentProps, ComponentType, lazy, Suspense } from 'react';
+import React, { ComponentType, ForwardedRef, lazy, PropsWithoutRef, Suspense } from 'react';
 
-type LoadableComponent<TComponent extends ComponentType<any>> = () => Promise<{
-  default: TComponent;
+type LoadableComponent<TProps extends {}> = () => Promise<{
+  default: ComponentType<TProps>;
 }>;
 
+/**
+ * Options for the lazy loaded component
+ */
 interface DynamicOptions {
+  /* Fallback UI element to use when loading the component */
   fallback?: React.ReactNode;
 }
 
@@ -21,15 +25,15 @@ interface DynamicOptions {
  * @example
  * const Header = dynamic(() => import('./components/header'))
  */
-export function dynamic<TComponent extends ComponentType<any>>(
-  loader: LoadableComponent<TComponent>,
+export function dynamic<TProps = {}, TRef = {}>(
+  loader: LoadableComponent<TProps>,
   options: DynamicOptions = {}
 ) {
   const Component = lazy(loader);
 
-  return (props: ComponentProps<TComponent>) => (
+  return React.forwardRef((props: PropsWithoutRef<TProps>, ref: ForwardedRef<TRef>) => (
     <Suspense fallback={options.fallback ?? null}>
-      <Component {...props} />
+      <Component {...props} ref={ref} />
     </Suspense>
-  );
+  ));
 }
