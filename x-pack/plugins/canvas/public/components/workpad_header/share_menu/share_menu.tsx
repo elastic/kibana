@@ -41,8 +41,8 @@ export const ShareMenu = () => {
 
   const ReportingModalComponent =
     reportingService.getReportingModalContent !== null
-      ? reportingService.getReportingModalContent({ onClose: () => {}, objectType: 'Canvas' })
-      : () => {};
+      ? reportingService.getReportingModalContent()
+      : null;
 
   const sharingData = {
     workpad,
@@ -54,7 +54,6 @@ export const ShareMenu = () => {
       ? () => {
           const session = overlays.openModal(
             toMountPoint(
-              // @ts-ignore
               <ReportingModalComponent
                 layoutOption="canvas"
                 onClose={() => session.close()}
@@ -69,7 +68,7 @@ export const ShareMenu = () => {
             }
           );
         }
-      : null;
+      : () => null;
 
   const onExport = useCallback(
     (type: string) => {

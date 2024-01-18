@@ -9,5 +9,5 @@ import { ReportingStart } from '@kbn/reporting-plugin/public';
 
 type ReportingModalContent = ReportingStart['components']['ReportingModalPDFV2'];
 export interface CanvasReportingService {
-  getReportingModalContent: ReportingModalContent | null;
+  getReportingModalContent: () => ReportingModalContent | null;
 }

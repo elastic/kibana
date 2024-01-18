@@ -22,11 +22,10 @@ export const reportingServiceFactory: CanvasReportingServiceFactory = ({
   const { reporting } = startPlugins;
 
   const reportingEnabled = () => ({
-    getReportingModalContent: () => reporting?.components.ReportingModalPDFV2 || null,
+    getReportingModalContent: () => reporting!.components.ReportingModalPDFV2,
   });
   const reportingDisabled = () => ({
     getReportingModalContent: () => null,
-    getReportingAPIClient: () => null,
   });
 
   if (!reporting) {
