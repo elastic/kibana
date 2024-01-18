@@ -9,6 +9,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCopy,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
@@ -21,9 +22,13 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import React, { FC, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
+import url from 'url';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
+import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
+import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
+import { getMaxUrlLength } from './reporting_panel_content/constants';
 
 export interface CsvModalProps {
   apiClient: ReportingAPIClient;
@@ -41,16 +46,33 @@ export interface CsvModalProps {
 
 export type Props = CsvModalProps & { intl: InjectedIntl };
 
-const renderDescription = (objectType: string): string => {
-  return objectType === 'dashboard'
-    ? 'PNG & PDF reports can take a few minutes to generate based upon the size of your dashboard'
-    : 'CSV reports can take a few minutes to generate based upon the size of your report';
-};
-
 export const CsvModalContentUI: FC<Props> = (props: Props) => {
+  const isSaved = Boolean(props.objectId);
   const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType } = props;
   const isMounted = useMountedState();
   const [createReportingJob, setCreatingReportJob] = useState(false);
+  const [absoluteUrl, setAbsoluteUrl] = useState('');
+  const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
+
+  useEffect(() => {
+    setAbsoluteReportGenerationUrl();
+  });
+
+  function getAbsoluteReportGenerationUrl() {
+    const relativePath = apiClient.getReportingPublicJobPath(
+      'csv',
+      apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
+    );
+    return url.resolve(window.location.href, relativePath);
+  }
+
+  const setAbsoluteReportGenerationUrl = () => {
+    if (!isMounted || !getAbsoluteReportGenerationUrl()) {
+      return;
+    } else {
+      setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
+    }
+  };
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
@@ -109,18 +131,60 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       });
   };
 
+  const renderCopyURLButton = ({
+    isUnsaved,
+  }: {
+    isUnsaved: boolean;
+    exceedsMaxLength: boolean;
+  }) => {
+    if (isUnsaved) {
+      if (exceedsMaxLength) {
+        return <ErrorUrlTooLongPanel isUnsaved />;
+      }
+      return <ErrorUnsavedWorkPanel />;
+    } else if (exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved={false} />;
+    }
+    return (
+      <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
+        {(copy) => (
+          <EuiButtonEmpty
+            iconType="copy"
+            flush="both"
+            onClick={copy}
+            data-test-subj="shareReportingCopyURL"
+          >
+            <FormattedMessage
+              id="xpack.reporting.modalContent.copyUrlButtonLabel"
+              defaultMessage="Copy URL  "
+            />
+          </EuiButtonEmpty>
+        )}
+      </EuiCopy>
+    );
+  };
+
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Generate a CSV</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>
+          <FormattedMessage id="xpack.reporting.csvModalHeader" defaultMessage="Generate a CSV" />
+        </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-          <EuiCallOut size="s" title={renderDescription(props.objectType)} iconType="iInCircle" />
+          <EuiCallOut
+            size="s"
+            title="CSV reports can take a few minutes to generate based upon the size of your report"
+            iconType="iInCircle"
+          />
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="m">
+          <EuiFlexItem>
+            {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
+          </EuiFlexItem>
           <EuiFlexItem>
             <EuiButtonEmpty onClick={props.onClose}>
               <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />

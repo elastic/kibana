@@ -57,6 +57,8 @@ export interface ReportingModalProps {
 
 export type Props = ReportingModalProps & { intl: InjectedIntl };
 
+type AllowedImageExportType = 'pngV2' | 'printablePdfV2' | 'printablePdf';
+
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const {
     apiClient,
@@ -72,19 +74,14 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const isSaved = Boolean(objectId);
   const [isStale, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
-  const [selectedRadio, setSelectedRadio] = useState<'pngV2' | 'printablePdfV2' | 'printablePdf'>(
-    'printablePdfV2'
-  );
+  const [selectedRadio, setSelectedRadio] = useState<AllowedImageExportType>('printablePdfV2');
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const isMounted = useMountedState();
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  const getJobsParams = (
-    type: 'pngV2' | 'printablePdf' | 'printablePdfV2',
-    opts?: JobParamsProviderOptions
-  ) => {
+  const getJobsParams = (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
     if (!opts) {
       return { ...props.getJobParams };
     }
@@ -248,7 +245,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const renderOptions = () => {
-    if (layoutOption === 'print') {
+    if (layoutOption === 'print' && selectedRadio !== 'pngV2') {
       return (
         <EuiFormRow
           helpText={
@@ -393,7 +390,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
                   { id: 'pngV2', label: 'PNG' },
                 ]}
                 onChange={(id) => {
-                  setSelectedRadio(id as 'printablePdfV2' | 'pngV2');
+                  setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);
                 }}
                 name="image reporting radio group"
                 idSelected={selectedRadio}
