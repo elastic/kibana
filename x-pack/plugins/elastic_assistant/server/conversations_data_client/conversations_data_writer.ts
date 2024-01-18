@@ -28,6 +28,7 @@ interface BulkParams {
   conversationsToCreate?: ConversationCreateProps[];
   conversationsToUpdate?: ConversationUpdateProps[];
   conversationsToDelete?: string[];
+  isPatch?: boolean;
 }
 
 export interface ConversationDataWriter {
@@ -63,7 +64,12 @@ export class ConversationDataWriter implements ConversationDataWriter {
       return {
         errors: errors
           ? items
-              .map((item) => item.create?.error?.reason)
+              .map(
+                (item) =>
+                  item.create?.error?.reason ??
+                  item.update?.error?.reason ??
+                  item.delete?.error?.reason
+              )
               .filter((error): error is string => !!error)
           : [],
         docs_created: items
@@ -98,9 +104,31 @@ export class ConversationDataWriter implements ConversationDataWriter {
       ]) ?? [];
 
     const updatedAt = new Date().toISOString();
+
+    const responseToUpdate = params.conversationsToUpdate
+      ? await this.options.esClient.search<SearchEsConversationSchema>({
+          body: {
+            query: {
+              ids: {
+                values: params.conversationsToUpdate?.map((c) => c.id),
+              },
+            },
+          },
+          _source: false,
+          ignore_unavailable: true,
+          index: this.options.index,
+          seq_no_primary_term: true,
+          size: 1000,
+        })
+      : undefined;
     const conversationUpdatedBody =
       params.conversationsToUpdate?.flatMap((conversation) => [
-        { update: { _id: conversation.id, _index: this.options.index } },
+        {
+          update: {
+            _id: conversation.id,
+            _index: responseToUpdate?.hits.hits.find((c) => c._id === conversation.id)?._index,
+          },
+        },
         {
           script: {
             source: `
@@ -148,7 +176,11 @@ export class ConversationDataWriter implements ConversationDataWriter {
           ctx._source.updated_at = params.updated_at;
         `,
             lang: 'painless',
-            params: transformToUpdateScheme(updatedAt, conversation),
+            params: {
+              ...transformToUpdateScheme(updatedAt, conversation), // when assigning undefined in painless, it will remove property and wil set it to null
+              // for patch we don't want to remove unspecified value in payload
+              assignEmpty: !(params.isPatch ?? true),
+            },
           },
           upsert: { counter: 1 },
         },

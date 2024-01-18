@@ -33,7 +33,8 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const options = useMemo<EuiComboBoxOptionOption[]>(
       () =>
         conversations.map((conversation) => ({
-          label: conversation.id ?? '',
+          // id: conversation.id
+          label: conversation.title ?? '',
           'data-test-subj': TEST_IDS.CONVERSATIONS_MULTISELECTOR_OPTION(conversation.id),
         })),
       [conversations]
@@ -41,7 +42,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const selectedOptions = useMemo<EuiComboBoxOptionOption[]>(() => {
       return selectedConversations != null
         ? selectedConversations.map((conversation) => ({
-            label: conversation.id,
+            label: conversation.title,
           }))
         : [];
     }, [selectedConversations]);
@@ -49,7 +50,7 @@ export const ConversationMultiSelector: React.FC<Props> = React.memo(
     const handleSelectionChange = useCallback(
       (conversationMultiSelectorOption: EuiComboBoxOptionOption[]) => {
         const newConversationSelection = conversations.filter((conversation) =>
-          conversationMultiSelectorOption.some((cmso) => conversation.id === cmso.label)
+          conversationMultiSelectorOption.some((cmso) => conversation.title === cmso.label)
         );
         onConversationSelectionChange(newConversationSelection);
       },

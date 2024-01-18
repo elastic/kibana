@@ -63,7 +63,7 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  onSave: () => void;
+  onSave: () => Promise<void>;
   selectedConversation: Conversation;
   onConversationSelected: (cId: string) => void;
   conversations: Record<string, Conversation>;
@@ -144,7 +144,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       }
     }, [selectedSystemPrompt, systemPromptSettings]);
 
-    const handleSave = useCallback(() => {
+    const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
         conversationSettings[defaultSelectedConversation.id] == null;
@@ -152,7 +152,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
       if (isSelectedConversationDeleted && newSelectedConversationId != null) {
         onConversationSelected(newSelectedConversationId);
       }
-      saveSettings();
+      await saveSettings();
       onSave();
     }, [
       conversationSettings,

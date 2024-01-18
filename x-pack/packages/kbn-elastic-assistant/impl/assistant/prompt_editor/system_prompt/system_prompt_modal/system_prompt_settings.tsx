@@ -133,19 +133,20 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
             )
           );
 
+          let updatedConversationsSettingsBulkActions = { ...conversationsSettingsBulkActions };
           Object.values(conversationSettings).forEach((convo) => {
             if (convo.id !== convo.title) {
-              setConversationsSettingsBulkActions({
-                ...conversationsSettingsBulkActions,
+              updatedConversationsSettingsBulkActions = {
+                ...updatedConversationsSettingsBulkActions,
                 update: {
-                  ...(conversationsSettingsBulkActions.update ?? {}),
+                  ...(updatedConversationsSettingsBulkActions.update ?? {}),
                   [convo.id]: {
-                    ...(conversationsSettingsBulkActions.update
-                      ? conversationsSettingsBulkActions.update[convo.id] ?? {}
+                    ...(updatedConversationsSettingsBulkActions.update
+                      ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
                       : {}),
                     apiConfig: {
-                      ...((conversationsSettingsBulkActions.update
-                        ? conversationsSettingsBulkActions.update[convo.id] ?? {}
+                      ...((updatedConversationsSettingsBulkActions.update
+                        ? updatedConversationsSettingsBulkActions.update[convo.id] ?? {}
                         : {}
                       ).apiConfig ?? {}),
                       defaultSystemPromptId: currentPromptConversationIds.includes(convo.id)
@@ -160,12 +161,12 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                     },
                   },
                 },
-              });
+              };
             } else {
-              setConversationsSettingsBulkActions({
-                ...conversationsSettingsBulkActions,
+              updatedConversationsSettingsBulkActions = {
+                ...updatedConversationsSettingsBulkActions,
                 create: {
-                  ...(conversationsSettingsBulkActions.create ?? {}),
+                  ...(updatedConversationsSettingsBulkActions.create ?? {}),
                   [convo.id]: {
                     ...convo,
                     apiConfig: {
@@ -182,9 +183,10 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                     },
                   },
                 },
-              });
+              };
             }
           });
+          setConversationsSettingsBulkActions(updatedConversationsSettingsBulkActions);
         }
       },
       [

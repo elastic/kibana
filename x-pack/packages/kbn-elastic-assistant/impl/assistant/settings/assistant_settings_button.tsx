@@ -23,6 +23,7 @@ interface Props {
   onConversationSelected: (cId: string) => void;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
 }
 
 /**
@@ -38,6 +39,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     selectedConversation,
     onConversationSelected,
     conversations,
+    refetchConversationsState,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -50,13 +52,14 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
       cleanupAndCloseModal();
     }, [cleanupAndCloseModal]);
 
-    const handleSave = useCallback(() => {
+    const handleSave = useCallback(async () => {
       cleanupAndCloseModal();
+      await refetchConversationsState();
       toasts?.addSuccess({
         iconType: 'check',
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
-    }, [cleanupAndCloseModal, toasts]);
+    }, [cleanupAndCloseModal, refetchConversationsState, toasts]);
 
     const handleShowConversationSettings = useCallback(() => {
       setSelectedSettingsTab(CONVERSATIONS_TAB);

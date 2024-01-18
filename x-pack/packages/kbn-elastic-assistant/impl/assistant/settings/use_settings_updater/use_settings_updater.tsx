@@ -32,7 +32,7 @@ interface UseSettingsUpdater {
   setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
-  saveSettings: () => void;
+  saveSettings: () => Promise<void>;
 }
 
 export const useSettingsUpdater = (
@@ -99,10 +99,10 @@ export const useSettingsUpdater = (
   /**
    * Save all pending settings
    */
-  const saveSettings = useCallback((): void => {
+  const saveSettings = useCallback(async (): Promise<void> => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    bulkConversationsChange(http, conversationsSettingsBulkActions);
+    await bulkConversationsChange(http, conversationsSettingsBulkActions);
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;

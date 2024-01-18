@@ -104,7 +104,18 @@ const AssistantComponent: React.FC<Props> = ({
   const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
     useConversation();
   const { data: conversationsData, isLoading, refetch } = useFetchCurrentUserConversations();
-  const { data: lastConversation, isLoading: isLoadingLast } = useLastConversation();
+  const {
+    data: lastConversation,
+    isLoading: isLoadingLast,
+    refetch: refetchLastUpdated,
+  } = useLastConversation();
+
+  const lastConversationId = useMemo(() => {
+    if (!isLoadingLast) {
+      return lastConversation?.id ?? WELCOME_CONVERSATION_TITLE;
+    }
+    return WELCOME_CONVERSATION_TITLE;
+  }, [isLoadingLast, lastConversation?.id]);
 
   useEffect(() => {
     if (!isLoading) {
@@ -168,13 +179,6 @@ const AssistantComponent: React.FC<Props> = ({
       )?.config?.apiProvider,
     [connectors]
   );
-
-  const lastConversationId = useMemo(() => {
-    if (!isLoadingLast) {
-      return lastConversation?.id ?? WELCOME_CONVERSATION_TITLE;
-    }
-    return WELCOME_CONVERSATION_TITLE;
-  }, [isLoadingLast, lastConversation?.id]);
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
     isAssistantEnabled ? lastConversationId : WELCOME_CONVERSATION_TITLE
@@ -555,11 +559,14 @@ const AssistantComponent: React.FC<Props> = ({
             onConversationSelected={handleOnConversationSelected}
             onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
-            setSelectedConversationId={setSelectedConversationId}
             showAnonymizedValues={showAnonymizedValues}
             title={title}
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
+            refetchConversationsState={async () => {
+              await refetchResults();
+              await refetchCurrentConversation();
+            }}
           />
         )}
 

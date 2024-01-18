@@ -35,12 +35,12 @@ interface OwnProps {
   onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   setCurrentConversation: React.Dispatch<React.SetStateAction<Conversation>>;
   shouldDisableKeyboardShortcut?: () => boolean;
   showAnonymizedValues: boolean;
   title: string | JSX.Element;
   conversations: Record<string, Conversation>;
+  refetchConversationsState: () => Promise<void>;
 }
 
 type Props = OwnProps;
@@ -60,12 +60,12 @@ export const AssistantHeader: React.FC<Props> = ({
   onConversationDeleted,
   onToggleShowAnonymizedValues,
   setIsSettingsModalVisible,
-  setSelectedConversationId,
   shouldDisableKeyboardShortcut,
   showAnonymizedValues,
   title,
   setCurrentConversation,
   conversations,
+  refetchConversationsState,
 }) => {
   const showAnonymizedValuesChecked = useMemo(
     () =>
@@ -140,6 +140,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   onConversationSelected={onConversationSelected}
                   conversations={conversations}
+                  refetchConversationsState={refetchConversationsState}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
