@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory } from 'react-router-dom';
-import { compact, merge } from 'lodash';
-import { useStateDebounced } from '../../../hooks/use_debounce';
+import { compact } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   getLatencyAggregationType,
@@ -27,6 +19,7 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
+import { useStateDebounced } from '../../../hooks/use_debounce';
 import {
   FETCH_STATUS,
   isPending,
@@ -35,11 +28,10 @@ import {
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { TransactionOverviewLink } from '../links/apm/transaction_overview_link';
-import { fromQuery, toQuery } from '../links/url_helpers';
+import { ManagedTable, TableSearchBar } from '../managed_table';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
-import { TableSearchBar } from '../table_search_bar/table_search_bar';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -50,9 +42,6 @@ const INITIAL_STATE: ApiResponse = {
   transactionOverflowCount: 0,
   hasActiveAlerts: false,
 };
-
-type SortDirection = 'asc' | 'desc';
-type SortField = 'name' | 'latency' | 'throughput' | 'errorRate' | 'impact';
 
 interface Props {
   hideTitle?: boolean;
@@ -108,14 +97,10 @@ export function TransactionsTable({
   const shouldShowSparkPlots = isSingleColumn || !isXl;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('', 300);
-  const [tableOptions, setTableOptions] = useTableOptions<SortField>({
-    initialPageSize: numberOfTransactionsPerPage,
-  });
 
-  const [currentPage, setCurrentPage] = useState<{
-    items: ApiResponse['transactionGroups'];
-    totalCount: number;
-  }>({ items: [], totalCount: 0 });
+  const [renderedItems, setRenderedItems] = useState<
+    ApiResponse['transactionGroups']
+  >([]);
 
   const {
     mainStatistics,
@@ -124,7 +109,7 @@ export function TransactionsTable({
     detailedStatisticsStatus,
   } = useTableData({
     comparisonEnabled,
-    currentPageItems: currentPage.items,
+    currentPageItems: renderedItems,
     end,
     environment,
     kuery,
@@ -164,62 +149,18 @@ export function TransactionsTable({
     shouldShowSparkPlots,
   ]);
 
-  const pagination = useMemo(() => {
-    return {
-      pageIndex: tableOptions.page.index,
-      pageSize: tableOptions.page.size,
-      totalItemCount: currentPage.totalCount,
-      showPerPageOptions,
-    };
-  }, [
-    tableOptions.page.index,
-    tableOptions.page.size,
-    currentPage.totalCount,
-    showPerPageOptions,
-  ]);
-
-  const sorting = useMemo(
-    () => ({ sort: tableOptions.sort }),
-    [tableOptions.sort]
-  );
-
-  const history = useHistory();
-  const onChangeHandler = useCallback(
-    (changedTableOptions: Partial<TableOptions<string>>) => {
-      setTableOptions((prevTableOptions) =>
-        merge({}, prevTableOptions, changedTableOptions)
-      );
-
-      if (saveTableOptionsToUrl) {
-        history.push({
-          ...history.location,
-          search: fromQuery({
-            ...toQuery(history.location.search),
-            page: changedTableOptions.page?.index,
-            pageSize: changedTableOptions.page?.size,
-            sortField: changedTableOptions.sort?.field,
-            sortDirection: changedTableOptions.sort?.direction,
-          }),
-        });
-      }
-    },
-    [setTableOptions, saveTableOptionsToUrl, history]
-  );
-
-  const onChangeSearchQuery = useCallback(
-    ({
-      searchQuery: q,
-      shouldFetchServer,
-    }: {
-      searchQuery: string;
-      shouldFetchServer: boolean;
-    }) => {
-      if (shouldFetchServer) {
-        setSearchQueryDebounced(q);
-      }
-    },
-    [setSearchQueryDebounced]
-  );
+  const tableSearchBar: TableSearchBar<ApiResponse['transactionGroups'][0]> =
+    useMemo(() => {
+      return {
+        fieldsToSearch: ['name'],
+        maxCountExceeded: mainStatistics.maxCountExceeded,
+        onChangeSearchQuery: setSearchQueryDebounced,
+        placeholder: i18n.translate(
+          'xpack.apm.transactionsTable.tableSearch.placeholder',
+          { defaultMessage: 'Search transactions by name' }
+        ),
+      };
+    }, [mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
 
   return (
     <EuiFlexGroup
@@ -280,23 +221,6 @@ export function TransactionsTable({
           </EuiFlexItem>
         )}
       <EuiFlexItem>
-        <TableSearchBar
-          isEnabled={true}
-          items={mainStatistics.transactionGroups}
-          fieldsToSearch={['name']}
-          maxCountExceeded={mainStatistics.maxCountExceeded}
-          tableOptions={tableOptions}
-          onChangeCurrentPage={setCurrentPage}
-          onChangeSearchQuery={onChangeSearchQuery}
-          placeholder={i18n.translate(
-            'xpack.apm.transactionsTable.tableSearch.placeholder',
-            {
-              defaultMessage: 'Search transactions by name',
-            }
-          )}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
         <OverviewTableContainer
           fixedHeight={fixedHeight}
           isEmptyAndNotInitiated={
@@ -304,8 +228,7 @@ export function TransactionsTable({
             mainStatisticsStatus === FETCH_STATUS.NOT_INITIATED
           }
         >
-          <EuiBasicTable
-            loading={mainStatisticsStatus === FETCH_STATUS.LOADING}
+          <ManagedTable
             noItemsMessage={
               mainStatisticsStatus === FETCH_STATUS.LOADING
                 ? i18n.translate('xpack.apm.transactionsTable.loading', {
@@ -315,18 +238,16 @@ export function TransactionsTable({
                     defaultMessage: 'No transactions found',
                   })
             }
-            error={
-              mainStatisticsStatus === FETCH_STATUS.FAILURE
-                ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
-                    defaultMessage: 'Failed to fetch',
-                  })
-                : ''
-            }
-            items={currentPage.items}
+            items={mainStatistics.transactionGroups}
             columns={columns}
-            pagination={pagination}
-            sorting={sorting}
-            onChange={onChangeHandler}
+            initialSortField="impact"
+            initialSortDirection="desc"
+            initialPageSize={numberOfTransactionsPerPage}
+            isLoading={mainStatisticsStatus === FETCH_STATUS.LOADING}
+            tableSearchBar={tableSearchBar}
+            showPerPageOptions={showPerPageOptions}
+            onChangeRenderedItems={setRenderedItems}
+            saveTableOptionsToUrl={saveTableOptionsToUrl}
           />
         </OverviewTableContainer>
       </EuiFlexItem>
@@ -471,52 +392,4 @@ function useTableData({
     detailedStatistics,
     detailedStatisticsStatus,
   };
-}
-
-interface TableOptions<F extends string> {
-  page: { index: number; size: number };
-  sort: { direction: SortDirection; field: F };
-}
-
-function useTableOptions<T extends string>({
-  initialPageSize,
-}: {
-  initialPageSize: number;
-}) {
-  const {
-    query: {
-      page: urlPage = 0,
-      pageSize: urlPageSize = initialPageSize,
-      sortField: urlSortField = 'impact',
-      sortDirection: urlSortDirection = 'desc',
-    },
-  } = useAnyOfApmParams(
-    '/services/{serviceName}/transactions',
-    '/services/{serviceName}/overview',
-    '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/overview'
-  );
-
-  const [tableOptions, setTableOptions] = useState<{
-    page: { index: number; size: number };
-    sort: { direction: SortDirection; field: T };
-  }>({
-    page: { index: urlPage, size: urlPageSize },
-    sort: {
-      field: urlSortField as T,
-      direction: urlSortDirection as SortDirection,
-    },
-  });
-
-  useEffect(() => {
-    setTableOptions({
-      page: { index: urlPage, size: urlPageSize },
-      sort: {
-        field: urlSortField as T,
-        direction: urlSortDirection as SortDirection,
-      },
-    });
-  }, [urlPage, urlPageSize, urlSortDirection, urlSortField]);
-
-  return [tableOptions, setTableOptions] as const;
 }
