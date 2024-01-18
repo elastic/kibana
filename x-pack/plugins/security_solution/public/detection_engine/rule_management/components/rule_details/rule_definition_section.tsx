@@ -54,7 +54,6 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import type { UseAlertSuppressionReturn } from './use_alert_suppression';
 import { useAlertSuppression } from './use_alert_suppression';
 
 interface SavedQueryNameProps {
@@ -427,7 +426,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  ruleSuppressionReturn: UseAlertSuppressionReturn
+  isSuppressionEnabled: boolean
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -657,15 +656,15 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if (ruleSuppressionReturn.isSuppressionEnabled) {
-    if (ruleSuppressionReturn.showGroupBy && ruleSuppressionReturn.groupByFields) {
+  if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
+    if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionGroupByPropertyTitle">
             <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
           </span>
         ),
-        description: <SuppressAlertsByField fields={ruleSuppressionReturn.groupByFields} />,
+        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
       });
     }
 
@@ -675,10 +674,10 @@ const prepareDefinitionSectionListItems = (
           <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_DURATION_FIELD_LABEL} />
         </span>
       ),
-      description: <SuppressAlertsDuration duration={ruleSuppressionReturn.duration} />,
+      description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
     });
 
-    if (ruleSuppressionReturn.showMissingFieldsStrategy) {
+    if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
@@ -687,7 +686,7 @@ const prepareDefinitionSectionListItems = (
         ),
         description: (
           <MissingFieldsStrategy
-            missingFieldsStrategy={ruleSuppressionReturn.missingFieldsStrategy}
+            missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
           />
         ),
       });
@@ -739,13 +738,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const ruleSuppressionReturn = useAlertSuppression(rule);
+  const { isSuppressionEnabled } = useAlertSuppression(rule);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
     savedQuery,
-    ruleSuppressionReturn
+    isSuppressionEnabled
   );
 
   return (

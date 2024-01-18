@@ -58,8 +58,9 @@ import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
 import {
   isThresholdRule,
-  isRuleSuppressionFullyConfigurable,
-  isSuppressibleAlertRule,
+  isSuppressionRuleConfiguredWithMissingFields,
+  isSuppressionRuleConfiguredWithGroupBy,
+  isSuppressionRuleConfiguredWithDuration,
 } from '../../../../../common/detection_engine/utils';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
@@ -210,7 +211,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveGroupByFields = isRuleSuppressionFullyConfigurable(ruleType);
+    const ruleCanHaveGroupByFields = isSuppressionRuleConfiguredWithGroupBy(ruleType);
     if (!ruleCanHaveGroupByFields) {
       return [];
     }
@@ -220,7 +221,7 @@ export const getDescriptionItem = (
     return [];
   } else if (field === 'groupByDuration') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveDuration = isSuppressibleAlertRule(ruleType);
+    const ruleCanHaveDuration = isSuppressionRuleConfiguredWithDuration(ruleType);
 
     if (!ruleCanHaveDuration) {
       return [];
@@ -244,7 +245,8 @@ export const getDescriptionItem = (
     }
   } else if (field === 'suppressionMissingFields') {
     const ruleType: Type = get('ruleType', data);
-    const ruleCanHaveSuppressionMissingFields = isRuleSuppressionFullyConfigurable(ruleType);
+    const ruleCanHaveSuppressionMissingFields =
+      isSuppressionRuleConfiguredWithMissingFields(ruleType);
     if (!ruleCanHaveSuppressionMissingFields) {
       return [];
     }

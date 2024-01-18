@@ -71,5 +71,12 @@ export const normalizeMachineLearningJobIds = (value: string | string[]): string
   Array.isArray(value) ? value : [value];
 
 export const isSuppressibleAlertRule = (ruleType: Type) => ruleType in SuppressibleAlertRules;
-export const isRuleSuppressionFullyConfigurable = (ruleType: Type) =>
+
+export const isSuppressionRuleConfiguredWithDuration = (ruleType: Type) =>
+  isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithGroupBy = (ruleType: Type) =>
+  !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);
+
+export const isSuppressionRuleConfiguredWithMissingFields = (ruleType: Type) =>
   !isThresholdRule(ruleType) && isSuppressibleAlertRule(ruleType);

@@ -8,30 +8,12 @@ import { useCallback } from 'react';
 import { SuppressibleAlertRules } from '../../../../../common/detection_engine/constants';
 import type { ExperimentalFeatures } from '../../../../../common';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import type {
-  AlertSuppressionGroupBy,
-  RuleResponse,
-  AlertSuppressionDuration,
-  AlertSuppressionMissingFieldsStrategy,
-} from '../../../../../common/api/detection_engine/model/rule_schema';
-
-const alertSuppressionField = 'alert_suppression';
-const groupByField = 'group_by';
-const missingFieldsStrategy = 'missing_fields_strategy';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface UseAlertSuppressionReturn {
   isSuppressionEnabled: boolean;
-  showGroupBy: boolean;
-  duration?: AlertSuppressionDuration;
-  groupByFields?: AlertSuppressionGroupBy;
-  showMissingFieldsStrategy: boolean;
-  missingFieldsStrategy?: AlertSuppressionMissingFieldsStrategy;
 }
-const defaultReturn: UseAlertSuppressionReturn = {
-  isSuppressionEnabled: false,
-  showGroupBy: false,
-  showMissingFieldsStrategy: false,
-};
+
 export const useAlertSuppression = (rule: Partial<RuleResponse>): UseAlertSuppressionReturn => {
   const IsRuleFeatureFlagEnabled = (ruleFFName: keyof ExperimentalFeatures) =>
     useIsExperimentalFeatureEnabled(ruleFFName);
@@ -45,20 +27,7 @@ export const useAlertSuppression = (rule: Partial<RuleResponse>): UseAlertSuppre
     return rule.type in SuppressibleAlertRules;
   }, [rule.type]);
 
-  if (alertSuppressionField in rule && rule.alert_suppression) {
-    defaultReturn.isSuppressionEnabled = isSuppressionEnabledForRuleType();
-    defaultReturn.duration = rule.alert_suppression.duration;
-
-    if (groupByField in rule.alert_suppression) {
-      defaultReturn.showGroupBy = true;
-      defaultReturn.groupByFields = rule.alert_suppression.group_by;
-    }
-
-    if (missingFieldsStrategy in rule.alert_suppression) {
-      defaultReturn.showMissingFieldsStrategy = true;
-
-      defaultReturn.missingFieldsStrategy = rule.alert_suppression.missing_fields_strategy;
-    }
-  }
-  return defaultReturn;
+  return {
+    isSuppressionEnabled: isSuppressionEnabledForRuleType(),
+  };
 };
