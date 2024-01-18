@@ -23,6 +23,7 @@ import {
 import {
   ESQLAstItem,
   ESQLColumn,
+  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLLiteral,
@@ -33,28 +34,35 @@ import {
 import { ESQLRealField, ESQLVariable, ReferenceMaps } from '../validation/types';
 import { removeMarkerArgFromArgsList } from './context';
 
+function isSingleItem(arg: ESQLAstItem): arg is ESQLSingleAstItem {
+  return arg && !Array.isArray(arg);
+}
+
+export function isSettingItem(arg: ESQLAstItem): arg is ESQLCommandMode {
+  return isSingleItem(arg) && arg.type === 'mode';
+}
 export function isFunctionItem(arg: ESQLAstItem): arg is ESQLFunction {
-  return arg && !Array.isArray(arg) && arg.type === 'function';
+  return isSingleItem(arg) && arg.type === 'function';
 }
 
 export function isOptionItem(arg: ESQLAstItem): arg is ESQLCommandOption {
-  return !Array.isArray(arg) && arg.type === 'option';
+  return isSingleItem(arg) && arg.type === 'option';
 }
 
 export function isSourceItem(arg: ESQLAstItem): arg is ESQLSource {
-  return arg && !Array.isArray(arg) && arg.type === 'source';
+  return isSingleItem(arg) && arg.type === 'source';
 }
 
 export function isColumnItem(arg: ESQLAstItem): arg is ESQLColumn {
-  return arg && !Array.isArray(arg) && arg.type === 'column';
+  return isSingleItem(arg) && arg.type === 'column';
 }
 
 export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
-  return arg && !Array.isArray(arg) && arg.type === 'literal';
+  return isSingleItem(arg) && arg.type === 'literal';
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return arg && !Array.isArray(arg) && arg.type === 'timeInterval';
+  return isSingleItem(arg) && arg.type === 'timeInterval';
 }
 
 export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
