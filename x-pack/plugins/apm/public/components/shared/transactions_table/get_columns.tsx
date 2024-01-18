@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -42,6 +41,7 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { fieldValuePairToKql } from '../../../../common/utils/field_value_pair_to_kql';
+import { ITableColumn } from '../managed_table';
 
 type TransactionGroupMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -76,7 +76,7 @@ export function getColumns({
   transactionOverflowCount: number;
   link: any;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
-}): Array<EuiBasicTableColumn<ServiceTransactionGroupItem>> {
+}): Array<ITableColumn<ServiceTransactionGroupItem>> {
   return [
     ...(showAlertsColumn
       ? [
@@ -128,7 +128,7 @@ export function getColumns({
                 </EuiToolTip>
               );
             },
-          } as EuiBasicTableColumn<ServiceTransactionGroupItem>,
+          } as ITableColumn<ServiceTransactionGroupItem>,
         ]
       : []),
     {
@@ -165,11 +165,9 @@ export function getColumns({
           detailedStatistics?.currentPeriod?.[name]?.latency;
         const previousTimeseries =
           detailedStatistics?.previousPeriod?.[name]?.latency;
-
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.LATENCY_AVG
         );
-
         return (
           <ListMetric
             color={currentPeriodColor}
@@ -201,11 +199,9 @@ export function getColumns({
           detailedStatistics?.currentPeriod?.[name]?.throughput;
         const previousTimeseries =
           detailedStatistics?.previousPeriod?.[name]?.throughput;
-
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.THROUGHPUT
         );
-
         return (
           <ListMetric
             color={currentPeriodColor}
@@ -260,11 +256,9 @@ export function getColumns({
           detailedStatistics?.currentPeriod?.[name]?.errorRate;
         const previousTimeseries =
           detailedStatistics?.previousPeriod?.[name]?.errorRate;
-
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
           ChartType.FAILED_TRANSACTION_RATE
         );
-
         return (
           <ListMetric
             color={currentPeriodColor}
