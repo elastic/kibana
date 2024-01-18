@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Response Actions Schema
   version: 'not applicable'
-paths: {}
+paths: { }
 components:
   x-codegen-enabled: true
   schemas:
@@ -113,13 +113,25 @@ components:
         - actionTypeId
         - params
 
-    EndpointParams:
+    DefaultParams:
       type: object
       properties:
         command:
           type: string
           enum:
             - isolate
+            - get-file
+        comment:
+          type: string
+      required:
+        - command
+
+    ProcessesParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
             - kill-process
             - suspend-process
         comment:
@@ -147,7 +159,9 @@ components:
           enum:
             - .endpoint
         params:
-          $ref: '#/components/schemas/EndpointParams'
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
       required:
         - action_type_id
         - params
@@ -161,7 +175,9 @@ components:
           enum:
             - .endpoint
         params:
-          $ref: '#/components/schemas/EndpointParams'
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
       required:
         - actionTypeId
         - params

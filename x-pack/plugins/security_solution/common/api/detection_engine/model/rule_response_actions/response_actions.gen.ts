@@ -77,9 +77,15 @@ export const RuleResponseOsqueryAction = z.object({
   params: OsqueryParamsCamelCase,
 });
 
-export type EndpointParams = z.infer<typeof EndpointParams>;
-export const EndpointParams = z.object({
-  command: z.enum(['isolate', 'kill-process', 'suspend-process']),
+export type DefaultParams = z.infer<typeof DefaultParams>;
+export const DefaultParams = z.object({
+  command: z.enum(['isolate', 'get-file']),
+  comment: z.string().optional(),
+});
+
+export type ProcessesParams = z.infer<typeof ProcessesParams>;
+export const ProcessesParams = z.object({
+  command: z.enum(['kill-process', 'suspend-process']),
   comment: z.string().optional(),
   config: z
     .object({
@@ -98,13 +104,13 @@ export const EndpointParams = z.object({
 export type EndpointResponseAction = z.infer<typeof EndpointResponseAction>;
 export const EndpointResponseAction = z.object({
   action_type_id: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([DefaultParams, ProcessesParams]),
 });
 
 export type RuleResponseEndpointAction = z.infer<typeof RuleResponseEndpointAction>;
 export const RuleResponseEndpointAction = z.object({
   actionTypeId: z.literal('.endpoint'),
-  params: EndpointParams,
+  params: z.union([DefaultParams, ProcessesParams]),
 });
 
 export type ResponseAction = z.infer<typeof ResponseAction>;

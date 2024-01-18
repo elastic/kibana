@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getErrorProcessAlerts, getProcessAlerts } from './utils';
+import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertWithAgent } from './types';
 
 const alert = {
@@ -56,6 +56,36 @@ const alert5 = {
   },
 };
 describe('EndpointResponseActionsUtils', () => {
+  describe('getIsolateAlerts', () => {
+    const alerts = [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
+    it('should return proper number of actions divided per agents with specified alert_ids', async () => {
+      const isolateAlerts = getIsolateAlerts(alerts);
+
+      const result = {
+        'agent-id-1': {
+          alert_ids: ['alert1', 'alert3', 'alert4', 'alert5'],
+          endpoint_ids: ['agent-id-1'],
+          hosts: {
+            'agent-id-1': {
+              id: 'agent-id-1',
+              name: 'jammy-1',
+            },
+          },
+        },
+        'agent-id-2': {
+          alert_ids: ['alert2'],
+          endpoint_ids: ['agent-id-2'],
+          hosts: {
+            'agent-id-2': {
+              id: 'agent-id-2',
+              name: 'jammy-2',
+            },
+          },
+        },
+      };
+      expect(isolateAlerts).toEqual(result);
+    });
+  });
   describe('getProcessAlerts', () => {
     // Casted as unknown first because we do not need all the data to test the functionality
     const alerts = [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
@@ -67,39 +97,53 @@ describe('EndpointResponseActionsUtils', () => {
       });
 
       const result = {
-        '1': {
-          alert_ids: ['alert1'],
-          endpoint_ids: ['agent-id-1'],
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: 'jammy-1',
+        'agent-id-1': {
+          '1': {
+            alert_ids: ['alert1'],
+            endpoint_ids: ['agent-id-1'],
+            hosts: {
+              'agent-id-1': {
+                id: 'agent-id-1',
+                name: 'jammy-1',
+              },
+            },
+            parameters: {
+              pid: 1,
             },
           },
-          parameters: {
-            pid: 1,
+          '2': {
+            alert_ids: ['alert3'],
+            endpoint_ids: ['agent-id-1'],
+            hosts: {
+              'agent-id-1': {
+                id: 'agent-id-1',
+                name: 'jammy-1',
+              },
+            },
+            parameters: {
+              pid: 2,
+            },
           },
         },
-        '2': {
-          alert_ids: ['alert2', 'alert3'],
-          endpoint_ids: ['agent-id-2', 'agent-id-1'],
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: 'jammy-1',
+        'agent-id-2': {
+          '2': {
+            alert_ids: ['alert2'],
+            endpoint_ids: ['agent-id-2'],
+            hosts: {
+              'agent-id-2': {
+                id: 'agent-id-2',
+                name: 'jammy-2',
+              },
             },
-            'agent-id-2': {
-              id: 'agent-id-2',
-              name: 'jammy-2',
+            parameters: {
+              pid: 2,
             },
-          },
-          parameters: {
-            pid: 2,
           },
         },
       };
       expect(processAlerts).toEqual(result);
     });
+
     it('should return actions that do not have value from default field (pid)', async () => {
       const processAlerts = getProcessAlerts(alerts, {
         overwrite: false,
@@ -107,17 +151,19 @@ describe('EndpointResponseActionsUtils', () => {
       });
 
       const result = {
-        '2': {
-          alert_ids: ['alert5'],
-          endpoint_ids: ['agent-id-1'],
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: 'jammy-1',
+        'agent-id-1': {
+          '2': {
+            alert_ids: ['alert5'],
+            endpoint_ids: ['agent-id-1'],
+            hosts: {
+              'agent-id-1': {
+                id: 'agent-id-1',
+                name: 'jammy-1',
+              },
             },
-          },
-          parameters: {
-            entity_id: 2,
+            parameters: {
+              entity_id: 2,
+            },
           },
         },
       };
@@ -135,18 +181,20 @@ describe('EndpointResponseActionsUtils', () => {
       });
 
       const result = {
-        'process.pid': {
-          alert_ids: ['alert4', 'alert5'],
-          endpoint_ids: ['agent-id-1'],
-          error: 'process.pid',
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: 'jammy-1',
+        'agent-id-1': {
+          'process.pid': {
+            alert_ids: ['alert4', 'alert5'],
+            endpoint_ids: ['agent-id-1'],
+            error: 'process.pid',
+            hosts: {
+              'agent-id-1': {
+                id: 'agent-id-1',
+                name: 'jammy-1',
+              },
             },
-          },
-          parameters: {
-            pid: 'process.pid not found',
+            parameters: {
+              pid: 'process.pid not found',
+            },
           },
         },
       };
@@ -159,22 +207,36 @@ describe('EndpointResponseActionsUtils', () => {
       });
 
       const result = {
-        'process.entity_id': {
-          alert_ids: ['alert1', 'alert2', 'alert3', 'alert4'],
-          endpoint_ids: ['agent-id-1', 'agent-id-2'],
-          error: 'process.entity_id',
-          hosts: {
-            'agent-id-1': {
-              id: 'agent-id-1',
-              name: 'jammy-1',
+        'agent-id-1': {
+          'process.entity_id': {
+            alert_ids: ['alert1', 'alert3', 'alert4'],
+            endpoint_ids: ['agent-id-1'],
+            error: 'process.entity_id',
+            hosts: {
+              'agent-id-1': {
+                id: 'agent-id-1',
+                name: 'jammy-1',
+              },
             },
-            'agent-id-2': {
-              id: 'agent-id-2',
-              name: 'jammy-2',
+            parameters: {
+              entity_id: 'process.entity_id not found',
             },
           },
-          parameters: {
-            entity_id: 'process.entity_id not found',
+        },
+        'agent-id-2': {
+          'process.entity_id': {
+            alert_ids: ['alert2'],
+            endpoint_ids: ['agent-id-2'],
+            error: 'process.entity_id',
+            hosts: {
+              'agent-id-2': {
+                id: 'agent-id-2',
+                name: 'jammy-2',
+              },
+            },
+            parameters: {
+              entity_id: 'process.entity_id not found',
+            },
           },
         },
       };
