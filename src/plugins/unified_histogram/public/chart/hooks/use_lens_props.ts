@@ -17,7 +17,7 @@ import type {
   UnifiedHistogramRequestContext,
   LensAttributesContext,
 } from '../../types';
-import { useStableCallback } from './use_stable_callback';
+import { useStableCallback } from '../../hooks/use_stable_callback';
 
 export const useLensProps = ({
   request,

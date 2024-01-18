@@ -34,7 +34,7 @@ import {
 } from '../types';
 import { buildBucketInterval } from './utils/build_bucket_interval';
 import { useTimeRange } from './hooks/use_time_range';
-import { useStableCallback } from './hooks/use_stable_callback';
+import { useStableCallback } from '../hooks/use_stable_callback';
 import { useLensProps } from './hooks/use_lens_props';
 
 export interface HistogramProps {

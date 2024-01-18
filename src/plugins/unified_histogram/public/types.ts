@@ -148,6 +148,13 @@ export type UnifiedHistogramInputMessage = UnifiedHistogramRefetchMessage;
  */
 export type UnifiedHistogramInput$ = Subject<UnifiedHistogramInputMessage>;
 
+export enum UnifiedHistogramSuggestionType {
+  unsupported = 'unsupported',
+  supportedLensSuggestion = 'supportedLensSuggestion',
+  localHistogramSuggestionForESQL = 'localHistogramSuggestionForESQL',
+  localHistogramDefault = 'localHistogramDefault',
+}
+
 export interface LensRequestData {
   dataViewId?: string;
   timeField?: string;
@@ -158,6 +165,7 @@ export interface LensRequestData {
 export interface LensAttributesContext {
   attributes: TypedLensByValueInput['attributes'];
   requestData: LensRequestData;
+  suggestionType: UnifiedHistogramSuggestionType;
 }
 
 /**
