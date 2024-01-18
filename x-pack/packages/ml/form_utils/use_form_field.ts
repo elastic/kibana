@@ -18,15 +18,15 @@ export const createSelectFormFields =
 const createSelectFormField =
   <FF extends string, FS extends string, VN extends string>(
     slice: FormSlice<FF, FS, VN>,
-    field: keyof ReturnType<FormSlice<FF, FS, VN>['getInitialState']>['formFields']
+    field: keyof State<FF, FS, VN>['formFields']
   ) =>
   (s: Record<string, State<FF, FS, VN>>) => {
-    return s[slice.name].formFields[field as FF];
+    return s[slice.name].formFields[field];
   };
 
 export const useFormField = <FF extends string, FS extends string, VN extends string>(
   slice: FormSlice<FF, FS, VN>,
-  field: keyof ReturnType<FormSlice<FF, FS, VN>['getInitialState']>['formFields']
+  field: keyof State<FF, FS, VN>['formFields']
 ) => {
   const selectFormField = useMemo(() => createSelectFormField(slice, field), [slice, field]);
   return useSelector(selectFormField);
