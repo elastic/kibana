@@ -1917,7 +1917,7 @@ export default function ({ getService }: FtrProviderContext) {
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
                 id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
+                locations: ['dev'],
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
@@ -2142,7 +2142,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeout: '80s',
                 type: 'http',
                 urls: ['http://localhost:9200'],
-                locations: ['localhost'],
+                locations: ['dev'],
                 params: {
                   testGlobalParam2: 'testGlobalParamOverwrite',
                   testLocal1: 'testLocalParamsValue',
