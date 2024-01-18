@@ -17,9 +17,6 @@ Previous versions: {kibana-ref-all}/8.11/whats-new.html[8.11] | {kibana-ref-all}
 
 We are introducing editing of an {esql} query on a dashboard and allows the users to select among different chart suggestions. This is quite powerful since users don't need to go back to Discover to edit the query and recreate the chart, they can simply adjust the query right there on a dashboard. 
 
-[role="screenshot"]
-image::images/edit-esql-dashboard.gif[A short video demo of how to edit {esql} in a dashboard]
-
 [discrete]
 ==== Improved ES|QL in-app documentation search
 Many users open the {esql} editor’s documentation popover to familiarize themselves with the commands and find examples. Our search input was searching only on the titles of the commands/functions and not the description of each. As a result users were failing to find what they wanted. For example, if they searched for IP then CIDR_MATCH would not appear, but only TO_IP. This change helps users learn {esql} faster by improving the search. 
