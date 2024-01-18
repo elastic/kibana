@@ -187,6 +187,14 @@ export const DocCountChart: FC<{
   );
 };
 
+/**
+ * Finds the last non-zero data point in the chart data
+ * backFillOffset can be set to jump back a number of buckets from the final non-zero bucket.
+ * This means the next time we load data, refresh the last n buckets of data in case there are new documents.
+ * @param data LineChartPoint[]
+ * @param backFillOffset number
+ * @returns
+ */
 function findLastTimestamp(data: LineChartPoint[], backFillOffset = 0) {
   let lastNonZeroDataPoint = data[0].time;
   let index = 0;
