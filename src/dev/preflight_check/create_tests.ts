@@ -6,29 +6,18 @@
  * Side Public License, v 1.
  */
 
-import chalk from 'chalk';
-import { MultiBar } from 'cli-progress';
 import { existsSync } from 'fs';
+import { Flags } from '@kbn/dev-cli-runner';
+import Table from 'cli-table3';
+import { ToolingLog } from '@kbn/tooling-log';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { dirname } from 'path';
 import { File } from '../file';
-import { checkFileCasing } from './check_file_casing';
-import { checkEsLint } from './check_eslint';
-import { checkTypescript } from './check_typescript';
-import { checkJest } from './check_jest';
-
-const checkTypes = ['i18n', 'typescript', 'eslint', 'jest', 'fileCasing'] as const;
-
-function getDefaults(taskName: string) {
-  const TASK_COL_LENGTH = 10;
-  return {
-    task: chalk.blue(taskName.padEnd(TASK_COL_LENGTH)),
-    filename: '',
-  };
-}
-
-export interface TestResponse {
-  test: typeof checkTypes[number];
-  errors: string[];
-}
+import { FileCasingCheck } from './checks/check_file_casing';
+import { EslintCheck } from './checks/check_eslint';
+import { TypescriptCheck } from './checks/check_typescript';
+import { JestCheck } from './checks/check_jest';
+import { findImportingFiles } from './utils/get_related_files';
 
 export interface DiffedFile {
   path: string;
@@ -40,36 +29,19 @@ export interface DiffedFile {
 
 export async function createTests({
   diffedFiles,
-  multibar,
   flags,
+  log,
 }: {
   diffedFiles: DiffedFile[];
-  multibar: MultiBar;
-  flags: { ci: boolean };
+  flags: Flags;
+  log: ToolingLog;
 }) {
-  const checks = checkTypes.reduce((acc, check) => {
-    acc[check] = {
-      files: [],
-    };
+  const typescriptCheck = new TypescriptCheck();
+  const eslintCheck = new EslintCheck({ fix: flags.fix });
+  const jestCheck = new JestCheck();
+  const fileCasingCheck = new FileCasingCheck();
 
-    return acc;
-  }, {} as Record<typeof checkTypes[number], { files: Array<{ path: string; file: File }> }>);
-
-  // add bars
-  const barTypescript = multibar.create(0, 0, getDefaults('typescript'));
-  const barEslint = multibar.create(0, 0, getDefaults('eslint'));
-  const barJest = multibar.create(0, 0, getDefaults('unit tests'));
-  const barFilecase = multibar.create(0, 0, getDefaults('file case'));
-  const barI18n = multibar.create(0, 0, getDefaults('i18n'));
-
-  if (flags.ci) {
-    multibar.remove(barTypescript);
-    multibar.remove(barJest);
-    multibar.remove(barEslint);
-    multibar.remove(barFilecase);
-    multibar.remove(barI18n);
-    multibar.stop();
-  }
+  const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck];
 
   for (const { path, mode, removed = [] } of diffedFiles) {
     const match = path.match(/^(.+?)((\.test|\.stories)?(\.tsx?|\.jsx?))$/);
@@ -79,67 +51,75 @@ export async function createTests({
 
     // If the user added a file with a test, add it to the list of files to test.
     if (ext === '.test.ts' || ext === '.test.tsx') {
-      checks.jest.files.push({ path, file: new File(path) });
-      barJest.setTotal(barJest.getTotal() + 1);
+      jestCheck.setFiles([{ path, file: new File(path) }]);
+      typescriptCheck.setFiles([{ path, file: new File(path) }]);
     }
 
     // if a user removed a line that includes i18n.translate, we need to run i18n check.
     if (
       removed.find((line) => line.includes('i18n.translate') || line.includes('<FormattedMessage'))
     ) {
-      checks.i18n.files.push({ path, file: new File(path) });
-      barI18n.setTotal(barI18n.getTotal() + 1);
+      // checks.i18n.files.push({ path, file: new File(path) });
     }
 
     // If the user has added a ts file, we need to run tsc and eslint on it.
     if (ext === '.ts' || ext === '.tsx') {
-      checks.typescript.files.push({ path, file: new File(path) });
-      barTypescript.setTotal(barTypescript.getTotal() + 1);
-
-      checks.eslint.files.push({ path, file: new File(path) });
-      barEslint.setTotal(barEslint.getTotal() + 1);
+      typescriptCheck.setFiles([{ path, file: new File(path) }]);
+      eslintCheck.setFiles([{ path, file: new File(path) }]);
 
       // Lets see if there is a corresponding Storybook or unit test file
       // for this file and also add it to the list to be checked.
       const storiesPath = `${pathWithoutExt}.stories.${ext}`;
       if (existsSync(storiesPath)) {
-        checks.eslint.files.push({ path: storiesPath, file: new File(storiesPath) });
-        barEslint.setTotal(barEslint.getTotal() + 1);
-
-        checks.typescript.files.push({ path: storiesPath, file: new File(storiesPath) });
-        barTypescript.setTotal(barTypescript.getTotal() + 1);
+        eslintCheck.setFiles([{ path: storiesPath, file: new File(storiesPath) }]);
+        typescriptCheck.setFiles([{ path: storiesPath, file: new File(storiesPath) }]);
       }
 
       const testPath = `${pathWithoutExt}.test.${ext}`;
       if (existsSync(testPath)) {
-        checks.eslint.files.push({ path: testPath, file: new File(testPath) });
-        barEslint.setTotal(barEslint.getTotal());
-
-        checks.typescript.files.push({ path: testPath, file: new File(testPath) });
-        barTypescript.setTotal(barTypescript.getTotal() + 1);
-
-        checks.jest.files.push({ path: testPath, file: new File(testPath) });
-        barJest.setTotal(barJest.getTotal() + 1);
+        eslintCheck.setFiles([{ path: testPath, file: new File(testPath) }]);
+        typescriptCheck.setFiles([{ path: testPath, file: new File(testPath) }]);
+        jestCheck.setFiles([{ path: testPath, file: new File(testPath) }]);
       }
+
+      // const relatedFiles = findImportingFiles({ directory: dirname(path), targetFile: path });
+
+      // typescriptCheck.setFiles(relatedFiles.map((p) => ({ path: p, file: new File(p) })));
     }
 
     if (mode === 'new') {
-      checks.fileCasing.files.push({ path, file: new File(path) });
-      barFilecase.setTotal(barFilecase.getTotal() + 1);
+      fileCasingCheck.setFiles([{ path, file: new File(path) }]);
     }
   }
 
-  if (!checks.typescript.files.length) multibar.remove(barTypescript);
-  if (!checks.eslint.files.length) multibar.remove(barEslint);
-  if (!checks.jest.files.length) multibar.remove(barJest);
-  if (!checks.fileCasing.files.length) multibar.remove(barFilecase);
-  if (!checks.i18n.files.length) multibar.remove(barI18n);
+  if (flags['show-file-set']) {
+    const relatedFiles = findImportingFiles({
+      directory: `${REPO_ROOT}/${dirname(diffedFiles[1].path)}`,
+      targetFile: diffedFiles[1].path,
+    });
 
-  return {
-    tsc: { test: checkTypescript, files: checks.typescript.files, bar: barTypescript },
-    eslint: { test: checkEsLint, files: checks.eslint.files, bar: barEslint },
-    jest: { test: checkJest, files: checks.jest.files, bar: barJest },
-    fileCasing: { test: checkFileCasing, files: checks.fileCasing.files, bar: barFilecase },
-    i18n: { files: checks.i18n.files, bar: barI18n },
-  };
+    typescriptCheck.setFiles(relatedFiles.map((p) => ({ path: p, file: new File(p) })));
+
+    const fileChangeSetTable = new Table({
+      head: ['Test', 'Files'],
+      // chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
+      colWidths: [15, 75],
+      wordWrap: true,
+      wrapOnWordBoundary: false,
+    });
+
+    fileChangeSetTable.push(
+      ...checks.map((check) => [
+        check.id,
+        check
+          .getFiles()
+          .map((f) => f.path)
+          .join('\n'),
+      ])
+    );
+
+    log.info(`\n${fileChangeSetTable.toString()}\n`);
+  }
+
+  return [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck];
 }

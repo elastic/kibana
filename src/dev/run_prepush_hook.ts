@@ -8,7 +8,6 @@
 
 import { existsSync } from 'node:fs';
 import { simpleGit } from 'simple-git';
-import cliProgress from 'cli-progress';
 import Table from 'cli-table3';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -17,7 +16,7 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import chalk from 'chalk';
 import { createTests } from './preflight_check/create_tests';
-import { nonNullable } from './preflight_check/non_nullable';
+import { nonNullable } from './preflight_check/utils/non_nullable';
 
 const HASH_FOR_NULL_OR_DELETED_FILE = '00000000000';
 
@@ -129,34 +128,11 @@ This might influence the outcome of these tests.
       log.warning(`${warning.toString()}\n`);
     }
 
+    const tests = await createTests({ diffedFiles, flags, log });
+
     log.info('🐎 Running preflight checks on your files...\n');
 
-    const multibar = new cliProgress.MultiBar(
-      {
-        clearOnComplete: false,
-        hideCursor: true,
-        fps: 60,
-        barCompleteChar: '\u2588',
-        barIncompleteChar: '\u2591',
-        format: '      {task} | {bar} | {value}/{total} | {filename}',
-      },
-      cliProgress.Presets.shades_grey
-    );
-
-    const { tsc, eslint, jest, fileCasing } = await createTests({
-      diffedFiles,
-      multibar,
-      flags: { ci: Boolean(flags.ci) },
-    });
-
-    const checkResponses = await Promise.all([
-      tsc.test(tsc.files, tsc.bar),
-      eslint.test(eslint.files, eslint.bar, { fix: Boolean(flags.fix) }),
-      jest.test(jest.files, jest.bar),
-      fileCasing.test(fileCasing.files, fileCasing.bar),
-    ]);
-
-    multibar.stop();
+    const checkResponses = await Promise.all(tests.map((test) => test.runCheck()));
 
     if (checkResponses.some((checkResponse) => checkResponse?.errors.length)) {
       log.info('Results');
@@ -192,17 +168,19 @@ This might influence the outcome of these tests.
   {
     description: `Run checks on files that have been changed in your branch compared to upstream.`,
     flags: {
-      boolean: ['fix', 'ci'],
-      string: ['max-files'],
+      boolean: ['fix', 'show-file-set'],
+      string: ['max-files', 'depth'],
       default: {
+        depth: 2,
         fix: false,
         'max-files': 30,
-        ci: false,
+        'show-file-set': true,
       },
       help: `
+      --depth            Max depth of related files to check against. If exceeded the script will skip the execution
       --fix              Attempt to autofix problems
       --max-files        Max files number to check against. If exceeded the script will skip the execution
-      --ci               Run in CI mode. This will not display progress bars.
+      --show-file-set    Show which files are being checked
       `,
     },
   }

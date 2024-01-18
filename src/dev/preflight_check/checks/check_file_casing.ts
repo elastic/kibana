@@ -8,17 +8,16 @@
 
 import { relative, basename } from 'path';
 import { dim } from 'chalk';
-import { SingleBar } from 'cli-progress';
-import { matchesAnyGlob } from '../globs';
+import { matchesAnyGlob } from '../../globs';
 
 import {
   IGNORE_DIRECTORY_GLOBS,
   IGNORE_FILE_GLOBS,
   TEMPORARILY_IGNORED_PATHS,
   KEBAB_CASE_DIRECTORY_GLOBS,
-} from '../precommit_hook/casing_check_config';
-import { File } from '../file';
-import { TestResponse } from './create_tests';
+} from '../../precommit_hook/casing_check_config';
+import { File } from '../../file';
+import { PreflightCheck } from '../preflight_check';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
@@ -127,25 +126,23 @@ async function checkForSnakeCase(files: File[]) {
   return results.length ? results : undefined;
 }
 
-export async function checkFileCasing(
-  files: Array<{ path: string; file: File }>,
-  bar?: SingleBar
-): Promise<TestResponse> {
-  const logs = [];
-  for (const { path, file } of files) {
-    bar?.increment();
-    bar?.update({ filename: path });
+export class FileCasingCheck extends PreflightCheck {
+  id = 'fileCasing';
 
-    const kebabCaseResponse = await checkForKebabCase([file]);
+  public async runCheck() {
+    const files = Array.from(this.files.values()).map(({ file }) => file);
+    const logs = [];
+
+    const kebabCaseResponse = await checkForKebabCase(files);
     if (kebabCaseResponse) {
       logs.push(kebabCaseResponse);
     }
 
-    const snakeCaseResponse = await checkForSnakeCase([file]);
+    const snakeCaseResponse = await checkForSnakeCase(files);
     if (snakeCaseResponse) {
       logs.push(snakeCaseResponse);
     }
-  }
 
-  return { test: 'fileCasing', errors: logs.flatMap((l) => l) };
+    return { test: 'fileCasing', errors: logs.flatMap((l) => l) };
+  }
 }
