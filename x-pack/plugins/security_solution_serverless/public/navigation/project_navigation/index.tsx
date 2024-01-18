@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import React, { Suspense } from 'react';
-import { EuiLoadingSpinner } from '@elastic/eui';
+import { type Services } from '../../common/services';
 
-const SecuritySideNavComponentLazy = React.lazy(() => import('./project_navigation'));
-
-export const SecuritySideNavComponent = () => (
-  <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-    <SecuritySideNavComponentLazy />
-  </Suspense>
-);
+export const initProjectNavigation = (services: Services) => {
+  import('./project_navigation').then(({ init }) => {
+    const { navigationTree$, panelContentProvider, dataTestSubj } = init(services);
+    services.serverless.initNavigation(navigationTree$, { panelContentProvider, dataTestSubj });
+  });
+};
