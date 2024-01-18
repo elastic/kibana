@@ -15,16 +15,13 @@ import type { Validator } from './validator';
 
 export function createFormSlice<FF extends string, FS extends string, VN extends string>(
   name: string,
-  formFieldsArr: Array<FormField<FF, FS, VN>>,
-  formSectionsArr: Array<FormSection<FS>>,
+  formFields: Array<FormField<FF, FS, VN>>,
+  formSections: Array<FormSection<FS>>,
   validators: Record<VN, Validator>
 ) {
-  const formFields = createFormFieldsMap(formFieldsArr);
-  const formSections = createFormSectionsMap(formSectionsArr);
-
   const initialState = {
-    formFields,
-    formSections,
+    formFields: createFormFieldsMap(formFields),
+    formSections: createFormSectionsMap(formSections),
     submitErrorMessage: undefined as string | undefined,
   };
 
@@ -65,14 +62,14 @@ export function createFormSlice<FF extends string, FS extends string, VN extends
       initialize: (
         state,
         action: PayloadAction<{
-          formFieldsArr: Array<FormField<FF, FS, VN>>;
-          formSectionsArr: Array<FormSection<FS>>;
+          formFields: Array<FormField<FF, FS, VN>>;
+          formSections: Array<FormSection<FS>>;
         }>
       ) => {
-        state.formFields = createFormFieldsMap(action.payload.formFieldsArr) as Draft<
+        state.formFields = createFormFieldsMap(action.payload.formFields) as Draft<
           Record<FF, FormField<FF, FS, VN>>
         >;
-        state.formSections = createFormSectionsMap(action.payload.formSectionsArr) as Draft<
+        state.formSections = createFormSectionsMap(action.payload.formSections) as Draft<
           Record<FS, FormSection<FS>>
         >;
       },

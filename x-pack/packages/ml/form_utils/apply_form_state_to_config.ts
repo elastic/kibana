@@ -23,11 +23,11 @@ export const applyFormStateToConfig = <FF extends string, FS extends string, VN 
   formFields: State<FF, FS, VN>['formFields'],
   formSections: State<FF, FS, VN>['formSections'],
   extendOriginalConfig = false
-) =>
+): C =>
   // Iterates over all form fields and only if necessary applies them to
   // the request object used for updating the transform.
   (Object.keys(formFields) as FF[]).reduce(
     (updateConfig, field) =>
       merge({ ...updateConfig }, getUpdateValue(field, config, formFields, formSections)),
-    extendOriginalConfig ? config : {}
+    (extendOriginalConfig ? config : {}) as C
   );

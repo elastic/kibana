@@ -10,30 +10,27 @@ import { createSelector } from '@reduxjs/toolkit';
 import { useSelector } from 'react-redux';
 
 import { applyFormStateToConfig } from './apply_form_state_to_config';
-import type { State } from './form_slice';
+import type { FormSlice } from './form_slice';
 import { createSelectFormFields } from './use_form_field';
 import { createSelectFormSections } from './use_form_sections';
 
-const createSelectUpdatedConfig = <
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  S extends State<FF, FS, VN>,
-  OC
->(
-  stateAccessor: string,
+const createSelectUpdatedConfig = <FF extends string, FS extends string, VN extends string, OC>(
+  slice: FormSlice<FF, FS, VN>,
   originalConfig: OC
 ) =>
   createSelector(
-    createSelectFormFields<FF, FS, VN, S>(stateAccessor),
-    createSelectFormSections<FF, FS, VN, S>(stateAccessor),
+    createSelectFormFields<FF, FS, VN>(slice),
+    createSelectFormSections<FF, FS, VN>(slice),
     (formFields, formSections) => applyFormStateToConfig(originalConfig, formFields, formSections)
   );
 
-export const useUpdatedConfig = <OC>(stateAccessor: string, originalConfig: OC) => {
+export const useUpdatedConfig = <FF extends string, FS extends string, VN extends string, OC>(
+  slice: FormSlice<FF, FS, VN>,
+  originalConfig: OC
+) => {
   const selectUpdatedConfig = useMemo(
-    () => createSelectUpdatedConfig(stateAccessor, originalConfig),
-    [originalConfig, stateAccessor]
+    () => createSelectUpdatedConfig(slice, originalConfig),
+    [originalConfig, slice]
   );
   return useSelector(selectUpdatedConfig);
 };
