@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
-  EuiFilterSelectItem,
   EuiNotificationBadge,
   EuiPopover,
+  EuiSelectable,
   EuiText,
   EuiTourStep,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { useInactiveAgentsCalloutHasBeenDismissed, useLastSeenInactiveAgentsCount } from '../hooks';
@@ -155,7 +155,37 @@ export const AgentStatusFilter: React.FC<{
     setIsStatusFilterOpen(isOpen);
   };
 
-  const { euiTheme } = useEuiTheme();
+  const [options, setOptions] = useState<EuiSelectableOption[]>(
+    statusFilters.map(({ label, status }) => {
+      return {
+        label,
+        checked: selectedStatus.includes(status) ? 'on' : undefined,
+        key: status,
+        append:
+          status === 'inactive' && newlyInactiveAgentsCount > 0 ? (
+            <LeftpaddedNotificationBadge>{newlyInactiveAgentsCount}</LeftpaddedNotificationBadge>
+          ) : undefined,
+      };
+    })
+  );
+
+  const onOptionsChange = useCallback(
+    (newOptions: EuiSelectableOption[]) => {
+      setOptions(newOptions);
+      newOptions.forEach((option, index) => {
+        if (option.checked !== options[index].checked) {
+          const status = option.key!;
+          if (option.checked !== 'on') {
+            onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
+          } else {
+            onSelectedStatusChange([...selectedStatus, status]);
+          }
+          return;
+        }
+      });
+    },
+    [onSelectedStatusChange, options, selectedStatus]
+  );
 
   return (
     <InactiveAgentsTourStep
@@ -181,33 +211,19 @@ export const AgentStatusFilter: React.FC<{
         closePopover={() => updateIsStatusFilterOpen(false)}
         panelPaddingSize="none"
       >
-        {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
-            instead of EuiFilterSelectItem (which is pending deprecation).
-            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
-        <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
-          {statusFilters.map(({ label, status }, idx) => (
-            <EuiFilterSelectItem
-              key={idx}
-              checked={selectedStatus.includes(status) ? 'on' : undefined}
-              onClick={() => {
-                if (selectedStatus.includes(status)) {
-                  onSelectedStatusChange([...selectedStatus.filter((s) => s !== status)]);
-                } else {
-                  onSelectedStatusChange([...selectedStatus, status]);
-                }
-              }}
-            >
-              <span>
-                {label}
-                {status === 'inactive' && newlyInactiveAgentsCount > 0 && (
-                  <LeftpaddedNotificationBadge>
-                    {newlyInactiveAgentsCount}
-                  </LeftpaddedNotificationBadge>
-                )}
-              </span>
-            </EuiFilterSelectItem>
-          ))}
-        </div>
+        <EuiSelectable
+          options={options}
+          onChange={onOptionsChange}
+          data-test-subj="agentList.agentStatusFilterOptions"
+          listProps={{
+            paddingSize: 's',
+            style: {
+              minWidth: 140,
+            },
+          }}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </EuiPopover>
     </InactiveAgentsTourStep>
   );
