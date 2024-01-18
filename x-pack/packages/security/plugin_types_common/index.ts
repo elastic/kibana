@@ -27,3 +27,11 @@ export type {
   UserProfileWithSecurity,
   UserProfileUserInfoWithSecurity,
 } from './src/user_profile';
+export type {
+  ApiKey,
+  RestApiKey,
+  CrossClusterApiKey,
+  ApiKeyToInvalidate,
+  ApiKeyRoleDescriptors,
+  CrossClusterApiKeyAccess,
+} from './src/model/api_key';

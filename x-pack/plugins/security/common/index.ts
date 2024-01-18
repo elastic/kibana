@@ -7,8 +7,6 @@
 
 export type {
   GetUserProfileResponse,
-  ApiKey,
-  RestApiKey,
   GetUserDisplayNameParams,
   EditUser,
   BuiltinESPrivileges,
@@ -24,6 +22,8 @@ export { getUserDisplayName, isRoleReserved } from './model';
 // Re-export types from the plugin directly to enhance the developer experience for consumers of the Security plugin.
 export type {
   AuthenticatedUser,
+  ApiKey,
+  RestApiKey,
   UserRealm,
   User,
   AuthenticationProvider,

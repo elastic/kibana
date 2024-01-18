@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ExclusiveUnion } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,7 +40,11 @@ import { FormattedDate, FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 
-import type { CategorizedApiKey } from './api_keys_grid_page';
+import type {
+  ApiKeyFlyoutProps,
+  ApiKeyFormValues,
+  CategorizedApiKey,
+} from './api_key_flyout_types';
 import { ApiKeyBadge, ApiKeyStatus, TimeToolTip } from './api_keys_grid_page';
 import type { ApiKeyRoleDescriptors } from '../../../../common/model';
 import { DocLink } from '../../../components/doc_link';
@@ -52,12 +55,7 @@ import { useHtmlId } from '../../../components/use_html_id';
 import { useInitialFocus } from '../../../components/use_initial_focus';
 import { RolesAPIClient } from '../../roles/roles_api_client';
 import { APIKeysAPIClient } from '../api_keys_api_client';
-import type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
-  UpdateAPIKeyParams,
-  UpdateAPIKeyResult,
-} from '../api_keys_api_client';
+import type { CreateAPIKeyParams, UpdateAPIKeyParams } from '../api_keys_api_client';
 
 const TypeLabel = () => (
   <FormattedMessage
@@ -79,37 +77,6 @@ const invalidJsonError = i18n.translate(
     defaultMessage: 'Enter valid JSON.',
   }
 );
-
-export interface ApiKeyFormValues {
-  name: string;
-  type: string;
-  expiration: string;
-  customExpiration: boolean;
-  customPrivileges: boolean;
-  includeMetadata: boolean;
-  access: string;
-  role_descriptors: string;
-  metadata: string;
-}
-
-interface CommonApiKeyFlyoutProps {
-  initialValues?: ApiKeyFormValues;
-  onCancel(): void;
-  canManageCrossClusterApiKeys?: boolean;
-  readOnly?: boolean;
-}
-
-interface CreateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
-  onSuccess?: (createApiKeyResponse: CreateAPIKeyResult) => void;
-}
-
-interface UpdateApiKeyFlyoutProps extends CommonApiKeyFlyoutProps {
-  onSuccess?: (updateApiKeyResponse: UpdateAPIKeyResult) => void;
-  apiKey: CategorizedApiKey;
-}
-
-export type ApiKeyFlyoutProps = ExclusiveUnion<CreateApiKeyFlyoutProps, UpdateApiKeyFlyoutProps>;
-
 const defaultInitialValues: ApiKeyFormValues = {
   name: '',
   type: 'rest',
@@ -944,3 +911,7 @@ function mapApiKeyFormValues(apiKey: CategorizedApiKey): ApiKeyFormValues {
     access: apiKey.type === 'cross_cluster' ? JSON.stringify(apiKey.access, null, 2) : '{}',
   };
 }
+
+// Default Export is needed to lazy load this react component
+// eslint-disable-next-line import/no-default-export
+export default ApiKeyFlyout;

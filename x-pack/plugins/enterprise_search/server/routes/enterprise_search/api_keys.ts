@@ -74,24 +74,4 @@ export function registerApiKeysRoutes(
       });
     }
   );
-
-  router.post(
-    {
-      path: '/internal/enterprise_search/api_keys',
-      validate: {
-        body: schema.any(),
-      },
-    },
-    async (context, request, response) => {
-      const result = await security.authc.apiKeys.create(request, request.body);
-      if (result) {
-        const apiKey = { ...result, beats_logstash_format: `${result.id}:${result.api_key}` };
-        return response.ok({ body: apiKey });
-      }
-      return response.customError({
-        body: 'Could not retrieve current user, security plugin is not ready',
-        statusCode: 502,
-      });
-    }
-  );
 }

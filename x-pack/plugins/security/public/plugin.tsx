@@ -35,6 +35,8 @@ import { AuthenticationService } from './authentication';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
+import type { ApiKeyFlyoutProps } from './management/api_keys/api_keys_grid/api_key_flyout_types';
+import { renderApiKeyFlyout } from './management/api_keys/api_keys_grid/render_api_key_flyout';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -217,6 +219,7 @@ export class SecurityPlugin
         ),
         userProfile$: this.securityApiClients.userProfiles.userProfile$,
       },
+      renderApiKeyFlyout: (props: ApiKeyFlyoutProps | undefined) => renderApiKeyFlyout(props, {}),
     };
   }
 

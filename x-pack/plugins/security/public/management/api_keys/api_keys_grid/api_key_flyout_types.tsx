@@ -5,52 +5,17 @@
  * 2.0.
  */
 
-import type { ApiKey, RestApiKey, SecurityLicense } from '@kbn/security-plugin-types-common';
-import { ReactElement } from 'react';
-import type { ExclusiveUnion } from '@elastic/eui';
 import type {
   SecurityCreateApiKeyResponse,
   SecurityUpdateApiKeyResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { AuthenticationServiceSetup, AuthenticationServiceStart } from './authentication';
-import type { SecurityNavControlServiceStart } from './nav_control';
-import type { UserProfileAPIClient } from './user_profile';
+import type { ExclusiveUnion } from '@elastic/eui';
 
-export interface SecurityPluginSetup {
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceSetup;
-  /**
-   * Exposes information about the available security features under the current license.
-   */
-  license: SecurityLicense;
-}
-
-export interface SecurityPluginStart {
-  /**
-   * Exposes the ability to add custom links to the dropdown menu in the top right, where the user's Avatar is.
-   */
-  navControlService: SecurityNavControlServiceStart;
-  /**
-   * Exposes authentication information about the currently logged in user.
-   */
-  authc: AuthenticationServiceStart;
-  /**
-   * A set of methods to work with Kibana user profiles.
-   */
-  userProfiles: UserProfileAPIClient;
-
-  /**
-   * Allow other plugins to render the API Key Flyout
-   */
-
-  renderApiKeyFlyout: (props: ApiKeyFlyoutProps) => ReactElement | null;
-}
+import type { ApiKey, RestApiKey } from '../../../../common';
 
 /**
- * Re-defining these here because we can't import from public here
- * we could move this to this public but that feels nasty
+ * The component types are in a separate file so we don't drag in the whole plugin in the bundle
+ * when lazy loading
  */
 
 export interface ApiKeyFormValues {

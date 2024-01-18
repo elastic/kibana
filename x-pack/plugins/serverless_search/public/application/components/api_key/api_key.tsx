@@ -24,6 +24,7 @@ import { css } from '@emotion/react';
 import { ApiKey } from '@kbn/security-plugin/common';
 import { useQuery } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { SecurityCreateApiKeyResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
 import { CreateApiKeyFlyout } from './create_api_key_flyout';
@@ -31,26 +32,24 @@ import './api_key.scss';
 import { CreateApiKeyResponse } from '../../hooks/api/use_create_api_key';
 
 export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: string) => void }) => {
-  const { http, user } = useKibanaServices();
+  const { http } = useKibanaServices();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const { data } = useQuery({
     queryKey: ['apiKey'],
     queryFn: () => http.fetch<{ apiKeys: ApiKey[] }>('/internal/serverless_search/api_keys'),
   });
   const [apiKey, setApiKey] = useState<CreateApiKeyResponse | undefined>(undefined);
-  const saveApiKey = (value: CreateApiKeyResponse) => {
-    setApiKey(value);
+  const saveApiKey = (value: SecurityCreateApiKeyResponse) => {
+    setApiKey(
+      value ? { ...value, beats_logstash_format: `${value.id}:${value.api_key}` } : undefined
+    );
     if (value.encoded) setClientApiKey(value.encoded);
   };
 
   return (
     <>
       {isFlyoutOpen && (
-        <CreateApiKeyFlyout
-          onClose={() => setIsFlyoutOpen(false)}
-          setApiKey={saveApiKey}
-          username={user?.full_name || user?.username || ''}
-        />
+        <CreateApiKeyFlyout onClose={() => setIsFlyoutOpen(false)} setApiKey={saveApiKey} />
       )}
       {apiKey ? (
         <EuiPanel className="apiKeySuccessPanel" data-test-subj="api-key-create-success-panel">

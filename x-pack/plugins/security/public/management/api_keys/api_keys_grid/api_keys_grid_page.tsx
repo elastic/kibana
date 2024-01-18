@@ -36,9 +36,10 @@ import { Route } from '@kbn/shared-ux-router';
 import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 
 import { ApiKeyFlyout } from './api_key_flyout';
+import type { CategorizedApiKey } from './api_key_flyout_types';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
-import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common';
+import type { ApiKey, AuthenticatedUser } from '../../../../common';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
@@ -823,21 +824,6 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       </EuiBadge>
     </EuiToolTip>
   );
-};
-
-/**
- * Interface representing a REST API key that is managed by Kibana.
- */
-export interface ManagedApiKey extends Omit<RestApiKey, 'type'> {
-  type: 'managed';
-}
-
-/**
- * Interface representing an API key the way it is presented in the Kibana UI  (with Kibana system
- * API keys given its own dedicated `managed` type).
- */
-export type CategorizedApiKey = (ApiKey | ManagedApiKey) & {
-  expired: boolean;
 };
 
 /**

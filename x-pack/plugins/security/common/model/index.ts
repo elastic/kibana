@@ -12,7 +12,7 @@ export type {
   ApiKeyToInvalidate,
   ApiKeyRoleDescriptors,
   CrossClusterApiKeyAccess,
-} from './api_key';
+} from '@kbn/security-plugin-types-common';
 export type { EditUser, GetUserDisplayNameParams } from './user';
 export type { GetUserProfileResponse } from './user_profile';
 export {
