@@ -7,48 +7,21 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-import { last } from 'lodash';
-import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { MessageRole } from '../../../../common';
+import moment from 'moment';
 import { chatClient, esClient, synthtraceEsClients } from '../../services';
-
-function extractEsqlQuery(response: string) {
-  return response.match(/```esql([\s\S]*?)```/)?.[1];
-}
 
 async function evaluateEsqlQuery({
   question,
   expected,
   criteria = [],
-  execute = true,
 }: {
   question: string;
   expected?: string;
   criteria?: string[];
-  execute?: boolean;
 }): Promise<void> {
-  let conversation = await chatClient.complete(question);
-
-  const esqlQuery = extractEsqlQuery(last(conversation.messages)?.content || '');
-
-  if (esqlQuery && execute) {
-    conversation = await chatClient.complete(
-      conversation.conversationId!,
-      conversation.messages.concat({
-        content: '',
-        role: MessageRole.Assistant,
-        function_call: {
-          name: 'execute_query',
-          arguments: JSON.stringify({
-            query: esqlQuery,
-          }),
-          trigger: MessageRole.User,
-        },
-      })
-    );
-  }
+  const conversation = await chatClient.complete(question);
 
   const evaluation = await chatClient.evaluate(conversation, [
     ...(expected
@@ -57,7 +30,7 @@ async function evaluateEsqlQuery({
       ${expected}`,
         ]
       : []),
-    ...(execute && expected ? [`The query successfully executed without an error`] : []),
+    ...(expected ? [`The query successfully executed without an error`] : []),
     ...criteria,
   ]);
 
@@ -146,7 +119,6 @@ describe('ES|QL query generation', () => {
           | SORT hire_date
           | KEEP emp_no, hire_date_formatted
           | LIMIT 5`,
-          execute: false,
         });
       });
 

@@ -21,7 +21,12 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 
 import * as i18n from './translations';
 
-describe('CustomFieldFlyout ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174285
+// FLAKY: https://github.com/elastic/kibana/issues/174286
+// FLAKY: https://github.com/elastic/kibana/issues/174287
+// FLAKY: https://github.com/elastic/kibana/issues/174288
+// FLAKY: https://github.com/elastic/kibana/issues/174289
+describe.skip('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {
