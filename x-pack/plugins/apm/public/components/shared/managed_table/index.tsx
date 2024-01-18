@@ -20,8 +20,8 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { fromQuery, toQuery } from '../links/url_helpers';
 import {
   getItemsFilteredBySearchQuery,
-  TableSearchBarV2,
-} from '../table_search_bar/table_search_bar_v2';
+  TableSearchBar,
+} from '../table_search_bar/table_search_bar';
 
 type SortDirection = 'asc' | 'desc';
 
@@ -259,7 +259,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   return (
     <>
       {isSearchBarEnabled ? (
-        <TableSearchBarV2
+        <TableSearchBar
           placeholder={tableSearchBar.placeholder}
           searchQuery={searchQuery}
           onChangeSearchQuery={onChangeSearchQuery}
