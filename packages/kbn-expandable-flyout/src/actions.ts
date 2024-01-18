@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createAction } from '@reduxjs/toolkit';
 import { FlyoutPanelProps } from './types';
 
 export enum ActionType {
@@ -20,39 +21,19 @@ export enum ActionType {
   closeFlyout = 'close_flyout',
 }
 
-export type Action =
-  | {
-      type: ActionType.openFlyout;
-      payload: {
-        right?: FlyoutPanelProps;
-        left?: FlyoutPanelProps;
-        preview?: FlyoutPanelProps;
-      };
-    }
-  | {
-      type: ActionType.openRightPanel;
-      payload: FlyoutPanelProps;
-    }
-  | {
-      type: ActionType.openLeftPanel;
-      payload: FlyoutPanelProps;
-    }
-  | {
-      type: ActionType.openPreviewPanel;
-      payload: FlyoutPanelProps;
-    }
-  | {
-      type: ActionType.closeRightPanel;
-    }
-  | {
-      type: ActionType.closeLeftPanel;
-    }
-  | {
-      type: ActionType.closePreviewPanel;
-    }
-  | {
-      type: ActionType.previousPreviewPanel;
-    }
-  | {
-      type: ActionType.closeFlyout;
-    };
+export const openPanelsAction = createAction<{
+  right?: FlyoutPanelProps;
+  left?: FlyoutPanelProps;
+  preview?: FlyoutPanelProps;
+}>(ActionType.openFlyout);
+
+export const openRightPanelAction = createAction<FlyoutPanelProps>(ActionType.openRightPanel);
+export const openLeftPanelAction = createAction<FlyoutPanelProps>(ActionType.openLeftPanel);
+export const openPreviewPanelAction = createAction<FlyoutPanelProps>(ActionType.openPreviewPanel);
+
+export const closePanelsAction = createAction(ActionType.closeFlyout);
+export const closeRightPanelAction = createAction(ActionType.closeRightPanel);
+export const closeLeftPanelAction = createAction(ActionType.closeLeftPanel);
+export const closePreviewPanelAction = createAction(ActionType.closePreviewPanel);
+
+export const previousPreviewPanelAction = createAction(ActionType.previousPreviewPanel);
