@@ -227,6 +227,7 @@ export const RulesCounters = () => {
 
   const counters = [
     {
+      id: 'rules-counters-posture-score',
       description: i18n.translate('xpack.csp.rulesCounters.postureScoreTitle', {
         defaultMessage: 'Posture Score',
       }),
@@ -253,6 +254,7 @@ export const RulesCounters = () => {
       ),
     },
     {
+      id: 'rules-counters-evaluated',
       description: i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedTitle', {
         defaultMessage: '{resourceName} Evaluated',
         values: {
@@ -276,6 +278,7 @@ export const RulesCounters = () => {
       ),
     },
     {
+      id: 'rules-counters-failed-findings',
       description: i18n.translate('xpack.csp.rulesCounters.failedFindingsTitle', {
         defaultMessage: 'Failed Findings',
       }),
@@ -299,6 +302,7 @@ export const RulesCounters = () => {
       ),
     },
     {
+      id: 'rules-counters-disabled-rules',
       description: i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterTitle', {
         defaultMessage: 'Disabled Rules',
       }),
