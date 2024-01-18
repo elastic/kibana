@@ -97,10 +97,61 @@ export class ConversationDataWriter implements ConversationDataWriter {
         transformToCreateScheme(changedAt, this.options.spaceId, this.options.user, conversation),
       ]) ?? [];
 
+    const updatedAt = new Date().toISOString();
     const conversationUpdatedBody =
       params.conversationsToUpdate?.flatMap((conversation) => [
         { update: { _id: conversation.id, _index: this.options.index } },
-        transformToUpdateScheme(changedAt, conversation),
+        {
+          script: {
+            source: `
+          if (params.assignEmpty == true || params.containsKey('api_config')) {
+            if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
+              ctx._source.api_config.connector_id = params.api_config.connector_id;
+            }
+            if (params.assignEmpty == true || params.api_config.containsKey('connector_type_title')) {
+              ctx._source.api_config.connector_type_title = params.api_config.connector_type_title;
+            }
+            if (params.assignEmpty == true || params.api_config.containsKey('default_system_prompt_id')) {
+              ctx._source.api_config.default_system_prompt_id = params.api_config.default_system_prompt_id;
+            }
+            if (params.assignEmpty == true || params.api_config.containsKey('model')) {
+              ctx._source.api_config.model = params.api_config.model;
+            }
+            if (params.assignEmpty == true || params.api_config.containsKey('provider')) {
+              ctx._source.api_config.provider = params.api_config.provider;
+            }
+          }
+          if (params.assignEmpty == true || params.containsKey('exclude_from_last_conversation_storage')) {
+            ctx._source.exclude_from_last_conversation_storage = params.exclude_from_last_conversation_storage;
+          }
+          if (params.assignEmpty == true || params.containsKey('replacements')) {
+            ctx._source.replacements = params.replacements;
+          }
+          if (params.assignEmpty == true || params.containsKey('title')) {
+            ctx._source.title = params.title;
+          }
+          if (params.assignEmpty == true || params.containsKey('messages')) {
+            def messages = [];
+            for (message in params.messages) {
+              def newMessage = [:];
+              newMessage['@timestamp'] = message['@timestamp'];
+              newMessage.content = message.content;
+              newMessage.is_error = message.is_error;
+              newMessage.presentation = message.presentation;
+              newMessage.reader = message.reader;
+              newMessage.replacements = message.replacements;
+              newMessage.role = message.role; 
+              messages.add(newMessage);
+            }
+            ctx._source.messages = messages;
+          }
+          ctx._source.updated_at = params.updated_at;
+        `,
+            lang: 'painless',
+            params: transformToUpdateScheme(updatedAt, conversation),
+          },
+          upsert: { counter: 1 },
+        },
       ]) ?? [];
 
     const response = params.conversationsToDelete
