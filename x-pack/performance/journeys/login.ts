@@ -44,8 +44,10 @@ export const journey = new Journey({
   await page.type(subj('loginUsername'), auth.getUsername(), { delay: inputDelays.TYPING });
   await page.type(subj('loginPassword'), auth.getPassword(), { delay: inputDelays.TYPING });
   await page.click(subj('loginSubmit'), { delay: inputDelays.MOUSE_CLICK });
+  await page.waitForSelector(subj('userMenuButton'), {
+    state: 'attached',
+  });
 
-  await kibanaPage.waitForHeader();
   log.error('test finished');
   console.log('#test finished');
 });

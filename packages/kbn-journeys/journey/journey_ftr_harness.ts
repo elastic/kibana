@@ -8,7 +8,7 @@
 
 import Url from 'url';
 import { inspect, format } from 'util';
-import { setTimeout } from 'timers/promises';
+import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
@@ -185,6 +185,7 @@ export class JourneyFtrHarness {
         this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
         this.pageTeardown$.next(this.page);
         await new Promise<void>((resolve) => telemetryTracker.add(resolve));
+        //await new Promise((resolve) => setTimeout(resolve, 100 * 1000));
       }
       console.log('telemetryTracker closed');
 
@@ -225,7 +226,7 @@ export class JourneyFtrHarness {
     // can't track but hope it is started within 3 seconds, node will stay
     // alive for active requests
     // https://github.com/elastic/apm-agent-nodejs/issues/2088
-    await setTimeout(3000);
+    await setTimer(3000);
   }
 
   private async onTeardown() {
@@ -339,9 +340,6 @@ export class JourneyFtrHarness {
   private telemetryTrackerCount = 0;
 
   private trackTelemetryRequests(page: Page) {
-    const id = ++this.telemetryTrackerCount;
-
-    const requestFailure$ = Rx.fromEvent<Request>(page, 'requestfailed');
     const requestSuccess$ = Rx.fromEvent<Request>(page, 'requestfinished');
     const request$ = Rx.fromEvent<Request>(page, 'request').pipe(
       Rx.takeUntil(
@@ -356,16 +354,27 @@ export class JourneyFtrHarness {
           // })
         )
       ),
-      Rx.mergeMap((request) => {
+      Rx.mergeMap((request: Request) => {
         if (!request.url().includes('telemetry-staging.elastic.co')) {
           return Rx.EMPTY;
         }
 
+        const id = ++this.telemetryTrackerCount;
+
         this.log.debug(`Waiting for telemetry request #${id} to complete`);
-        return Rx.merge(requestFailure$, requestSuccess$).pipe(
-          Rx.first((r) => r === request),
+        console.log(`Waiting for telemetry request #${id} to complete`);
+        return Rx.of(requestSuccess$).pipe(
+          Rx.timeout(60_000),
+          Rx.catchError((error) => {
+            if (error instanceof Error && error.name === 'TimeoutError') {
+              console.log(`Timeout error occurred: ${error.message}`);
+            }
+            // Rethrow the error if it's not a TimeoutError
+            return Rx.throwError(() => new Error(error));
+          }),
           Rx.tap({
-            complete: () => this.log.debug(`Telemetry request #${id} complete`),
+            complete: () => console.log(`Telemetry request #${id} complete`),
+            error: (err) => console.log(err),
           })
         );
       })

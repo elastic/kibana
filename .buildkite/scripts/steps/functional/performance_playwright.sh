@@ -20,7 +20,7 @@ if [ "$BUILDKITE_PIPELINE_SLUG" == "kibana-performance-data-set-extraction" ]; t
 else
   # pipeline should use bare metal static worker
   echo "--- Running performance tests"
-  for i in {1..4}
+  for i in {1..8}
   do
     echo "--- Running login journey #$i"
     node scripts/run_performance.js --kibana-install-dir "$KIBANA_BUILD_LOCATION" --journey-path "x-pack/performance/journeys/login.ts"
