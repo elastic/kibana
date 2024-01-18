@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FIELDS_FOR_WILDCARD_PATH } from '@kbn/data-views-plugin/common/constants';
 import {
   addEndpointResponseAction,
   fillUpNewRule,
@@ -247,11 +246,9 @@ describe(
           cleanupRule(ruleId);
         });
 
-        it('All response action controls are disabled', () => {
-          cy.intercept('GET', `${FIELDS_FOR_WILDCARD_PATH}*`).as('getFieldsForWildcard');
-          visitRuleActions(ruleId);
-          cy.wait('@getFieldsForWildcard');
-          cy.getByTestSubj('edit-rule-actions-tab').click();
+      it('All response action controls are disabled', () => {
+        visitRuleActions(ruleId);
+        cy.getByTestSubj('edit-rule-actions-tab').click();
 
           cy.getByTestSubj('response-actions-wrapper').within(() => {
             cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
