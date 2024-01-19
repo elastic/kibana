@@ -24,7 +24,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana_alerting_cases",
-    "id": "alert:903b890f-4e98-4ea5-bc10-71433f01de18",
+    "id": "alert:ef277b05-595b-41b9-9674-d199753c40ca",
     "source": {
       "alert": {
         "name": "test_rule",
@@ -32,7 +32,7 @@
         "enabled": true,
         "alertTypeId": "apm.transaction_error_rate",
         "consumer": "alerts",
-        "legacyId": null,
+        "legacyId": "some-legacy-id",
         "schedule": {
           "interval": "1m"
         },
@@ -62,15 +62,19 @@
           "windowUnit": "m",
           "environment": "ENVIRONMENT_ALL"
         },
+        "mapped_params": {
+          "risk_score": 1.23,
+          "severity": "some-severity"
+        },
         "createdBy": "elastic",
         "updatedBy": "elastic",
         "createdAt": "2024-01-16T22:09:07.964Z",
         "updatedAt": "2024-01-16T22:09:07.964Z",
-        "apiKey": "S7odcWLc1kd/BaRMg5Z1f/RouQ2iVkB2m2+NE2LWPN0QLg5iTVmhS1jiaS7gVfnAbhd0ZNu83L9oOXhBGZ+l/smeMqnAv1p67SMbEn3uhPQGuW1l8PppFDcPxBbfOee+zI7oziSxIrI51P09c5vi2alwpUzpob8b6WccuQuh0nRbI4dtv15NM8fpwzsFeU7/5DjeESlp9wmrUQ==",
+        "apiKey": "wcMBDKjLBuKz3Dr2v9GhNRpBXEtJsfwrcwmGiQ3TjPVpfq/EnGtQINomNpjWQUZ9v7Ix+3fAY2mPfjb/F9IO44fYENUbzhsKs2np1F6qXL/bsrGhEkZfLbbuNeI3ybTDuiUzzZuWCOjdomuXUwLd+trkMQzDwJiVYIXf4gzhrwJ+qZ8v4YoYLXyZfY7P+nkTmxOFvUsNds6MZRRER+E=",
         "apiKeyOwner": "elastic",
         "apiKeyCreatedByUser": false,
-        "throttle": null,
-        "notifyWhen": null,
+        "throttle": "some-throttle-value",
+        "notifyWhen": "onThrottleInterval",
         "muteAll": false,
         "mutedInstanceIds": [],
         "executionStatus": {
@@ -130,21 +134,15 @@
         "nextRun": "2024-01-16T22:10:09.409Z"
       },
       "type": "alert",
-      "references": [
-        {
-          "id": "5ebfb140-3a76-4875-9f31-967851bd1e0b",
-          "name": "action_0",
-          "type": "action"
-        }
-      ],
+      "references": [],
       "managed": false,
       "namespaces": [
         "default"
       ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "10.1.0",
-      "updated_at": "2024-01-16T22:09:11.135Z",
-      "created_at": "2024-01-16T22:09:07.965Z"
+      "updated_at": "2024-01-18T22:05:08.546Z",
+      "created_at": "2024-01-18T22:05:08.546Z"
     }
   }
 }
@@ -182,12 +180,17 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "synthetics-param:c3938846-6927-4c8e-8af1-d25b4d3da0ca",
+    "id": "synthetics-param:a304e397-723a-495c-a934-126504d53d10",
     "source": {
       "synthetics-param": {
         "key": "test_synthetics_param",
-        "value": "4yVjT+XzsQA4TW8nYHNmNsjA2ujrgoMVtJsEcyXfAN9vHGnzasECZ5mpNi1/QG1StVEV3GROmqC7/8jnFBJGskPcQtnjgWccx2+jfd7WAK8LqN/8Pf0nKvrrExt+PJl9nJVhoLvub0DKPNC0UbawlEeyyAKfLNgwrMhSNV2vnQsgOIyJT5jXKe31ZaDLpKm8OWd7Q7rRWjXa3naa",
-        "description": ""
+        "value": "VxVUb6Ic61EO/VYkgTrnhK7YO2aOeJdEjPowQ0SJd0W2S43VdNL+gx1Um5sqi2YaAk1ArP/tJ2Bfdxq4I6u64O5l6p2LHio6RgCb0QwzK7fmY0pS4iRYiPyhWmrZn0Y0qkVonQXsux+nAZWJQv5JZZVm/loAc0jA0kmVTNFUE/K0sjrFnASqH9OAr5Z+kzgGCPkMK4HmP79N8H23",
+        "description": "some description here",
+        "tags": [
+          "a",
+          "b",
+          "c"
+        ]
       },
       "type": "synthetics-param",
       "references": [],
@@ -196,8 +199,8 @@
         "default"
       ],
       "coreMigrationVersion": "8.8.0",
-      "updated_at": "2024-01-17T03:09:29.568Z",
-      "created_at": "2024-01-17T03:09:29.568Z"
+      "updated_at": "2024-01-18T22:32:44.274Z",
+      "created_at": "2024-01-18T22:32:44.274Z"
     }
   }
 }
@@ -206,7 +209,7 @@
   "type": "doc",
   "value": {
     "index": ".kibana",
-    "id": "synthetics-monitor:85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
+    "id": "synthetics-monitor:305ea066-0f33-47f2-8d15-2bf82c5ea430",
     "source": {
       "synthetics-monitor": {
         "type": "browser",
@@ -224,10 +227,16 @@
           "unit": "m",
           "number": "10"
         },
-        "service.name": "",
+        "service.name": "some-service-name",
+        "custom_heartbeat_id": "some-heartbeat-id",
         "config_id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
-        "tags": [],
-        "timeout": null,
+        "tags": [
+          "a",
+          "b",
+          "c"
+        ],
+        "timeout": 9999,
+        "wait": 200,
         "name": "localhost",
         "locations": [
           {
@@ -241,25 +250,41 @@
           }
         ],
         "namespace": "default",
+        "original_space": "some-space",
         "origin": "ui",
-        "journey_id": "",
-        "hash": "",
+        "journey_id": "some-journey-id",
+        "hash": "some-hash",
+        "max_redirects": 2,
+        "mode": "some-mode",
         "id": "85e2583e-d02e-4cff-8b23-a91ae75e8dc2",
         "max_attempts": 2,
-        "project_id": "",
-        "playwright_options": "",
+        "project_id": "some-project-id",
+        "playwright_options": "some-playwright-options",
         "__ui": {
           "script_source": {
             "is_generated_script": false,
             "file_name": ""
           }
         },
-        "url.port": null,
-        "playwright_text_assertion": "",
+        "url.port": 9555,
+        "proxy_url": "some-proxy-url",
+        "proxy_use_local_resolver": false,
+        "response.include_body": false,
+        "response.include_headers": false,
+        "response.include_body_max_bytes": true,
+        "check.response.status": 200,
+        "check.request.method": "get",
+        "ipv4": "10.10.10.10",
+        "ipv6": "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
+        "playwright_text_assertion": "some-assertion",
         "urls": "localhost",
         "screenshots": "on",
-        "filter_journeys.match": "",
-        "filter_journeys.tags": [],
+        "filter_journeys.match": "some-filter-journeys-match",
+        "filter_journeys.tags": [
+          "a",
+          "b",
+          "c"
+        ],
         "ignore_https_errors": false,
         "throttling": {
           "value": {
@@ -270,8 +295,8 @@
           "id": "default",
           "label": "Default"
         },
-        "ssl.certificate_authorities": "",
-        "ssl.certificate": "",
+        "ssl.certificate_authorities": "some-ca",
+        "ssl.certificate": "some-certificate",
         "ssl.verification_mode": "full",
         "ssl.supported_protocols": [
           "TLSv1.1",
@@ -279,15 +304,15 @@
           "TLSv1.3"
         ],
         "revision": 2,
-        "secrets": "HGbJmokq3zhhyvf6AdGWNuQLe50TJzGTjg1D25igXiqEHKub+kN0b2X2gDkgT2gZGSBtdG9vOAGElERGjX9/I094lHhCUFlH9lx+nKHn7Rd6LEvB3splnGrhCGOPazin8lLvPBfF1EgyOExzOMkOLT7oGiT6iU7ILY6uu8gXah0gJhdn06iBoqncoAS234jswyEgBI3cejQhiS7hSGQMxvRWxPQa+bK2QIvKbwAvOsycV0Wmw/ItOqa01m4Iul4YCRkqSafQ7DC3Qt/DBF9zx1gMjv+p6h4yPzuiVJNAXelt2UydcPYfgPkz0Vum7ItHWSD3ZOII0LB3BUS0dgBBvaxYOlSczkcVcY4U2RW6x7U2yaPOgL7a1fIK7sqeeoeG0hTZ1OW/twt2QvMVJ3zSq6VjYnI8VjAIl5lZqmpZlQ3Pfc3+s2nGiiDbaeyMIStHwp6+FgJwmAScmqKRIGk="
+        "secrets": "hK+lf2dby84QJJm2W9Sml+XdqtzXUZGAcMlRNBP8ta+WjkCRqBc8e2IZaHCVwQsp4YhjPuP2DANk5fbge0fcjR/1BPpenpcRPvglSxTyfcrIYH8LtZ6Jt4Z6D1126101CdDMwtFHVVZhx5g26b4FSd2lr8mtjCda+K6tFbKTk8qhnEx0f+L6PhlFBAYruehfQd6NJFd/Ts4CKk4tHONhpCsGFHL32HUipGgxiDJi3oLMA4+QGAAd/BcsONC6Fh6niRUi7IbCkTxqJgOCHrYtOfuDW8K+0UF2ysgGuhT+fKi7ldL26KI3s2qc60GbQ6+KhUunnTwpE7PpZjqmELxHBusq4p+Q/zjK4IUBNFEvFJihA9AraCRqtSI6ckho1qpy0ny/TX7H2hyYibgiFyxW0OeHd13Y195vs0DArHik+BafZGnXfx+S2m/GYVGnTSY8X1VevhWeEuMzOE7OC703uGwzUns3/fmGwqQwk/7xnnU6slIcYIP38yqDBbnuFdTyREumNA=="
       },
       "type": "synthetics-monitor",
       "references": [],
       "managed": false,
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.9.0",
-      "updated_at": "2024-01-16T22:52:01.957Z",
-      "created_at": "2024-01-16T22:26:57.615Z"
+      "updated_at": "2024-01-19T00:13:32.522Z",
+      "created_at": "2024-01-19T00:13:32.522Z"
     }
   }
 }

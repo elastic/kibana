@@ -45,13 +45,13 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'alert' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/903b890f-4e98-4ea5-bc10-71433f01de18`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/ef277b05-595b-41b9-9674-d199753c40ca`
           )
           .expect(200);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
         expect(decryptedObject.attributes.apiKey).to.eql(
-          'b0F0U0ZJMEJJbVVLTnNEYUw2cHU6RDJSLUNYWFNReWVqSF8tMFVNXzQ5Zw=='
+          'This api key was encrypted prior to the AAD include list change.'
         );
       });
 
@@ -69,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'synthetics-param' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-param/c3938846-6927-4c8e-8af1-d25b4d3da0ca`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-param/a304e397-723a-495c-a934-126504d53d10`
           )
           .expect(200);
 
@@ -82,19 +82,19 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'synthetics-monitor' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-monitor/85e2583e-d02e-4cff-8b23-a91ae75e8dc2`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-monitor/305ea066-0f33-47f2-8d15-2bf82c5ea430`
           )
           .expect(200);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
         const secrets = JSON.parse(decryptedObject.attributes.secrets);
         expect(secrets).to.eql({
-          params: '',
+          params: 'some-params',
           'source.inline.script': `step('Go to localhost', async () => {\n  await page.goto('localhost');\n});`,
           'source.project.content': '',
           synthetics_args: ['param1', 'param2', 'param3'],
-          'ssl.key': '',
-          'ssl.key_passphrase': '',
+          'ssl.key': 'some-ssl-key',
+          'ssl.key_passphrase': 'some-passphrase',
         });
       });
 
