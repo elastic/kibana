@@ -52,7 +52,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Default Grouping', async () => {
       it('groups vulnerabilities by cloud account and sort by number of vulnerabilities desc', async () => {
-        const groupSelector = await findings.groupSelector();
+        const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Cloud account');
 
@@ -93,7 +93,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('2 vulnerabilities');
       });
       it('groups vulnerabilities by CVE and sort by number of vulnerabilities desc', async () => {
-        const groupSelector = await findings.groupSelector();
+        const groupSelector = findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('CVE');
 
@@ -131,10 +131,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('2 vulnerabilities');
       });
       it('groups vulnerabilities by resource and sort by number of vulnerabilities desc', async () => {
-        const groupSelector = await findings.groupSelector();
-        await groupSelector.openDropDown();
+        const groupSelector = findings.groupSelector();
         await groupSelector.setValue('Resource');
-
         const grouping = await findings.findingsGrouping();
 
         const resourceOrder = [
