@@ -22,20 +22,20 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { getIndexDevConsoleStatement } from '../../../../common/data_grid';
-import { useDocumentationLinks } from '../../../../hooks/use_documentation_links';
+import { getIndexDevConsoleStatement } from '../../../common/data_grid';
+import { useDocumentationLinks } from '../../../hooks/use_documentation_links';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
 import {
   selectPreviewRequest,
   selectTransformConfigQuery,
-} from '../../state_management/step_define_selectors';
-import { advancedEditorsSidebarWidth } from '../../constants';
+} from '../state_management/step_define_selectors';
+import { advancedEditorsSidebarWidth } from '../constants';
 
-import { AdvancedQueryEditorSwitch } from '../advanced_query_editor_switch';
-import { AdvancedSourceEditor } from '../advanced_source_editor';
-import { SourceSearchBar } from '../source_search_bar';
-import { useDataView, useSearchItems } from '../wizard/wizard';
+import { AdvancedQueryEditorSwitch } from './advanced_query_editor_switch';
+import { AdvancedSourceEditor } from './advanced_source_editor';
+import { SourceSearchBar } from './source_search_bar';
+import { useDataView, useSearchItems } from './wizard/wizard';
 
 export const SearchFilterFormRow: FC = () => {
   const searchItems = useSearchItems();

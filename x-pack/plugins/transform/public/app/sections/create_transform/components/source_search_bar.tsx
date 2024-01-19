@@ -9,13 +9,13 @@ import React, { type FC } from 'react';
 import { EuiCode, EuiInputPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { PLUGIN } from '../../../../../../common/constants';
+import { PLUGIN } from '../../../../../common/constants';
 
-import { useAppDependencies } from '../../../../app_dependencies';
+import { useAppDependencies } from '../../../app_dependencies';
 
-import { useDataView } from '../wizard/wizard';
-import { useSearchBar } from '../step_define/hooks/use_search_bar';
-import { QUERY_LANGUAGE_KUERY } from '../step_define';
+import { useDataView } from './wizard/wizard';
+import { useSearchBar } from './step_define/hooks/use_search_bar';
+import { QUERY_LANGUAGE_KUERY } from './step_define';
 
 export const SourceSearchBar: FC = () => {
   const {

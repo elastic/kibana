@@ -12,16 +12,16 @@ import { EuiFormRow, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataGrid } from '@kbn/ml-data-grid';
 
-import { TRANSFORM_FUNCTION } from '../../../../../../common/constants';
+import { TRANSFORM_FUNCTION } from '../../../../../common/constants';
 
-import { getTransformPreviewDevConsoleStatement } from '../../../../common/data_grid';
-import { useTransformConfigData } from '../../../../hooks/use_transform_config_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { getTransformPreviewDevConsoleStatement } from '../../../common/data_grid';
+import { useTransformConfigData } from '../../../hooks/use_transform_config_data';
+import { useToastNotifications } from '../../../app_dependencies';
 
-import { useWizardSelector } from '../../state_management/create_transform_store';
-import { selectPreviewRequest } from '../../state_management/step_define_selectors';
+import { useWizardSelector } from '../state_management/create_transform_store';
+import { selectPreviewRequest } from '../state_management/step_define_selectors';
 
-import { useDataView } from '../wizard/wizard';
+import { useDataView } from './wizard/wizard';
 
 export const TransformConfigPreviewFormRow: FC = () => {
   const dataView = useDataView();

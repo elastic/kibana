@@ -11,7 +11,7 @@ import { EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
 
 export const DatePickerApplySwitch: FC = () => {
   const isDatePickerApplyEnabled = useWizardSelector((s) => s.stepDefine.isDatePickerApplyEnabled);

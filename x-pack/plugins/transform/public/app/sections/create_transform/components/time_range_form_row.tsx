@@ -25,13 +25,13 @@ import {
   TRANSFORM_FROZEN_TIER_PREFERENCE,
   type TransformStorageKey,
   type TransformStorageMapped,
-} from '../../../../../../common/types/storage';
+} from '../../../../../common/types/storage';
 
-import { advancedEditorsSidebarWidth } from '../../constants';
+import { advancedEditorsSidebarWidth } from '../constants';
 
-import { DatePickerApplySwitch } from '../date_picker_apply_switch';
-import { useDatePicker } from '../step_define/hooks/use_date_picker';
-import { useDataView, useSearchItems } from '../wizard/wizard';
+import { DatePickerApplySwitch } from './date_picker_apply_switch';
+import { useDatePicker } from './step_define/hooks/use_date_picker';
+import { useDataView, useSearchItems } from './wizard/wizard';
 
 const ALLOW_TIME_RANGE_ON_TRANSFORM_CONFIG = false;
 

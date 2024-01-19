@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
-import { useWizardSelector, useWizardActions } from '../../state_management/create_transform_store';
+import { useWizardSelector, useWizardActions } from '../state_management/create_transform_store';
 
 const { collapseLiteralStrings, useXJsonMode } = XJson;
 

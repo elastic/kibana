@@ -17,18 +17,19 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isDefined } from '@kbn/ml-is-defined';
-import { AdvancedRuntimeMappingsEditor } from '../advanced_runtime_mappings_editor/advanced_runtime_mappings_editor';
-import { AdvancedRuntimeMappingsEditorSwitch } from '../advanced_runtime_mappings_editor_switch';
-import {
-  isPivotGroupByConfigWithUiSupport,
-  PivotAggsConfigWithUiSupport,
-} from '../../../../common';
-import { isPivotAggConfigWithUiSupport } from '../../../../common/pivot_group_by';
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
-import { advancedEditorsSidebarWidth } from '../../constants';
+
+import { isPivotGroupByConfigWithUiSupport, PivotAggsConfigWithUiSupport } from '../../../common';
+import { isPivotAggConfigWithUiSupport } from '../../../common/pivot_group_by';
+
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
+import { advancedEditorsSidebarWidth } from '../constants';
+
+import { AdvancedRuntimeMappingsEditor } from './advanced_runtime_mappings_editor';
+import { AdvancedRuntimeMappingsEditorSwitch } from './advanced_runtime_mappings_editor_switch';
 
 const COPY_TO_CLIPBOARD_RUNTIME_MAPPINGS = i18n.translate(
   'xpack.transform.indexPreview.copyRuntimeFieldsClipboardTooltip',

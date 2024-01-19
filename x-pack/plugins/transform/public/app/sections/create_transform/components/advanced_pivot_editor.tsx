@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
 
 const { collapseLiteralStrings, useXJsonMode } = XJson;
 

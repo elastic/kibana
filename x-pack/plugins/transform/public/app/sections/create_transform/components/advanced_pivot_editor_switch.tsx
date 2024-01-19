@@ -11,12 +11,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SwitchModal } from '../switch_modal';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
+import { selectPreviewRequest } from '../state_management/step_define_selectors';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
-import { selectPreviewRequest } from '../../state_management/step_define_selectors';
-
-import { useDataView } from '../wizard/wizard';
+import { SwitchModal } from './switch_modal';
+import { useDataView } from './wizard/wizard';
 
 export const AdvancedPivotEditorSwitch: FC = () => {
   const dataView = useDataView();

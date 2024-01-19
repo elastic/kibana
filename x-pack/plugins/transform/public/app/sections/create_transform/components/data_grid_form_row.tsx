@@ -12,8 +12,8 @@ import { EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataGrid } from '@kbn/ml-data-grid';
 
-import { useIndexData } from '../../../../hooks/use_index_data';
-import { useToastNotifications } from '../../../../app_dependencies';
+import { useIndexData } from '../../../hooks/use_index_data';
+import { useToastNotifications } from '../../../app_dependencies';
 
 export const DataGridFormRow: FC = () => {
   const toastNotifications = useToastNotifications();

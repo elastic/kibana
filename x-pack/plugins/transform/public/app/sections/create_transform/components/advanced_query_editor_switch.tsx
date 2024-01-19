@@ -11,9 +11,10 @@ import { EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { SwitchModal } from '../switch_modal';
-import { defaultSearch } from '../step_define';
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
+
+import { SwitchModal } from './switch_modal';
+import { defaultSearch } from './step_define';
 
 export const AdvancedQueryEditorSwitch: FC = () => {
   const isAdvancedSourceEditorEnabled = useWizardSelector(

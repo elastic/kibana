@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/code-editor';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { useWizardActions, useWizardSelector } from '../state_management/create_transform_store';
 
 export const AdvancedSourceEditor: FC = () => {
   const advancedEditorSourceConfig = useWizardSelector(

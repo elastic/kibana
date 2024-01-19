@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { useDataView, useSearchItems } from '../wizard/wizard';
+import { useDataView, useSearchItems } from './wizard/wizard';
 
 export const DataViewFormRow: FC = () => {
   const searchItems = useSearchItems();

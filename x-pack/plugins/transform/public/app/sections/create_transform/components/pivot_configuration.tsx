@@ -11,10 +11,10 @@ import { EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { AggListForm } from '../aggregation_list';
-import { AggListDropDown } from '../pivot_configuration_dropdown/agg_list_dropdown';
-import { GroupByDropDown } from '../pivot_configuration_dropdown/group_by_dropdown';
-import { GroupByListForm } from '../group_by_list';
+import { AggListForm } from './aggregation_list';
+import { AggListDropDown } from './pivot_configuration_dropdown/agg_list_dropdown';
+import { GroupByDropDown } from './pivot_configuration_dropdown/group_by_dropdown';
+import { GroupByListForm } from './group_by_list';
 
 export const PivotConfiguration: FC = () => (
   <>
