@@ -9,7 +9,6 @@ import React, { FC, useEffect } from 'react';
 
 import {
   EuiAccordion,
-  EuiComboBox,
   EuiSwitch,
   EuiFieldText,
   EuiForm,
@@ -23,16 +22,10 @@ import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 
-import { getErrorMessage } from '../../../../../../common/utils/errors';
-
-import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
-import { ToastNotificationText } from '../../../../components';
 import { TransformRetentionPolicy } from '../../../../components/transform_retention_policy';
-import { useGetEsIngestPipelines } from '../../../../hooks';
 import {
   isContinuousModeDelay,
   isTransformWizardFrequency,
@@ -49,16 +42,11 @@ import { useDataView } from '../wizard/wizard';
 import { TransformDestinationIndexForm } from './transform_destination_index_form';
 import { TransformCreateDataViewForm } from './transform_create_data_view_form';
 import { TransformLatestCallout } from './transform_latest_callout';
+import { TransformIngestPipelineNamesForm } from './transform_ingest_pipeline_names_form';
 
 export const StepDetailsForm: FC = () => {
   const dataView = useDataView();
 
-  const { i18n: i18nStart, theme } = useAppDependencies();
-  const toastNotifications = useToastNotifications();
-
-  const destinationIngestPipeline = useWizardSelector(
-    (s) => s.stepDetails.destinationIngestPipeline
-  );
   const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
   const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
   const continuousModeDateField = useWizardSelector((s) => s.stepDetails.continuousModeDateField);
@@ -70,7 +58,6 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.transformSettingsNumFailureRetries
   );
   const {
-    setDestinationIngestPipeline,
     setContinuousModeEnabled,
     setContinuousModeDelay,
     setContinuousModeDateField,
@@ -84,25 +71,6 @@ export const StepDetailsForm: FC = () => {
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
 
-  const { error: esIngestPipelinesError, data: esIngestPipelinesData } = useGetEsIngestPipelines();
-  const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
-
-  useEffect(() => {
-    if (esIngestPipelinesError !== null) {
-      toastNotifications.addDanger({
-        title: i18n.translate('xpack.transform.stepDetailsForm.errorGettingIngestPipelines', {
-          defaultMessage: 'An error occurred getting the existing ingest pipeline names:',
-        }),
-        text: toMountPoint(
-          <ToastNotificationText text={getErrorMessage(esIngestPipelinesError)} />,
-          { theme, i18n: i18nStart }
-        ),
-      });
-    }
-    // custom comparison
-    /* eslint-disable react-hooks/exhaustive-deps */
-  }, [esIngestPipelinesError]);
-
   const sourceIndexDateFieldNames = dataView.fields
     .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
     .map((f) => f.name)
@@ -115,7 +83,9 @@ export const StepDetailsForm: FC = () => {
     if (isContinuousModeAvailable) {
       setContinuousModeDateField(sourceIndexDateFieldNames[0]);
     }
-  }, []);
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [isContinuousModeAvailable]);
 
   const isTransformFrequencyValid = isTransformWizardFrequency(transformFrequency);
 
@@ -174,42 +144,8 @@ export const StepDetailsForm: FC = () => {
         />
 
         <TransformDestinationIndexForm />
-
-        {ingestPipelineNames.length > 0 && (
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.transform.stepDetailsForm.destinationIngestPipelineLabel',
-              {
-                defaultMessage: 'Destination ingest pipeline',
-              }
-            )}
-          >
-            <EuiComboBox
-              data-test-subj="transformDestinationPipelineSelect"
-              aria-label={i18n.translate(
-                'xpack.transform.stepDetailsForm.destinationIngestPipelineAriaLabel',
-                {
-                  defaultMessage: 'Select an ingest pipeline (optional)',
-                }
-              )}
-              placeholder={i18n.translate(
-                'xpack.transform.stepDetailsForm.destinationIngestPipelineComboBoxPlaceholder',
-                {
-                  defaultMessage: 'Select an ingest pipeline (optional)',
-                }
-              )}
-              singleSelection={{ asPlainText: true }}
-              options={ingestPipelineNames.map((label: string) => ({ label }))}
-              selectedOptions={
-                destinationIngestPipeline !== '' ? [{ label: destinationIngestPipeline }] : []
-              }
-              onChange={(options) => setDestinationIngestPipeline(options[0]?.label ?? '')}
-            />
-          </EuiFormRow>
-        )}
-
+        <TransformIngestPipelineNamesForm />
         <TransformLatestCallout />
-
         <TransformCreateDataViewForm />
 
         {/* Continuous mode */}

@@ -47,6 +47,7 @@ export const EditTransformFlyoutForm: FC = () => (
         defaultMessage: 'Description',
       })}
     />
+
     <FormTextInput
       slice={editTransformFlyoutSlice}
       field="frequency"
@@ -58,11 +59,9 @@ export const EditTransformFlyoutForm: FC = () => (
           'The interval to check for changes in source indices when the transform runs continuously.',
       })}
     />
-
     <EuiSpacer size="l" />
 
     <EditTransformRetentionPolicy />
-
     <EuiSpacer size="l" />
 
     <EuiAccordion
@@ -87,7 +86,6 @@ export const EditTransformFlyoutForm: FC = () => (
             }
           )}
         />
-
         <EuiSpacer size="m" />
 
         <div data-test-subj="transformEditAccordionIngestPipelineContent">
@@ -95,7 +93,6 @@ export const EditTransformFlyoutForm: FC = () => (
         </div>
       </div>
     </EuiAccordion>
-
     <EuiSpacer size="l" />
 
     <EuiAccordion
