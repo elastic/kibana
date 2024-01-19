@@ -11,16 +11,15 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
-import { isValidIndexName } from '../../../../../../common/utils/es_utils';
 
 import { useDocumentationLinks, useGetEsIndices } from '../../../../hooks';
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
 
-import { useWizardSelector } from '../../state_management/create_transform_store';
-import { setFormField } from '../../state_management/step_details_slice';
+import { setFormField, stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 export const TransformDestinationIndexForm: FC = () => {
   const dispatch = useDispatch();
@@ -28,12 +27,15 @@ export const TransformDestinationIndexForm: FC = () => {
   const toastNotifications = useToastNotifications();
   const { esIndicesCreateIndex } = useDocumentationLinks();
 
-  const transformId = useWizardSelector((s) => s.stepDetailsForm.formFields.transformId.value);
-  const transformIdValid = useWizardSelector(
-    (s) => s.stepDetailsForm.formFields.transformId.errorMessages.length === 0
-  );
-  const destinationIndex = useWizardSelector(
-    (s) => s.stepDetailsForm.formFields.destinationIndex.value
+  const {
+    value: transformId,
+    errorMessages: transformIdErrorMessages,
+    reservedValues: transformIdReservedValues,
+  } = useFormField(stepDetailsFormSlice, 'transformId');
+
+  const { value: destinationIndex, errorMessages: destinationIndexErrorMessages } = useFormField(
+    stepDetailsFormSlice,
+    'destinationIndex'
   );
 
   const { error: esIndicesError, data: esIndicesData } = useGetEsIndices();
@@ -55,10 +57,8 @@ export const TransformDestinationIndexForm: FC = () => {
     /* eslint-disable react-hooks/exhaustive-deps */
   }, [esIndicesError]);
 
-  const transformIdExists = false;
-  const transformIdEmpty = transformId === '';
-
-  const indexNameExists = indexNames.some((name) => destinationIndex === name);
+  const transformIdExists = transformIdReservedValues?.some((id) => id === transformId) ?? false;
+  const indexNameExists = indexNames.some((name) => name === destinationIndex);
 
   const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
     destinationIndex !== undefined && destinationIndex === transformId
@@ -70,21 +70,18 @@ export const TransformDestinationIndexForm: FC = () => {
   );
 
   useEffect(() => {
-    if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
+    if (destIndexSameAsId === true && transformId !== '' && transformIdErrorMessages.length === 0) {
       setDestinationIndex(transformId);
     }
   }, [destIndexSameAsId, transformId]);
-
-  const indexNameEmpty = destinationIndex === '';
-  const indexNameValid = isValidIndexName(destinationIndex);
 
   return (
     <DestinationIndexForm
       createIndexLink={esIndicesCreateIndex}
       destinationIndex={destinationIndex}
-      destinationIndexNameEmpty={indexNameEmpty}
+      destinationIndexNameEmpty={destinationIndex === ''}
       destinationIndexNameExists={indexNameExists}
-      destinationIndexNameValid={indexNameValid}
+      destinationIndexNameValid={destinationIndexErrorMessages.length === 0}
       destIndexSameAsId={destIndexSameAsId}
       fullWidth={false}
       indexNameExistsMessage={i18n.translate(
