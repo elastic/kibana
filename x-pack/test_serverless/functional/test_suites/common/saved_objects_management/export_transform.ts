@@ -14,9 +14,13 @@ function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));
 }
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const pageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('export transforms', () => {
     describe('root objects export transforms', () => {
@@ -24,18 +28,25 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
+        await pageObjects.svlCommonPage.login();
+        await pageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-objects');
+        await pageObjects.savedObjects.waitTableIsLoaded();
       });
 
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_transform'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
+        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('allows to mutate the objects during an export', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-export-transform'],
             excludeExportDetails: true,
@@ -59,7 +70,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('allows to add additional objects to an export', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -79,7 +91,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('allows to add additional objects to an export when exporting by type', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-export-add'],
             excludeExportDetails: true,
@@ -99,7 +112,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns a 400 when the type causes a transform error', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-export-transform-error'],
             excludeExportDetails: true,
@@ -120,7 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns a 400 when the type causes an invalid transform', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             type: ['test-export-invalid-transform'],
             excludeExportDetails: true,
@@ -144,18 +159,25 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
+        await pageObjects.svlCommonPage.login();
+        await pageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-objects');
+        await pageObjects.savedObjects.waitTableIsLoaded();
       });
 
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
+        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('execute export transforms for reference objects', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -189,18 +211,25 @@ export default function ({ getService }: FtrProviderContext) {
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
+        await pageObjects.svlCommonPage.login();
+        await pageObjects.common.navigateToApp('management');
+        await testSubjects.click('app-card-objects');
+        await pageObjects.savedObjects.waitTableIsLoaded();
       });
 
       after(async () => {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion'
         );
+        await kibanaServer.savedObjects.cleanStandardList();
+        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('should only export objects returning `true` for `isExportable`', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -227,7 +256,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('lists objects that got filtered', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
@@ -264,7 +294,8 @@ export default function ({ getService }: FtrProviderContext) {
       it('excludes objects if `isExportable` throws', async () => {
         await supertest
           .post('/api/saved_objects/_export')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .send({
             objects: [
               {
