@@ -76,7 +76,13 @@ run(
 
     const checkResponses = await Promise.all(tests.map((test) => test.runCheck()));
 
-    if (checkResponses.some((checkResponse) => checkResponse?.errors.length)) {
+    if (!checkResponses.some((checkResponse) => checkResponse?.errors.length)) {
+      reportTime(runStartTime, 'total', {
+        success: true,
+      });
+
+      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨\n`);
+    } else {
       log.info(`${chalk.bold('Results')}`);
 
       const resultsSummaryTable = new Table({
@@ -99,12 +105,6 @@ run(
       });
 
       throw new Error('preflight checks failed.');
-    } else {
-      reportTime(runStartTime, 'total', {
-        success: true,
-      });
-
-      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨\n`);
     }
   },
   {
@@ -113,7 +113,7 @@ run(
       boolean: ['check-dependent-files', 'fix', 'show-file-set'],
       string: ['max-files'],
       default: {
-        'check-dependent-files': false,
+        'check-dependent-files': true,
         fix: false,
         'max-files': 30,
         'show-file-set': false,

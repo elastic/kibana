@@ -40,8 +40,7 @@ export async function createTests({
   const fileCasingCheck = new FileCasingCheck({ flags, log });
   const i18nCheck = new I18nCheck({ flags, log });
 
-  // const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
-  const checks = [i18nCheck];
+  const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
 
   const files = flags['check-dependent-files']
     ? await getDependentFiles({ files: diffedFiles, log })
