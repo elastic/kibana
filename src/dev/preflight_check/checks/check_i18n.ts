@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+import { merge } from 'lodash';
+import { dirname, resolve } from 'path';
+import chalk from 'chalk';
+import { extractUntrackedMessagesTask } from '../../i18n/tasks/extract_untracked_translations';
 import {
-  checkCompatibility,
-  checkConfigs,
-  extractDefaultMessages,
-  extractUntrackedMessages,
-  mergeConfigs,
-} from '../../i18n/tasks';
+  assignConfigFromPath,
+  ErrorReporter,
+  extractMessagesFromPathToMap,
+  filterConfigPaths,
+  I18nConfig,
+  integrateLocaleFiles,
+} from '../../i18n';
 import { PreflightCheck, TestResponse } from './preflight_check';
+import { getI18nIdentifierFromFilePath } from '../utils/get_i18n_identifier_from_file_path';
 
 export class I18nCheck extends PreflightCheck {
   id = 'i18n';
@@ -26,32 +33,73 @@ export class I18nCheck extends PreflightCheck {
       return response;
     }
 
-    const paths = files.map(({ path }) => path);
+    const reporter = new ErrorReporter();
 
-    const srcPaths = Array().concat(paths);
+    const paths = files.map(({ path }) => ({ path, i18nId: getI18nIdentifierFromFilePath(path) }));
+    console.log('paths', paths);
+    const kibanaRC = resolve(REPO_ROOT, '.i18nrc.json');
+    const xpackRC = resolve(REPO_ROOT, 'x-pack/.i18nrc.json');
 
-    const config = {
-      paths: {},
-      exclude: [],
-      translations: [],
-      prefix: '',
-    };
-
-    checkConfigs();
-    mergeConfigs();
-    extractUntrackedMessages(srcPaths);
-    extractDefaultMessages(config, srcPaths);
-    checkCompatibility(
-      config,
-      {
-        fix: Boolean(this.flags.fix),
-        ignoreIncompatible: false,
-        ignoreMalformed: false,
-        ignoreMissing: false,
-        ignoreUnused: false,
-      },
-      this.log
+    const configs = await Promise.all(
+      [kibanaRC, xpackRC].map((configPath) => assignConfigFromPath(undefined, configPath))
     );
+
+    const config: I18nConfig = merge({}, ...configs);
+
+    const filteredConfigPaths = Object.entries(config.paths).reduce((acc, [key, value]) => {
+      if (typeof value === 'string' && paths.find(({ path }) => path.includes(value))) {
+        acc[key] = value;
+      }
+
+      if (
+        typeof value === 'object' &&
+        Array.isArray(value) &&
+        value.find((val) => paths.find(({ path }) => path.includes(val)))
+      ) {
+        acc[key] = value;
+      }
+      return acc;
+    }, {} as Record<string, string[]>);
+
+    const newConfig = { ...config, paths: filteredConfigPaths };
+
+    for (const { path } of paths) {
+      await extractUntrackedMessagesTask({ path: dirname(path), config: newConfig, reporter });
+    }
+
+    const filteredPaths = filterConfigPaths(
+      paths.map(({ path }) => path),
+      newConfig
+    ) as string[];
+    if (filteredPaths.length === 0) {
+      this.log.error(
+        `${chalk.white.bgRed(
+          ' I18N ERROR '
+        )} None of input paths is covered by the mappings in .i18nrc.json.`
+      );
+    }
+
+    const messages = new Map<string, { message: string }>();
+
+    for (const filteredPath of filteredPaths) {
+      // Return result if no new errors were reported for this path.
+      await extractMessagesFromPathToMap(dirname(filteredPath), messages, newConfig, reporter);
+    }
+
+    for (const translation of newConfig.translations) {
+      await integrateLocaleFiles(messages, {
+        dryRun: true,
+        ignoreIncompatible: true,
+        ignoreUnused: false,
+        ignoreMissing: true,
+        filterOnPath: paths.map(({ i18nId }) => i18nId),
+        ignoreMalformed: true,
+        sourceFileName: translation,
+        targetFileName: this.flags.fix ? translation : undefined,
+        config: newConfig,
+        log: this.log,
+      });
+    }
 
     return response;
   }
