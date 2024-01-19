@@ -71,7 +71,12 @@ describe('CreateSourceEditor', () => {
 
   test('should preview requested data view on load when mostCommonDataViewId prop provided', async () => {
     const onSourceConfigChange = jest.fn();
-    render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} mostCommonDataViewId="123abc" />);
+    render(
+      <CreateSourceEditor
+        onSourceConfigChange={onSourceConfigChange}
+        mostCommonDataViewId="123abc"
+      />
+    );
     await waitFor(() =>
       expect(onSourceConfigChange).toBeCalledWith({
         columns: [
