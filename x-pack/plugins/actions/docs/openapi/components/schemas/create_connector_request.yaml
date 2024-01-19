@@ -30,6 +30,7 @@ discriminator:
     .cases-webhook: 'create_connector_request_cases_webhook.yaml'
     .d3security: 'create_connector_request_d3security.yaml'
     .email: 'create_connector_request_email.yaml'
+    .gen-ai: 'create_connector_request_genai.yaml'
     .index: 'create_connector_request_index.yaml'
     .jira: 'create_connector_request_jira.yaml'
     .opsgenie: 'create_connector_request_opsgenie.yaml'
