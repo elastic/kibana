@@ -131,6 +131,11 @@ export class FileCasingCheck extends PreflightCheck {
 
   public async runCheck() {
     const files = Array.from(this.files.values()).map(({ file }) => file);
+
+    if (files.length === 0) {
+      return { test: this.id, errors: [] };
+    }
+
     const logs = [];
 
     const kebabCaseResponse = await checkForKebabCase(files);

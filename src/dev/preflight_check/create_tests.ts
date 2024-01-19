@@ -7,14 +7,15 @@
  */
 
 import { Flags } from '@kbn/dev-cli-runner';
-import Table from 'cli-table3';
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { FileCasingCheck } from './checks/check_file_casing';
 import { EslintCheck } from './checks/check_eslint';
 import { TypescriptCheck } from './checks/check_typescript';
 import { JestCheck } from './checks/check_jest';
-import { getRelatedFiles } from './utils/get_related_files';
+import { getDependentFiles } from './utils/get_dependent_files';
+import { I18nCheck } from './checks/check_i18n';
+import { renderCheckTable } from './utils/render_check_table';
 
 export interface DiffedFile {
   path: string;
@@ -37,11 +38,12 @@ export async function createTests({
   const eslintCheck = new EslintCheck({ fix: flags.fix });
   const jestCheck = new JestCheck();
   const fileCasingCheck = new FileCasingCheck();
+  const i18nCheck = new I18nCheck();
 
-  const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck];
+  const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
 
-  const files = flags['check-related-files']
-    ? await getRelatedFiles({ files: diffedFiles, log })
+  const files = flags['check-dependent-files']
+    ? await getDependentFiles({ files: diffedFiles, log })
     : diffedFiles;
 
   for (const { path, mode, removed = [] } of files) {
@@ -54,11 +56,10 @@ export async function createTests({
       typescriptCheck.setFiles([{ path, file: new File(path) }]);
     }
 
-    // if a user removed a line that includes i18n.translate, we need to run i18n check.
     if (
       removed.find((line) => line.includes('i18n.translate') || line.includes('<FormattedMessage'))
     ) {
-      // checks.i18n.files.push({ path, file: new File(path) });
+      i18nCheck.setFiles([{ path, file: new File(path) }]);
     }
 
     if (ext === '.ts' || ext === '.tsx') {
@@ -72,26 +73,10 @@ export async function createTests({
   }
 
   if (flags['show-file-set']) {
-    const fileChangeSetTable = new Table({
-      head: ['Test', 'Files'],
-      // chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
-      colWidths: [15, 75],
-      wordWrap: true,
-      wrapOnWordBoundary: false,
-    });
-
-    fileChangeSetTable.push(
-      ...checks.map((check) => [
-        check.id,
-        check
-          .getFiles()
-          .map((f) => f.path)
-          .join('\n'),
-      ])
-    );
-
-    log.info(`\n${fileChangeSetTable.toString()}\n`);
+    // Allows user to see a complete list of all files that will be checked,
+    // categorized per check.
+    renderCheckTable({ checks, log });
   }
 
-  return [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck];
+  return checks;
 }

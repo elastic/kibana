@@ -93,7 +93,7 @@ export async function buildImportMap({
   return invertBy(importMap);
 }
 
-export async function getRelatedFiles({ files, log }: { files: DiffedFile[]; log: ToolingLog }) {
+export async function getDependentFiles({ files, log }: { files: DiffedFile[]; log: ToolingLog }) {
   // This takes the list of changed files and finds all the modules in the repo that import any of these files.
   // We need to run the checks on these files as well, because they may have been broken by the changes.
   const repoModuleImportMap = await buildImportMap({ log });

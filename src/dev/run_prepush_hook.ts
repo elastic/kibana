@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import Table from 'cli-table3';
 import { run } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
-
-import chalk from 'chalk';
 import { createTests } from './preflight_check/create_tests';
 import { getDiffedFilesForCurrentBranch } from './preflight_check/utils/get_diffed_files_for_current_branch';
 import { checkIfBranchIsClean } from './preflight_check/utils/check_if_branch_is_clean';
@@ -111,19 +110,19 @@ run(
   {
     description: `Run checks on files that have been changed in your branch compared to origin/main.`,
     flags: {
-      boolean: ['check-related-files', 'fix', 'show-file-set'],
+      boolean: ['check-dependent-files', 'fix', 'show-file-set'],
       string: ['max-files'],
       default: {
-        'check-related-files': false,
+        'check-dependent-files': false,
         fix: false,
         'max-files': 30,
         'show-file-set': false,
       },
       help: `
-      --check-related-files   Also check files that import any of the changed files. Slower but more thorough.
-      --fix                   Attempt to autofix problems
-      --max-files             Max files number to check against. If exceeded the script will skip the execution
-      --show-file-set         Show which files are being checked
+      --check-dependent-files   Also check files that import any of the changed files (dependents). Slower but more thorough.
+      --fix                     Attempt to autofix problems
+      --max-files               Max files number to check against. If exceeded the script will skip the execution
+      --show-file-set           Show which files are being checked
       `,
     },
   }

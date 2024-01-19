@@ -30,7 +30,7 @@ export class TypescriptCheck extends PreflightCheck {
       paths.push(relativeToRepoRoot);
     }
 
-    const tsConfigFile = await readFile(`${REPO_ROOT}/tsconfig.base.json`, 'utf-8');
+    const tsConfigFile = await readFile(`${REPO_ROOT}/tsconfig.json`, 'utf-8');
     const tsConfig = json5.parse(tsConfigFile);
     const tempTsConfigContents = {
       ...tsConfig,

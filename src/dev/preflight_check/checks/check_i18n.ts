@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { dirname } from 'path';
-import execa from 'execa';
-import { findFileUpwards } from '../utils/find_file_upwards';
 import { PreflightCheck, TestResponse } from './preflight_check';
 
-export class JestCheck extends PreflightCheck {
-  id = 'jest';
+export class I18nCheck extends PreflightCheck {
+  id = 'i18n';
 
   public async runCheck() {
     const files = Array.from(this.files.values());
@@ -22,23 +19,6 @@ export class JestCheck extends PreflightCheck {
       return response;
     }
 
-    for (const { path } of files) {
-      const jestConfig = await findFileUpwards(dirname(path), 'jest.config.js');
-
-      if (!jestConfig) {
-        // Could not find jest.config.js for ${path}
-        return response;
-      }
-
-      try {
-        await execa('npx', ['jest', path, '-c', jestConfig], {
-          env: { FORCE_COLOR: 'true' },
-          stdio: ['ignore'],
-        });
-      } catch (error) {
-        response.errors.push(error);
-      }
-    }
     return response;
   }
 }
