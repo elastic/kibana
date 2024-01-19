@@ -14,7 +14,7 @@ import { UiActionsStart, createAction } from '@kbn/ui-actions-plugin/public';
 import { OverlayStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 
-const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-waldo`;
+const DYNAMIC_ACTION_ID = `${ACTION_HELLO_WORLD}-Waldo`;
 
 interface Props {
   uiActionsStartService: UiActionsStart;
@@ -68,12 +68,12 @@ export const HelloWorldExample = ({ uiActionsStartService, openModal }: Props) =
               const dynamicAction = createAction({
                 id: DYNAMIC_ACTION_ID,
                 type: ACTION_HELLO_WORLD,
-                getDisplayName: () => 'Say hello to waldo',
+                getDisplayName: () => 'Say hello to Waldo',
                 execute: async () => {
                   const overlay = openModal(
                     toMountPoint(
                       <EuiModalBody>
-                        <EuiText data-test-subj="dynamicHelloWorldActionText">Hello waldo</EuiText>{' '}
+                        <EuiText data-test-subj="dynamicHelloWorldActionText">Hello Waldo</EuiText>{' '}
                         <EuiButton data-test-subj="closeModal" onClick={() => overlay.close()}>
                           Close
                         </EuiButton>

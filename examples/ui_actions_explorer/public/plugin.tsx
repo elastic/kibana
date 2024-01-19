@@ -78,7 +78,7 @@ export class UiActionsExplorerPlugin implements Plugin<void, void, {}, StartDeps
     deps.developerExamples.register({
       appId: 'uiActionsExplorer',
       title: 'Actions & Triggers',
-      description: `Learn how to extent Kibana's UI event system with actions and triggers. In the screen shot, plugins extend dashboard panels by attaching additional actions to 'PANEL_BADGE_TRIGGER' and 'CONTEXT_MENU_TRIGGER' triggers.`,
+      description: `Learn how to extent Kibana's UI event system with actions and triggers. In the screen shot, plugins extend dashboard panels by attaching new actions to PANEL_BADGE_TRIGGER and CONTEXT_MENU_TRIGGER triggers.`,
       image,
       links: [
         {
