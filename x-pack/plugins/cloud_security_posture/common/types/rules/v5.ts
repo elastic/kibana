@@ -95,15 +95,19 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * rule section
    */
-  section: schema.maybe(schema.arrayOf(schema.string())),
-  ruleNumber: schema.maybe(schema.arrayOf(schema.string())),
+  section: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+  ),
+  ruleNumber: schema.maybe(
+    schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
+  ),
 });
 
 export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export interface BenchmarkRuleSelectParams {
-  section?: string;
-  ruleNumber?: string;
+  section?: string[];
+  ruleNumber?: string[];
 }
 
 export interface PageUrlParams {

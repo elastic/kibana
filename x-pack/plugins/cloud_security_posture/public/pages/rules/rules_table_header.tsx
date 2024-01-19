@@ -39,8 +39,8 @@ export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
-  onSectionChange: (value: string | undefined) => void;
-  onRuleNumberChange: (value: string | undefined) => void;
+  onSectionChange: (value: string[] | undefined) => void;
+  onRuleNumberChange: (value: string[] | undefined) => void;
   sectionSelectOptions: string[];
   ruleNumberSelectOptions: string[];
   totalRulesCount: number;
@@ -144,12 +144,13 @@ export const RulesTableHeader = ({
                   defaultMessage: 'CIS Section',
                 }
               )}
-              singleSelection={{ asPlainText: true }}
+              // singleSelection={{ asPlainText: true }}
               options={sectionOptions}
               selectedOptions={selectedSection}
               onChange={(option) => {
+                const optionSectionArray = option.map((val) => val.label);
                 setSelectedSection(option);
-                onSectionChange(option.length ? option[0].label : undefined);
+                onSectionChange(option.length ? optionSectionArray : undefined);
               }}
             />
           </EuiFlexItem>
@@ -166,12 +167,13 @@ export const RulesTableHeader = ({
                   defaultMessage: 'Rule Number',
                 }
               )}
-              singleSelection={{ asPlainText: true }}
+              // singleSelection={{ asPlainText: true }}
               options={ruleNumberOptions}
               selectedOptions={selectedRuleNumber}
               onChange={(option) => {
+                const optionRuleNumberArray = option.map((val) => val.label);
                 setSelectedRuleNumber(option);
-                onRuleNumberChange(option.length ? option[0].label : undefined);
+                onRuleNumberChange(option.length ? optionRuleNumberArray : undefined);
               }}
             />
           </EuiFlexItem>

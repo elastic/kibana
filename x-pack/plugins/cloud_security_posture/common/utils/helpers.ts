@@ -218,3 +218,29 @@ export const getBenchmarkFilterQuery = (
     : '';
   return baseQuery + sectionQuery + ruleNumberQuery;
 };
+
+export const getBenchmarkFilterQueryV2 = (
+  id: BenchmarkId,
+  version?: string,
+  selectParams?: BenchmarkRuleSelectParams
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
+
+  let sectionQuery = '';
+  let ruleNumberQuery = '';
+  if (selectParams?.section) {
+    const sectionParamsArr = selectParams.section?.map(
+      (params) => `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${params}"`
+    );
+    sectionQuery = ' AND (' + sectionParamsArr.join(' OR ') + ')';
+  }
+  if (selectParams?.ruleNumber) {
+    const ruleNumbersParamsArr = selectParams?.ruleNumber?.map(
+      (params) =>
+        `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${params}"`
+    );
+    ruleNumberQuery = ' AND (' + ruleNumbersParamsArr.join(' OR ') + ')';
+  }
+
+  return baseQuery + sectionQuery + ruleNumberQuery;
+};
