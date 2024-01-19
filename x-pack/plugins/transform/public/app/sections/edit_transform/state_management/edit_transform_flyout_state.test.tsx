@@ -68,8 +68,6 @@ describe('Transform: useEditTransformFlyoutActions/Selector()', () => {
 
     expect(result.current.isFormTouched).toBe(true);
     expect(result.current.isFormValid).toBe(false);
-    expect(result.current.frequency.errorMessages).toStrictEqual([
-      'The frequency value is not valid.',
-    ]);
+    expect(result.current.frequency.errors).toStrictEqual(['The frequency value is not valid.']);
   });
 });

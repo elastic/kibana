@@ -28,16 +28,11 @@ export const FormTextArea = <FF extends string, FS extends string, VN extends st
   placeHolder = false,
 }: FormTextProps<FF, FS, VN>) => {
   const dispatch = useDispatch();
-  const { defaultValue, errorMessages, value } = useFormField(slice, field);
+  const { defaultValue, errors, value } = useFormField(slice, field);
   const upperCaseField = capitalizeFirstLetter(field as string);
 
   return (
-    <EuiFormRow
-      label={label}
-      helpText={helpText}
-      isInvalid={errorMessages.length > 0}
-      error={errorMessages}
-    >
+    <EuiFormRow label={label} helpText={helpText} isInvalid={errors.length > 0} error={errors}>
       <EuiTextArea
         data-test-subj={`${slice.name}${upperCaseField}Input`}
         placeholder={
@@ -50,7 +45,7 @@ export const FormTextArea = <FF extends string, FS extends string, VN extends st
               })
             : undefined
         }
-        isInvalid={errorMessages.length > 0}
+        isInvalid={errors.length > 0}
         value={value}
         onChange={(e) =>
           dispatch(

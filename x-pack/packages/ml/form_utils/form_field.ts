@@ -17,7 +17,7 @@ export interface FormField<FF extends string, FS extends string, VN extends stri
   configFieldName: string | undefined;
   defaultValue: string;
   dependsOn: FF[];
-  errorMessages: string[];
+  errors: string[];
   isNullable: boolean;
   isOptional: boolean;
   isOptionalInSection?: boolean;
@@ -55,7 +55,7 @@ export const initializeFormField = <FF extends string, FS extends string, VN ext
     configFieldName,
     defaultValue,
     dependsOn: [],
-    errorMessages: [],
+    errors: [],
     isNullable: false,
     isOptional: true,
     validator: 'stringValidator' as VN,

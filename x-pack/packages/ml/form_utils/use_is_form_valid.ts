@@ -17,8 +17,7 @@ import type { FormSlice, State } from './form_slice';
 // if the overall form is valid or not.
 const isFormValid = <FF extends string, FS extends string, VN extends string>(
   formFields: State<FF, FS, VN>['formFields']
-) =>
-  Object.values(formFields).every((d) => (d as FormField<FF, FS, VN>).errorMessages.length === 0);
+) => Object.values(formFields).every((d) => (d as FormField<FF, FS, VN>).errors.length === 0);
 
 const createSelectIsFormValid = <FF extends string, FS extends string, VN extends string>(
   slice: FormSlice<FF, FS, VN>
