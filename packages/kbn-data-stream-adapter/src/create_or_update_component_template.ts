@@ -70,7 +70,10 @@ const createOrUpdateComponentTemplateHelper = async (
   try {
     await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), { logger });
   } catch (error) {
-    if (error.message.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
+    const limitErrorMatch = error.message.match(
+      /Limit of total fields \[(\d+)\] has been exceeded/
+    );
+    if (limitErrorMatch != null) {
       // This error message occurs when there is an index template using this component template
       // that contains a field limit setting that using this component template exceeds
       // Specifically, this can happen for the ECS component template when we add new fields
@@ -78,6 +81,9 @@ const createOrUpdateComponentTemplateHelper = async (
       // number of new ECS fields pushes the composed mapping above the limit, this error will
       // occur. We have to update the field limit inside the index template now otherwise we
       // can never update the component template
+
+      logger.info(`Updating total_fields.limit from ${limitErrorMatch[1]} to ${totalFieldsLimit}`);
+
       await putIndexTemplateTotalFieldsLimitUsingComponentTemplate(
         esClient,
         template.name,

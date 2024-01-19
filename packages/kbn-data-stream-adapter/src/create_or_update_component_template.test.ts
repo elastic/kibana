@@ -108,7 +108,7 @@ describe('createOrUpdateComponentTemplate', () => {
   it(`should update index template field limit and retry if putTemplate throws error with field limit error`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
       new EsErrors.ResponseError({
-        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+        body: 'illegal_argument_exception: Limit of total fields [1800] has been exceeded',
       } as DiagnosticResult)
     );
     const existingIndexTemplate = {
@@ -144,6 +144,7 @@ describe('createOrUpdateComponentTemplate', () => {
       totalFieldsLimit: 2500,
     });
 
+    expect(logger.info).toHaveBeenCalledWith('Updating total_fields.limit from 1800 to 2500');
     expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
@@ -164,7 +165,7 @@ describe('createOrUpdateComponentTemplate', () => {
   it(`should update index template field limit and retry if putTemplate throws error with field limit error when there are malformed index templates`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
       new EsErrors.ResponseError({
-        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+        body: 'illegal_argument_exception: Limit of total fields [1800] has been exceeded',
       } as DiagnosticResult)
     );
     const existingIndexTemplate = {
@@ -220,6 +221,7 @@ describe('createOrUpdateComponentTemplate', () => {
       totalFieldsLimit: 2500,
     });
 
+    expect(logger.info).toHaveBeenCalledWith('Updating total_fields.limit from 1800 to 2500');
     expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(2);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
@@ -240,7 +242,7 @@ describe('createOrUpdateComponentTemplate', () => {
   it(`should retry getIndexTemplate and putIndexTemplate on transient ES errors`, async () => {
     clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
       new EsErrors.ResponseError({
-        body: 'illegal_argument_exception: Limit of total fields [1900] has been exceeded',
+        body: 'illegal_argument_exception: Limit of total fields [1800] has been exceeded',
       } as DiagnosticResult)
     );
     const existingIndexTemplate = {
@@ -281,6 +283,7 @@ describe('createOrUpdateComponentTemplate', () => {
       totalFieldsLimit: 2500,
     });
 
+    expect(logger.info).toHaveBeenCalledWith('Updating total_fields.limit from 1800 to 2500');
     expect(clusterClient.indices.getIndexTemplate).toHaveBeenCalledTimes(3);
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
   });

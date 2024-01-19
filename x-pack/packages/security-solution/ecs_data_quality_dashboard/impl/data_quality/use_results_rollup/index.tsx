@@ -8,7 +8,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { EcsVersion } from '@kbn/ecs';
 
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash/fp';
 import {
   getTotalDocsCount,
   getTotalIncompatible,
@@ -65,9 +65,12 @@ const useStoredPatternRollups = (patterns: string[]) => {
   const [storedRollups, setStoredRollups] = useState<Record<string, PatternRollup>>({});
 
   useEffect(() => {
+    if (isEmpty(patterns)) {
+      return;
+    }
+
     let ignore = false;
     const abortController = new AbortController();
-
     const fetchStoredRollups = async () => {
       const results = await getResults({ httpFetch, abortController, patterns, toasts });
       if (results?.length && !ignore) {
@@ -79,8 +82,7 @@ const useStoredPatternRollups = (patterns: string[]) => {
     return () => {
       ignore = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patterns]);
+  }, [httpFetch, patterns, toasts]);
 
   return storedRollups;
 };

@@ -11,7 +11,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
-import { isEmpty } from 'lodash';
+import { isEmpty } from 'lodash/fp';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 interface CreateOrUpdateIndexTemplateOpts {

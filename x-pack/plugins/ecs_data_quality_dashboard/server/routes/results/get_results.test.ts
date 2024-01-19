@@ -10,10 +10,13 @@ import { serverMock } from '../../__mocks__/server';
 import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import type { LatestAggResponseBucket } from './get_results';
-import { getResultsRoute } from './get_results';
+import { getResultsRoute, getQuery } from './get_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { resultBody, resultDocument } from './results.mock';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchResponse,
+  SecurityHasPrivilegesResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ResultDocument } from '../../schemas/result';
 
 const searchResponse = {
@@ -51,6 +54,10 @@ describe('getResultsRoute route', () => {
 
     ({ context } = requestContextMock.createTools());
 
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
+    } as unknown as SecurityHasPrivilegesResponse);
+
     getResultsRoute(server.router, logger);
   });
 
@@ -81,6 +88,95 @@ describe('getResultsRoute route', () => {
     const errorMessage = 'Error!';
     const mockSearch = context.core.elasticsearch.client.asInternalUser.search;
     mockSearch.mockRejectedValueOnce({ message: errorMessage });
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(500);
+    expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+  });
+});
+
+describe('request pattern authorization', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let { context } = requestContextMock.createTools();
+  let logger: MockedLogger;
+
+  const req = requestMock.create({
+    method: 'get',
+    path: RESULTS_ROUTE_PATH,
+    query: { patterns: 'logs-*,alerts-*' },
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    server = serverMock.create();
+    logger = loggerMock.create();
+
+    ({ context } = requestContextMock.createTools());
+
+    context.core.elasticsearch.client.asInternalUser.search.mockResolvedValue(searchResponse);
+
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    getResultsRoute(server.router, logger);
+  });
+
+  it('should authorize pattern', async () => {
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockResolvedValueOnce({
+      index: { 'logs-*': { all: true }, 'alerts-*': { all: true } },
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(mockHasPrivileges).toHaveBeenCalledWith({
+      index: [
+        { names: ['logs-*', 'alerts-*'], privileges: ['all', 'read', 'view_index_metadata'] },
+      ],
+    });
+    expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalled();
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual([{ '@timestamp': expect.any(Number), ...resultBody }]);
+  });
+
+  it('should search authorized patterns only', async () => {
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockResolvedValueOnce({
+      index: { 'logs-*': { all: false }, 'alerts-*': { all: true } },
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(context.core.elasticsearch.client.asInternalUser.search).toHaveBeenCalledWith({
+      index: expect.any(String),
+      ...getQuery(['alerts-*']),
+    });
+
+    expect(response.status).toEqual(200);
+  });
+
+  it('should not search unauthorized patterns', async () => {
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockResolvedValueOnce({
+      index: { 'logs-*': { all: false }, 'alerts-*': { all: false } },
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(context.core.elasticsearch.client.asInternalUser.search).not.toHaveBeenCalled();
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual([]);
+  });
+
+  it('handles pattern authorization error', async () => {
+    const errorMessage = 'Error!';
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockRejectedValueOnce({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);

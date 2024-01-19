@@ -17,10 +17,10 @@ import type { DataQualityDashboardRequestHandlerContext } from '../../types';
 import { createResultFromDocument } from './parser';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
-const getQuery = (patterns: string) => ({
+export const getQuery = (patterns: string[]) => ({
   size: 0,
   query: {
-    bool: { filter: [{ terms: { 'rollup.pattern': patterns.split(',') } }] },
+    bool: { filter: [{ terms: { 'rollup.pattern': patterns } }] },
   },
   aggs: {
     latest: {
@@ -43,6 +43,7 @@ export const getResultsRoute = (
     .get({
       path: RESULTS_ROUTE_PATH,
       access: 'internal',
+      options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -65,10 +66,26 @@ export const getResultsRoute = (
         }
 
         try {
-          const query = { index, ...getQuery(request.query.patterns) };
-          const esClient = services.core.elasticsearch.client.asInternalUser;
+          // Confirm user has authorization for the requested patterns
+          const { patterns } = request.query;
+          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
+          const privileges = await userEsClient.security.hasPrivileges({
+            index: [
+              { names: patterns.split(','), privileges: ['all', 'read', 'view_index_metadata'] },
+            ],
+          });
+          const authorizedPatterns = Object.keys(privileges.index).filter((pattern) =>
+            Object.values(privileges.index[pattern]).some((v) => v === true)
+          );
+          if (authorizedPatterns.length === 0) {
+            return response.ok({ body: [] });
+          }
 
-          const { aggregations } = await esClient.search<
+          // Get the latest result of each pattern
+          const query = { index, ...getQuery(authorizedPatterns) };
+          const internalEsClient = services.core.elasticsearch.client.asInternalUser;
+
+          const { aggregations } = await internalEsClient.search<
             ResultDocument,
             Record<string, { buckets: LatestAggResponseBucket[] }>
           >(query);

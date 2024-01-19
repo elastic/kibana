@@ -24,6 +24,7 @@ export const postResultsRoute = (
     .post({
       path: RESULTS_ROUTE_PATH,
       access: 'internal',
+      options: { tags: ['access:securitySolution'] },
     })
     .addVersion(
       {
@@ -50,6 +51,17 @@ export const postResultsRoute = (
         }
 
         try {
+          // Confirm user has authorization for the pattern payload
+          const { pattern } = request.body.rollup;
+          const userEsClient = services.core.elasticsearch.client.asCurrentUser;
+          const privileges = await userEsClient.security.hasPrivileges({
+            index: [{ names: [pattern], privileges: ['all', 'read', 'view_index_metadata'] }],
+          });
+          if (!privileges.has_all_requested) {
+            return response.ok({ body: { result: 'noop' } });
+          }
+
+          // Index the result
           const document = createDocumentFromResult(request.body);
           const esClient = services.core.elasticsearch.client.asInternalUser;
           const outcome = await esClient.index({ index, body: document });

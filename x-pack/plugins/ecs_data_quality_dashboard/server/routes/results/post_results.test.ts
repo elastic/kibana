@@ -11,7 +11,10 @@ import { requestMock } from '../../__mocks__/request';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { postResultsRoute } from './post_results';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
-import type { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SecurityHasPrivilegesResponse,
+  WriteResponseBase,
+} from '@elastic/elasticsearch/lib/api/types';
 import { resultBody, resultDocument } from './results.mock';
 
 describe('postResultsRoute route', () => {
@@ -28,6 +31,10 @@ describe('postResultsRoute route', () => {
     logger = loggerMock.create();
 
     ({ context } = requestContextMock.createTools());
+
+    context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+      has_all_requested: true,
+    } as unknown as SecurityHasPrivilegesResponse);
 
     postResultsRoute(server.router, logger);
   });
@@ -58,10 +65,81 @@ describe('postResultsRoute route', () => {
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining(errorMessage));
   });
 
-  it('handles error', async () => {
+  it('handles index error', async () => {
     const errorMessage = 'Error!';
     const mockIndex = context.core.elasticsearch.client.asInternalUser.index;
     mockIndex.mockRejectedValueOnce({ message: errorMessage });
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(response.status).toEqual(500);
+    expect(response.body).toEqual({ message: errorMessage, status_code: 500 });
+  });
+});
+
+describe('request pattern authorization', () => {
+  let server: ReturnType<typeof serverMock.create>;
+  let { context } = requestContextMock.createTools();
+  let logger: MockedLogger;
+
+  const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    server = serverMock.create();
+    logger = loggerMock.create();
+
+    ({ context } = requestContextMock.createTools());
+
+    context.core.elasticsearch.client.asInternalUser.index.mockResolvedValueOnce({
+      result: 'created',
+    } as WriteResponseBase);
+
+    postResultsRoute(server.router, logger);
+  });
+
+  it('should authorize pattern', async () => {
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockResolvedValueOnce({
+      has_all_requested: true,
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(mockHasPrivileges).toHaveBeenCalledWith({
+      index: [
+        { names: [resultBody.rollup.pattern], privileges: ['all', 'read', 'view_index_metadata'] },
+      ],
+    });
+    expect(context.core.elasticsearch.client.asInternalUser.index).toHaveBeenCalled();
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ result: 'created' });
+  });
+
+  it('should not index unauthorized pattern', async () => {
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockResolvedValueOnce({
+      has_all_requested: false,
+    } as unknown as SecurityHasPrivilegesResponse);
+
+    const response = await server.inject(req, requestContextMock.convertContext(context));
+    expect(mockHasPrivileges).toHaveBeenCalledWith({
+      index: [
+        { names: [resultBody.rollup.pattern], privileges: ['all', 'read', 'view_index_metadata'] },
+      ],
+    });
+    expect(context.core.elasticsearch.client.asInternalUser.index).not.toHaveBeenCalled();
+
+    expect(response.status).toEqual(200);
+    expect(response.body).toEqual({ result: 'noop' });
+  });
+
+  it('handles pattern authorization error', async () => {
+    const errorMessage = 'Error!';
+    const mockHasPrivileges =
+      context.core.elasticsearch.client.asCurrentUser.security.hasPrivileges;
+    mockHasPrivileges.mockRejectedValueOnce({ message: errorMessage });
 
     const response = await server.inject(req, requestContextMock.convertContext(context));
     expect(response.status).toEqual(500);
