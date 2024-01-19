@@ -127,7 +127,7 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               await setTimeout(delay);
             }
 
-            await procs.stop('kibana');
+            await procs.stop('kibana', 'SIGKILL');
           } finally {
             if (shutdownEs) {
               await shutdownEs();
