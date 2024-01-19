@@ -20,8 +20,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('_bulk_get', () => {
     describe('saved objects with hidden type', () => {
       before(async () => {
-        // await kibanaServer.savedObjects.cleanStandardList();
-
         await esArchiver.load(
           'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects'
         );

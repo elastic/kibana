@@ -26,7 +26,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('types with `hiddenFromHttpApis` ', () => {
     before(async () => {
       await kbnServer.savedObjects.cleanStandardList();
-
       await kbnServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_from_http_apis'
       );

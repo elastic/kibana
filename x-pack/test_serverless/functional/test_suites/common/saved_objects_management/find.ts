@@ -38,6 +38,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
+        // emptyKibanaIndex fails in Serverless with
+        // "index_not_found_exception: no such index [.kibana_ingest]",
+        // so it was switched to `savedObjects.cleanStandardList()
         await kibanaServer.savedObjects.cleanStandardList();
         await pageObjects.svlCommonPage.forceLogout();
       });
