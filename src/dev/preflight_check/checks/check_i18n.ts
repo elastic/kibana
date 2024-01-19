@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { REPO_ROOT } from '@kbn/repo-info';
 import { merge } from 'lodash';
 import { dirname, resolve } from 'path';
 import chalk from 'chalk';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { extractUntrackedMessagesTask } from '../../i18n/tasks/extract_untracked_translations';
 import {
   assignConfigFromPath,
@@ -35,13 +35,16 @@ export class I18nCheck extends PreflightCheck {
 
     const reporter = new ErrorReporter();
 
-    const paths = files.map(({ path }) => ({ path, i18nId: getI18nIdentifierFromFilePath(path) }));
-    console.log('paths', paths);
-    const kibanaRC = resolve(REPO_ROOT, '.i18nrc.json');
-    const xpackRC = resolve(REPO_ROOT, 'x-pack/.i18nrc.json');
+    const paths = files.map(({ path }) => ({
+      path,
+      i18nId: getI18nIdentifierFromFilePath(path),
+    }));
+
+    const kibanaI18nrc = resolve(REPO_ROOT, '.i18nrc.json');
+    const xpackI18nrc = resolve(REPO_ROOT, 'x-pack/.i18nrc.json');
 
     const configs = await Promise.all(
-      [kibanaRC, xpackRC].map((configPath) => assignConfigFromPath(undefined, configPath))
+      [kibanaI18nrc, xpackI18nrc].map((configPath) => assignConfigFromPath(undefined, configPath))
     );
 
     const config: I18nConfig = merge({}, ...configs);
@@ -61,15 +64,20 @@ export class I18nCheck extends PreflightCheck {
       return acc;
     }, {} as Record<string, string[]>);
 
-    const newConfig = { ...config, paths: filteredConfigPaths };
+    const configWithPathsForRelevantFiles = { ...config, paths: filteredConfigPaths };
 
     for (const { path } of paths) {
-      await extractUntrackedMessagesTask({ path: dirname(path), config: newConfig, reporter });
+      await extractUntrackedMessagesTask({
+        path: dirname(path),
+        config: configWithPathsForRelevantFiles,
+        reporter,
+      });
     }
 
+    // Checks if any of the input paths is covered by the mappings in .i18nrc.json
     const filteredPaths = filterConfigPaths(
       paths.map(({ path }) => path),
-      newConfig
+      config
     ) as string[];
     if (filteredPaths.length === 0) {
       this.log.error(
@@ -79,26 +87,48 @@ export class I18nCheck extends PreflightCheck {
       );
     }
 
-    const messages = new Map<string, { message: string }>();
+    const uniqueAppRoots = paths.reduce((acc, { path }) => {
+      const relativePathArray = path.includes('src')
+        ? path.split('/').slice(0, 2)
+        : path.split('/').slice(0, 3);
 
-    for (const filteredPath of filteredPaths) {
-      // Return result if no new errors were reported for this path.
-      await extractMessagesFromPathToMap(dirname(filteredPath), messages, newConfig, reporter);
+      const appRoot = `${REPO_ROOT}/${relativePathArray.join('/')}`;
+
+      if (!acc.includes(appRoot)) {
+        acc.push(appRoot);
+      }
+      return acc;
+    }, [] as string[]);
+
+    // Gets all i18n messages for the apps in the changed files set
+    const messages = new Map<string, { message: string }>();
+    for (const appRoot of uniqueAppRoots) {
+      await extractMessagesFromPathToMap(
+        appRoot,
+        messages,
+        configWithPathsForRelevantFiles,
+        reporter
+      );
     }
 
-    for (const translation of newConfig.translations) {
-      await integrateLocaleFiles(messages, {
+    for (const translation of configWithPathsForRelevantFiles.translations) {
+      const error = await integrateLocaleFiles(messages, {
         dryRun: true,
-        ignoreIncompatible: true,
+        ignoreIncompatible: false,
         ignoreUnused: false,
         ignoreMissing: true,
-        filterOnPath: paths.map(({ i18nId }) => i18nId),
+        filterPerI18nId: [...new Set(paths.map(({ i18nId }) => i18nId))],
         ignoreMalformed: true,
         sourceFileName: translation,
         targetFileName: this.flags.fix ? translation : undefined,
-        config: newConfig,
+        config: configWithPathsForRelevantFiles,
         log: this.log,
+        returnErrorsInsteadOfThrow: true,
       });
+
+      if (error) {
+        response.errors.push(`${chalk.bold(translation)}: ${error}`);
+      }
     }
 
     return response;

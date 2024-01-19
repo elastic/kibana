@@ -34,9 +34,10 @@ export interface IntegrateOptions {
   ignoreIncompatible: boolean;
   ignoreUnused: boolean;
   ignoreMissing: boolean;
-  filterOnPath?: string[];
   config: I18nConfig;
   log: ToolingLog;
+  filterPerI18nId?: string[];
+  returnErrorsInsteadOfThrow?: boolean;
 }
 
 type MessageMap = Map<string, { message: string }>;
@@ -114,6 +115,10 @@ export function verifyMessages(
   }
 
   if (errorMessage) {
+    if (options.returnErrorsInsteadOfThrow) {
+      return errorMessage;
+    }
+
     throw createFailError(errorMessage);
   }
 }
@@ -189,29 +194,19 @@ export async function integrateLocaleFiles(
   options: IntegrateOptions
 ) {
   const localizedMessages = JSON.parse((await readFileAsync(options.sourceFileName)).toString());
-  // console.log('localizedMessages', localizedMessages);
   if (!localizedMessages.formats) {
     throw createFailError(`Locale file should contain formats object.`);
   }
 
-  console.log('filterOnPath', options.filterOnPath);
-
-  const messages = options.filterOnPath
-    ? Object.entries(localizedMessages.messages).filter(([key, value]) => {
-        if (options.filterOnPath?.find((p) => key.startsWith(`${p}.`))) {
-          return { key, value };
-        } else {
-          return { key, value };
-        }
-      })
-    : Object.entries(localizedMessages.messages);
-
-  console.log('messages', messages);
+  const messages = options.filterPerI18nId
+    ? Object.entries(localizedMessages.messages as Record<string, string>).filter(([key]) =>
+        options.filterPerI18nId?.find((p) => key.startsWith(`${p}.`))
+      )
+    : Object.entries(localizedMessages.messages as Record<string, string>);
 
   const localizedMessagesMap: LocalizedMessageMap = new Map(messages);
-  // console.log('defaultMessagesMap', defaultMessagesMap);
-  // console.log('defaultMessagesMap', defaultMessagesMap);
-  // verifyMessages(localizedMessagesMap, defaultMessagesMap, options);
+
+  const response = verifyMessages(localizedMessagesMap, defaultMessagesMap, options);
 
   const knownNamespaces = Object.keys(options.config.paths);
   const groupedLocalizedMessagesMap = groupMessagesByNamespace(
@@ -222,4 +217,6 @@ export async function integrateLocaleFiles(
   if (!options.dryRun) {
     await writeMessages(groupedLocalizedMessagesMap, localizedMessages.formats, options);
   }
+
+  return response;
 }
