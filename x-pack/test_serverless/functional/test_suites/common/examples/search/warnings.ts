@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await toasts.clearAllToasts();
+      await toasts.dismissAllToasts();
     });
 
     it('should show search warnings as toasts', async () => {

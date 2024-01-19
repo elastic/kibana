@@ -85,19 +85,6 @@ export class ToastsService extends FtrService {
     return title;
   }
 
-  public async clearAllToasts(): Promise<void> {
-    const toasts = await this.find.allByCssSelector('.euiToast');
-    for (const toastElement of toasts) {
-      try {
-        await toastElement.moveMouseTo();
-        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
-        await closeBtn.click();
-      } catch (err) {
-        // ignore errors, toast clear themselves after timeout
-      }
-    }
-  }
-
   public async dismissAllToasts(): Promise<void> {
     const toasts = await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
 
