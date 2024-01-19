@@ -12,6 +12,7 @@ import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
+import useLatest from 'react-use/lib/useLatest';
 import { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
@@ -169,7 +170,9 @@ export const PanelsResizable = ({
     [enableResizeWithPortalsHack]
   );
 
-  const onResizeEnd = useCallback(() => {
+  // EUI will call an outdated version of this callback when the resize ends,
+  // so we need to make sure on our end that the latest version is called.
+  const onResizeEnd = useLatest(() => {
     if (!resizeWithPortalsHackIsResizing) {
       return;
     }
@@ -185,7 +188,7 @@ export const PanelsResizable = ({
     }
 
     disableResizeWithPortalsHack();
-  }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
+  });
 
   // Don't render EuiResizableContainer until we have have valid
   // panel sizes or it can cause the resize functionality to break.
@@ -199,7 +202,9 @@ export const PanelsResizable = ({
       direction={direction}
       onPanelWidthChange={onPanelSizeChange}
       onResizeStart={onResizeStart}
-      onResizeEnd={onResizeEnd}
+      onResizeEnd={() => {
+        onResizeEnd.current();
+      }}
       data-test-subj={`${dataTestSubj}ResizableContainer`}
       css={css`
         height: 100%;
