@@ -17,11 +17,11 @@ import { FormSectionToggle } from '@kbn/ml-form-utils/components/form_section_to
 import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 import { type FormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
-import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+import type { PostTransformsPreviewRequestSchema } from '../../../common/api_schemas/transforms';
 
-import { useDestIndexAvailableTimeFields } from '../../../hooks';
+import { useDestIndexAvailableTimeFields } from '../hooks';
 
-import { useDataView } from '../../create_transform/components/wizard/wizard';
+import { useDataView } from '../sections/create_transform/components/wizard/wizard';
 
 export const TransformRetentionPolicy = <FF extends string, FS extends string, VN extends string>({
   slice,

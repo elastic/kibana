@@ -16,10 +16,11 @@ import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
 import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
 import { isLatestTransform, isPivotTransform } from '../../../../../common/types/transform';
 
+import { TransformRetentionPolicy } from '../../../components/transform_retention_policy';
+
 import { useTransformConfig } from '../../create_transform/components/wizard/wizard';
 import { editTransformFlyoutSlice } from '../state_management/edit_transform_flyout_state';
 
-import { TransformRetentionPolicy } from './transform_retention_policy';
 import { EditTransformIngestPipeline } from './edit_transform_ingest_pipeline';
 
 const EditTransformRetentionPolicy: FC = () => {

@@ -31,6 +31,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
+import { TransformRetentionPolicy } from '../../../../components/transform_retention_policy';
 import { useGetEsIngestPipelines } from '../../../../hooks';
 import {
   isContinuousModeDelay,
@@ -44,8 +45,6 @@ import { selectPreviewRequest } from '../../state_management/step_define_selecto
 import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 import { useDataView } from '../wizard/wizard';
-
-import { TransformRetentionPolicy } from '../../../edit_transform/components/transform_retention_policy';
 
 import { TransformDestinationIndexForm } from './transform_destination_index_form';
 import { TransformCreateDataViewForm } from './transform_create_data_view_form';
