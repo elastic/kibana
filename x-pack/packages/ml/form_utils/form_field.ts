@@ -28,16 +28,13 @@ export interface FormField<FF extends string, FS extends string, VN extends stri
   valueParser: ValueParserName;
 }
 
-export function createFormFieldsMap<
-  FF extends string,
-  FS extends string,
-  VN extends string,
-  T extends Record<FF, FormField<FF, FS, VN>>
->(formFields: Array<FormField<FF, FS, VN>>) {
-  return formFields.reduce<T>((acc, curr) => {
-    acc[curr.formFieldName as FF] = curr as T[FF];
+export function createFormFieldsMap<FF extends string, FS extends string, VN extends string>(
+  formFields: Array<FormField<FF, FS, VN>>
+) {
+  return formFields.reduce<Record<FF, FormField<FF, FS, VN>>>((acc, curr) => {
+    acc[curr.formFieldName as FF] = curr as FormField<FF, FS, VN>;
     return acc;
-  }, {} as T);
+  }, {} as Record<FF, FormField<FF, FS, VN>>);
 }
 
 export const initializeFormField = <FF extends string, FS extends string, VN extends string, C>(
