@@ -235,7 +235,7 @@ export const getBenchmarkFilterQueryV2 = (
     sectionQuery = ' AND (' + sectionParamsArr.join(' OR ') + ')';
   }
   if (selectParams?.ruleNumber) {
-    const ruleNumbersParamsArr = selectParams?.ruleNumber?.map(
+    const ruleNumbersParamsArr = selectParams.ruleNumber?.map(
       (params) =>
         `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${params}"`
     );

@@ -37,7 +37,7 @@ export const useFindCspBenchmarkRule = (
     () => {
       return http.get<FindCspBenchmarkRuleResponse>(FIND_CSP_BENCHMARK_RULE_ROUTE_PATH, {
         query: { benchmarkId, page, perPage, search, section, benchmarkVersion, ruleNumber },
-        version: '2',
+        version: '3',
       });
     }
   );

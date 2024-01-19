@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { getBenchmarkFilterQuery } from '../../../../common/utils/helpers';
+import { getBenchmarkFilterQueryV2 } from '../../../../common/utils/helpers';
 import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 import type {
@@ -23,9 +23,11 @@ export const findBenchmarkRuleHandler = async (
   if (!options.benchmarkId) {
     throw new Error('Please provide benchmarkId');
   }
-
+  const sectionFilter: string[] | undefined =
+    typeof options?.section === 'string' ? [options?.section] : options?.section;
+  const ruleNumberFilter: string[] | undefined =
+    typeof options?.ruleNumber === 'string' ? [options?.ruleNumber] : options?.ruleNumber;
   const benchmarkId = options.benchmarkId;
-
   const cspCspBenchmarkRulesSo = await soClient.find<CspBenchmarkRule>({
     type: CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
     searchFields: options.searchFields,
@@ -34,9 +36,9 @@ export const findBenchmarkRuleHandler = async (
     perPage: options.perPage,
     sortField: options.sortField,
     fields: options?.fields,
-    filter: getBenchmarkFilterQuery(benchmarkId, options.benchmarkVersion || '', {
-      section: options.section,
-      ruleNumber: options.ruleNumber,
+    filter: getBenchmarkFilterQueryV2(benchmarkId, options.benchmarkVersion || '', {
+      section: sectionFilter,
+      ruleNumber: ruleNumberFilter,
     }),
   });
 
