@@ -9,12 +9,8 @@
 import { nonNullable } from './non_nullable';
 
 describe('nonNullable', () => {
-  let foo: string | null = 'foo';
-
-  foo = 6;
-
   it('should return true for non-null values', () => {
-    expect(nonNullable('foo')).toBe(false);
+    expect(nonNullable('foo')).toBe(true);
     expect(nonNullable(0)).toBe(true);
     expect(nonNullable(false)).toBe(true);
     expect(nonNullable(true)).toBe(true);
@@ -28,15 +24,3 @@ describe('nonNullable', () => {
     expect(nonNullable(undefined)).toBe(false);
   });
 });
-
-class Hello {
-  public static world() {
-    return 'world';
-  }
-}
-
-class Foo {
-  public static bar() {
-    return 'bar';
-  }
-}

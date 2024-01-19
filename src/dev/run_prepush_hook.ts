@@ -113,7 +113,7 @@ run(
       boolean: ['check-dependent-files', 'fix', 'show-file-set'],
       string: ['max-files'],
       default: {
-        'check-dependent-files': true,
+        'check-dependent-files': false,
         fix: false,
         'max-files': 30,
         'show-file-set': false,

@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
+import chalk from 'chalk';
 import { Flags } from '@kbn/dev-cli-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
-import { FileCasingCheck } from './checks/check_file_casing';
 import { EslintCheck } from './checks/check_eslint';
-import { TypescriptCheck } from './checks/check_typescript';
-import { JestCheck } from './checks/check_jest';
-import { getDependentFiles } from './utils/get_dependent_files';
+import { FileCasingCheck } from './checks/check_file_casing';
 import { I18nCheck } from './checks/check_i18n';
+import { JestCheck } from './checks/check_jest';
+import { TypescriptCheck } from './checks/check_typescript';
+import { getDependentFiles } from './utils/get_dependent_files';
 import { renderCheckTable } from './utils/render_check_table';
 
 export interface DiffedFile {
@@ -43,7 +44,7 @@ export async function createTests({
   const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
 
   if (flags['check-dependent-files']) {
-    log.info('🕵️‍♀️ Collecting dependent files... (this can take up to 20 seconds)');
+    log.info(`🕵️‍♀️  ${chalk.bold('Collecting dependent files...')} (this can take up to 20 seconds)`);
   }
 
   const files = flags['check-dependent-files']
@@ -58,6 +59,7 @@ export async function createTests({
     if (ext === '.test.ts' || ext === '.test.tsx') {
       jestCheck.setFiles([{ path, file: new File(path) }]);
       typescriptCheck.setFiles([{ path, file: new File(path) }]);
+      eslintCheck.setFiles([{ path, file: new File(path) }]);
     }
 
     if (
