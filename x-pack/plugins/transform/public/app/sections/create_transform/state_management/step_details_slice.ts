@@ -24,6 +24,7 @@ export const stepDetailsFormSlice = createFormSlice(
   getStepDetailsFormSections(),
   validators
 );
+export type StepDetailsFormState = ReturnType<typeof stepDetailsFormSlice.getInitialState>;
 
 export const { initialize, setFormField, setFormSection, setSubmitErrorMessage } =
   stepDetailsFormSlice.actions;
@@ -33,9 +34,6 @@ export const stepDetailsSlice = createSlice({
   initialState: getDefaultStepDetailsState(),
   reducers: {
     setStepDetailsState: (_, action: PayloadAction<StepDetailsState>) => action.payload,
-    setDestinationIngestPipeline: (state, action: PayloadAction<string>) => {
-      state.destinationIngestPipeline = action.payload;
-    },
     setContinuousModeEnabled: (state, action: PayloadAction<boolean>) => {
       state.isContinuousModeEnabled = action.payload;
     },

@@ -16,14 +16,9 @@ import {
 } from '../../../../../../common/constants';
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
-export type EsIndexName = string;
-export type EsIngestPipelineName = string;
-export type DataViewTitle = string;
-
 export interface StepDetailsState {
   continuousModeDateField: string;
   continuousModeDelay: string;
-  destinationIngestPipeline: EsIngestPipelineName;
   isContinuousModeEnabled: boolean;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
@@ -50,6 +45,8 @@ export const getStepDetailsFormFields = (
     isOptional: false,
     validator: 'indexNameValidator',
   }),
+  // optional ingest pipeline
+  initializeFormField('destinationIngestPipeline', 'dest.pipeline', config),
   initializeFormField('dataViewTimeField', undefined, config, {
     validator: 'stringValidator',
     section: 'createDataView',
@@ -88,7 +85,6 @@ export function getDefaultStepDetailsState(): StepDetailsState {
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
     transformSettingsNumFailureRetries: undefined,
-    destinationIngestPipeline: '',
     valid: false,
   };
 }
@@ -105,11 +101,6 @@ export function applyTransformConfigToDetailsState(
       state.continuousModeDateField = continuousModeTime.field;
       state.continuousModeDelay = continuousModeTime?.delay ?? DEFAULT_CONTINUOUS_MODE_DELAY;
       state.isContinuousModeEnabled = true;
-    }
-
-    // Ingest Pipeline
-    if (transformConfig.dest.pipeline !== undefined) {
-      state.destinationIngestPipeline = transformConfig.dest.pipeline;
     }
 
     // Frequency

@@ -6,11 +6,13 @@
  */
 
 import React, { useEffect, type FC } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 
 import { getErrorMessage } from '../../../../../../common/utils/errors';
 
@@ -18,17 +20,17 @@ import { useAppDependencies, useToastNotifications } from '../../../../app_depen
 import { ToastNotificationText } from '../../../../components';
 import { useGetEsIngestPipelines } from '../../../../hooks';
 
-import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
+import { stepDetailsFormSlice, setFormField } from '../../state_management/step_details_slice';
 
 export const TransformIngestPipelineNamesForm: FC = () => {
+  const dispatch = useDispatch();
   const { i18n: i18nStart, theme } = useAppDependencies();
   const toastNotifications = useToastNotifications();
 
-  const destinationIngestPipeline = useWizardSelector(
-    (s) => s.stepDetails.destinationIngestPipeline
+  const { value: destinationIngestPipeline } = useFormField(
+    stepDetailsFormSlice,
+    'destinationIngestPipeline'
   );
-
-  const { setDestinationIngestPipeline } = useWizardActions();
 
   const { error: esIngestPipelinesError, data: esIngestPipelinesData } = useGetEsIngestPipelines();
 
@@ -77,7 +79,11 @@ export const TransformIngestPipelineNamesForm: FC = () => {
         selectedOptions={
           destinationIngestPipeline !== '' ? [{ label: destinationIngestPipeline }] : []
         }
-        onChange={(options) => setDestinationIngestPipeline(options[0]?.label ?? '')}
+        onChange={(options) =>
+          dispatch(
+            setFormField({ field: 'destinationIngestPipeline', value: options[0]?.label ?? '' })
+          )
+        }
       />
     </EuiFormRow>
   );

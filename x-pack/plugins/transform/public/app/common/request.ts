@@ -31,10 +31,8 @@ import { DateHistogramAgg, HistogramAgg, TermsAgg } from '../../../common/types/
 
 import type { SavedSearchQuery } from '../hooks/use_search_items';
 import type { StepDefineState } from '../sections/create_transform/components/step_define';
-import type {
-  StepDetailsState,
-  StepDetailsFormState,
-} from '../sections/create_transform/components/step_details';
+import type { StepDetailsState } from '../sections/create_transform/components/step_details';
+import type { StepDetailsFormState } from '../sections/create_transform/state_management/step_details_slice';
 
 import {
   getEsAggFromAggConfig,
@@ -254,12 +252,6 @@ export const getCreateTransformRequestBody = (
     transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
       ? { frequency: transformDetailsState.transformFrequency }
       : {}),
-    dest: {
-      // conditionally add optional ingest pipeline
-      ...(transformDetailsState.destinationIngestPipeline !== ''
-        ? { pipeline: transformDetailsState.destinationIngestPipeline }
-        : {}),
-    },
     // conditionally add continuous mode config
     ...(transformDetailsState.isContinuousModeEnabled
       ? {
@@ -285,8 +277,6 @@ export const getCreateTransformRequestBody = (
     transformDetailsFormState.formSections,
     true
   );
-
-  console.log('configWithAppliedFormState', configWithAppliedFormState);
 
   return configWithAppliedFormState;
 };
