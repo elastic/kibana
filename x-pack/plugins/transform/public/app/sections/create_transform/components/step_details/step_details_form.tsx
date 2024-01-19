@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { useDispatch } from 'react-redux';
 
 import {
   EuiAccordion,
@@ -32,7 +31,7 @@ import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import { ToastNotificationText } from '../../../../components';
-import { useGetEsIngestPipelines, useDestIndexAvailableTimeFields } from '../../../../hooks';
+import { useGetEsIngestPipelines } from '../../../../hooks';
 import {
   isContinuousModeDelay,
   isTransformWizardFrequency,
@@ -42,7 +41,7 @@ import {
 
 import { useWizardActions, useWizardSelector } from '../../state_management/create_transform_store';
 import { selectPreviewRequest } from '../../state_management/step_define_selectors';
-import { stepDetailsFormSlice, setFormField } from '../../state_management/step_details_slice';
+import { stepDetailsFormSlice } from '../../state_management/step_details_slice';
 
 import { useDataView } from '../wizard/wizard';
 
@@ -53,7 +52,6 @@ import { TransformCreateDataViewForm } from './transform_create_data_view_form';
 import { TransformLatestCallout } from './transform_latest_callout';
 
 export const StepDetailsForm: FC = () => {
-  const dispatch = useDispatch();
   const dataView = useDataView();
 
   const { i18n: i18nStart, theme } = useAppDependencies();
@@ -86,7 +84,6 @@ export const StepDetailsForm: FC = () => {
   const isFormValid = useIsFormValid(stepDetailsFormSlice);
 
   const previewRequest = useWizardSelector((state) => selectPreviewRequest(state, dataView));
-  const destIndexAvailableTimeFields = useDestIndexAvailableTimeFields(previewRequest);
 
   const { error: esIngestPipelinesError, data: esIngestPipelinesData } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -118,14 +115,6 @@ export const StepDetailsForm: FC = () => {
   useEffect(() => {
     if (isContinuousModeAvailable) {
       setContinuousModeDateField(sourceIndexDateFieldNames[0]);
-    }
-  }, []);
-
-  // Retention Policy
-  const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
-  useEffect(() => {
-    if (!isRetentionPolicyAvailable) {
-      dispatch(setFormField({ field: 'retentionPolicyField', value: '' }));
     }
   }, []);
 
@@ -312,10 +301,7 @@ export const StepDetailsForm: FC = () => {
           </>
         )}
 
-        <TransformRetentionPolicy
-          slice={stepDetailsFormSlice}
-          destIndexAvailableTimeFields={destIndexAvailableTimeFields}
-        />
+        <TransformRetentionPolicy slice={stepDetailsFormSlice} previewRequest={previewRequest} />
 
         <EuiSpacer size="l" />
 

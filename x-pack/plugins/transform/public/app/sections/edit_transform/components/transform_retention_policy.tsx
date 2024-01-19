@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Draft } from 'immer';
 
@@ -17,22 +17,43 @@ import { useFormField } from '@kbn/ml-form-utils/use_form_field';
 import { useFormSection } from '@kbn/ml-form-utils/use_form_sections';
 import { type FormSlice, type State } from '@kbn/ml-form-utils/form_slice';
 
+import type { PostTransformsPreviewRequestSchema } from '../../../../../common/api_schemas/transforms';
+
+import { useDestIndexAvailableTimeFields } from '../../../hooks';
+
 import { useDataView } from '../../create_transform/components/wizard/wizard';
 
 export const TransformRetentionPolicy = <FF extends string, FS extends string, VN extends string>({
   slice,
-  destIndexAvailableTimeFields,
+  previewRequest,
 }: {
   slice: FormSlice<FF, FS, VN>;
-  destIndexAvailableTimeFields: string[];
+  previewRequest: PostTransformsPreviewRequestSchema;
 }) => {
   const dispatch = useDispatch();
   const dataView = useDataView();
   const dataViewId = dataView.id;
   const retentionPolicySection = useFormSection(slice, 'retentionPolicy' as FS);
   const retentionPolicyField = useFormField(slice, 'retentionPolicyField' as FF);
+  const destIndexAvailableTimeFields = useDestIndexAvailableTimeFields(previewRequest);
 
-  const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
+  const isLoading = destIndexAvailableTimeFields === undefined;
+  const isRetentionPolicyAvailable =
+    Array.isArray(destIndexAvailableTimeFields) && destIndexAvailableTimeFields.length > 0;
+
+  useEffect(() => {
+    if (!isLoading && !isRetentionPolicyAvailable && retentionPolicyField.value !== '') {
+      dispatch(
+        slice.actions.setFormField({
+          field: 'retentionPolicyField' as keyof Draft<State<FF, FS, VN>>['formFields'],
+          value: '',
+        })
+      );
+    }
+    // custom comparison
+    /* eslint-disable react-hooks/exhaustive-deps */
+  }, [isLoading, isRetentionPolicyAvailable]);
+
   const retentionDateFieldOptions = useMemo(() => {
     return Array.isArray(destIndexAvailableTimeFields)
       ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
@@ -43,7 +64,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
     <>
       <EuiFormRow
         helpText={
-          isRetentionPolicyAvailable === false
+          !isLoading && isRetentionPolicyAvailable === false
             ? i18n.translate('xpack.transform.RetentionPolicyError', {
                 defaultMessage:
                   'Retention policy settings are not available for indices without date fields.',
@@ -65,11 +86,11 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
               })
             )
           }
-          disabled={!isRetentionPolicyAvailable}
+          disabled={isLoading || !isRetentionPolicyAvailable}
           data-test-subj="transformRetentionPolicySwitch"
         />
       </EuiFormRow>
-      {retentionPolicySection.enabled && (
+      {!isLoading && retentionPolicySection.enabled && (
         <div data-test-subj="transformRetentionPolicyContent">
           <EuiSpacer size="m" />
           {

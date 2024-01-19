@@ -30,8 +30,8 @@ export const useDestIndexAvailableTimeFields = (
     previewRequest !== undefined
   );
 
-  const destIndexAvailableTimeFields = useMemo<string[]>(() => {
-    if (!transformPreview) return [];
+  const destIndexAvailableTimeFields = useMemo<string[] | undefined>(() => {
+    if (!transformPreview) return;
     const properties = transformPreview.generated_dest_index.mappings.properties;
     const timeFields: string[] = Object.keys(properties).filter(
       (col) => properties[col].type === 'date'
