@@ -172,7 +172,7 @@ export const PanelsResizable = ({
 
   // EUI will call an outdated version of this callback when the resize ends,
   // so we need to make sure on our end that the latest version is called.
-  const onResizeEnd = useLatest(() => {
+  const onResizeEndStable = useLatest(() => {
     if (!resizeWithPortalsHackIsResizing) {
       return;
     }
@@ -190,6 +190,10 @@ export const PanelsResizable = ({
     disableResizeWithPortalsHack();
   });
 
+  const onResizeEnd = useCallback(() => {
+    onResizeEndStable.current();
+  }, [onResizeEndStable]);
+
   // Don't render EuiResizableContainer until we have have valid
   // panel sizes or it can cause the resize functionality to break.
   if (!panelSizes.fixedPanelSizePct && !panelSizes.flexPanelSizePct) {
@@ -202,9 +206,7 @@ export const PanelsResizable = ({
       direction={direction}
       onPanelWidthChange={onPanelSizeChange}
       onResizeStart={onResizeStart}
-      onResizeEnd={() => {
-        onResizeEnd.current();
-      }}
+      onResizeEnd={onResizeEnd}
       data-test-subj={`${dataTestSubj}ResizableContainer`}
       css={css`
         height: 100%;
