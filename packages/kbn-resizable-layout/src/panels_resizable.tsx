@@ -58,19 +58,10 @@ export const PanelsResizable = ({
   const { height: containerHeight, width: containerWidth } = useResizeObserver(container);
   const containerSize = getContainerSize(direction, containerWidth, containerHeight);
 
-  // EuiResizableContainer doesn't work properly when used with react-reverse-portal and
-  // will cancel the resize. To work around this we keep track of when resizes start and
-  // end to toggle the rendering of a transparent overlay which prevents the cancellation.
-  // EUI issue: https://github.com/elastic/eui/issues/6199
-  const [resizeWithPortalsHackIsResizing, setResizeWithPortalsHackIsResizing] = useState(false);
-  const enableResizeWithPortalsHack = useCallback(
-    () => setResizeWithPortalsHackIsResizing(true),
-    []
-  );
-  const disableResizeWithPortalsHack = useCallback(
-    () => setResizeWithPortalsHackIsResizing(false),
-    []
-  );
+  // The resize overlay makes it so that other mouse events (e.g. tooltip hovers, etc)
+  // don't occur when mouse dragging
+  const [isResizing, setIsResizing] = useState(false);
+
   // Align the resizable button border to overlap exactly over existing panel/layout borders
   const buttonBorderCss = css`
     position: relative;
@@ -82,10 +73,10 @@ export const PanelsResizable = ({
   const defaultButtonCss = css`
     z-index: 3;
   `;
-  const resizeWithPortalsHackButtonCss = css`
+  const resizingButtonCss = css`
     z-index: 4;
   `;
-  const resizeWithPortalsHackOverlayCss = css`
+  const resizingOverlayCss = css`
     position: absolute;
     top: 0;
     left: 0;
@@ -162,34 +153,29 @@ export const PanelsResizable = ({
     setPanelSizes,
   ]);
 
-  const onResizeStart = useCallback(
-    (trigger: ResizeTrigger) => {
-      if (trigger !== 'pointer') {
-        return;
-      }
-
-      enableResizeWithPortalsHack();
-    },
-    [enableResizeWithPortalsHack]
-  );
-
-  const onResizeEnd = useCallback(() => {
-    if (!resizeWithPortalsHackIsResizing) {
+  const onResizeStart = useCallback((trigger: ResizeTrigger) => {
+    if (trigger !== 'pointer') {
       return;
     }
+    setIsResizing(true);
+  }, []);
 
-    // We don't want the resize button to retain focus after the resize is complete,
-    // but EuiResizableContainer will force focus it onClick. To work around this we
-    // use setTimeout to wait until after onClick has been called before blurring.
-    if (document.activeElement instanceof HTMLElement) {
-      const button = document.activeElement;
-      setTimeout(() => {
-        button.blur();
-      });
-    }
-
-    disableResizeWithPortalsHack();
-  }, [disableResizeWithPortalsHack, resizeWithPortalsHackIsResizing]);
+  const onResizeEnd = useCallback(() => {
+    setIsResizing((_isResizing) => {
+      // We don't want the resize button to retain focus after the resize is complete,
+      // but EuiResizableContainer will force focus it onClick. To work around this we
+      // use setTimeout to wait until after onClick has been called before blurring.
+      if (_isResizing) {
+        if (document.activeElement instanceof HTMLElement) {
+          const button = document.activeElement;
+          setTimeout(() => {
+            button.blur();
+          });
+        }
+      }
+      return false;
+    });
+  }, []);
 
   // Don't render EuiResizableContainer until we have have valid
   // panel sizes or it can cause the resize functionality to break.
@@ -223,10 +209,7 @@ export const PanelsResizable = ({
           <EuiResizableButton
             className={resizeButtonClassName}
             indicator="border"
-            css={[
-              buttonBorderCss,
-              resizeWithPortalsHackIsResizing ? resizeWithPortalsHackButtonCss : defaultButtonCss,
-            ]}
+            css={[buttonBorderCss, isResizing ? resizingButtonCss : defaultButtonCss]}
             data-test-subj={`${dataTestSubj}ResizableButton`}
           />
           <EuiResizablePanel
@@ -237,7 +220,7 @@ export const PanelsResizable = ({
           >
             {flexPanel}
           </EuiResizablePanel>
-          {resizeWithPortalsHackIsResizing ? <div css={resizeWithPortalsHackOverlayCss} /> : <></>}
+          {isResizing ? <div css={resizingOverlayCss} /> : <></>}
         </>
       )}
     </EuiResizableContainer>
