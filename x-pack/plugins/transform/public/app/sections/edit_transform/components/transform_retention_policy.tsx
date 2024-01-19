@@ -27,11 +27,15 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
   slice,
   previewRequest,
 }: {
-  slice: FormSlice<FF | 'retentionPolicyField', FS | 'retentionPolicy', VN>;
+  slice: FormSlice<
+    FF | 'retentionPolicyField' | 'retentionPolicyMaxAge',
+    FS | 'retentionPolicy',
+    VN
+  >;
   previewRequest: PostTransformsPreviewRequestSchema;
 }) => {
   type ActionFormFields = keyof Draft<
-    State<FF | 'retentionPolicyField', FS | 'retentionPolicy', VN>
+    State<FF | 'retentionPolicyField' | 'retentionPolicyMaxAge', FS | 'retentionPolicy', VN>
   >['formFields'];
 
   const dispatch = useDispatch();
@@ -120,7 +124,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
           ) : (
             <FormTextInput
               slice={slice}
-              field={'retentionPolicyField' as FF}
+              field={'retentionPolicyField'}
               label={i18n.translate('xpack.transform.retentionPolicyFieldLabel', {
                 defaultMessage: 'Date field to set retention policy',
               })}
@@ -129,7 +133,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
         }
         <FormTextInput
           slice={slice}
-          field={'retentionPolicyMaxAge' as FF}
+          field={'retentionPolicyMaxAge'}
           label={i18n.translate(
             'xpack.transform.transformList.editFlyoutFormRetentionPolicyMaxAgeLabel',
             {
