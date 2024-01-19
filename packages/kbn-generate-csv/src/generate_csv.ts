@@ -7,17 +7,12 @@
  */
 
 import moment from 'moment';
-import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type {
-  IEsSearchRequest,
-  ISearchSource,
-  ISearchStartSearchSource,
-} from '@kbn/data-plugin/common';
-import { ES_SEARCH_STRATEGY, cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {
@@ -67,54 +62,6 @@ export class CsvGenerator {
     private logger: Logger,
     private stream: Writable
   ) {}
-
-  private async doSearch(
-    searchSource: ISearchSource,
-    settings: CsvExportSettings,
-    cursor: SearchCursor
-  ) {
-    const { scroll: scrollSettings, maxConcurrentShardRequests } = settings;
-    searchSource.setField('size', scrollSettings.size);
-
-    const searchAfter = cursor.getSearchAfter();
-    if (searchAfter) {
-      searchSource.setField('searchAfter', searchAfter);
-    }
-
-    cursor.doSearchPrior();
-
-    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
-    if (searchBody == null) {
-      throw new Error('Could not retrieve the search body!');
-    }
-
-    const searchParams: IEsSearchRequest = {
-      params: {
-        body: searchBody,
-        max_concurrent_shard_requests: maxConcurrentShardRequests,
-      },
-    };
-
-    let results: estypes.SearchResponse<unknown> | undefined;
-    try {
-      const { rawResponse, ...rawDetails } = await lastValueFrom(
-        this.clients.data.search(searchParams, {
-          strategy: ES_SEARCH_STRATEGY,
-          transport: {
-            maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
-            requestTimeout: settings.scroll.duration,
-          },
-        })
-      );
-      results = rawResponse;
-      cursor.doSearchPost(rawDetails, rawResponse);
-    } catch (err) {
-      this.logger.error(`CSV export search error: ${err}`);
-      throw err;
-    }
-
-    return results;
-  }
 
   /*
    * Load field formats for each field in the list
@@ -233,7 +180,7 @@ export class CsvGenerator {
       /*
        * Intrinsically, generating the rows is a synchronous process. Awaiting
        * on a setImmediate call here partititions what could be a very long and
-       * CPU-intenstive synchronous process into an asychronous process. This
+       * CPU-intenstive synchronous process into asychronous processes. This
        * give NodeJS to process other asychronous events that wait on the Event
        * Loop.
        *
@@ -337,14 +284,27 @@ export class CsvGenerator {
           searchSource.setField(...pagingFieldsForSearchSource);
         }
 
-        const results = await this.doSearch(searchSource, settings, cursor);
+        searchSource.setField('size', settings.scroll.size);
+
+        const searchAfter = cursor.getSearchAfter();
+        if (searchAfter) {
+          searchSource.setField('searchAfter', searchAfter); // for pit only
+        }
+
+        let results: estypes.SearchResponse<unknown> | undefined;
+        try {
+          results = await cursor.getPage(searchSource);
+        } catch (err) {
+          this.logger.error(`CSV export search error: ${err}`);
+          throw err;
+        }
+
         if (!results) {
           logger.warn(`Search results are undefined!`);
           break;
         }
 
-        const { hits: resultsHits } = results;
-        const { hits, total } = resultsHits;
+        const { hits, total } = results.hits;
         const trackedTotal = total as estypes.SearchTotalHits;
         const currentTotal = trackedTotal?.value ?? total;
 
@@ -357,7 +317,7 @@ export class CsvGenerator {
         cursor.updateIdFromResults(results);
 
         // track the beginning of the next page of search results
-        cursor.setSearchAfter(hits);
+        cursor.setSearchAfter(hits); // for pit only
 
         // check for shard failures, log them and add a warning if found
         const { _shards: shards } = results;
@@ -417,13 +377,13 @@ export class CsvGenerator {
       } else {
         warnings.push(i18nTexts.unknownError(err?.message ?? err));
       }
-    }
-
-    try {
-      await cursor.closeCursorId();
-    } catch (err) {
-      logger.error(err);
-      warnings.push(i18nTexts.csvUnableToClosePit());
+    } finally {
+      try {
+        await cursor.closeCursorId();
+      } catch (err) {
+        logger.error(err);
+        warnings.push(cursor.getUnableToCloseCursorMessage());
+      }
     }
 
     logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);

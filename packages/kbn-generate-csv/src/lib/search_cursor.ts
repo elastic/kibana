@@ -8,11 +8,22 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { IKibanaSearchResponse, SearchSourceFields } from '@kbn/data-plugin/common';
+import type {
+  IEsSearchResponse,
+  IKibanaSearchResponse,
+  ISearchSource,
+  SearchRequest,
+  SearchSourceFields,
+} from '@kbn/data-plugin/common';
+import { ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { IScopedSearchClient } from '@kbn/data-plugin/server';
+import { lastValueFrom } from 'rxjs';
 import type { CsvPagingStrategy } from '../../types';
 import type { CsvExportSettings } from './get_export_settings';
+import { i18nTexts } from './i18n_texts';
 
 interface Clients {
+  data: IScopedSearchClient;
   es: IScopedClusterClient;
 }
 
@@ -43,6 +54,8 @@ export class SearchCursor {
     if (this.strategy === 'pit') {
       this.cursorId = await this.openPointInTime();
     }
+
+    // initialization not necessary for scroll strategy
   }
 
   private async openPointInTime() {
@@ -83,12 +96,66 @@ export class SearchCursor {
     return pitId;
   }
 
-  public doSearchPrior() {
+  private async searchWithPit(searchBody: SearchRequest) {
+    const searchParamsPit = {
+      params: {
+        body: searchBody,
+        max_concurrent_shard_requests: this.settings.maxConcurrentShardRequests,
+      },
+    };
+    return await lastValueFrom(
+      this.clients.data.search(searchParamsPit, {
+        strategy: ES_SEARCH_STRATEGY,
+        transport: {
+          maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+          requestTimeout: this.settings.scroll.duration,
+        },
+      })
+    );
+  }
+
+  private async scan(searchBody: SearchRequest) {
+    const searchParamsScan = {
+      params: {
+        body: searchBody,
+        index: this.indexPatternTitle,
+        scroll: this.settings.scroll.duration,
+        size: this.settings.scroll.size,
+        ignore_throttled: this.settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+      },
+    };
+    return await lastValueFrom(
+      this.clients.data.search(searchParamsScan, {
+        strategy: ES_SEARCH_STRATEGY,
+        transport: {
+          maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+          requestTimeout: this.settings.scroll.duration,
+        },
+      })
+    );
+  }
+
+  private async scroll() {
+    return await this.clients.es.asCurrentUser.scroll(
+      {
+        scroll: this.settings.scroll.duration,
+        scroll_id: this.cursorId,
+      },
+      {
+        maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+        requestTimeout: this.settings.scroll.duration,
+      }
+    );
+  }
+
+  private doSearchPrior() {
     if (this.strategy === 'pit') {
       this.logger.debug(
         `Executing search request with PIT ID: [${this.formatCursorId(this.cursorId)}]` +
           (this.searchAfter ? ` search_after: [${this.searchAfter}]` : '')
       );
+    } else {
+      this.logger.debug(`Executing search request with scroll`);
     }
   }
 
@@ -97,19 +164,19 @@ export class SearchCursor {
    * @param clientDetails: Details from the data.search client
    * @param results:       Raw data from ES
    */
-  public doSearchPost(
+  private doSearchPost(
     clientDetails: Omit<IKibanaSearchResponse<unknown>, 'rawResponse'>,
     results: estypes.SearchResponse<unknown>
   ) {
+    const { hits: resultsHits, ...headerWithPit } = results;
+    const { hits, ...hitsMeta } = resultsHits;
+    const trackedTotal = resultsHits.total as estypes.SearchTotalHits;
+    const currentTotal = trackedTotal?.value ?? resultsHits.total;
+
+    const totalAccuracy = trackedTotal?.relation ?? 'unknown';
+    this.logger.debug(`Received total hits: ${currentTotal}. Accuracy: ${totalAccuracy}.`);
+
     if (this.strategy === 'pit') {
-      const { hits: resultsHits, ...headerWithPit } = results;
-      const { hits, ...hitsMeta } = resultsHits;
-      const trackedTotal = resultsHits.total as estypes.SearchTotalHits;
-      const currentTotal = trackedTotal?.value ?? resultsHits.total;
-
-      const totalAccuracy = trackedTotal?.relation ?? 'unknown';
-      this.logger.debug(`Received total hits: ${currentTotal}. Accuracy: ${totalAccuracy}.`);
-
       // reconstruct the data.search response (w/out the data) for logging
       const { pit_id: newPitId, ...header } = headerWithPit;
       const logInfo = {
@@ -125,10 +192,45 @@ export class SearchCursor {
     }
   }
 
-  public updateIdFromResults(results: Pick<estypes.SearchResponse<unknown>, 'pit_id'>) {
-    if (this.strategy === 'pit') {
-      this.cursorId = results.pit_id ?? this.cursorId;
+  public async getPage(searchSource: ISearchSource) {
+    this.doSearchPrior();
+
+    let response: IEsSearchResponse | undefined;
+
+    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
+    if (searchBody == null) {
+      throw new Error('Could not retrieve the search body!');
     }
+
+    if (this.strategy === 'pit') {
+      response = await this.searchWithPit(searchBody);
+    } else if (this.strategy === 'scroll' && this.cursorId == null) {
+      response = await this.scan(searchBody);
+    } else if (this.strategy === 'scroll') {
+      response = { rawResponse: await this.scroll() };
+    }
+
+    if (!response) {
+      throw new Error(`Response could not be retrieved!`);
+    }
+
+    const { rawResponse, ...rawDetails } = response;
+
+    this.doSearchPost(rawDetails, rawResponse);
+
+    return rawResponse;
+  }
+
+  public updateIdFromResults(
+    results: Pick<estypes.SearchResponse<unknown>, 'pit_id' | '_scroll_id'>
+  ) {
+    let cursorId: string | undefined;
+    if (this.strategy === 'pit') {
+      cursorId = results.pit_id;
+    } else {
+      cursorId = results._scroll_id;
+    }
+    this.cursorId = cursorId ?? this.cursorId;
   }
 
   /**
@@ -159,13 +261,24 @@ export class SearchCursor {
   }
 
   public async closeCursorId() {
-    if (this.strategy === 'pit') {
-      if (this.cursorId) {
-        this.logger.debug(`Closing PIT ${this.formatCursorId(this.cursorId)}`);
+    if (this.cursorId) {
+      if (this.strategy === 'pit') {
+        this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
         await this.clients.es.asCurrentUser.closePointInTime({ body: { id: this.cursorId } });
       } else {
-        this.logger.warn(`No PIT ID to clear!`);
+        this.logger.debug(`Executing clearScroll on ${this.formatCursorId(this.cursorId)}`);
+        await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [this.cursorId] });
       }
+    } else {
+      this.logger.warn(`No ${this.strategy}Id to clear!`);
+    }
+  }
+
+  public getUnableToCloseCursorMessage() {
+    if (this.strategy === 'pit') {
+      return i18nTexts.csvUnableToClosePit();
+    } else {
+      return i18nTexts.csvUnableToCloseScroll();
     }
   }
 

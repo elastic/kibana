@@ -48,4 +48,9 @@ export const i18nTexts = {
       defaultMessage:
         'Unable to close the Point-In-Time used for search. Check the Kibana server logs.',
     }),
+  csvUnableToCloseScroll: () =>
+    i18n.translate('generateCsv.csvUnableToCloseScroll', {
+      defaultMessage:
+        'Unable to close the scroll context used for search. Check the Kibana server logs.',
+    }),
 };
