@@ -10,17 +10,31 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
+  const PageObjects = getPageObjects([
+    'common',
+    'svlCommonPage',
+    'settings',
+    'header',
+    'savedObjects',
+  ]);
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
+  const testSubjects = getService('testSubjects');
 
   describe('import warnings', () => {
     before(async () => {
-      await esArchiver.emptyKibanaIndex();
+      // emptyKibanaIndex fails in Serverless with
+      // "index_not_found_exception: no such index [.kibana_ingest]",
+      // so it was switched to `savedObjects.cleanStandardList()
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     beforeEach(async () => {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
+      await PageObjects.svlCommonPage.login();
+      await PageObjects.common.navigateToApp('management');
+      await testSubjects.click('app-card-objects');
+      await PageObjects.savedObjects.waitTableIsLoaded();
     });
 
     it('should display simple warnings', async () => {
