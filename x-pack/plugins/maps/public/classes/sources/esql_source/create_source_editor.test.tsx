@@ -10,10 +10,10 @@ import { render, waitFor } from '@testing-library/react';
 import { CreateSourceEditor } from './create_source_editor';
 
 jest.mock('../../../kibana_services', () => {
-  const mockDataView = {
+  const mockDefaultDataView = {
     fields: [
       {
-        name: 'geometry',
+        name: 'location',
         type: 'geo_point',
       },
       {
@@ -26,11 +26,25 @@ jest.mock('../../../kibana_services', () => {
       return 'logs';
     },
   };
+  const mockDataView = {
+    fields: [
+      {
+        name: 'geometry',
+        type: 'geo_shape',
+      },
+    ],
+    getIndexPattern: () => {
+      return 'world_countries';
+    },
+  };
   return {
     getIndexPatternService() {
       return {
-        getDefaultDataView: async () => {
+        get: async () => {
           return mockDataView;
+        },
+        getDefaultDataView: async () => {
+          return mockDefaultDataView;
         },
       };
     },
@@ -38,19 +52,36 @@ jest.mock('../../../kibana_services', () => {
 });
 
 describe('CreateSourceEditor', () => {
-  test('should preview layer on load', async () => {
+  test('should preview default data view on load', async () => {
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
       expect(onSourceConfigChange).toBeCalledWith({
         columns: [
           {
-            name: 'geometry',
+            name: 'location',
             type: 'geo_point',
           },
         ],
         dateField: '@timestamp',
-        esql: 'from logs | keep geometry | limit 10000',
+        esql: 'from logs | keep location | limit 10000',
+      })
+    );
+  });
+
+  test('should preview requested data view on load when mostCommonDataViewId prop provided', async () => {
+    const onSourceConfigChange = jest.fn();
+    render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} mostCommonDataViewId="123abc" />);
+    await waitFor(() =>
+      expect(onSourceConfigChange).toBeCalledWith({
+        columns: [
+          {
+            name: 'geometry',
+            type: 'geo_shape',
+          },
+        ],
+        dateField: undefined,
+        esql: 'from world_countries | keep geometry | limit 10000',
       })
     );
   });
