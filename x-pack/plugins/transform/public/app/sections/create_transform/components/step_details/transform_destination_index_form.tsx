@@ -29,11 +29,11 @@ export const TransformDestinationIndexForm: FC = () => {
 
   const {
     value: transformId,
-    errorMessages: transformIdErrorMessages,
+    errors: transformIdErrors,
     reservedValues: transformIdReservedValues,
   } = useFormField(stepDetailsFormSlice, 'transformId');
 
-  const { value: destinationIndex, errorMessages: destinationIndexErrorMessages } = useFormField(
+  const { value: destinationIndex, errors: destinationIndexErrors } = useFormField(
     stepDetailsFormSlice,
     'destinationIndex'
   );
@@ -70,7 +70,7 @@ export const TransformDestinationIndexForm: FC = () => {
   );
 
   useEffect(() => {
-    if (destIndexSameAsId === true && transformId !== '' && transformIdErrorMessages.length === 0) {
+    if (destIndexSameAsId === true && transformId !== '' && transformIdErrors.length === 0) {
       setDestinationIndex(transformId);
     }
   }, [destIndexSameAsId, transformId]);
@@ -81,7 +81,7 @@ export const TransformDestinationIndexForm: FC = () => {
       destinationIndex={destinationIndex}
       destinationIndexNameEmpty={destinationIndex === ''}
       destinationIndexNameExists={indexNameExists}
-      destinationIndexNameValid={destinationIndexErrorMessages.length === 0}
+      destinationIndexNameValid={destinationIndexErrors.length === 0}
       destIndexSameAsId={destIndexSameAsId}
       fullWidth={false}
       indexNameExistsMessage={i18n.translate(

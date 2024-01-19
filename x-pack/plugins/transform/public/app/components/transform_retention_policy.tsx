@@ -94,8 +94,8 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
               label={i18n.translate('xpack.transform.retentionPolicyFieldLabel', {
                 defaultMessage: 'Date field for retention policy',
               })}
-              isInvalid={retentionPolicyField.errorMessages.length > 0}
-              error={retentionPolicyField.errorMessages}
+              isInvalid={retentionPolicyField.errors.length > 0}
+              error={retentionPolicyField.errors}
               helpText={i18n.translate('xpack.transform.retentionPolicyDateFieldHelpText', {
                 defaultMessage:
                   'Select the date field that can be used to identify out of date documents in the destination index.',

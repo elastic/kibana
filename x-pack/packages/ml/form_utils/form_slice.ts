@@ -44,7 +44,7 @@ export function createFormSlice<FF extends string, FS extends string, VN extends
     return isOptional;
   }
 
-  function getFormFieldErrorMessages(
+  function getFormFieldErrors(
     value: string,
     validatorName: VN,
     isOptional: boolean,
@@ -83,7 +83,7 @@ export function createFormSlice<FF extends string, FS extends string, VN extends
         const formField = state.formFields[action.payload.field] as FormField<FF, FS, VN>;
         const isOptional = isFormFieldOptional(state, action.payload.field);
 
-        formField.errorMessages = getFormFieldErrorMessages(
+        formField.errors = getFormFieldErrors(
           action.payload.value,
           formField.validator,
           isOptional,
@@ -110,7 +110,7 @@ export function createFormSlice<FF extends string, FS extends string, VN extends
               state,
               formFieldName as keyof Draft<typeof initialState>['formFields']
             );
-            formField.errorMessages = getFormFieldErrorMessages(
+            formField.errors = getFormFieldErrors(
               formField.value,
               formField.validator,
               isOptional,

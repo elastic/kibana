@@ -31,10 +31,7 @@ const ingestPipelineLabel = i18n.translate(
 export const EditTransformIngestPipeline: FC = () => {
   const dispatch = useDispatch();
   const { euiTheme } = useEuiTheme();
-  const { errorMessages, value } = useFormField(
-    editTransformFlyoutSlice,
-    'destinationIngestPipeline'
-  );
+  const { errors, value } = useFormField(editTransformFlyoutSlice, 'destinationIngestPipeline');
 
   const { data: esIngestPipelinesData, isLoading } = useGetEsIngestPipelines();
   const ingestPipelineNames = esIngestPipelinesData?.map(({ name }) => name) ?? [];
@@ -45,11 +42,7 @@ export const EditTransformIngestPipeline: FC = () => {
         // If the list of ingest pipelines is not available
         // gracefully defaults to text input
         ingestPipelineNames.length > 0 || isLoading ? (
-          <EuiFormRow
-            label={ingestPipelineLabel}
-            isInvalid={errorMessages.length > 0}
-            error={errorMessages}
-          >
+          <EuiFormRow label={ingestPipelineLabel} isInvalid={errors.length > 0} error={errors}>
             <EuiSkeletonRectangle
               width="100%"
               height={euiTheme.size.xxl}
