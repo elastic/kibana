@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { useFormField } from '../use_form_field';
 
 import { capitalizeFirstLetter } from '../utils/capitalize_first_letter';
-import type { FormSlice, State } from '../form_slice';
+import type { State } from '../form_slice';
 
 import type { FormTextProps } from './types';
 
@@ -25,7 +25,7 @@ export const FormTextInput = <FF extends string, FS extends string, VN extends s
   label,
   helpText,
   placeHolder = false,
-}: FormTextProps<FF, FS, VN, FormSlice<FF, FS, VN>>) => {
+}: FormTextProps<FF, FS, VN>) => {
   const dispatch = useDispatch();
   const { defaultValue, errorMessages, value } = useFormField(slice, field);
   const upperCaseField = capitalizeFirstLetter(field as string);
