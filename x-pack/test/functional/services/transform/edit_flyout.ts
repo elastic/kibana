@@ -42,14 +42,14 @@ export function TransformEditFlyoutProvider({ getService }: FtrProviderContext) 
     },
 
     async assertTransformEditFlyoutRetentionPolicySwitchEnabled(expectedValue: boolean) {
-      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, {
+      await testSubjects.existOrFail(`editTransformFlyoutRetentionPolicySwitch`, {
         timeout: 1000,
       });
       await retry.tryForTime(5000, async () => {
-        const isEnabled = await testSubjects.isEnabled(`transformRetentionPolicySwitch`);
+        const isEnabled = await testSubjects.isEnabled(`editTransformFlyoutRetentionPolicySwitch`);
         expect(isEnabled).to.eql(
           expectedValue,
-          `Expected 'transformRetentionPolicySwitch' input to be '${
+          `Expected 'editTransformFlyoutRetentionPolicySwitch' input to be '${
             expectedValue ? 'enabled' : 'disabled'
           }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
         );

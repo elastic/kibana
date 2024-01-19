@@ -841,13 +841,15 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertRetentionPolicySwitchExists() {
-      await testSubjects.existOrFail(`transformRetentionPolicySwitch`, { allowHidden: true });
+      await testSubjects.existOrFail(`stepDetailsFormRetentionPolicySwitch`, { allowHidden: true });
     },
 
     async assertRetentionPolicySwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformRetentionPolicySwitch', 'aria-checked')) ===
-        'true';
+        (await testSubjects.getAttribute(
+          'stepDetailsFormRetentionPolicySwitch',
+          'aria-checked'
+        )) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Retention policy switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
