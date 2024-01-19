@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { File } from '../file';
+import { File } from '../../file';
 
 export interface TestResponse {
   test: string;

@@ -11,14 +11,14 @@ import { readFile, writeFile, unlink } from 'fs/promises';
 import execa from 'execa';
 import * as json5 from 'json5';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { PreflightCheck, TestResponse } from '../preflight_check';
+import { PreflightCheck, TestResponse } from './preflight_check';
 
 export class TypescriptCheck extends PreflightCheck {
   id = 'typescript';
 
   public async runCheck() {
     const files = Array.from(this.files.values());
-    const response: TestResponse = { test: 'typescript', errors: [] };
+    const response: TestResponse = { test: this.id, errors: [] };
 
     if (files.length === 0) {
       return response;

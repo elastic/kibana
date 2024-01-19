@@ -8,7 +8,7 @@
 
 import { ESLint } from 'eslint';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { PreflightCheck, TestResponse } from '../preflight_check';
+import { PreflightCheck, TestResponse } from './preflight_check';
 
 export class EslintCheck extends PreflightCheck {
   id = 'eslint';

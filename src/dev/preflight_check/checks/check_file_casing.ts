@@ -17,7 +17,7 @@ import {
   KEBAB_CASE_DIRECTORY_GLOBS,
 } from '../../precommit_hook/casing_check_config';
 import { File } from '../../file';
-import { PreflightCheck } from '../preflight_check';
+import { PreflightCheck } from './preflight_check';
 
 const NON_SNAKE_CASE_RE = /[A-Z \-]/;
 const NON_KEBAB_CASE_RE = /[A-Z \_]/;
@@ -143,6 +143,6 @@ export class FileCasingCheck extends PreflightCheck {
       logs.push(snakeCaseResponse);
     }
 
-    return { test: 'fileCasing', errors: logs.flatMap((l) => l) };
+    return { test: this.id, errors: logs.flatMap((l) => l) };
   }
 }
