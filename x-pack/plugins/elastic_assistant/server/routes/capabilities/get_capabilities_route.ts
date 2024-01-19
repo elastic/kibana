@@ -8,10 +8,10 @@
 import { IKibanaResponse, IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import type { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
 import { CAPABILITIES } from '../../../common/constants';
 import { ElasticAssistantRequestHandlerContext } from '../../types';
 
-import { GetCapabilitiesResponse } from '../../schemas/capabilities/get_capabilities_route.gen';
 import { buildResponse } from '../../lib/build_response';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
