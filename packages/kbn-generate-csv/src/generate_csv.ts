@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import moment from 'moment';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
 
@@ -31,7 +32,7 @@ import {
   ReportingError,
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 
 import { CONTENT_TYPE_CSV } from './constants';
@@ -59,6 +60,7 @@ export class CsvGenerator {
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
     private config: ReportingConfigType['csv'],
+    private taskInstanceFields: TaskInstanceFields,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
@@ -346,16 +348,19 @@ export class CsvGenerator {
   }
 
   public async generateData(): Promise<TaskRunResult> {
+    const logger = this.logger;
     const [settings, searchSource] = await Promise.all([
-      getExportSettings(
-        this.clients.uiSettings,
-        this.config,
-        this.job.browserTimezone,
-        this.logger
-      ),
+      getExportSettings(this.clients.uiSettings, this.config, this.job.browserTimezone, logger),
       this.dependencies.searchSourceStart.create(this.job.searchSource),
     ]);
-    let reportingError: undefined | ReportingError;
+
+    const { startedAt, retryAt } = this.taskInstanceFields;
+    if (startedAt) {
+      this.logger.debug(
+        `Task started at: ${startedAt && moment(startedAt).format()}.` +
+          ` Can run until: ${retryAt && moment(retryAt).format()}`
+      );
+    }
 
     const index = searchSource.getField('index');
 
@@ -372,12 +377,13 @@ export class CsvGenerator {
     let totalRecords: number | undefined;
     let searchAfter: estypes.SortResults | undefined;
 
+    let reportingError: undefined | ReportingError;
     let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
     // apply timezone from the job to all date field formatters
     try {
       index.fields.getByType('date').forEach(({ name }) => {
-        this.logger.debug(`Setting timezone on ${name}`);
+        logger.debug(`Setting timezone on ${name}`);
         const format: FieldFormatConfig = {
           ...index.fieldFormatMap[name],
           id: index.fieldFormatMap[name]?.id || 'date', // allow id: date_nanos
@@ -389,7 +395,7 @@ export class CsvGenerator {
         index.setFieldFormat(name, format);
       });
     } catch (err) {
-      this.logger.error(err);
+      logger.error(err);
     }
 
     const columns = new Set<string>(this.job.columns ?? []);
@@ -403,7 +409,7 @@ export class CsvGenerator {
 
         const results = await this.doSearch(searchSource, settings, searchAfter);
         if (!results) {
-          this.logger.warn(`Search results are undefined!`);
+          logger.warn(`Search results are undefined!`);
           break;
         }
 
@@ -423,14 +429,14 @@ export class CsvGenerator {
         // Update last sort results for next query. PIT is used, so the sort results
         // automatically include _shard_doc as a tiebreaker
         searchAfter = hits[hits.length - 1]?.sort as estypes.SortResults | undefined;
-        this.logger.debug(`Received search_after: [${searchAfter}]`);
+        logger.debug(`Received search_after: [${searchAfter}]`);
 
         // check for shard failures, log them and add a warning if found
         const { _shards: shards } = results;
         if (shards.failures) {
           shards.failures.forEach(({ reason }) => {
             warnings.push(`Shard failure: ${JSON.stringify(reason)}`);
-            this.logger.warn(JSON.stringify(reason));
+            logger.warn(JSON.stringify(reason));
           });
         }
 
@@ -438,7 +444,7 @@ export class CsvGenerator {
         try {
           table = tabifyDocs(results, index, { shallow: true, includeIgnoredValues: true });
         } catch (err) {
-          this.logger.error(err);
+          logger.error(err);
           warnings.push(i18nTexts.unknownError(err?.message ?? err));
         }
 
@@ -472,7 +478,7 @@ export class CsvGenerator {
         warnings.push(i18nTexts.escapedFormulaValuesMessage);
       }
     } catch (err) {
-      this.logger.error(err);
+      logger.error(err);
       if (err instanceof esErrors.ResponseError) {
         if ([401, 403].includes(err.statusCode ?? 0)) {
           reportingError = new AuthenticationExpiredError();
@@ -487,20 +493,20 @@ export class CsvGenerator {
 
     try {
       if (pitId) {
-        this.logger.debug(`Closing PIT ${this.formatPit(pitId)}`);
+        logger.debug(`Closing PIT ${this.formatPit(pitId)}`);
         await this.clients.es.asCurrentUser.closePointInTime({ body: { id: pitId } });
       } else {
-        this.logger.warn(`No PIT ID to clear!`);
+        logger.warn(`No PIT ID to clear!`);
       }
     } catch (err) {
-      this.logger.error(err);
+      logger.error(err);
       warnings.push(i18nTexts.csvUnableToClosePit());
     }
 
-    this.logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
+    logger.info(`Finished generating. Row count: ${this.csvRowCount}.`);
 
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
-      this.logger.warn(
+      logger.warn(
         `ES scroll returned fewer total hits than expected! ` +
           `Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`
       );

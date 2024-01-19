@@ -370,7 +370,10 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
         });
 
         it('filters by risk level', () => {
+          cy.get(HOSTS_TABLE).should('be.visible');
+          cy.get(HOSTS_TABLE_ROWS).should('have.length', 5);
           cy.get(HOSTS_DONUT_CHART).should('include.text', '6Total');
+
           openRiskTableFilterAndSelectTheCriticalOption();
 
           cy.get(HOSTS_DONUT_CHART).should('include.text', '1Total');
@@ -461,6 +464,8 @@ describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => 
 
         it('filters by risk level', () => {
           cy.get(USERS_DONUT_CHART).should('include.text', '7Total');
+          cy.get(USERS_TABLE).should('be.visible');
+          cy.get(USERS_TABLE_ROWS).should('have.length', 5);
 
           openUserRiskTableFilterAndSelectTheLowOption(1);
 

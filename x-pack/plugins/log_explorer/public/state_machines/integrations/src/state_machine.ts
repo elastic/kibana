@@ -10,7 +10,7 @@ import { isEmpty, isError, omitBy } from 'lodash';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { Dataset, Integration } from '../../../../common/datasets';
 import { IDatasetsClient } from '../../../services/datasets';
-import { DEFAULT_CONTEXT } from './defaults';
+import { createDefaultContext } from './defaults';
 import {
   DefaultIntegrationsContext,
   IntegrationsContext,
@@ -20,7 +20,7 @@ import {
 } from './types';
 
 export const createPureIntegrationsStateMachine = (
-  initialContext: DefaultIntegrationsContext = DEFAULT_CONTEXT
+  initialContext: DefaultIntegrationsContext = createDefaultContext()
 ) =>
   createMachine<IntegrationsContext, IntegrationsEvent, IntegrationTypestate>(
     {
