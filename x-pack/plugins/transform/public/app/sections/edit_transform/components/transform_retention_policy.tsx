@@ -27,14 +27,21 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
   slice,
   previewRequest,
 }: {
-  slice: FormSlice<FF, FS, VN>;
+  slice: FormSlice<FF | 'retentionPolicyField', FS | 'retentionPolicy', VN>;
   previewRequest: PostTransformsPreviewRequestSchema;
 }) => {
+  type ActionFormFields = keyof Draft<
+    State<FF | 'retentionPolicyField', FS | 'retentionPolicy', VN>
+  >['formFields'];
+  type ActionFormSections = keyof Draft<
+    State<FF | 'retentionPolicyField', FS | 'retentionPolicy', VN>
+  >['formSections'];
+
   const dispatch = useDispatch();
   const dataView = useDataView();
   const dataViewId = dataView.id;
-  const retentionPolicySection = useFormSection(slice, 'retentionPolicy' as FS);
-  const retentionPolicyField = useFormField(slice, 'retentionPolicyField' as FF);
+  const retentionPolicyField = useFormField(slice, 'retentionPolicyField');
+  const retentionPolicySection = useFormSection(slice, 'retentionPolicy');
   const destIndexAvailableTimeFields = useDestIndexAvailableTimeFields(previewRequest);
 
   const isLoading = destIndexAvailableTimeFields === undefined;
@@ -45,7 +52,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
     if (!isLoading && !isRetentionPolicyAvailable && retentionPolicyField.value !== '') {
       dispatch(
         slice.actions.setFormField({
-          field: 'retentionPolicyField' as keyof Draft<State<FF, FS, VN>>['formFields'],
+          field: 'retentionPolicyField' as ActionFormFields,
           value: '',
         })
       );
@@ -81,7 +88,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
           onChange={(e) =>
             dispatch(
               slice.actions.setFormSection({
-                section: 'retentionPolicy' as keyof Draft<State<FF, FS, VN>>['formSections'],
+                section: 'retentionPolicy' as ActionFormSections,
                 enabled: e.target.checked,
               })
             )
@@ -121,9 +128,7 @@ export const TransformRetentionPolicy = <FF extends string, FS extends string, V
                   onChange={(e) =>
                     dispatch(
                       slice.actions.setFormField({
-                        field: 'retentionPolicyField' as keyof Draft<
-                          State<FF, FS, VN>
-                        >['formFields'],
+                        field: 'retentionPolicyField' as ActionFormFields,
                         value: e.target.value,
                       })
                     )
