@@ -15,7 +15,6 @@ import { applyFormStateToConfig } from '@kbn/ml-form-utils/apply_form_state_to_c
 import type { PivotConfigDefinition } from '../../../common/types/transform';
 import type { LatestFunctionConfig } from '../../../common/api_schemas/transforms';
 import {
-  DEFAULT_CONTINUOUS_MODE_DELAY,
   DEFAULT_TRANSFORM_FREQUENCY,
   DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
   DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
@@ -251,20 +250,6 @@ export const getCreateTransformRequestBody = (
     ...(transformDetailsState.transformFrequency !== '' &&
     transformDetailsState.transformFrequency !== DEFAULT_TRANSFORM_FREQUENCY
       ? { frequency: transformDetailsState.transformFrequency }
-      : {}),
-    // conditionally add continuous mode config
-    ...(transformDetailsState.isContinuousModeEnabled
-      ? {
-          sync: {
-            time: {
-              // conditionally add continuous mode delay, skip if default value
-              ...(transformDetailsState.continuousModeDelay !== DEFAULT_CONTINUOUS_MODE_DELAY
-                ? { delay: transformDetailsState.continuousModeDelay }
-                : {}),
-              field: transformDetailsState.continuousModeDateField,
-            },
-          },
-        }
       : {}),
     ...(transformDetailsState._meta ? { _meta: transformDetailsState._meta } : {}),
     // conditionally add additional settings

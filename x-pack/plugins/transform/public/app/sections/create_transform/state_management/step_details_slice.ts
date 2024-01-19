@@ -34,15 +34,6 @@ export const stepDetailsSlice = createSlice({
   initialState: getDefaultStepDetailsState(),
   reducers: {
     setStepDetailsState: (_, action: PayloadAction<StepDetailsState>) => action.payload,
-    setContinuousModeEnabled: (state, action: PayloadAction<boolean>) => {
-      state.isContinuousModeEnabled = action.payload;
-    },
-    setContinuousModeDelay: (state, action: PayloadAction<string>) => {
-      state.continuousModeDelay = action.payload;
-    },
-    setContinuousModeDateField: (state, action: PayloadAction<string>) => {
-      state.continuousModeDateField = action.payload;
-    },
     setTransformFrequency: (state, action: PayloadAction<string>) => {
       state.transformFrequency = action.payload;
     },

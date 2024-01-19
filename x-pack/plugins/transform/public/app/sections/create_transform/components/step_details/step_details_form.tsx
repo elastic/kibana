@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 import {
   EuiAccordion,
@@ -21,6 +22,8 @@ import { i18n } from '@kbn/i18n';
 import { FormTextArea } from '@kbn/ml-form-utils/components/form_text_area';
 import { FormTextInput } from '@kbn/ml-form-utils/components/form_text_input';
 import { useIsFormValid } from '@kbn/ml-form-utils/use_is_form_valid';
+import { useFormField } from '@kbn/ml-form-utils/use_form_field';
+import { useFormSection } from '@kbn/ml-form-utils/use_form_sections';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
@@ -45,11 +48,16 @@ import { TransformCreateDataViewForm } from './transform_create_data_view_form';
 import { TransformLatestCallout } from './transform_latest_callout';
 
 export const StepDetailsForm: FC = () => {
+  const dispatch = useDispatch();
   const dataView = useDataView();
 
-  const isContinuousModeEnabled = useWizardSelector((s) => s.stepDetails.isContinuousModeEnabled);
-  const continuousModeDelay = useWizardSelector((s) => s.stepDetails.continuousModeDelay);
-  const continuousModeDateField = useWizardSelector((s) => s.stepDetails.continuousModeDateField);
+  const { enabled: isContinuousModeEnabled } = useFormSection(
+    stepDetailsFormSlice,
+    'continuousMode'
+  );
+  const continuousModeDelay = useFormField(stepDetailsFormSlice, 'continuousModeDelay');
+  const continuousModeDateField = useFormField(stepDetailsFormSlice, 'continuousModeDateField');
+
   const transformFrequency = useWizardSelector((s) => s.stepDetails.transformFrequency);
   const transformSettingsMaxPageSearchSize = useWizardSelector(
     (s) => s.stepDetails.transformSettingsMaxPageSearchSize
@@ -58,9 +66,6 @@ export const StepDetailsForm: FC = () => {
     (s) => s.stepDetails.transformSettingsNumFailureRetries
   );
   const {
-    setContinuousModeEnabled,
-    setContinuousModeDelay,
-    setContinuousModeDateField,
     setTransformFrequency,
     setTransformSettingsMaxPageSearchSize,
     setTransformSettingsNumFailureRetries,
@@ -78,10 +83,15 @@ export const StepDetailsForm: FC = () => {
 
   // Continuous Mode
   const isContinuousModeAvailable = sourceIndexDateFieldNames.length > 0;
-  const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay);
+  const isContinuousModeDelayValid = isContinuousModeDelay(continuousModeDelay.value);
   useEffect(() => {
     if (isContinuousModeAvailable) {
-      setContinuousModeDateField(sourceIndexDateFieldNames[0]);
+      dispatch(
+        stepDetailsFormSlice.actions.setFormField({
+          field: 'continuousModeDateField',
+          value: sourceIndexDateFieldNames[0],
+        })
+      );
     }
     // custom comparison
     /* eslint-disable react-hooks/exhaustive-deps */
@@ -165,7 +175,14 @@ export const StepDetailsForm: FC = () => {
               defaultMessage: 'Continuous mode',
             })}
             checked={isContinuousModeEnabled === true}
-            onChange={() => setContinuousModeEnabled(!isContinuousModeEnabled)}
+            onChange={() =>
+              dispatch(
+                stepDetailsFormSlice.actions.setFormSection({
+                  section: 'continuousMode',
+                  enabled: !isContinuousModeEnabled,
+                })
+              )
+            }
             disabled={isContinuousModeAvailable === false}
             data-test-subj="transformContinuousModeSwitch"
           />
@@ -189,8 +206,15 @@ export const StepDetailsForm: FC = () => {
             >
               <EuiSelect
                 options={sourceIndexDateFieldNames.map((text: string) => ({ text, value: text }))}
-                value={continuousModeDateField}
-                onChange={(e) => setContinuousModeDateField(e.target.value)}
+                value={continuousModeDateField.value}
+                onChange={(e) =>
+                  dispatch(
+                    stepDetailsFormSlice.actions.setFormField({
+                      field: 'continuousModeDateField',
+                      value: e.target.value,
+                    })
+                  )
+                }
                 data-test-subj="transformContinuousDateFieldSelect"
               />
             </EuiFormRow>
@@ -221,8 +245,15 @@ export const StepDetailsForm: FC = () => {
                     values: { exampleValue: '60s' },
                   }
                 )}
-                value={continuousModeDelay}
-                onChange={(e) => setContinuousModeDelay(e.target.value)}
+                value={continuousModeDelay.value}
+                onChange={(e) =>
+                  dispatch(
+                    stepDetailsFormSlice.actions.setFormField({
+                      field: 'continuousModeDelay',
+                      value: e.target.value,
+                    })
+                  )
+                }
                 aria-label={i18n.translate(
                   'xpack.transform.stepDetailsForm.continuousModeAriaLabel',
                   {

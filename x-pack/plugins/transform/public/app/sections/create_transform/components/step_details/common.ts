@@ -17,9 +17,6 @@ import {
 import type { TransformConfigUnion } from '../../../../../../common/types/transform';
 
 export interface StepDetailsState {
-  continuousModeDateField: string;
-  continuousModeDelay: string;
-  isContinuousModeEnabled: boolean;
   transformFrequency: string;
   transformSettingsMaxPageSearchSize?: number;
   transformSettingsDocsPerSecond: number | null;
@@ -67,6 +64,22 @@ export const getStepDetailsFormFields = (
     section: 'retentionPolicy',
     validator: 'retentionPolicyMaxAgeValidator',
   }),
+  // continuous mode
+  initializeFormField('continuousModeDelay', 'sync.time.delay', config, {
+    dependsOn: ['continuousModeDateField'],
+    defaultValue: DEFAULT_CONTINUOUS_MODE_DELAY,
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: true,
+    section: 'continuousMode',
+    validator: 'stringValidator',
+  }),
+  initializeFormField('continuousModeDateField', 'sync.time.field', config, {
+    isNullable: false,
+    isOptional: true,
+    isOptionalInSection: false,
+    section: 'continuousMode',
+  }),
 ];
 
 export const getStepDetailsFormSections = (config?: TransformConfigUnion) => [
@@ -74,13 +87,11 @@ export const getStepDetailsFormSections = (config?: TransformConfigUnion) => [
     defaultEnabled: true,
   }),
   initializeFormSection('retentionPolicy', 'retention_policy', config),
+  initializeFormSection('continuousMode', 'sync.time', config),
 ];
 
 export function getDefaultStepDetailsState(): StepDetailsState {
   return {
-    continuousModeDateField: '',
-    continuousModeDelay: DEFAULT_CONTINUOUS_MODE_DELAY,
-    isContinuousModeEnabled: false,
     transformFrequency: DEFAULT_TRANSFORM_FREQUENCY,
     transformSettingsMaxPageSearchSize: DEFAULT_TRANSFORM_SETTINGS_MAX_PAGE_SEARCH_SIZE,
     transformSettingsDocsPerSecond: DEFAULT_TRANSFORM_SETTINGS_DOCS_PER_SECOND,
@@ -95,14 +106,6 @@ export function applyTransformConfigToDetailsState(
 ): StepDetailsState {
   // apply the transform configuration to wizard DETAILS state
   if (transformConfig !== undefined) {
-    // Continuous mode
-    const continuousModeTime = transformConfig.sync?.time;
-    if (continuousModeTime !== undefined) {
-      state.continuousModeDateField = continuousModeTime.field;
-      state.continuousModeDelay = continuousModeTime?.delay ?? DEFAULT_CONTINUOUS_MODE_DELAY;
-      state.isContinuousModeEnabled = true;
-    }
-
     // Frequency
     if (transformConfig.frequency !== undefined) {
       state.transformFrequency = transformConfig.frequency;

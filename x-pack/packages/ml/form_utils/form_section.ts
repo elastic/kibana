@@ -18,21 +18,19 @@ export interface FormSection<FS extends string> {
   enabled: boolean;
 }
 
-export function createFormSectionsMap<K extends string, T extends Record<K, FormSection<K>>>(
-  formSections: Array<FormSection<K>>
-) {
-  return formSections.reduce<T>((acc, curr) => {
-    acc[curr.formSectionName as K] = curr as T[K];
+export function createFormSectionsMap<FS extends string>(formSections: Array<FormSection<FS>>) {
+  return formSections.reduce<Record<FS, FormSection<FS>>>((acc, curr) => {
+    acc[curr.formSectionName as FS] = curr as FormSection<FS>;
     return acc;
-  }, {} as T);
+  }, {} as Record<FS, FormSection<FS>>);
 }
 
-export const initializeFormSection = <T extends string, C>(
-  formSectionName: T,
+export const initializeFormSection = <FS extends string, C>(
+  formSectionName: FS,
   configFieldName?: string,
   config?: C,
-  overloads?: Partial<FormSection<T>>
-): FormSection<T> => {
+  overloads?: Partial<FormSection<FS>>
+): FormSection<FS> => {
   const defaultEnabled = overloads?.defaultEnabled ?? false;
   const rawEnabled = configFieldName && getNestedProperty(config ?? {}, configFieldName, undefined);
   const enabled = isDefined(rawEnabled) || defaultEnabled;
