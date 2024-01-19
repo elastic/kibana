@@ -10,16 +10,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects([
-    'common',
-    'svlCommonPage',
-    'settings',
-    'header',
-    'savedObjects',
-  ]);
-  const esArchiver = getService('esArchiver');
+  const PageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
+
   const kibanaServer = getService('kibanaServer');
-  const svlCommonApi = getService('svlCommonApi');
   const testSubjects = getService('testSubjects');
 
   describe('import warnings', () => {

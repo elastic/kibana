@@ -15,9 +15,11 @@ const fixturePaths = {
 };
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['common', 'settings', 'header', 'savedObjects']);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage', 'savedObjects']);
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
+  const svlCommonApi = getService('svlCommonApi');
   const testSubjects = getService('testSubjects');
 
   describe('saved objects management with hidden types', () => {
@@ -25,24 +27,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
+      await PageObjects.svlCommonPage.login();
+      await PageObjects.common.navigateToApp('management');
+      await testSubjects.click('app-card-objects');
+      await PageObjects.savedObjects.waitTableIsLoaded();
     });
 
     after(async () => {
       await esArchiver.unload(
         'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     beforeEach(async () => {
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.clickKibanaSavedObjects();
+      // await PageObjects.svlCommonPage.login();
+      await PageObjects.common.navigateToApp('management');
+      await testSubjects.click('app-card-objects');
+      await PageObjects.savedObjects.waitTableIsLoaded();
     });
 
     describe('API calls', () => {
       it('should flag the object as hidden in its meta', async () => {
         await supertest
           .get('/api/kibana/management/saved_objects/_find?type=test-actions-export-hidden')
-          .set('kbn-xsrf', 'true')
+          .set(svlCommonApi.getCommonRequestHeader())
+          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200)
           .then((resp) => {
             expect(

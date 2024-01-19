@@ -14,8 +14,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     // loadTestFile(require.resolve('./scroll_count'));
     // loadTestFile(require.resolve('./bulk_get'));
     // loadTestFile(require.resolve('./export_transform'));
-    loadTestFile(require.resolve('./import_warnings'));
-    // loadTestFile(require.resolve('./hidden_types'));
+    // loadTestFile(require.resolve('./import_warnings'));
+    loadTestFile(require.resolve('./hidden_types'));
     // loadTestFile(require.resolve('./visible_in_management'));
     // loadTestFile(require.resolve('./hidden_from_http_apis'));
   });
