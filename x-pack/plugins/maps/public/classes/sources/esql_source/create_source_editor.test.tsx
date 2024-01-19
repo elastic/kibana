@@ -19,7 +19,7 @@ jest.mock('../../../kibana_services', () => {
       {
         name: '@timestamp',
         type: 'date',
-      }
+      },
     ],
     timeFieldName: '@timestamp',
     getIndexPattern: () => {
@@ -31,7 +31,7 @@ jest.mock('../../../kibana_services', () => {
       return {
         getDefaultDataView: async () => {
           return mockDataView;
-        }
+        },
       };
     },
   };
@@ -41,15 +41,17 @@ describe('CreateSourceEditor', () => {
   test('should preview layer on load', async () => {
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
-    await waitFor(() => expect(onSourceConfigChange).toBeCalledWith({
-      columns: [
-        {
-          name: 'geometry',
-          type: 'geo_point'
-        }
-      ],
-      dateField: '@timestamp',
-      esql: 'from logs | keep geometry | limit 10000'
-    }));
+    await waitFor(() =>
+      expect(onSourceConfigChange).toBeCalledWith({
+        columns: [
+          {
+            name: 'geometry',
+            type: 'geo_point',
+          },
+        ],
+        dateField: '@timestamp',
+        esql: 'from logs | keep geometry | limit 10000',
+      })
+    );
   });
 });
