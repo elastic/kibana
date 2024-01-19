@@ -25,6 +25,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
 
+import { TransformIngestPipelineNamesForm } from '../../../../components/transform_ingest_pipeline_names_form';
 import { TransformRetentionPolicy } from '../../../../components/transform_retention_policy';
 import {
   isContinuousModeDelay,
@@ -42,7 +43,6 @@ import { useDataView } from '../wizard/wizard';
 import { TransformDestinationIndexForm } from './transform_destination_index_form';
 import { TransformCreateDataViewForm } from './transform_create_data_view_form';
 import { TransformLatestCallout } from './transform_latest_callout';
-import { TransformIngestPipelineNamesForm } from './transform_ingest_pipeline_names_form';
 
 export const StepDetailsForm: FC = () => {
   const dataView = useDataView();
@@ -144,7 +144,7 @@ export const StepDetailsForm: FC = () => {
         />
 
         <TransformDestinationIndexForm />
-        <TransformIngestPipelineNamesForm />
+        <TransformIngestPipelineNamesForm slice={stepDetailsFormSlice} />
         <TransformLatestCallout />
         <TransformCreateDataViewForm />
 
