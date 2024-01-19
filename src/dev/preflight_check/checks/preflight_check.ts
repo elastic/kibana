@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../../file';
 
 export interface TestResponse {
@@ -17,9 +18,11 @@ export class PreflightCheck {
   id: string = '';
   files: Map<string, { path: string; file: File }> = new Map();
   flags: Record<string, any> = {};
+  log: ToolingLog;
 
-  constructor(flags: Record<string, any> = {}) {
+  constructor({ flags = {}, log }: { flags: Record<string, any>; log: ToolingLog }) {
     this.flags = flags;
+    this.log = log;
   }
 
   public getId = () => this.id;

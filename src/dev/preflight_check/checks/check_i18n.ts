@@ -6,6 +6,13 @@
  * Side Public License, v 1.
  */
 
+import {
+  checkCompatibility,
+  checkConfigs,
+  extractDefaultMessages,
+  extractUntrackedMessages,
+  mergeConfigs,
+} from '../../i18n/tasks';
 import { PreflightCheck, TestResponse } from './preflight_check';
 
 export class I18nCheck extends PreflightCheck {
@@ -18,6 +25,33 @@ export class I18nCheck extends PreflightCheck {
     if (files.length === 0) {
       return response;
     }
+
+    const paths = files.map(({ path }) => path);
+
+    const srcPaths = Array().concat(paths);
+
+    const config = {
+      paths: {},
+      exclude: [],
+      translations: [],
+      prefix: '',
+    };
+
+    checkConfigs();
+    mergeConfigs();
+    extractUntrackedMessages(srcPaths);
+    extractDefaultMessages(config, srcPaths);
+    checkCompatibility(
+      config,
+      {
+        fix: Boolean(this.flags.fix),
+        ignoreIncompatible: false,
+        ignoreMalformed: false,
+        ignoreMissing: false,
+        ignoreUnused: false,
+      },
+      this.log
+    );
 
     return response;
   }

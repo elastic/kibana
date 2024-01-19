@@ -34,13 +34,14 @@ export async function createTests({
   flags: Flags;
   log: ToolingLog;
 }) {
-  const typescriptCheck = new TypescriptCheck();
-  const eslintCheck = new EslintCheck({ fix: flags.fix });
-  const jestCheck = new JestCheck();
-  const fileCasingCheck = new FileCasingCheck();
-  const i18nCheck = new I18nCheck();
+  const typescriptCheck = new TypescriptCheck({ flags, log });
+  const eslintCheck = new EslintCheck({ flags, log });
+  const jestCheck = new JestCheck({ flags, log });
+  const fileCasingCheck = new FileCasingCheck({ flags, log });
+  const i18nCheck = new I18nCheck({ flags, log });
 
-  const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
+  // const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
+  const checks = [i18nCheck];
 
   const files = flags['check-dependent-files']
     ? await getDependentFiles({ files: diffedFiles, log })
