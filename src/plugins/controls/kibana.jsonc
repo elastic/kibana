@@ -9,7 +9,6 @@
     "browser": true,
     "requiredPlugins": [
       "presentationUtil",
-      "savedObjects",
       "kibanaReact",
       "expressions",
       "embeddable",
