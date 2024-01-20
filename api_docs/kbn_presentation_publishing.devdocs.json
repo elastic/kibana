@@ -21,6 +21,48 @@
     "functions": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiCanAccessViewMode",
+        "type": "Function",
+        "tags": [],
+        "label": "apiCanAccessViewMode",
+        "description": [
+          "\nA type guard which can be used to determine if a given API has access to a view mode, its own or from its parent."
+        ],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAccessViewMode",
+            "text": "CanAccessViewMode"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiCanAccessViewMode.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiFiresPhaseEvents",
         "type": "Function",
         "tags": [],
@@ -51,6 +93,49 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/fires_phase_events.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasParentApi",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasParentApi",
+        "description": [
+          "\nA type guard which checks whether or not a given API has a parent API."
+        ],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<unknown>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasParentApi.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -92,6 +177,46 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.apiHasUniqueId",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasUniqueId",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasUniqueId",
+            "text": "HasUniqueId"
+          }
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.apiHasUniqueId.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -440,49 +565,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.apiPublishesParentApi",
-        "type": "Function",
-        "tags": [],
-        "label": "apiPublishesParentApi",
-        "description": [
-          "\nA type guard which checks whether or not a given API publishes its parent API."
-        ],
-        "signature": [
-          "(unknownApi: unknown) => unknownApi is ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
-          },
-          "<unknown>"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.apiPublishesParentApi.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "unknownApi",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.apiPublishesPartialLocalUnifiedSearch",
         "type": "Function",
         "tags": [],
@@ -556,46 +638,6 @@
               "unknown"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.apiPublishesUniqueId",
-        "type": "Function",
-        "tags": [],
-        "label": "apiPublishesUniqueId",
-        "description": [],
-        "signature": [
-          "(unknownApi: unknown) => unknownApi is ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
-          }
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.apiPublishesUniqueId.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "unknownApi",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -808,6 +850,128 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getInheritedViewMode",
+        "type": "Function",
+        "tags": [],
+        "label": "getInheritedViewMode",
+        "description": [
+          "\nA function which will get the view mode from the API or the parent API. if this api has a view mode AND its\nparent has a view mode, we consider the APIs version the source of truth."
+        ],
+        "signature": [
+          "(api?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAccessViewMode",
+            "text": "CanAccessViewMode"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getInheritedViewMode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.CanAccessViewMode",
+                "text": "CanAccessViewMode"
+              },
+              " | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.getViewModeSubject",
+        "type": "Function",
+        "tags": [],
+        "label": "getViewModeSubject",
+        "description": [],
+        "signature": [
+          "(api?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAccessViewMode",
+            "text": "CanAccessViewMode"
+          },
+          " | undefined) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.ViewMode",
+            "text": "ViewMode"
+          },
+          "> | undefined"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.getViewModeSubject.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.CanAccessViewMode",
+                "text": "CanAccessViewMode"
+              },
+              " | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.hasEditCapabilities",
         "type": "Function",
         "tags": [],
@@ -843,56 +1007,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useApiPublisher",
-        "type": "Function",
-        "tags": [],
-        "label": "useApiPublisher",
-        "description": [
-          "\nPublishes any API to the passed in ref. Note that any API passed in will not be rebuilt on\nsubsequent renders, so it does not support reactive variables. Instead, pass in setter functions\nand publishing subjects to allow other components to listen to changes."
-        ],
-        "signature": [
-          "<ApiType extends unknown = unknown>(api: ApiType, ref: React.ForwardedRef<ApiType>) => void"
-        ],
-        "path": "packages/presentation/presentation_publishing/publishing_utils.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useApiPublisher.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType"
-            ],
-            "path": "packages/presentation/presentation_publishing/publishing_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useApiPublisher.$2",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ref",
-            "description": [],
-            "signature": [
-              "React.ForwardedRef<ApiType>"
-            ],
-            "path": "packages/presentation/presentation_publishing/publishing_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1300,6 +1414,57 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.useInheritedViewMode",
+        "type": "Function",
+        "tags": [],
+        "label": "useInheritedViewMode",
+        "description": [
+          "\nA hook that gets a view mode from this API or its parent as a reactive variable which will cause re-renders on change.\nif this api has a view mode AND its parent has a view mode, we consider the APIs version the source of truth."
+        ],
+        "signature": [
+          "<ApiType extends ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAccessViewMode",
+            "text": "CanAccessViewMode"
+          },
+          " = ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.CanAccessViewMode",
+            "text": "CanAccessViewMode"
+          },
+          ">(api: ApiType | undefined) => void"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.useInheritedViewMode.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "ApiType | undefined"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.useLocalFilters",
         "type": "Function",
         "tags": [],
@@ -1587,55 +1752,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useParentApi",
-        "type": "Function",
-        "tags": [],
-        "label": "useParentApi",
-        "description": [],
-        "signature": [
-          "<ApiType extends Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
-          },
-          "<unknown>> = Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
-          },
-          "<unknown>>>(api: ApiType) => UnwrapParent<ApiType>"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useParentApi.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.usePublishingSubject",
         "type": "Function",
         "tags": [],
@@ -1777,57 +1893,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.useUniqueId",
-        "type": "Function",
-        "tags": [],
-        "label": "useUniqueId",
-        "description": [
-          "\nGets this API's UUID as a reactive variable which will cause re-renders on change."
-        ],
-        "signature": [
-          "<ApiType extends Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
-          },
-          "> = Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
-          },
-          ">>(api: ApiType) => OptionalIfOptional<ApiType[\"uuid\"], string>"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.useUniqueId.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "api",
-            "description": [],
-            "signature": [
-              "ApiType"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2383,6 +2448,44 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasParentApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasParentApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<ParentApiType>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasParentApi.parentApi",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "ParentApiType"
+            ],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_parent_api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.HasType",
         "type": "Interface",
         "tags": [],
@@ -2461,6 +2564,31 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.HasUniqueId",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasUniqueId",
+        "description": [],
+        "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-common.HasUniqueId.uuid",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "path": "packages/presentation/presentation_publishing/interfaces/has_uuid.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5374,194 +5502,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.PublishesParentApi",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublishesParentApi",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
-          },
-          "<ParentApiType>"
-        ],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesParentApi.parentApi",
-            "type": "Object",
-            "tags": [],
-            "label": "parentApi",
-            "description": [],
-            "signature": [
-              "{ readonly value: ParentApiType; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: ParentApiType) => void): Promise<void>; (next: (value: ParentApiType) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => ParentApiType; pipe: { (): ",
-              "Observable",
-              "<ParentApiType>; <A>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<ParentApiType, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
-              "Observer",
-              "<ParentApiType>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
-              "Operator",
-              "<ParentApiType, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<ParentApiType>; operator: ",
-              "Operator",
-              "<any, ParentApiType> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<ParentApiType>> | ((value: ParentApiType) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: ParentApiType) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<ParentApiType | undefined>; (PromiseCtor: PromiseConstructor): Promise<ParentApiType | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<ParentApiType | undefined>; }; }"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_parent_api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.PublishesSavedObjectId",
         "type": "Interface",
         "tags": [],
@@ -5734,184 +5674,6 @@
               "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/publishes_saved_object_id.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-common.PublishesUniqueId",
-        "type": "Interface",
-        "tags": [],
-        "label": "PublishesUniqueId",
-        "description": [],
-        "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-common.PublishesUniqueId.uuid",
-            "type": "Object",
-            "tags": [],
-            "label": "uuid",
-            "description": [],
-            "signature": [
-              "{ readonly value: string; source: ",
-              "Observable",
-              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string) => void): Promise<void>; (next: (value: string) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string; pipe: { (): ",
-              "Observable",
-              "<string>; <A>(op1: ",
-              "OperatorFunction",
-              "<string, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<string, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
-              "Observer",
-              "<string>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
-              "Operator",
-              "<string, R>) => ",
-              "Observable",
-              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
-              "Observable",
-              "<string>; operator: ",
-              "Operator",
-              "<any, string> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<string>> | ((value: string) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: string) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
-            ],
-            "path": "packages/presentation/presentation_publishing/interfaces/publishes_uuid.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -6303,6 +6065,47 @@
     "misc": [
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-common.CanAccessViewMode",
+        "type": "Type",
+        "tags": [],
+        "label": "CanAccessViewMode",
+        "description": [
+          "\nThis API can access a view mode, either its own or from its parent API."
+        ],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> | Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">>>"
+        ],
+        "path": "packages/presentation/presentation_publishing/interfaces/can_access_view_mode.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-common.PhaseEventType",
         "type": "Type",
         "tags": [],
@@ -6414,7 +6217,9 @@
         "type": "Type",
         "tags": [],
         "label": "PublishesWritableViewMode",
-        "description": [],
+        "description": [
+          "\nThis API publishes a writable universal view mode which can change compatibility of actions and the\nvisibility of components."
+        ],
         "signature": [
           {
             "pluginId": "@kbn/presentation-publishing",
@@ -6613,7 +6418,7 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"view\" | \"edit\" | \"preview\" | \"print\""
+          "\"view\" | \"edit\" | \"print\" | \"preview\""
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,

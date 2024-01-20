@@ -575,6 +575,24 @@
         "tags": [],
         "label": "PresentationContainer",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          " extends Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">"
+        ],
         "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
         "deprecated": false,
         "trackAdoption": false,
