@@ -4,20 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { Conversation } from '@kbn/elastic-assistant';
 import {
   AssistantProvider as ElasticAssistantProvider,
-  bulkConversationsChange,
+  bulkChangeConversations,
 } from '@kbn/elastic-assistant';
 
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
 import { LOCAL_STORAGE_KEY, augmentMessageCodeBlocks } from './helpers';
-import { useBaseConversations } from './use_conversation_store';
+import { useBaseConversations, useConversationStore } from './use_conversation_store';
 import { DEFAULT_ALLOW, DEFAULT_ALLOW_REPLACEMENT } from './content/anonymization';
 import { PROMPT_CONTEXTS } from './content/prompt_contexts';
 import { BASE_SECURITY_QUICK_PROMPTS } from './content/quick_prompts';
@@ -44,6 +44,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
+  const userConversations = useConversationStore();
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
@@ -54,22 +55,34 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const alertsIndexPattern = signalIndexName ?? undefined;
   const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
-  // migrate conversations from the local storage if its have messages
+  // migrate conversations with messages from the local storage
+  // won't happen again if the user conversations exist in the index
   const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
 
-  if (conversations && Object.keys(conversations).length > 0) {
-    const conversationsToCreate = Object.values(
-      conversations as Record<string, Conversation>
-    ).filter((c) => c.messages && c.messages.length > 0);
-    // post bulk create
-    bulkConversationsChange(http, {
-      create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
-        res[c.id] = { ...c, title: c.id };
-        return res;
-      }, {}),
-    });
-    storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
-  }
+  useEffect(() => {
+    const migrateConversationsFromLocalStorage = async () => {
+      if (
+        Object.keys(userConversations).length > 0 &&
+        conversations &&
+        Object.keys(conversations).length > 0
+      ) {
+        const conversationsToCreate = Object.values(
+          conversations as Record<string, Conversation>
+        ).filter((c) => c.messages && c.messages.length > 0);
+        // post bulk create
+        const bulkResult = await bulkChangeConversations(http, {
+          create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
+            res[c.id] = { ...c, title: c.id };
+            return res;
+          }, {}),
+        });
+        if (bulkResult.success) {
+          storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
+        }
+      }
+    };
+    migrateConversationsFromLocalStorage();
+  }, [conversations, http, storage, userConversations]);
 
   return (
     <ElasticAssistantProvider

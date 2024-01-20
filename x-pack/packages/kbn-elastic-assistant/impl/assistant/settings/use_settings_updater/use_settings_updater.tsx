@@ -11,7 +11,7 @@ import { useAssistantContext } from '../../../assistant_context';
 import type { KnowledgeBaseConfig } from '../../types';
 import {
   ConversationsBulkActions,
-  bulkConversationsChange,
+  bulkChangeConversations,
 } from '../../api/conversations/use_bulk_actions_conversations';
 
 interface UseSettingsUpdater {
@@ -102,7 +102,7 @@ export const useSettingsUpdater = (
   const saveSettings = useCallback(async (): Promise<void> => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    await bulkConversationsChange(http, conversationsSettingsBulkActions);
+    await bulkChangeConversations(http, conversationsSettingsBulkActions);
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;

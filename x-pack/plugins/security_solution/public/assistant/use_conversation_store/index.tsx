@@ -9,7 +9,8 @@ import { useFetchCurrentUserConversations, type Conversation } from '@kbn/elasti
 
 import { merge, unset } from 'lodash/fp';
 import { DATA_QUALITY_DASHBOARD_CONVERSATION_ID } from '@kbn/ecs-data-quality-dashboard/impl/data_quality/data_quality_panel/tabs/summary_tab/callout_summary/translations';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { useLinkAuthorized } from '../../common/links';
 import { SecurityPageName } from '../../../common';
@@ -25,37 +26,47 @@ export const useConversationStore = (): Record<string, Conversation> => {
     [isDataQualityDashboardPageExists]
   );
 
-  const { data: conversationsData, isLoading } = useFetchCurrentUserConversations();
-
-  useEffect(() => {
-    if (!isLoading) {
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
       const userConversations = (conversationsData?.data ?? []).reduce<
         Record<string, Conversation>
       >((transformed, conversation) => {
         transformed[conversation.id] = conversation;
         return transformed;
       }, {});
-
-      const notUsedBaseConversations = Object.keys(baseConversations).filter(
-        (baseId) => (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-      );
-
-      setConversations(
-        merge(
-          userConversations,
-          notUsedBaseConversations.reduce<Record<string, Conversation>>(
-            (transformed, conversation) => {
-              transformed[conversation] = baseConversations[conversation];
-              return transformed;
-            },
-            {}
+      return merge(
+        userConversations,
+        Object.keys(baseConversations)
+          .filter(
+            (baseId) =>
+              (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
           )
-        )
+          .reduce<Record<string, Conversation>>((transformed, conversation) => {
+            transformed[conversation] = baseConversations[conversation];
+            return transformed;
+          }, {})
       );
-    }
-  }, [baseConversations, conversationsData?.data, isLoading]);
+    },
+    [baseConversations]
+  );
+  const {
+    data: conversationsData,
+    isLoading,
+    isError,
+  } = useFetchCurrentUserConversations(onFetchedConversations);
 
-  return merge(baseConversations, conversations);
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      setConversations(conversationsData ?? {});
+    }
+  }, [conversationsData, isLoading, isError]);
+
+  const result = useMemo(
+    () => merge(baseConversations, conversations),
+    [baseConversations, conversations]
+  );
+
+  return result;
 };
 
 export const useBaseConversations = (): Record<string, Conversation> => {

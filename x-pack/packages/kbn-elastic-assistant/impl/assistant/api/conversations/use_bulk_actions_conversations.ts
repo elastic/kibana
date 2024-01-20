@@ -31,7 +31,7 @@ export interface BulkActionAggregatedError {
   message: string;
   status_code: number;
   err_code?: string;
-  rules: Array<{ id: string; name?: string }>;
+  conversations: Array<{ id: string; name?: string }>;
 }
 
 export interface BulkActionAttributes {
@@ -40,9 +40,11 @@ export interface BulkActionAttributes {
   errors?: BulkActionAggregatedError[];
 }
 
-export interface BulkUpdateResponse {
+export interface BulkActionResponse {
   success?: boolean;
-  rules_count?: number;
+  conversations_count?: number;
+  message?: string;
+  status_code?: number;
   attributes: BulkActionAttributes;
 }
 
@@ -67,11 +69,11 @@ export interface ConversationsBulkActions {
   };
 }
 
-export const bulkConversationsChange = (
+export const bulkChangeConversations = (
   http: HttpSetup,
   conversationsActions: ConversationsBulkActions
 ) => {
-  return http.fetch<Conversation[]>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
+  return http.fetch<BulkActionResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
     method: 'POST',
     version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
     body: JSON.stringify({

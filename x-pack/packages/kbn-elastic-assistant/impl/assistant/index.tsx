@@ -51,6 +51,7 @@ import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
 import {
+  FetchConversationsResponse,
   useFetchCurrentUserConversations,
   useLastConversation,
 } from './api/conversations/use_fetch_current_user_conversations';
@@ -101,9 +102,44 @@ const AssistantComponent: React.FC<Props> = ({
     [selectedPromptContexts]
   );
 
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
+      const userConversations = (conversationsData?.data ?? []).reduce<
+        Record<string, Conversation>
+      >((transformed, conversation) => {
+        transformed[conversation.id] = conversation;
+        return transformed;
+      }, {});
+      return merge(
+        userConversations,
+        Object.keys(baseConversations)
+          .filter(
+            (baseId) =>
+              (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
+          )
+          .reduce<Record<string, Conversation>>((transformed, conversation) => {
+            transformed[conversation] = baseConversations[conversation];
+            return transformed;
+          }, {})
+      );
+    },
+    [baseConversations]
+  );
+  const {
+    data: conversationsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useFetchCurrentUserConversations(onFetchedConversations);
+
   const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
     useConversation();
-  const { data: conversationsData, isLoading, refetch } = useFetchCurrentUserConversations();
+  useEffect(() => {
+    if (!isLoading && !isError) {
+      setConversations(conversationsData ?? {});
+    }
+  }, [conversationsData, isError, isLoading]);
+
   const {
     data: lastConversation,
     isLoading: isLoadingLast,
@@ -117,54 +153,13 @@ const AssistantComponent: React.FC<Props> = ({
     return WELCOME_CONVERSATION_TITLE;
   }, [isLoadingLast, lastConversation?.id]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      const userConversations = (conversationsData?.data ?? []).reduce<
-        Record<string, Conversation>
-      >((transformed, conversation) => {
-        transformed[conversation.id] = conversation;
-        return transformed;
-      }, {});
-      setConversations(
-        merge(
-          userConversations,
-          Object.keys(baseConversations)
-            .filter(
-              (baseId) =>
-                (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-            )
-            .reduce<Record<string, Conversation>>((transformed, conversation) => {
-              transformed[conversation] = baseConversations[conversation];
-              return transformed;
-            }, {})
-        )
-      );
-    }
-  }, [baseConversations, conversationsData?.data, isLoading]);
-
   const refetchResults = useCallback(async () => {
-    const res = await refetch();
-    if (!res.isLoading) {
-      const userConversations = (res?.data?.data ?? []).reduce<Record<string, Conversation>>(
-        (transformed, conversation) => {
-          transformed[conversation.id] = conversation;
-          return transformed;
-        },
-        {}
-      );
-      const updatedConv = merge(
-        userConversations,
-        Object.keys(baseConversations)
-          .filter((baseId) => (res.data?.data ?? []).find((c) => c.title === baseId) === undefined)
-          .reduce<Record<string, Conversation>>((transformed, conversation) => {
-            transformed[conversation] = baseConversations[conversation];
-            return transformed;
-          }, {})
-      );
-      setConversations(updatedConv);
-      return updatedConv;
+    const updatedConv = await refetch();
+    if (!updatedConv.isLoading) {
+      setConversations(updatedConv.data ?? {});
+      return updatedConv.data;
     }
-  }, [baseConversations, refetch]);
+  }, [refetch]);
 
   // Connector details
   const { data: connectors, isSuccess: areConnectorsFetched } = useLoadConnectors({ http });
