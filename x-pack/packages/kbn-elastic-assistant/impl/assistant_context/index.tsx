@@ -31,12 +31,14 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
 import { CONVERSATIONS_TAB, SettingsTabs } from '../assistant/settings/assistant_settings';
 import { AssistantAvailability, AssistantTelemetry } from './types';
 import { useCapabilities } from '../assistant/api/capabilities/use_capabilities';
+import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/translations';
 
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
@@ -87,7 +89,6 @@ export interface AssistantProviderProps {
   http: HttpSetup;
   baseConversations: Record<string, Conversation>;
   nameSpace?: string;
-  // setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   title?: string;
@@ -133,6 +134,7 @@ export interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
+  getLastConversationId: (id?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
@@ -140,10 +142,10 @@ export interface UseAssistantContext {
   selectedSettingsTab: SettingsTabs;
   setAllQuickPrompts: React.Dispatch<React.SetStateAction<QuickPrompt[] | undefined>>;
   setAllSystemPrompts: React.Dispatch<React.SetStateAction<Prompt[] | undefined>>;
-  // setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
+  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -194,6 +196,9 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     `${nameSpace}.${SYSTEM_PROMPT_LOCAL_STORAGE_KEY}`,
     baseSystemPrompts
   );
+
+  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
+    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
 
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
@@ -248,6 +253,14 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
+  const getLastConversationId = useCallback(
+    // if a conversationId has been provided, use that
+    // if not, check local storage
+    // last resort, go to welcome conversation
+    (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
+    [localStorageLastConversationId]
+  );
+
   // Fetch assistant capabilities
   const { data: capabilities } = useCapabilities({ http, toasts });
   const { assistantModelEvaluation: modelEvaluatorEnabled, assistantStreamingEnabled } =
@@ -282,7 +295,6 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       selectedSettingsTab,
       setAllQuickPrompts: setLocalStorageQuickPrompts,
       setAllSystemPrompts: setLocalStorageSystemPrompts,
-      // setConversations: onConversationsUpdated,
       setDefaultAllow,
       setDefaultAllowReplacement,
       setKnowledgeBase: setLocalStorageKnowledgeBase,
@@ -292,6 +304,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
+      getLastConversationId,
+      setLastConversationId: setLocalStorageLastConversationId,
       baseConversations,
     }),
     [
@@ -301,6 +315,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       assistantStreamingEnabled,
       assistantTelemetry,
       augmentMessageCodeBlocks,
+      localStorageQuickPrompts,
+      localStorageSystemPrompts,
       baseAllow,
       baseAllowReplacement,
       basePath,
@@ -313,22 +329,22 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       getComments,
       http,
       localStorageKnowledgeBase,
-      localStorageQuickPrompts,
-      localStorageSystemPrompts,
       modelEvaluatorEnabled,
-      nameSpace,
       promptContexts,
+      nameSpace,
       registerPromptContext,
       selectedSettingsTab,
+      setLocalStorageQuickPrompts,
+      setLocalStorageSystemPrompts,
       setDefaultAllow,
       setDefaultAllowReplacement,
       setLocalStorageKnowledgeBase,
-      setLocalStorageQuickPrompts,
-      setLocalStorageSystemPrompts,
       showAssistantOverlay,
       title,
       toasts,
       unRegisterPromptContext,
+      getLastConversationId,
+      setLocalStorageLastConversationId,
       baseConversations,
     ]
   );

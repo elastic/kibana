@@ -53,7 +53,6 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 import {
   FetchConversationsResponse,
   useFetchCurrentUserConversations,
-  useLastConversation,
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
 
@@ -88,10 +87,15 @@ const AssistantComponent: React.FC<Props> = ({
     getComments,
     http,
     promptContexts,
+    setLastConversationId,
+    getLastConversationId,
     title,
     allSystemPrompts,
     baseConversations,
   } = useAssistantContext();
+
+  const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
+    useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -132,26 +136,11 @@ const AssistantComponent: React.FC<Props> = ({
     refetch,
   } = useFetchCurrentUserConversations(onFetchedConversations);
 
-  const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
-    useConversation();
   useEffect(() => {
     if (!isLoading && !isError) {
       setConversations(conversationsData ?? {});
     }
   }, [conversationsData, isError, isLoading]);
-
-  const {
-    data: lastConversation,
-    isLoading: isLoadingLast,
-    refetch: refetchLastUpdated,
-  } = useLastConversation();
-
-  const lastConversationId = useMemo(() => {
-    if (!isLoadingLast) {
-      return lastConversation?.id ?? WELCOME_CONVERSATION_TITLE;
-    }
-    return WELCOME_CONVERSATION_TITLE;
-  }, [isLoadingLast, lastConversation?.id]);
 
   const refetchResults = useCallback(async () => {
     const updatedConv = await refetch();
@@ -176,7 +165,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const [selectedConversationId, setSelectedConversationId] = useState<string>(
-    isAssistantEnabled ? lastConversationId : WELCOME_CONVERSATION_TITLE
+    isAssistantEnabled ? getLastConversationId(conversationId) : WELCOME_CONVERSATION_TITLE
   );
 
   useEffect(() => {
@@ -191,20 +180,30 @@ const AssistantComponent: React.FC<Props> = ({
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {
+      if (
+        (!cId && selectedConversationId === currentConversation.title) ||
+        !conversations[selectedConversationId]
+      ) {
+        return;
+      }
       const updatedConversation = await getConversation(cId ?? selectedConversationId);
       if (updatedConversation) {
         setCurrentConversation(updatedConversation);
       }
       return updatedConversation;
     },
-    [getConversation, selectedConversationId]
+    [conversations, currentConversation.title, getConversation, selectedConversationId]
   );
 
   useEffect(() => {
-    if (!isLoadingLast && lastConversation && lastConversation.id) {
-      setCurrentConversation(lastConversation);
+    if (!isLoading) {
+      const conversation =
+        conversations[selectedConversationId ?? getLastConversationId(conversationId)];
+      if (conversation) {
+        setCurrentConversation(conversation);
+      }
     }
-  }, [isLoadingLast, lastConversation]);
+  }, [conversationId, conversations, getLastConversationId, isLoading, selectedConversationId]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(() => {
@@ -226,6 +225,18 @@ const AssistantComponent: React.FC<Props> = ({
 
   // Settings modal state (so it isn't shared between assistant instances like Timeline)
   const [isSettingsModalVisible, setIsSettingsModalVisible] = useState(false);
+
+  // Remember last selection for reuse after keyboard shortcut is pressed.
+  // Clear it if there is no connectors
+  useEffect(() => {
+    if (areConnectorsFetched && !connectors?.length) {
+      return setLastConversationId(WELCOME_CONVERSATION_TITLE);
+    }
+
+    if (!currentConversation.excludeFromLastConversationStorage) {
+      setLastConversationId(currentConversation.id);
+    }
+  }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,
@@ -314,6 +325,7 @@ const AssistantComponent: React.FC<Props> = ({
         const refetchedConversation = await refetchCurrentConversation(cId);
         if (refetchedConversation) {
           setCurrentConversation(refetchedConversation);
+          setConversations({ ...(conversations ?? {}), [cId]: refetchedConversation });
         }
         setEditingSystemPromptId(
           getDefaultSystemPrompt({ allSystemPrompts, conversation: refetchedConversation })?.id
@@ -559,8 +571,10 @@ const AssistantComponent: React.FC<Props> = ({
             conversations={conversations}
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={async () => {
-              await refetchResults();
-              await refetchCurrentConversation();
+              const refetchedConversations = await refetchResults();
+              if (refetchCurrentConversation[selectedConversationId]) {
+                await refetchCurrentConversation();
+              }
             }}
           />
         )}

@@ -88,7 +88,10 @@ export const AssistantHeader: React.FC<Props> = ({
             isDisabled={isDisabled}
             docLinks={docLinks}
             selectedConversation={currentConversation}
-            setCurrentConversation={setCurrentConversation}
+            onChange={(updatedConversation) => {
+              setCurrentConversation(updatedConversation);
+              onConversationSelected(updatedConversation.id);
+            }}
             title={title}
           />
         </EuiFlexItem>

@@ -73,6 +73,9 @@ export const bulkChangeConversations = (
   http: HttpSetup,
   conversationsActions: ConversationsBulkActions
 ) => {
+  const conversationIdsToDelete = conversationsActions.delete?.ids.filter(
+    (cId) => !(conversationsActions.create ?? {})[cId] && !(conversationsActions.update ?? {})[cId]
+  );
   return http.fetch<BulkActionResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
     method: 'POST',
     version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
@@ -80,7 +83,10 @@ export const bulkChangeConversations = (
       update: conversationsActions.update
         ? Object.keys(conversationsActions.update).reduce(
             (conversationsToUpdate: ConversationUpdateParams[], conversationId) => {
-              if (conversationsActions.update) {
+              if (
+                conversationsActions.update &&
+                !conversationsActions.delete?.ids.includes(conversationId)
+              ) {
                 conversationsToUpdate.push({
                   id: conversationId,
                   ...conversationsActions.update[conversationId],
@@ -94,7 +100,10 @@ export const bulkChangeConversations = (
       create: conversationsActions.create
         ? Object.keys(conversationsActions.create).reduce(
             (conversationsToCreate: Conversation[], conversationId: string) => {
-              if (conversationsActions.create) {
+              if (
+                conversationsActions.create &&
+                !conversationsActions.delete?.ids.includes(conversationId)
+              ) {
                 conversationsToCreate.push(conversationsActions.create[conversationId]);
               }
               return conversationsToCreate;
@@ -102,7 +111,12 @@ export const bulkChangeConversations = (
             []
           )
         : undefined,
-      delete: conversationsActions.delete,
+      delete:
+        conversationIdsToDelete && conversationIdsToDelete.length > 0
+          ? {
+              ids: conversationIdsToDelete,
+            }
+          : undefined,
     }),
   });
 };
