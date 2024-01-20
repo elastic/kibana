@@ -13,6 +13,7 @@ import { useFieldFromProps } from '../hooks';
 
 export interface Props<T, FormType = FormData, I = T> {
   path: string;
+  // @ts-expect-error upgrade typescript v4.9.5
   config?: FieldConfig<T, FormType, I>;
   defaultValue?: T;
   component?: FunctionComponent<any>;

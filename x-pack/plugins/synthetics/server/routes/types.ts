@@ -114,6 +114,6 @@ export type SyntheticsRouteHandler<
   request,
   response,
   server,
-  savedObjectsClient,
-  subject: Subject,
+  savedObjectsClient, // @ts-expect-error upgrade typescript v4.9.5
+  subject: Subject, // @ts-expect-error upgrade typescript v4.9.5
 }: RouteContext<Params, Query, Body>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;

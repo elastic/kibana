@@ -20,6 +20,7 @@ export const createVisAsync = async <TVisParams = VisParams>(
   const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
 
+  // @ts-expect-error upgrade typescript v4.9.5
   await vis.setState(visState);
   return vis;
 };

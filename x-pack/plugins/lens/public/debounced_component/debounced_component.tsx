@@ -24,6 +24,7 @@ export function debouncedComponent<TProps>(component: FunctionComponent<TProps>,
     useEffect(() => () => debouncePropsChange.cancel(), [debouncePropsChange]);
     debouncePropsChange(props);
 
+    // @ts-expect-error upgrade typescript v4.9.5
     return React.createElement(MemoizedComponent, cachedProps);
   };
 }

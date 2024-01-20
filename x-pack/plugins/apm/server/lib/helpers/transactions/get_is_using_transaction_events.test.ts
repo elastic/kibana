@@ -116,9 +116,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseSomeHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseNoHits;
             }
@@ -141,9 +143,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseNoHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseSomeHits;
             }
@@ -199,9 +203,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseSomeHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseNoHits;
             }
@@ -224,9 +230,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseNoHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseSomeHits;
             }
@@ -249,9 +257,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseSomeHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseNoHits;
             }
@@ -273,9 +283,11 @@ describe('getIsUsingTransactionEvents', () => {
         {
           config,
           mockResponse: (request) => {
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_aggregated_transactions') {
               return mockResponseNoHits;
             }
+            // @ts-expect-error upgrade typescript v4.9.5
             if (request === 'get_has_transactions') {
               return mockResponseSomeHits;
             }

@@ -132,6 +132,7 @@ export function withAutoScale<T>(WrappedComponent: ComponentType<T>) {
               : {}),
           }}
         >
+          {/* @ts-expect-error upgrade typescript v4.9.5*/}
           <WrappedComponent {...(restProps as T)} />
         </div>
       </div>

@@ -514,6 +514,7 @@ export const commonMigratePartitionChartGroups = (
         ...attributes.state,
         visualization: {
           ...attributes.state.visualization,
+          // @ts-expect-error upgrade typescript v4.9.5
           layers: attributes.state.visualization.layers.map((l) => {
             const groups = l.groups;
 

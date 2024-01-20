@@ -17,6 +17,7 @@ export const fetchServiceLocations = async (): Promise<{
   throttling: ThrottlingOptions | undefined;
   locations: ServiceLocations;
 }> => {
+  // @ts-expect-error upgrade typescript v4.9.5
   const { throttling, locations } = await apiService.get(
     SYNTHETICS_API_URLS.SERVICE_LOCATIONS,
     undefined,

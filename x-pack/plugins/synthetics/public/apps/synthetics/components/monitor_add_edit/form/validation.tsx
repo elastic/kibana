@@ -22,7 +22,7 @@ type ValidationLibrary = Record<string, Validator>;
 
 // returns true if invalid
 export function validateHeaders<T>(headers: T): boolean {
-  return Object.keys(headers).some((key) => {
+  return Object.keys(headers as any).some((key) => {
     if (key) {
       const whiteSpaceRegEx = /[\s]/g;
       return whiteSpaceRegEx.test(key);

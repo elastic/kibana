@@ -350,6 +350,7 @@ export class DynamicStyleProperty<T>
   }
 
   getDataMappingFunction() {
+    // @ts-expect-error upgrade typescript v4.9.5
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;

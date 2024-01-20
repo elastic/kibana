@@ -104,6 +104,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       },
     } = this;
 
+    // @ts-expect-error upgrade typescript v4.9.5
     return getVisibleChildren(Array.from(childDimensions.entries()), scrollViewHeight, scrollTop);
   };
 
@@ -135,8 +136,11 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
     }
 
     onVisibleChildrenChange({
+      // @ts-expect-error upgrade typescript v4.9.5
       bottomChild: visibleChildren.bottomChild,
+      // @ts-expect-error upgrade typescript v4.9.5
       middleChild: visibleChildren.middleChild,
+      // @ts-expect-error upgrade typescript v4.9.5
       topChild: visibleChildren.topChild,
       fromScroll,
       ...scrollPosition,
@@ -205,6 +209,7 @@ export class VerticalScrollPanel<Child> extends React.PureComponent<
       if (visibleChildren) {
         return {
           scrollOffset: visibleChildren.middleChildOffset,
+          // @ts-expect-error upgrade typescript v4.9.5
           scrollTarget: visibleChildren.middleChild,
         };
       }

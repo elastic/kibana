@@ -56,10 +56,12 @@ const operationDefinitionMap: Record<string, GenericOperationDefinition> = {
   }),
   derivative: createOperationDefinitionMock('derivative', { input: 'fullReference' }),
   moving_average: createOperationDefinitionMock('moving_average', {
+    // @ts-expect-error upgrade typescript v4.9.5
     input: 'fullReference',
     operationParams: [{ name: 'window', type: 'number', required: true }],
     filterable: true,
     getErrorMessage: jest.fn(() => ['mock error']),
+    // @ts-expect-error upgrade typescript v4.9.5
     buildColumn: ({ referenceIds }, columnsParams) => ({
       label: 'moving_average',
       dataType: 'number',

@@ -287,7 +287,9 @@ export class ServiceAPIClient {
     result: AxiosResponse<any> | ServicePayload
   ) {
     if ('status' in result || 'request' in result) {
+      // @ts-expect-error upgrade typescript v4.9.5
       if (result.data) {
+        // @ts-expect-error upgrade typescript v4.9.5
         this.logger.debug(result.data);
       }
       this.logger.debug(

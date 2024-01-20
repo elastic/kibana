@@ -78,6 +78,7 @@ export function InspectorContextProvider({ children }: { children: ReactNode }) 
   }, [history, inspectorAdapters]);
 
   return (
+    // @ts-expect-error upgrade typescript v4.9.5
     <InspectorContext.Provider value={{ ...value, addInspectorRequest }}>
       {children}
     </InspectorContext.Provider>

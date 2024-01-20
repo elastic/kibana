@@ -44,6 +44,7 @@ export class QueryContext {
   }
 
   async search<TParams>(params: TParams, operationName?: string) {
+    // @ts-expect-error upgrade typescript v4.9.5
     return this.callES.search(params, operationName);
   }
 

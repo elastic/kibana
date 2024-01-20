@@ -18,6 +18,7 @@ import { PluginServiceFactory } from './factory';
  */
 export type PluginServiceProviders<Services, StartParameters = {}> = {
   [K in keyof Services]: PluginServiceProvider<
+    // @ts-expect-error upgrade typescript v4.9.5
     Services[K],
     StartParameters,
     Services,

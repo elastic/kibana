@@ -43,6 +43,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
         notifyWhen: 'onThrottleInterval',
         throttle: '1m',
       },
+      // @ts-expect-error upgrade typescript v4.9.5
       alertsFilter: { query: { kql: 'test:1', dsl: '{}', filters: [] } },
     },
   ],

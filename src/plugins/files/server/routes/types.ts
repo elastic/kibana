@@ -41,6 +41,7 @@ export type FilesRequestHandler<
   Method extends RouteMethod = any
 > = RequestHandler<P, Q, B, FilesRequestHandlerContext, Method, KibanaResponseFactory>;
 
+// @ts-expect-error upgrade typescript v4.9.5
 export type AsyncResponse<T> = Promise<IKibanaResponse<T>>;
 
 export type CreateHandler<E extends AnyEndpoint> = FilesRequestHandler<

@@ -147,6 +147,7 @@ describe('UserList ', () => {
               username: null,
               email: null,
               full_name: null,
+              // @ts-expect-error upgrade typescript v4.9.5
               uid: null,
             },
           },

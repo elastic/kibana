@@ -312,6 +312,7 @@ export const UnifiedHistogramLayout = ({
       </InPortal>
       <InPortal node={mainPanelNode}>
         {React.isValidElement(children)
+          // @ts-expect-error upgrade typescript v4.9.5
           ? React.cloneElement(children, { isChartAvailable })
           : children}
       </InPortal>

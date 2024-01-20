@@ -67,7 +67,9 @@ export class Interval<TFields = Fields> {
     map: (
       timestamp: number,
       index: number
+      // @ts-expect-error upgrade typescript v4.9.5
     ) => Serializable<TGeneratedFields> | Array<Serializable<TGeneratedFields>>
+    // @ts-expect-error upgrade typescript v4.9.5
   ): SynthtraceGenerator<TGeneratedFields> {
     const timestamps = this.getTimestamps();
 

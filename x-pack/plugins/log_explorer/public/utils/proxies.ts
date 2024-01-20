@@ -23,7 +23,7 @@ export const createPropertyGetProxy = <Target extends object, Key extends keyof 
     get(accessedTarget, accessedKey, ...rest) {
       const value = Reflect.get(accessedTarget, accessedKey, ...rest);
       if (hasKey(replacements, accessedKey)) {
-        return replacements[accessedKey](value);
+        return replacements[accessedKey](value as any);
       } else {
         return value;
       }

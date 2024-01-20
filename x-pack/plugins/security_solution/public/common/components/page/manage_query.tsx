@@ -43,6 +43,7 @@ export function manageQuery<T>(
     });
 
     const otherProps = omit(['refetch', 'setQuery'], props);
+    // @ts-expect-error upgrade typescript v4.9.5
     return <WrappedComponent {...(otherProps as T)} />;
   };
 
