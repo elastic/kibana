@@ -70,7 +70,7 @@
             "section": "def-public.ICasesDeepLinkId",
             "text": "ICasesDeepLinkId"
           },
-          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string | T[\"title\"]; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
+          ", Partial<T>>> | undefined; }) => { id: \"cases\"; path: string; deepLinks: ({ id: \"cases_create\"; path: string; title: string; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; } | { id: \"cases_configure\"; path: string; title: string; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; deepLinks?: T[\"deepLinks\"] | undefined; })[]; title: string; keywords?: T[\"keywords\"] | undefined; navLinkStatus?: T[\"navLinkStatus\"] | undefined; searchable?: T[\"searchable\"] | undefined; category?: T[\"category\"] | undefined; order?: T[\"order\"] | undefined; tooltip?: T[\"tooltip\"] | undefined; euiIconType?: T[\"euiIconType\"] | undefined; icon?: T[\"icon\"] | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/common/navigation/deep_links.ts",
         "deprecated": false,
@@ -386,7 +386,7 @@
           "CustomFieldTypes",
           ".TOGGLE; value: boolean | null; } | { key: string; type: ",
           "CustomFieldTypes",
-          ".TEXT; value: string | null; })[] | undefined; }, \"description\" | \"title\"> | undefined; }"
+          ".TEXT; value: string | null; })[] | undefined; }, \"title\" | \"description\"> | undefined; }"
         ],
         "path": "x-pack/plugins/cases/public/client/ui/get_create_case_flyout.tsx",
         "deprecated": false,
@@ -512,7 +512,7 @@
               "section": "def-common.CaseSeverity",
               "text": "CaseSeverity"
             },
-            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"description\" | \"title\" | (\"description\" | \"title\")[] | undefined; sortField?: \"category\" | \"title\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
+            "[] | undefined; assignees?: string | string[] | undefined; reporters?: string | string[] | undefined; defaultSearchOperator?: \"AND\" | \"OR\" | undefined; from?: string | undefined; search?: string | undefined; searchFields?: \"title\" | \"description\" | (\"title\" | \"description\")[] | undefined; sortField?: \"title\" | \"category\" | \"createdAt\" | \"updatedAt\" | \"status\" | \"severity\" | \"closedAt\" | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; to?: string | undefined; owner?: string | string[] | undefined; category?: string | string[] | undefined; } & Partial<",
             "Pagination",
             ">, signal?: AbortSignal | undefined) => Promise<",
             {

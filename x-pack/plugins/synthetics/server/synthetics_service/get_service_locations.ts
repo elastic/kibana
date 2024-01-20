@@ -18,8 +18,8 @@ import {
 } from '../../common/runtime_types';
 
 export const getDevLocation = (devUrl: string): PublicLocation => ({
-  id: 'localhost',
-  label: 'Local Synthetics Service',
+  id: 'dev',
+  label: 'Dev Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
