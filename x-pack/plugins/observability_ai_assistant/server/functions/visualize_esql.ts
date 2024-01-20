@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { normalizeType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { visualizeESQLFunction } from '../../common/functions/visualize_esql';
 import type { FunctionRegistrationParameters } from '.';
@@ -34,7 +34,7 @@ export function registerVisualizeESQLFunction({
         response.columns?.map(({ name, type }) => ({
           id: name,
           name,
-          meta: { type: normalizeType(type) },
+          meta: { type: esFieldTypeToKibanaFieldType(type) },
         })) ?? [];
       return { content: columns };
     }

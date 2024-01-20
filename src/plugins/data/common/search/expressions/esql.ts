@@ -7,7 +7,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { normalizeType } from '@kbn/field-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -217,7 +217,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             body.columns?.map(({ name, type }) => ({
               id: name,
               name,
-              meta: { type: normalizeType(type) },
+              meta: { type: esFieldTypeToKibanaFieldType(type) },
             })) ?? [];
           const columnNames = columns.map(({ name }) => name);
           const rows = body.values.map((row) => zipObject(columnNames, row));

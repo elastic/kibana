@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { Suggestion } from '../src/types';
+import type { TableChangeType } from '../src/types';
 
 export const currentSuggestionMock = {
   title: 'Heat map',
@@ -130,5 +130,5 @@ export const currentSuggestionMock = {
   },
   datasourceId: 'textBased',
   columns: 2,
-  changeType: 'initial',
-} as Suggestion;
+  changeType: 'initial' as TableChangeType,
+};

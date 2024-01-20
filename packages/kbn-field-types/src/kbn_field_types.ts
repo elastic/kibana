@@ -49,7 +49,7 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
 export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
 
-export function normalizeType(type: string) {
+export function esFieldTypeToKibanaFieldType(type: string) {
   switch (type) {
     case ES_FIELD_TYPES._INDEX:
     case ES_FIELD_TYPES.GEO_POINT:
