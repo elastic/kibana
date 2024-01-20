@@ -10,8 +10,8 @@ import { KibanaRequest } from '@kbn/core/server';
 import { Query, SearchSource } from '@kbn/data-plugin/common';
 import { AggregateQuery, Filter } from '@kbn/es-query';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { DiscoverServerPluginLocatorService, LocatorServiceScopedClient } from '..';
-import { DiscoverAppLocatorParams } from '../../common';
 
 export const createLocatorServiceMock = (): DiscoverServerPluginLocatorService => {
   const mockFields = ['@timestamp', 'mock-message'];

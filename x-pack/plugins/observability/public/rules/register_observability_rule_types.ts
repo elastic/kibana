@@ -14,7 +14,7 @@ import {
   ALERT_START,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { MetricExpression } from '../components/custom_threshold/types';
 import type { CustomThresholdExpressionMetric } from '../../common/custom_threshold_rule/types';

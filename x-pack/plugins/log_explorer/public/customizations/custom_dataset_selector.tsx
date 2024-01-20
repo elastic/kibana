@@ -6,7 +6,7 @@
  */
 
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 import { DatasetSelector } from '../components/dataset_selector';
 import { DatasetsProvider, useDatasetsContext } from '../hooks/use_datasets';
@@ -103,20 +103,20 @@ export default CustomDatasetSelector;
 export type CustomDatasetSelectorBuilderProps = CustomDatasetSelectorProps & {
   datasetsClient: IDatasetsClient;
   dataViews: DataViewsPublicPluginStart;
-  discover: DiscoverStart;
+  share: SharePluginStart;
 };
 
 function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorProps>) {
   return function ComponentWithProviders({
     datasetsClient,
     dataViews,
-    discover,
+    share,
     logExplorerControllerStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
-          <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
+          <DataViewsProvider dataViewsService={dataViews} shareService={share}>
             <Component logExplorerControllerStateService={logExplorerControllerStateService} />
           </DataViewsProvider>
         </DatasetsProvider>

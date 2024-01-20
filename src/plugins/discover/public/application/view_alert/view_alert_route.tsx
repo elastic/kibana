@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
-import { DiscoverAppLocatorParams } from '../../../common/locator';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { displayPossibleDocsDiffInfoAlert } from '../main/hooks/use_alert_results_toast';
 import { getAlertUtils, QueryParams } from './view_alert_utils';

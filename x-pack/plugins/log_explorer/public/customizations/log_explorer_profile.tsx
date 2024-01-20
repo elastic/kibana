@@ -42,7 +42,7 @@ export const createLogExplorerProfileCustomizations =
       ...plugins,
       ...discoverServices,
     };
-    const { data, dataViews, discover, navigation, unifiedSearch } = pluginsWithOverrides;
+    const { data, dataViews, share, navigation, unifiedSearch } = pluginsWithOverrides;
 
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
@@ -66,7 +66,7 @@ export const createLogExplorerProfileCustomizations =
             <LazyCustomDatasetSelector
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
-              discover={discover}
+              share={share}
               logExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>

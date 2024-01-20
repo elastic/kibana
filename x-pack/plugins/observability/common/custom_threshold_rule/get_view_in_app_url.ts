@@ -6,7 +6,7 @@
  */
 
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import type { TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CustomThresholdExpressionMetric } from './types';

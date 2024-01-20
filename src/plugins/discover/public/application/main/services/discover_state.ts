@@ -24,6 +24,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { loadSavedSearch as loadSavedSearchFn } from './load_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { DiscoverCustomizationContext, FetchStatus } from '../../types';
@@ -33,7 +34,6 @@ import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
   DiscoverAppState,
   DiscoverAppStateContainer,

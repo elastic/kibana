@@ -5,18 +5,20 @@
  * 2.0.
  */
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { useEffect, useState } from 'react';
 
 import { useStartServices } from '../../../../../../../hooks';
 
 export const useGetDiscoverLogsLinkForAgents = (agentIds: string[]) => {
-  const { discover } = useStartServices();
+  const { share } = useStartServices();
   const [link, setLink] = useState<string | null>(null);
 
   useEffect(() => {
     const getLink = async () => {
-      if (discover && discover.locator) {
-        const newLink = await discover.locator.getUrl({
+      const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+      if (locator) {
+        const newLink = await locator.getUrl({
           indexPatternId: 'logs-*',
           timeRange: {
             from: 'now-1h',
@@ -41,7 +43,7 @@ export const useGetDiscoverLogsLinkForAgents = (agentIds: string[]) => {
       }
     };
     getLink();
-  }, [discover, agentIds]);
+  }, [share.url.locators, agentIds]);
 
   return link;
 };

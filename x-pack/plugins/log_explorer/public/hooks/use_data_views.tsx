@@ -9,13 +9,13 @@ import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
 
 interface DataViewsContextDeps {
   dataViewsService: DataViewsPublicPluginStart;
-  discoverService: DiscoverStart;
+  shareService: SharePluginStart;
 }
 
 export interface SearchDataViewsParams {
@@ -28,11 +28,11 @@ export type SearchDataViews = (params: SearchDataViewsParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
 
-const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDeps) => {
+const useDataViews = ({ dataViewsService, shareService }: DataViewsContextDeps) => {
   const dataViewsStateService = useInterpret(() =>
     createDataViewsStateMachine({
       dataViews: dataViewsService,
-      discover: discoverService,
+      share: shareService,
     })
   );
 

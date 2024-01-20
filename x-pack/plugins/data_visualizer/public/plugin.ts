@@ -10,7 +10,6 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import { Plugin } from '@kbn/core/public';
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
@@ -39,7 +38,6 @@ export interface DataVisualizerSetupDependencies {
   home?: HomePublicPluginSetup;
   embeddable: EmbeddableSetup;
   share: SharePluginSetup;
-  discover: DiscoverSetup;
 }
 export interface DataVisualizerStartDependencies {
   analytics: AnalyticsServiceStart;
@@ -50,7 +48,6 @@ export interface DataVisualizerStartDependencies {
   embeddable: EmbeddableStart;
   security?: SecurityPluginSetup;
   share: SharePluginStart;
-  discover: DiscoverStart;
   lens?: LensPublicStart;
   charts: ChartsPluginStart;
   dataViewFieldEditor?: IndexPatternFieldEditorStart;

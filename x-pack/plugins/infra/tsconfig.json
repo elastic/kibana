@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", "types/**/*"],
+  "include": [
+    "../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "types/**/*"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -57,7 +63,6 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/shared-ux-router",
     "@kbn/shared-ux-link-redirect-app",
-    "@kbn/discover-plugin",
     "@kbn/observability-alert-details",
     "@kbn/observability-shared-plugin",
     "@kbn/observability-ai-assistant-plugin",
@@ -82,7 +87,10 @@
     "@kbn/ebt-tools",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/discover-locators"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }

@@ -8,6 +8,7 @@
 import { useCallback, useEffect, useState } from 'react';
 
 import { FilterStateStore } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { useKibana, isModifiedEvent, isLeftClickEvent } from '../lib/kibana';
 
 interface UseDiscoverLink {
@@ -17,8 +18,9 @@ interface UseDiscoverLink {
 export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
   const {
     application: { navigateToUrl },
+    share,
   } = useKibana().services;
-  const locator = useKibana().services.discover?.locator;
+  const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {

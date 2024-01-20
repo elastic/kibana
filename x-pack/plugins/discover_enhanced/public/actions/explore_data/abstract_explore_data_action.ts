@@ -6,18 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ViewMode, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { KibanaLocation } from '@kbn/share-plugin/public';
+import { KibanaLocation, SharePluginStart } from '@kbn/share-plugin/public';
 import { DOC_TYPE as LENS_DOC_TYPE } from '@kbn/lens-plugin/common/constants';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import * as shared from './shared';
 
 export const ACTION_EXPLORE_DATA = 'ACTION_EXPLORE_DATA';
 
 export interface PluginDeps {
-  discover: Pick<DiscoverStart, 'locator'>;
+  share?: SharePluginStart;
 }
 
 export interface CoreDeps {
@@ -29,7 +29,7 @@ export interface Params {
 }
 
 export abstract class AbstractExploreDataAction<Context extends { embeddable?: IEmbeddable }> {
-  public readonly getIconType = (context: Context): string => 'discoverApp';
+  public readonly getIconType = (_context: Context): string => 'discoverApp';
 
   public readonly getDisplayName = (context: Context): string =>
     i18n.translate('xpack.discover.FlyoutCreateDrilldownAction.displayName', {
@@ -48,7 +48,8 @@ export abstract class AbstractExploreDataAction<Context extends { embeddable?: I
     const { capabilities } = core.application;
 
     if (capabilities.discover && !capabilities.discover.show) return false;
-    if (!plugins.discover.locator) return false;
+    const locator = plugins.share?.url.locators.get(DISCOVER_APP_LOCATOR);
+    if (!locator) return false;
     if (!shared.hasExactlyOneIndexPattern(embeddable)) return false;
     if (embeddable.getInput().viewMode !== ViewMode.VIEW) return false;
 

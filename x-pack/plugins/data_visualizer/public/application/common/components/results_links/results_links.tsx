@@ -15,6 +15,7 @@ import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { FileUploadPluginStart } from '@kbn/file-upload-plugin/public';
 import { flatten } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { LinkCardProps } from '../link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
@@ -71,7 +72,7 @@ export const ResultsLinks: FC<Props> = ({
     services: {
       fileUpload,
       application: { getUrlForApp, capabilities },
-      discover,
+      share,
     },
   } = useDataVisualizerKibana();
 
@@ -92,16 +93,22 @@ export const ResultsLinks: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) {
+
+      const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+      if (!locator) {
         // eslint-disable-next-line no-console
         console.error('Discover locator not available');
         return;
       }
-      const discoverUrl = await discover.locator.getUrl({
+
+      const discoverUrl = await locator.getUrl({
         indexPatternId: dataViewId,
         timeRange: globalState?.time ? globalState.time : undefined,
       });
+
       if (unmounted) return;
+
       setDiscoverLink(discoverUrl);
     };
 
@@ -151,7 +158,7 @@ export const ResultsLinks: FC<Props> = ({
       unmounted = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataViewId, discover, JSON.stringify(globalState)]);
+  }, [dataViewId, share.url.locators, JSON.stringify(globalState)]);
 
   useEffect(() => {
     updateTimeValues();

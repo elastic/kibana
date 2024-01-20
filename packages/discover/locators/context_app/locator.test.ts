@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { addProfile } from '../../../../common/customizations';
+import { addProfile } from '@kbn/discover-utils';
 import { getStatesFromKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverContextAppLocatorDefinition } from './locator';
 

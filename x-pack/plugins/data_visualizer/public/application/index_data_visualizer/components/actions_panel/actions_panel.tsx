@@ -16,6 +16,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '@kbn/ml-url-state';
 import { isDefined } from '@kbn/ml-is-defined';
 
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { LinkCardProps } from '../../../common/components/link_card/link_card';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { LinkCard } from '../../../common/components/link_card';
@@ -45,7 +46,7 @@ export const ActionsPanel: FC<Props> = ({
     services: {
       data,
       application: { capabilities },
-      discover,
+      share,
     },
   } = useDataVisualizerKibana();
 
@@ -57,12 +58,15 @@ export const ActionsPanel: FC<Props> = ({
     const getDiscoverUrl = async (): Promise<void> => {
       const isDiscoverAvailable = capabilities.discover?.show ?? false;
       if (!isDiscoverAvailable) return;
-      if (!discover.locator) {
+
+      const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
+
+      if (!locator) {
         // eslint-disable-next-line no-console
         console.error('Discover locator not available');
         return;
       }
-      const discoverUrl = await discover.locator.getUrl({
+      const discoverUrl = await locator.getUrl({
         indexPatternId: dataViewId,
         filters: data.query.filterManager.getFilters() ?? [],
         query:
@@ -112,7 +116,7 @@ export const ActionsPanel: FC<Props> = ({
     searchQueryLanguage,
     globalState,
     capabilities,
-    discover,
+    share.url.locators,
     data.query,
     getAdditionalLinks,
   ]);

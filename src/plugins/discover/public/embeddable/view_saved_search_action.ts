@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { type IEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
+import type { DiscoverAppLocator } from '@kbn/discover-locators';
 import type { SavedSearchEmbeddable } from './saved_search_embeddable';
-import type { DiscoverAppLocator } from '../../common';
 import { getDiscoverLocatorParams } from './get_discover_locator_params';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';

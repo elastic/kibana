@@ -19,6 +19,7 @@
     "@kbn/es-query",
     "@kbn/unified-search-plugin",
     "@kbn/config-schema",
+    "@kbn/discover-locators",
   ],
   "exclude": [
     "target/**/*",

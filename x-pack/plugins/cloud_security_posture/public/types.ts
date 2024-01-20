@@ -18,7 +18,6 @@ import { ToastsStart } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import type {
   UsageCollectionSetup,
@@ -62,7 +61,6 @@ export interface CspClientPluginStartDeps {
   fieldFormats: FieldFormatsStart;
   toastNotifications: ToastsStart;
   charts: ChartsPluginStart;
-  discover: DiscoverStart;
   fleet: FleetStart;
   licensing: LicensingPluginStart;
   share: SharePluginStart;

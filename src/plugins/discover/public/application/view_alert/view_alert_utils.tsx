@@ -18,7 +18,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { MarkdownSimple } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Filter } from '@kbn/es-query';
-import { DiscoverAppLocatorParams } from '../../../common/locator';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 
 export interface SearchThresholdAlertParams extends RuleTypeParams {
   searchConfiguration: SerializedSearchSourceFields;

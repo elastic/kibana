@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { DiscoverAppLocatorParams } from '@kbn/discover-locators';
 import { Aggregators } from './types';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';

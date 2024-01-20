@@ -6,10 +6,26 @@
     "id": "observabilityOnboarding",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observability_onboarding"],
-    "requiredPlugins": ["data", "observability", "observabilityShared", "discover", "share", "fleet"],
-    "optionalPlugins": ["cloud", "usageCollection"],
-    "requiredBundles": ["kibanaReact"],
-    "extraPublicDirs": ["common"]
+    "configPath": [
+      "xpack",
+      "observability_onboarding"
+    ],
+    "requiredPlugins": [
+      "data",
+      "observability",
+      "observabilityShared",
+      "share",
+      "fleet"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
   }
 }

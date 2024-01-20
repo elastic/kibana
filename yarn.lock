@@ -4424,11 +4424,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/discover-locators@link:packages/discover/locators":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-plugin@link:src/plugins/discover":
   version "0.0.0"
   uid ""
 
-"@kbn/discover-utils@link:packages/kbn-discover-utils":
+"@kbn/discover-utils@link:packages/discover/utils":
   version "0.0.0"
   uid ""
 

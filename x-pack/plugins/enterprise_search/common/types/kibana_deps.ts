@@ -8,7 +8,6 @@
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -20,7 +19,6 @@ export interface KibanaDeps {
   charts: ChartsPluginStart;
   cloud: CloudStart;
   data: DataPublicPluginStart;
-  discover: DiscoverStart;
   features: FeaturesPluginStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   licensing: LicensingPluginStart;

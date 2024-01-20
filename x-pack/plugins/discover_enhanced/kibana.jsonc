@@ -13,10 +13,9 @@
     "requiredPlugins": [
       "uiActions",
       "embeddable",
-      "discover"
+      "share"
     ],
     "optionalPlugins": [
-      "share",
       "usageCollection"
     ],
     "requiredBundles": [

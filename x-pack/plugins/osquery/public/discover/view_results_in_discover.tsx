@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FilterStateStore } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
@@ -27,8 +28,8 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   endDate,
   startDate,
 }) => {
-  const { discover, application } = useKibana().services;
-  const locator = discover?.locator;
+  const { share, application } = useKibana().services;
+  const locator = share.url.locators.get(DISCOVER_APP_LOCATOR);
   const discoverPermissions = application.capabilities.discover;
   const { data: logsDataView } = useLogsDataView({ skip: !actionId, checkOnly: true });
 

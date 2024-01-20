@@ -8,6 +8,3 @@
 
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
-
-export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './locator';
-export type { DiscoverAppLocator, DiscoverAppLocatorParams } from './locator';

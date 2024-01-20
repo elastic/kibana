@@ -11,7 +11,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { LogExplorerTabs, LogExplorerTabsProps } from './log_explorer_tabs';
-import { DISCOVER_APP_LOCATOR } from '../../../common';
+import { DISCOVER_APP_LOCATOR } from '@kbn/discover-locators';
 import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 
 const createMockLocator = (id: string) => ({

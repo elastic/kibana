@@ -10,7 +10,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { getESQLSearchProvider } from './search_provider';
 import { createDiscoverDataViewsMock } from '../__mocks__/data_views';
-import type { DiscoverAppLocator } from '../../common';
+import type { DiscoverAppLocator } from '@kbn/discover-locators';
 
 describe('ES|QL search provider', () => {
   const uiCapabilitiesMock = new Promise<ApplicationStart['capabilities']>((resolve) => {

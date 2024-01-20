@@ -41,7 +41,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/lens-plugin",
     "@kbn/es-query",
-    "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/std",
     "@kbn/core-ui-settings-browser",
@@ -80,7 +79,10 @@
     "@kbn/core-plugins-server",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/serverless",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/discover-locators"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
