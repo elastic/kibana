@@ -6,7 +6,8 @@
  */
 
 import { UnionToIntersection, ValuesType } from 'utility-types';
-import { isEqual, pull, merge, castArray } from 'lodash';
+import { merge, castArray } from 'lodash';
+import stableStringify from 'json-stable-stringify';
 
 /**
  * Joins a list of records by a given key. Key can be any type of value, from
@@ -56,16 +57,16 @@ export function joinByKey(
     merge({}, a, b)
 ) {
   const keys = castArray(key);
+  const map = new Map();
   return items.reduce<Array<Record<string, any>>>((prev, current) => {
-    let item = prev.find((prevItem) =>
-      keys.every((k) => isEqual(prevItem[k], current[k]))
-    );
+    const stableKey = stableStringify(keys.map((k) => current[k]));
 
-    if (!item) {
-      item = { ...current };
-      prev.push(item);
+    if (map.has(stableKey)) {
+      const index = map.get(stableKey);
+      prev[index] = mergeFn(prev[index], current);
     } else {
-      pull(prev, item).push(mergeFn(item, current));
+      map.set(stableKey, prev.length);
+      prev.push({ ...current });
     }
 
     return prev;
