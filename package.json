@@ -1584,7 +1584,6 @@
     "jest-matcher-utils": "^29.6.1",
     "jest-mock": "^29.6.1",
     "jest-runtime": "^29.6.1",
-    "jest-silent-reporter": "^0.5.0",
     "jest-snapshot": "^29.6.1",
     "jest-specific-snapshot": "^8.0.0",
     "jest-styled-components": "7.0.3",
