@@ -54,10 +54,10 @@ export const convertToPercentileColumn = (
     sourceField: field.name,
     ...commonColumnParams,
     params: { ...params, ...getFormat(series) },
+    // @ts-expect-error upgrade typescript v4.9.5
     meta:
       index !== undefined
         ? {
-            // @ts-expect-error upgrade typescript v4.9.5
             reference: `${metric.id}.${index}`,
             ...commonColumnParams.meta,
           }
