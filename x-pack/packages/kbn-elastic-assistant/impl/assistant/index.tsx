@@ -572,7 +572,7 @@ const AssistantComponent: React.FC<Props> = ({
             onConversationDeleted={handleOnConversationDeleted}
             refetchConversationsState={async () => {
               const refetchedConversations = await refetchResults();
-              if (refetchCurrentConversation[selectedConversationId]) {
+              if (refetchedConversations && refetchedConversations[selectedConversationId]) {
                 await refetchCurrentConversation();
               }
             }}
