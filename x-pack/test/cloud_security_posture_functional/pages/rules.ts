@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   RULES_BULK_ACTION_OPTION_DISABLE,
   RULES_BULK_ACTION_OPTION_ENABLE,
+  RULE_NUMBER_FILTER_SEARCH_FIELD,
 } from '../page_objects/rule_page';
 
 // eslint-disable-next-line import/no-default-export
@@ -137,6 +138,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickFilterButton('disabled');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableRulesRowSwitchButton()) > 1).to.be(true);
+      });
+    });
+
+    describe('Rules Page - CIS Section & Rule Number filters', () => {
+      it('Table should only show result that has the same section as in the Section filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('etcd');
+        await rule.rulePage.clickFilterPopOverOption('Scheduler');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
+      });
+
+      it('TTable should only show result that has the same section as in the Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.clickFilterPopOverOption('1.1.1');
+        await rule.rulePage.clickFilterPopOverOption('1.1.2');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 2).to.be(true);
+      });
+
+      it('Table should only show result that passes both Section and Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('etcd');
+        await rule.rulePage.clickFilterPopOverOption('Scheduler');
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.filterTextInput(RULE_NUMBER_FILTER_SEARCH_FIELD, '1.4.2');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await rule.rulePage.clickFilterPopOverOption('1.4.2');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
       });
     });
   });

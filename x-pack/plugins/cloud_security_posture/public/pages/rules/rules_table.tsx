@@ -190,7 +190,7 @@ const getColumns = ({
         }}
       />
     ),
-    width: '30px',
+    width: '3%',
     sortable: false,
     render: (rules, item: CspBenchmarkRulesWithStates) => {
       return (
@@ -255,7 +255,7 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
       defaultMessage: 'Enabled',
     }),
-    width: '10%',
+    width: '5%',
     truncateText: true,
     render: (name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {

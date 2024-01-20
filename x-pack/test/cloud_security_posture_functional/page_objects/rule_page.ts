@@ -20,6 +20,9 @@ export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
+export const CIS_SECTION_FILTER = 'options-filter-popover-button-section';
+export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number';
+export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -85,6 +88,28 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     getEnableRulesRowSwitchButton: async () => {
       const enableRulesRowSwitch = await testSubjects.findAll(RULES_ROWS_ENABLE_SWITCH_BUTTON);
       return await enableRulesRowSwitch.length;
+    },
+
+    clickFilterPopover: async (filterType: 'section' | 'ruleNumber') => {
+      const filterPopoverButton =
+        (await filterType) === 'section'
+          ? await testSubjects.find(CIS_SECTION_FILTER)
+          : await testSubjects.find(RULE_NUMBER_FILTER);
+
+      await filterPopoverButton.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    clickFilterPopOverOption: async (value: string) => {
+      const chosenValue = await testSubjects.find('options-filter-popover-item-' + (await value));
+      await chosenValue.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    filterTextInput: async (selector: string, value: string) => {
+      const textField = await testSubjects.find('rule-number-search-input');
+      await textField.type(value);
+      await PageObjects.header.waitUntilLoadingHasFinished();
     },
   };
 

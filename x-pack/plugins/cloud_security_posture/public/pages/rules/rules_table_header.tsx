@@ -6,13 +6,11 @@
  */
 import React, { useState } from 'react';
 import {
-  EuiComboBox,
   EuiFieldSearch,
   EuiFlexItem,
   EuiText,
   EuiSpacer,
   EuiFlexGroup,
-  type EuiComboBoxOptionOption,
   EuiPopover,
   EuiButtonEmpty,
   EuiContextMenuItem,
@@ -28,6 +26,7 @@ import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
+import { MultiSelectFilter } from '../../common/component/multi_select_filter';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -36,6 +35,8 @@ export const RULES_SELECT_ALL_RULES = 'select-all-rules-button';
 export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
+export const CIS_SECTION_FILTER = 'cis-section-filter';
+export const RULE_NUMBER_FILTER = 'rule-number-filter';
 
 interface RulesTableToolbarProps {
   search: (value: string) => void;
@@ -81,16 +82,16 @@ export const RulesTableHeader = ({
   setSelectAllRules,
   setSelectedRules,
 }: RulesTableToolbarProps) => {
-  const [selectedSection, setSelectedSection] = useState<EuiComboBoxOptionOption[]>([]);
-  const [selectedRuleNumber, setSelectedRuleNumber] = useState<EuiComboBoxOptionOption[]>([]);
+  const [selectedSection, setSelectedSection] = useState<string[]>([]);
+  const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
   const sectionOptions = sectionSelectOptions.map((option) => ({
+    key: option,
     label: option,
   }));
-
   const ruleNumberOptions = ruleNumberSelectOptions.map((option) => ({
+    key: option,
     label: option,
   }));
-
   const [isEnabledRulesFilterOn, setIsEnabledRulesFilterOn] = useState(false);
   const [isDisabledRulesFilterOn, setisDisabledRulesFilterOn] = useState(false);
 
@@ -130,28 +131,28 @@ export const RulesTableHeader = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
-        <EuiFlexGroup gutterSize="none" direction="row">
+        <EuiFlexGroup gutterSize="s" direction="row">
           <EuiFlexItem
             css={css`
               min-width: 160px;
             `}
           >
-            <EuiComboBox
-              fullWidth={true}
-              placeholder={i18n.translate(
+            <MultiSelectFilter
+              buttonLabel={i18n.translate(
                 'xpack.csp.rules.rulesTableHeader.sectionSelectPlaceholder',
                 {
                   defaultMessage: 'CIS Section',
                 }
               )}
-              // singleSelection={{ asPlainText: true }}
-              options={sectionOptions}
-              selectedOptions={selectedSection}
-              onChange={(option) => {
-                const optionSectionArray = option.map((val) => val.label);
-                setSelectedSection(option);
-                onSectionChange(option.length ? optionSectionArray : undefined);
+              id={'section'}
+              onChange={(section) => {
+                setSelectedSection([...section?.selectedOptionKeys]);
+                onSectionChange(
+                  section?.selectedOptionKeys ? section?.selectedOptionKeys : undefined
+                );
               }}
+              options={sectionOptions}
+              selectedOptionKeys={selectedSection}
             />
           </EuiFlexItem>
           <EuiFlexItem
@@ -159,22 +160,22 @@ export const RulesTableHeader = ({
               min-width: 160px;
             `}
           >
-            <EuiComboBox
-              fullWidth={true}
-              placeholder={i18n.translate(
+            <MultiSelectFilter
+              buttonLabel={i18n.translate(
                 'xpack.csp.rules.rulesTableHeader.ruleNumberSelectPlaceholder',
                 {
                   defaultMessage: 'Rule Number',
                 }
               )}
-              // singleSelection={{ asPlainText: true }}
-              options={ruleNumberOptions}
-              selectedOptions={selectedRuleNumber}
-              onChange={(option) => {
-                const optionRuleNumberArray = option.map((val) => val.label);
-                setSelectedRuleNumber(option);
-                onRuleNumberChange(option.length ? optionRuleNumberArray : undefined);
+              id={'rule-number'}
+              onChange={(ruleNumber) => {
+                setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
+                onRuleNumberChange(
+                  ruleNumber?.selectedOptionKeys ? ruleNumber?.selectedOptionKeys : undefined
+                );
               }}
+              options={ruleNumberOptions}
+              selectedOptionKeys={selectedRuleNumber}
             />
           </EuiFlexItem>
           <EuiFlexItem
