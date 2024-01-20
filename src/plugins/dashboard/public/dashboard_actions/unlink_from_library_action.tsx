@@ -10,24 +10,25 @@ import { apiCanUnlinkFromLibrary, CanUnlinkFromLibrary } from '@kbn/presentation
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
-  apiPublishesViewMode,
+  apiCanAccessViewMode,
+  CanAccessViewMode,
   EmbeddableApiContext,
+  getInheritedViewMode,
   PublishesPanelTitle,
-  PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
-export type UnlinkPanelFromLibraryActionApi = PublishesViewMode &
+export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
   CanUnlinkFromLibrary &
   Partial<PublishesPanelTitle>;
 
 export const unlinkActionIsCompatible = (
   api: unknown | null
 ): api is UnlinkPanelFromLibraryActionApi =>
-  Boolean(apiPublishesViewMode(api) && apiCanUnlinkFromLibrary(api));
+  Boolean(apiCanAccessViewMode(api) && apiCanUnlinkFromLibrary(api));
 
 export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
@@ -54,7 +55,7 @@ export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!unlinkActionIsCompatible(embeddable)) return false;
-    return embeddable.viewMode.value === 'edit' && (await embeddable.canUnlinkFromLibrary());
+    return getInheritedViewMode(embeddable) === 'edit' && (await embeddable.canUnlinkFromLibrary());
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

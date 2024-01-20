@@ -15,7 +15,6 @@
  */
 
 import { TracksOverlays } from '@kbn/presentation-containers';
-import { BehaviorSubject } from 'rxjs';
 import { inspector } from '../../kibana_services';
 import { InspectPanelActionApi, InspectPanelAction } from './inspect_panel_action';
 
@@ -74,11 +73,11 @@ describe('Inspect panel action', () => {
 
   it('opens overlay on parent if parent is an overlay tracker', async () => {
     inspector.open = jest.fn().mockReturnValue({ onClose: Promise.resolve(undefined) });
-    context.embeddable.parentApi = new BehaviorSubject<unknown>({
+    context.embeddable.parentApi = {
       openOverlay: jest.fn(),
       clearOverlays: jest.fn(),
-    });
+    };
     await action.execute(context);
-    expect((context.embeddable.parentApi.value as TracksOverlays).openOverlay).toHaveBeenCalled();
+    expect((context.embeddable.parentApi as TracksOverlays).openOverlay).toHaveBeenCalled();
   });
 });
