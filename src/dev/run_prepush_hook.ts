@@ -35,7 +35,7 @@ run(
     process.env.IS_KIBANA_PREPUSH_HOOK = 'true';
 
     const filesChangedSummaryTable = new Table({
-      head: ['Files changed in this PR compared to origin/main:', 'Status'],
+      head: ['Files changed on this branch compared to origin/main:', 'Status'],
       chars: { mid: '', 'left-mid': '', 'mid-mid': '', 'right-mid': '' },
       colWidths: [80, 10],
       wordWrap: true,
