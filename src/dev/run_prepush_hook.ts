@@ -17,6 +17,8 @@ import { checkIfBranchIsClean } from './preflight_check/utils/check_if_branch_is
 
 run(
   async ({ log, flags }) => {
+    const startTime = process.hrtime();
+
     const toolingLog = new ToolingLog({
       level: 'info',
       writeTo: process.stdout,
@@ -81,7 +83,26 @@ run(
         success: true,
       });
 
-      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨\n`);
+      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨`);
+
+      const endTime = process.hrtime(startTime);
+
+      const elapsedTimeInSeconds = endTime[0] + endTime[1] / 1e9;
+
+      log.info(
+        `Performed ${tests
+          .filter((test) => test.getFiles().length)
+          .map((test, index, arr) => {
+            const count = Number(test.getFiles().length);
+            const prefix = index === arr.length - 1 ? 'and ' : '';
+
+            return `${prefix}${count} ${test.id} ${count === 1 ? 'check' : 'checks'}${
+              prefix ? '' : ','
+            } `;
+          })
+          .join('')
+          .slice(0, -1)} in ${elapsedTimeInSeconds.toFixed(2)} seconds.\n`
+      );
     } else {
       log.info(`${chalk.bold('Results')}`);
 
