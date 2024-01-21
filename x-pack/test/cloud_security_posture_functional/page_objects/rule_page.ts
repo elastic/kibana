@@ -101,7 +101,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     },
 
     clickFilterPopOverOption: async (value: string) => {
-      const chosenValue = await testSubjects.find('options-filter-popover-item-' + (await value));
+      const chosenValue = await testSubjects.find('options-filter-popover-item-' + value);
       await chosenValue.click();
     },
 
