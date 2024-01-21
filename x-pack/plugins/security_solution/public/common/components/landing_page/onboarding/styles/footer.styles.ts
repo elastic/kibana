@@ -6,6 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const useFooterStyles = () => {
@@ -13,23 +14,23 @@ export const useFooterStyles = () => {
 
   const footerStyles = useMemo(
     () => ({
-      wrapperStyle: `
+      wrapperStyle: css`
         padding: ${euiTheme.size.xl} ${euiTheme.size.l} ${euiTheme.base * 4.5}px;
         gap: ${euiTheme.base * 3.75}px;
       `,
-      titleStyle: `
+      titleStyle: css`
         font-size: ${euiTheme.base * 0.875}px;
         font-weight: ${euiTheme.font.weight.semiBold};
         line-height: ${euiTheme.size.l};
         color: ${euiTheme.colors.title};
       `,
-      descriptionStyle: `
+      descriptionStyle: css`
         font-size: 12.25px;
         font-weight: ${euiTheme.font.weight.regular};
         line-height: ${euiTheme.base * 1.25}px;
         color: ${euiTheme.colors.darkestShade};
       `,
-      linkStyle: `
+      linkStyle: css`
         font-size: ${euiTheme.size.m};
         font-weight: ${euiTheme.font.weight.medium};
         line-height: ${euiTheme.size.base};

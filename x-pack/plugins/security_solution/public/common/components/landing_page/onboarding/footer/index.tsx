@@ -19,16 +19,16 @@ const FooterComponent = () => {
       alignItems="center"
       justifyContent="spaceBetween"
       gutterSize="none"
-      css={wrapperStyle}
+      className={wrapperStyle}
     >
       {footer.map((item) => (
         <EuiFlexItem key={`footer-${item.key}`}>
           <img src={item.icon} alt={item.title} height="64" width="64" />
           <EuiSpacer size="m" />
-          <p css={titleStyle}>{item.title}</p>
-          <p css={descriptionStyle}>{item.description}</p>
+          <p className={titleStyle}>{item.title}</p>
+          <p className={descriptionStyle}>{item.description}</p>
           <EuiSpacer size="m" />
-          <EuiLink href={item.link.href} external={true} target="_blank" css={linkStyle}>
+          <EuiLink href={item.link.href} external={true} target="_blank" className={linkStyle}>
             {item.link.title}
           </EuiLink>
         </EuiFlexItem>

@@ -6,6 +6,7 @@
  */
 
 import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const LEFT_CONTENT_PANEL_WIDTH = 486;
@@ -19,7 +20,7 @@ export const useStepContentStyles = () => {
 
   const customStyles = useMemo(
     () => ({
-      stepContentGroupStyles: `
+      stepContentGroupStyles: css`
         &.step-content-group {
           justify-content: space-between;
           margin-top: ${euiTheme.size.l};
@@ -30,13 +31,13 @@ export const useStepContentStyles = () => {
           border-radius: ${euiTheme.border.radius.medium};
         }
       `,
-      leftContentStyles: `
+      leftContentStyles: css`
         &.left-panel {
           padding: 0 0 0 ${euiTheme.size.s};
           width: ${LEFT_CONTENT_PANEL_WIDTH}px;
         }
       `,
-      descriptionStyles: `
+      descriptionStyles: css`
         &.step-content-description {
           margin-bottom: 0px;
           margin-block-end: 0px !important;
@@ -47,19 +48,19 @@ export const useStepContentStyles = () => {
           }
         }
       `,
-      rightPanelStyles: `
+      rightPanelStyles: css`
         &.right-panel {
           padding: 0 6px 0 ${euiTheme.size.l};
           width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
         }
       `,
-      rightPanelContentStyles: `
+      rightPanelContentStyles: css`
         &.right-panel-wrapper {
           height: ${RIGHT_CONTENT_HEIGHT}px;
           width: ${RIGHT_CONTENT_WIDTH}px;
         }
       `,
-      getRightContentStyles: ({ shadow }: { shadow: boolean }) => `
+      getRightContentStyles: ({ shadow }: { shadow: boolean }) => css`
         &.right-panel-content {
           height: 100%;
           width: 100%;

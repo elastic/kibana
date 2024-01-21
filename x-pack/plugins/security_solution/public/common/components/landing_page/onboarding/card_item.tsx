@@ -48,12 +48,16 @@ const CardItemComponent: React.FC<{
     () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
     [cardId, expandedCardSteps]
   );
-
-  const cardClassNames = classnames('card-item', {
-    'card-expanded': isExpandedCard,
-  });
-
   const cardItemPanelStyle = useCardItemStyles();
+
+  const cardClassNames = classnames(
+    'card-item',
+    {
+      'card-expanded': isExpandedCard,
+    },
+    cardItemPanelStyle
+  );
+
   const getCardStep = useCallback(
     (stepId: StepId) => cardItem?.steps?.find((step) => step.id === stepId),
     [cardItem?.steps]
@@ -95,7 +99,6 @@ const CardItemComponent: React.FC<{
       className={cardClassNames}
       hasBorder
       paddingSize="none"
-      css={cardItemPanelStyle}
       borderRadius="none"
       data-test-subj={cardId}
     >

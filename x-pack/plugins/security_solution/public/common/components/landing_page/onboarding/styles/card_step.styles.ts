@@ -6,6 +6,7 @@
  */
 
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const HEIGHT_ANIMATION_DURATION = 250;
@@ -16,7 +17,7 @@ export const useCardStepStyles = () => {
 
   const customStyles = useMemo(
     () => ({
-      stepPanelStyles: `
+      stepPanelStyles: css`
         .stepContentWrapper {
           display: grid;
           grid-template-rows: 1fr;
@@ -31,14 +32,14 @@ export const useCardStepStyles = () => {
           overflow: hidden;
         }
       `,
-      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) => `
+      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) => css`
         cursor: ${hasStepContent ? 'pointer' : 'default'};
         gap: ${euiTheme.size.base};
       `,
-      stepItemStyles: `
+      stepItemStyles: css`
         align-self: center;
       `,
-      stepIconStyles: `
+      stepIconStyles: css`
         &.step-icon {
           border-radius: 50%;
           width: ${euiTheme.size.xxxl};
@@ -51,7 +52,7 @@ export const useCardStepStyles = () => {
           background-color: ${completeStepBackgroundColor};
         }
       `,
-      stepTitleStyles: `
+      stepTitleStyles: css`
         &.step-title {
           padding-right: ${euiTheme.size.m};
           line-height: ${euiTheme.size.xxxl};
@@ -60,13 +61,13 @@ export const useCardStepStyles = () => {
           vertical-align: middle;
         }
       `,
-      allDoneTextStyles: `
+      allDoneTextStyles: css`
         &.all-done-badge {
           background-color: ${completeStepBackgroundColor};
           color: ${euiTheme.colors.successText};
         }
       `,
-      toggleButtonStyles: `
+      toggleButtonStyles: css`
         &.toggle-button {
           margin-left: ${euiTheme.base * 0.375}px;
         }

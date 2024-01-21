@@ -31,11 +31,11 @@ const ProgressComponent: React.FC<{
             size="m"
             label={
               <span>
-                <span css={textStyle}>{PROGRESS_TRACKER_LABEL}</span>
+                <span className={textStyle}>{PROGRESS_TRACKER_LABEL}</span>
                 <EuiSpacer size="s" />
               </span>
             }
-            valueText={<span css={textStyle}>{`${stepsDone}/${totalActiveSteps}`}</span>}
+            valueText={<span className={textStyle}>{`${stepsDone}/${totalActiveSteps}`}</span>}
           />
         </EuiFlexItem>
       )}

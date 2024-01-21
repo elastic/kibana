@@ -6,6 +6,7 @@
  */
 
 import { useEuiShadow, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 
 export const SHADOW_ANIMATION_DURATION = 350;
 
@@ -13,7 +14,7 @@ export const useCardItemStyles = () => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('l');
 
-  return `
+  return css`
     &.card-item {
       padding: ${euiTheme.size.base};
       border-radius: ${euiTheme.size.s};

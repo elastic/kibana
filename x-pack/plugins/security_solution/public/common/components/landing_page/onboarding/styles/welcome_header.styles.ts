@@ -6,7 +6,9 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
+import { CONTENT_WIDTH } from '../helpers';
 import launch from '../images/launch.png';
 
 export const useWelcomeHeaderStyles = () => {
@@ -14,41 +16,48 @@ export const useWelcomeHeaderStyles = () => {
 
   const welcomeHeaderStyles = useMemo(() => {
     return {
-      headerStyles: `background-image: url(${launch});
+      headerStyles: css`
+        background-image: url(${launch});
         background-size: 40%;
         background-repeat: no-repeat;
         background-position-x: right;
         background-position-y: center;
         padding: ${euiTheme.base * 0.625}px 0;
       `,
-      headerTitleStyles: `
+      headerTitleStyles: css`
         padding-bottom: ${euiTheme.size.s};
         font-size: ${euiTheme.base}px;
         color: ${euiTheme.colors.darkShade};
         font-weight: ${euiTheme.font.weight.bold};
         line-height: ${euiTheme.size.l};
       `,
-      headerSubtitleStyles: `
+      headerSubtitleStyles: css`
         font-size: ${euiTheme.base * 2.125}px;
         color: ${euiTheme.colors.title};
         font-weight: ${euiTheme.font.weight.bold};
       `,
-      headerDescriptionStyles: `
+      headerDescriptionStyles: css`
         font-size: ${euiTheme.base}px;
         color: ${euiTheme.colors.subduedText};
         line-height: ${euiTheme.size.l};
         font-weight: ${euiTheme.font.weight.regular};
       `,
-      currentPlanWrapperStyles: `
+      headerContentStyles: css`
+        width: ${CONTENT_WIDTH / 2}px;
+      `,
+      currentPlanWrapperStyles: css`
         background-color: ${euiTheme.colors.lightestShade};
         border-radius: 56px;
         padding: ${euiTheme.size.xs} ${euiTheme.size.s} ${euiTheme.size.xs} ${euiTheme.size.m};
         height: ${euiTheme.size.xl};
       `,
-      currentPlanTextStyles: `
+      currentPlanTextStyles: css`
         font-size: ${euiTheme.size.m};
         font-weight: ${euiTheme.font.weight.bold};
         padding-right: ${euiTheme.size.xs};
+      `,
+      projectFeaturesUrlStyles: css`
+        padding-left: ${euiTheme.size.xs};
       `,
     };
   }, [

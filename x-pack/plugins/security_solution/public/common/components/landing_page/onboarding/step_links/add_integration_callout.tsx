@@ -10,6 +10,7 @@ import { EuiCallOut, EuiIcon, EuiLink, useEuiTheme } from '@elastic/eui';
 
 import { SecurityPageName, useNavigateTo } from '@kbn/security-solution-navigation';
 
+import classnames from 'classnames';
 import { useAddIntegrationsCalloutStyles } from '../styles/add_integrations_callout.styles';
 import { ADD_INTEGRATIONS_STEP } from './translations';
 import { AddIntegrationsSteps } from '../types';
@@ -27,9 +28,11 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
     });
   }, [navigateTo]);
 
+  const classNames = classnames('add-integrations-callout', calloutWrapperStyles);
+
   return (
     <EuiCallOut
-      className="eui-displayInlineBlock"
+      className={classNames}
       title={
         <>
           <EuiIcon
@@ -38,15 +41,15 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
             color={euiTheme.colors.title}
             className="eui-alignMiddle"
           />
-          <span css={calloutTitleStyles}>
+          <span className={calloutTitleStyles}>
             <FormattedMessage
               id="xpack.securitySolution.onboarding.addIntegrationCallout.description"
               defaultMessage="To {stepName} add integrations first {addIntegration}"
               values={{
                 addIntegration: (
-                  <EuiLink onClick={toggleStep} css={calloutAnchorStyles}>
+                  <EuiLink onClick={toggleStep} className={calloutAnchorStyles}>
                     {ADD_INTEGRATIONS_STEP}
-                    <EuiIcon type="arrowRight" size="s" css={calloutAnchorStyles} />
+                    <EuiIcon type="arrowRight" size="s" className={calloutAnchorStyles} />
                   </EuiLink>
                 ),
                 stepName: stepName ?? (
@@ -61,7 +64,6 @@ const AddIntegrationsCalloutComponent = ({ stepName }: { stepName?: string }) =>
         </>
       }
       size="s"
-      css={calloutWrapperStyles}
     />
   );
 };

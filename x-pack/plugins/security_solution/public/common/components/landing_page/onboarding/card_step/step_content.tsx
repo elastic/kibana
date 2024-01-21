@@ -6,6 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import classnames from 'classnames';
 import React from 'react';
 
 import { useCheckStepCompleted } from '../hooks/use_check_step_completed';
@@ -52,24 +53,34 @@ const StepContentComponent = ({
     toggleTaskCompleteStatus,
   });
 
+  const stepContentGroupClassName = classnames('step-content-group', stepContentGroupStyles);
+  const leftContentClassNames = classnames('left-panel', leftContentStyles);
+
+  const descriptionClassNames = classnames(
+    'step-content-description',
+    'eui-displayBlock',
+    descriptionStyles
+  );
+
+  const rightPanelClassNames = classnames('right-panel', rightPanelStyles);
+
+  const rightPanelContentClassNames = classnames('right-panel-wrapper', rightPanelContentStyles);
   return (
     <EuiFlexGroup
       color="plain"
-      className="step-content-group"
-      css={stepContentGroupStyles}
+      className={stepContentGroupClassName}
       data-test-subj={`${stepId}-content`}
       direction="row"
       gutterSize="none"
     >
       {step.description && (
-        <EuiFlexItem grow={false} css={leftContentStyles} className="left-panel">
+        <EuiFlexItem grow={false} className={leftContentClassNames}>
           <EuiText size="s">
             {step.description.map((desc, index) => (
               <div
                 data-test-subj={`${stepId}-description-${index}`}
                 key={`${stepId}-description-${index}`}
-                className="eui-displayBlock step-content-description"
-                css={descriptionStyles}
+                className={descriptionClassNames}
               >
                 {desc}
               </div>
@@ -78,17 +89,8 @@ const StepContentComponent = ({
         </EuiFlexItem>
       )}
       {splitPanel && (
-        <EuiFlexItem
-          grow={false}
-          data-test-subj="split-panel"
-          className="right-panel"
-          css={rightPanelStyles}
-        >
-          {splitPanel && (
-            <div className="right-panel-wrapper" css={rightPanelContentStyles}>
-              {splitPanel}
-            </div>
-          )}
+        <EuiFlexItem grow={false} data-test-subj="split-panel" className={rightPanelClassNames}>
+          {splitPanel && <div className={rightPanelContentClassNames}>{splitPanel}</div>}
         </EuiFlexItem>
       )}
     </EuiFlexGroup>

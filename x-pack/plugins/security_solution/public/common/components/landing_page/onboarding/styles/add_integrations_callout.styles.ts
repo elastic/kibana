@@ -6,6 +6,7 @@
  */
 
 import { useEuiBackgroundColor, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const useAddIntegrationsCalloutStyles = () => {
@@ -14,21 +15,21 @@ export const useAddIntegrationsCalloutStyles = () => {
 
   const customStyles = useMemo(
     () => ({
-      calloutWrapperStyles: `
+      calloutWrapperStyles: css`
         border-radius: ${euiTheme.border.radius.medium};
         border: 1px solid ${euiTheme.colors.lightShade};
         padding: ${euiTheme.size.xs} ${euiTheme.size.m};
         background-color: ${backgroundColor};
         margin-top: ${euiTheme.size.base};
       `,
-      calloutTitleStyles: `
+      calloutTitleStyles: css`
         color: ${euiTheme.colors.title};
         font-size: ${euiTheme.size.m};
         font-weight: ${euiTheme.font.weight.regular};
         line-height: ${euiTheme.base * 1.25}px;
         margin-left: ${euiTheme.size.xs};
       `,
-      calloutAnchorStyles: `
+      calloutAnchorStyles: css`
         margin-left: ${euiTheme.size.s};
       `,
     }),

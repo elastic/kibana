@@ -103,13 +103,20 @@ const CardStepComponent: React.FC<{
   } = useCardStepStyles();
   const stepGroundStyles = getStepGroundStyles({ hasStepContent });
 
-  const panelClassNames = classnames({
-    'step-panel-collapsed': !isExpandedStep,
-  });
+  const panelClassNames = classnames(
+    {
+      'step-panel-collapsed': !isExpandedStep,
+    },
+    stepPanelStyles
+  );
 
   const stepIconClassNames = classnames('step-icon', {
     'step-icon-done': isDone,
+    stepIconStyles,
   });
+
+  const stepTitleClassNames = classnames('step-title', stepTitleStyles);
+  const allDoneTextNames = classnames('all-done-badge', allDoneTextStyles);
 
   return (
     <EuiPanel
@@ -120,23 +127,20 @@ const CardStepComponent: React.FC<{
       paddingSize="none"
       className={panelClassNames}
       id={stepId}
-      css={stepPanelStyles}
     >
-      <EuiFlexGroup gutterSize="none" css={stepGroundStyles}>
-        <EuiFlexItem grow={false} onClick={toggleStep} css={stepItemStyles}>
-          <span className={stepIconClassNames} css={stepIconStyles}>
+      <EuiFlexGroup gutterSize="none" className={stepGroundStyles}>
+        <EuiFlexItem grow={false} onClick={toggleStep} className={stepItemStyles}>
+          <span className={stepIconClassNames}>
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
           </span>
         </EuiFlexItem>
-        <EuiFlexItem grow={1} onClick={toggleStep} css={stepItemStyles}>
-          <span className="step-title" css={stepTitleStyles}>
-            {title}
-          </span>
+        <EuiFlexItem grow={1} onClick={toggleStep} className={stepItemStyles}>
+          <span className={stepTitleClassNames}>{title}</span>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} css={stepItemStyles}>
+        <EuiFlexItem grow={false} className={stepItemStyles}>
           <div>
             {isDone && (
-              <EuiBadge className="all-done-badge" css={allDoneTextStyles} color="success">
+              <EuiBadge className={allDoneTextNames} color="success">
                 {ALL_DONE_TEXT}
               </EuiBadge>
             )}

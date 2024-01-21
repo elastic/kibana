@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import classnames from 'classnames';
 import React from 'react';
 import { useStepContentStyles } from '../../styles/step_content.styles';
 
@@ -14,12 +15,8 @@ const ContentWrapperComponent: React.FC<{ children: React.ReactElement; shadow?:
 }) => {
   const { getRightContentStyles } = useStepContentStyles();
   const rightContentStyles = getRightContentStyles({ shadow });
-
-  return (
-    <div className="right-panel-content" css={rightContentStyles}>
-      {children}
-    </div>
-  );
+  const rightPanelContentClassNames = classnames('right-panel-content', rightContentStyles);
+  return <div className={rightPanelContentClassNames}>{children}</div>;
 };
 
 export const ContentWrapper = React.memo(ContentWrapperComponent);

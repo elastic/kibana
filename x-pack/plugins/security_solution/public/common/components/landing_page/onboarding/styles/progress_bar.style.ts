@@ -6,13 +6,14 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/css';
 import { useMemo } from 'react';
 
 export const useProgressBarStyles = () => {
   const { euiTheme } = useEuiTheme();
   const progressBarStyles = useMemo(
     () => ({
-      textStyle: `
+      textStyle: css`
         font-size: 10.5px;
         font-weight: ${euiTheme.font.weight.bold};
         text-transform: uppercase;
