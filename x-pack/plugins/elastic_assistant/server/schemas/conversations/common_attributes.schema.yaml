@@ -230,3 +230,15 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Replacement'
+    
+    ConversationMessageCreateProps:
+      type: object
+      required:
+        - messages
+      properties:
+        messages:
+          type: array
+          items:
+              $ref: '#/components/schemas/Message'
+          description: The conversation messages.
+

@@ -20,7 +20,7 @@ import { readConversationRoute } from './conversation/read_route';
 import { updateConversationRoute } from './conversation/update_route';
 import { findUserConversationsRoute } from './conversation/find_user_conversations_route';
 import { bulkActionConversationsRoute } from './conversation/bulk_actions_route';
-import { readLastConversationRoute } from './conversation/read_last_route';
+import { appendConversationMessageRoute } from './conversation/append_conversation_messages_route';
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
@@ -42,7 +42,7 @@ export const registerRoutes = (
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
-  readLastConversationRoute(router);
+  appendConversationMessageRoute(router);
 
   // Conversations bulk CRUD
   bulkActionConversationsRoute(router, logger);

@@ -40,12 +40,6 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
       },
       async (context, request, response): Promise<IKibanaResponse<FindConversationsResponse>> => {
         const assistantResponse = buildResponse(response);
-
-        /* const validationErrors = validateFindConversationsRequestQuery(request.query);
-        if (validationErrors.length) {
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }*/
-
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);

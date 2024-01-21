@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
@@ -15,6 +14,8 @@ import {
 import { ElasticAssistantPluginRouter } from '../../types';
 import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
+import { DeleteConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
+import { buildRouteValidationWithZod } from '../route_validation';
 
 export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -30,28 +31,26 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            params: schema.object({
-              conversationId: schema.string(),
-            }),
+            params: buildRouteValidationWithZod(DeleteConversationRequestParams),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
         try {
-          const { conversationId } = request.params;
+          const { id } = request.params;
 
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const existingConversation = await dataClient?.getConversation(conversationId);
+          const existingConversation = await dataClient?.getConversation(id);
           if (existingConversation == null) {
             return assistantResponse.error({
-              body: `conversation id: "${conversationId}" not found`,
+              body: `conversation id: "${id}" not found`,
               statusCode: 404,
             });
           }
-          await dataClient?.deleteConversation(conversationId);
+          await dataClient?.deleteConversation(id);
 
           return response.ok({ body: {} });
         } catch (err) {

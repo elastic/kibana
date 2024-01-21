@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
@@ -15,6 +14,8 @@ import {
 import { ConversationResponse } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
 import { ElasticAssistantPluginRouter } from '../../types';
+import { buildRouteValidationWithZod } from '../route_validation';
+import { ReadConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
 
 export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -30,22 +31,20 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            params: schema.object({
-              conversationId: schema.string(),
-            }),
+            params: buildRouteValidationWithZod(ReadConversationRequestParams),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const responseObj = buildResponse(response);
 
-        const { conversationId } = request.params;
+        const { id } = request.params;
 
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const conversation = await dataClient?.getConversation(conversationId);
+          const conversation = await dataClient?.getConversation(id);
           return response.ok({ body: conversation ?? {} });
         } catch (err) {
           const error = transformError(err);

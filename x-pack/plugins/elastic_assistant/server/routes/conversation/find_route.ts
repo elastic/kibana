@@ -39,13 +39,7 @@ export const findConversationsRoute = (router: ElasticAssistantPluginRouter, log
         },
       },
       async (context, request, response): Promise<IKibanaResponse<FindConversationsResponse>> => {
-        const siemResponse = buildResponse(response);
-
-        /* const validationErrors = validateFindConversationsRequestQuery(request.query);
-        if (validationErrors.length) {
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }*/
-
+        const assistantResponse = buildResponse(response);
         try {
           const { query } = request;
           const ctx = await context.resolve(['core', 'elasticAssistant']);
@@ -63,7 +57,7 @@ export const findConversationsRoute = (router: ElasticAssistantPluginRouter, log
           return response.ok({ body: result });
         } catch (err) {
           const error = transformError(err);
-          return siemResponse.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });

@@ -19,13 +19,14 @@ import {
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
+  Message,
 } from '../schemas/conversations/common_attributes.gen';
 import { FindConversationsResponse } from '../schemas/conversations/find_conversations_route.gen';
 import { findConversations } from './find_conversations';
 import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import { deleteConversation } from './delete_conversation';
-import { getLastConversation } from './get_last_conversation';
+import { appendConversationMessages } from './append_conversation_messages';
 
 export enum OpenAiProviderType {
   OpenAi = 'OpenAI',
@@ -128,13 +129,19 @@ export class AIAssistantConversationsDataClient {
    * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
    * @returns The conversation created
    */
-  public getLastConversation = async (): Promise<ConversationResponse> => {
+  public appendConversationMessages = async (
+    conversation: ConversationResponse,
+    messages: Message[]
+  ): Promise<ConversationResponse | null> => {
     const { currentUser } = this;
     const esClient = await this.options.elasticsearchClientPromise;
-    return getLastConversation(
+    return appendConversationMessages(
       esClient,
+      this.options.logger,
       this.indexTemplateAndPattern.alias,
-      currentUser?.profile_uid ?? ''
+      currentUser?.profile_uid ?? '',
+      conversation,
+      messages
     );
   };
 

@@ -7,7 +7,6 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
@@ -19,6 +18,7 @@ import {
   ConversationUpdateProps,
 } from '../../schemas/conversations/common_attributes.gen';
 import { buildResponse } from '../utils';
+import { UpdateConversationRequestParams } from '../../schemas/conversations/crud_conversation_route.gen';
 
 export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -35,28 +35,22 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         validate: {
           request: {
             body: buildRouteValidationWithZod(ConversationUpdateProps),
-            params: schema.object({
-              conversationId: schema.string(),
-            }),
+            params: buildRouteValidationWithZod(UpdateConversationRequestParams),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
-        const siemResponse = buildResponse(response);
-        const { conversationId } = request.params;
-        /* const validationErrors = validateUpdateConversationProps(request.body);
-        if (validationErrors.length) {
-          return siemResponse.error({ statusCode: 400, body: validationErrors });
-        }*/
+        const assistantResponse = buildResponse(response);
+        const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const existingConversation = await dataClient?.getConversation(conversationId);
+          const existingConversation = await dataClient?.getConversation(id);
           if (existingConversation == null) {
-            return siemResponse.error({
-              body: `conversation id: "${conversationId}" not found`,
+            return assistantResponse.error({
+              body: `conversation id: "${id}" not found`,
               statusCode: 404,
             });
           }
@@ -65,8 +59,8 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             request.body
           );
           if (conversation == null) {
-            return siemResponse.error({
-              body: `conversation id: "${conversationId}" was not updated`,
+            return assistantResponse.error({
+              body: `conversation id: "${id}" was not updated`,
               statusCode: 400,
             });
           }
@@ -75,7 +69,7 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
           });
         } catch (err) {
           const error = transformError(err);
-          return siemResponse.error({
+          return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,
           });
