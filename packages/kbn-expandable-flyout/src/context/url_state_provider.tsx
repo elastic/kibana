@@ -6,18 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useCallback, useMemo } from 'react';
-import { FlyoutPanelProps, ExpandableFlyoutContextValue } from '../types';
+import { useCallback, useMemo } from 'react';
+import { FlyoutPanelProps, ExpandableFlyoutApi } from '../types';
 import { useRightPanel } from '../hooks/use_right_panel';
 import { useLeftPanel } from '../hooks/use_left_panel';
 import { usePreviewPanel } from '../hooks/use_preview_panel';
-import { ExpandableFlyoutContext } from '../context';
-import { State } from '../reducer';
+import { State } from '../state';
 
-/**
- * Private component that manages flyout state with url query params
- */
-export const UrlStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
+export const useFlyoutUrlState = (): ExpandableFlyoutApi => {
   const { setRightPanelState, rightPanelState } = useRightPanel();
   const { setLeftPanelState, leftPanelState } = useLeftPanel();
   const { previewState, setPreviewState } = usePreviewPanel();
@@ -82,7 +78,7 @@ export const UrlStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     setPreviewState([]);
   }, [setRightPanelState, setLeftPanelState, setPreviewState]);
 
-  const contextValue: ExpandableFlyoutContextValue = useMemo(
+  const contextValue: ExpandableFlyoutApi = useMemo(
     () => ({
       panels,
       openFlyout: openPanels,
@@ -109,9 +105,5 @@ export const UrlStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
     ]
   );
 
-  return (
-    <ExpandableFlyoutContext.Provider value={contextValue}>
-      {children}
-    </ExpandableFlyoutContext.Provider>
-  );
+  return contextValue;
 };

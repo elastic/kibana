@@ -143,7 +143,7 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
 
   return (
     <>
-      <EuiTabs>{renderTabs()}</EuiTabs>
+      <EuiTabs data-test-subj="case-view-tabs">{renderTabs()}</EuiTabs>
       <EuiSpacer size="l" />
     </>
   );

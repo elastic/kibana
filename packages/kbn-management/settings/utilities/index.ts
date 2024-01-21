@@ -16,4 +16,4 @@ export {
   type UseUpdateParameters,
 } from './field';
 
-export { categorizeFields, getCategoryName } from './category';
+export { categorizeFields, getCategoryName, getCategoryCounts } from './category';
