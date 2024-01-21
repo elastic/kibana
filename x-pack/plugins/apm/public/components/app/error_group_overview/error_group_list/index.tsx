@@ -151,7 +151,7 @@ function ErrorGroupList({
         field: 'message',
         sortable: false,
         width: '50%',
-        render: (_, item: ErrorGroupItem) => {
+        render: (_, item) => {
           return (
             <MessageAndCulpritCell>
               <EuiToolTip

@@ -11,7 +11,7 @@ import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import {
   INSIGHTS_TAB_BUTTON_GROUP_TEST_ID,
   INSIGHTS_TAB_ENTITIES_BUTTON_TEST_ID,
@@ -77,7 +77,8 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
  */
 export const InsightsTab: React.FC = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
-  const { openLeftPanel, panels } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const panels = useExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
 
   const onChangeCompressed = useCallback(
