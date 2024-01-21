@@ -8,7 +8,7 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
@@ -87,10 +87,12 @@ export function useSnapshot(
     };
   }, [makeRequest, sendRequestImmediately, resetRequestState, requestTs]);
 
+  const nodes = useMemo(() => (response ? response.nodes : []), [response]);
+
   return {
     error: (error && error.message) || null,
     loading,
-    nodes: response ? response.nodes : [],
+    nodes,
     interval: response ? response.interval : '60s',
     reload: makeRequest,
   };

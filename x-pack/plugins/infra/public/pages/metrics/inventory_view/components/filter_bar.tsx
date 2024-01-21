@@ -10,14 +10,19 @@ import React from 'react';
 
 import { WaffleTimeControls } from './waffle/waffle_time_controls';
 import { SearchBar } from './search_bar';
+import { useSnapshotModeContext } from '../hooks/use_snapshot_mode';
 
-export const FilterBar = ({ interval }: { interval: string }) => (
-  <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" style={{ flexGrow: 0 }}>
-    <EuiFlexItem>
-      <SearchBar />
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      <WaffleTimeControls interval={interval} />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const FilterBar = () => {
+  const { interval } = useSnapshotModeContext();
+
+  return (
+    <EuiFlexGroup justifyContent="spaceBetween" gutterSize="m" style={{ flexGrow: 0 }}>
+      <EuiFlexItem>
+        <SearchBar />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <WaffleTimeControls interval={interval} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

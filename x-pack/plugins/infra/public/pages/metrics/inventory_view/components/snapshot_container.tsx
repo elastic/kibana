@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import { SnapshotNode } from '../../../../../common/http_api';
 import { useSnapshot } from '../hooks/use_snaphot';
 import { useWaffleFiltersContext } from '../hooks/use_waffle_filters';
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
+import { useSnapshotModeContext } from '../hooks/use_snapshot_mode';
+import { Layout } from './layout';
 
-interface RenderProps {
-  reload: () => Promise<any>;
-  interval: string;
-  nodes: SnapshotNode[];
-  loading: boolean;
-}
-
-interface Props {
-  render: React.FC<RenderProps>;
-}
-export const SnapshotContainer = ({ render }: Props) => {
+export const SnapshotContainer = () => {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, view } = useWaffleOptionsContext();
   const { currentTime } = useWaffleTimeContext();
@@ -50,6 +42,25 @@ export const SnapshotContainer = ({ render }: Props) => {
       abortable: true,
     }
   );
+  const { setInterval, setNodes } = useSnapshotModeContext();
 
-  return render({ loading, nodes, reload, interval });
+  const { currentView } = useInventoryViews();
+
+  useEffect(() => {
+    setInterval(interval);
+  }, [interval, setInterval]);
+
+  useEffect(() => {
+    setNodes(nodes);
+  }, [nodes, setNodes]);
+
+  return (
+    <Layout
+      currentView={currentView}
+      loading={loading}
+      nodes={nodes}
+      reload={reload}
+      interval={interval}
+    />
+  );
 };

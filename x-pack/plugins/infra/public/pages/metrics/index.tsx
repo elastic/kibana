@@ -21,7 +21,7 @@ import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { MetricsExplorerOptionsContainer } from './metrics_explorer/hooks/use_metrics_explorer_options';
 import { WithMetricsExplorerOptionsUrlState } from '../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
 import { MetricsExplorerPage } from './metrics_explorer';
-import { SnapshotPage } from './inventory_view';
+import { InventoryPage } from './inventory_view';
 import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
 import { SourceLoadingPage } from '../../components/source_loading_page';
@@ -105,7 +105,7 @@ export const InfrastructurePage = () => {
                     </HeaderMenuPortal>
                   )}
                   <Routes>
-                    <Route path={'/inventory'} component={SnapshotPage} />
+                    <Route path={'/inventory'} component={InventoryPage} />
                     {config.featureFlags.metricsExplorerEnabled && (
                       <Route path={'/explorer'}>
                         <MetricsExplorerOptionsContainer>

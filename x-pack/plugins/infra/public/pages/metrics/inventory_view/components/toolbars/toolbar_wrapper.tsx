@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { fieldToName } from '../../lib/field_to_display_name';
 import { useSourceContext } from '../../../../../containers/metrics_source';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
-import { WaffleInventorySwitcher } from '../waffle/waffle_inventory_switcher';
 import { ToolbarProps } from './types';
 
 interface Props {
@@ -40,9 +39,6 @@ export const ToolbarWrapper = (props: Props) => {
   const { createDerivedIndexPattern } = useSourceContext();
   return (
     <EuiFlexGroup responsive={false} wrap gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <WaffleInventorySwitcher />
-      </EuiFlexItem>
       {props.children({
         createDerivedIndexPattern,
         changeMetric,

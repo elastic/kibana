@@ -6,26 +6,48 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import { EuiFlexGroup } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { FilterBar } from './components/filter_bar';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import { LayoutView } from './components/layout_view';
 import { MetricsPageTemplate } from '../page_template';
 import { inventoryTitle } from '../../../translations';
-import { SavedViews } from './components/saved_views';
 import { SnapshotContainer } from './components/snapshot_container';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { SurveySection } from './components/survey_section';
 import { NoRemoteCluster } from '../../../components/empty_states';
+import { WaffleInventorySwitcher } from './components/waffle/waffle_inventory_switcher';
+import { SnapshotToolbar } from './components/snapshot_toolbar';
+import { SnapshotModeProvider } from './hooks/use_snapshot_mode';
+import { TryItButton } from '../../../components/try_it_button';
+import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 
-export const SnapshotPage = () => {
+const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
+
+const SNAPSHOT_NODE_TYPES = [
+  'host',
+  'pod',
+  'container',
+  'awsEC2',
+  'awsS3',
+  'awsSQS',
+  'awsRDS',
+] as const;
+
+export const InventoryPage = () => {
+  const { nodeType } = useWaffleOptionsContext();
+
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
 
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
@@ -36,7 +58,11 @@ export const SnapshotPage = () => {
     },
   ]);
 
-  const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+  const [hostsLinkClicked, setHostsLinkClicked] = useLocalStorage<boolean>(
+    HOSTS_LINK_LOCAL_STORAGE_KEY,
+    false
+  );
+  const hostsLinkClickedRef = useRef<boolean | undefined>(hostsLinkClicked);
 
   if (isLoading && !source) return <SourceLoadingPage />;
 
@@ -60,7 +86,7 @@ export const SnapshotPage = () => {
           hasData={metricIndicesExist}
           pageHeader={{
             pageTitle: inventoryTitle,
-            rightSideItems: [<SavedViews />, <SurveySection />],
+            rightSideItems: [<SurveySection />],
           }}
           pageSectionProps={{
             contentProps: {
@@ -71,14 +97,55 @@ export const SnapshotPage = () => {
             },
           }}
         >
-          <SnapshotContainer
-            render={({ loading, nodes, reload, interval }) => (
-              <>
-                <FilterBar interval={interval} />
-                <LayoutView loading={loading} nodes={nodes} reload={reload} interval={interval} />
-              </>
-            )}
-          />
+          <SnapshotModeProvider>
+            <EuiFlexGroup direction="column">
+              <EuiFlexItem grow={false}>
+                <FilterBar />
+              </EuiFlexItem>
+
+              <EuiFlexItem grow={false}>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <WaffleInventorySwitcher />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    {SNAPSHOT_NODE_TYPES.includes(nodeType) ? (
+                      <SnapshotToolbar />
+                    ) : (
+                      <div>IntegrationsToolbar</div>
+                    )}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+
+              {!hostsLinkClickedRef.current && nodeType === 'host' && (
+                <EuiFlexItem grow={false}>
+                  <TryItButton
+                    data-test-subj="inventory-hostsView-link"
+                    label={i18n.translate('xpack.infra.layout.hostsLandingPageLink', {
+                      defaultMessage: 'Introducing a new Hosts analysis experience',
+                    })}
+                    link={{
+                      app: 'metrics',
+                      pathname: '/hosts',
+                    }}
+                    experimental
+                    onClick={() => {
+                      setHostsLinkClicked(true);
+                    }}
+                  />
+                </EuiFlexItem>
+              )}
+
+              <EuiFlexItem>
+                {SNAPSHOT_NODE_TYPES.includes(nodeType) ? (
+                  <SnapshotContainer />
+                ) : (
+                  <div>IntegrationsContainer</div>
+                )}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </SnapshotModeProvider>
         </MetricsPageTemplate>
       </div>
     </EuiErrorBoundary>

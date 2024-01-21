@@ -106,6 +106,7 @@ export function SavedViewsToolbarControls<TSingleSavedViewState extends SavedVie
         data-test-subj="savedViews-popover"
         button={
           <EuiButton
+            size="s"
             onClick={togglePopoverAndLoad}
             data-test-subj="savedViews-openPopover"
             iconType="arrowDown"
