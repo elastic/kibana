@@ -103,11 +103,10 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     clickFilterPopOverOption: async (value: string) => {
       const chosenValue = await testSubjects.find('options-filter-popover-item-' + (await value));
       await chosenValue.click();
-      await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     filterTextInput: async (selector: string, value: string) => {
-      const textField = await testSubjects.find('rule-number-search-input');
+      const textField = await testSubjects.find(selector);
       await textField.type(value);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
@@ -119,6 +118,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       `cloud_security_posture/benchmarks/${benchmarkCisId}/${benchmarkCisVersion}/rules`,
       { shouldUseHashForSubUrl: false }
     );
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   return {

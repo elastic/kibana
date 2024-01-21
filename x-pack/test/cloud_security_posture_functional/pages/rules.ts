@@ -60,7 +60,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await rule.waitForPluginInitialized();
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     afterEach(async () => {
@@ -149,7 +148,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
       });
 
-      it('TTable should only show result that has the same section as in the Rule number filter', async () => {
+      it('Table should only show result that has the same section as in the Rule number filter', async () => {
         await rule.rulePage.clickFilterPopover('ruleNumber');
         await rule.rulePage.clickFilterPopOverOption('1.1.1');
         await rule.rulePage.clickFilterPopOverOption('1.1.2');
