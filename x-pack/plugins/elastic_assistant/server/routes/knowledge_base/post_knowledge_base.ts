@@ -45,7 +45,7 @@ export const postKnowledgeBaseRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(CreateKnowledgeBaseRequestParams),
+            params: buildRouteValidationWithZod(CreateKnowledgeBaseRequestParams),
           },
         },
       },

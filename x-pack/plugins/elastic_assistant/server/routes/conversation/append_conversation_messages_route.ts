@@ -42,7 +42,6 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
         const { id } = request.params;
-        console.log(id)
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();

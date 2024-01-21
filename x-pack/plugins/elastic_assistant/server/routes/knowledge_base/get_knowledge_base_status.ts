@@ -46,7 +46,7 @@ export const getKnowledgeBaseStatusRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ReadKnowledgeBaseRequestParams),
+            params: buildRouteValidationWithZod(ReadKnowledgeBaseRequestParams),
           },
         },
       },

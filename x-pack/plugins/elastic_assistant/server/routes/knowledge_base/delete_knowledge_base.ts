@@ -42,7 +42,7 @@ export const deleteKnowledgeBaseRoute = (
         version: ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(DeleteKnowledgeBaseRequestParams),
+            params: buildRouteValidationWithZod(DeleteKnowledgeBaseRequestParams),
           },
         },
       },
