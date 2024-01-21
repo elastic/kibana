@@ -14,22 +14,19 @@ export const useCardItemStyles = () => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('l');
 
-  return css`
-    &.card-item {
-      padding: ${euiTheme.size.base};
-      border-radius: ${euiTheme.size.s};
-      border: 1px solid ${euiTheme.colors.lightShade};
-      box-sizing: content-box;
-
-      &:hover,
-      &.card-expanded {
-        ${shadow};
-        transition: box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out;
-      }
-
-      &.card-expanded {
-        border: 2px solid #6092c0;
-      }
-    }
-  `;
+  return css({
+    '&.card-item': {
+      padding: euiTheme.size.base,
+      borderRadius: euiTheme.size.s,
+      border: `1px solid ${euiTheme.colors.lightShade}`,
+      boxSizing: `content-box`,
+    },
+    '&:hover, &.card-expanded': {
+      boxShadow: shadow,
+      transition: `box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out`,
+    },
+    '&.card-expanded': {
+      border: `2px solid #6092c0`,
+    },
+  });
 };

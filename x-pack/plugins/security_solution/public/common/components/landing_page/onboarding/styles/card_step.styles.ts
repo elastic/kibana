@@ -17,61 +17,60 @@ export const useCardStepStyles = () => {
 
   const customStyles = useMemo(
     () => ({
-      stepPanelStyles: css`
-        .stepContentWrapper {
-          display: grid;
-          grid-template-rows: 1fr;
-          transition: grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in;
-        }
+      stepPanelStyles: css({
+        '.stepContentWrapper': {
+          display: 'grid',
+          gridTemplateRows: '1fr',
+          transition: `grid-template-rows ${HEIGHT_ANIMATION_DURATION}ms ease-in`,
+        },
 
-        &.step-panel-collapsed .stepContentWrapper {
-          grid-template-rows: 0fr;
-        }
+        '&.step-panel-collapsed .stepContentWrapper': {
+          gridTemplateRows: '0fr',
+        },
 
-        .stepContent {
-          overflow: hidden;
-        }
-      `,
-      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) => css`
-        cursor: ${hasStepContent ? 'pointer' : 'default'};
-        gap: ${euiTheme.size.base};
-      `,
-      stepItemStyles: css`
-        align-self: center;
-      `,
-      stepIconStyles: css`
-        &.step-icon {
-          border-radius: 50%;
-          width: ${euiTheme.size.xxxl};
-          height: ${euiTheme.size.xxxl};
-          padding: ${euiTheme.size.m};
-          background-color: ${euiTheme.colors.body};
-        }
+        '.stepContent': {
+          overflow: 'hidden',
+        },
+      }),
+      getStepGroundStyles: ({ hasStepContent }: { hasStepContent: boolean }) =>
+        css({
+          cursor: hasStepContent ? 'pointer' : 'default',
+          gap: euiTheme.size.base,
+        }),
+      stepItemStyles: css({ alignSelf: 'center' }),
+      stepIconStyles: css({
+        '&.step-icon': {
+          borderRadius: '50%',
+          width: euiTheme.size.xxxl,
+          height: euiTheme.size.xxxl,
+          padding: euiTheme.size.m,
+          backgroundColor: euiTheme.colors.body,
+        },
 
-        &.step-icon-done {
-          background-color: ${completeStepBackgroundColor};
-        }
-      `,
-      stepTitleStyles: css`
-        &.step-title {
-          padding-right: ${euiTheme.size.m};
-          line-height: ${euiTheme.size.xxxl};
-          font-size: ${euiTheme.base * 0.875}px;
-          font-weight: ${euiTheme.font.weight.semiBold};
-          vertical-align: middle;
-        }
-      `,
-      allDoneTextStyles: css`
-        &.all-done-badge {
-          background-color: ${completeStepBackgroundColor};
-          color: ${euiTheme.colors.successText};
-        }
-      `,
-      toggleButtonStyles: css`
-        &.toggle-button {
-          margin-left: ${euiTheme.base * 0.375}px;
-        }
-      `,
+        '&.step-icon-done': {
+          backgroundColor: completeStepBackgroundColor,
+        },
+      }),
+      stepTitleStyles: css({
+        '&.step-title': {
+          paddingRight: euiTheme.size.m,
+          lineHeight: euiTheme.size.xxxl,
+          fontSize: `${euiTheme.base * 0.875}px`,
+          fontWeight: euiTheme.font.weight.semiBold,
+          verticalAlign: 'middle',
+        },
+      }),
+      allDoneTextStyles: css({
+        '&.all-done-badge': {
+          backgroundColor: completeStepBackgroundColor,
+          color: euiTheme.colors.successText,
+        },
+      }),
+      toggleButtonStyles: css({
+        '&.toggle-button': {
+          marginLeft: `${euiTheme.base * 0.375}px`,
+        },
+      }),
     }),
     [
       completeStepBackgroundColor,

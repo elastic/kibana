@@ -20,56 +20,57 @@ export const useStepContentStyles = () => {
 
   const customStyles = useMemo(
     () => ({
-      stepContentGroupStyles: css`
-        &.step-content-group {
-          justify-content: space-between;
-          margin-top: ${euiTheme.size.l};
-          padding: ${euiTheme.size.l};
-          transition: opacity ${euiTheme.animation.normal};
-          overflow: hidden;
-          border: 1px solid ${euiTheme.colors.lightShade};
-          border-radius: ${euiTheme.border.radius.medium};
-        }
-      `,
-      leftContentStyles: css`
-        &.left-panel {
-          padding: 0 0 0 ${euiTheme.size.s};
-          width: ${LEFT_CONTENT_PANEL_WIDTH}px;
-        }
-      `,
-      descriptionStyles: css`
-        &.step-content-description {
-          margin-bottom: 0px;
-          margin-block-end: 0px !important;
-          line-height: ${euiTheme.size.l};
+      stepContentGroupStyles: css({
+        '&.step-content-group': {
+          justifyContent: 'space-between',
+          marginTop: euiTheme.size.l,
+          padding: euiTheme.size.l,
+          transition: `opacity ${euiTheme.animation.normal}`,
+          overflow: 'hidden',
+          border: `1px solid ${euiTheme.colors.lightShade}`,
+          borderRadius: euiTheme.border.radius.medium,
+        },
+      }),
+      leftContentStyles: css({
+        '&.left-panel': {
+          padding: `0 0 0 ${euiTheme.size.s}`,
+          width: `${LEFT_CONTENT_PANEL_WIDTH}px`,
+        },
+      }),
+      descriptionStyles: css({
+        '&.step-content-description': {
+          marginBottom: '0px',
+          marginBlockEnd: '0px !important',
+          lineHeight: euiTheme.size.l,
 
-          .step-paragraph {
-            margin-top: ${euiTheme.size.xl};
-          }
-        }
-      `,
-      rightPanelStyles: css`
-        &.right-panel {
-          padding: 0 6px 0 ${euiTheme.size.l};
-          width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
-        }
-      `,
-      rightPanelContentStyles: css`
-        &.right-panel-wrapper {
-          height: ${RIGHT_CONTENT_HEIGHT}px;
-          width: ${RIGHT_CONTENT_WIDTH}px;
-        }
-      `,
-      getRightContentStyles: ({ shadow }: { shadow: boolean }) => css`
-        &.right-panel-content {
-          height: 100%;
-          width: 100%;
-          position: relative;
-          overflow: hidden;
-          ${shadow ? imageShadow : ''}
-          border-radius: ${euiTheme.border.radius.medium};
-        }
-      `,
+          '.step-paragraph': {
+            marginTop: euiTheme.size.xl,
+          },
+        },
+      }),
+      rightPanelStyles: css({
+        '&.right-panel': {
+          padding: `0 6px 0 ${euiTheme.size.l}`,
+          width: `${RIGHT_CONTENT_PANEL_WIDTH}px`,
+        },
+      }),
+      rightPanelContentStyles: css({
+        '&.right-panel-wrapper': {
+          height: `${RIGHT_CONTENT_HEIGHT}px`,
+          width: `${RIGHT_CONTENT_WIDTH}px`,
+        },
+      }),
+      getRightContentStyles: ({ shadow }: { shadow: boolean }) =>
+        css({
+          '&.right-panel-content': {
+            height: '100%',
+            width: '100%',
+            position: 'relative',
+            overflow: 'hidden',
+            boxShadow: shadow ? imageShadow : '',
+            borderRadius: euiTheme.border.radius.medium,
+          },
+        }),
     }),
     [
       euiTheme.animation.normal,

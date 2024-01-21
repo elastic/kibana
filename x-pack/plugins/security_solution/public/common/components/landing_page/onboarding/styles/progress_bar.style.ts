@@ -13,11 +13,11 @@ export const useProgressBarStyles = () => {
   const { euiTheme } = useEuiTheme();
   const progressBarStyles = useMemo(
     () => ({
-      textStyle: css`
-        font-size: 10.5px;
-        font-weight: ${euiTheme.font.weight.bold};
-        text-transform: uppercase;
-      `,
+      textStyle: css({
+        fontSize: '10.5px',
+        fontWeight: euiTheme.font.weight.bold,
+        textTransform: 'uppercase',
+      }),
     }),
     [euiTheme.font.weight.bold]
   );

@@ -14,27 +14,27 @@ export const useFooterStyles = () => {
 
   const footerStyles = useMemo(
     () => ({
-      wrapperStyle: css`
-        padding: ${euiTheme.size.xl} ${euiTheme.size.l} ${euiTheme.base * 4.5}px;
-        gap: ${euiTheme.base * 3.75}px;
-      `,
-      titleStyle: css`
-        font-size: ${euiTheme.base * 0.875}px;
-        font-weight: ${euiTheme.font.weight.semiBold};
-        line-height: ${euiTheme.size.l};
-        color: ${euiTheme.colors.title};
-      `,
-      descriptionStyle: css`
-        font-size: 12.25px;
-        font-weight: ${euiTheme.font.weight.regular};
-        line-height: ${euiTheme.base * 1.25}px;
-        color: ${euiTheme.colors.darkestShade};
-      `,
-      linkStyle: css`
-        font-size: ${euiTheme.size.m};
-        font-weight: ${euiTheme.font.weight.medium};
-        line-height: ${euiTheme.size.base};
-      `,
+      wrapperStyle: css({
+        padding: `${euiTheme.size.xl} ${euiTheme.size.l} ${euiTheme.base * 4.5}px`,
+        gap: `${euiTheme.base * 3.75}px`,
+      }),
+      titleStyle: css({
+        fontSize: `${euiTheme.base * 0.875}px`,
+        fontWeight: euiTheme.font.weight.semiBold,
+        lineHeight: euiTheme.size.l,
+        color: euiTheme.colors.title,
+      }),
+      descriptionStyle: css({
+        fontSize: '12.25px',
+        fontWeight: euiTheme.font.weight.regular,
+        lineHeight: `${euiTheme.base * 1.25}px`,
+        color: euiTheme.colors.darkestShade,
+      }),
+      linkStyle: css({
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.medium,
+        lineHeight: euiTheme.size.base,
+      }),
     }),
     [
       euiTheme.base,
