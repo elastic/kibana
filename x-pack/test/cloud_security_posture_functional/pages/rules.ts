@@ -157,13 +157,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('Table should only show result that passes both Section and Rule number filter', async () => {
         await rule.rulePage.clickFilterPopover('section');
-        await rule.rulePage.clickFilterPopOverOption('etcd');
-        await rule.rulePage.clickFilterPopOverOption('Scheduler');
+        await rule.rulePage.clickFilterPopOverOption('Control Plane Node Configuration Files');
         await rule.rulePage.clickFilterPopover('section');
         await rule.rulePage.clickFilterPopover('ruleNumber');
-        await rule.rulePage.filterTextInput(RULE_NUMBER_FILTER_SEARCH_FIELD, '1.4.2');
+        await rule.rulePage.filterTextInput(RULE_NUMBER_FILTER_SEARCH_FIELD, '1.1.5');
         await pageObjects.header.waitUntilLoadingHasFinished();
-        await rule.rulePage.clickFilterPopOverOption('1.4.2');
+        await rule.rulePage.clickFilterPopOverOption('1.1.5');
         expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
       });
     });
