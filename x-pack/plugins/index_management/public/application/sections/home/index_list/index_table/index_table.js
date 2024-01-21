@@ -41,7 +41,6 @@ import {
   reactRouterNavigate,
   attemptToURIDecode,
 } from '../../../../../shared_imports';
-import { REFRESH_RATE_INDEX_LIST } from '../../../../constants';
 import { getDataStreamDetailsLink, getIndexDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
@@ -49,6 +48,8 @@ import { renderBadges } from '../../../../lib/render_badges';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 import { CreateIndexButton } from '../create_index/create_index_button';
+
+const PAGE_SIZE_OPTIONS = [10, 50, 100];
 
 const getHeaders = ({ showIndexStats }) => {
   const headers = {};
@@ -119,24 +120,30 @@ export class IndexTable extends Component {
 
   componentDidMount() {
     this.props.loadIndices();
-    this.interval = setInterval(
-      () =>
-        this.props.reloadIndices(
-          this.props.indices.map((i) => i.name),
-          { asSystemRequest: true }
-        ),
-      REFRESH_RATE_INDEX_LIST
-    );
-    const { location, filterChanged } = this.props;
-    const { filter } = qs.parse((location && location.search) || '');
-    if (filter) {
-      const decodedFilter = attemptToURIDecode(filter);
 
+    const { filterChanged, pageSizeChanged, pageChanged, toggleNameToVisibleMap, toggleChanged } =
+      this.props;
+    const { filter, pageSize, pageIndex, ...rest } = this.readURLParams();
+
+    if (filter) {
       try {
-        const filter = EuiSearchBar.Query.parse(decodedFilter);
-        filterChanged(filter);
+        const parsedFilter = EuiSearchBar.Query.parse(filter);
+        filterChanged(parsedFilter);
       } catch (e) {
         this.setState({ filterError: e });
+      }
+    }
+    if (pageSize && PAGE_SIZE_OPTIONS.includes(pageSize)) {
+      pageSizeChanged(pageSize);
+    }
+    if (pageIndex && pageIndex > -1) {
+      pageChanged(pageIndex);
+    }
+    const toggleParams = Object.keys(rest);
+    const toggles = Object.keys(toggleNameToVisibleMap);
+    for (const toggleParam of toggleParams) {
+      if (toggles.includes(toggleParam)) {
+        toggleChanged(toggleParam, rest[toggleParam] === 'true');
       }
     }
   }
@@ -147,26 +154,29 @@ export class IndexTable extends Component {
     // navigating back to this tab would just show an empty list because the backing indices
     // would be hidden.
     this.props.filterChanged('');
-    clearInterval(this.interval);
   }
 
   readURLParams() {
     const { location } = this.props;
-    const { includeHiddenIndices } = qs.parse((location && location.search) || '');
+    const { filter, pageSize, pageIndex, ...rest } = qs.parse((location && location.search) || '');
     return {
-      includeHiddenIndices: includeHiddenIndices === 'true',
+      filter: filter ? attemptToURIDecode(String(filter)) : undefined,
+      pageSize: pageSize ? Number(String(pageSize)) : undefined,
+      pageIndex: pageIndex ? Number(String(pageIndex)) : undefined,
+      ...rest,
     };
   }
 
-  setIncludeHiddenParam(hidden) {
-    const { pathname, search } = this.props.location;
+  setURLParam(paramName, value) {
+    const { location, history } = this.props;
+    const { pathname, search } = location;
     const params = qs.parse(search);
-    if (hidden) {
-      params.includeHiddenIndices = 'true';
+    if (value) {
+      params[paramName] = value;
     } else {
-      delete params.includeHiddenIndices;
+      delete params[paramName];
     }
-    this.props.history.push(pathname + '?' + qs.stringify(params));
+    history.push(pathname + '?' + qs.stringify(params));
   }
 
   onSort = (column) => {
@@ -206,6 +216,7 @@ export class IndexTable extends Component {
     if (error) {
       this.setState({ filterError: error });
     } else {
+      this.setURLParam('filter', encodeURIComponent(query.text));
       this.props.filterChanged(query);
       this.setState({ filterError: null });
     }
@@ -258,14 +269,13 @@ export class IndexTable extends Component {
     return indexOfUnselectedItem === -1;
   };
 
-  buildHeader(config) {
+  buildHeader(headers) {
     const { sortField, isSortAscending } = this.props;
-    const headers = getHeaders({ showIndexStats: config.enableIndexStats });
     return Object.entries(headers).map(([fieldName, label]) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
       const widthClassName =
-        fieldName === 'name' && config.enableIndexStats ? 'indTable__header__width' : '';
+        fieldName === 'name' && Object.keys(headers).length > 2 ? 'indTable__header__width' : '';
       return (
         <EuiTableHeaderCell
           key={fieldName}
@@ -282,7 +292,7 @@ export class IndexTable extends Component {
   }
 
   buildRowCell(fieldName, value, index, appServices) {
-    const { filterChanged, history } = this.props;
+    const { filterChanged, history, location } = this.props;
 
     if (fieldName === 'health') {
       return <DataHealth health={value} />;
@@ -291,7 +301,7 @@ export class IndexTable extends Component {
         <Fragment>
           <EuiLink
             data-test-subj="indexTableIndexNameLink"
-            onClick={() => history.push(getIndexDetailsLink(value))}
+            onClick={() => history.push(getIndexDetailsLink(value, location.search || ''))}
           >
             {value}
           </EuiLink>
@@ -416,10 +426,16 @@ export class IndexTable extends Component {
       <EuiTablePagination
         activePage={pager.getCurrentPageIndex()}
         itemsPerPage={pager.itemsPerPage}
-        itemsPerPageOptions={[10, 50, 100]}
+        itemsPerPageOptions={PAGE_SIZE_OPTIONS}
         pageCount={pager.getTotalPages()}
-        onChangeItemsPerPage={pageSizeChanged}
-        onChangePage={pageChanged}
+        onChangeItemsPerPage={(pageSize) => {
+          this.setURLParam('pageSize', pageSize);
+          pageSizeChanged(pageSize);
+        }}
+        onChangePage={(pageIndex) => {
+          this.setURLParam('pageIndex', pageIndex);
+          pageChanged(pageIndex);
+        }}
       />
     );
   }
@@ -436,7 +452,10 @@ export class IndexTable extends Component {
           id={`checkboxToggles-${name}`}
           data-test-subj={`checkboxToggles-${name}`}
           checked={toggleNameToVisibleMap[name]}
-          onChange={(event) => toggleChanged(name, event.target.checked)}
+          onChange={(event) => {
+            this.setURLParam(name, event.target.checked);
+            toggleChanged(name, event.target.checked);
+          }}
           label={label}
         />
       </EuiFlexItem>
@@ -444,10 +463,18 @@ export class IndexTable extends Component {
   }
 
   render() {
-    const { filter, indices, loadIndices, indicesLoading, indicesError, allIndices, pager } =
-      this.props;
+    const {
+      filter,
+      filterChanged,
+      indices,
+      loadIndices,
+      indicesLoading,
+      indicesError,
+      allIndices,
+      pager,
+      location,
+    } = this.props;
 
-    const { includeHiddenIndices } = this.readURLParams();
     const hasContent = !indicesLoading && !indicesError;
 
     if (!hasContent) {
@@ -497,7 +524,8 @@ export class IndexTable extends Component {
       <AppContextConsumer>
         {({ services, config }) => {
           const { extensionsService } = services;
-
+          const headers = getHeaders({ showIndexStats: config.enableIndexStats });
+          const columnsCount = Object.keys(headers).length + 1;
           return (
             <EuiPageSection paddingSize="none">
               <EuiFlexGroup alignItems="center">
@@ -532,21 +560,6 @@ export class IndexTable extends Component {
                       {extensionsService.toggles.map((toggle) => {
                         return this.renderToggleControl(toggle);
                       })}
-
-                      <EuiFlexItem grow={false}>
-                        <EuiSwitch
-                          id="checkboxShowHiddenIndices"
-                          data-test-subj="indexTableIncludeHiddenIndicesToggle"
-                          checked={includeHiddenIndices}
-                          onChange={(event) => this.setIncludeHiddenParam(event.target.checked)}
-                          label={
-                            <FormattedMessage
-                              id="xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel"
-                              defaultMessage="Include hidden indices"
-                            />
-                          }
-                        />
-                      </EuiFlexItem>
                     </EuiFlexGroup>
                   )}
                 </EuiFlexItem>
@@ -565,6 +578,7 @@ export class IndexTable extends Component {
                         <IndexActionsContextMenu
                           indexNames={Object.keys(selectedIndicesMap)}
                           isOnListView={true}
+                          indicesListURLParams={location.search || ''}
                           resetSelection={() => {
                             this.setState({ selectedIndicesMap: {} });
                           }}
@@ -593,6 +607,7 @@ export class IndexTable extends Component {
                               defaultMessage: 'Search',
                             }
                           ),
+                          'data-test-subj': 'indicesSearch',
                         }}
                         aria-label={i18n.translate(
                           'xpack.idxMgmt.indexTable.systemIndicesSearchIndicesAriaLabel',
@@ -608,9 +623,7 @@ export class IndexTable extends Component {
                       <EuiButton
                         isLoading={indicesLoading}
                         color="success"
-                        onClick={() => {
-                          loadIndices();
-                        }}
+                        onClick={loadIndices}
                         iconType="refresh"
                         data-test-subj="reloadIndicesButton"
                       >
@@ -631,43 +644,54 @@ export class IndexTable extends Component {
 
               <EuiSpacer size="m" />
 
-              {indices.length > 0 ? (
-                <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                  <EuiTable className="indTable" data-test-subj="indexTable">
-                    <EuiScreenReaderOnly>
-                      <caption role="status" aria-relevant="text" aria-live="polite">
-                        <FormattedMessage
-                          id="xpack.idxMgmt.indexTable.captionText"
-                          defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
-                          values={{ count: indices.length, total: pager.totalItems }}
-                        />
-                      </caption>
-                    </EuiScreenReaderOnly>
+              <div style={{ maxWidth: '100%', overflow: 'auto' }}>
+                <EuiTable className="indTable" data-test-subj="indexTable">
+                  <EuiScreenReaderOnly>
+                    <caption role="status" aria-relevant="text" aria-live="polite">
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexTable.captionText"
+                        defaultMessage="Below is the indices table containing {count, plural, one {# row} other {# rows}} out of {total}."
+                        values={{ count: indices.length, total: pager.totalItems }}
+                      />
+                    </caption>
+                  </EuiScreenReaderOnly>
 
-                    <EuiTableHeader>
-                      <EuiTableHeaderCellCheckbox>
-                        <EuiCheckbox
-                          id="selectAllIndexes"
-                          checked={this.areAllItemsSelected()}
-                          onChange={this.toggleAll}
-                          type="inList"
-                          aria-label={i18n.translate(
-                            'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
-                            {
-                              defaultMessage: 'Select all rows',
-                            }
-                          )}
-                        />
-                      </EuiTableHeaderCellCheckbox>
-                      {this.buildHeader(config)}
-                    </EuiTableHeader>
+                  <EuiTableHeader>
+                    <EuiTableHeaderCellCheckbox>
+                      <EuiCheckbox
+                        id="selectAllIndexes"
+                        checked={this.areAllItemsSelected()}
+                        onChange={this.toggleAll}
+                        type="inList"
+                        aria-label={i18n.translate(
+                          'xpack.idxMgmt.indexTable.selectAllIndicesAriaLabel',
+                          {
+                            defaultMessage: 'Select all rows',
+                          }
+                        )}
+                      />
+                    </EuiTableHeaderCellCheckbox>
+                    {this.buildHeader(headers)}
+                  </EuiTableHeader>
 
-                    <EuiTableBody>{this.buildRows(services, config)}</EuiTableBody>
-                  </EuiTable>
-                </div>
-              ) : (
-                <NoMatch />
-              )}
+                  <EuiTableBody>
+                    {indices.length > 0 ? (
+                      this.buildRows(services, config)
+                    ) : (
+                      <EuiTableRow>
+                        <EuiTableRowCell align="center" colSpan={columnsCount}>
+                          <NoMatch
+                            loadIndices={loadIndices}
+                            filter={filter}
+                            resetFilter={() => filterChanged('')}
+                            extensionsService={extensionsService}
+                          />
+                        </EuiTableRowCell>
+                      </EuiTableRow>
+                    )}
+                  </EuiTableBody>
+                </EuiTable>
+              </div>
 
               <EuiSpacer size="m" />
 

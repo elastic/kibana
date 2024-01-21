@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { EuiHealth, transparentize } from '@elastic/eui';
+import { EuiHealth, EuiTextColor, transparentize } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 import { euiLightVars } from '@kbn/ui-theme';
@@ -38,17 +38,25 @@ export const RiskScoreLevel: React.FC<{
   severity: RiskSeverity;
   hideBackgroundColor?: boolean;
   toolTipContent?: JSX.Element;
-}> = ({ severity, hideBackgroundColor = false, toolTipContent }) => {
+  ['data-test-subj']?: string;
+}> = ({
+  severity,
+  hideBackgroundColor = false,
+  toolTipContent,
+  'data-test-subj': dataTestSubj,
+}) => {
   const badge = (
     <RiskBadge
       color={euiLightVars.euiColorDanger}
       $severity={severity}
       $hideBackgroundColor={hideBackgroundColor}
-      data-test-subj="risk-score"
+      data-test-subj={dataTestSubj ?? 'risk-score'}
     >
-      <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
-        {severity}
-      </EuiHealth>
+      <EuiTextColor color="default">
+        <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
+          {severity}
+        </EuiHealth>
+      </EuiTextColor>
     </RiskBadge>
   );
 

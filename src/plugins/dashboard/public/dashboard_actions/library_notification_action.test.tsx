@@ -6,91 +6,55 @@
  * Side Public License, v 1.
  */
 
-import {
-  ErrorEmbeddable,
-  IContainer,
-  isErrorEmbeddable,
-  ReferenceOrValueEmbeddable,
-  ViewMode,
-} from '@kbn/embeddable-plugin/public';
-import {
-  ContactCardEmbeddable,
-  ContactCardEmbeddableFactory,
-  ContactCardEmbeddableInput,
-  ContactCardEmbeddableOutput,
-  CONTACT_CARD_EMBEDDABLE,
-} from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
-
-import { pluginServices } from '../services/plugin_services';
-import { UnlinkFromLibraryAction } from './unlink_from_library_action';
+import { ViewMode } from '@kbn/presentation-publishing';
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject } from 'rxjs';
 import { LibraryNotificationAction } from './library_notification_action';
-import { DashboardContainer } from '../dashboard_container/embeddable/dashboard_container';
-import { buildMockDashboard } from '../mocks';
+import {
+  UnlinkFromLibraryAction,
+  UnlinkPanelFromLibraryActionApi,
+} from './unlink_from_library_action';
 
-const mockEmbeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
-pluginServices.getServices().embeddable.getEmbeddableFactory = jest
-  .fn()
-  .mockReturnValue(mockEmbeddableFactory);
+describe('library notification action', () => {
+  let action: LibraryNotificationAction;
+  let unlinkAction: UnlinkFromLibraryAction;
+  let context: { embeddable: UnlinkPanelFromLibraryActionApi };
 
-let container: DashboardContainer;
-let embeddable: ContactCardEmbeddable & ReferenceOrValueEmbeddable;
-let unlinkAction: UnlinkFromLibraryAction;
+  let updateViewMode: (viewMode: ViewMode) => void;
 
-beforeEach(async () => {
-  unlinkAction = {
-    getDisplayName: () => 'unlink from dat library',
-    execute: jest.fn(),
-  } as unknown as UnlinkFromLibraryAction;
+  beforeEach(() => {
+    const viewModeSubject = new BehaviorSubject<ViewMode>('edit');
+    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
 
-  container = buildMockDashboard();
-
-  const contactCardEmbeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Kibanana',
+    unlinkAction = new UnlinkFromLibraryAction();
+    action = new LibraryNotificationAction(unlinkAction);
+    context = {
+      embeddable: {
+        viewMode: viewModeSubject,
+        canUnlinkFromLibrary: jest.fn().mockResolvedValue(true),
+        unlinkFromLibrary: jest.fn(),
+      },
+    };
   });
 
-  if (isErrorEmbeddable(contactCardEmbeddable)) {
-    throw new Error('Failed to create embeddable');
-  }
-  embeddable = embeddablePluginMock.mockRefOrValEmbeddable<
-    ContactCardEmbeddable,
-    ContactCardEmbeddableInput
-  >(contactCardEmbeddable, {
-    mockedByReferenceInput: { savedObjectId: 'testSavedObjectId', id: contactCardEmbeddable.id },
-    mockedByValueInput: { firstName: 'Kibanana', id: contactCardEmbeddable.id },
+  it('is compatible when api meets all conditions', async () => {
+    expect(await action.isCompatible(context)).toBe(true);
   });
-  embeddable.updateInput({ viewMode: ViewMode.EDIT });
-});
 
-test('Notification is incompatible with Error Embeddables', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
-  const errorEmbeddable = new ErrorEmbeddable(
-    'Wow what an awful error',
-    { id: ' 404' },
-    embeddable.getRoot() as IContainer
-  );
-  expect(await action.isCompatible({ embeddable: errorEmbeddable })).toBe(false);
-});
+  it('is incompatible when api is missing required functions', async () => {
+    const emptyContext = { embeddable: {} };
+    expect(await action.isCompatible(emptyContext)).toBe(false);
+  });
 
-test('Notification is shown when embeddable on dashboard has reference type input', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  expect(await action.isCompatible({ embeddable })).toBe(true);
-});
+  it('is incompatible when can unlink from library resolves to false', async () => {
+    context.embeddable.canUnlinkFromLibrary = jest.fn().mockResolvedValue(false);
+    expect(await action.isCompatible(context)).toBe(false);
+  });
 
-test('Notification is not shown when embeddable input is by value', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
-  embeddable.updateInput(await embeddable.getInputAsValueType());
-  expect(await action.isCompatible({ embeddable })).toBe(false);
-});
-
-test('Notification is not shown when view mode is set to view', async () => {
-  const action = new LibraryNotificationAction(unlinkAction);
-  embeddable.updateInput(await embeddable.getInputAsRefType());
-  embeddable.updateInput({ viewMode: ViewMode.VIEW });
-  expect(await action.isCompatible({ embeddable })).toBe(false);
+  it('calls onChange when view mode changes', async () => {
+    const onChange = jest.fn();
+    action.subscribeToCompatibilityChanges(context, onChange);
+    updateViewMode('view');
+    await waitFor(() => expect(onChange).toHaveBeenCalledWith(false, action));
+  });
 });

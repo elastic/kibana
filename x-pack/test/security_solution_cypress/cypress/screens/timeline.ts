@@ -54,6 +54,8 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
 
+export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
+
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';
@@ -262,8 +264,7 @@ export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.ale
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
 
-export const ACTIVE_TIMELINE_BOTTOM_BAR =
-  '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
+export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
   `[data-test-subj="draggable-content-${fieldName}"]`;
