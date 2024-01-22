@@ -33,7 +33,7 @@ export const LinkToAlertsPage = ({ assetName, queryField, dateRange }: LinkToAle
   );
 
   return (
-    <RedirectAppLinks coreStart={services} style={{ display: 'inline-block' }}>
+    <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
         data-test-subj="infraAssetDetailsAlertsShowAllButton"
         size="xs"
