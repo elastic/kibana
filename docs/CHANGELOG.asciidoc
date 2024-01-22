@@ -187,7 +187,7 @@ Discover::
 Elastic Security::
 For the Elastic Security 8.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
-*  Split details panel from model selection list ({kibana-pull}173434[#173434]).
+*  Trained models can now be deployed and started directly from the Machine Learning inference pipeline configuration flyout ({kibana-pull}173434[#173434]).
 Fleet::
 * Adds support for Elasticsearch output performance presets ({kibana-pull}172359[#172359]).
 * Adds a new `keep_monitoring_alive` flag to agent policies ({kibana-pull}168865[#168865]).

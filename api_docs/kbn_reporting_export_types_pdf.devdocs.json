@@ -304,6 +304,8 @@
                 "section": "def-common.TaskPayloadPDFV2",
                 "text": "TaskPayloadPDFV2"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -363,6 +365,21 @@
                 "id": "def-server.PdfExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf_v2.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -381,7 +398,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-pdf",
-                "id": "def-server.PdfExportType.runTask.$4",
+                "id": "def-server.PdfExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
@@ -692,6 +709,8 @@
                 "section": "def-common.TaskPayloadPDF",
                 "text": "TaskPayloadPDF"
               },
+              ", taskInstanceFields: ",
+              "TaskInstanceFields",
               ", cancellationToken: ",
               {
                 "pluginId": "@kbn/reporting-common",
@@ -751,6 +770,21 @@
                 "id": "def-server.PdfV1ExportType.runTask.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-reporting/export_types/pdf/printable_pdf.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/reporting-export-types-pdf",
+                "id": "def-server.PdfV1ExportType.runTask.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "cancellationToken",
                 "description": [],
                 "signature": [
@@ -769,7 +803,7 @@
               },
               {
                 "parentPluginId": "@kbn/reporting-export-types-pdf",
-                "id": "def-server.PdfV1ExportType.runTask.$4",
+                "id": "def-server.PdfV1ExportType.runTask.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",
