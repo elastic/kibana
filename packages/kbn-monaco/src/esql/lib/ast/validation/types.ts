@@ -64,9 +64,13 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; argType: string };
   };
-  unsupportedFunction: {
+  unsupportedFunctionForCommand: {
     message: string;
     type: { name: string; command: string };
+  };
+  unsupportedFunctionForCommandOption: {
+    message: string;
+    type: { name: string; command: string; option: string };
   };
   shadowFieldType: {
     message: string;

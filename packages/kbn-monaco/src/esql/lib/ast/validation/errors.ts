@@ -104,12 +104,23 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'unsupportedFunction':
+    case 'unsupportedFunctionForCommand':
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
+            name: out.name,
+          },
+        }),
+      };
+    case 'unsupportedFunctionForCommandOption':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
+          defaultMessage: '{command} {option} does not support function {name}',
+          values: {
+            command: out.command,
+            option: out.option,
             name: out.name,
           },
         }),
