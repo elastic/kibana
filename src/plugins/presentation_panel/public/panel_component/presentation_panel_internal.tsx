@@ -83,7 +83,9 @@ export const PresentationPanelInternal = <
   useEffect(() => {
     let subscription: Subscription;
     if (api && onPanelStatusChange && apiFiresPhaseEvents(api)) {
-      subscription = api.onPhaseChange.subscribe((phase) => onPanelStatusChange(phase));
+      subscription = api.onPhaseChange.subscribe((phase) => {
+        if (phase) onPanelStatusChange(phase);
+      });
     }
     return () => subscription?.unsubscribe();
   }, [api, onPanelStatusChange]);

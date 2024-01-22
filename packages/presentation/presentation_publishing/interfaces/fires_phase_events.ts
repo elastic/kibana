@@ -21,7 +21,7 @@ export interface PhaseEvent {
 }
 
 export interface FiresPhaseEvents {
-  onPhaseChange: PublishingSubject<PhaseEvent>;
+  onPhaseChange: PublishingSubject<PhaseEvent | undefined>;
 }
 
 export const apiFiresPhaseEvents = (unknownApi: null | unknown): unknownApi is FiresPhaseEvents => {
