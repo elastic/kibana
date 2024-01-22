@@ -148,7 +148,7 @@ export interface ParsedUrlQueryParams extends Partial<UrlQueryParams> {
   [index: string]: string | string[] | undefined | null;
 }
 
-export type LocalStorageQueryParams = Partial<Omit<QueryParams, 'page'>>;
+export type URLParams = UrlQueryParams & FilterOptions;
 
 export interface SystemFilterOptions {
   search: string;

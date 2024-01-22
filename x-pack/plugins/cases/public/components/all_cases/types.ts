@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../common/ui';
+import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
 
-export const CASES_TABLE_PERPAGE_VALUES = [10, 25, 50, 100];
+export const CASES_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -32,3 +32,23 @@ export interface CasesColumnSelection {
   name: string;
   isChecked: boolean;
 }
+
+type SupportedFilterOptionsInURL = Pick<
+  FilterOptions,
+  'search' | 'severity' | 'status' | 'tags' | 'assignees' | 'category'
+>;
+
+export interface AllCasesTableState {
+  filterOptions: FilterOptions;
+  queryParams: QueryParams;
+}
+
+export interface AllCasesURLState {
+  filterOptions: Partial<SupportedFilterOptionsInURL>;
+  queryParams: Partial<QueryParams>;
+}
+
+type ValuesAsArrayOfStrings<T> = { [key in keyof T]: string[] };
+
+export type AllCasesURLQueryParams = Partial<ValuesAsArrayOfStrings<QueryParams>> &
+  Partial<ValuesAsArrayOfStrings<SupportedFilterOptionsInURL>> & { [key: string]: string[] };
