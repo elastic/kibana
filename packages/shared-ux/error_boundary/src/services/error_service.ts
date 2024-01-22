@@ -83,7 +83,7 @@ export class KibanaErrorService {
     const name = this.getErrorComponentName(errorInfo);
 
     try {
-      if (isFatal) {
+      if (isFatal && this.analytics) {
         let componentStack = '';
         let errorStack = '';
 
@@ -95,7 +95,7 @@ export class KibanaErrorService {
           errorStack = error.stack;
         }
 
-        this.analytics?.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
+        this.analytics.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
           component_name: name,
           component_stack: componentStack,
           error_message: error.toString(),
