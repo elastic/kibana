@@ -65,7 +65,8 @@ export function validateCustomFieldTypesInRequest({
       const configuration = customFieldsConfiguration.find((item) => item.key === invalidFieldKey);
 
       if (configuration !== undefined) {
-        invalidCustomFieldLabels.push(`"${configuration.label}"`);
+        const invalidLabel = configuration.label ? configuration.label : 'Unknown';
+        invalidCustomFieldLabels.push(`"${invalidLabel}"`);
       }
     });
 

@@ -163,6 +163,40 @@ describe('validators', () => {
       );
     });
 
+    it('throws with label unknown for missing custom field labels', () => {
+      expect(() =>
+        validateCustomFieldTypesInRequest({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TEXT,
+              value: 'foobar',
+            },
+          ],
+
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            },
+          ] as CustomFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: \\"Unknown\\""`
+      );
+    });
+
     it('throws if configuration is missing and request has custom fields', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
