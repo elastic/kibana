@@ -7,12 +7,15 @@
  */
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
-import { SearchCursor, SearchCursorSettings } from './search_cursor';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ISearchClient } from '@kbn/data-plugin/common';
+import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
+import { SearchCursor, SearchCursorSettings } from './search_cursor';
 
 describe('CSV Export Search Cursor', () => {
   let settings: SearchCursorSettings;
   let es: IScopedClusterClient;
+  let data: ISearchClient;
   let logger: Logger;
   let cursor: SearchCursor;
 
@@ -27,11 +30,12 @@ describe('CSV Export Search Cursor', () => {
     };
 
     es = elasticsearchServiceMock.createScopedClusterClient();
+    data = createSearchRequestHandlerContext();
     jest.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({ id: 'what-a-pit-id' });
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursor('test-index-pattern-string', settings, { es }, logger);
+    cursor = new SearchCursor('test-index-pattern-string', settings, { data, es }, logger);
     await cursor.initialize();
   });
 

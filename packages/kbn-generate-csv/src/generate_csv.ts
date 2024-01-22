@@ -11,9 +11,8 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
 import type {
   FieldFormat,
@@ -38,7 +37,7 @@ import { SearchCursor } from './lib/search_cursor';
 
 interface Clients {
   es: IScopedClusterClient;
-  data: IScopedSearchClient;
+  data: ISearchClient;
   uiSettings: IUiSettingsClient;
 }
 

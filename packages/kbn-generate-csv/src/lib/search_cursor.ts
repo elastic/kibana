@@ -11,19 +11,19 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type {
   IEsSearchResponse,
   IKibanaSearchResponse,
+  ISearchClient,
   ISearchSource,
   SearchRequest,
   SearchSourceFields,
 } from '@kbn/data-plugin/common';
 import { ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { lastValueFrom } from 'rxjs';
 import type { CsvPagingStrategy } from '../../types';
 import type { CsvExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 
 interface Clients {
-  data: IScopedSearchClient;
+  data: ISearchClient;
   es: IScopedClusterClient;
 }
 
@@ -122,6 +122,7 @@ export class SearchCursor {
         scroll: this.settings.scroll.duration,
         size: this.settings.scroll.size,
         ignore_throttled: this.settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+        max_concurrent_shard_requests: this.settings.maxConcurrentShardRequests,
       },
     };
 

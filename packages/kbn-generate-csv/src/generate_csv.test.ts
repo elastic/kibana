@@ -19,9 +19,8 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import { ISearchClient, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
-import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -41,7 +40,7 @@ const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
-  let mockDataClient: IScopedSearchClient;
+  let mockDataClient: ISearchClient;
   let mockConfig: ReportingConfigType['csv'];
   let mockLogger: jest.Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
@@ -294,6 +293,10 @@ describe('CsvGenerator', () => {
   });
 
   describe('PIT strategy', () => {
+    beforeEach(() => {
+      mockConfig = { ...mockConfig, scroll: { ...mockConfig.scroll, strategy: 'pit' } };
+    });
+
     it('uses the pit ID to page all the data', async () => {
       mockDataClient.search = jest
         .fn()
@@ -495,6 +498,86 @@ describe('CsvGenerator', () => {
 
         expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
       });
+    });
+  });
+
+  describe('Scroll strategy', () => {
+    beforeEach(() => {
+      mockConfig = { ...mockConfig, scroll: { ...mockConfig.scroll, strategy: 'scroll' } };
+    });
+
+    it('uses the scroll context to page all the data', async () => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from the initial search'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              ),
+              HITS_TOTAL
+            ),
+          })
+        )
+        .mockImplementation(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from a subsequent scroll'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              )
+            ),
+          })
+        );
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.warnings).toEqual([]);
+      expect(content).toMatchSnapshot();
+
+      expect(mockDataClient.search).toHaveBeenCalledTimes(10);
+      expect(mockDataClient.search).toBeCalledWith(
+        {
+          params: expect.objectContaining({
+            index: 'logstash-*',
+            scroll: '30s',
+            size: 500,
+            max_concurrent_shard_requests: 5,
+          }),
+        },
+        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      );
+
+      expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
     });
   });
 
