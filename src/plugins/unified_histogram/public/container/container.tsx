@@ -20,11 +20,7 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import {
-  topPanelHeightSelector,
-  currentSuggestionContextSelector,
-  externalVisContextSelector,
-} from './utils/state_selectors';
+import { topPanelHeightSelector, currentSuggestionContextSelector } from './utils/state_selectors';
 import { getStableVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
@@ -63,6 +59,7 @@ export type UnifiedHistogramContainerProps = {
   | 'children'
   | 'onBrushEnd'
   | 'onFilter'
+  | 'externalVisContext'
   | 'onVisContextChanged'
   | 'withDefaultActions'
   | 'disabledActions'
@@ -80,7 +77,6 @@ export type UnifiedHistogramApi = {
   UnifiedHistogramStateService,
   | 'state$'
   | 'setChartHidden'
-  | 'setExternalVisContext'
   | 'setTopPanelHeight'
   | 'setBreakdownField'
   | 'setTimeInterval'
@@ -125,7 +121,6 @@ export const UnifiedHistogramContainer = forwardRef<
         stateService,
         'state$',
         'setChartHidden',
-        'setExternalVisContext',
         'setTopPanelHeight',
         'setBreakdownField',
         'setTimeInterval',
@@ -138,7 +133,6 @@ export const UnifiedHistogramContainer = forwardRef<
     stateService?.state$,
     currentSuggestionContextSelector
   );
-  const externalVisContext = useStateSelector(stateService?.state$, externalVisContextSelector);
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -169,7 +163,6 @@ export const UnifiedHistogramContainer = forwardRef<
       {...layoutProps}
       {...stateProps}
       currentSuggestionContext={currentSuggestionContext}
-      externalVisContext={externalVisContext}
       onVisContextChanged={handleVisContextChange}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}

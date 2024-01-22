@@ -11,7 +11,6 @@ import {
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
-  ExternalVisContext,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useRef, useMemo, useState } from 'react';
@@ -66,10 +65,7 @@ export const useDiscoverHistogram = ({
       hideChart: chartHidden,
       interval: timeInterval,
       breakdownField,
-      visContext,
     } = stateContainer.appState.getState();
-
-    console.log('initial discover vis', visContext);
 
     return {
       localStorageKeyPrefix: 'discover',
@@ -80,7 +76,6 @@ export const useDiscoverHistogram = ({
         breakdownField,
         totalHitsStatus: UnifiedHistogramFetchStatus.loading,
         totalHitsResult: undefined,
-        externalVisContext: visContext,
       },
     };
   }, [stateContainer.appState]);
@@ -137,11 +132,6 @@ export const useDiscoverHistogram = ({
 
         if ('chartHidden' in changes && typeof changes.chartHidden === 'boolean') {
           unifiedHistogram?.setChartHidden(changes.chartHidden);
-        }
-
-        if ('externalVisContext' in changes) {
-          console.log('sending external vis to histogram', changes.externalVisContext);
-          unifiedHistogram?.setExternalVisContext(changes.externalVisContext);
         }
       }
     );
@@ -335,14 +325,6 @@ export const useDiscoverHistogram = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
-  const onVisContextChanged = useCallback(
-    (visContext: ExternalVisContext | undefined) => {
-      console.log('got new vis context from histogram', visContext);
-      stateContainer.appState.update({ visContext });
-    },
-    [stateContainer]
-  );
-
   return {
     ref,
     getCreationOptions,
@@ -358,7 +340,6 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
-    onVisContextChanged,
   };
 };
 
@@ -425,17 +406,6 @@ const createAppStateObservable = (state$: Observable<DiscoverAppState>) => {
         changes.chartHidden = curr.hideChart;
       }
 
-      if (!isEqual(prev?.visContext?.attributes, curr.visContext?.attributes)) {
-        console.log(
-          'noticed changes in discover vis context',
-          'prev:',
-          prev?.visContext?.attributes,
-          'next:',
-          curr.visContext?.attributes
-        );
-        changes.externalVisContext = curr.visContext;
-      }
-
       return changes;
     }),
     filter((changes) => Object.keys(changes).length > 0)
@@ -463,7 +433,7 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
 
 const createCurrentSuggestionObservable = (state$: Observable<UnifiedHistogramState>) => {
   return state$.pipe(
-    map((state) => state.currentSuggestion),
+    map((state) => state.currentSuggestionContext),
     distinctUntilChanged(isEqual)
   );
 };

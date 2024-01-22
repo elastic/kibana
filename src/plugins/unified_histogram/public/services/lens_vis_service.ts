@@ -462,14 +462,15 @@ export class LensVisService {
 
       if (queryHasTransformationalCommands) return undefined;
 
-      const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange });
+      const interval = computeInterval(timeRange, this.services.data);
+      const esqlQuery = this.getESQLHistogramQuery({ dataView, query, timeRange, interval });
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
         textBasedColumns: [
           {
-            id: `${dataView.timeFieldName} per interval`,
-            name: `${dataView.timeFieldName} per interval`,
+            id: `${dataView.timeFieldName} every ${interval}`,
+            name: `${dataView.timeFieldName} every ${interval}`,
             meta: {
               type: 'date',
             },
@@ -499,15 +500,17 @@ export class LensVisService {
     dataView,
     timeRange,
     query,
+    interval,
   }: {
     dataView: DataView;
     timeRange: TimeRange;
     query: AggregateQuery;
+    interval?: string;
   }): string => {
-    const interval = computeInterval(timeRange, this.services.data);
+    const queryInterval = interval ?? computeInterval(timeRange, this.services.data);
     const language = getAggregateQueryMode(query);
     const safeQuery = cleanupESQLQueryForLensSuggestions(query[language]);
-    return `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} per interval\``;
+    return `${safeQuery} | EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``;
   };
 
   private getAllSuggestions = ({ queryParams }: { queryParams: QueryParams }): Suggestion[] => {

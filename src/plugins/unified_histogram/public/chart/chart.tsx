@@ -156,7 +156,7 @@ export function Chart({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion: lensVisServiceCurrentSuggestionContext?.suggestion,
+    currentSuggestion,
     disableAutoFetching,
     input$,
     beforeRefetch: updateTimeRange,

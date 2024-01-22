@@ -10,11 +10,7 @@ import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { LensEmbeddableOutput } from '@kbn/lens-plugin/public';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { UnifiedHistogramFetchStatus } from '../..';
-import type {
-  UnifiedHistogramServices,
-  UnifiedHistogramChartLoadEvent,
-  ExternalVisContext,
-} from '../../types';
+import type { UnifiedHistogramServices, UnifiedHistogramChartLoadEvent } from '../../types';
 import {
   getBreakdownField,
   getChartHidden,
@@ -37,10 +33,6 @@ export interface UnifiedHistogramState {
    * The current Lens suggestion
    */
   currentSuggestionContext: CurrentSuggestionContext | undefined;
-  /**
-   * Lens vis which can be stored externally
-   */
-  externalVisContext: ExternalVisContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -110,10 +102,6 @@ export interface UnifiedHistogramStateService {
    */
   setCurrentSuggestionContext: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   /**
-   * Sets external custom Lens vis
-   */
-  setExternalVisContext: (externalVisContext: ExternalVisContext | undefined) => void;
-  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -163,7 +151,6 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
-    externalVisContext: undefined,
     currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
@@ -209,10 +196,6 @@ export const createStateService = (
 
     setCurrentSuggestionContext: (suggestionContext: CurrentSuggestionContext | undefined) => {
       updateState({ currentSuggestionContext: suggestionContext });
-    },
-
-    setExternalVisContext: (externalVisContext: ExternalVisContext | undefined) => {
-      updateState({ externalVisContext });
     },
 
     setTimeInterval: (timeInterval: string) => {

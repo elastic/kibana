@@ -7,7 +7,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
+import {
+  type ExternalVisContext,
+  UnifiedHistogramContainer,
+} from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverHistogram } from './use_discover_histogram';
@@ -33,6 +36,16 @@ export const DiscoverHistogramLayout = ({
   const { dataState } = stateContainer;
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
   const hideChart = useAppStateSelector((state) => state.hideChart);
+  const visContext = useAppStateSelector((state) => state.visContext);
+
+  const onVisContextChanged = useCallback(
+    (newVisContext: ExternalVisContext | undefined) => {
+      console.log('got new vis context from histogram', newVisContext);
+      stateContainer.appState.update({ visContext: newVisContext });
+    },
+    [stateContainer]
+  );
+
   const unifiedHistogramProps = useDiscoverHistogram({
     stateContainer,
     inspectorAdapters: dataState.inspectorAdapters,
@@ -62,6 +75,8 @@ export const DiscoverHistogramLayout = ({
       container={container}
       css={histogramLayoutCss}
       renderCustomChartToggleActions={renderCustomChartToggleActions}
+      externalVisContext={visContext}
+      onVisContextChanged={onVisContextChanged}
     >
       <DiscoverMainContent
         {...mainContentProps}

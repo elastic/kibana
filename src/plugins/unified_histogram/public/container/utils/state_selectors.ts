@@ -16,8 +16,6 @@ export const totalHitsResultSelector = (state: UnifiedHistogramState) => state.t
 export const totalHitsStatusSelector = (state: UnifiedHistogramState) => state.totalHitsStatus;
 export const currentSuggestionContextSelector = (state: UnifiedHistogramState) =>
   state.currentSuggestionContext;
-export const externalVisContextSelector = (state: UnifiedHistogramState) =>
-  state.externalVisContext;
 export const lensAdaptersSelector = (state: UnifiedHistogramState) => state.lensAdapters;
 export const lensEmbeddableOutputSelector$ = (state: UnifiedHistogramState) =>
   state.lensEmbeddableOutput$;
