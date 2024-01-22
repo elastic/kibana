@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useRef, useState, useEffect } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import { isRumAgentName } from '../../../../../../../common/agent_name';
+import {
+  isMobileAgentName,
+  isRumAgentName,
+} from '../../../../../../../common/agent_name';
 import {
   TRACE_ID,
   TRANSACTION_ID,
@@ -335,6 +338,18 @@ function RelatedErrors({
     kuery += ` and ${TRANSACTION_ID} : "${item.doc.transaction?.id}"`;
   }
 
+  const mobileHref = apmRouter.link(
+    `/mobile-services/{serviceName}/errors-and-crashes`,
+    {
+      path: { serviceName: item.doc.service.name },
+      query: {
+        ...query,
+        serviceGroup: '',
+        kuery,
+      },
+    }
+  );
+
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
     path: { serviceName: item.doc.service.name },
     query: {
@@ -349,7 +364,7 @@ function RelatedErrors({
       // eslint-disable-next-line jsx-a11y/click-events-have-key-events
       <div onClick={(e: React.MouseEvent) => e.stopPropagation()}>
         <EuiBadge
-          href={href}
+          href={isMobileAgentName(item.doc.agent.name) ? mobileHref : href}
           color={theme.eui.euiColorDanger}
           iconType="arrowRight"
         >

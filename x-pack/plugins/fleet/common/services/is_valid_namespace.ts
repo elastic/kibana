@@ -10,8 +10,11 @@ import { i18n } from '@kbn/i18n';
 // Namespace string eventually becomes part of an index name. This method partially implements index name rules from
 // https://github.com/elastic/elasticsearch/blob/master/docs/reference/indices/create-index.asciidoc
 // and implements a limit based on https://github.com/elastic/kibana/issues/75846
-export function isValidNamespace(namespace: string): { valid: boolean; error?: string } {
-  if (!namespace.trim()) {
+export function isValidNamespace(
+  namespace: string,
+  allowBlankNamespace?: boolean
+): { valid: boolean; error?: string } {
+  if (!namespace.trim() && !allowBlankNamespace) {
     return {
       valid: false,
       error: i18n.translate('xpack.fleet.namespaceValidation.requiredErrorMessage', {

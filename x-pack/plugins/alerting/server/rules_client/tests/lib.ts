@@ -10,6 +10,7 @@ import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { ConstructorOptions } from '../rules_client';
 import { RuleTypeRegistry } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../../common';
@@ -50,6 +51,8 @@ export function getBeforeSetup(
   eventLogClient?: jest.Mocked<IEventLogClient>
 ) {
   jest.resetAllMocks();
+  rulesClientParams.uiSettings.asScopedToClient =
+    uiSettingsServiceMock.createStartContract().asScopedToClient;
   rulesClientParams.createAPIKey.mockResolvedValue({ apiKeysEnabled: false });
   rulesClientParams.getUserName.mockResolvedValue('elastic');
   taskManager.runSoon.mockResolvedValue({ id: '' });

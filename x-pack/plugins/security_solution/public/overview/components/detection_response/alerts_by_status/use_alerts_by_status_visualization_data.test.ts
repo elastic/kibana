@@ -23,9 +23,9 @@ describe('useAlertsByStatusVisualizationData', () => {
     (useVisualizationResponse as jest.Mock).mockImplementation(
       ({ visualizationId }: { visualizationId: string }) => {
         const mockCount = {
-          [openAlertsVisualizationId]: [{ hits: { total: 10 } }],
-          [acknowledgedAlertsVisualizationId]: [{ hits: { total: 20 } }],
-          [closedAlertsVisualizationId]: [{ hits: { total: 30 } }],
+          [openAlertsVisualizationId]: { responses: [{ hits: { total: 10 } }] },
+          [acknowledgedAlertsVisualizationId]: { responses: [{ hits: { total: 20 } }] },
+          [closedAlertsVisualizationId]: { responses: [{ hits: { total: 30 } }] },
         };
         return mockCount[visualizationId];
       }
