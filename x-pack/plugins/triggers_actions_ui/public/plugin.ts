@@ -28,6 +28,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -172,6 +173,7 @@ interface PluginsStart {
   unifiedSearch: UnifiedSearchPublicPluginStart;
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
+  lens: LensPublicStart;
 }
 
 export class Plugin
@@ -298,6 +300,7 @@ export class Plugin
           licensing: pluginsStart.licensing,
           expressions: pluginsStart.expressions,
           isServerless: !!pluginsStart.serverless,
+          lens: pluginsStart.lens,
         });
       },
     });

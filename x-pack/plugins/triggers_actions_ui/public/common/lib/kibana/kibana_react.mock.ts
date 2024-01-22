@@ -14,6 +14,7 @@ import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import {
   RuleTypeRegistryContract,
@@ -75,6 +76,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     licensing: licensingPluginMock,
     expressions: expressionsPluginMock.createStartContract(),
     isServerless: false,
+    lens: lensPluginMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 
