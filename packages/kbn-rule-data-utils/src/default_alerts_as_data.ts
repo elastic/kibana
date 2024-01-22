@@ -7,7 +7,6 @@
  */
 
 import { ValuesType } from 'utility-types';
-import { ALERT_EVALUATION_VALUE } from './technical_field_names';
 
 const TIMESTAMP = '@timestamp' as const;
 
