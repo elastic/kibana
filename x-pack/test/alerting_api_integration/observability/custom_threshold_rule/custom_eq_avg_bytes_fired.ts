@@ -46,14 +46,14 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       dataForgeConfig = {
-        schedule: [{ template: 'good', start: 'now-15m', end: 'now' }],
+        schedule: [{ template: 'good', start: 'now-15m', end: 'now+5m' }],
         indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 60000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await waitForDocumentInIndex({
         esClient,
         indexName: dataForgeIndices.join(','),
-        docCountTarget: 45,
+        docCountTarget: 60,
       });
 
       await createDataView({
