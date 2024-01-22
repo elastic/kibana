@@ -40,6 +40,7 @@
     "@kbn/lens-plugin",
     "@kbn/maps-plugin",
     "@kbn/ml-agg-utils",
+    "@kbn/ml-cancellable-search",
     "@kbn/ml-date-picker",
     "@kbn/ml-is-defined",
     "@kbn/ml-is-populated-object",

@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/x-pack/packages/ml/url_state'],
+  roots: ['<rootDir>/x-pack/packages/ml/cancellable_search'],
 };
