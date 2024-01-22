@@ -21,6 +21,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_ACTION,
@@ -71,6 +72,14 @@ export const alertWithTags: TopAlert = {
   fields: {
     ...alert.fields,
     [ALERT_RULE_TAGS]: tags,
+  },
+};
+
+export const untrackedAlert: TopAlert = {
+  ...alertWithTags,
+  fields: {
+    ...alertWithTags.fields,
+    [ALERT_STATUS]: ALERT_STATUS_UNTRACKED,
   },
 };
 
