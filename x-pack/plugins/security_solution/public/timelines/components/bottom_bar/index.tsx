@@ -13,7 +13,7 @@ import { selectTitleByTimelineById } from '../../store/selectors';
 import { AddTimelineButton } from '../flyout/add_timeline_button';
 import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
-import { AddToFavoritesButton } from '../timeline/properties/helpers';
+import { AddToFavoritesButton } from '../add_to_favorites';
 import { TimelineEventsCountBadge } from '../../../common/hooks/use_timeline_events_count';
 
 const openTimelineButton = (title: string) =>
@@ -53,7 +53,7 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(({ show, tim
           <AddTimelineButton timelineId={timelineId} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <AddToFavoritesButton timelineId={timelineId} compact />
+          <AddToFavoritesButton timelineId={timelineId} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink

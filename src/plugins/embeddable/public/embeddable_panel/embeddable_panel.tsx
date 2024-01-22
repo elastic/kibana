@@ -8,17 +8,15 @@
 
 import { css } from '@emotion/react';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';
-import { useApiPublisher } from '@kbn/presentation-publishing';
+import { PanelCompatibleComponent } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import { isPromise } from '@kbn/std';
-import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { untilPluginStartServicesReady } from '../kibana_services';
-import { LegacyEmbeddableAPI } from '../lib/embeddables/i_embeddable';
-import { CreateEmbeddableComponent } from '../registry/create_embeddable_component';
-import { EmbeddablePanelProps, LegacyEmbeddableCompatibilityComponent } from './types';
+import { EmbeddablePanelProps } from './types';
 
 const getComponentFromEmbeddable = async (
   embeddable: EmbeddablePanelProps['embeddable']
-): Promise<LegacyEmbeddableCompatibilityComponent> => {
+): Promise<PanelCompatibleComponent> => {
   const startServicesPromise = untilPluginStartServicesReady();
   const embeddablePromise =
     typeof embeddable === 'function' ? embeddable() : Promise.resolve(embeddable);
@@ -27,7 +25,7 @@ const getComponentFromEmbeddable = async (
     await unwrappedEmbeddable.parent.untilEmbeddableLoaded(unwrappedEmbeddable.id);
   }
 
-  return CreateEmbeddableComponent((apiRef) => {
+  return React.forwardRef((props, apiRef) => {
     const [node, setNode] = useState<ReactNode | undefined>();
     const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
@@ -45,7 +43,7 @@ const getComponentFromEmbeddable = async (
       };
     }, [embeddableRoot]);
 
-    useApiPublisher(unwrappedEmbeddable, apiRef);
+    useImperativeHandle(apiRef, () => unwrappedEmbeddable);
 
     return (
       <div css={css(`width: 100%; height: 100%; display:flex`)} ref={embeddableRoot}>
@@ -56,12 +54,10 @@ const getComponentFromEmbeddable = async (
 };
 
 /**
- * Loads and renders an embeddable.
+ * Loads and renders a legacy embeddable.
  */
 export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   const { embeddable, ...passThroughProps } = props;
   const componentPromise = useMemo(() => getComponentFromEmbeddable(embeddable), [embeddable]);
-  return (
-    <PresentationPanel<LegacyEmbeddableAPI> {...passThroughProps} Component={componentPromise} />
-  );
+  return <PresentationPanel {...passThroughProps} Component={componentPromise} />;
 };
