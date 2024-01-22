@@ -6,11 +6,10 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import { DEFAULT_DATASET_TYPE } from '../../../../common/constants';
 
 import { getDataStreamDetails } from '.';
-const accessLogsDataStream = 'nginx.access-default';
-const errorLogsDataStream = 'nginx.error-default';
+const accessLogsDataStream = 'logs-nginx.access-default';
+const errorLogsDataStream = 'logs-nginx.error-default';
 const dateStr1 = '1702998651925'; // .ds-logs-nginx.access-default-2023.12.19-000001
 const dateStr2 = '1703110671019'; // .ds-logs-nginx.access-default-2023.12.20-000002
 const dateStr3 = '1702998866744'; // .ds-logs-nginx.error-default-2023.12.19-000001
@@ -27,8 +26,7 @@ describe('getDataStreamDetails', () => {
     try {
       await getDataStreamDetails({
         esClient: esClientMock,
-        datasetQuery: 'non-existent',
-        type: DEFAULT_DATASET_TYPE,
+        dataStream: 'non-existent',
       });
     } catch (e) {
       expect(e).toBe(MOCK_INDEX_ERROR);
@@ -43,8 +41,7 @@ describe('getDataStreamDetails', () => {
 
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
-      datasetQuery: errorLogsDataStream,
-      type: DEFAULT_DATASET_TYPE,
+      dataStream: errorLogsDataStream,
     });
     expect(dataStreamDetails).toEqual({ createdOn: Number(dateStr3) });
   });
@@ -56,8 +53,7 @@ describe('getDataStreamDetails', () => {
     );
     const dataStreamDetails = await getDataStreamDetails({
       esClient: esClientMock,
-      datasetQuery: accessLogsDataStream,
-      type: DEFAULT_DATASET_TYPE,
+      dataStream: accessLogsDataStream,
     });
     expect(dataStreamDetails).toEqual({ createdOn: Number(dateStr1) });
   });
