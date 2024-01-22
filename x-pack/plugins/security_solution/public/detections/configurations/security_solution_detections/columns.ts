@@ -21,6 +21,13 @@ import {
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
 } from './translations';
 
+export const assigneesColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
+  id: 'kibana.alert.workflow_assignee_ids',
+  initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+};
+
 const getBaseColumns = (
   license?: LicenseService
 ): Array<
@@ -28,12 +35,6 @@ const getBaseColumns = (
 > => {
   const isPlatinumPlus = license?.isPlatinumPlus?.() ?? false;
   return [
-    {
-      columnHeaderType: defaultColumnHeaderType,
-      displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
-      id: 'kibana.alert.workflow_assignee_ids',
-      initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
-    },
     {
       columnHeaderType: defaultColumnHeaderType,
       displayAsText: i18n.ALERTS_HEADERS_SEVERITY,
@@ -115,6 +116,7 @@ export const getColumns = (
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
   },
+  assigneesColumn,
   ...getBaseColumns(license),
 ];
 
