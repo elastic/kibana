@@ -25,6 +25,7 @@ import {
   isAgentUpgradeable,
   AGENT_UPGRADE_COOLDOWN_IN_MIN,
   isAgentUpgrading,
+  differsOnlyInPatch,
 } from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
@@ -192,9 +193,13 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
   if (!versionToUpgradeNumber)
     throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (!force && semverGt(versionToUpgradeNumber, kibanaVersionNumber)) {
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, kibanaVersionNumber) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, kibanaVersionNumber)
+  ) {
     throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
+      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
   }
 

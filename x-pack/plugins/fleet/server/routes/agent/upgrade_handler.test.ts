@@ -28,6 +28,11 @@ describe('upgrade handler', () => {
       expect(() => checkKibanaVersion('8.4.1-SNAPSHOT', '8.4.0', true)).not.toThrowError();
     });
 
+    it('should not throw if not force is specified and patch is newer', () => {
+      expect(() => checkKibanaVersion('8.4.1', '8.4.0', false)).not.toThrowError();
+      expect(() => checkKibanaVersion('8.4.1-SNAPSHOT', '8.4.0', false)).not.toThrowError();
+    });
+
     it('should throw if force is specified and minor is newer', () => {
       expect(() => checkKibanaVersion('8.5.0', '8.4.0', true)).toThrowError();
     });

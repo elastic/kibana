@@ -27,7 +27,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 
-import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
+import { AGENT_UPGRADE_COOLDOWN_IN_MIN, differsOnlyInPatch } from '../../../../../../../common/services';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import {
@@ -44,7 +44,6 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
-  differsOnlyInPatch,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
