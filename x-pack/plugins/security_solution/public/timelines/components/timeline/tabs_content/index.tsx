@@ -135,7 +135,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       [activeTimelineTab]
     );
 
-    const memoAssTab = useCallback(() => {
+    const getAssistantTab = useCallback(() => {
       if (showTimeline) {
         const AssistantTab = tabWithSuspense(lazy(() => import('../assistant_tab_content')));
         return (
@@ -216,7 +216,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
         >
           {isGraphOrNotesTabs && getTab(activeTimelineTab)}
         </HideShowContainer>
-        {hasAssistantPrivilege ? memoAssTab() : null}
+        {hasAssistantPrivilege ? getAssistantTab() : null}
       </>
     );
   }
