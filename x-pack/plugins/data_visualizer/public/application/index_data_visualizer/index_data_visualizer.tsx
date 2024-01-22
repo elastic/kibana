@@ -26,6 +26,7 @@ import {
   type Accessor,
   type Dictionary,
   type SetUrlState,
+  UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -83,75 +84,10 @@ export const getLocatorParams = (params: {
 };
 
 const DataVisualizerESQLStateContextProvider = () => {
-  const history = useHistory();
-  const { search: urlSearchString } = useLocation();
-
-  const setUrlState: SetUrlState = useCallback(
-    (
-      accessor: Accessor,
-      attribute: string | Dictionary<any>,
-      value?: any,
-      replaceState?: boolean
-    ) => {
-      const prevSearchString = urlSearchString;
-      const urlState = parseUrlState(prevSearchString);
-      const parsedQueryString = parse(prevSearchString, { sort: false });
-
-      if (!Object.prototype.hasOwnProperty.call(urlState, accessor)) {
-        urlState[accessor] = {};
-      }
-
-      if (typeof attribute === 'string') {
-        if (isEqual(getNestedProperty(urlState, `${accessor}.${attribute}`), value)) {
-          return prevSearchString;
-        }
-
-        urlState[accessor][attribute] = value;
-      } else {
-        const attributes = attribute;
-        Object.keys(attributes).forEach((a) => {
-          urlState[accessor][a] = attributes[a];
-        });
-      }
-
-      try {
-        const oldLocationSearchString = stringify(parsedQueryString, {
-          sort: false,
-          encode: false,
-        });
-
-        Object.keys(urlState).forEach((a) => {
-          if (isRisonSerializationRequired(a)) {
-            parsedQueryString[a] = encode(urlState[a]);
-          } else {
-            parsedQueryString[a] = urlState[a];
-          }
-        });
-        const newLocationSearchString = stringify(parsedQueryString, {
-          sort: false,
-          encode: false,
-        });
-
-        if (oldLocationSearchString !== newLocationSearchString) {
-          const newSearchString = stringify(parsedQueryString, { sort: false });
-          if (replaceState) {
-            history.replace({ search: newSearchString });
-          } else {
-            history.push({ search: newSearchString });
-          }
-        }
-      } catch (error) {
-        // eslint-disable-next-line no-console
-        console.error('Could not save url state', error);
-      }
-    },
-    [history, urlSearchString]
-  );
-
   return (
-    <UrlStateContextProvider value={{ searchString: urlSearchString, setUrlState }}>
+    <UrlStateProvider>
       <IndexDataVisualizerESQL />
-    </UrlStateContextProvider>
+    </UrlStateProvider>
   );
 };
 
