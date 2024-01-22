@@ -892,6 +892,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -17615,7 +17618,7 @@
         "label": "isValidNamespace",
         "description": [],
         "signature": [
-          "(namespace: string) => { valid: boolean; error?: string | undefined; }"
+          "(namespace: string, allowBlankNamespace: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
         "deprecated": false,
@@ -17635,6 +17638,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidNamespace.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowBlankNamespace",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -21430,6 +21448,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -25564,7 +25585,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; title: string; version: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; path: string; description: string; version: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

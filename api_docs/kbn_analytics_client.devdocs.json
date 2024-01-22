@@ -751,18 +751,6 @@
                 "path": "x-pack/plugins/elastic_assistant/server/lib/langchain/elasticsearch_store/elasticsearch_store.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/post_actions_connector_execute.ts"
-              },
-              {
                 "plugin": "globalSearchBar",
                 "path": "x-pack/plugins/global_search_bar/public/telemetry/event_reporter.ts"
               },
