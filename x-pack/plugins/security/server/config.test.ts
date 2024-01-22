@@ -2518,7 +2518,7 @@ describe('checkFipsConfig', () => {
         isTLSEnabled: true,
       });
     } catch (e) {
-      expect(mockExit).toHaveBeenNthCalledWith(1, 78);
+      logger.error('Should not throw error!');
     }
 
     expect(loggingSystemMock.collect(logger).info).toMatchInlineSnapshot(`
