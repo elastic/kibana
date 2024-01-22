@@ -44,7 +44,7 @@ export const setup = async (httpSetup: HttpSetup): Promise<HomeTestBed> => {
   };
 
   const toggleHiddenIndices = async function () {
-    find('indexTableIncludeHiddenIndicesToggle').simulate('click');
+    find('checkboxToggles-includeHiddenIndices').simulate('click');
   };
 
   return {

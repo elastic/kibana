@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { useExpandableFlyoutContext, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { ThreatIntelligenceOverview } from './threat_intelligence_overview';
@@ -48,7 +48,7 @@ const panelContextValue = {
 } as unknown as RightPanelContext;
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -66,7 +66,7 @@ const flyoutContextValue = {
 
 describe('<ThreatIntelligenceOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render wrapper component', () => {
