@@ -729,7 +729,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
+        `"Failed to create case: Error: The following custom fields have the wrong type in the request: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
   });

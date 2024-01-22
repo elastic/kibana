@@ -59,8 +59,20 @@ export function validateCustomFieldTypesInRequest({
   }
 
   if (invalidCustomFieldKeys.length) {
+    const invalidCustomFieldLabels: string[] = [];
+
+    invalidCustomFieldKeys.forEach((invalidFieldKey) => {
+      const configuration = customFieldsConfiguration.find((item) => item.key === invalidFieldKey);
+
+      if (configuration !== undefined) {
+        invalidCustomFieldLabels.push(`"${configuration.label}"`);
+      }
+    });
+
     throw Boom.badRequest(
-      `The following custom fields have the wrong type in the request: ${invalidCustomFieldKeys}`
+      `The following custom fields have the wrong type in the request: ${invalidCustomFieldLabels.join(
+        ', '
+      )}`
     );
   }
 }

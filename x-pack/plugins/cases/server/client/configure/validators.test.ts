@@ -28,7 +28,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 'label 1','label 2'"`
+        `"Invalid custom field types in request for the following keys: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -46,7 +46,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 'label 1'"`
+        `"Invalid custom field types in request for the following keys: \\"label 1\\""`
       );
     });
 
@@ -124,7 +124,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following required custom fields are missing the default value: 'label 1','label 2'"`
+        `"The following required custom fields are missing the default value: \\"label 1\\", \\"label 2\\""`
       );
     });
   });
@@ -161,7 +161,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 'label 1','label 2'"`
+        `"The following optional custom fields try to define a default value: \\"label 1\\", \\"label 2\\""`
       );
     });
 
@@ -173,7 +173,7 @@ describe('validators', () => {
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 'label 1'"`
+        `"The following optional custom fields try to define a default value: \\"label 1\\""`
       );
     });
 
@@ -183,7 +183,7 @@ describe('validators', () => {
           requestCustomFields: [{ key: '1', required: false, defaultValue: 0, label: 'label 1' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 'label 1'"`
+        `"The following optional custom fields try to define a default value: \\"label 1\\""`
       );
     });
 
@@ -193,7 +193,7 @@ describe('validators', () => {
           requestCustomFields: [{ key: '1', required: false, defaultValue: '', label: 'label 1' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 'label 1'"`
+        `"The following optional custom fields try to define a default value: \\"label 1\\""`
       );
     });
   });

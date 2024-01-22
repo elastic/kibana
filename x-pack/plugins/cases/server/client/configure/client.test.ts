@@ -343,7 +343,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        "Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: 'text label'"
+        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: "text label"'
       );
     });
 
@@ -366,7 +366,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        "Failed to get patch configure in route: Error: The following required custom fields are missing the default value: 'text label'"
+        'Failed to get patch configure in route: Error: The following required custom fields are missing the default value: "text label"'
       );
     });
 
@@ -390,7 +390,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        "Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: 'text label'"
+        'Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: "text label"'
       );
     });
   });
@@ -473,7 +473,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        "Failed to create case configuration: Error: The following required custom fields are missing the default value: 'text label'"
+        'Failed to create case configuration: Error: The following required custom fields are missing the default value: "text label"'
       );
     });
 
@@ -496,7 +496,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        "Failed to create case configuration: Error: The following optional custom fields try to define a default value: 'text label'"
+        'Failed to create case configuration: Error: The following optional custom fields try to define a default value: "text label"'
       );
     });
   });

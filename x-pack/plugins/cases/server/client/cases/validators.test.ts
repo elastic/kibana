@@ -100,7 +100,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'first label',
               required: false,
             },
             {
@@ -112,7 +112,7 @@ describe('validators', () => {
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: first_key"`
+        `"The following custom fields have the wrong type in the request: \\"first label\\""`
       );
     });
 
@@ -141,25 +141,25 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'first label',
               required: false,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'second label',
               required: false,
             },
             {
               key: 'third_key',
               type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
+              label: 'third label',
               required: false,
             },
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: first_key,second_key,third_key"`
+        `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
       );
     });
 
@@ -568,9 +568,7 @@ describe('validators', () => {
           customFieldsConfiguration,
           customFields: customFieldsMax,
         })
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed."`
-      );
+      ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
     });
   });
 });
