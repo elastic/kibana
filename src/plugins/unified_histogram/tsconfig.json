@@ -23,7 +23,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/visualizations-plugin",
-    "@kbn/discover-utils",
     "@kbn/resizable-layout",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
