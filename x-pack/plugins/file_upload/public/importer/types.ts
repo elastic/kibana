@@ -52,4 +52,8 @@ export interface IImporter {
     pipelineId: string | undefined,
     setImportProgress: (progress: number) => void
   ): Promise<ImportResults>;
+  initialized(): boolean;
+  getIndex(): string | undefined;
+  getTimeField(): string | undefined;
+  previewIndexTimeRange(): Promise<{ start: number | null; end: number | null }>;
 }

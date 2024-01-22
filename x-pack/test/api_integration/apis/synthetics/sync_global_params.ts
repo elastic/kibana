@@ -71,8 +71,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       const testLocations: Array<PrivateLocation | ServiceLocation> = [
         {
-          id: 'localhost',
-          label: 'Local Synthetics Service',
+          id: 'dev',
+          label: 'Dev Service',
           geo: { lat: 0, lon: 0 },
           url: 'mockDevUrl',
           isServiceManaged: true,
