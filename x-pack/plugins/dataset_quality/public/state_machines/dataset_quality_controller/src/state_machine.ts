@@ -7,17 +7,21 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { getDefaultTimeRange } from '../../../utils';
+import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
   DatasetQualityControllerTypeState,
 } from './types';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBkD2UCiAPADgG1QCcxCBhVAOwBdDU88SA6AVwoEt2q2BDPNgL0gBiAEoZSGAJIA1DABEA+gGUAKgEEVGBaQDyAOXWS9GEQG0ADAF1EoHKlhsulGyCyIAtACYAbIwDsAIzmAJwAzH4ArAA0IACeiJ5+AByMwZ6hnokALD6e5kneAL6FMWiYuATEZJQ0dAyEjByOPHz8HFBy3FTc0mxgAO5CEJRgjRQAbqgA1qNl2PhEJOTUtPRMTVy8Au2d3b0DCByTAMZdbJQWlpcudg5OFC5uCAGejObentFxiBHBwYyeLIBX5JfLeX7BCLFUroeaVJY1Vb1MbNLZtCgdLo9PqDEi0Br4LoAMyIAFtGHMKotqis6utOC1thjdtiDkdUKd7pdrkgQLdms5eU9sowAqEkn8IuLIUDvN4YvEEFksqE3hFQaEglkperPNCQJSFlVlrU1g0Noz0VATasAArcChgPCwIYjMaTGYU2FU42Iunmhlo9o2uj2x3Ow4TDlnC5WHm2ewCh5Cjy+YLeJJ+cGfTMS96fBWIJJJAKMULa8wZbzmPyfbxZfWG+E003Ii1BjEhvBhp0uvFERiEqgkwjkpvUrttwOtYN+7sO3uRk4xijcqw3RP3R4JPyqgJZDM14sygJywsIXf-TV+LLBEIFXc5Rveo0I2lmlGbVrCMQSGRaORJCUXRZBEBQ1FtW1lHUTR4z5TdzmTUBhVCdNRX3QEQmSbUknPCJAn8IJawiTxgm1dIoRKA0X2bSd6VRb8IFEcQpFkBQAEUAFUTAATWgjQMDg-ktxTBBMIiRhiyzcUpSzSJz0fRhvACPws0rEsIgietn3KV8WyReivwESBGAgLFYDAKglCdMBjnuRhxi2MyuAxayGDsxChGQIDND0BQVB0bQAAk1D0ABxDAlCEhDBWQxAyN8W8wkCJIfDSIFzzlLJ0KyfIwmVAIklCUIdLhCc5ynBjjIgUzzMstzbPsxy+Gc9oGo8yghE4205AEhRevUJQMBUZQMGQcQVEkfRoruRDtwQB9RXBVCIn3cwQnBc8S1VcEVQ0yIPgCAJSp9N9W0My0TOc7gLKsmyOooBynLOVz7vuIQBrUIaRqG8bSEm-QFDEVQdDEBQADE1EkZBOLEGak3m8FS1COUAmCNS5Wvc80hSYtPFS4rvDvJJNJOvS6IDKrBBq67bva+y2AgBgup6vrPu+0a-oBvR4ZEuLnh8FJCaK6t8drcstrFJSIj24EDs8I6ydoiqLrRK66ru9yGaZsAPo0L7hs5iapr84GArByHodhwT115YS5tE4FwUYFUifMdJlQid2sklnaZfFOWtIV46qPHX130qozqdq7o6bexCWBwVrmSxfZBmGR13WmWYaPKiPVcYmObvq+PKET5PMT2HEl2jLk41thNZti1xEEK4qlKBPIUfVHJQmxtCIVS9MvewopQ9z8PzspqP1djkutYT5gk5eyvWVxQh8UHPBiTJL1dOV-Pp8ummNfpxfl5c1e05rzlELXaw7ZipCW+edMUi9kIwh77xNXPIJITeGkfKy0ayniVnnKen5j6MGOHOMKtAl6wBYOwac1UhBGEkJNNQ3kABaWhdAGBEDoZACgwpEO6uBW0kheYO35nmAEgI0afGVAHXC3xnjlgkrlSUwQmHuzHjCfeECDJHzVjVWB754GoEQY0HWet1AKGkJIDAAB1BQ3UBryBoc3J4LwDwAk1Ojcih5wh-ylNlIqljEj4wopRQRZVJ4iKgWImBcCEE4CQYzZmGi+oEJUEQkhtpQpjSig3eCTdn66JRn4VImRqx+DCLwzIAQzFkRdvuDMqk-D5FvHY6iQjHH+mcYXCRpopEyKXhXLsPZnSukzuyT0YczpOPbCUtx0iPHlxXtUhcEZ2S31jFcMJ9sdGt3RuYN4GRAShG-r-dhKkMzSzvFpXcRNEgh3sadfSRTWnVVcZI9xSDKndLnDUvsG8BxDhHGOCezSdmoOjqU1Y5TOnHMvj08MsAb4rnvhuCJ80VJpKSNqLIoJ+FpBvH-QIEl1rlhJumImaRKJUQoKgCAcAXBNO2WaP5CNRLuBvIREI4QviKgSf4CUwQSYkQPOkMi4DCkflYLs6muK+YvxyH-bwMT8Z-D5fyv4Aj8kOLuR+FlOxU44jZbQl+7hSye01AWdhyoJnYV+DM7UMzUoMtFZHS0s53xnOlaMhAXgJlZCzEHJK-KCgKX3GWFSt57zcvLHqceBTdUF2qsayJPwSKpA+JWBWvwgTanPKhV4CteEkTlCEHIwQdXYr1S42m89GoypGb6hA1ZVQo2UujasmMVJ4QIoENIGZgS5MSImimxS9mps1umsuzVGYrzPs3TN81Ah7hybC3aeQ-CZV+ACJhqUf5BoKDWlWojC4NvbY9LxYAfUAu1DyksCSSb1nMAeNhioso5TyuWIERUSrupFUmr10c52l0em8iVVcBjLsdqeGJwJULig3WRIq-dspVgjcCI8B4p2HzrY89piCn382rBM9MXdg1kX3KS1unxX0oyBO+9U6M8lYtrSykyTy6AvKOSgqmkBIMv3rCkWDQbgQIbDfMlGKQxTZlPGkfhwHIF4fEeBzpi7yO6KlP8UiylbzZLyPjP+R6lLdwVms9jZ6tm4YefhnjRyL4GtNEax+-zHZYQBH8EInxNLrsHfMt2bxKygt+HKP4nxijFCAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOgDMcBjACxK0oaTAGJkAQQAqEgPoAZAPITkAUWQBtAAwBdRKAAO1WGRJ19IcogC0ARgDsAFnYBOWwDZbb21p9OATP4ANCAAHoiO-gAc7ACs7lqx9vYAzC7+SVG2AL7ZISJYOATEZFR0jMysHNzo-ILCGKjsRNSoEPUF2OiwXLwCQqIQdGDsggBu1ADWI51FhKQUNPRMLGy9tf0NmM2t7UKz3et1Qgjj1DwYZrTaOjcWRiboVxZWCC7uIeEItrHO7oFRdJRLTuf4BXL5RpdYoLMrLSprGrHLZNFptDpgKAMNqQZDnHpIzaDYajWgTabsA4w0pLCqrap9DqNHbo-aY7EQXH4o6bU5k86XOg3O5IEAPUzmUVfWxRGLvfwpX7AqLuFxaeyxEKvd7sfyOWwpByBexaKIpLIQkBU+Y08orKqjCCsUSUAASEgAcgBxVSyAAKEh9IsMxgltAsXz1cUBoMcKXcvwVWkSWsQsXNuviHmSUX8at8lutJUWdoRHBITrALvd3t9ACVFAB1ADK-tUdf9gdUwbFoaektAkecsRj7jjCciKWTmssiDH7nYCTVtn8Wn8thlBtyeRAtGonPgoqLsNp9rY9z7zylNkVWnYiR+U-1G8cH1nCGs-n+7BSAXsK6nKJHEcIDCyhOZizhOkHUJJlMAvR4r0HG813vWJHy0Z9bFfVMP3sOUPC8KIkjVVUPDAzBoRtEt4XpHk4NRXYGK6Q8Q0QgcwhsDJnAfdNMI3bCEmCd8Yl+Lxk3-TCJ38CjCjwaioLPBkNgYlk9hRFj6KEBCwwjLiQTQjCsNfNdcPeWSqMg08yy0lE1OYnAeh4agAFsDFYdAwB0-tw2vD9V38OJVTHeJQRSRx3jfV483se88y0FwUinBUxxcewLIgk9Szo2D9mZNF1OQdkcQgPEeFY3t2N85D-PTdgsjSjxIlVFV7FwmJ8JSdd7ESjUIsCWIMvkqzspgxk8u2AqMSxEqyoJcaoG8pDOP81D1xAjIXDS+IuqiXCfGcDckqcEDVSBFIhupGjoMRBaCnstkZs5UruWctyPK80VxR8vTVtieqvH-McvxcVrcIyQKNVzDw0vzdJ3EuhTrLoitWCWjivk-WVdXsBJfzcW8U3fYDYtXRwRxlED1WibdsiAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -27,16 +31,58 @@ export const createPureDatasetQualityControllerStateMachine = (
       context: initialContext,
       predictableActionArguments: true,
       id: 'DatasetQualityController',
-      initial: 'initialized',
+      initial: 'fetchingData',
       states: {
-        initialized: {
+        fetchingData: {
+          type: 'parallel',
+          states: {
+            loadingDatasets: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadDataStreamStats',
+                    onDone: {
+                      target: 'complete',
+                      actions: ['storeDataStreamStats'],
+                    },
+                  },
+                },
+                complete: {
+                  type: 'final',
+                },
+              },
+            },
+            loadingDegradedDocs: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadDegradedDocs',
+                    onDone: {
+                      target: 'complete',
+                      actions: ['storeDegradedDocStats'],
+                    },
+                  },
+                },
+                complete: {
+                  type: 'final',
+                },
+              },
+            },
+          },
+          onDone: {
+            target: 'idle',
+          },
+        },
+        idle: {
           on: {
             CHANGE_PAGE: {
-              target: 'initialized',
+              target: 'idle',
               actions: ['storeTablePage'],
             },
             CHANGE_ROWS_PER_PAGE: {
-              target: 'initialized',
+              target: 'idle',
               actions: ['storeTableRowsPerPage'],
             },
           },
@@ -65,6 +111,20 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeDataStreamStats: assign((_context, event) => {
+          return 'data' in event
+            ? {
+                dataStreamStats: event.data as DataStreamStat[],
+              }
+            : {};
+        }),
+        storeDegradedDocStats: assign((_context, event) => {
+          return 'data' in event
+            ? {
+                degradedDocStats: event.data as DegradedDocsStat[],
+              }
+            : {};
+        }),
       },
     }
   );
@@ -72,15 +132,27 @@ export const createPureDatasetQualityControllerStateMachine = (
 export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
+  dataStreamStatsClient: IDataStreamsStatsClient;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
+  dataStreamStatsClient,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {},
-    services: {},
+    services: {
+      loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
+      loadDegradedDocs: (_context) => {
+        const defaultTimeRange = getDefaultTimeRange();
+
+        return dataStreamStatsClient.getDataStreamsDegradedStats({
+          start: defaultTimeRange.from,
+          end: defaultTimeRange.to,
+        });
+      },
+    },
   });
 
 export type DatasetQualityControllerStateService = InterpreterFrom<

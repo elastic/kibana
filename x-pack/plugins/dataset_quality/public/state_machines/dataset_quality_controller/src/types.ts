@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import { DoneInvokeEvent } from 'xstate';
+import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
+import {
+  DataStreamDegradedDocsStatServiceResponse,
+  DataStreamStatServiceResponse,
+} from '../../../../common/data_streams_stats';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+
 interface WithTableOptions {
   table: {
     page: number;
@@ -12,12 +20,33 @@ interface WithTableOptions {
   };
 }
 
-export type DefaultDatasetQualityControllerState = WithTableOptions;
-
-export interface DatasetQualityControllerTypeState {
-  value: 'uninitialized';
-  context: DefaultDatasetQualityControllerState;
+interface WithDataStreamStats {
+  dataStreamStats: DataStreamStat[];
 }
+
+interface WithDegradedDocs {
+  degradedDocStats: DegradedDocsStat[];
+}
+
+export type DefaultDatasetQualityControllerState = WithTableOptions &
+  WithDataStreamStats &
+  WithDegradedDocs;
+
+type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
+
+export type DatasetQualityControllerTypeState =
+  | {
+      value: 'uninitialized';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'loadingDatasets';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'loadingDegradedDocs';
+      context: DefaultDatasetQualityStateContext;
+    };
 
 export type DatasetQualityControllerContext = DatasetQualityControllerTypeState['context'];
 
@@ -29,4 +58,6 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'CHANGE_ROWS_PER_PAGE';
       rowsPerPage: number;
-    };
+    }
+  | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
+  | DoneInvokeEvent<DataStreamStatServiceResponse>;

@@ -12,4 +12,6 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
     page: 0,
     rowsPerPage: 10,
   },
+  dataStreamStats: [],
+  degradedDocStats: [],
 };

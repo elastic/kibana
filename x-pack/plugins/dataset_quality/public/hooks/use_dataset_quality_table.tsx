@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useSelector } from '@xstate/react';
 import { find, orderBy } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -13,7 +12,7 @@ import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
-import { getDefaultTimeRange, useKibanaContextForPlugin } from '../utils';
+import { useKibanaContextForPlugin } from '../utils';
 
 const DEFAULT_SORT_FIELD = 'title';
 const DEFAULT_SORT_DIRECTION = 'desc';
@@ -32,22 +31,25 @@ export const useDatasetQualityTable = () => {
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<DIRECTION>(DEFAULT_SORT_DIRECTION);
 
-  const defaultTimeRange = getDefaultTimeRange();
+  const { service } = useDatasetQualityContext();
 
-  const { dataStreamsStatsServiceClient: client, service } = useDatasetQualityContext();
-  const table = useSelector(service, (state) => {
-    return state.context.table;
-  });
+  const { page, rowsPerPage } = useSelector(service, (state) => state.context.table);
+  const dataStreamStats = useSelector(service, (state) => state.context.dataStreamStats);
+  const loading = useSelector(service, (state) => state.matches('loadingDatasets'));
+  const degradedStats = useSelector(service, (state) => state.context.degradedDocStats);
+  const loadingDegradedStats = useSelector(service, (state) =>
+    state.matches('loadingDegradedDocs')
+  );
 
-  const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
-  const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
+  // const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
+  /* const { data: degradedStats = [], loading: loadingDegradedStats } = useFetcher(
     async () =>
       client.getDataStreamsDegradedStats({
         start: defaultTimeRange.from,
         end: defaultTimeRange.to,
       }),
     []
-  );
+  ); */
 
   const columns = useMemo(
     () => getDatasetQualitTableColumns({ fieldFormats, loadingDegradedStats }),
@@ -55,9 +57,9 @@ export const useDatasetQualityTable = () => {
   );
 
   const pagination = {
-    pageIndex: table.page,
-    pageSize: table.rowsPerPage,
-    totalItemCount: data.length,
+    pageIndex: page,
+    pageSize: rowsPerPage,
+    totalItemCount: dataStreamStats.length,
     hidePerPageOptions: true,
   };
 
@@ -86,7 +88,7 @@ export const useDatasetQualityTable = () => {
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;
-    const mergedData = data.map((dataStream) => {
+    const mergedData = dataStreamStats.map((dataStream) => {
       const degradedDocs = find(degradedStats, { dataset: dataStream.rawName });
 
       return {
@@ -97,25 +99,24 @@ export const useDatasetQualityTable = () => {
 
     const sortedItems = orderBy(mergedData, overridenSortingField, sortDirection);
 
-    return sortedItems.slice(table.page * table.rowsPerPage, (table.page + 1) * table.rowsPerPage);
-  }, [sortField, data, sortDirection, table.page, table.rowsPerPage, degradedStats]);
+    return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
+  }, [sortField, dataStreamStats, sortDirection, page, rowsPerPage, degradedStats]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage =
-      table.rowsPerPage ?? 1 * table.page ?? 0 + (renderedItems.length ? 1 : 0);
-    const endNumberItemsOnPage = table.rowsPerPage * table.page + renderedItems.length;
+    const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
-    return table.rowsPerPage === 0 ? (
+    return rowsPerPage === 0 ? (
       <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
         <strong>
           {startNumberItemsOnPage}-{endNumberItemsOnPage}
         </strong>{' '}
-        {tableSummaryOfText} {data.length}
+        {tableSummaryOfText} {dataStreamStats.length}
       </>
     );
-  }, [data.length, renderedItems.length, table.page, table.rowsPerPage]);
+  }, [dataStreamStats.length, renderedItems.length, page, rowsPerPage]);
 
   return {
     sort,
