@@ -5263,6 +5263,64 @@
           }
         }
       },
+      "run_connector_subaction_closeincident": {
+        "title": "The closeIncident subaction",
+        "type": "object",
+        "required": [
+          "subAction",
+          "subActionParams"
+        ],
+        "description": "The `closeIncident` subaction for ServiceNow ITSM connectors.",
+        "properties": {
+          "subAction": {
+            "type": "string",
+            "description": "The action to test.",
+            "enum": [
+              "closeIncident"
+            ]
+          },
+          "subActionParams": {
+            "type": "object",
+            "required": [
+              "incident"
+            ],
+            "properties": {
+              "incident": {
+                "type": "object",
+                "anyOf": [
+                  {
+                    "required": [
+                      "correlation_id"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "externalId"
+                    ]
+                  }
+                ],
+                "properties": {
+                  "correlation_id": {
+                    "type": [
+                      "null",
+                      "string"
+                    ],
+                    "description": "The unique identifier used for the ServiceNow incident.",
+                    "maxLength": 100,
+                    "default": "{{rule.id}}:{{alert.id}}"
+                  },
+                  "externalId": {
+                    "type": [
+                      "null",
+                      "string"
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "run_connector_subaction_createalert": {
         "title": "The createAlert subaction",
         "type": "object",
@@ -5833,6 +5891,9 @@
                   },
                   {
                     "$ref": "#/components/schemas/run_connector_subaction_closealert"
+                  },
+                  {
+                    "$ref": "#/components/schemas/run_connector_subaction_closeincident"
                   },
                   {
                     "$ref": "#/components/schemas/run_connector_subaction_createalert"
