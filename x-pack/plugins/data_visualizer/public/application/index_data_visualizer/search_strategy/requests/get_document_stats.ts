@@ -33,7 +33,11 @@ export const getESQLDocumentCountStats = async (
   searchOptions?: ISearchOptions
 ): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
   if (!isESQLQuery(query)) {
-    throw Error('No ESQL query provided');
+    throw Error(
+      i18n.translate('xpack.dataVisualizer.esql.noQueryProvided', {
+        defaultMessage: 'No ES|QL query provided',
+      })
+    );
   }
   const esqlBaseQuery = query.esql;
   let earliestMs = Infinity;
