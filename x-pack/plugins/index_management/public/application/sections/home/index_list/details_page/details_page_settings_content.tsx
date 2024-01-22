@@ -281,6 +281,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                   schemas: [
                     {
                       uri: editor.getModel()?.uri.toString() ?? '',
+                      fileMatch: ['*'],
                       schema: {
                         type: 'object',
                         properties: settingsSchemaProperties,
