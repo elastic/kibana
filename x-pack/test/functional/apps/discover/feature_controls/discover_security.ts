@@ -198,7 +198,6 @@ export default function (ctx: FtrProviderContext) {
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.createShortUrlMissingOrFail();
-        await PageObjects.share.closeShareModal();
       });
 
       savedQuerySecurityUtils.shouldDisallowSavingButAllowLoadingSavedQueries();

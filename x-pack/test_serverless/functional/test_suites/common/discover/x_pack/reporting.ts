@@ -66,6 +66,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
+        await PageObjects.share.closeShareModal();
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",
