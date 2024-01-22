@@ -13,21 +13,26 @@ import {
   HIGHLIGHTED_FIELDS_LINKED_CELL_TEST_ID,
 } from './test_ids';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import { useSentinelOneAgentData } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
 
+jest.mock('@kbn/expandable-flyout', () => ({
+  useExpandableFlyoutApi: jest.fn(),
+  ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+}));
+
 const flyoutContextValue = {
   openLeftPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+} as unknown as ExpandableFlyoutApi;
+
 const panelContextValue = {
   eventId: 'event id',
   indexName: 'indexName',
@@ -36,14 +41,16 @@ const panelContextValue = {
 
 const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
-    <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-      <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFieldsCell values={values} field={field} />
-      </RightPanelContext.Provider>
-    </ExpandableFlyoutContext.Provider>
+    <RightPanelContext.Provider value={panelContextValue}>
+      <HighlightedFieldsCell values={values} field={field} />
+    </RightPanelContext.Provider>
   );
 
 describe('<HighlightedFieldsCell />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render a basic cell', () => {
     const { getByTestId } = render(<HighlightedFieldsCell values={['value']} field={'field'} />);
 
