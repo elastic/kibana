@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(options).to.have.length(3);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '82 available fields.'
+          '76 available fields. 6 empty fields.'
         );
 
         await testSubjects.click('typeFilter-number');
