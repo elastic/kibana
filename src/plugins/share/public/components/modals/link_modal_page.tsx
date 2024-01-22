@@ -483,7 +483,12 @@ export class LinkModal extends Component<LinkModalProps, State> {
                 <EuiFlexItem>
                   <EuiCopy textToCopy={this.state.url ?? ''}>
                     {(copy) => (
-                      <EuiButton fill onClick={copy} data-test-subj="copyShareUrlButton">
+                      <EuiButton
+                        fill
+                        onClick={copy}
+                        data-test-subj="copyShareUrlButton"
+                        data-share-url={this.state.url}
+                      >
                         <FormattedMessage
                           id="share.link.copyLinkButton"
                           defaultMessage="Copy link"
