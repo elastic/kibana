@@ -8,10 +8,11 @@
 
 import { apiCanLinkToLibrary, CanLinkToLibrary } from '@kbn/presentation-library';
 import {
-  apiPublishesViewMode,
+  apiCanAccessViewMode,
   EmbeddableApiContext,
   PublishesPanelTitle,
-  PublishesViewMode,
+  CanAccessViewMode,
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { pluginServices } from '../services/plugin_services';
@@ -19,12 +20,12 @@ import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings
 
 export const ACTION_ADD_TO_LIBRARY = 'saveToLibrary';
 
-export type AddPanelToLibraryActionApi = PublishesViewMode &
+export type AddPanelToLibraryActionApi = CanAccessViewMode &
   CanLinkToLibrary &
   Partial<PublishesPanelTitle>;
 
 const isApiCompatible = (api: unknown | null): api is AddPanelToLibraryActionApi =>
-  Boolean(apiPublishesViewMode(api) && apiCanLinkToLibrary(api));
+  Boolean(apiCanAccessViewMode(api) && apiCanLinkToLibrary(api));
 
 export class AddToLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_ADD_TO_LIBRARY;
@@ -51,7 +52,7 @@ export class AddToLibraryAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return embeddable.viewMode.value === 'edit' && (await embeddable.canLinkToLibrary());
+    return getInheritedViewMode(embeddable) === 'edit' && (await embeddable.canLinkToLibrary());
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
