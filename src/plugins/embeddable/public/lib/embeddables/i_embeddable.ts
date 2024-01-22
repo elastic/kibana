@@ -12,6 +12,7 @@ import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/publ
 import {
   HasEditCapabilities,
   HasType,
+  HasDisableTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
@@ -38,6 +39,7 @@ export type { EmbeddableInput };
  */
 export type LegacyEmbeddableAPI = HasType &
   HasUniqueId &
+  HasDisableTriggers &
   PublishesViewMode &
   PublishesDataViews &
   HasEditCapabilities &

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { HasType } from '@kbn/presentation-publishing';
 import { Embeddable } from '@kbn/embeddable-plugin/public';
-import type { VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
+import type { HasVisualizeConfig, VisualizeEmbeddable } from '@kbn/visualizations-plugin/public';
 
 export function isLegacyMap(embeddable: Embeddable) {
   return (
@@ -14,4 +15,14 @@ export function isLegacyMap(embeddable: Embeddable) {
     typeof (embeddable as VisualizeEmbeddable).getVis === 'function' &&
     ['region_map', 'tile_map'].includes((embeddable as VisualizeEmbeddable).getVis()?.type?.name)
   );
+}
+
+type LegacyMapApi = HasType &
+  Partial<HasVisualizeConfig>;
+
+export function isLegacyMapApi(api: LegacyMapApi) {
+  if (api.type !== 'visualization' || !api.getVis) {
+    return false;
+  }
+  return ['region_map', 'tile_map'].includes(api.getVis().type?.name);
 }

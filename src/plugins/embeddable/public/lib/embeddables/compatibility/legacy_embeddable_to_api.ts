@@ -95,6 +95,7 @@ export const legacyEmbeddableToApi = (
 
   const uuid = embeddable.id;
   const parentApi = embeddable.parent;
+  const disableTriggers = embeddable.getInput().disableTriggers;
 
   /**
    * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
@@ -151,6 +152,7 @@ export const legacyEmbeddableToApi = (
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
+      disableTriggers: disableTriggers === undefined ? false : disableTriggers,
       viewMode,
       dataLoading,
       blockingError,

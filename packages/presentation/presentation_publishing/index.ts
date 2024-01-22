@@ -84,6 +84,7 @@ export {
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
+export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
