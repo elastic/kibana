@@ -13676,6 +13676,46 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getEsqlFn",
+        "type": "Function",
+        "tags": [],
+        "label": "getEsqlFn",
+        "description": [],
+        "signature": [
+          "({ getStartDependencies }: EsqlFnArguments) => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.EsqlExpressionFunctionDefinition",
+            "text": "EsqlExpressionFunctionDefinition"
+          }
+        ],
+        "path": "src/plugins/data/common/search/expressions/esql.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.getEsqlFn.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ getStartDependencies }",
+            "description": [],
+            "signature": [
+              "EsqlFnArguments"
+            ],
+            "path": "src/plugins/data/common/search/expressions/esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getFilterBucketAgg",
         "type": "Function",
         "tags": [],
@@ -31961,6 +32001,44 @@
           "\"esql\""
         ],
         "path": "src/plugins/data/common/search/strategies/esql_search/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.EsqlExpressionFunctionDefinition",
+        "type": "Type",
+        "tags": [],
+        "label": "EsqlExpressionFunctionDefinition",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"esql\", Input, Arguments, Output, ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/esql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

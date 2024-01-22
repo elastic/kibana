@@ -46,11 +46,11 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     null
   );
 
-  const dashboardId = api.parentApi.value.savedObjectId.value;
+  const dashboardId = api.parentApi.savedObjectId.value;
 
   const onSubmit = useCallback(() => {
-    const dashboard = api.parentApi.value;
-    const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid.value);
+    const dashboard = api.parentApi;
+    const panelToCopy = dashboard.getDashboardPanelFromId(api.uuid);
 
     if (!panelToCopy) {
       throw new PanelNotFoundError();

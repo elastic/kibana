@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { EuiPopover, EuiIcon } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useBoolean } from '../../../../../hooks/use_boolean';
 
 export const Popover = ({ children }: { children: React.ReactNode }) => {
-  const buttonRef = useRef<HTMLDivElement | null>(null);
   const [isPopoverOpen, { off: closePopover, toggle: togglePopover }] = useBoolean(false);
 
   const onButtonClick = useCallback(
-    (e: React.MouseEvent<SVGElement>) => {
+    (e: React.MouseEvent<HTMLButtonElement>) => {
       e.preventDefault();
       e.stopPropagation();
       togglePopover();
@@ -26,17 +24,10 @@ export const Popover = ({ children }: { children: React.ReactNode }) => {
   return (
     <EuiPopover
       panelPaddingSize="s"
-      ownFocus={false}
-      buttonRef={(el) => (buttonRef.current = el)}
       button={
-        <EuiIcon
-          data-test-subj="hostsViewTableColumnPopoverButton"
-          type="questionInCircle"
-          css={css`
-            cursor: pointer;
-          `}
-          onClick={onButtonClick}
-        />
+        <button onClick={onButtonClick} data-test-subj="hostsViewTableColumnPopoverButton">
+          <EuiIcon type="questionInCircle" />
+        </button>
       }
       isOpen={isPopoverOpen}
       closePopover={closePopover}
