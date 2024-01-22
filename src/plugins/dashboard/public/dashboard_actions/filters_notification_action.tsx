@@ -13,14 +13,16 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import {
+  apiCanAccessViewMode,
   apiPublishesPartialLocalUnifiedSearch,
-  apiPublishesUniqueId,
-  apiPublishesViewMode,
+  apiHasUniqueId,
+  CanAccessViewMode,
   EmbeddableApiContext,
+  getInheritedViewMode,
+  getViewModeSubject,
+  HasParentApi,
   PublishesLocalUnifiedSearch,
-  PublishesParentApi,
-  PublishesUniqueId,
-  PublishesViewMode,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { merge } from 'rxjs';
 import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
@@ -30,20 +32,18 @@ import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_s
 
 export const BADGE_FILTERS_NOTIFICATION = 'ACTION_FILTERS_NOTIFICATION';
 
-export type FiltersNotificationActionApi = PublishesUniqueId &
-  PublishesViewMode &
+export type FiltersNotificationActionApi = HasUniqueId &
+  CanAccessViewMode &
   Partial<PublishesLocalUnifiedSearch> &
-  PublishesParentApi<DashboardPluginInternalFunctions>;
+  HasParentApi<DashboardPluginInternalFunctions>;
 
 const isApiCompatible = (api: unknown | null): api is FiltersNotificationActionApi =>
   Boolean(
-    apiPublishesUniqueId(api) &&
-      apiPublishesViewMode(api) &&
-      apiPublishesPartialLocalUnifiedSearch(api)
+    apiHasUniqueId(api) && apiCanAccessViewMode(api) && apiPublishesPartialLocalUnifiedSearch(api)
   );
 
 const compatibilityCheck = (api: EmbeddableApiContext['embeddable']) => {
-  if (!isApiCompatible(api) || api.viewMode.value !== 'edit') return false;
+  if (!isApiCompatible(api) || getInheritedViewMode(api) !== 'edit') return false;
   const query = api.localQuery?.value;
   return (
     (api.localFilters?.value ?? []).length > 0 ||
@@ -102,12 +102,10 @@ export class FiltersNotificationAction implements Action<EmbeddableApiContext> {
   ) {
     if (!isApiCompatible(embeddable)) return;
     return merge(
-      ...[embeddable.localQuery, embeddable.localFilters, embeddable.viewMode].filter((value) =>
-        Boolean(value)
+      ...[embeddable.localQuery, embeddable.localFilters, getViewModeSubject(embeddable)].filter(
+        (value) => Boolean(value)
       )
-    ).subscribe(() => {
-      onChange(compatibilityCheck(embeddable), this);
-    });
+    ).subscribe(() => onChange(compatibilityCheck(embeddable), this));
   }
 
   public execute = async () => {};
