@@ -82,7 +82,7 @@ export const getSyntheticsAssetsCheckRoute: SyntheticsRestApiRouteFactory = () =
           error: 'Synthetics package is not installed, installation failed.',
         };
       } else {
-        server.logger.info(`Synthetics package missing assets are installed.`);
+        server.logger.info(`Synthetics package assets reinstalled successfully.`);
         return { hasAllAssets: true, reinstalled: true };
       }
     }
