@@ -18,7 +18,6 @@ import {
   isTab,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
-
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { isInTableScope, isTimelineScope } from '../../../helpers';
 import { timelineSelectors } from '../../../timelines/store';
@@ -263,7 +262,7 @@ export const EventFieldsBrowser = React.memo<Props>(
             containerElement: containerElement.current,
             keyboardEvent,
             onSkipFocusBeforeEventsTable: focusSearchInput,
-            onSkipFocusAfterEventsTable: () => {},
+            onSkipFocusAfterEventsTable: noop,
           });
         } else {
           onKeyDownFocusHandler({

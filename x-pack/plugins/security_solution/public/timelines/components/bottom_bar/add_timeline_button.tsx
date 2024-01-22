@@ -24,7 +24,7 @@ interface AddTimelineButtonComponentProps {
 
 /**
  * Plus button that opens a popover with options to create a new timeline, a new timeline template or open an existing timeline.
- * The component is use in the timeline bottom_bar
+ * The component is used in the timeline bottom_bar.
  */
 export const AddTimelineButton = React.memo<AddTimelineButtonComponentProps>(({ timelineId }) => {
   const [isPopoverOpen, setPopover] = useState(false);
