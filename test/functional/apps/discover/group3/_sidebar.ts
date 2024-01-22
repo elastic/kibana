@@ -95,35 +95,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show filters by type in text-based view', async function () {
+      it('should show sidebar correctly in text-based view', async function () {
         await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
         await browser.refresh();
 
-        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
-        let options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(6);
-        await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
-
         await PageObjects.discover.selectTextBaseLang();
-
+        await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
-        options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
-        expect(options).to.have.length(3);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '74 available fields. 8 empty fields.'
         );
+      });
 
+      it('should show filter by type correctly in text-based view', async function () {
+        await kibanaServer.uiSettings.update({ 'discover:enableESQL': true });
+        await browser.refresh();
+
+        await PageObjects.discover.selectTextBaseLang();
+
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+        await PageObjects.unifiedFieldList.openSidebarFieldFilter();
+        const options = await find.allByCssSelector('[data-test-subj*="typeFilter"]');
+        expect(options).to.have.length(3);
         await testSubjects.click('typeFilter-number');
+        await PageObjects.unifiedFieldList.closeSidebarFieldFilter();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        await retry.waitFor('updates', async () => {
-          return (
-            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '6 available fields.'
-          );
-        });
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          '2 available fields. 4 empty fields.'
+        );
       });
     });
 
