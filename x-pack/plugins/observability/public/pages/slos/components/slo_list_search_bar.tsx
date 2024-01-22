@@ -74,7 +74,6 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
         query={{ query: String(query), language: 'kuery' }}
         showSubmitButton={true}
         showDatePicker={false}
-        onQueryChange={(value) => onStateChange({ kqlQuery: String(value?.query) })}
         showQueryInput={true}
       />
     </Container>
