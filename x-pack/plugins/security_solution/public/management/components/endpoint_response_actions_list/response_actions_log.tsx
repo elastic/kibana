@@ -9,11 +9,11 @@ import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getCommandKey } from '../../../../common/endpoint/service/response_actions/utils';
-import type {
-  ResponseActionsApiCommandNames,
-  ResponseActionStatus,
-  ResponseActionType,
+import {
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionsApiCommandNames,
+  type ResponseActionStatus,
+  type ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
@@ -79,7 +79,9 @@ export const ResponseActionsLog = memo<
         setQueryParams((prevState) => ({
           ...prevState,
           commands: commandsFromUrl?.length
-            ? commandsFromUrl.map((commandFromUrl) => getCommandKey(commandFromUrl))
+            ? commandsFromUrl.map(
+                (commandFromUrl) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[commandFromUrl]
+              )
             : prevState.commands,
           hosts: agentIdsFromUrl?.length ? agentIdsFromUrl : prevState.agentIds,
           statuses: statusesFromUrl?.length

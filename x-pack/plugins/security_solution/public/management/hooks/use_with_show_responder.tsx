@@ -6,12 +6,12 @@
  */
 
 import React, { useCallback } from 'react';
-import { getCommandKey } from '../../../common/endpoint/service/response_actions/utils';
 import { useLicense } from '../../common/hooks/use_license';
 import type { ImmutableArray } from '../../../common/endpoint/types';
-import type {
-  ConsoleResponseActionCommands,
-  ResponseActionAgentType,
+import {
+  type ConsoleResponseActionCommands,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionAgentType,
 } from '../../../common/endpoint/service/response_actions/constants';
 import { isResponseActionSupported } from '../../../common/endpoint/service/response_actions/is_response_action_supported';
 import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
@@ -82,7 +82,9 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                 ...command,
                 helpHidden: !isResponseActionSupported(
                   agentType,
-                  getCommandKey(command.name as ConsoleResponseActionCommands),
+                  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[
+                    command.name as ConsoleResponseActionCommands
+                  ],
                   'manual',
                   endpointPrivileges
                 ),

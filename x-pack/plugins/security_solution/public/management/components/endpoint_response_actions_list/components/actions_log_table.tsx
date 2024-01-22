@@ -24,7 +24,7 @@ import {
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getUiCommand } from '../../../../../common/endpoint/service/response_actions/utils';
+import { RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
 import { SecurityPageName } from '../../../../../common/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
@@ -87,7 +87,7 @@ const getResponseActionListTableColumns = ({
       width: !showHostNames ? '21%' : '10%',
       truncateText: true,
       render: (_command: ActionListApiResponse['data'][number]['command']) => {
-        const command = getUiCommand(_command);
+        const command = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[_command];
         return (
           <EuiToolTip content={command} anchorClassName="eui-textTruncate">
             <EuiText

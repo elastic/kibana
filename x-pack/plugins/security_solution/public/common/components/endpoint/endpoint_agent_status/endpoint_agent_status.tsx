@@ -20,11 +20,13 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_POLL_INTERVAL } from '../../../../management/common/constants';
 import { HOST_STATUS_TO_BADGE_COLOR } from '../../../../management/pages/endpoint_hosts/view/host_constants';
 import { getEmptyValue } from '../../empty_value';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  type ResponseActionsApiCommandNames,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { useGetEndpointPendingActionsSummary } from '../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary';
 import { useTestIdGenerator } from '../../../../management/hooks/use_test_id_generator';
-import type { HostInfo, EndpointPendingActions } from '../../../../../common/endpoint/types';
+import type { EndpointPendingActions, HostInfo } from '../../../../../common/endpoint/types';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import { getAgentStatusText } from '../agent_status_text';
 
@@ -219,7 +221,7 @@ const EndpointHostResponseActionsStatus = memo<EndpointHostResponseActionsStatus
           list.push({
             count: actionCount,
             label:
-              RESPONSE_ACTION_API_COMMANDS_TO_CONSOLE_COMMAND_MAP[
+              RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
                 actionName as ResponseActionsApiCommandNames
               ] ?? actionName,
           });

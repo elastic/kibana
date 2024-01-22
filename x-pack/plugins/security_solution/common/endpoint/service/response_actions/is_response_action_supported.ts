@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { getRbacControl, getUiCommand } from './utils';
+import { getRbacControl } from './utils';
 import type { EndpointPrivileges } from '../../types';
-import type {
-  ResponseActionAgentType,
-  ResponseActionsApiCommandNames,
-  ResponseActionType,
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  type ResponseActionAgentType,
+  type ResponseActionsApiCommandNames,
+  type ResponseActionType,
 } from './constants';
 
 type SupportMap = Record<
@@ -30,7 +31,7 @@ const getResponseActionsSupportMap = ({
   actionType: ResponseActionType;
   privileges: EndpointPrivileges;
 }): boolean => {
-  const commandName = getUiCommand(actionName);
+  const commandName = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[actionName];
   const RESPONSE_ACTIONS_SUPPORT_MAP = {
     [actionName]: {
       automated: {

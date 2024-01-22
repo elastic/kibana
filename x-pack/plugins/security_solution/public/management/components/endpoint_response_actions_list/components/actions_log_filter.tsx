@@ -8,8 +8,10 @@
 import { orderBy } from 'lodash/fp';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle, EuiSelectable } from '@elastic/eui';
-import { getUiCommand } from '../../../../../common/endpoint/service/response_actions/utils';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  type ResponseActionsApiCommandNames,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { ActionsLogFilterPopover } from './actions_log_filter_popover';
 import { type FilterItems, type FilterName, useActionsLogFilter } from './hooks';
 import { ClearAllButton } from './clear_all_button';
@@ -113,7 +115,12 @@ export const ActionsLogFilter = memo(
           if (filterName === 'actions') {
             setUrlActionsFilters(
               selectedItems
-                .map((item) => getUiCommand(item as ResponseActionsApiCommandNames))
+                .map(
+                  (item) =>
+                    RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[
+                      item as ResponseActionsApiCommandNames
+                    ]
+                )
                 .join()
             );
           } else if (filterName === 'hosts') {

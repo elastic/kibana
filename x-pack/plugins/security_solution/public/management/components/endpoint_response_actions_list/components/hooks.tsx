@@ -10,16 +10,14 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import {
-  getCommandKey,
-  getUiCommand,
-} from '../../../../../common/endpoint/service/response_actions/utils';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
-import type { ResponseActionStatus } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
+  RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
+  type ResponseActionStatus,
 } from '../../../../../common/endpoint/service/response_actions/constants';
 import type { DateRangePickerValues } from './actions_log_date_range_picker';
 import type { FILTER_NAMES } from '../translations';
@@ -233,9 +231,12 @@ export const useActionsLogFilter = ({
           return true;
         }).map((commandName) => ({
           key: commandName,
-          label: getUiCommand(commandName),
+          label: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[commandName],
           checked:
-            !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
+            !isFlyout &&
+            commands
+              ?.map((command) => RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP[command])
+              .includes(commandName)
               ? 'on'
               : undefined,
           'data-test-subj': `${filterName}-filter-option`,
