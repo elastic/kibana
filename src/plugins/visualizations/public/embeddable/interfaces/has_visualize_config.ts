@@ -14,5 +14,5 @@ export interface HasVisualizeConfig {
 }
 
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
-  return Boolean(api && (api as HasVisualizeConfig).getVis);
+  return Boolean(api && typeof (api as HasVisualizeConfig).getVis === 'function');
 };

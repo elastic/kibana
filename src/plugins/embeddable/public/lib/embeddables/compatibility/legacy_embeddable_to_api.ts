@@ -152,7 +152,7 @@ export const legacyEmbeddableToApi = (
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
-      disableTriggers: disableTriggers === undefined ? false : disableTriggers,
+      disableTriggers: disableTriggers ?? false,
       viewMode,
       dataLoading,
       blockingError,
