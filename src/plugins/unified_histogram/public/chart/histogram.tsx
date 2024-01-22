@@ -181,6 +181,8 @@ export function Histogram({
   });
 
   const { euiTheme } = useEuiTheme();
+  const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
+  0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
   const chartCss = css`
     position: relative;
     flex-grow: 1;
@@ -195,6 +197,7 @@ export function Histogram({
     & .lnsExpressionRenderer {
       width: ${chartSize};
       margin: auto;
+      box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
 
     & .echLegend .echLegendList {
