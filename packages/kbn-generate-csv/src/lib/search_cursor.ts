@@ -124,6 +124,7 @@ export class SearchCursor {
         ignore_throttled: this.settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
+
     return await lastValueFrom(
       this.clients.data.search(searchParamsScan, {
         strategy: ES_SEARCH_STRATEGY,
@@ -155,7 +156,13 @@ export class SearchCursor {
           (this.searchAfter ? ` search_after: [${this.searchAfter}]` : '')
       );
     } else {
-      this.logger.debug(`Executing search request with scroll`);
+      if (this.cursorId) {
+        this.logger.debug(
+          `Executing search request with scroll ID [${this.formatCursorId(this.cursorId)}]`
+        );
+      } else {
+        this.logger.debug(`Executing search for initial scan request.`);
+      }
     }
   }
 
@@ -176,19 +183,23 @@ export class SearchCursor {
     const totalAccuracy = trackedTotal?.relation ?? 'unknown';
     this.logger.debug(`Received total hits: ${currentTotal}. Accuracy: ${totalAccuracy}.`);
 
+    // reconstruct the data.search response (w/out the data) for logging
+    const { pit_id: newPitId, _scroll_id: newScrollId, ...header } = headerWithPit;
+    const logInfo = {
+      ...clientDetails,
+      rawResponse: {
+        ...header,
+        hits: hitsMeta,
+        pit_id: newPitId ? `${this.formatCursorId(newPitId)}` : undefined,
+        _scroll_id: newScrollId ? `${this.formatCursorId(newScrollId)}` : undefined,
+      },
+    };
+
+    this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
     if (this.strategy === 'pit') {
-      // reconstruct the data.search response (w/out the data) for logging
-      const { pit_id: newPitId, ...header } = headerWithPit;
-      const logInfo = {
-        ...clientDetails,
-        rawResponse: {
-          ...header,
-          hits: hitsMeta,
-          pit_id: `${this.formatCursorId(newPitId)}`,
-        },
-      };
-      this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
-      this.logger.debug(`Received PIT ID: [${this.formatCursorId(results.pit_id)}]`);
+      this.logger.debug(`Received PIT ID: [${this.formatCursorId(newPitId)}]`);
+    } else {
+      this.logger.debug(`Received Scroll ID: [${this.formatCursorId(newScrollId)}]`);
     }
   }
 

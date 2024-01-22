@@ -134,7 +134,7 @@ Array [
     "Building 1 CSV data rows",
   ],
   Array [
-    "Closing PIT oju9fs3698s3[39 bytes]",
+    "Executing close PIT on oju9fs3698s3[39 bytes]",
   ],
 ]
 `;
