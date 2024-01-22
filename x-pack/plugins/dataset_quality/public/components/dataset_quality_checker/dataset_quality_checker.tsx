@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { useActor } from '@xstate/react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { CheckTimeRange } from '../../../common';
+import { CheckPlanStep, CheckTimeRange, DataStreamQualityCheckExecution } from '../../../common';
 import { IDataStreamQualityClient } from '../../services/data_stream_quality';
 import {
   DataStreamQualityChecksStateProvider,
@@ -90,12 +90,18 @@ const ConnectedPlannedChecksList = () => {
   const checks = state.context.plan?.checks ?? [];
 
   return (
-    <>
-      {checks.map(({ check_id: checkId, data_stream: dataStream }) => (
-        <EuiPanel key={`${checkId}-${dataStream}`}>{checkId}</EuiPanel>
+    <EuiFlexGroup direction="column">
+      {checks.map((check) => (
+        <EuiFlexItem key={`${check.check_id}-${check.data_stream}`} grow={false}>
+          <EuiPanel>
+            <PreJson value={check} />
+          </EuiPanel>
+        </EuiFlexItem>
       ))}
-      <EuiButton onClick={performChecks}>Run checks</EuiButton>
-    </>
+      <EuiFlexItem grow={false}>
+        <EuiButton onClick={performChecks}>Run checks</EuiButton>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
@@ -105,19 +111,65 @@ const ConnectedCheckProgressList = () => {
   const checkProgress = state.context.checkProgress;
 
   return (
-    <>
-      {checkProgress.map(({ check: { check_id: checkId, data_stream: dataStream }, progress }) =>
-        progress === 'pending' ? (
-          <EuiPanel key={`${checkId}-${dataStream}`}>{checkId}</EuiPanel>
-        ) : (
-          <EuiPanel key={`${checkId}-${dataStream}`} color="success">
-            {checkId}
-          </EuiPanel>
-        )
-      )}
-    </>
+    <EuiFlexGroup direction="column">
+      {checkProgress.map((check) => (
+        <EuiFlexItem key={`${check.check.check_id}-${check.check.data_stream}`} grow={false}>
+          {check.progress === 'pending' ? (
+            <CheckListPendingItem check={check.check} />
+          ) : (
+            <CheckListFinishedItem check={check.check} execution={check.execution} />
+          )}
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
   );
 };
+
+const CheckListPendingItem = ({ check }: { check: CheckPlanStep }) => (
+  <EuiPanel>
+    <pre>{JSON.stringify(check, null, 2)}</pre>
+  </EuiPanel>
+);
+
+const CheckListFinishedItem = ({
+  check,
+  execution,
+}: {
+  check: CheckPlanStep;
+  execution: DataStreamQualityCheckExecution;
+}) => {
+  if (execution.result.type === 'skipped') {
+    return (
+      <EuiPanel color="warning">
+        <PreJson value={check} />
+        <PreJson value={execution} />
+      </EuiPanel>
+    );
+  } else if (execution.result.type === 'passed') {
+    return (
+      <EuiPanel color="success">
+        <PreJson value={check} />
+        <PreJson value={execution} />
+      </EuiPanel>
+    );
+  } else if (execution.result.type === 'failed') {
+    return (
+      <EuiPanel color="danger">
+        <PreJson value={check} />
+        <PreJson value={execution} />
+      </EuiPanel>
+    );
+  }
+
+  return (
+    <EuiPanel color="accent">
+      <PreJson value={check} />
+      <PreJson value={execution} />
+    </EuiPanel>
+  );
+};
+
+const PreJson = ({ value }: { value: unknown }) => <pre>{JSON.stringify(value, null, 2)}</pre>;
 
 const useRandomId = (prefix: string) => {
   const generateId = useMemo(() => htmlIdGenerator(prefix), [prefix]);

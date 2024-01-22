@@ -10,6 +10,7 @@ import * as rt from 'io-ts';
 export const ignoredFieldFailReasonRT = rt.strict({
   type: rt.literal('ignored-field'),
   field_name: rt.string,
+  document_count: rt.number,
 });
 
 export const ingestPipelineErrorFailReasonRT = rt.strict({

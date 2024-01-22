@@ -41,7 +41,13 @@ export class DataStreamQualityService {
     const [check] = this.checks.filter((_check) => _check.id === checkId);
 
     const started = new Date().toISOString();
-    const result = await check.apply(this.dependencies)(args);
+    const result = await check
+      .apply(this.dependencies)(args)
+      .catch((err) => ({
+        type: 'error' as const,
+        name: err.name,
+        description: err.message,
+      }));
     const finished = new Date().toISOString();
 
     return {

@@ -144,7 +144,7 @@ export const createPureDataStreamQualityChecksStateMachine = (
             'checkProgress' in context ? context.checkProgress : [];
           const newCheckProgress: DataStreamQualityCheckProgress[] = previousCheckProgress.map(
             (previousCheckResult) =>
-              previousCheckResult.check.check_id === event.checkResult.id
+              getStepId(previousCheckResult.check) === event.stepId
                 ? {
                     progress: 'finished',
                     check: previousCheckResult.check,
@@ -193,6 +193,7 @@ export const createDataStreamQualityChecksStateMachine = ({
 
             return {
               type: 'checkFinished',
+              stepId: getStepId(check),
               checkResult,
             };
           })
@@ -235,6 +236,7 @@ export type DataStreamQualityChecksEvent =
     }
   | {
       type: 'checkFinished';
+      stepId: string;
       checkResult: DataStreamQualityCheckExecution;
     }
   | {
@@ -255,3 +257,5 @@ export type DataStreamQualityCheckProgress =
       check: CheckPlanStep;
       execution: DataStreamQualityCheckExecution;
     };
+
+const getStepId = (check: CheckPlanStep) => `${check.check_id}-${check.data_stream}`;
