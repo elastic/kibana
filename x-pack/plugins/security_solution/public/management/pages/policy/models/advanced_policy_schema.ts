@@ -1523,4 +1523,35 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.alerts.sample_collection',
+      {
+        defaultMessage:
+          "A value of 'false' disables malicious sample collection for Windows alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'mac.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      {
+        defaultMessage: "A value of 'false' disables malicious sample collection for Mac alerts. Default: true.",
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.alerts.sample_collection',
+    first_supported_version: '8.13',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.alerts.sample_collection',
+      {
+        defaultMessage: "A value of 'false' disables malicious sample collection for Linux alerts. Default: true.",
+      }
+    ),
+  },
 ];
