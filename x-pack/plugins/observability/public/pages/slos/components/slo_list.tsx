@@ -126,16 +126,14 @@ export function SloList({ autoRefresh }: Props) {
       )}
 
       {groupBy !== 'ungrouped' && (
-        <>
-          <GroupView
-            sloView={view}
-            groupBy={groupBy}
-            isCompact={isCompact}
-            kqlQuery={query}
-            sort={sort}
-            direction={direction}
-          />
-        </>
+        <GroupView
+          sloView={view}
+          groupBy={groupBy}
+          isCompact={isCompact}
+          kqlQuery={query}
+          sort={sort}
+          direction={direction}
+        />
       )}
 
       {total > 0 ? (
