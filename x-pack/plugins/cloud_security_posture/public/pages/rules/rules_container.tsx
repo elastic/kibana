@@ -7,23 +7,31 @@
 import React, { useState, useMemo } from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
+import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
 import { RulesTableHeader } from './rules_table_header';
-import {
-  useFindCspBenchmarkRule,
-  type RulesQuery,
-  type RulesQueryResult,
-} from './use_csp_benchmark_rules';
+import { useFindCspBenchmarkRule, type RulesQuery } from './use_csp_benchmark_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
 import { LOCAL_STORAGE_PAGE_SIZE_RULES_KEY } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import type { CspBenchmarkRule, PageUrlParams } from '../../../common/types/latest';
+import type {
+  CspBenchmarkRule,
+  PageUrlParams,
+  RuleStateAttributes,
+} from '../../../common/types/latest';
+import { useCspGetRulesStates } from './use_csp_rules_state';
+
+export interface CspBenchmarkRulesWithStates {
+  metadata: CspBenchmarkRule['metadata'];
+  state: 'muted' | 'unmuted';
+}
+
 interface RulesPageData {
-  rules_page: CspBenchmarkRule[];
-  all_rules: CspBenchmarkRule[];
-  rules_map: Map<string, CspBenchmarkRule>;
+  rules_page: CspBenchmarkRulesWithStates[];
+  all_rules: CspBenchmarkRulesWithStates[];
+  rules_map: Map<string, CspBenchmarkRulesWithStates>;
   total: number;
   error?: string;
   loading: boolean;
@@ -31,25 +39,25 @@ interface RulesPageData {
 
 export type RulesState = RulesPageData & RulesQuery;
 
-const getRulesPageData = (
-  { status, data, error }: Pick<RulesQueryResult, 'data' | 'status' | 'error'>,
+const getRulesPage = (
+  data: CspBenchmarkRulesWithStates[],
+  status: string,
+  error: unknown,
   query: RulesQuery
 ): RulesPageData => {
-  const rules = data?.items || ([] as CspBenchmarkRule[]);
-
-  const page = getPage(rules, query);
+  const page = getPage(data, query);
 
   return {
     loading: status === 'loading',
     error: error ? extractErrorMessage(error) : undefined,
-    all_rules: rules,
-    rules_map: new Map(rules.map((rule) => [rule.metadata.id, rule])),
+    all_rules: data,
+    rules_map: new Map(data.map((rule) => [rule.metadata.id, rule])),
     rules_page: page,
-    total: data?.total || 0,
+    total: data?.length || 0,
   };
 };
 
-const getPage = (data: CspBenchmarkRule[], { page, perPage }: RulesQuery) =>
+const getPage = (data: CspBenchmarkRulesWithStates[], { page, perPage }: RulesQuery) =>
   data.slice(page * perPage, (page + 1) * perPage);
 
 const MAX_ITEMS_PER_PAGE = 10000;
@@ -58,6 +66,9 @@ export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
+
+  const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
+
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
     ruleNumber: undefined,
@@ -78,11 +89,6 @@ export const RulesContainer = () => {
     params.benchmarkVersion
   );
 
-  const rulesPageData = useMemo(
-    () => getRulesPageData({ data, error, status }, rulesQuery),
-    [data, error, status, rulesQuery]
-  );
-
   // We need to make this call again without the filters. this way the section list is always full
   const allRules = useFindCspBenchmarkRule(
     {
@@ -93,6 +99,42 @@ export const RulesContainer = () => {
     params.benchmarkVersion
   );
 
+  const rulesStates = useCspGetRulesStates();
+  const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
+  const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
+    (ruleState: RuleStateAttributes) =>
+      ruleState.benchmark_id === params.benchmarkId &&
+      ruleState.benchmark_version === 'v' + params.benchmarkVersion
+  );
+
+  const rulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
+    if (!data) return [];
+
+    return data.items
+      .filter((rule: CspBenchmarkRule) => rule.metadata.benchmark.rule_number !== undefined)
+      .map((rule: CspBenchmarkRule) => {
+        const rulesKey = buildRuleKey(
+          rule.metadata.benchmark.id,
+          rule.metadata.benchmark.version,
+          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+          rule.metadata.benchmark.rule_number!
+        );
+
+        const match = rulesStates?.data?.[rulesKey];
+        const rulesState = match?.muted ? 'muted' : 'unmuted';
+
+        return { ...rule, state: rulesState || 'unmuted' };
+      });
+  }, [data, rulesStates?.data]);
+
+  const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
+    if (enabledDisabledItemsFilter === 'disabled')
+      return rulesWithStates?.filter((rule) => rule?.state === 'muted');
+    else if (enabledDisabledItemsFilter === 'enabled')
+      return rulesWithStates?.filter((rule) => rule?.state === 'unmuted');
+    else return rulesWithStates;
+  }, [rulesWithStates, enabledDisabledItemsFilter]);
+
   const sectionList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
@@ -101,8 +143,33 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
-  const cleanedSectionList = [...new Set(sectionList)];
+  const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
+    return a.localeCompare(b, 'en', { sensitivity: 'base' });
+  });
   const cleanedRuleNumberList = [...new Set(ruleNumberList)];
+
+  const rulesPageData = useMemo(
+    () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
+    [filteredRulesWithStates, status, error, rulesQuery]
+  );
+
+  const [selectedRules, setSelectedRules] = useState<CspBenchmarkRulesWithStates[]>([]);
+
+  const setSelectAllRules = () => {
+    setSelectedRules(rulesPageData.all_rules);
+  };
+
+  const rulesFlyoutData: CspBenchmarkRulesWithStates = {
+    ...{
+      state:
+        filteredRulesStates.find(
+          (filteredRuleState) => filteredRuleState.rule_id === selectedRuleId
+        )?.muted === true
+          ? 'muted'
+          : 'unmuted',
+    },
+    ...{ metadata: rulesPageData.rules_map.get(selectedRuleId!)?.metadata! },
+  };
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
@@ -121,6 +188,12 @@ export const RulesContainer = () => {
           totalRulesCount={rulesPageData.all_rules.length}
           pageSize={rulesPageData.rules_page.length}
           isSearching={status === 'loading'}
+          selectedRules={selectedRules}
+          refetchRulesStates={rulesStates.refetch}
+          setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+          currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
+          setSelectAllRules={setSelectAllRules}
+          setSelectedRules={setSelectedRules}
         />
         <EuiSpacer />
         <RulesTable
@@ -136,12 +209,16 @@ export const RulesContainer = () => {
           }}
           setSelectedRuleId={setSelectedRuleId}
           selectedRuleId={selectedRuleId}
+          refetchRulesStates={rulesStates.refetch}
+          selectedRules={selectedRules}
+          setSelectedRules={setSelectedRules}
         />
       </EuiPanel>
       {selectedRuleId && (
         <RuleFlyout
-          rule={rulesPageData.rules_map.get(selectedRuleId)!}
+          rule={rulesFlyoutData}
           onClose={() => setSelectedRuleId(null)}
+          refetchRulesStates={rulesStates.refetch}
         />
       )}
     </div>

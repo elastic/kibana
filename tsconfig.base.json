@@ -1168,6 +1168,8 @@
       "@kbn/performance-testing-dataset-extractor/*": ["packages/kbn-performance-testing-dataset-extractor/*"],
       "@kbn/picomatcher": ["packages/kbn-picomatcher"],
       "@kbn/picomatcher/*": ["packages/kbn-picomatcher/*"],
+      "@kbn/plugin-check": ["packages/kbn-plugin-check"],
+      "@kbn/plugin-check/*": ["packages/kbn-plugin-check/*"],
       "@kbn/plugin-generator": ["packages/kbn-plugin-generator"],
       "@kbn/plugin-generator/*": ["packages/kbn-plugin-generator/*"],
       "@kbn/plugin-helpers": ["packages/kbn-plugin-helpers"],
