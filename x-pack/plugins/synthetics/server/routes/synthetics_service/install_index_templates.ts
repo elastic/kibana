@@ -13,6 +13,7 @@ export const installIndexTemplatesRoute: SyntheticsRestApiRouteFactory = () => (
   method: 'GET',
   path: SYNTHETICS_API_URLS.INDEX_TEMPLATES,
   validate: {},
+  writeAccess: true,
   handler: async ({ server }): Promise<any> => {
     return installSyntheticsIndexTemplates(server);
   },

@@ -23,6 +23,7 @@ export const getSyntheticsAssetsCheckRoute: SyntheticsRestApiRouteFactory = () =
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_ASSETS_CHECK,
   validate: {},
+  writeAccess: true,
   handler: async ({
     server,
   }): Promise<{ hasAllAssets: boolean; reinstalled?: boolean; error?: string }> => {
