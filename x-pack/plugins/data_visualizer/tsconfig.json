@@ -73,7 +73,8 @@
     "@kbn/visualization-utils",
     "@kbn/text-based-languages",
     "@kbn/code-editor",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",

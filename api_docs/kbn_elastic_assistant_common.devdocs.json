@@ -470,6 +470,21 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetCapabilitiesResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetCapabilitiesResponse",
+        "description": [],
+        "signature": [
+          "{ assistantModelEvaluation: boolean; assistantStreamingEnabled: boolean; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
@@ -483,9 +498,24 @@
           "\nDefault features available to the elastic assistant"
         ],
         "signature": [
-          "{ readonly assistantModelEvaluation: boolean; readonly assistantStreamingEnabled: boolean; }"
+          "{ readonly assistantModelEvaluation: false; readonly assistantStreamingEnabled: false; }"
         ],
         "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetCapabilitiesResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetCapabilitiesResponse",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ assistantModelEvaluation: Zod.ZodBoolean; assistantStreamingEnabled: Zod.ZodBoolean; }, \"strip\", Zod.ZodTypeAny, { assistantModelEvaluation: boolean; assistantStreamingEnabled: boolean; }, { assistantModelEvaluation: boolean; assistantStreamingEnabled: boolean; }>"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/schemas/capabilities/get_capabilities_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

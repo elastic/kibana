@@ -456,7 +456,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups> ? groups : T extends Readonly<",
+          "<infer groups extends string> ? groups : T extends Readonly<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -464,7 +464,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups>> ? groups : never"
+          "<infer groups extends string>> ? groups : never"
         ],
         "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
