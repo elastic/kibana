@@ -6,10 +6,8 @@
  */
 
 import {
-  type EuiDataGridCellValueElementProps,
   type EuiDataGridControlColumn,
   type EuiDataGridCustomBodyProps,
-  type EuiDataGridProps,
 } from '@elastic/eui';
 import React, { memo, useMemo, useCallback, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,8 +28,6 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import type {
   ExpandedDetailTimeline,
   ExpandedDetailType,
-  SetEventsDeleted,
-  SetEventsLoading,
 } from '../../../../../../common/types';
 import type { TimelineItem } from '../../../../../../common/search_strategy';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -49,21 +45,16 @@ import { SourcererScopeName } from '../../../../../common/store/sourcerer/model'
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
-import { getDefaultControlColumn } from '../../body/control_columns';
-import { useLicense } from '../../../../../common/hooks/use_license';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
-import { Actions } from '../../../../../common/components/header_actions/actions';
 import { getColumnHeaderUnified } from '../../body/column_headers/helpers';
-import { eventIsPinned } from '../../body/helpers';
 import { getFormattedFields } from '../body/renderers/formatted_field_udt';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
 import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from './styles';
 import CustomGridBodyControls from './render_custom_body';
-import RowDetails from './row_details';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
-import { NOTES_BUTTON_CLASS_NAME } from '../../properties/helpers';
+import { useControlColumns } from './use_control_columns';
 
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
@@ -135,8 +126,6 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
       },
     } = useKibana();
 
-    const isEnterprisePlus = useLicense().isEnterprise();
-
     const [expandedDoc, setExpandedDoc] = useState<DataTableRecord & TimelineItem>();
     const [fetchedPage, setFechedPage] = useState<number>(0);
 
@@ -171,11 +160,7 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
 
     const {
       timeline: {
-        eventIdToNoteIds,
-        loadingEventIds,
-        selectedEventIds,
         filterManager,
-        pinnedEventIds,
         excludedRowRendererIds,
         rowHeight,
         sampleSize,
@@ -183,7 +168,6 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
-    const { leadingControlColumns, expandedRowTrailingColumns } = useControlColumns();
     // const { activeStep, isTourShown, incrementStep } = useTourContext();
 
     /* const isTourAnchor = useMemo(
@@ -239,19 +223,27 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
       [events, dataView]
     );
 
-    const setEventsLoading = useCallback<SetEventsLoading>(
-      ({ eventIds, isLoading }) => {
-        dispatch(timelineActions.setEventsLoading({ id: timelineId, eventIds, isLoading }));
-      },
-      [dispatch, timelineId]
-    );
+    // Row renderers
+    const enabledRowRenderers = useMemo(() => {
+      if (
+        excludedRowRendererIds &&
+        excludedRowRendererIds.length === Object.keys(RowRendererId).length
+      )
+        return [];
 
-    const setEventsDeleted = useCallback<SetEventsDeleted>(
-      ({ eventIds, isDeleted }) => {
-        dispatch(timelineActions.setEventsDeleted({ id: timelineId, eventIds, isDeleted }));
-      },
-      [dispatch, timelineId]
-    );
+      if (!excludedRowRendererIds) return rowRenderers;
+
+      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
+    }, [excludedRowRendererIds, rowRenderers]);
+
+    const { leadingControlColumns, expandedRowTrailingColumns } = useControlColumns({
+      enabledRowRenderers,
+      expandedDoc,
+      gridRows: discoverGridRows,
+      refetch,
+      timelineId,
+      trGroupRef,
+    });
 
     // Event details
     const handleOnEventDetailPanelOpened = useCallback(
@@ -305,30 +297,6 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
       [discoverGridRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
     );
 
-    const toggleShowNotesEvent = useCallback(
-      (eventId: string) => {
-        const row = notesMap[eventId];
-        if (row?.isAddingNote !== true) {
-          dispatch(
-            timelineActions.setNotesMap({
-              id: timelineId,
-              notesMap: {
-                ...notesMap,
-                [eventId]: { ...row, isAddingNote: true },
-              },
-            })
-          );
-          setTimeout(() => {
-            const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
-              `.${NOTES_BUTTON_CLASS_NAME}`
-            );
-            notesButtonElement?.focus();
-          }, 0);
-        }
-      },
-      [notesMap, dispatch, timelineId]
-    );
-
     // Sorting
     const sortingColumns = useMemo(() => {
       return (
@@ -356,19 +324,6 @@ export const TimelineDataTableComponent: React.FC<Props> = memo(
       },
       [dispatch, timelineId]
     );
-
-    // Row renderers
-    const enabledRowRenderers = useMemo(() => {
-      if (
-        excludedRowRendererIds &&
-        excludedRowRendererIds.length === Object.keys(RowRendererId).length
-      )
-        return [];
-
-      if (!excludedRowRendererIds) return rowRenderers;
-
-      return rowRenderers.filter((rowRenderer) => !excludedRowRendererIds.includes(rowRenderer.id));
-    }, [excludedRowRendererIds, rowRenderers]);
 
     const getRowRendererBody = useCallback(
       ({
