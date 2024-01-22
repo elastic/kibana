@@ -31,7 +31,10 @@ export const PresentationPanelError = ({
     () => (isEditable ? () => editPanelAction?.execute({ embeddable: api }) : undefined),
     [api, isEditable]
   );
-  const label = useMemo(() => editPanelAction?.getDisplayName({ embeddable: api }), [api]);
+  const label = useMemo(
+    () => (isEditable ? editPanelAction?.getDisplayName({ embeddable: api }) : ''),
+    [api, isEditable]
+  );
 
   const panelTitle = usePanelTitle(api);
   const ariaLabel = useMemo(

@@ -8,13 +8,11 @@
 
 import { apiCanExpandPanels, CanExpandPanels } from '@kbn/presentation-containers';
 import {
-  apiPublishesUniqueId,
-  apiPublishesParentApi,
-  apiPublishesViewMode,
+  apiHasParentApi,
+  apiHasUniqueId,
   EmbeddableApiContext,
-  PublishesUniqueId,
-  PublishesParentApi,
-  PublishesViewMode,
+  HasParentApi,
+  HasUniqueId,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
@@ -22,17 +20,10 @@ import { dashboardExpandPanelActionStrings } from './_dashboard_actions_strings'
 
 export const ACTION_EXPAND_PANEL = 'togglePanel';
 
-export type ExpandPanelActionApi = PublishesViewMode &
-  PublishesUniqueId &
-  PublishesParentApi<CanExpandPanels>;
+export type ExpandPanelActionApi = HasUniqueId & HasParentApi<CanExpandPanels>;
 
 const isApiCompatible = (api: unknown | null): api is ExpandPanelActionApi =>
-  Boolean(
-    apiPublishesUniqueId(api) &&
-      apiPublishesViewMode(api) &&
-      apiPublishesParentApi(api) &&
-      apiCanExpandPanels(api.parentApi.value)
-  );
+  Boolean(apiHasUniqueId(api) && apiHasParentApi(api) && apiCanExpandPanels(api.parentApi));
 
 export class ExpandPanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EXPAND_PANEL;
@@ -43,14 +34,14 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
 
   public getDisplayName({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.value.expandedPanelId.value
+    return embeddable.parentApi.expandedPanelId.value
       ? dashboardExpandPanelActionStrings.getMinimizeTitle()
       : dashboardExpandPanelActionStrings.getMaximizeTitle();
   }
 
   public getIconType({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    return embeddable.parentApi.value.expandedPanelId.value ? 'minimize' : 'expand';
+    return embeddable.parentApi.expandedPanelId.value ? 'minimize' : 'expand';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
@@ -59,8 +50,8 @@ export class ExpandPanelAction implements Action<EmbeddableApiContext> {
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi.value.expandPanel(
-      embeddable.parentApi.value.expandedPanelId.value ? undefined : embeddable.uuid.value
+    embeddable.parentApi.expandPanel(
+      embeddable.parentApi.expandedPanelId.value ? undefined : embeddable.uuid
     );
   }
 }
