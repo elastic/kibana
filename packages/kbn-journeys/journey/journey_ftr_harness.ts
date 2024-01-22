@@ -443,8 +443,20 @@ export class JourneyFtrHarness {
   }
 
   private onConsoleEvent = async (message: playwright.ConsoleMessage) => {
+    // logging only events realted to performance metrics
+    const trackedEvents = ['performance_metric', 'Loaded Kibana'];
+
     try {
       const { url, lineNumber, columnNumber } = message.location();
+
+      if (
+        url.includes('kbn-ui-shared-deps-npm.dll.js') ||
+        url.includes('kbn-ui-shared-deps-src.js')
+      ) {
+        // ignore messages from kbn-ui-shared-deps-npm.dll.js & kbn-ui-shared-deps-src.js
+        return;
+      }
+
       const location = `${url}:${lineNumber}:${columnNumber}`;
 
       const args = await asyncMap(message.args(), (handle) => handle.jsonValue());
@@ -456,11 +468,13 @@ export class JourneyFtrHarness {
         // ignore Error with Permissions-Policy header: Unrecognized feature: 'web-share'
         return;
       }
+
       if (
-        url.includes('kbn-ui-shared-deps-npm.dll.js') ||
-        url.includes('kbn-ui-shared-deps-src.js')
+        url.includes('core.entry.js') &&
+        args.length > 1 &&
+        ![trackedEvents].includes(args[1]?.ebt_event?.event_type)
       ) {
-        // ignore messages from kbn-ui-shared-deps-npm.dll.js & kbn-ui-shared-deps-src.js
+        // ignore events like "click"
         return;
       }
 
