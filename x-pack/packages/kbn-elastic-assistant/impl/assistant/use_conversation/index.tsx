@@ -13,6 +13,7 @@ import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
 import { getDefaultSystemPrompt } from './helpers';
 import {
+  appendConversationMessagesApi,
   createConversationApi,
   deleteConversationApi,
   getConversationById,
@@ -131,10 +132,9 @@ export const useConversation = (): UseConversation => {
       if (prevConversation != null) {
         const { messages } = prevConversation;
         const message = messages[messages.length - 1];
-        const updatedMessages = message
-          ? [...messages.slice(0, -1), { ...message, content }]
-          : [...messages];
-        await updateConversationApi({
+        const updatedMessages = message ? [{ ...message, content }] : [];
+
+        await appendConversationMessagesApi({
           http,
           conversationId,
           messages: updatedMessages,
@@ -148,28 +148,23 @@ export const useConversation = (): UseConversation => {
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
-    async ({ conversationId, message }: AppendMessageProps): Promise<Message[]> => {
+    async ({ conversationId, message }: AppendMessageProps): Promise<Message[] | undefined> => {
       assistantTelemetry?.reportAssistantMessageSent({
         conversationId,
         role: message.role,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
       });
-      let messages: Message[] = [];
-      const prevConversation = await getConversationById({ http, id: conversationId });
-      if (isHttpFetchError(prevConversation)) {
-        return [];
-      }
 
-      if (prevConversation != null) {
-        messages = [...prevConversation.messages, message];
-        await updateConversationApi({
-          http,
-          conversationId,
-          messages,
-        });
+      const res = await appendConversationMessagesApi({
+        http,
+        conversationId,
+        messages: [message],
+      });
+      if (isHttpFetchError(res)) {
+        return;
       }
-      return messages;
+      return res.messages;
     },
     [assistantTelemetry, isEnabledKnowledgeBase, isEnabledRAGAlerts, http]
   );

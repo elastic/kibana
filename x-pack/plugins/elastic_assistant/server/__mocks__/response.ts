@@ -6,7 +6,41 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { getConversationMock, getQueryConversationParams } from './conversations_schema.mock';
+import { estypes } from '@elastic/elasticsearch';
 
 export const responseMock = {
   create: httpServerMock.createResponseFactory,
 };
+
+export interface FindHit<T = C> {
+  page: number;
+  perPage: number;
+  total: number;
+  data: T[];
+}
+
+export const getEmptyFindResult = (): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 0,
+  data: [],
+});
+
+export const getFindConversationsResultWithSingleHit = (): FindHit => ({
+  page: 1,
+  perPage: 1,
+  total: 1,
+  data: [getConversationMock(getQueryConversationParams())],
+});
+
+export const getBasicEmptySearchResponse = (): estypes.SearchResponse<unknown> => ({
+  took: 1,
+  timed_out: false,
+  _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+  hits: {
+    hits: [],
+    total: { relation: 'eq', value: 0 },
+    max_score: 0,
+  },
+});

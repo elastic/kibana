@@ -103,7 +103,10 @@ export const useChatSend = ({
       });
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
-      await appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+      await appendMessage({
+        conversationId: currentConversation.id,
+        message: responseMessage,
+      });
       await refresh();
     },
     [

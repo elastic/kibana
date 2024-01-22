@@ -15,7 +15,7 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 
 interface Props {
-  amendMessage: (message: string) => void;
+  amendMessage: (message: string) => Promise<void>;
   content?: string;
   isError?: boolean;
   isFetching?: boolean;

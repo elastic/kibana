@@ -5,838 +5,2175 @@
  * 2.0.
  */
 
-import {
-  createOrUpdateComponentTemplate,
-  createOrUpdateIndexTemplate,
-} from '@kbn/alerting-plugin/server';
-import {
-  loggingSystemMock,
-  elasticsearchServiceMock,
-  savedObjectsClientMock,
-} from '@kbn/core/server/mocks';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { SavedObject } from '@kbn/core/server';
+import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { errors as EsErrors } from '@elastic/elasticsearch';
+import { ReplaySubject, Subject } from 'rxjs';
+import { IRuleTypeAlerts, RecoveredActionGroup } from '../types';
+import { retryUntil } from './test_utils';
+import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
+import { getDataStreamAdapter } from './lib/data_stream_adapter';
+import { conversationsDataClientMock } from '../__mocks__/conversations_data_client.mock';
+import { AIAssistantConversationsDataClient } from '../conversations_data_client';
+import { AIAssistantService } from '.';
 
-const getSavedObjectConfiguration = (attributes = {}) => ({
-  page: 1,
-  per_page: 20,
-  total: 1,
-  saved_objects: [
-    {
-      type: 'risk-engine-configuration',
-      id: 'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
-      namespaces: ['default'],
-      attributes: {
-        enabled: false,
-        ...attributes,
+jest.mock('../conversations_data_client');
+
+let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+const SimulateTemplateResponse = {
+  template: {
+    aliases: {
+      alias_name_1: {
+        is_hidden: true,
       },
-      references: [],
-      managed: false,
-      updated_at: '2023-07-28T09:52:28.768Z',
-      created_at: '2023-07-28T09:12:26.083Z',
-      version: 'WzE4MzIsMV0=',
-      coreMigrationVersion: '8.8.0',
-      score: 0,
+      alias_name_2: {
+        is_hidden: true,
+      },
     },
-  ],
-});
+    mappings: { enabled: false },
+    settings: {},
+  },
+};
+interface HTTPError extends Error {
+  statusCode: number;
+}
 
-const transformsMock = {
-  count: 1,
-  transforms: [
+interface EsError extends Error {
+  meta: {
+    body: {
+      error: {
+        type: string;
+      };
+    };
+  };
+}
+
+const GetAliasResponse = {
+  '.internal.alerts-test.alerts-default-000001': {
+    aliases: {
+      alias_1: {
+        is_hidden: true,
+      },
+      alias_2: {
+        is_hidden: true,
+      },
+    },
+  },
+};
+
+const GetDataStreamResponse: IndicesGetDataStreamResponse = {
+  data_streams: [
     {
-      id: 'ml_hostriskscore_pivot_transform_default',
-      dest: { index: '' },
-      source: { index: '' },
+      name: 'ignored',
+      generation: 1,
+      timestamp_field: { name: 'ignored' },
+      hidden: true,
+      indices: [{ index_name: 'ignored', index_uuid: 'ignored' }],
+      status: 'green',
+      template: 'ignored',
     },
   ],
 };
 
-jest.mock('@kbn/alerting-plugin/server', () => ({
-  createOrUpdateComponentTemplate: jest.fn(),
-  createOrUpdateIndexTemplate: jest.fn(),
-}));
+const IlmPutBody = {
+  policy: {
+    _meta: {
+      managed: true,
+    },
+    phases: {
+      hot: {
+        actions: {
+          rollover: {
+            max_age: '30d',
+            max_primary_shard_size: '50gb',
+          },
+        },
+      },
+    },
+  },
+  name: '.alerts-ilm-policy',
+};
 
-jest.mock('./utils/create_datastream', () => ({
-  createDataStream: jest.fn(),
-}));
+interface GetIndexTemplatePutBodyOpts {
+  context?: string;
+  namespace?: string;
+  useLegacyAlerts?: boolean;
+  useEcs?: boolean;
+  secondaryAlias?: string;
+  useDataStream?: boolean;
+}
+const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
+  const context = opts ? opts.context : undefined;
+  const namespace = (opts ? opts.namespace : undefined) ?? DEFAULT_NAMESPACE_STRING;
+  const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
+  const useEcs = opts ? opts.useEcs : undefined;
+  const secondaryAlias = opts ? opts.secondaryAlias : undefined;
+  const useDataStream = opts?.useDataStream ?? false;
 
-jest.mock('../../risk_score/transform/helpers/transforms', () => ({
-  createAndStartTransform: jest.fn(),
-}));
-
-jest.mock('./utils/create_index', () => ({
-  createIndex: jest.fn(),
-}));
-
-jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
-jest.spyOn(transforms, 'startTransform').mockResolvedValue(Promise.resolve());
-
-describe('RiskEngineDataClient', () => {
-  for (const useDataStreamForAlerts of [false, true]) {
-    const label = useDataStreamForAlerts ? 'data streams' : 'aliases';
-
-    describe(`using ${label} for alert indices`, () => {
-      let riskEngineDataClient: RiskEngineDataClient;
-      let mockSavedObjectClient: ReturnType<typeof savedObjectsClientMock.create>;
-      let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-      const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-      const totalFieldsLimit = 1000;
-
-      beforeEach(() => {
-        logger = loggingSystemMock.createLogger();
-        mockSavedObjectClient = savedObjectsClientMock.create();
-        const options = {
-          logger,
-          kibanaVersion: '8.9.0',
-          esClient,
-          soClient: mockSavedObjectClient,
-          namespace: 'default',
-        };
-        riskEngineDataClient = new RiskEngineDataClient(options);
-      });
-
-      afterEach(() => {
-        jest.clearAllMocks();
-      });
-
-      describe('getWriter', () => {
-        it('should return a writer object', async () => {
-          const writer = await riskEngineDataClient.getWriter({ namespace: 'default' });
-          expect(writer).toBeDefined();
-          expect(typeof writer?.bulk).toBe('function');
-        });
-
-        it('should cache and return the same writer for the same namespace', async () => {
-          const writer1 = await riskEngineDataClient.getWriter({ namespace: 'default' });
-          const writer2 = await riskEngineDataClient.getWriter({ namespace: 'default' });
-          const writer3 = await riskEngineDataClient.getWriter({ namespace: 'space-1' });
-
-          expect(writer1).toEqual(writer2);
-          expect(writer2).not.toEqual(writer3);
-        });
-      });
-
-      describe('initializeResources success', () => {
-        it('should initialize risk engine resources', async () => {
-          await riskEngineDataClient.initializeResources({ namespace: 'default' });
-
-          expect(createOrUpdateComponentTemplate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              logger,
-              esClient,
-              template: expect.objectContaining({
-                name: '.risk-score-mappings',
-                _meta: {
-                  managed: true,
+  const indexPatterns = useDataStream
+    ? [`.alerts-${context ? context : 'test'}.alerts-${namespace}`]
+    : [`.internal.alerts-${context ? context : 'test'}.alerts-${namespace}-*`];
+  return {
+    name: `.alerts-${context ? context : 'test'}.alerts-${namespace}-index-template`,
+    body: {
+      index_patterns: indexPatterns,
+      composed_of: [
+        ...(useEcs ? ['.alerts-ecs-mappings'] : []),
+        `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
+        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
+        '.alerts-framework-mappings',
+      ],
+      ...(useDataStream ? { data_stream: { hidden: true } } : {}),
+      priority: namespace.length,
+      template: {
+        settings: {
+          auto_expand_replicas: '0-1',
+          hidden: true,
+          ...(useDataStream
+            ? {}
+            : {
+                'index.lifecycle': {
+                  name: '.alerts-ilm-policy',
+                  rollover_alias: `.alerts-${context ? context : 'test'}.alerts-${namespace}`,
                 },
               }),
-              totalFieldsLimit: 1000,
+          'index.mapping.ignore_malformed': true,
+          'index.mapping.total_fields.limit': 2500,
+        },
+        mappings: {
+          dynamic: false,
+          _meta: {
+            kibana: { version: '8.8.0' },
+            managed: true,
+            namespace,
+          },
+        },
+        ...(secondaryAlias
+          ? {
+              aliases: {
+                [`${secondaryAlias}-default`]: {
+                  is_write_index: false,
+                },
+              },
+            }
+          : {}),
+      },
+      _meta: {
+        kibana: { version: '8.8.0' },
+        managed: true,
+        namespace,
+      },
+    },
+  };
+};
+
+const TestRegistrationContext: IRuleTypeAlerts = {
+  context: 'test',
+  mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+  shouldWrite: true,
+};
+
+const getContextInitialized = async (
+  assistantService: AIAssistantService,
+  context: string = TestRegistrationContext.context,
+  namespace: string = DEFAULT_NAMESPACE_STRING
+) => {
+  const { result } = await assistantService.getSpaceResourcesInitializationPromise(namespace);
+  return result;
+};
+
+const conversationsDataClient = conversationsDataClientMock.create();
+const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
+  id: 'test.rule-type',
+  name: 'My test rule',
+  actionGroups: [{ id: 'default', name: 'Default' }, RecoveredActionGroup],
+  defaultActionGroupId: 'default',
+  minimumLicenseRequired: 'basic',
+  isExportable: true,
+  recoveryActionGroup: RecoveredActionGroup,
+  executor: jest.fn(),
+  category: 'test',
+  producer: 'alerts',
+  cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
+  autoRecoverAlerts: true,
+  validate: {
+    params: { validate: (params) => params },
+  },
+  validLegacyConsumers: [],
+};
+
+const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
+  ...ruleType,
+  alerts: TestRegistrationContext as IRuleTypeAlerts<{}>,
+};
+
+describe('AI Assistant Service', () => {
+  let pluginStop$: Subject<void>;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    logger = loggingSystemMock.createLogger();
+    pluginStop$ = new ReplaySubject(1);
+    jest.spyOn(global.Math, 'random').mockReturnValue(0.01);
+    clusterClient.indices.simulateTemplate.mockImplementation(async () => SimulateTemplateResponse);
+    clusterClient.indices.simulateIndexTemplate.mockImplementation(
+      async () => SimulateTemplateResponse
+    );
+    clusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+    clusterClient.indices.getDataStream.mockImplementation(async () => GetDataStreamResponse);
+  });
+
+  afterEach(() => {
+    pluginStop$.next();
+    pluginStop$.complete();
+  });
+
+  for (const useDataStreamForAlerts of [false, true]) {
+    const label = useDataStreamForAlerts ? 'data streams' : 'aliases';
+    const dataStreamAdapter = getDataStreamAdapter({ useDataStreamForAlerts });
+
+    describe(`using ${label} for alert indices`, () => {
+      describe('AIAssistantService()', () => {
+        test('should correctly initialize common resources', async () => {
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => (await assistantService.isInitialized()) === true
+          );
+
+          expect(assistantService.isInitialized()).toEqual(true);
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          }
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+
+          const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+          expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+          const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+          expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+        });
+
+        test('should log error and set initialized to false if adding ILM policy throws error', async () => {
+          if (useDataStreamForAlerts) return;
+
+          clusterClient.ilm.putLifecycle.mockRejectedValueOnce(new Error('fail'));
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error installing ILM policy .alerts-ilm-policy - fail`
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(1);
+        });
+
+        test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
+          clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error installing component template .alerts-framework-mappings - fail`
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+        });
+
+        test('should update index template field limit and retry initialization if creating/updating common component template fails with field limit error', async () => {
+          clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(
+            new EsErrors.ResponseError(
+              elasticsearchClientMock.createApiResponse({
+                statusCode: 400,
+                body: {
+                  error: {
+                    root_cause: [
+                      {
+                        type: 'illegal_argument_exception',
+                        reason:
+                          'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                      },
+                    ],
+                    type: 'illegal_argument_exception',
+                    reason:
+                      'updating component template [.alerts-ecs-mappings] results in invalid composable template [.alerts-security.alerts-default-index-template] after templates are merged',
+                    caused_by: {
+                      type: 'illegal_argument_exception',
+                      reason:
+                        'composable template [.alerts-security.alerts-default-index-template] template after composition with component templates [.alerts-ecs-mappings, .alerts-security.alerts-mappings, .alerts-technical-mappings] is invalid',
+                      caused_by: {
+                        type: 'illegal_argument_exception',
+                        reason:
+                          'invalid composite mappings for [.alerts-security.alerts-default-index-template]',
+                        caused_by: {
+                          type: 'illegal_argument_exception',
+                          reason: 'Limit of total fields [1900] has been exceeded',
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+            )
+          );
+          const existingIndexTemplate = {
+            name: 'test-template',
+            index_template: {
+              index_patterns: ['test*'],
+              composed_of: ['.alerts-framework-mappings'],
+              template: {
+                settings: {
+                  auto_expand_replicas: '0-1',
+                  hidden: true,
+                  'index.lifecycle': {
+                    name: '.alerts-ilm-policy',
+                    rollover_alias: `.alerts-empty-default`,
+                  },
+                  'index.mapping.total_fields.limit': 1800,
+                },
+                mappings: {
+                  dynamic: false,
+                },
+              },
+            },
+          };
+          clusterClient.indices.getIndexTemplate.mockResolvedValueOnce({
+            index_templates: [existingIndexTemplate],
+          });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          expect(clusterClient.indices.getIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
+            name: existingIndexTemplate.name,
+            body: {
+              ...existingIndexTemplate.index_template,
+              template: {
+                ...existingIndexTemplate.index_template.template,
+                settings: {
+                  ...existingIndexTemplate.index_template.template?.settings,
+                  'index.mapping.total_fields.limit': 2500,
+                },
+              },
+            },
+          });
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          // 3x for framework, legacy-alert and ecs mappings, then 1 extra time to update component template
+          // after updating index template field limit
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+        });
+      });
+
+      describe('register()', () => {
+        let assistantService: AIAssistantService;
+        beforeEach(async () => {
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+        });
+
+        test('should correctly install resources for context when common initialization is complete', async () => {
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          } else {
+            expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
+          }
+
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+          expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+          const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+          expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+          const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+          expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+            getIndexTemplatePutBody({ useDataStream: useDataStreamForAlerts })
+          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalledWith({
+              expand_wildcards: 'all',
+              name: '.alerts-test.alerts-default',
+            });
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalledWith({
+              index: '.internal.alerts-test.alerts-default-000001',
+              body: {
+                aliases: {
+                  '.alerts-test.alerts-default': {
+                    is_write_index: true,
+                  },
+                },
+              },
+            });
+            expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+              index: '.internal.alerts-test.alerts-default-*',
+              name: '.alerts-test.alerts-*',
+            });
+          }
+        });
+
+        test('should correctly install resources for custom namespace on demand when isSpaceAware is true', async () => {
+          assistantService.register({ ...TestRegistrationContext, isSpaceAware: true });
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          } else {
+            expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
+          }
+
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+            1,
+            getIndexTemplatePutBody({ useDataStream: useDataStreamForAlerts })
+          );
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenNthCalledWith(1, {
+              expand_wildcards: 'all',
+              name: '.alerts-test.alerts-default',
+            });
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
+              index: '.internal.alerts-test.alerts-default-000001',
+              body: {
+                aliases: {
+                  '.alerts-test.alerts-default': {
+                    is_write_index: true,
+                  },
+                },
+              },
+            });
+            expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
+              index: '.internal.alerts-test.alerts-default-*',
+              name: '.alerts-test.alerts-*',
+            });
+          }
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+
+          clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
+            data_streams: [],
+          }));
+
+          await retryUntil(
+            'context in namespace initialized',
+            async () =>
+              (await getContextInitialized(
+                assistantService,
+                TestRegistrationContext.context,
+                'another-namespace'
+              )) === true
+          );
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
+            2,
+            getIndexTemplatePutBody({
+              namespace: 'another-namespace',
+              useDataStream: useDataStreamForAlerts,
             })
           );
-          expect((createOrUpdateComponentTemplate as jest.Mock).mock.lastCall[0].template.template)
-            .toMatchInlineSnapshot(`
-            Object {
-              "mappings": Object {
-                "dynamic": "strict",
-                "properties": Object {
-                  "@timestamp": Object {
-                    "ignore_malformed": false,
-                    "type": "date",
-                  },
-                  "host": Object {
-                    "properties": Object {
-                      "name": Object {
-                        "type": "keyword",
-                      },
-                      "risk": Object {
-                        "properties": Object {
-                          "calculated_level": Object {
-                            "type": "keyword",
-                          },
-                          "calculated_score": Object {
-                            "type": "float",
-                          },
-                          "calculated_score_norm": Object {
-                            "type": "float",
-                          },
-                          "category_1_count": Object {
-                            "type": "long",
-                          },
-                          "category_1_score": Object {
-                            "type": "float",
-                          },
-                          "id_field": Object {
-                            "type": "keyword",
-                          },
-                          "id_value": Object {
-                            "type": "keyword",
-                          },
-                          "inputs": Object {
-                            "properties": Object {
-                              "category": Object {
-                                "type": "keyword",
-                              },
-                              "description": Object {
-                                "type": "keyword",
-                              },
-                              "id": Object {
-                                "type": "keyword",
-                              },
-                              "index": Object {
-                                "type": "keyword",
-                              },
-                              "risk_score": Object {
-                                "type": "float",
-                              },
-                              "timestamp": Object {
-                                "type": "date",
-                              },
-                            },
-                            "type": "object",
-                          },
-                          "notes": Object {
-                            "type": "keyword",
-                          },
-                        },
-                        "type": "object",
-                      },
-                    },
-                  },
-                  "user": Object {
-                    "properties": Object {
-                      "name": Object {
-                        "type": "keyword",
-                      },
-                      "risk": Object {
-                        "properties": Object {
-                          "calculated_level": Object {
-                            "type": "keyword",
-                          },
-                          "calculated_score": Object {
-                            "type": "float",
-                          },
-                          "calculated_score_norm": Object {
-                            "type": "float",
-                          },
-                          "category_1_count": Object {
-                            "type": "long",
-                          },
-                          "category_1_score": Object {
-                            "type": "float",
-                          },
-                          "id_field": Object {
-                            "type": "keyword",
-                          },
-                          "id_value": Object {
-                            "type": "keyword",
-                          },
-                          "inputs": Object {
-                            "properties": Object {
-                              "category": Object {
-                                "type": "keyword",
-                              },
-                              "description": Object {
-                                "type": "keyword",
-                              },
-                              "id": Object {
-                                "type": "keyword",
-                              },
-                              "index": Object {
-                                "type": "keyword",
-                              },
-                              "risk_score": Object {
-                                "type": "float",
-                              },
-                              "timestamp": Object {
-                                "type": "date",
-                              },
-                            },
-                            "type": "object",
-                          },
-                          "notes": Object {
-                            "type": "keyword",
-                          },
-                        },
-                        "type": "object",
-                      },
-                    },
-                  },
-                },
-              },
-              "settings": Object {},
-            }
-          `);
-
-          expect(createOrUpdateIndexTemplate).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            template: {
-              name: '.risk-score.risk-score-default-index-template',
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 4
+          );
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 4
+          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 4
+          );
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).toHaveBeenNthCalledWith(1, {
+              name: '.alerts-test.alerts-another-namespace',
+            });
+            expect(clusterClient.indices.getDataStream).toHaveBeenNthCalledWith(2, {
+              expand_wildcards: 'all',
+              name: '.alerts-test.alerts-another-namespace',
+            });
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
+              index: '.internal.alerts-test.alerts-another-namespace-000001',
               body: {
-                data_stream: { hidden: true },
-                index_patterns: ['risk-score.risk-score-default'],
-                composed_of: ['.risk-score-mappings'],
-                template: {
-                  lifecycle: {},
-                  settings: {
-                    'index.mapping.total_fields.limit': totalFieldsLimit,
-                  },
-                  mappings: {
-                    dynamic: false,
-                    _meta: {
-                      kibana: {
-                        version: '8.9.0',
-                      },
-                      managed: true,
-                      namespace: 'default',
-                    },
-                  },
-                },
-                _meta: {
-                  kibana: {
-                    version: '8.9.0',
-                  },
-                  managed: true,
-                  namespace: 'default',
-                },
-              },
-            },
-          });
-
-          expect(createDataStream).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            totalFieldsLimit,
-            indexPatterns: {
-              template: `.risk-score.risk-score-default-index-template`,
-              alias: `risk-score.risk-score-default`,
-            },
-          });
-
-          expect(createIndex).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            options: {
-              index: `risk-score.risk-score-latest-default`,
-              mappings: {
-                dynamic: 'strict',
-                properties: {
-                  '@timestamp': {
-                    ignore_malformed: false,
-                    type: 'date',
-                  },
-                  host: {
-                    properties: {
-                      name: {
-                        type: 'keyword',
-                      },
-                      risk: {
-                        properties: {
-                          calculated_level: {
-                            type: 'keyword',
-                          },
-                          calculated_score: {
-                            type: 'float',
-                          },
-                          calculated_score_norm: {
-                            type: 'float',
-                          },
-                          category_1_count: {
-                            type: 'long',
-                          },
-                          category_1_score: {
-                            type: 'float',
-                          },
-                          id_field: {
-                            type: 'keyword',
-                          },
-                          id_value: {
-                            type: 'keyword',
-                          },
-                          inputs: {
-                            properties: {
-                              category: {
-                                type: 'keyword',
-                              },
-                              description: {
-                                type: 'keyword',
-                              },
-                              id: {
-                                type: 'keyword',
-                              },
-                              index: {
-                                type: 'keyword',
-                              },
-                              risk_score: {
-                                type: 'float',
-                              },
-                              timestamp: {
-                                type: 'date',
-                              },
-                            },
-                            type: 'object',
-                          },
-                          notes: {
-                            type: 'keyword',
-                          },
-                        },
-                        type: 'object',
-                      },
-                    },
-                  },
-                  user: {
-                    properties: {
-                      name: {
-                        type: 'keyword',
-                      },
-                      risk: {
-                        properties: {
-                          calculated_level: {
-                            type: 'keyword',
-                          },
-                          calculated_score: {
-                            type: 'float',
-                          },
-                          calculated_score_norm: {
-                            type: 'float',
-                          },
-                          category_1_count: {
-                            type: 'long',
-                          },
-                          category_1_score: {
-                            type: 'float',
-                          },
-                          id_field: {
-                            type: 'keyword',
-                          },
-                          id_value: {
-                            type: 'keyword',
-                          },
-                          inputs: {
-                            properties: {
-                              category: {
-                                type: 'keyword',
-                              },
-                              description: {
-                                type: 'keyword',
-                              },
-                              id: {
-                                type: 'keyword',
-                              },
-                              index: {
-                                type: 'keyword',
-                              },
-                              risk_score: {
-                                type: 'float',
-                              },
-                              timestamp: {
-                                type: 'date',
-                              },
-                            },
-                            type: 'object',
-                          },
-                          notes: {
-                            type: 'keyword',
-                          },
-                        },
-                        type: 'object',
-                      },
-                    },
+                aliases: {
+                  '.alerts-test.alerts-another-namespace': {
+                    is_write_index: true,
                   },
                 },
               },
-            },
-          });
-
-          expect(transforms.createTransform).toHaveBeenCalledWith({
-            logger,
-            esClient,
-            transform: {
-              dest: {
-                index: 'risk-score.risk-score-latest-default',
-              },
-              frequency: '1h',
-              latest: {
-                sort: '@timestamp',
-                unique_key: ['host.name', 'user.name'],
-              },
-              source: {
-                index: ['risk-score.risk-score-default'],
-              },
-              sync: {
-                time: {
-                  delay: '2s',
-                  field: '@timestamp',
-                },
-              },
-              transform_id: 'risk_score_latest_transform_default',
-            },
-          });
+            });
+            expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
+              index: '.internal.alerts-test.alerts-another-namespace-*',
+              name: '.alerts-test.alerts-*',
+            });
+          }
         });
-      });
 
-      describe('initializeResources error', () => {
-        it('should handle errors during initialization', async () => {
-          const error = new Error('There error');
-          (createOrUpdateIndexTemplate as jest.Mock).mockRejectedValueOnce(error);
+        test('should not install component template for context if fieldMap is empty', async () => {
+          assistantService.register({
+            context: 'empty',
+            mappings: { fieldMap: {} },
+          });
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService, 'empty')) === true
+          );
 
-          try {
-            await riskEngineDataClient.initializeResources({ namespace: 'default' });
-          } catch (e) {
+          if (!useDataStreamForAlerts) {
+            expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+          } else {
+            expect(clusterClient.ilm.putLifecycle).not.toHaveBeenCalled();
+          }
+
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(3);
+          const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+          expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+          const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+          expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+          const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+          expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+
+          const template = {
+            name: `.alerts-empty.alerts-default-index-template`,
+            body: {
+              index_patterns: [
+                useDataStreamForAlerts
+                  ? `.alerts-empty.alerts-default`
+                  : `.internal.alerts-empty.alerts-default-*`,
+              ],
+              composed_of: ['.alerts-framework-mappings'],
+              ...(useDataStreamForAlerts ? { data_stream: { hidden: true } } : {}),
+              priority: 7,
+              template: {
+                settings: {
+                  auto_expand_replicas: '0-1',
+                  hidden: true,
+                  ...(useDataStreamForAlerts
+                    ? {}
+                    : {
+                        'index.lifecycle': {
+                          name: '.alerts-ilm-policy',
+                          rollover_alias: `.alerts-empty.alerts-default`,
+                        },
+                      }),
+                  'index.mapping.ignore_malformed': true,
+                  'index.mapping.total_fields.limit': 2500,
+                },
+                mappings: {
+                  _meta: {
+                    kibana: { version: '8.8.0' },
+                    managed: true,
+                    namespace: 'default',
+                  },
+                  dynamic: false,
+                },
+              },
+              _meta: {
+                kibana: { version: '8.8.0' },
+                managed: true,
+                namespace: 'default',
+              },
+            },
+          };
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(template);
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalledWith({});
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalledWith({
+              expand_wildcards: 'all',
+              name: '.alerts-empty.alerts-default',
+            });
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalledWith({
+              index: '.internal.alerts-empty.alerts-default-000001',
+              body: {
+                aliases: {
+                  '.alerts-empty.alerts-default': {
+                    is_write_index: true,
+                  },
+                },
+              },
+            });
+            expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+              index: '.internal.alerts-empty.alerts-default-*',
+              name: '.alerts-empty.alerts-*',
+            });
+          }
+
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 1 : 2
+          );
+        });
+
+        test('should skip initialization if context already exists', async () => {
+          assistantService.register(TestRegistrationContext);
+          assistantService.register(TestRegistrationContext);
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
+          );
+        });
+
+        test('should throw error if context already exists and has been registered with a different field map', async () => {
+          assistantService.register(TestRegistrationContext);
+          expect(() => {
+            assistantService.register({
+              ...TestRegistrationContext,
+              mappings: { fieldMap: { anotherField: { type: 'keyword', required: false } } },
+            });
+          }).toThrowErrorMatchingInlineSnapshot(
+            `"test has already been registered with different options"`
+          );
+        });
+
+        test('should throw error if context already exists and has been registered with a different options', async () => {
+          assistantService.register(TestRegistrationContext);
+          expect(() => {
+            assistantService.register({
+              ...TestRegistrationContext,
+              useEcs: true,
+            });
+          }).toThrowErrorMatchingInlineSnapshot(
+            `"test has already been registered with different options"`
+          );
+        });
+
+        test('should allow same context with different "shouldWrite" option', async () => {
+          assistantService.register(TestRegistrationContext);
+          assistantService.register({
+            ...TestRegistrationContext,
+            shouldWrite: false,
+          });
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
+          );
+        });
+
+        test('should not update index template if simulating template throws error', async () => {
+          clusterClient.indices.simulateTemplate.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - fail`,
+            expect.any(Error)
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          // putIndexTemplate is skipped but other operations are called as expected
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+        });
+
+        test('should log error and set initialized to false if simulating template returns empty mappings', async () => {
+          clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+            ...SimulateTemplateResponse,
+            template: {
+              ...SimulateTemplateResponse.template,
+              mappings: {},
+            },
+          }));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({
+            result: false,
+            error:
+              'Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping',
+          });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            new Error(
+              `No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping`
+            )
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+        });
+
+        test('should log error and set initialized to false if updating index template throws error', async () => {
+          clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. fail', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Error installing index template .alerts-test.alerts-default-index-template - fail`,
+            expect.any(Error)
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+        });
+
+        test('should log error and set initialized to false if checking for concrete write index throws error', async () => {
+          clusterClient.indices.getAlias.mockRejectedValueOnce(new Error('fail'));
+          clusterClient.indices.getDataStream.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. fail', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            useDataStreamForAlerts
+              ? `Error fetching data stream for .alerts-test.alerts-default - fail`
+              : `Error fetching concrete indices for .internal.alerts-test.alerts-default-* pattern - fail`
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+        });
+
+        test('should not throw error if checking for concrete write index throws 404', async () => {
+          const error = new Error(`index doesn't exist`) as HTTPError;
+          error.statusCode = 404;
+          clusterClient.indices.getAlias.mockRejectedValueOnce(error);
+          clusterClient.indices.getDataStream.mockRejectedValueOnce(error);
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+          }
+        });
+
+        test('should log error and set initialized to false if updating index settings for existing indices throws error', async () => {
+          clusterClient.indices.putSettings.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. fail', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            useDataStreamForAlerts
+              ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: fail`
+              : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: fail`
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+        });
+
+        test('should skip updating index mapping for existing indices if simulate index template throws error', async () => {
+          clusterClient.indices.simulateIndexTemplate.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(logger.error).toHaveBeenCalledWith(
+            useDataStreamForAlerts
+              ? `Ignored PUT mappings for .alerts-test.alerts-default; error generating simulated mappings: fail`
+              : `Ignored PUT mappings for alias_1; error generating simulated mappings: fail`
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+
+            // this is called to update backing indices, so not used with data streams
+            expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          }
+        });
+
+        test('should log error and set initialized to false if updating index mappings for existing indices throws error', async () => {
+          clusterClient.indices.putMapping.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. fail', result: false });
+
+          if (useDataStreamForAlerts) {
             expect(logger.error).toHaveBeenCalledWith(
-              `Error initializing risk engine resources: ${error.message}`
+              `Failed to PUT mapping for .alerts-test.alerts-default: fail`
             );
+          } else {
+            expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias_1: fail`);
+          }
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
         });
-      });
 
-      describe('getStatus', () => {
-        it('should return initial status', async () => {
-          const status = await riskEngineDataClient.getStatus({
-            namespace: 'default',
-          });
-          expect(status).toEqual({
-            isMaxAmountOfRiskEnginesReached: false,
-            riskEngineStatus: 'NOT_INSTALLED',
-            legacyRiskEngineStatus: 'NOT_INSTALLED',
-          });
-        });
+        test('does not updating settings or mappings if no existing concrete indices', async () => {
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
+          clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
+            data_streams: [],
+          }));
 
-        describe('saved object exists and transforms not', () => {
-          beforeEach(() => {
-            mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
-          });
-
-          it('should return status with enabled true', async () => {
-            mockSavedObjectClient.find.mockResolvedValue(
-              getSavedObjectConfiguration({
-                enabled: true,
-              })
-            );
-
-            const status = await riskEngineDataClient.getStatus({
-              namespace: 'default',
-            });
-            expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: true,
-              riskEngineStatus: 'ENABLED',
-              legacyRiskEngineStatus: 'NOT_INSTALLED',
-            });
-          });
-
-          it('should return status with enabled false', async () => {
-            mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
-
-            const status = await riskEngineDataClient.getStatus({
-              namespace: 'default',
-            });
-            expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
-              riskEngineStatus: 'DISABLED',
-              legacyRiskEngineStatus: 'NOT_INSTALLED',
-            });
-          });
-        });
-
-        describe('legacy transforms', () => {
-          it('should fetch transforms', async () => {
-            await riskEngineDataClient.getStatus({
-              namespace: 'default',
-            });
-
-            expect(esClient.transform.getTransform).toHaveBeenCalledTimes(4);
-            expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(1, {
-              transform_id: 'ml_hostriskscore_pivot_transform_default',
-            });
-            expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(2, {
-              transform_id: 'ml_hostriskscore_latest_transform_default',
-            });
-            expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(3, {
-              transform_id: 'ml_userriskscore_pivot_transform_default',
-            });
-            expect(esClient.transform.getTransform).toHaveBeenNthCalledWith(4, {
-              transform_id: 'ml_userriskscore_latest_transform_default',
-            });
-          });
-
-          it('should return that legacy transform enabled if at least on transform exist', async () => {
-            esClient.transform.getTransform.mockResolvedValueOnce(transformsMock);
-
-            const status = await riskEngineDataClient.getStatus({
-              namespace: 'default',
-            });
-
-            expect(status).toEqual({
-              isMaxAmountOfRiskEnginesReached: false,
-              riskEngineStatus: 'NOT_INSTALLED',
-              legacyRiskEngineStatus: 'ENABLED',
-            });
-
-            esClient.transform.getTransformStats.mockReset();
-          });
-        });
-      });
-
-      describe('#getConfiguration', () => {
-        it('retrieves configuration from the saved object', async () => {
-          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
-
-          const configuration = await riskEngineDataClient.getConfiguration();
-
-          expect(mockSavedObjectClient.find).toHaveBeenCalledTimes(1);
-
-          expect(configuration).toEqual({
-            enabled: false,
-          });
-        });
-      });
-
-      describe('enableRiskEngine', () => {
-        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-
-        beforeEach(() => {
-          mockSavedObjectClient.find.mockResolvedValue(getSavedObjectConfiguration());
-          mockTaskManagerStart = taskManagerMock.createStart();
-        });
-
-        it('returns an error if saved object does not exist', async () => {
-          mockSavedObjectClient.find.mockResolvedValue({
-            page: 1,
-            per_page: 20,
-            total: 0,
-            saved_objects: [],
-          });
-
-          await expect(
-            riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
-          ).rejects.toThrow('Risk engine configuration not found');
-        });
-
-        it('should update saved object attribute', async () => {
-          await riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart });
-
-          expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
-            'risk-engine-configuration',
-            'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
-            {
-              enabled: true,
-            },
-            {
-              refresh: 'wait_for',
-            }
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
           );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
         });
 
-        describe('if task manager throws an error', () => {
-          beforeEach(() => {
-            mockTaskManagerStart.ensureScheduled.mockRejectedValueOnce(
-              new Error('Task Manager error')
-            );
-          });
+        test('should log error and set initialized to false if concrete indices exist but none are write index', async () => {
+          // not applicable for data streams
+          if (useDataStreamForAlerts) return;
 
-          it('disables the risk engine and re-throws the error', async () => {
-            await expect(
-              riskEngineDataClient.enableRiskEngine({ taskManager: mockTaskManagerStart })
-            ).rejects.toThrow('Task Manager error');
-
-            expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
-              'risk-engine-configuration',
-              'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
-              {
-                enabled: false,
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
+            '.internal.alerts-test.alerts-default-0001': {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: false,
+                  is_hidden: true,
+                },
+                alias_2: {
+                  is_write_index: false,
+                  is_hidden: true,
+                },
               },
-              {
-                refresh: 'wait_for',
-              }
-            );
-          });
-        });
-      });
+            },
+          }));
 
-      describe('disableRiskEngine', () => {
-        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-
-        beforeEach(() => {
-          mockTaskManagerStart = taskManagerMock.createStart();
-        });
-
-        it('should return error if saved object not exist', async () => {
-          mockSavedObjectClient.find.mockResolvedValueOnce({
-            page: 1,
-            per_page: 20,
-            total: 0,
-            saved_objects: [],
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({
+            error:
+              'Failure during installation. Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default',
+            result: false,
           });
 
-          expect.assertions(1);
-          try {
-            await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
-          } catch (e) {
-            expect(e.message).toEqual('Risk engine configuration not found');
+          expect(logger.error).toHaveBeenCalledWith(
+            new Error(
+              `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
+            )
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+        });
+
+        test('does not create new index if concrete write index exists', async () => {
+          // not applicable for data streams
+          if (useDataStreamForAlerts) return;
+
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
+            '.internal.alerts-test.alerts-default-0001': {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                  is_hidden: true,
+                },
+                alias_2: {
+                  is_write_index: false,
+                  is_hidden: true,
+                },
+              },
+            },
+          }));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
         });
 
-        it('should update saved object attrubute', async () => {
-          mockSavedObjectClient.find.mockResolvedValueOnce(getSavedObjectConfiguration());
+        test('should log error and set initialized to false if create concrete index throws error', async () => {
+          // not applicable for data streams
+          if (useDataStreamForAlerts) return;
 
-          await riskEngineDataClient.disableRiskEngine({ taskManager: mockTaskManagerStart });
+          clusterClient.indices.create.mockRejectedValueOnce(new Error('fail'));
+          clusterClient.indices.createDataStream.mockRejectedValueOnce(new Error('fail'));
 
-          expect(mockSavedObjectClient.update).toHaveBeenCalledWith(
-            'risk-engine-configuration',
-            'de8ca330-2d26-11ee-bc86-f95bf6192ee6',
-            {
-              enabled: false,
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. fail', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+        });
+
+        test('should not throw error if create concrete index throws resource_already_exists_exception error and write index already exists', async () => {
+          // not applicable for data streams
+          if (useDataStreamForAlerts) return;
+
+          const error = new Error(`fail`) as EsError;
+          error.meta = {
+            body: {
+              error: {
+                type: 'resource_already_exists_exception',
+              },
             },
-            {
-              refresh: 'wait_for',
+          };
+          clusterClient.indices.create.mockRejectedValueOnce(error);
+          clusterClient.indices.get.mockImplementationOnce(async () => ({
+            '.internal.alerts-test.alerts-default-000001': {
+              aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
+            },
+          }));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.get).toHaveBeenCalled();
+          expect(clusterClient.indices.create).toHaveBeenCalled();
+        });
+
+        test('should log error and set initialized to false if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
+          // not applicable for data streams
+          if (useDataStreamForAlerts) return;
+
+          const error = new Error(`fail`) as EsError;
+          error.meta = {
+            body: {
+              error: {
+                type: 'resource_already_exists_exception',
+              },
+            },
+          };
+          clusterClient.indices.create.mockRejectedValueOnce(error);
+          clusterClient.indices.get.mockImplementationOnce(async () => ({
+            '.internal.alerts-test.alerts-default-000001': {
+              aliases: { '.alerts-test.alerts-default': { is_write_index: false } },
+            },
+          }));
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await assistantService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({
+            error:
+              'Failure during installation. Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias',
+            result: false,
+          });
+
+          expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.get).toHaveBeenCalled();
+          expect(clusterClient.indices.create).toHaveBeenCalled();
+        });
+      });
+
+      describe('createAIAssistantDatastreamClient()', () => {
+        let assistantService: AIAssistantService;
+        beforeEach(async () => {
+          (AIAssistantConversationsDataClient as jest.Mock).mockImplementation(
+            () => conversationsDataClient
+          );
+        });
+
+        test('should create new AlertsClient', async () => {
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+            kibanaVersion: '8.8.0',
+          });
+        });
+
+        test('should retry initializing common resources if common resource initialization failed', async () => {
+          clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+
+          // Installing ILM policy failed so no calls to install context-specific resources
+          // should be made
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          const result = await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 2
+          );
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+            kibanaVersion: '8.8.0',
+          });
+
+          expect(result).not.toBe(null);
+          expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.info).toHaveBeenCalledWith(
+            `Resource installation for "test" succeeded after retry`
+          );
+        });
+
+        test('should not retry initializing common resources if common resource initialization is in progress', async () => {
+          // this is the initial call that fails
+          clusterClient.cluster.putComponentTemplate.mockRejectedValueOnce(new Error('fail'));
+
+          // this is the retry call that we'll artificially inflate the duration of
+          clusterClient.cluster.putComponentTemplate.mockImplementationOnce(async () => {
+            await new Promise((r) => setTimeout(r, 1000));
+            return { acknowledged: true };
+          });
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+
+          // Installing ILM policy failed so no calls to install context-specific resources
+          // should be made
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          // call createAIAssistantConversationsDataClient at the same time which will trigger the retries
+          const result = await Promise.all([
+            assistantService.createAlertsClient({
+              logger,
+              ruleType: ruleTypeWithAlertDefinition,
+              namespace: 'default',
+              rule: {
+                consumer: 'bar',
+                executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                id: '1',
+                name: 'rule-name',
+                parameters: {
+                  bar: true,
+                },
+                revision: 0,
+                spaceId: 'default',
+                tags: ['rule-', '-tags'],
+              },
+            }),
+            assistantService.createAlertsClient({
+              logger,
+              ruleType: ruleTypeWithAlertDefinition,
+              namespace: 'default',
+              rule: {
+                consumer: 'bar',
+                executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                id: '1',
+                name: 'rule-name',
+                parameters: {
+                  bar: true,
+                },
+                revision: 0,
+                spaceId: 'default',
+                tags: ['rule-', '-tags'],
+              },
+            }),
+          ]);
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 2
+          );
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+            kibanaVersion: '8.8.0',
+          });
+
+          expect(result[0]).not.toBe(null);
+          expect(result[1]).not.toBe(null);
+          expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.info).toHaveBeenCalledWith(
+            `Resource installation for "test" succeeded after retry`
+          );
+          expect(logger.info).toHaveBeenCalledWith(
+            `Skipped retrying common resource initialization because it is already being retried.`
+          );
+        });
+
+        test('should retry initializing context specific resources if context specific resource initialization failed', async () => {
+          clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+            ...SimulateTemplateResponse,
+            template: {
+              ...SimulateTemplateResponse.template,
+              mappings: {},
+            },
+          }));
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          const result = await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+            kibanaVersion: '8.8.0',
+          });
+
+          expect(result).not.toBe(null);
+          expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.info).toHaveBeenCalledWith(
+            `Resource installation for "test" succeeded after retry`
+          );
+        });
+
+        test('should not retry initializing context specific resources if context specific resource initialization is in progress', async () => {
+          // this is the initial call that fails
+          clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+            ...SimulateTemplateResponse,
+            template: {
+              ...SimulateTemplateResponse.template,
+              mappings: {},
+            },
+          }));
+
+          // this is the retry call that we'll artificially inflate the duration of
+          clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => {
+            await new Promise((r) => setTimeout(r, 1000));
+            return SimulateTemplateResponse;
+          });
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          const createAlertsClientWithDelay = async (delayMs: number | null) => {
+            if (delayMs) {
+              await new Promise((r) => setTimeout(r, delayMs));
             }
+
+            return await assistantService.createAlertsClient({
+              logger,
+              ruleType: ruleTypeWithAlertDefinition,
+              namespace: 'default',
+              rule: {
+                consumer: 'bar',
+                executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                id: '1',
+                name: 'rule-name',
+                parameters: {
+                  bar: true,
+                },
+                revision: 0,
+                spaceId: 'default',
+                tags: ['rule-', '-tags'],
+              },
+            });
+          };
+
+          const result = await Promise.all([
+            createAlertsClientWithDelay(null),
+            createAlertsClientWithDelay(1),
+          ]);
+
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledTimes(2);
+          expect(AIAssistantConversationsDataClient).toHaveBeenCalledWith({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            dataStreamAdapter,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+            kibanaVersion: '8.8.0',
+          });
+
+          expect(result[0]).not.toBe(null);
+          expect(result[1]).not.toBe(null);
+          expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+
+          // Should only log the retry once because the second call should
+          // leverage the outcome of the first retry
+          expect(
+            logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+            ).length
+          ).toEqual(1);
+          expect(
+            logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (calls: any[]) =>
+                calls[0] === `Resource installation for "test" succeeded after retry`
+            ).length
+          ).toEqual(1);
+        });
+
+        test('should throttle retries of initializing context specific resources', async () => {
+          // this is the initial call that fails
+          clusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+            ...SimulateTemplateResponse,
+            template: {
+              ...SimulateTemplateResponse.template,
+              mappings: {},
+            },
+          }));
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          const createAlertsClientWithDelay = async (delayMs: number | null) => {
+            if (delayMs) {
+              await new Promise((r) => setTimeout(r, delayMs));
+            }
+
+            return await assistantService.createAlertsClient({
+              logger,
+              ruleType: ruleTypeWithAlertDefinition,
+              namespace: 'default',
+              rule: {
+                consumer: 'bar',
+                executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+                id: '1',
+                name: 'rule-name',
+                parameters: {
+                  bar: true,
+                },
+                revision: 0,
+                spaceId: 'default',
+                tags: ['rule-', '-tags'],
+              },
+            });
+          };
+
+          await Promise.all([
+            createAlertsClientWithDelay(null),
+            createAlertsClientWithDelay(1),
+            createAlertsClientWithDelay(2),
+          ]);
+
+          expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+
+          // Should only log the retry once because the second and third retries should be throttled
+          expect(
+            logger.info.mock.calls.filter(
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (calls: any[]) => calls[0] === `Retrying resource initialization for context "test"`
+            ).length
+          ).toEqual(1);
+        });
+
+        test('should return null if retrying common resources initialization fails again', async () => {
+          let failCount = 0;
+          clusterClient.cluster.putComponentTemplate.mockImplementation(() => {
+            throw new Error(`fail ${++failCount}`);
+          });
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+
+          // Installing ILM policy failed so no calls to install context-specific resources
+          // should be made
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          const result = await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 2
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          expect(result).toBe(null);
+          expect(AlertsClient).not.toHaveBeenCalled();
+          expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            expect.stringMatching(
+              /There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Original error: Failure during installation\. fail \d+; Error after retry: Failure during installation\. fail \d+/
+            )
+          );
+        });
+
+        test('should return null if retrying common resources initialization fails again with same error', async () => {
+          clusterClient.cluster.putComponentTemplate.mockRejectedValue(new Error('fail'));
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil('error log called', async () => logger.error.mock.calls.length > 0);
+
+          expect(assistantService.isInitialized()).toEqual(false);
+
+          // Installing component template failed so no calls to install context-specific resources
+          // should be made
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          const result = await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 2
+          );
+          expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.getAlias).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
+
+          expect(result).toBe(null);
+          expect(AlertsClient).not.toHaveBeenCalled();
+          expect(logger.info).toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Retry failed with error: Failure during installation. fail`
+          );
+        });
+
+        test('should return null if retrying context specific initialization fails again', async () => {
+          clusterClient.indices.simulateTemplate.mockImplementationOnce(async () => ({
+            ...SimulateTemplateResponse,
+            template: {
+              ...SimulateTemplateResponse.template,
+              mappings: {},
+            },
+          }));
+          clusterClient.indices.putIndexTemplate.mockRejectedValueOnce(
+            new Error('fail index template')
+          );
+
+          assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+          assistantService.register(TestRegistrationContext);
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          const result = await assistantService.createAlertsClient({
+            logger,
+            ruleType: ruleTypeWithAlertDefinition,
+            namespace: 'default',
+            rule: {
+              consumer: 'bar',
+              executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              id: '1',
+              name: 'rule-name',
+              parameters: {
+                bar: true,
+              },
+              revision: 0,
+              spaceId: 'default',
+              tags: ['rule-', '-tags'],
+            },
+          });
+
+          expect(AlertsClient).not.toHaveBeenCalled();
+          expect(result).toBe(null);
+          expect(logger.info).not.toHaveBeenCalledWith(`Retrying common resource initialization`);
+          expect(logger.info).toHaveBeenCalledWith(
+            `Retrying resource initialization for context "test"`
+          );
+          expect(logger.warn).toHaveBeenCalledWith(
+            `There was an error in the framework installing namespace-level resources and creating concrete indices for context "test" - Original error: Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping; Error after retry: Failure during installation. fail index template`
           );
         });
       });
 
-      describe('init', () => {
-        let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
-        const initializeResourcesMock = jest.spyOn(
-          RiskEngineDataClient.prototype,
-          'initializeResources'
-        );
-        const enableRiskEngineMock = jest.spyOn(RiskEngineDataClient.prototype, 'enableRiskEngine');
+      describe('retries', () => {
+        test('should retry adding ILM policy for transient ES errors', async () => {
+          if (useDataStreamForAlerts) return;
 
-        const disableLegacyRiskEngineMock = jest.spyOn(
-          RiskEngineDataClient.prototype,
-          'disableLegacyRiskEngine'
-        );
-        beforeEach(() => {
-          mockTaskManagerStart = taskManagerMock.createStart();
-          disableLegacyRiskEngineMock.mockImplementation(() => Promise.resolve(true));
-
-          initializeResourcesMock.mockImplementation(() => {
-            return Promise.resolve();
+          clusterClient.ilm.putLifecycle
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
           });
 
-          enableRiskEngineMock.mockImplementation(() => {
-            return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
-          });
-
-          jest
-            .spyOn(savedObjectConfig, 'initSavedObjects')
-            .mockResolvedValue({} as unknown as SavedObject<RiskEngineConfiguration>);
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(3);
         });
 
-        afterEach(() => {
-          initializeResourcesMock.mockReset();
-          enableRiskEngineMock.mockReset();
-          disableLegacyRiskEngineMock.mockReset();
+        test('should retry adding component template for transient ES errors', async () => {
+          clusterClient.cluster.putComponentTemplate
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+          });
+
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(5);
         });
 
-        it('success', async () => {
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
+        test('should retry updating index template for transient ES errors', async () => {
+          clusterClient.indices.putIndexTemplate
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
           });
 
-          expect(initResult).toEqual({
-            errors: [],
-            legacyRiskEngineDisabled: true,
-            riskEngineConfigurationCreated: true,
-            riskEngineEnabled: true,
-            riskEngineResourcesInstalled: true,
-          });
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+          expect(assistantService.isInitialized()).toEqual(true);
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
         });
 
-        it('should catch error for disableLegacyRiskEngine, but continue', async () => {
-          disableLegacyRiskEngineMock.mockImplementation(() => {
-            throw new Error('Error disableLegacyRiskEngineMock');
-          });
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
+        test('should retry updating index settings for existing indices for transient ES errors', async () => {
+          clusterClient.indices.putSettings
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
           });
 
-          expect(initResult).toEqual({
-            errors: ['Error disableLegacyRiskEngineMock'],
-            legacyRiskEngineDisabled: false,
-            riskEngineConfigurationCreated: true,
-            riskEngineEnabled: true,
-            riskEngineResourcesInstalled: true,
-          });
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
+          } else {
+            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
+          }
         });
 
-        it('should catch error for resource init', async () => {
-          disableLegacyRiskEngineMock.mockImplementationOnce(() => {
-            throw new Error('Error disableLegacyRiskEngineMock');
+        test('should retry updating index mappings for existing indices for transient ES errors', async () => {
+          clusterClient.indices.putMapping
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
           });
 
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
-          });
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
 
-          expect(initResult).toEqual({
-            errors: ['Error disableLegacyRiskEngineMock'],
-            legacyRiskEngineDisabled: false,
-            riskEngineConfigurationCreated: true,
-            riskEngineEnabled: true,
-            riskEngineResourcesInstalled: true,
-          });
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 3 : 4
+          );
         });
 
-        it('should catch error for initializeResources and stop', async () => {
-          initializeResourcesMock.mockImplementationOnce(() => {
-            throw new Error('Error initializeResourcesMock');
+        test('should retry creating concrete index for transient ES errors', async () => {
+          clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
+            data_streams: [],
+          }));
+          clusterClient.indices.createDataStream
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ acknowledged: true });
+          clusterClient.indices.create
+            .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+            .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+            .mockResolvedValue({ index: 'index', shards_acknowledged: true, acknowledged: true });
+          const assistantService = new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
           });
 
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
+          await retryUntil(
+            'alert service initialized',
+            async () => assistantService.isInitialized() === true
+          );
+
+          assistantService.register(TestRegistrationContext);
+          await retryUntil(
+            'context initialized',
+            async () => (await getContextInitialized(assistantService)) === true
+          );
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).toHaveBeenCalledTimes(3);
+          } else {
+            expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);
+          }
+        });
+      });
+
+      describe('timeout', () => {
+        test('should short circuit initialization if timeout exceeded', async () => {
+          clusterClient.cluster.putComponentTemplate.mockImplementationOnce(async () => {
+            await new Promise((resolve) => setTimeout(resolve, 20));
+            return { acknowledged: true };
+          });
+          new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            timeoutMs: 10,
+            dataStreamAdapter,
           });
 
-          expect(initResult).toEqual({
-            errors: ['Error initializeResourcesMock'],
-            legacyRiskEngineDisabled: true,
-            riskEngineConfigurationCreated: false,
-            riskEngineEnabled: false,
-            riskEngineResourcesInstalled: false,
-          });
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+
+          expect(logger.error).toHaveBeenCalledWith(new Error(`Timeout: it took more than 10ms`));
         });
 
-        it('should catch error for initSavedObjects and stop', async () => {
-          jest.spyOn(savedObjectConfig, 'initSavedObjects').mockImplementationOnce(() => {
-            throw new Error('Error initSavedObjects');
+        test('should short circuit initialization if pluginStop$ signal received but not throw error', async () => {
+          pluginStop$.next();
+          new AIAssistantService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            timeoutMs: 10,
+            dataStreamAdapter,
           });
 
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
-          });
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
-          expect(initResult).toEqual({
-            errors: ['Error initSavedObjects'],
-            legacyRiskEngineDisabled: true,
-            riskEngineConfigurationCreated: false,
-            riskEngineEnabled: false,
-            riskEngineResourcesInstalled: true,
-          });
-        });
-
-        it('should catch error for enableRiskEngineMock and stop', async () => {
-          enableRiskEngineMock.mockImplementationOnce(() => {
-            throw new Error('Error enableRiskEngineMock');
-          });
-
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
-          });
-
-          expect(initResult).toEqual({
-            errors: ['Error enableRiskEngineMock'],
-            legacyRiskEngineDisabled: true,
-            riskEngineConfigurationCreated: true,
-            riskEngineEnabled: false,
-            riskEngineResourcesInstalled: true,
-          });
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
+          );
         });
       });
     });

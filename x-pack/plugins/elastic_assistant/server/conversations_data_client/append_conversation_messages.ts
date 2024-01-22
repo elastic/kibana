@@ -37,7 +37,7 @@ export const appendConversationMessages = async (
           values: [existingConversation.id ?? ''],
         },
       },
-      refresh: false,
+      refresh: true,
       script: {
         lang: 'painless',
         params: {
@@ -77,7 +77,12 @@ export const appendConversationMessages = async (
     );
     throw err;
   }
-  return getConversation(esClient, conversationIndex, existingConversation.id ?? '');
+  const updatedConversation = await getConversation(
+    esClient,
+    conversationIndex,
+    existingConversation.id ?? ''
+  );
+  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (updatedAt: string, messages: Message[]) => {

@@ -14,6 +14,7 @@ import {
   ElasticAssistantRequestHandlerContext,
 } from '../types';
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { conversationsDataClientMock } from './conversations_data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -28,6 +29,9 @@ export const createMockClients = () => {
       getRegisteredTools: jest.fn(),
       logger: loggingSystemMock.createLogger(),
       telemetry: coreMock.createSetup().analytics,
+      getAIAssistantConversationsDataClient: conversationsDataClientMock.create(),
+      getAIAssistantPromptsSOClient: jest.fn(),
+      getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -78,8 +82,9 @@ const createElasticAssistantRequestContextMock = (
     getRegisteredFeatures: jest.fn(),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
-    getAIAssistantDataClient: jest.fn(),
-    getAIAssistantSOClient: jest.fn(),
+    getAIAssistantConversationsDataClient: jest.fn(),
+    getAIAssistantPromptsSOClient: jest.fn(),
+    getAIAssistantAnonimizationFieldsSOClient: jest.fn(),
     getCurrentUser: jest.fn(),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn(),

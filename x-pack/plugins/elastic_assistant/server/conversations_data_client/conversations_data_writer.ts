@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
@@ -99,7 +100,7 @@ export class ConversationDataWriter implements ConversationDataWriter {
     const changedAt = new Date().toISOString();
     const conversationBody =
       params.conversationsToCreate?.flatMap((conversation) => [
-        { create: { _index: this.options.index, op_type: 'create' } },
+        { create: { _index: this.options.index, _id: uuidV4() } },
         transformToCreateScheme(changedAt, this.options.spaceId, this.options.user, conversation),
       ]) ?? [];
 

@@ -80,7 +80,7 @@ export interface AssistantProviderProps {
     }: {
       conversationId: string;
       content: string;
-    }) => void;
+    }) => Promise<void>;
     currentConversation: Conversation;
     isFetchingResponse: boolean;
     regenerateMessage: (conversationId: string) => void;
@@ -128,7 +128,7 @@ export interface UseAssistantContext {
     }: {
       conversationId: string;
       content: string;
-    }) => void;
+    }) => Promise<void>;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];

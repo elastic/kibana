@@ -13,14 +13,14 @@ import {
   ElasticAssistantPluginSetupDependencies,
   GetElser,
 } from '../types';
-import { createConversationRoute } from './conversation/create_route';
-import { deleteConversationRoute } from './conversation/delete_route';
-import { findConversationsRoute } from './conversation/find_route';
-import { readConversationRoute } from './conversation/read_route';
-import { updateConversationRoute } from './conversation/update_route';
-import { findUserConversationsRoute } from './conversation/find_user_conversations_route';
-import { bulkActionConversationsRoute } from './conversation/bulk_actions_route';
-import { appendConversationMessageRoute } from './conversation/append_conversation_messages_route';
+import { createConversationRoute } from './conversations/create_route';
+import { deleteConversationRoute } from './conversations/delete_route';
+import { findConversationsRoute } from './conversations/find_route';
+import { readConversationRoute } from './conversations/read_route';
+import { updateConversationRoute } from './conversations/update_route';
+import { findUserConversationsRoute } from './conversations/find_user_conversations_route';
+import { bulkActionConversationsRoute } from './conversations/bulk_actions_route';
+import { appendConversationMessageRoute } from './conversations/append_conversation_messages_route';
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';

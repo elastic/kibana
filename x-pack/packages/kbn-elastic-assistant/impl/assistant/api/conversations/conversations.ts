@@ -137,9 +137,12 @@ export interface PutConversationMessageParams {
 }
 
 /**
- * API call for evaluating models.
+ * API call for updating conversation.
  *
  * @param {PutConversationMessageParams} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {string} [options.title] - Conversation title
+ * @param {AbortSignal} [options.signal] - AbortSignal
  *
  * @returns {Promise<Conversation | IHttpFetchError>}
  */
@@ -163,6 +166,41 @@ export const updateConversationApi = async ({
           messages,
           replacements,
           apiConfig,
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        signal,
+      }
+    );
+
+    return response as Conversation;
+  } catch (error) {
+    return error as IHttpFetchError;
+  }
+};
+
+/**
+ * API call for evaluating models.
+ *
+ * @param {PutConversationMessageParams} options - The options object.
+ *
+ * @returns {Promise<Conversation | IHttpFetchError>}
+ */
+export const appendConversationMessagesApi = async ({
+  http,
+  conversationId,
+  messages,
+  signal,
+}: PutConversationMessageParams): Promise<Conversation | IHttpFetchError> => {
+  try {
+    const response = await http.fetch(
+      `${ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL}/${conversationId}/messages`,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          messages,
         }),
         headers: {
           'Content-Type': 'application/json',

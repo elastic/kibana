@@ -119,15 +119,11 @@ export class AIAssistantConversationsDataClient {
   };
 
   /**
-   * Creates a conversation, if given at least the "title" and "apiConfig"
-   * See {@link https://www.elastic.co/guide/en/security/current/}
-   * for more information around formats of the deserializer and serializer
+   * Updates a conversation with the new messages.
    * @param options
-   * @param options.id The id of the conversat to create or "undefined" if you want an "id" to be auto-created for you
-   * @param options.title A custom deserializer for the conversation. Optionally, you an define this as handle bars. See online docs for more information.
+   * @param options.conversation The existing conversation to which append the new messages.
    * @param options.messages Set this to true if this is a conversation that is "immutable"/"pre-packaged".
-   * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
-   * @returns The conversation created
+   * @returns The conversation updated
    */
   public appendConversationMessages = async (
     conversation: ConversationResponse,
@@ -178,7 +174,7 @@ export class AIAssistantConversationsDataClient {
    * See {@link https://www.elastic.co/guide/en/security/current/}
    * for more information around formats of the deserializer and serializer
    * @param options
-   * @param options.id The id of the conversat to create or "undefined" if you want an "id" to be auto-created for you
+   * @param options.id The id of the conversation to create or "undefined" if you want an "id" to be auto-created for you
    * @param options.title A custom deserializer for the conversation. Optionally, you an define this as handle bars. See online docs for more information.
    * @param options.messages Set this to true if this is a conversation that is "immutable"/"pre-packaged".
    * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
@@ -203,12 +199,11 @@ export class AIAssistantConversationsDataClient {
    * See {@link https://www.elastic.co/guide/en/elasticsearch/reference/current/optimistic-concurrency-control.html}
    * for more information around optimistic concurrency control.
    * @param options
-   * @param options._version This is the version, useful for optimistic concurrency control.
    * @param options.id id of the conversation to replace the conversation container data with.
-   * @param options.name The new name, or "undefined" if this should not be updated.
-   * @param options.description The new description, or "undefined" if this should not be updated.
-   * @param options.meta Additional meta data to associate with the conversation items as an object of "key/value" pairs. You can set this to "undefined" to not update meta values.
-   * @param options.version Updates the version of the conversation.
+   * @param options.title The new tilet, or "undefined" if this should not be updated.
+   * @param options.messages The new messages, or "undefined" if this should not be updated.
+   * @param options.excludeFromLastConversationStorage The new value for excludeFromLastConversationStorage, or "undefined" if this should not be updated.
+   * @param options.replacements The new value for replacements, or "undefined" if this should not be updated.
    */
   public updateConversation = async (
     existingConversation: ConversationResponse,
@@ -218,6 +213,7 @@ export class AIAssistantConversationsDataClient {
     const esClient = await this.options.elasticsearchClientPromise;
     return updateConversation(
       esClient,
+      this.options.logger,
       this.indexTemplateAndPattern.alias,
       existingConversation,
       updatedProps,

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   ConversationResponse,
   ConversationUpdateProps,
 } from '../schemas/conversations/common_attributes.gen';
-import { waitUntilDocumentIndexed } from '../lib/wait_until_document_indexed';
 import { getConversation } from './get_conversation';
 
 export interface UpdateConversationSchema {
@@ -46,36 +45,34 @@ export interface UpdateConversationSchema {
 
 export const updateConversation = async (
   esClient: ElasticsearchClient,
+  logger: Logger,
   conversationIndex: string,
   existingConversation: ConversationResponse,
   conversation: ConversationUpdateProps,
   isPatch?: boolean
 ): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
+  const params = transformToUpdateScheme(updatedAt, conversation);
 
-  // checkVersionConflict(_version, list._version);
-  // const calculatedVersion = version == null ? list.version + 1 : version;
-
-  const params: UpdateConversationSchema = transformToUpdateScheme(updatedAt, conversation);
-
-  const response = await esClient.updateByQuery({
-    conflicts: 'proceed',
-    index: conversationIndex,
-    query: {
-      ids: {
-        values: [existingConversation.id ?? ''],
+  try {
+    const response = await esClient.updateByQuery({
+      conflicts: 'proceed',
+      index: conversationIndex,
+      query: {
+        ids: {
+          values: [existingConversation.id ?? ''],
+        },
       },
-    },
-    refresh: false,
-    script: {
-      lang: 'painless',
-      params: {
-        ...params,
-        // when assigning undefined in painless, it will remove property and wil set it to null
-        // for patch we don't want to remove unspecified value in payload
-        assignEmpty: !(isPatch ?? true),
-      },
-      source: `
+      refresh: true,
+      script: {
+        lang: 'painless',
+        params: {
+          ...params,
+          // when assigning undefined in painless, it will remove property and wil set it to null
+          // for patch we don't want to remove unspecified value in payload
+          assignEmpty: !(isPatch ?? true),
+        },
+        source: `
           if (params.assignEmpty == true || params.containsKey('api_config')) {
             if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
               ctx._source.api_config.connector_id = params.api_config.connector_id;
@@ -119,29 +116,27 @@ export const updateConversation = async (
           }
           ctx._source.updated_at = params.updated_at;
         `,
-    },
-  });
+      },
+    });
 
-  let updatedOCCVersion: string | undefined;
-  if (response.updated) {
-    const checkIfListUpdated = async (): Promise<void> => {
-      const updatedConversation = await getConversation(
-        esClient,
-        conversationIndex,
-        existingConversation.id ?? ''
+    if (response.failures && response.failures.length > 0) {
+      logger.warn(
+        `Error updating conversation: ${response.failures.map((f) => f.id)} by ID: ${
+          existingConversation.id
+        }`
       );
-      /* if (updatedList?._version === list._version) {
-          throw Error('Document has not been re-indexed in time');
-        }
-        updatedOCCVersion = updatedList?._version;
-        */
-    };
-
-    await waitUntilDocumentIndexed(checkIfListUpdated);
-  } else {
-    throw Error('No conversation has been updated');
+      return null;
+    }
+  } catch (err) {
+    logger.warn(`Error updating conversation: ${err} by ID: ${existingConversation.id}`);
+    throw err;
   }
-  return getConversation(esClient, conversationIndex, existingConversation.id ?? '');
+  const updatedConversation = await getConversation(
+    esClient,
+    conversationIndex,
+    existingConversation.id ?? ''
+  );
+  return updatedConversation;
 };
 
 export const transformToUpdateScheme = (
@@ -153,7 +148,7 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
   }: ConversationUpdateProps
-) => {
+): UpdateConversationSchema => {
   return {
     updated_at: updatedAt,
     title,

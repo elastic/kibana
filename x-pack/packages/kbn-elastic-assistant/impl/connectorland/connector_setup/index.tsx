@@ -174,13 +174,13 @@ export const useConnectorSetup = ({
   );
 
   const onSaveConnector = useCallback(
-    (connector: ActionConnector) => {
+    async (connector: ActionConnector) => {
       const config = getGenAiConfig(connector);
       // add action type title to new connector
       const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
       // persist only the active conversation
 
-      setApiConfig({
+      await setApiConfig({
         conversationId: conversation.id,
         title: conversation.title,
         isDefault: conversation.isDefault,
@@ -210,7 +210,7 @@ export const useConnectorSetup = ({
 
       refetchConnectors?.();
       setIsConnectorModalVisible(false);
-      appendMessage({
+      await appendMessage({
         conversationId: conversation.id,
         message: {
           role: 'assistant',
