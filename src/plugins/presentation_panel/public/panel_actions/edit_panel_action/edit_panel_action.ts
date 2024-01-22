@@ -9,11 +9,13 @@
 import { i18n } from '@kbn/i18n';
 
 import {
-  apiPublishesViewMode,
   hasEditCapabilities,
   HasEditCapabilities,
   EmbeddableApiContext,
-  PublishesViewMode,
+  CanAccessViewMode,
+  apiCanAccessViewMode,
+  getInheritedViewMode,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import {
   Action,
@@ -23,10 +25,10 @@ import {
 
 export const ACTION_EDIT_PANEL = 'editPanel';
 
-export type EditPanelActionApi = PublishesViewMode & HasEditCapabilities;
+export type EditPanelActionApi = CanAccessViewMode & HasEditCapabilities;
 
 const isApiCompatible = (api: unknown | null): api is EditPanelActionApi => {
-  return hasEditCapabilities(api) && apiPublishesViewMode(api);
+  return hasEditCapabilities(api) && apiCanAccessViewMode(api);
 };
 
 export class EditPanelAction
@@ -53,7 +55,7 @@ export class EditPanelAction
     onChange: (isCompatible: boolean, action: Action<EmbeddableApiContext>) => void
   ) {
     if (!isApiCompatible(embeddable)) return;
-    return embeddable.viewMode.subscribe((viewMode) => {
+    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
       if (viewMode === 'edit' && isApiCompatible(embeddable) && embeddable.isEditingEnabled()) {
         onChange(true, this);
         return;
@@ -77,7 +79,7 @@ export class EditPanelAction
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable) || !embeddable.isEditingEnabled()) return false;
-    return embeddable.viewMode.value === 'edit';
+    return getInheritedViewMode(embeddable) === 'edit';
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {

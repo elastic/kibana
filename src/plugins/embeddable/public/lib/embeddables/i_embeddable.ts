@@ -8,6 +8,7 @@
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 import { CanLinkToLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
+import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/public/panel_component/types';
 import {
   HasEditCapabilities,
   HasType,
@@ -16,8 +17,8 @@ import {
   PublishesDataViews,
   PublishesDisabledActionIds,
   PublishesLocalUnifiedSearch,
-  PublishesParentApi,
-  PublishesUniqueId,
+  HasParentApi,
+  HasUniqueId,
   PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
@@ -36,9 +37,8 @@ export type { EmbeddableInput };
  * Types for compatibility between the legacy Embeddable system and the new system
  */
 export type LegacyEmbeddableAPI = HasType &
-  PublishesUniqueId &
+  HasUniqueId &
   PublishesViewMode &
-  PublishesParentApi &
   PublishesDataViews &
   HasEditCapabilities &
   PublishesDataLoading &
@@ -49,6 +49,7 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesWritablePanelTitle &
   PublishesWritablePanelDescription &
   Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
+  HasParentApi<DefaultPresentationPanelApi['parentApi']> &
   EmbeddableHasTimeRange;
 
 export interface EmbeddableAppContext {
