@@ -95,12 +95,11 @@ export const useRulesListFilterStore = ({
     [rulesListFilterUrl]
   );
 
-  const getFilterStore = useCallback(
+  const filtersStore = useMemo(
     () =>
       hasFilterFromUrl ? rulesListFilterUrl : hasFilterFromLocalStorage ? rulesListFilterLocal : {},
     [hasFilterFromLocalStorage, hasFilterFromUrl, rulesListFilterLocal, rulesListFilterUrl]
   );
-  const filtersStore = getFilterStore();
   const [filters, setFilters] = useState<RulesListFilters>({
     actionTypes: filtersStore?.actionTypes ?? [],
     ruleExecutionStatuses: lastResponseFilter ?? [],
@@ -166,16 +165,15 @@ export const useRulesListFilterStore = ({
 
   useEffect(() => {
     if (hasFilterFromUrl || hasFilterFromLocalStorage) {
-      const updatedFiltersStore = getFilterStore();
       setFilters({
-        actionTypes: updatedFiltersStore?.actionTypes ?? [],
+        actionTypes: filtersStore?.actionTypes ?? [],
         ruleExecutionStatuses: lastResponseFilter ?? [],
-        ruleLastRunOutcomes: updatedFiltersStore?.lastResponse ?? lastRunOutcomeFilter ?? [],
-        ruleParams: updatedFiltersStore?.params ?? ruleParamFilter ?? {},
-        ruleStatuses: updatedFiltersStore?.status ?? statusFilter ?? [],
-        searchText: updatedFiltersStore?.search ?? searchFilter ?? '',
-        tags: updatedFiltersStore?.tags ?? [],
-        types: updatedFiltersStore?.type ?? typeFilter ?? [],
+        ruleLastRunOutcomes: filtersStore?.lastResponse ?? lastRunOutcomeFilter ?? [],
+        ruleParams: filtersStore?.params ?? ruleParamFilter ?? {},
+        ruleStatuses: filtersStore?.status ?? statusFilter ?? [],
+        searchText: filtersStore?.search ?? searchFilter ?? '',
+        tags: filtersStore?.tags ?? [],
+        types: filtersStore?.type ?? typeFilter ?? [],
         kueryNode: undefined,
       });
     }

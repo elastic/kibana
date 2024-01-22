@@ -30,8 +30,16 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const toasts = getService('toasts');
 
   async function refreshRulesList() {
-    await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
-    await testSubjects.click('manageRulesPageButton');
+    const existsClearFilter = await testSubjects.exists('rules-list-clear-filter');
+    const existsRefreshButton = await testSubjects.exists('refreshRulesButton');
+    if (existsClearFilter) {
+      await testSubjects.click('rules-list-clear-filter');
+    } else if (existsRefreshButton) {
+      await testSubjects.click('refreshRulesButton');
+    } else {
+      await svlCommonNavigation.sidenav.clickLink({ text: 'Alerts' });
+      await testSubjects.click('manageRulesPageButton');
+    }
   }
 
   async function failRule({
