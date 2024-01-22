@@ -55,7 +55,7 @@ export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup
   const hasAllAssets = missingIndexTemplates.length === 0 && missingPipelines.length === 0;
   if (!hasAllAssets) {
     server.logger.error(
-      `Synthetics assets are missing. Assets check route will try to reinstall assets.`
+      `Synthetics assets are missing. Attempting to reinstall assets.`
     );
 
     // reinstall synthetics integration
@@ -75,7 +75,7 @@ export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup
         error: 'Synthetics package is not installed, installation failed.',
       };
     } else {
-      server.logger.info(`Synthetics package missing assets are installed.`);
+      server.logger.info(`Synthetics package assets reinstalled successfully.`);
       return { hasAllAssets: true, reinstalled: true };
     }
   }
