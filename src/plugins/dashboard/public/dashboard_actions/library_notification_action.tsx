@@ -8,7 +8,11 @@
 
 import React from 'react';
 
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import {
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  getViewModeSubject,
+} from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { LibraryNotificationPopover } from './library_notification_popover';
 import { unlinkActionIsCompatible, UnlinkFromLibraryAction } from './unlink_from_library_action';
@@ -43,7 +47,7 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
      * TODO: Upgrade this action by subscribing to changes in the existance of a saved object id. Currently,
      *  this is unnecessary because a link or unlink operation will cause the panel to unmount and remount.
      */
-    return embeddable.viewMode.subscribe((viewMode) => {
+    return getViewModeSubject(embeddable)?.subscribe((viewMode) => {
       embeddable.canUnlinkFromLibrary().then((canUnlink) => {
         onChange(viewMode === 'edit' && canUnlink, this);
       });
@@ -62,7 +66,7 @@ export class LibraryNotificationAction implements Action<EmbeddableApiContext> {
 
   public isCompatible = async ({ embeddable }: EmbeddableApiContext) => {
     if (!unlinkActionIsCompatible(embeddable)) return false;
-    return embeddable.viewMode.value === 'edit' && embeddable.canUnlinkFromLibrary();
+    return getInheritedViewMode(embeddable) === 'edit' && embeddable.canUnlinkFromLibrary();
   };
 
   public execute = async () => {};

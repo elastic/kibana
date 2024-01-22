@@ -12,14 +12,15 @@ import {
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
-  apiPublishesUniqueId,
-  apiPublishesParentApi,
-  apiPublishesViewMode,
+  apiHasUniqueId,
   EmbeddableApiContext,
-  PublishesUniqueId,
+  HasUniqueId,
   PublishesPanelTitle,
-  PublishesParentApi,
-  PublishesViewMode,
+  apiCanAccessViewMode,
+  CanAccessViewMode,
+  HasParentApi,
+  apiHasParentApi,
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ReplacePanelSOFinder } from '.';
@@ -28,17 +29,17 @@ import { dashboardReplacePanelActionStrings } from './_dashboard_actions_strings
 
 export const ACTION_REPLACE_PANEL = 'replacePanel';
 
-export type ReplacePanelActionApi = PublishesViewMode &
-  PublishesUniqueId &
+export type ReplacePanelActionApi = CanAccessViewMode &
+  HasUniqueId &
   Partial<PublishesPanelTitle> &
-  PublishesParentApi<PresentationContainer & Partial<TracksOverlays>>;
+  HasParentApi<PresentationContainer & Partial<TracksOverlays>>;
 
 const isApiCompatible = (api: unknown | null): api is ReplacePanelActionApi =>
   Boolean(
-    apiPublishesUniqueId(api) &&
-      apiPublishesViewMode(api) &&
-      apiPublishesParentApi(api) &&
-      apiIsPresentationContainer(api.parentApi.value)
+    apiHasUniqueId(api) &&
+      apiCanAccessViewMode(api) &&
+      apiHasParentApi(api) &&
+      apiIsPresentationContainer(api.parentApi)
   );
 
 export class ReplacePanelAction implements Action<EmbeddableApiContext> {
@@ -60,7 +61,7 @@ export class ReplacePanelAction implements Action<EmbeddableApiContext> {
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) return false;
-    return embeddable.viewMode.value === 'edit';
+    return getInheritedViewMode(embeddable) === 'edit';
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
