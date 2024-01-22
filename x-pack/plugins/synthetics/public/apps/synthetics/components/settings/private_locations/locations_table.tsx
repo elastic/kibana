@@ -18,6 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux';
 import { Criteria } from '@elastic/eui/src/components/basic_table/basic_table';
+import { CopyName } from './copy_name';
 import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
@@ -62,6 +63,7 @@ export const PrivateLocationsTable = ({
     {
       field: 'label',
       name: LOCATION_NAME_LABEL,
+      render: (label: string) => <CopyName text={label} />,
     },
     {
       field: 'monitors',
@@ -82,7 +84,7 @@ export const PrivateLocationsTable = ({
       render: (val: string[]) => {
         const tags = val ?? [];
         if (tags.length === 0) {
-          return <EuiText>--</EuiText>;
+          return '--';
         }
         return (
           <EuiFlexGroup gutterSize="xs" wrap>

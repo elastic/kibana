@@ -5,18 +5,22 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { takeOsqueryActionWithParams } from '../../tasks/live_query';
 import { ServerlessRoleName } from '../../support/roles';
 
 describe.skip('ALL - Timelines', { tags: ['@ess'] }, () => {
+  before(() => {
+    initializeDataViews();
+  });
   beforeEach(() => {
     cy.login(ServerlessRoleName.SOC_MANAGER);
   });
 
   it('should substitute osquery parameter on non-alert event take action', () => {
     cy.visit('/app/security/timelines');
-    cy.getBySel('flyoutBottomBar').within(() => {
-      cy.getBySel('flyoutOverlay').click();
+    cy.getBySel('timeline-bottom-bar').within(() => {
+      cy.getBySel('timeline-bottom-bar-title-button').click();
     });
     cy.getBySel('timelineQueryInput').type('NOT host.name: "dev-fleet-server.8220"{enter}');
     // Filter out alerts

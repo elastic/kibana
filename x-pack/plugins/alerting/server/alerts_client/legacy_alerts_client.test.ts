@@ -118,6 +118,18 @@ const testAlert2 = {
   },
 };
 
+const defaultExecutionOpts = {
+  maxAlerts: 1000,
+  ruleLabel: `test: rule-name`,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  activeAlertsFromState: {
+    '1': testAlert1,
+    '2': testAlert2,
+  },
+  recoveredAlertsFromState: {},
+  startedAt: null,
+};
+
 describe('Legacy Alerts Client', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -130,16 +142,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `test: my-test-rule`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     expect(createAlertFactory).toHaveBeenCalledWith({
       alerts: {
@@ -159,16 +162,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `test: my-test-rule`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     alertsClient.factory();
     expect(getPublicAlertFactory).toHaveBeenCalledWith(mockCreateAlertFactory);
@@ -180,16 +174,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `test: my-test-rule`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     alertsClient.getAlert('1');
     expect(mockCreateAlertFactory.get).toHaveBeenCalledWith('1');
@@ -201,16 +186,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `test: my-test-rule`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     alertsClient.checkLimitUsage();
     expect(mockCreateAlertFactory.alertLimit.checkLimitUsage).toHaveBeenCalled();
@@ -222,16 +198,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `test: my-test-rule`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     alertsClient.hasReachedAlertLimit();
     expect(mockCreateAlertFactory.hasReachedAlertLimit).toHaveBeenCalled();
@@ -269,16 +236,7 @@ describe('Legacy Alerts Client', () => {
       ruleType,
     });
 
-    await alertsClient.initializeExecution({
-      maxAlerts: 1000,
-      ruleLabel: `ruleLogPrefix`,
-      flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-      activeAlertsFromState: {
-        '1': testAlert1,
-        '2': testAlert2,
-      },
-      recoveredAlertsFromState: {},
-    });
+    await alertsClient.initializeExecution(defaultExecutionOpts);
 
     alertsClient.processAndLogAlerts({
       eventLogger: alertingEventLogger,
@@ -304,6 +262,7 @@ describe('Legacy Alerts Client', () => {
       autoRecoverAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
       maintenanceWindowIds: ['window-id1', 'window-id2'],
+      startedAt: null,
     });
 
     expect(trimRecoveredAlerts).toHaveBeenCalledWith(logger, {}, 1000);
@@ -334,7 +293,7 @@ describe('Legacy Alerts Client', () => {
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
       recoveredAlerts: {},
-      ruleLogPrefix: 'ruleLogPrefix',
+      ruleLogPrefix: 'test: rule-name',
       ruleRunMetricsStore,
       canSetRecoveryContext: false,
       shouldPersistAlerts: true,

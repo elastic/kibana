@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { stringifyZodError } from '@kbn/securitysolution-es-utils';
-import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import type { ExportRulesRequestQueryInput } from './export_rules_route.gen';
 import { ExportRulesRequestBody, ExportRulesRequestQuery } from './export_rules_route.gen';
 
@@ -121,7 +120,7 @@ describe('Export rules request schema', () => {
       const result = ExportRulesRequestQuery.safeParse(payload);
       expectParseError(result);
       expect(stringifyZodError(result.error)).toEqual(
-        `exclude_export_details: Invalid enum value. Expected 'true' | 'false', received 'invalid string'`
+        `exclude_export_details: Invalid enum value. Expected 'true' | 'false', received 'invalid string', exclude_export_details: Expected boolean, received string`
       );
     });
   });

@@ -8,7 +8,7 @@
 import { Document } from 'langchain/document';
 
 /**
- * Mock LangChain `Document`s from `knowledge_base/esql/docs`, loaded from a LangChain `DirectoryLoader`
+ * Mock LangChain `Document`s from `knowledge_base/esql/documentation`, loaded from a LangChain `DirectoryLoader`
  */
 export const mockEsqlDocsFromDirectoryLoader: Document[] = [
   {
@@ -16,7 +16,7 @@ export const mockEsqlDocsFromDirectoryLoader: Document[] = [
       '[[esql-agg-avg]]\n=== `AVG`\nThe average of a numeric field.\n\n[source.merge.styled,esql]\n----\ninclude::{esql-specs}/stats.csv-spec[tag=avg]\n----\n[%header.monospaced.styled,format=dsv,separator=|]\n|===\ninclude::{esql-specs}/stats.csv-spec[tag=avg-result]\n|===\n\nThe result is always a `double` not matter the input type.\n',
     metadata: {
       source:
-        '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/docs/aggregation_functions/avg.asciidoc',
+        '/Users/andrew.goldstein/Projects/forks/andrew-goldstein/kibana/x-pack/plugins/elastic_assistant/server/knowledge_base/esql/documentation/aggregation_functions/avg.asciidoc',
     },
   },
 ];

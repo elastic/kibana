@@ -7,7 +7,7 @@ SO_MIGRATIONS_SNAPSHOT_FOLDER=kibana-so-types-snapshots
 SNAPSHOT_FILE_PATH="${1:-target/plugin_so_types_snapshot.json}"
 
 echo "--- Creating snapshot of Saved Object migration info"
-node scripts/snapshot_plugin_types --outputPath "$SNAPSHOT_FILE_PATH"
+node scripts/snapshot_plugin_types snapshot --outputPath "$SNAPSHOT_FILE_PATH"
 
 echo "--- Uploading as ${BUILDKITE_COMMIT}.json"
 SNAPSHOT_PATH="${SO_MIGRATIONS_SNAPSHOT_FOLDER}/${BUILDKITE_COMMIT}.json"

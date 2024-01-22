@@ -8,12 +8,12 @@
 import { ReactText } from 'react';
 import Color from 'color';
 import { get, first, last, min, max } from 'lodash';
-import { createFormatter } from '../../../../../common/formatters';
 import {
   InventoryVisTypeRT,
   InventoryFormatterType,
   InventoryVisType,
-} from '../../../../../common/inventory_models/types';
+} from '@kbn/metrics-data-access-plugin/common';
+import { createFormatter } from '../../../../../common/formatters';
 import { SeriesOverrides } from '../types';
 import {
   NodeDetailsDataSeries,

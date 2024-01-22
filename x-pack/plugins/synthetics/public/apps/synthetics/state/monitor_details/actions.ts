@@ -38,5 +38,4 @@ export const getMonitorRecentPingsAction = createAsyncAction<MostRecentPingsRequ
   '[MONITOR DETAILS] GET RECENT PINGS'
 );
 
-export const showOnlyFinalAttemptsAction = createAction<boolean>('SHOW ONLY FINAL ATTEMPTS');
 export const setStatusFilter = createAction<'up' | 'down' | undefined>('SET STATUS FILTER');

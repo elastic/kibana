@@ -16,6 +16,5 @@ export const useFetchSloList = (): UseFetchSloListResponse => {
     isError: false,
     isSuccess: true,
     data: sloList,
-    refetch: function () {} as UseFetchSloListResponse['refetch'],
   };
 };

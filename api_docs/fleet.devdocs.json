@@ -782,7 +782,8 @@
                 "docId": "kibGuidedOnboardingPluginApi",
                 "section": "def-public.GuidedOnboardingPluginStart",
                 "text": "GuidedOnboardingPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/plugin.ts",
             "deprecated": false,
@@ -891,6 +892,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2367,6 +2371,18 @@
         "label": "KibanaSavedObjectType",
         "description": [],
         "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-public.SetupTechnology",
+        "type": "Enum",
+        "tags": [],
+        "label": "SetupTechnology",
+        "description": [],
+        "path": "x-pack/plugins/fleet/common/types/models/setup_technology.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4514,7 +4530,7 @@
             "text": "AgentNotFoundError"
           },
           " extends ",
-          "FleetError"
+          "FleetNotFoundError"
         ],
         "path": "x-pack/plugins/fleet/server/errors/index.ts",
         "deprecated": false,
@@ -4828,7 +4844,11 @@
               "\nList agents"
             ],
             "signature": [
-              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }) => Promise<{ agents: ",
+              "(options: Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+              "AggregationsAggregationContainer",
+              "> | undefined; searchAfter?: ",
+              "SortResults",
+              " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }) => Promise<{ agents: ",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -4836,7 +4856,9 @@
                 "section": "def-common.Agent",
                 "text": "Agent"
               },
-              "[]; total: number; page: number; perPage: number; }>"
+              "[]; total: number; page: number; perPage: number; aggregations?: Record<string, ",
+              "AggregationsAggregate",
+              "> | undefined; }>"
             ],
             "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
             "deprecated": false,
@@ -4850,7 +4872,11 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; }"
+                  "Readonly<{ page?: number | undefined; perPage?: number | undefined; kuery?: any; sortField?: string | undefined; sortOrder?: \"asc\" | \"desc\" | undefined; showUpgradeable?: boolean | undefined; } & {}> & { showInactive: boolean; aggregations?: Record<string, ",
+                  "AggregationsAggregationContainer",
+                  "> | undefined; searchAfter?: ",
+                  "SortResults",
+                  " | undefined; pitId?: string | undefined; getStatusSummary?: boolean | undefined; }"
                 ],
                 "path": "x-pack/plugins/fleet/server/services/agents/agent_service.ts",
                 "deprecated": false,
@@ -6694,7 +6720,7 @@
             "label": "ensureInstalledPackage",
             "description": [],
             "signature": [
-              "(options: { pkgName: string; pkgVersion?: string | undefined; spaceId?: string | undefined; }) => Promise<",
+              "(options: { pkgName: string; pkgVersion?: string | undefined; spaceId?: string | undefined; force?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "fleet",
                 "scope": "common",
@@ -6753,6 +6779,111 @@
                     "description": [],
                     "signature": [
                       "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.ensureInstalledPackage.$1.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.installPackage",
+            "type": "Function",
+            "tags": [],
+            "label": "installPackage",
+            "description": [],
+            "signature": [
+              "(options: { pkgName: string; pkgVersion?: string | undefined; spaceId?: string | undefined; force?: boolean | undefined; }) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.InstallResult",
+                "text": "InstallResult"
+              },
+              " | undefined>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.installPackage.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.pkgName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pkgName",
+                    "description": [],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.pkgVersion",
+                    "type": "string",
+                    "tags": [],
+                    "label": "pkgVersion",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.spaceId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "spaceId",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.installPackage.$1.force",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "force",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
                     ],
                     "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
                     "deprecated": false,
@@ -7135,9 +7266,9 @@
               },
               ", options?: { spaceId?: string | undefined; id?: string | undefined; user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7292,9 +7423,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7558,9 +7689,9 @@
               "NewPackagePolicyWithId",
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7674,9 +7805,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -7768,9 +7899,9 @@
               },
               "[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -7882,9 +8013,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8371,9 +8502,9 @@
               },
               ", options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8489,9 +8620,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8575,9 +8706,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8688,9 +8819,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -8803,9 +8934,9 @@
               },
               ", ids: string[], options?: { user?: ",
               {
-                "pluginId": "security",
+                "pluginId": "@kbn/security-plugin-types-common",
                 "scope": "common",
-                "docId": "kibSecurityPluginApi",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                 "section": "def-common.AuthenticatedUser",
                 "text": "AuthenticatedUser"
               },
@@ -8908,9 +9039,9 @@
                     "description": [],
                     "signature": [
                       {
-                        "pluginId": "security",
+                        "pluginId": "@kbn/security-plugin-types-common",
                         "scope": "common",
-                        "docId": "kibSecurityPluginApi",
+                        "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
                         "section": "def-common.AuthenticatedUser",
                         "text": "AuthenticatedUser"
                       },
@@ -17487,7 +17618,7 @@
         "label": "isValidNamespace",
         "description": [],
         "signature": [
-          "(namespace: string) => { valid: boolean; error?: string | undefined; }"
+          "(namespace: string, allowBlankNamespace: boolean | undefined) => { valid: boolean; error?: string | undefined; }"
         ],
         "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
         "deprecated": false,
@@ -17507,6 +17638,21 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.isValidNamespace.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowBlankNamespace",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/is_valid_namespace.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -18164,17 +18310,19 @@
           },
           {
             "parentPluginId": "fleet",
-            "id": "def-common.BundledPackage.buffer",
-            "type": "Object",
+            "id": "def-common.BundledPackage.getBuffer",
+            "type": "Function",
             "tags": [],
-            "label": "buffer",
+            "label": "getBuffer",
             "description": [],
             "signature": [
-              "Buffer"
+              "() => Promise<Buffer>"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -20628,6 +20776,21 @@
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.Installation.latest_install_failed_attempts",
+            "type": "Array",
+            "tags": [],
+            "label": "latest_install_failed_attempts",
+            "description": [],
+            "signature": [
+              "InstallFailedAttempt",
+              "[] | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -21285,6 +21448,9 @@
             "tags": [],
             "label": "namespace",
             "description": [],
+            "signature": [
+              "string | undefined"
+            ],
             "path": "x-pack/plugins/fleet/common/types/models/package_policy.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -22478,7 +22644,7 @@
             "label": "owner",
             "description": [],
             "signature": [
-              "{ github: string; }"
+              "{ github: string; type?: \"elastic\" | \"partner\" | \"community\" | undefined; }"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -22501,6 +22667,20 @@
                 "text": "RegistryElasticsearch"
               },
               ", \"index_template.settings\" | \"index_template.mappings\" | \"index_template.data_stream\"> | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "agent",
+            "description": [],
+            "signature": [
+              "{ privileges?: { root?: boolean | undefined; } | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
             "deprecated": false,
@@ -22857,6 +23037,36 @@
             "description": [],
             "signature": [
               "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.lifecycle]",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.agent]",
+            "description": [],
+            "signature": [
+              "RegistryAgent",
               " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -23371,7 +23581,7 @@
             "label": "[RegistryVarsEntryKeys.type]",
             "description": [],
             "signature": [
-              "\"string\" | \"text\" | \"integer\" | \"select\" | \"bool\" | \"password\" | \"yaml\" | \"textarea\""
+              "\"string\" | \"text\" | \"integer\" | \"select\" | \"textarea\" | \"bool\" | \"password\" | \"yaml\""
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
             "deprecated": false,
@@ -24999,6 +25209,8 @@
         "signature": [
           "NewElasticsearchOutput",
           " | ",
+          "NewRemoteElasticsearchOutput",
+          " | ",
           "NewLogstashOutput",
           " | ",
           "KafkaOutput"
@@ -25373,7 +25585,7 @@
         "label": "RegistrySearchResult",
         "description": [],
         "signature": [
-          "{ type?: \"input\" | \"integration\" | undefined; name: string; description: string; title: string; version: string; path: string; download: string; internal?: boolean | undefined; icons?: (",
+          "{ type?: \"input\" | \"integration\" | undefined; name: string; title: string; path: string; description: string; version: string; download: string; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

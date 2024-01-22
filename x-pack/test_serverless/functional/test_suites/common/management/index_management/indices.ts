@@ -28,5 +28,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const url = await browser.getCurrentUrl();
       expect(url).to.contain(`/indices`);
     });
+    it('can create an index', async () => {
+      const testIndexName = `index-ftr-test-${Math.random()}`;
+      await pageObjects.indexManagement.clickCreateIndexButton();
+      await pageObjects.indexManagement.setCreateIndexName(testIndexName);
+      await pageObjects.indexManagement.clickCreateIndexSaveButton();
+      await pageObjects.indexManagement.expectIndexToExist(testIndexName);
+    });
   });
 };

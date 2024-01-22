@@ -6,14 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import React, { Fragment, type FC } from 'react';
 
-import { isGroupNode, isItemNode } from '../../../utils';
 import { PanelGroup } from './panel_group';
 import { PanelNavItem } from './panel_nav_item';
 import type { PanelNavNode } from './types';
+
+function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+  return children !== undefined;
+}
+
+function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
+  return children === undefined;
+}
 
 /**
  * All the children of a panel must be wrapped into groups. This is because a group in DOM is represented by <ul> tags
@@ -39,7 +46,7 @@ function serializeChildren(node: PanelNavNode): ChromeProjectNavigationNode[] | 
       {
         id: 'root',
         title: '',
-        path: [...node.path, 'root'],
+        path: `${node.path}.root`,
         children: [...node.children],
       },
     ];
@@ -69,13 +76,10 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
     (child) => child.sideNavStatus !== 'hidden'
   );
   const serializedChildren = serializeChildren({ ...selectedNode, children: filteredChildren });
-  const totalChildren = serializedChildren?.length ?? 0;
-  const firstChildIsGroup = !!serializedChildren?.[0]?.children;
-  const firstGroupTitle = firstChildIsGroup && serializedChildren?.[0]?.title;
-  const firstGroupHasTitle = !!firstGroupTitle;
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+      {/* Panel title */}
       <EuiFlexItem>
         {typeof selectedNode.title === 'string' ? (
           <EuiTitle size="xxs">
@@ -86,10 +90,9 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
         )}
       </EuiFlexItem>
 
+      {/* Panel navigation */}
       <EuiFlexItem style={{ width: '100%' }}>
         <>
-          {firstGroupHasTitle && <EuiSpacer size="l" />}
-
           {serializedChildren && (
             <>
               {serializedChildren.map((child, i) => {
@@ -103,9 +106,6 @@ export const DefaultContent: FC<Props> = ({ selectedNode }) => {
                       isFirstInList={i === 0}
                       hasHorizontalRuleBefore={hasHorizontalRuleBefore}
                     />
-                    {i < totalChildren - 1 && (
-                      <EuiSpacer size={child.appendHorizontalRule ? 'm' : 'l'} />
-                    )}
                   </Fragment>
                 ) : (
                   <PanelNavItem key={child.id} item={child} />

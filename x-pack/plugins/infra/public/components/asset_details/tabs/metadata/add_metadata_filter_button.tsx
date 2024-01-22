@@ -12,12 +12,10 @@ import { useMetricsDataViewContext } from '../../../../pages/metrics/hosts/hooks
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { buildMetadataFilter } from './build_metadata_filter';
 import { useUnifiedSearchContext } from '../../../../pages/metrics/hosts/hooks/use_unified_search';
+import type { Field } from './utils';
 
 interface AddMetadataFilterButtonProps {
-  item: {
-    name: string;
-    value: string | string[] | undefined;
-  };
+  item: Field;
 }
 
 const filterAddedToastTitle = i18n.translate('xpack.infra.metadataEmbeddable.filterAdded', {

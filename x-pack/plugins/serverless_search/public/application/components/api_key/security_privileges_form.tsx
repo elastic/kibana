@@ -7,7 +7,7 @@
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { CodeEditorField } from '@kbn/kibana-react-plugin/public';
+import { CodeEditorField } from '@kbn/code-editor';
 import React from 'react';
 import { docLinks } from '../../../../common/doc_links';
 
@@ -23,8 +23,12 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
   error,
 }) => {
   return (
-    <>
-      <EuiLink href={docLinks.roleDescriptors} target="_blank">
+    <div data-test-subj="create-api-role-descriptors-code-editor-container">
+      <EuiLink
+        data-test-subj="serverlessSearchSecurityPrivilegesFormLearnHowToStructureRoleDescriptorsLink"
+        href={docLinks.roleDescriptors}
+        target="_blank"
+      >
         {i18n.translate('xpack.serverlessSearch.apiKey.roleDescriptorsLinkLabel', {
           defaultMessage: 'Learn how to structure role descriptors',
         })}
@@ -44,6 +48,6 @@ export const SecurityPrivilegesForm: React.FC<SecurityPrivilegesFormProps> = ({
         onChange={(e) => onChangeRoleDescriptors(e)}
         value={roleDescriptors}
       />
-    </>
+    </div>
   );
 };

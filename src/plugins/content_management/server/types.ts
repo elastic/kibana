@@ -9,7 +9,10 @@
 import { CoreApi } from './core';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupDependencies {}
+export interface ContentManagementServerSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContentManagementServerStartDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerSetup extends CoreApi {}

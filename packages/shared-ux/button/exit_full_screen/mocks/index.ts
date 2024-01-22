@@ -9,7 +9,7 @@
 export {
   getKibanaDependenciesMock as getExitFullScreenButtonKibanaDependenciesMock,
   getServicesMock as getExitFullScreenButtonServicesMock,
-} from './src/jest';
+} from './jest';
 
-export { StorybookMock as ExitFullScreenButtonStorybookMock } from './src/storybook';
-export type { Params as ExitFullScreenButtonStorybookParams } from './src/storybook';
+export { StorybookMock as ExitFullScreenButtonStorybookMock } from './storybook';
+export type { Params as ExitFullScreenButtonStorybookParams } from './storybook';

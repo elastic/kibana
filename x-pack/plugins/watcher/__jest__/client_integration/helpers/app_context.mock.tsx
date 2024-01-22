@@ -45,7 +45,7 @@ export const mockContextValue: AppDeps = {
   settings: settingsServiceMock.createStartContract(),
   toasts: notificationServiceMock.createSetupContract().toasts,
   theme: {
-    useChartsTheme: jest.fn(),
+    useChartsBaseTheme: jest.fn(),
   } as any,
   // For our test harness, we don't use this mocked out http service
   http: httpServiceMock.createSetupContract(),

@@ -10,11 +10,11 @@ import type { CoreSetup } from '@kbn/core/public';
 import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
-import { getDefaultNavigationComponent } from './default_navigation';
+import { initProjectNavigation } from './project_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
+import { enableManagementCardsLanding } from './management_cards';
 
 export const setupNavigation = (
   _core: CoreSetup,
@@ -28,19 +28,19 @@ export const startNavigation = (services: Services) => {
   const { serverless, management } = services;
   serverless.setProjectHome(APP_PATH);
 
-  const projectNavigationTree = new ProjectNavigationTree(services);
+  enableManagementCardsLanding(services);
 
   if (services.experimentalFeatures.platformNavEnabled) {
-    projectNavigationTree.getNavigationTree$().subscribe((navigationTree) => {
-      serverless.setSideNavComponent(getDefaultNavigationComponent(navigationTree, services));
-    });
+    initProjectNavigation(services);
   } else {
-    management.setupCardsNavigation({ enabled: true });
+    // TODO: Remove this else block as platform is enabled by default
+    // Issue: https://github.com/elastic/kibana/issues/174944
 
-    projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
-      serverless.setNavigation({ navigationTree: chromeNavigationTree });
-    });
-    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+    // const projectNavigationTree = new ProjectNavigationTree(services);
+    // projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
+    //   serverless.setNavigation({ navigationTree: chromeNavigationTree });
+    // });
+    serverless.setSideNavComponentDeprecated(getSecuritySideNavComponent(services));
   }
   management.setIsSidebarEnabled(false);
 

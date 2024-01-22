@@ -98,7 +98,7 @@ export const indexEvaluations = async ({
 
     return true;
   } catch (e) {
-    logger.error('Error indexing data into the evaluation index', e);
+    logger.error(`Error indexing data into the evaluation index\n${e}`);
     return false;
   }
 };

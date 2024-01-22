@@ -6,27 +6,24 @@
  */
 
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
-import type { InventoryItemType } from '../inventory_models/types';
-import type { LogsLocatorDependencies, LogsLocatorParams } from './logs_locator';
+import {
+  INFRA_NODE_LOGS_LOCATOR_ID,
+  NodeLogsLocatorParams,
+  createNodeLogsQuery,
+} from '@kbn/logs-shared-plugin/common';
+import type { InfraLogsLocatorDependencies } from './logs_locator';
 
-export const NODE_LOGS_LOCATOR_ID = 'NODE_LOGS_LOCATOR';
+export type InfraNodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
 
-export interface NodeLogsLocatorParams extends LogsLocatorParams {
-  nodeId: string;
-  nodeType: InventoryItemType;
-}
+export type InfraNodeLogsLocatorDependencies = InfraLogsLocatorDependencies;
 
-export type NodeLogsLocator = LocatorPublic<NodeLogsLocatorParams>;
+export class InfraNodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
+  public readonly id = INFRA_NODE_LOGS_LOCATOR_ID;
 
-export type NodeLogsLocatorDependencies = LogsLocatorDependencies;
-
-export class NodeLogsLocatorDefinition implements LocatorDefinition<NodeLogsLocatorParams> {
-  public readonly id = NODE_LOGS_LOCATOR_ID;
-
-  constructor(protected readonly deps: NodeLogsLocatorDependencies) {}
+  constructor(protected readonly deps: InfraNodeLogsLocatorDependencies) {}
 
   public readonly getLocation = async (params: NodeLogsLocatorParams) => {
-    const { createNodeLogsQuery, createSearchString } = await import('./helpers');
+    const { createSearchString } = await import('./helpers');
 
     const query = createNodeLogsQuery(params);
 

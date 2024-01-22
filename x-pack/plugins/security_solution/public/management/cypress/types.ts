@@ -8,6 +8,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Role } from '@kbn/security-plugin/common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { ActionDetails } from '../../../common/endpoint/types';
 import type { CyLoadEndpointDataOptions } from './support/plugin_handlers/endpoint_data_loader';
 import type { SecurityTestUser } from './common/constants';
@@ -65,4 +66,18 @@ export interface LoadUserAndRoleCyTaskOptions {
 
 export interface CreateUserAndRoleCyTaskOptions {
   role: Role;
+}
+
+export interface UninstallAgentFromHostTaskOptions {
+  hostname: string;
+  uninstallToken: string;
+}
+
+export interface IsAgentAndEndpointUninstalledFromHostTaskOptions {
+  hostname: string;
+}
+
+export interface LogItTaskOptions {
+  level: keyof Pick<ToolingLog, 'info' | 'debug' | 'verbose'>;
+  data: any;
 }

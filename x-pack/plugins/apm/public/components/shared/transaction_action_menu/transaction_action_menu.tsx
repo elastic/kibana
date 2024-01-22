@@ -26,6 +26,7 @@ import {
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
@@ -37,6 +38,7 @@ import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { CustomLinkMenuSection } from './custom_link_menu_section';
 import { getSections } from './sections';
 import { CustomLinkFlyout } from './custom_link_flyout';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 interface Props {
   readonly transaction?: Transaction;
@@ -129,13 +131,15 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, infra, share } = useApmPluginContext();
+  const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
+  const { dataView } = useAdHocApmDataView();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
     ALL_DATASETS_LOCATOR_ID
   )!;
+  const logsLocators = getLogsLocatorsFromUrlService(share.url);
 
   const infraLinksAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfraUiAvailable
@@ -155,13 +159,14 @@ function ActionMenuSections({
     basePath: core.http.basePath,
     location,
     apmRouter,
-    infraLocators: infra?.locators,
     infraLinksAvailable,
     profilingLocators,
     rangeFrom,
     rangeTo,
     environment,
     allDatasetsLocator,
+    logsLocators,
+    dataViewId: dataView?.id,
   });
 
   const externalMenuItems = useAsync(() => {

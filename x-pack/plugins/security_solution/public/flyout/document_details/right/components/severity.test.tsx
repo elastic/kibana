@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { RightPanelContext } from '../context';
-import { SEVERITY_TITLE_TEST_ID, SEVERITY_VALUE_TEST_ID } from './test_ids';
+import { SEVERITY_VALUE_TEST_ID } from './test_ids';
 import { DocumentSeverity } from './severity';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { TestProviders } from '../../../../common/mock';
@@ -31,7 +31,6 @@ describe('<DocumentSeverity />', () => {
 
     const { getByTestId } = renderDocumentSeverity(contextValue);
 
-    expect(getByTestId(SEVERITY_TITLE_TEST_ID)).toBeInTheDocument();
     const severity = getByTestId(SEVERITY_VALUE_TEST_ID);
     expect(severity).toBeInTheDocument();
     expect(severity).toHaveTextContent('Low');

@@ -5,7 +5,14 @@
  * 2.0.
  */
 import React, { useRef, useState, useCallback, useMemo, useEffect } from 'react';
-import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiButton } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiButton,
+  EuiThemeProvider,
+} from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import useResizeObserver from 'use-resize-observer';
@@ -217,26 +224,28 @@ export const TTYPlayer = ({
         <div ref={ref} data-test-subj="sessionView:TTYPlayer" css={styles.terminal} />
       </div>
 
-      <TTYPlayerControls
-        currentProcessEvent={currentProcessEvent}
-        processStartMarkers={processStartMarkers}
-        isPlaying={isPlaying}
-        currentLine={currentLine}
-        linesLength={lines.length}
-        onSeekLine={onSeekLine}
-        onTogglePlayback={onTogglePlayback}
-        onClose={onClose}
-        onJumpToEvent={onJumpToEvent}
-        textSizer={
-          <TTYTextSizer
-            tty={tty}
-            containerHeight={containerHeight}
-            fontSize={fontSize}
-            onFontSizeChanged={setFontSize}
-            isFullscreen={isFullscreen}
-          />
-        }
-      />
+      <EuiThemeProvider colorMode="dark">
+        <TTYPlayerControls
+          currentProcessEvent={currentProcessEvent}
+          processStartMarkers={processStartMarkers}
+          isPlaying={isPlaying}
+          currentLine={currentLine}
+          linesLength={lines.length}
+          onSeekLine={onSeekLine}
+          onTogglePlayback={onTogglePlayback}
+          onClose={onClose}
+          onJumpToEvent={onJumpToEvent}
+          textSizer={
+            <TTYTextSizer
+              tty={tty}
+              containerHeight={containerHeight}
+              fontSize={fontSize}
+              onFontSizeChanged={setFontSize}
+              isFullscreen={isFullscreen}
+            />
+          }
+        />
+      </EuiThemeProvider>
     </div>
   );
 };

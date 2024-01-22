@@ -138,7 +138,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField name="user.full_name" fullWidth />
+        <FormField name="user.full_name" data-test-subj={'userProfileFullName'} fullWidth />
       </FormRow>
 
       <FormRow
@@ -153,7 +153,7 @@ const UserDetailsEditor: FunctionComponent<UserDetailsEditorProps> = ({ user }) 
         labelAppend={<OptionalText />}
         fullWidth
       >
-        <FormField type="email" name="user.email" fullWidth />
+        <FormField type="email" name="user.email" data-test-subj={'userProfileEmail'} fullWidth />
       </FormRow>
     </EuiDescribedFormGroup>
   );
@@ -189,6 +189,7 @@ const UserSettingsEditor: FunctionComponent<UserSettingsEditorProps> = ({
       <EuiKeyPadMenuItem
         name={id}
         label={label}
+        data-test-subj={`themeKeyPadItem${label}`}
         checkable="single"
         isSelected={idSelected === id}
         isDisabled={isThemeOverridden}
@@ -810,7 +811,11 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                 </Form>
               </KibanaPageTemplate.Section>
               {formChanges.count > 0 ? (
-                <KibanaPageTemplate.BottomBar paddingSize="m" position="fixed">
+                <KibanaPageTemplate.BottomBar
+                  paddingSize="m"
+                  position="fixed"
+                  data-test-subj={'userProfileBottomBar'}
+                >
                   <SaveChangesBottomBar />
                 </KibanaPageTemplate.BottomBar>
               ) : null}
@@ -964,7 +969,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
+        <EuiButtonEmpty onClick={formik.handleReset} color="text">
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"
@@ -974,6 +979,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={formik.submitForm}
+          data-test-subj="saveProfileChangesButton"
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}
           color="success"

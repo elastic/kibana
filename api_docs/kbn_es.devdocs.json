@@ -797,7 +797,7 @@
         "label": "ArtifactLicense",
         "description": [],
         "signature": [
-          "\"basic\" | \"trial\" | \"oss\""
+          "\"basic\" | \"trial\""
         ],
         "path": "packages/kbn-es/src/artifact.ts",
         "deprecated": false,

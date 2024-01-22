@@ -16,6 +16,7 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
   });
   const bodySchema = schema.object({
     dataRetention: schema.maybe(schema.string()),
+    enabled: schema.maybe(schema.boolean()),
   });
 
   router.put(
@@ -25,15 +26,21 @@ export function registerPutDataRetention({ router, lib: { handleEsError } }: Rou
     },
     async (context, request, response) => {
       const { name } = request.params as TypeOf<typeof paramsSchema>;
-      const { dataRetention } = request.body as TypeOf<typeof bodySchema>;
+      const { dataRetention, enabled } = request.body as TypeOf<typeof bodySchema>;
 
       const { client } = (await context.core).elasticsearch;
 
       try {
-        await client.asCurrentUser.indices.putDataLifecycle({
-          name,
-          data_retention: dataRetention,
-        });
+        // Only when enabled is explicitly set to false, we delete the data retention policy.
+        if (enabled === false) {
+          await client.asCurrentUser.indices.deleteDataLifecycle({ name });
+        } else {
+          // Otherwise, we create or update the data retention policy.
+          await client.asCurrentUser.indices.putDataLifecycle({
+            name,
+            data_retention: dataRetention,
+          });
+        }
 
         return response.ok({ body: { success: true } });
       } catch (error) {

@@ -174,3 +174,13 @@ export function expandToTileBoundaries(extent: MapExtent, zoom: number): MapExte
     maxLat: tileToLatitude(upperLeftY, tileCount),
   };
 }
+
+export function isPointInTile(lat: number, lon: number, x: number, y: number, z: number) {
+  const tileCount = getTileCount(z);
+  const lonX = longitudeToTile(lon, tileCount);
+  if (lonX !== x) {
+    return false;
+  }
+  const latY = latitudeToTile(lat, tileCount);
+  return latY === y;
+}

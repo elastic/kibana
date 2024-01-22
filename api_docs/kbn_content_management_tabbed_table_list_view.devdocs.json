@@ -2,26 +2,10 @@
   "id": "@kbn/content-management-tabbed-table-list-view",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-        "id": "def-common.TabbedTableListView",
+        "id": "def-public.TabbedTableListView",
         "type": "Function",
         "tags": [],
         "label": "TabbedTableListView",
@@ -35,7 +19,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.TabbedTableListView.$1",
+            "id": "def-public.TabbedTableListView.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  title,\n  description,\n  headingId,\n  children,\n  tabs,\n  activeTabId,\n  changeActiveTab,\n}",
@@ -56,7 +40,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-        "id": "def-common.TableListTab",
+        "id": "def-public.TableListTab",
         "type": "Interface",
         "tags": [],
         "label": "TableListTab",
@@ -64,9 +48,9 @@
         "signature": [
           {
             "pluginId": "@kbn/content-management-tabbed-table-list-view",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnContentManagementTabbedTableListViewPluginApi",
-            "section": "def-common.TableListTab",
+            "section": "def-public.TableListTab",
             "text": "TableListTab"
           },
           "<T>"
@@ -77,7 +61,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.TableListTab.title",
+            "id": "def-public.TableListTab.title",
             "type": "string",
             "tags": [],
             "label": "title",
@@ -88,7 +72,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.TableListTab.id",
+            "id": "def-public.TableListTab.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -99,7 +83,7 @@
           },
           {
             "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.TableListTab.getTableList",
+            "id": "def-public.TableListTab.getTableList",
             "type": "Function",
             "tags": [],
             "label": "getTableList",
@@ -108,9 +92,9 @@
               "(propsFromParent: ",
               {
                 "pluginId": "@kbn/content-management-tabbed-table-list-view",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnContentManagementTabbedTableListViewPluginApi",
-                "section": "def-common.TableListTabParentProps",
+                "section": "def-public.TableListTabParentProps",
                 "text": "TableListTabParentProps"
               },
               "<T>) => React.ReactNode | Promise<React.ReactNode>"
@@ -121,7 +105,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-                "id": "def-common.TableListTab.getTableList.$1",
+                "id": "def-public.TableListTab.getTableList.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "propsFromParent",
@@ -129,9 +113,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/content-management-tabbed-table-list-view",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnContentManagementTabbedTableListViewPluginApi",
-                    "section": "def-common.TableListTabParentProps",
+                    "section": "def-public.TableListTabParentProps",
                     "text": "TableListTabParentProps"
                   },
                   "<T>"
@@ -146,103 +130,13 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-        "id": "def-common.UserContentCommonSchema",
-        "type": "Interface",
-        "tags": [],
-        "label": "UserContentCommonSchema",
-        "description": [],
-        "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.updatedAt",
-            "type": "string",
-            "tags": [],
-            "label": "updatedAt",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.managed",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "managed",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.references",
-            "type": "Array",
-            "tags": [],
-            "label": "references",
-            "description": [],
-            "signature": [
-              "SavedObjectsReference",
-              "[]"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-            "id": "def-common.UserContentCommonSchema.attributes",
-            "type": "Object",
-            "tags": [],
-            "label": "attributes",
-            "description": [],
-            "signature": [
-              "{ title: string; description?: string | undefined; }"
-            ],
-            "path": "packages/content-management/table_list_view_table/src/table_list_view_table.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/content-management-tabbed-table-list-view",
-        "id": "def-common.TableListTabParentProps",
+        "id": "def-public.TableListTabParentProps",
         "type": "Type",
         "tags": [],
         "label": "TableListTabParentProps",
@@ -256,6 +150,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

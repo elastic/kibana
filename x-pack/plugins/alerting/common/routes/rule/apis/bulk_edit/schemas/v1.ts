@@ -6,19 +6,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { validateDurationV1, validateNotifyWhenV1 } from '../../../validation';
-import { validateSnoozeScheduleV1 } from '../validation';
+import { validateDurationV1 } from '../../../validation';
 import { rRuleRequestSchemaV1 } from '../../../../r_rule';
-import { ruleNotifyWhenV1 } from '../../../response';
-
-const notifyWhenSchema = schema.oneOf(
-  [
-    schema.literal(ruleNotifyWhenV1.CHANGE),
-    schema.literal(ruleNotifyWhenV1.ACTIVE),
-    schema.literal(ruleNotifyWhenV1.THROTTLE),
-  ],
-  { validate: validateNotifyWhenV1 }
-);
+import { notifyWhenSchemaV1, scheduleIdsSchemaV1 } from '../../../response';
+import { ruleSnoozeScheduleSchemaV1 } from '../../../request';
 
 export const scheduleIdsSchema = schema.maybe(schema.arrayOf(schema.string()));
 
@@ -27,15 +18,6 @@ export const ruleSnoozeScheduleSchema = schema.object({
   duration: schema.number(),
   rRule: rRuleRequestSchemaV1,
 });
-
-const ruleSnoozeScheduleSchemaWithValidation = schema.object(
-  {
-    id: schema.maybe(schema.string()),
-    duration: schema.number(),
-    rRule: rRuleRequestSchemaV1,
-  },
-  { validate: validateSnoozeScheduleV1 }
-);
 
 const ruleActionSchema = schema.object({
   group: schema.string(),
@@ -46,7 +28,7 @@ const ruleActionSchema = schema.object({
     schema.object({
       summary: schema.boolean(),
       throttle: schema.nullable(schema.string()),
-      notifyWhen: notifyWhenSchema,
+      notifyWhen: notifyWhenSchemaV1,
     })
   ),
 });
@@ -80,17 +62,17 @@ export const bulkEditOperationsSchema = schema.arrayOf(
     schema.object({
       operation: schema.literal('set'),
       field: schema.literal('notifyWhen'),
-      value: notifyWhenSchema,
+      value: notifyWhenSchemaV1,
     }),
     schema.object({
       operation: schema.oneOf([schema.literal('set')]),
       field: schema.literal('snoozeSchedule'),
-      value: ruleSnoozeScheduleSchemaWithValidation,
+      value: ruleSnoozeScheduleSchemaV1,
     }),
     schema.object({
       operation: schema.oneOf([schema.literal('delete')]),
       field: schema.literal('snoozeSchedule'),
-      value: schema.maybe(scheduleIdsSchema),
+      value: schema.maybe(scheduleIdsSchemaV1),
     }),
     schema.object({
       operation: schema.literal('set'),

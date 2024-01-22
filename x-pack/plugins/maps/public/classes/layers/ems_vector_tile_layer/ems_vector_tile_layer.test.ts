@@ -43,8 +43,8 @@ describe('EmsVectorTileLayer', () => {
       startLoading: (requestId: string, token: string, meta: unknown) => {
         actualMeta = meta;
       },
-      onLoadError: (requestId: string, token: string, message: string) => {
-        actualErrorMessage = message;
+      onLoadError: (requestId: string, token: string, error: Error) => {
+        actualErrorMessage = error.message;
       },
       dataFilters: { foo: 'bar' } as unknown as DataFilters,
     } as unknown as DataRequestContext;

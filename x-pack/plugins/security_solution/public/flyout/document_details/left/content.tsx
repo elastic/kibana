@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlyoutBody, useEuiBackgroundColor } from '@elastic/eui';
+import { useEuiBackgroundColor } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
 import { tabs } from './tabs';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 export interface PanelContentProps {
   /**
@@ -29,13 +30,13 @@ export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
   }, [selectedTabId]);
 
   return (
-    <EuiFlyoutBody
+    <FlyoutBody
       css={css`
         background-color: ${useEuiBackgroundColor('subdued')};
       `}
     >
       {selectedTabContent}
-    </EuiFlyoutBody>
+    </FlyoutBody>
   );
 };
 

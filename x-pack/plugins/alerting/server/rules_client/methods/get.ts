@@ -12,6 +12,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
 import { formatLegacyActions } from '../lib';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetParams {
   id: string;
@@ -29,7 +30,7 @@ export async function get<Params extends RuleTypeParams = never>(
     excludeFromPublicApi = false,
   }: GetParams
 ): Promise<SanitizedRule<Params> | SanitizedRuleWithLegacyId<Params>> {
-  const result = await context.unsecuredSavedObjectsClient.get<RawRule>('alert', id);
+  const result = await context.unsecuredSavedObjectsClient.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
   try {
     await context.authorization.ensureAuthorized({
       ruleTypeId: result.attributes.alertTypeId,
@@ -41,7 +42,7 @@ export async function get<Params extends RuleTypeParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -50,7 +51,7 @@ export async function get<Params extends RuleTypeParams = never>(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
   const rule = getAlertFromRaw<Params>(

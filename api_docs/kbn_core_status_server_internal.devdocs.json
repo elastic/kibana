@@ -168,24 +168,12 @@
               "<unknown>>) => void; getDependenciesStatus$: (plugin: string) => ",
               "Observable",
               "<Record<string, ",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
-              "<unknown>>>; getDerivedStatus$: (plugin: string) => ",
+              "PluginStatus",
+              ">>; getDerivedStatus$: (plugin: string) => ",
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-status-common",
-                "scope": "common",
-                "docId": "kibKbnCoreStatusCommonPluginApi",
-                "section": "def-common.ServiceStatus",
-                "text": "ServiceStatus"
-              },
-              "<unknown>>; }; isStatusPageAnonymous: () => boolean; }>"
+              "PluginStatus",
+              ">; }; isStatusPageAnonymous: () => boolean; }>"
             ],
             "path": "packages/core/status/core-status-server-internal/src/status_service.ts",
             "deprecated": false,

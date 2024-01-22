@@ -41,6 +41,9 @@ export const getTopMetricsMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.topMetricsTitle', {
       defaultMessage: 'Top metrics',
     }),
+    getValueType: (aggConfig) => {
+      return aggConfig.getParam('field')?.type;
+    },
     makeLabel(aggConfig) {
       const isDescOrder = aggConfig.getParam('sortOrder').value === 'desc';
       const size = aggConfig.getParam('size');

@@ -21,6 +21,7 @@ export interface FieldBase {
   timeSeriesMetric?: DataViewField['timeSeriesMetric'];
   esTypes?: DataViewField['esTypes'];
   scripted?: DataViewField['scripted'];
+  conflictDescriptions?: Record<string, string[]>;
 }
 
 export type GetCustomFieldType<T extends FieldBase> = (field: T) => FieldTypeKnown;

@@ -9,11 +9,11 @@ import type { FC } from 'react';
 import React, { memo, useState, useCallback, useEffect } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLeftPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelVisualizeTab } from '..';
+import { DocumentDetailsLeftPanelKey, LeftPanelVisualizeTab } from '..';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
   VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
@@ -52,7 +52,8 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
  */
 export const VisualizeTab: FC = memo(() => {
   const { eventId, indexName, scopeId } = useLeftPanelContext();
-  const { panels, openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const panels = useExpandableFlyoutState();
   const [activeVisualizationId, setActiveVisualizationId] = useState(
     panels.left?.path?.subTab ?? SESSION_VIEW_ID
   );
@@ -64,7 +65,7 @@ export const VisualizeTab: FC = memo(() => {
         startTransaction({ name: ALERTS_ACTIONS.OPEN_ANALYZER });
       }
       openLeftPanel({
-        id: LeftPanelKey,
+        id: DocumentDetailsLeftPanelKey,
         path: {
           tab: LeftPanelVisualizeTab,
           subTab: optionId,

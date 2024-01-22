@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { DefineAlertConnectors } from './define_connectors';
-import { screen } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
+import { screen, fireEvent } from '@testing-library/react';
 import { ENABLE_STATUS_ALERT } from './translations';
 import { render } from '../../../../lib/helper/rtl_helpers';
 

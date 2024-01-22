@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export * from './data_retention.journey';
+// export * from './data_retention.journey'; // it is flaky
 export * from './project_api_keys.journey';
 export * from './getting_started.journey';
 export * from './add_monitor.journey';

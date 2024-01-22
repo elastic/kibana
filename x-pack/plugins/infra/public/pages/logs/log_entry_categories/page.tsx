@@ -11,6 +11,7 @@ import { useLogsBreadcrumbs } from '../../../hooks/use_logs_breadcrumbs';
 import { LogEntryCategoriesPageContent } from './page_content';
 import { LogEntryCategoriesPageProviders } from './page_providers';
 import { logCategoriesTitle } from '../../../translations';
+import { LogMlJobIdFormatsShimProvider } from '../shared/use_log_ml_job_id_formats_shim';
 
 export const LogEntryCategoriesPage = () => {
   useLogsBreadcrumbs([
@@ -21,9 +22,11 @@ export const LogEntryCategoriesPage = () => {
 
   return (
     <EuiErrorBoundary>
-      <LogEntryCategoriesPageProviders>
-        <LogEntryCategoriesPageContent />
-      </LogEntryCategoriesPageProviders>
+      <LogMlJobIdFormatsShimProvider>
+        <LogEntryCategoriesPageProviders>
+          <LogEntryCategoriesPageContent />
+        </LogEntryCategoriesPageProviders>
+      </LogMlJobIdFormatsShimProvider>
     </EuiErrorBoundary>
   );
 };

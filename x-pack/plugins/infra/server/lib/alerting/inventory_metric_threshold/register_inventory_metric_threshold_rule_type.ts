@@ -11,6 +11,11 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeKeys,
+} from '@kbn/metrics-data-access-plugin/common';
 import type { InfraConfig } from '../../../../common/plugin_config_types';
 import {
   Comparator,
@@ -20,11 +25,6 @@ import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeKeys,
-} from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,

@@ -11,6 +11,8 @@
     "@kbn/config-schema",
     "@kbn/config",
     "@kbn/core-http-common",
+    "@kbn/core-plugins-server",
+    "@kbn/core-lifecycle-server",
   ],
   "exclude": [
     "target/**/*",

@@ -7,17 +7,17 @@
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { SignificantTerm } from './types';
+import type { SignificantItem } from './types';
 
 /**
- * Type guard for a significant term.
+ * Type guard for a significant item.
  * Note this is used as a custom type within Log Rate Analysis
  * for a p-value based variant, not a generic significant terms
  * aggregation type.
  * @param arg The unknown type to be evaluated
- * @returns whether arg is of type SignificantTerm
+ * @returns whether arg is of type SignificantItem
  */
-export function isSignificantTerm(arg: unknown): arg is SignificantTerm {
+export function isSignificantItem(arg: unknown): arg is SignificantItem {
   return isPopulatedObject(arg, [
     'key',
     'type',

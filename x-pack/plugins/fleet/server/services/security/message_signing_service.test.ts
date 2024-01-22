@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE } from '../../constants';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -64,7 +65,7 @@ describe('MessageSigningService', () => {
       .getSavedObjects()
       .getScopedClient({} as unknown as KibanaRequest) as jest.Mocked<SavedObjectsClientContract>;
 
-    messageSigningService = new MessageSigningService(esoClientMock);
+    messageSigningService = new MessageSigningService(loggingSystemMock.create(), esoClientMock);
   }
 
   describe('with encryption key configured', () => {
@@ -207,6 +208,33 @@ describe('MessageSigningService', () => {
       );
       expect(isVerified).toBe(true);
       expect(data).toBe(message);
+    });
+
+    it('will retry getting keypair if ESO error', async () => {
+      esoClientMock.createPointInTimeFinderDecryptedAsInternalUser = jest
+        .fn()
+        .mockRejectedValueOnce(new Error('some error'))
+        .mockRejectedValueOnce(new Error('another error'))
+        .mockResolvedValueOnce({
+          close: jest.fn(),
+          find: function* asyncGenerator() {
+            yield { saved_objects: [] };
+          },
+        });
+
+      const generateKeyPairResponse = await messageSigningService.generateKeyPair();
+      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(3);
+      expect(soClientMock.create).toHaveBeenLastCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+        private_key: expect.any(String),
+        public_key: expect.any(String),
+        passphrase: expect.any(String),
+      });
+
+      expect(generateKeyPairResponse).toEqual({
+        passphrase: expect.any(String),
+        privateKey: expect.any(String),
+        publicKey: expect.any(String),
+      });
     });
   });
 

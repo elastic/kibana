@@ -9,7 +9,7 @@ import { render } from '../../utils/test_helper';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
-import { inventoryThresholdAlert } from '../../rules/fixtures/example_alerts';
+import { inventoryThresholdAlertEs } from '../../rules/fixtures/example_alerts';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 
@@ -20,11 +20,7 @@ describe('AlertsFlyoutBody', () => {
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
 
   const setup = (id: string) => {
-    const dataFieldEs = inventoryThresholdAlert.reduce(
-      (acc, d) => ({ ...acc, [d.field]: d.value }),
-      {}
-    );
-    const alert = parseAlert(observabilityRuleTypeRegistryMock)(dataFieldEs);
+    const alert = parseAlert(observabilityRuleTypeRegistryMock)(inventoryThresholdAlertEs);
     return render(<AlertsFlyoutBody alert={alert} id={id} />);
   };
 

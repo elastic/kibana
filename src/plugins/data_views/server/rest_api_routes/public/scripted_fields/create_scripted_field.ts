@@ -76,7 +76,7 @@ export const registerCreateScriptedFieldRoute = (
             throw new Error(`Field [name = ${field.name}] already exists.`);
           }
 
-          indexPattern.fields.add({
+          indexPattern.upsertScriptedField({
             ...field,
             runtimeField: undefined,
             aggregatable: true,

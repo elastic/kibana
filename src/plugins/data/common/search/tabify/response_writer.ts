@@ -74,7 +74,9 @@ export class TabbedAggResponseWriter {
           name: column.name,
           meta: {
             type:
-              column.aggConfig.type.valueType || column.aggConfig.params.field?.type || 'number',
+              column.aggConfig.type.getValueType?.(column.aggConfig) ||
+              column.aggConfig.params.field?.type ||
+              'number',
             field: column.aggConfig.params.field?.name,
             index: column.aggConfig.getIndexPattern()?.title,
             params: column.aggConfig.toSerializedFieldFormat(),

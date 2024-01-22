@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart, ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import type { InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import {
   createTestServers,
   createRootWithCorePlugins,
@@ -38,7 +39,7 @@ describe('FileService', () => {
   let fileService: FileServiceStart;
   let blobStorageService: BlobStorageService;
   let esClient: ElasticsearchClient;
-  let coreStart: CoreStart;
+  let coreStart: InternalCoreStart;
   let fileServiceFactory: FileServiceFactory;
   let security: ReturnType<typeof securityMock.createSetup>;
   let auditLogger: AuditLogger;
@@ -93,11 +94,13 @@ describe('FileService', () => {
   });
 
   let disposables: File[] = [];
+
   async function createDisposableFile<M = unknown>(args: CreateFileArgs<M>) {
     const file = await fileService.create(args);
     disposables.push(file);
     return file;
   }
+
   afterEach(async () => {
     await fileService.bulkDelete({ ids: disposables.map((d) => d.id) });
     const { files } = await fileService.find({ kind: [fileKind] });
@@ -326,6 +329,7 @@ describe('FileService', () => {
   interface CustomMeta {
     some: string;
   }
+
   it('updates files', async () => {
     const file = await createDisposableFile<CustomMeta>({ fileKind, name: 'test' });
     const updatableFields = {

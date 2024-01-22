@@ -279,6 +279,25 @@ describe('Security Telemetry filters', () => {
       });
     });
 
+    it('copies over github integration fields', () => {
+      const event = {
+        not_event: 'much data, much wow',
+        github: {
+          org: 'elastic',
+          repo: 'kibana',
+          team: 'elastic/security-data-analytics',
+          sensitive: 'i contain sensitive data',
+        },
+      };
+      expect(copyAllowlistedFields(prebuiltRuleAllowlistFields, event)).toStrictEqual({
+        github: {
+          org: 'elastic',
+          repo: 'kibana',
+          team: 'elastic/security-data-analytics',
+        },
+      });
+    });
+
     it('copies over process/parent fields', () => {
       const event = {
         not_event: 'much data, much wow',

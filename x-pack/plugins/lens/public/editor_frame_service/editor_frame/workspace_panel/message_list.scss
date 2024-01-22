@@ -11,11 +11,13 @@
 }
 
 .lnsWorkspaceWarningList__item {
-  padding: $euiSize;
-
   & + & {
     border-top: $euiBorderThin;
   }
+}
+
+.lnsWorkspaceWarningList__textItem {
+  padding: $euiSize;
 }
 
 .lnsWorkspaceWarningList__description {

@@ -108,6 +108,21 @@ const configSchema = schema.object(
  */
 export type CspConfigType = TypeOf<typeof configSchema>;
 
+/**
+ * @internal
+ */
+export type CspAdditionalConfig = Pick<
+  Partial<CspConfigType>,
+  | 'connect_src'
+  | 'default_src'
+  | 'font_src'
+  | 'frame_src'
+  | 'img_src'
+  | 'script_src'
+  | 'style_src'
+  | 'worker_src'
+>;
+
 export const cspConfig: ServiceConfigDescriptor<CspConfigType> = {
   // TODO: Move this to server.csp using config deprecations
   // ? https://github.com/elastic/kibana/pull/52251

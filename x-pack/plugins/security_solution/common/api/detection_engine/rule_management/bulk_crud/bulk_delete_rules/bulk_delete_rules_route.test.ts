@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { exactCheck, formatErrors, foldLeftRight } from '@kbn/securitysolution-io-ts-utils';
-import { BulkDeleteRulesRequestBody } from './bulk_delete_rules_route';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
+import { BulkDeleteRulesRequestBody } from './bulk_delete_rules_route.gen';
 
 // only the basics of testing are here.
 // see: query_rules_schema.test.ts for the bulk of the validation tests
@@ -15,11 +15,9 @@ describe('Bulk delete rules request schema', () => {
   test('can take an empty array and validate it', () => {
     const payload: BulkDeleteRulesRequestBody = [];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual([]);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('non uuid being supplied to id does not validate', () => {
@@ -29,11 +27,9 @@ describe('Bulk delete rules request schema', () => {
       },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual(['Invalid value "1" supplied to "id"']);
-    expect(output.schema).toEqual({});
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseError(result);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"0.id: Invalid uuid"`);
   });
 
   test('both rule_id and id being supplied do validate', () => {
@@ -44,11 +40,9 @@ describe('Bulk delete rules request schema', () => {
       },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('only id validates with two elements', () => {
@@ -57,11 +51,9 @@ describe('Bulk delete rules request schema', () => {
       { id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('only rule_id validates', () => {
@@ -69,11 +61,9 @@ describe('Bulk delete rules request schema', () => {
       { rule_id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('only rule_id validates with two elements', () => {
@@ -82,11 +72,9 @@ describe('Bulk delete rules request schema', () => {
       { rule_id: '2' },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 
   test('both id and rule_id validates with two separate elements', () => {
@@ -95,10 +83,8 @@ describe('Bulk delete rules request schema', () => {
       { rule_id: '2' },
     ];
 
-    const decoded = BulkDeleteRulesRequestBody.decode(payload);
-    const checked = exactCheck(payload, decoded);
-    const output = foldLeftRight(checked);
-    expect(formatErrors(output.errors)).toEqual([]);
-    expect(output.schema).toEqual(payload);
+    const result = BulkDeleteRulesRequestBody.safeParse(payload);
+    expectParseSuccess(result);
+    expect(result.data).toEqual(payload);
   });
 });

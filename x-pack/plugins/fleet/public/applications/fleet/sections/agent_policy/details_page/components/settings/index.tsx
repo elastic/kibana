@@ -187,7 +187,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        color="ghost"
+                        color="text"
                         onClick={() => {
                           setAgentPolicy({ ...originalAgentPolicy });
                           setHasChanges(false);
@@ -204,7 +204,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                         <DevtoolsRequestFlyoutButton
                           isDisabled={isLoading || Object.keys(validation).length > 0}
                           btnProps={{
-                            color: 'ghost',
+                            color: 'text',
                           }}
                           description={i18n.translate(
                             'xpack.fleet.editAgentPolicy.devtoolsRequestDescription',

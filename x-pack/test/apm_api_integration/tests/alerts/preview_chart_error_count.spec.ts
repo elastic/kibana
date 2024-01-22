@@ -70,12 +70,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   registry.when(`with data loaded`, { config: 'basic', archives: [] }, () => {
     describe('error_count', () => {
-      before(async () => {
+      beforeEach(async () => {
         await generateErrorData({ serviceName: 'synth-go', start, end, synthtraceEsClient });
         await generateErrorData({ serviceName: 'synth-java', start, end, synthtraceEsClient });
       });
 
-      after(() => synthtraceEsClient.clean());
+      afterEach(() => synthtraceEsClient.clean());
 
       it('with data', async () => {
         const options = getOptions();

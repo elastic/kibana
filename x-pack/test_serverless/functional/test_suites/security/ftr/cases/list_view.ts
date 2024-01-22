@@ -6,30 +6,32 @@
  */
 
 import expect from '@kbn/expect';
+import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
-import { SeverityAll } from '@kbn/cases-plugin/common/ui';
+import { navigateToCasesApp } from '../../../../../shared/lib/cases/helpers';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+const owner = SECURITY_SOLUTION_OWNER;
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Cases List', function () {
-    // multiple errors in after hook due to delete permission
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
 
       await svlSecNavigation.navigateToLandingPage();
 
-      await testSubjects.click('solutionSideNavItemLink-cases');
+      await navigateToCasesApp(getPageObject, getService, owner);
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await cases.casesTable.waitForCasesToBeDeleted();
       await svlCommonPage.forceLogout();
     });
@@ -49,8 +51,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('bulk actions', () => {
-      // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-      // action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
       describe('delete', () => {
         createNCasesBeforeDeleteAllAfter(8, getPageObject, getService);
 
@@ -110,7 +110,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         afterEach(async () => {
-          await cases.api.deleteAllCases();
+          await svlCases.api.deleteAllCaseItems();
           await cases.casesTable.waitForCasesToBeDeleted();
         });
 
@@ -154,7 +154,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('severity filtering', () => {
       // Error: retry.tryForTime timeout: Error: expected 10 to equal 5
       before(async () => {
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
 
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
         await cases.api.createCase({ severity: CaseSeverity.LOW, owner: 'securitySolution' });
@@ -170,11 +170,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
          * There is no easy way to clear the filtering.
          * Refreshing the page seems to be easier.
          */
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
         await cases.casesTable.waitForCasesToBeDeleted();
       });
 
@@ -182,20 +182,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         // by default filter by all
         await cases.casesTable.validateCasesTableHasNthRows(5);
 
-        // low
         await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
 
-        // high
         await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
         await cases.casesTable.validateCasesTableHasNthRows(2);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
 
-        // critical
         await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
         await cases.casesTable.validateCasesTableHasNthRows(1);
+        // to uncheck
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
 
-        // back to all
-        await cases.casesTable.filterBySeverity(SeverityAll);
         await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });
@@ -279,6 +280,7 @@ const createNCasesBeforeDeleteAllAfter = (
   getService: FtrProviderContext['getService']
 ) => {
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const header = getPageObject('header');
 
   before(async () => {
@@ -288,7 +290,7 @@ const createNCasesBeforeDeleteAllAfter = (
   });
 
   after(async () => {
-    await cases.api.deleteAllCases();
+    await svlCases.api.deleteAllCaseItems();
     await cases.casesTable.waitForCasesToBeDeleted();
   });
 };

@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function IndexManagementPageProvider({ getService }: FtrProviderContext) {
@@ -22,11 +22,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async reloadIndicesButton() {
       return await testSubjects.find('reloadIndicesButton');
     },
-    async toggleRollupIndices() {
-      await testSubjects.click('checkboxToggles-rollupToggle');
-    },
     async toggleHiddenIndices() {
-      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+      await testSubjects.click('checkboxToggles-includeHiddenIndices');
     },
 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
@@ -34,9 +31,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
-    async clickDataStreamAt(indexOfRow: number): Promise<void> {
-      const dataStreamLinks = await testSubjects.findAll('nameLink');
-      await dataStreamLinks[indexOfRow].click();
+    async clickDataStreamNameLink(name: string): Promise<void> {
+      await find.clickByLinkText(name);
     },
 
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {
@@ -133,6 +129,29 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
           return (await testSubjects.isDisplayed('indexDetailsHeader')) === true;
         });
       },
+    },
+    async clickCreateIndexButton() {
+      await testSubjects.click('createIndexButton');
+      await testSubjects.existOrFail('createIndexSaveButton');
+    },
+    async setCreateIndexName(value: string) {
+      await testSubjects.existOrFail('createIndexNameFieldText');
+      await testSubjects.setValue('createIndexNameFieldText', value);
+    },
+    async clickCreateIndexSaveButton() {
+      await testSubjects.click('createIndexSaveButton');
+      // Wait for modal to close
+      await testSubjects.missingOrFail('createIndexSaveButton');
+    },
+    async expectIndexToExist(indexName: string) {
+      const table = await find.byCssSelector('table');
+      const rows = await table.findAllByTestSubject('indexTableRow');
+      const indexNames: string[] = await Promise.all(
+        rows.map(async (row) => {
+          return await (await row.findByTestSubject('indexTableIndexNameLink')).getVisibleText();
+        })
+      );
+      expect(indexNames.some((i) => i === indexName)).to.be(true);
     },
   };
 }

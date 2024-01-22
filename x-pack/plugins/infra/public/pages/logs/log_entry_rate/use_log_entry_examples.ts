@@ -8,6 +8,7 @@
 import { useMemo, useState } from 'react';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
 
+import { IdFormat } from '../../../../common/http_api/latest';
 import { LogEntryExample } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -18,6 +19,7 @@ export const useLogEntryExamples = ({
   endTime,
   exampleCount,
   logViewReference,
+  idFormat,
   startTime,
   categoryId,
 }: {
@@ -25,6 +27,7 @@ export const useLogEntryExamples = ({
   endTime: number;
   exampleCount: number;
   logViewReference: PersistedLogViewReference;
+  idFormat?: IdFormat;
   startTime: number;
   categoryId?: string;
 }) => {
@@ -35,9 +38,14 @@ export const useLogEntryExamples = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormat) {
+          throw new Error('idFormat is undefined');
+        }
+
         return await callGetLogEntryExamplesAPI(
           {
             logViewReference,
+            idFormat,
             startTime,
             endTime,
             dataset,
@@ -51,7 +59,7 @@ export const useLogEntryExamples = ({
         setLogEntryExamples(examples);
       },
     },
-    [dataset, endTime, exampleCount, logViewReference, startTime]
+    [dataset, endTime, exampleCount, logViewReference, startTime, idFormat]
   );
 
   const isLoadingLogEntryExamples = useMemo(

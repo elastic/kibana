@@ -23,6 +23,12 @@ import type {
   PluginStartContract as FeaturesPluginStart,
 } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
+  AuditServiceSetup,
+  AuthorizationServiceSetup,
+  SecurityPluginSetup as SecurityPluginSetupWithoutDeprecatedMembers,
+  SecurityPluginStart,
+} from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -33,14 +39,10 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
-import type { AuditServiceSetup } from './audit';
 import { AuditService } from './audit';
-import type {
-  AuthenticationServiceStart,
-  InternalAuthenticationServiceStart,
-} from './authentication';
+import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
-import type { AuthorizationServiceSetup, AuthorizationServiceSetupInternal } from './authorization';
+import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -56,11 +58,11 @@ import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
 import { UserProfileService } from './user_profile';
-import type { UserProfileServiceStart, UserProfileServiceStartInternal } from './user_profile';
+import type { UserProfileServiceStartInternal } from './user_profile';
 import { UserProfileSettingsClient } from './user_profile/user_profile_settings_client';
 import type { UserSettingServiceStart } from './user_profile/user_setting_service';
 import { UserSettingService } from './user_profile/user_setting_service';
-import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
+import type { AuthenticatedUser, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 
 export type SpacesService = Pick<
@@ -71,7 +73,7 @@ export type SpacesService = Pick<
 /**
  * Describes public Security plugin contract returned at the `setup` stage.
  */
-export interface SecurityPluginSetup {
+export interface SecurityPluginSetup extends SecurityPluginSetupWithoutDeprecatedMembers {
   /**
    * @deprecated Use `authc` methods from the `SecurityServiceStart` contract instead.
    */
@@ -80,36 +82,6 @@ export interface SecurityPluginSetup {
    * @deprecated Use `authz` methods from the `SecurityServiceStart` contract instead.
    */
   authz: AuthorizationServiceSetup;
-  /**
-   * Exposes information about the available security features under the current license.
-   */
-  license: SecurityLicense;
-  /**
-   * Exposes services for audit logging.
-   */
-  audit: AuditServiceSetup;
-  /**
-   * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
-   */
-  privilegeDeprecationsService: PrivilegeDeprecationsService;
-}
-
-/**
- * Describes public Security plugin contract returned at the `start` stage.
- */
-export interface SecurityPluginStart {
-  /**
-   * Authentication services to confirm the user is who they say they are.
-   */
-  authc: AuthenticationServiceStart;
-  /**
-   * Authorization services to manage and access the permissions a particular user has.
-   */
-  authz: AuthorizationServiceSetup;
-  /**
-   * User profiles services to retrieve user profiles.
-   */
-  userProfiles: UserProfileServiceStart;
 }
 
 export interface PluginSetupDependencies {
@@ -201,6 +173,7 @@ export class SecurityPlugin
 
   private readonly userSettingService: UserSettingService;
   private userSettingServiceStart?: UserSettingServiceStart;
+  private userProfileSettingsClient: UserProfileSettingsClient;
   private readonly getUserProfileService = () => {
     if (!this.userProfileStart) {
       throw new Error(`userProfileStart is not registered!`);
@@ -233,6 +206,10 @@ export class SecurityPlugin
     );
 
     this.analyticsService = new AnalyticsService(this.initializerContext.logger.get('analytics'));
+
+    this.userProfileSettingsClient = new UserProfileSettingsClient(
+      this.initializerContext.logger.get('user-settings-client')
+    );
   }
 
   public setup(
@@ -255,25 +232,12 @@ export class SecurityPlugin
     const kibanaIndexName = this.getKibanaIndexName();
 
     // A subset of `start` services we need during `setup`.
-    const startServicesPromise = core
-      .getStartServices()
-      .then(([coreServices, depsServices, startServices]) => ({
-        elasticsearch: coreServices.elasticsearch,
-        features: depsServices.features,
-        userProfiles: startServices.userProfiles,
-      }));
+    const startServicesPromise = core.getStartServices().then(([coreServices, depsServices]) => ({
+      elasticsearch: coreServices.elasticsearch,
+      features: depsServices.features,
+    }));
 
-    /**
-     * Once the UserProfileServiceStart is available, use it to start the SecurityPlugin > UserSettingService.
-     *
-     * Then the UserProfileSettingsClient is created with the SecurityPlugin > UserSettingServiceStart and set on
-     * the Core > UserSettingsServiceSetup
-     */
-    startServicesPromise.then(({ userProfiles }) => {
-      this.userSettingServiceStart = this.userSettingService.start(userProfiles);
-      const client = new UserProfileSettingsClient(this.userSettingServiceStart);
-      core.userSettings.setUserProfileSettings(client);
-    });
+    core.userSettings.setUserProfileSettings(this.userProfileSettingsClient);
 
     const { license } = this.securityLicenseService.setup({
       license$: licensing.license$,
@@ -408,6 +372,7 @@ export class SecurityPlugin
 
     this.userProfileStart = this.userProfileService.start({ clusterClient, session });
     this.userSettingServiceStart = this.userSettingService.start(this.userProfileStart);
+    this.userProfileSettingsClient.setUserSettingsServiceStart(this.userSettingServiceStart);
 
     // In serverless, we want to redirect users to the list of projects instead of standard "Logged Out" page.
     const customLogoutURL =

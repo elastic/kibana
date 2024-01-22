@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 
@@ -23,7 +24,8 @@ interface SavedObjectsCountUsage {
 
 export function registerSavedObjectsCountUsageCollector(
   usageCollection: UsageCollectionSetup,
-  getAllSavedObjectTypes: () => Promise<string[]>
+  getAllSavedObjectTypes: () => Promise<string[]>,
+  getSoClientWithHiddenIndices: () => Promise<SavedObjectsClientContract>
 ) {
   usageCollection.registerCollector(
     usageCollection.makeUsageCollector<SavedObjectsCountUsage>({
@@ -67,14 +69,19 @@ export function registerSavedObjectsCountUsageCollector(
           },
         },
       },
-      async fetch({ soClient }) {
+      async fetch() {
+        const soClient = await getSoClientWithHiddenIndices();
         const allRegisteredSOTypes = await getAllSavedObjectTypes();
+        const namespaces = ['*'];
         const {
           total,
           per_type: buckets,
           non_expected_types: nonRegisteredTypes,
           others,
-        } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, false);
+        } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, {
+          namespaces,
+          exclusive: false,
+        });
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => ({ type, count })),

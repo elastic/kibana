@@ -302,7 +302,6 @@ export const GetPingsParamsType = t.intersection([
     monitorId: t.string,
     sort: t.string,
     status: t.string,
-    finalAttempt: t.boolean,
   }),
 ]);
 

@@ -6,13 +6,13 @@
  */
 
 import { IRouter, Logger } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { GET_ILM_EXPLAIN, INTERNAL_API_VERSION } from '../../common/constants';
 import { fetchILMExplain } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import { GetILMExplainParams } from '../schemas/get_ilm_explain';
+import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
 export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
   router.versioned
@@ -42,12 +42,11 @@ export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
             body: ilmExplain.indices,
           });
         } catch (err) {
-          const error = transformError(err);
+          logger.error(JSON.stringify(err));
 
-          logger.error(error.message);
           return resp.error({
-            body: error.message,
-            statusCode: error.statusCode,
+            body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
+            statusCode: err.statusCode ?? 500,
           });
         }
       }

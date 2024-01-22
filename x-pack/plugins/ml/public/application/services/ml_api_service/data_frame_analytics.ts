@@ -49,7 +49,7 @@ export interface DeleteDataFrameAnalyticsWithIndexResponse {
   acknowledged: boolean;
   analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
   destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
-  destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
+  destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus;
 }
 
 export interface JobsExistsResponse {
@@ -83,12 +83,15 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   },
   createDataFrameAnalytics(
     analyticsId: string,
-    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>
+    analyticsConfig: DeepPartial<DataFrameAnalyticsConfig>,
+    createDataView: boolean = false,
+    timeFieldName?: string
   ) {
     const body = JSON.stringify(analyticsConfig);
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
       method: 'PUT',
+      query: { createDataView, timeFieldName },
       body,
       version: '1',
     });
@@ -142,9 +145,10 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
       version: '1',
     });
   },
-  deleteDataFrameAnalytics(analyticsId: string) {
+  deleteDataFrameAnalytics(analyticsId: string, force: boolean = true) {
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
+      query: { force },
       method: 'DELETE',
       version: '1',
     });
@@ -152,11 +156,12 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
     deleteDestIndex: boolean,
-    deleteDestIndexPattern: boolean
+    deleteDestDataView: boolean,
+    force: boolean = true
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
-      query: { deleteDestIndex, deleteDestIndexPattern },
+      query: { deleteDestIndex, deleteDestDataView, force },
       method: 'DELETE',
       version: '1',
     });

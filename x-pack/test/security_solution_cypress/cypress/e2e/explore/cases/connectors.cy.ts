@@ -10,7 +10,7 @@ import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../.
 import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
-import { cleanKibana, deleteAllCasesItems, deleteConnectors } from '../../../tasks/common';
+import { deleteAllCasesItems, deleteConnectors } from '../../../tasks/api_calls/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
@@ -47,10 +47,6 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   };
 
   const snConnector = getServiceNowConnector();
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();

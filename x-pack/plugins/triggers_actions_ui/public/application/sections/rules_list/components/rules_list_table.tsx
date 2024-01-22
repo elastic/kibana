@@ -340,7 +340,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           { defaultMessage: 'Name' }
         ),
         sortable: true,
-        truncateText: true,
+        truncateText: false,
         width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {

@@ -12,6 +12,7 @@ export class MonacoEditorService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly findService = this.ctx.getService('find');
 
   public async waitCodeEditorReady(containerTestSubjId: string) {
     const editorContainer = await this.testSubjects.find(containerTestSubjId);
@@ -51,5 +52,11 @@ export class MonacoEditorService extends FtrService {
         value
       );
     });
+  }
+
+  public async getCurrentMarkers(testSubjId: string) {
+    return this.findService.allByCssSelector(
+      `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`
+    );
   }
 }

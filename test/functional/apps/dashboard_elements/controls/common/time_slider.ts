@@ -106,7 +106,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const valueAfter = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueBefore).to.not.equal(valueAfter);
 
-        await dashboardControls.closeTimeSliderPopover();
         await dashboard.clickCancelOutOfEditMode();
         const valueNow = await dashboardControls.getTimeSliceFromTimeSlider();
         expect(valueNow).to.equal(valueBefore);

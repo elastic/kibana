@@ -6,26 +6,15 @@
  */
 
 import { OnlyEsqlQueryRuleParams } from '../types';
-import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { Comparator } from '../../../../common/comparator_types';
 import { getEsqlQuery } from './fetch_esql_query';
 
-const createDataView = () => {
-  const id = 'test-id';
-  const {
-    type,
-    version,
-    attributes: { timeFieldName, fields, title },
-  } = stubbedSavedObjectIndexPattern(id);
+const getTimeRange = () => {
+  const date = Date.now();
+  const dateStart = new Date(date - 300000).toISOString();
+  const dateEnd = new Date(date).toISOString();
 
-  return new DataView({
-    spec: { id, type, version, timeFieldName, fields: JSON.parse(fields), title },
-    fieldFormats: fieldFormatsMock,
-    shortDotsEnable: false,
-    metaFields: ['_id', '_type', '_score'],
-  });
+  return { dateStart, dateEnd };
 };
 
 const defaultParams: OnlyEsqlQueryRuleParams = {
@@ -44,7 +33,6 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
 
 describe('fetchEsqlQuery', () => {
   describe('getEsqlQuery', () => {
-    const dataViewMock = createDataView();
     afterAll(() => {
       jest.resetAllMocks();
     });
@@ -58,7 +46,8 @@ describe('fetchEsqlQuery', () => {
 
     it('should generate the correct query', async () => {
       const params = defaultParams;
-      const { query, dateStart, dateEnd } = getEsqlQuery(dataViewMock, params, undefined);
+      const { dateStart, dateEnd } = getTimeRange();
+      const query = getEsqlQuery(params, undefined, dateStart, dateEnd);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -80,13 +69,12 @@ describe('fetchEsqlQuery', () => {
           "query": "from test",
         }
       `);
-      expect(dateStart).toMatch('2020-02-09T23:10:41.941Z');
-      expect(dateEnd).toMatch('2020-02-09T23:15:41.941Z');
     });
 
     it('should generate the correct query with the alertLimit', async () => {
       const params = defaultParams;
-      const { query, dateStart, dateEnd } = getEsqlQuery(dataViewMock, params, 100);
+      const { dateStart, dateEnd } = getTimeRange();
+      const query = getEsqlQuery(params, 100, dateStart, dateEnd);
 
       expect(query).toMatchInlineSnapshot(`
         Object {
@@ -108,8 +96,6 @@ describe('fetchEsqlQuery', () => {
           "query": "from test | limit 100",
         }
       `);
-      expect(dateStart).toMatch('2020-02-09T23:10:41.941Z');
-      expect(dateEnd).toMatch('2020-02-09T23:15:41.941Z');
     });
   });
 });

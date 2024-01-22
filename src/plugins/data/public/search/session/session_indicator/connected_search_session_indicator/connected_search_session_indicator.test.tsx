@@ -80,7 +80,8 @@ test("shouldn't show indicator in case no active search session", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="kbnRedirectCrossAppLinks"
+        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        data-test-subj="kbnRedirectAppLink"
       />
     </div>
   `);
@@ -109,7 +110,8 @@ test("shouldn't show indicator in case app hasn't opt-in", async () => {
   expect(container).toMatchInlineSnapshot(`
     <div>
       <div
-        class="kbnRedirectCrossAppLinks"
+        css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+        data-test-subj="kbnRedirectAppLink"
       />
     </div>
   `);

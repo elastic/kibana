@@ -7,51 +7,26 @@
 
 import { resolve } from 'path';
 import { FtrConfigProviderContext } from '@kbn/test';
-import { pageObjects } from './page_objects';
+import { generateConfig } from './config.base';
 import { services } from './services';
-import {
-  getRegistryUrlAsArray,
-  createEndpointDockerConfig,
-} from '../security_solution_endpoint_api_int/registry';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function (ftrConfigProviderContext: FtrConfigProviderContext) {
+  const { readConfigFile } = ftrConfigProviderContext;
+
   const xpackFunctionalConfig = await readConfigFile(
     require.resolve('../functional/config.base.js')
   );
 
-  return {
-    ...xpackFunctionalConfig.getAll(),
-    pageObjects,
+  return generateConfig({
+    ftrConfigProviderContext,
+    baseConfig: xpackFunctionalConfig,
     testFiles: [resolve(__dirname, './apps/integrations')],
-    dockerServers: createEndpointDockerConfig(),
-    junit: {
-      reportName: 'X-Pack Endpoint Integrations Functional Tests',
-    },
+    junitReportName: 'X-Pack Endpoint Integrations Functional Tests on ESS',
+    target: 'ess',
+    kbnServerArgs: [
+      // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
+      '--xpack.securitySolution.packagerTaskInterval=5s',
+    ],
     services,
-    apps: {
-      ...xpackFunctionalConfig.get('apps'),
-      ['securitySolutionManagement']: {
-        pathname: '/app/security/administration',
-      },
-      ['security']: {
-        pathname: '/app/security',
-      },
-    },
-    kbnTestServer: {
-      ...xpackFunctionalConfig.get('kbnTestServer'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
-        // if you return an empty string here the kibana server will not start properly but an empty array works
-        ...getRegistryUrlAsArray(),
-        // always install Endpoint package by default when Fleet sets up
-        `--xpack.fleet.packages.0.name=endpoint`,
-        `--xpack.fleet.packages.0.version=latest`,
-        // set the packagerTaskInterval to 5s in order to speed up test executions when checking fleet artifacts
-        '--xpack.securitySolution.packagerTaskInterval=5s',
-      ],
-    },
-    layout: {
-      fixedHeaderHeight: 200,
-    },
-  };
+  });
 }

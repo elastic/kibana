@@ -7,8 +7,8 @@
  */
 
 import type { DebugState } from '@elastic/charts';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 type Duration =
   | 'Milliseconds'
@@ -667,6 +667,7 @@ export class VisualBuilderPageObject extends FtrService {
     const fieldEl = await this.getFieldForAggregation(aggNth);
 
     await this.comboBox.setElement(fieldEl, field);
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   public async setFieldForAggregateBy(field: string): Promise<void> {

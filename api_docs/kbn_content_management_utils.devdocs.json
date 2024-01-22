@@ -763,7 +763,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"conflict\" | \"exactMatch\" | \"aliasMatch\">; aliasTargetId: ",
+          "<\"exactMatch\" | \"aliasMatch\" | \"conflict\">; aliasTargetId: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -883,7 +883,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined>; attributes: ",
+          "<Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined>; attributes: ",
           {
             "pluginId": "@kbn/config-schema",
             "scope": "common",
@@ -1282,7 +1282,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<object>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+              "<object>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -1709,7 +1709,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attributes>; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+              "<Attributes>; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
             ],
             "path": "packages/kbn-content-management-utils/src/types.ts",
             "deprecated": false,
@@ -3149,7 +3149,7 @@
           "Return value for Saved Object get, T is item returned"
         ],
         "signature": [
-          "{ item: T; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+          "{ item: T; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
         ],
         "path": "packages/kbn-content-management-utils/src/types.ts",
         "deprecated": false,
@@ -4021,7 +4021,7 @@
                 "section": "def-common.Type",
                 "text": "Type"
               },
-              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; statusCode: number; metadata: Readonly<{} & {}>; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
+              "<Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; namespaces?: string[] | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; version?: string | undefined; originId?: string | undefined; } & { type: string; id: string; references: Readonly<{ name?: string | undefined; } & { type: string; id: string; }>[]; attributes: Readonly<{ [x: string]: any; } & {}>; }> | undefined>"
             ],
             "path": "packages/kbn-content-management-utils/src/schema.ts",
             "deprecated": false,

@@ -7,7 +7,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { ProfilingDataAccessPlugin } from './plugin';
 import type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart } from './plugin';
 
 const configSchema = schema.object({
@@ -29,6 +28,7 @@ export type ProfilingConfig = TypeOf<typeof configSchema>;
 
 export type { ProfilingDataAccessPluginSetup, ProfilingDataAccessPluginStart };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ProfilingDataAccessPlugin } = await import('./plugin');
   return new ProfilingDataAccessPlugin(initializerContext);
 }

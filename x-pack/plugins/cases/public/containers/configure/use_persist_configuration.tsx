@@ -47,7 +47,7 @@ export const usePersistConfiguration = () => {
     {
       mutationKey: casesMutationsKeys.persistCaseConfiguration,
       onSuccess: () => {
-        queryClient.invalidateQueries(casesQueriesKeys.configuration());
+        queryClient.invalidateQueries(casesQueriesKeys.configuration({ owner }));
         showSuccessToast(i18n.SUCCESS_CONFIGURE);
       },
       onError: (error: ServerError) => {

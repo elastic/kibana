@@ -18,12 +18,11 @@ import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -32,13 +31,13 @@ import { asDuration } from '../../../../common/utils/formatters';
 import { TopAlert } from '../../../typings/alerts';
 import { ExperimentalBadge } from '../../../components/experimental_badge';
 import {
-  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '../alert_details';
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  alertStatus?: AlertStatus;
   dataTestSubj: string;
 }
 
@@ -52,13 +51,12 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
+export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
 
   const showExperimentalBadge =
-    alert.fields[ALERT_RULE_TYPE_ID] === LOG_DOCUMENT_COUNT_RULE_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_THRESHOLD_ALERT_TYPE_ID ||
     alert.fields[ALERT_RULE_TYPE_ID] === METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID;
 
@@ -71,10 +69,12 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          <AlertLifecycleStatusBadge
-            alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">

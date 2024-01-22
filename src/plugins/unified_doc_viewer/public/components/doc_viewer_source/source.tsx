@@ -16,7 +16,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '@kbn/discover-utils';
-import { useEsDocSearch, useUnifiedDocViewerServices } from '../../hooks';
+import { getUnifiedDocViewerServices } from '../../plugin';
+import { useEsDocSearch } from '../../hooks';
 import { getHeight } from './get_height';
 import { JSONCodeEditorCommonMemoized } from '../json_code_editor';
 
@@ -36,6 +37,8 @@ interface SourceViewerProps {
 export const MAX_LINES_CLASSIC_TABLE = 500;
 // Displayed margin of the code editor to the window bottom when rendered in the document explorer flyout
 export const MARGIN_BOTTOM = 25;
+// Minimum height for the source content to guarantee minimum space when the flyout is scrollable.
+export const MIN_HEIGHT = 400;
 
 export const DocViewerSource = ({
   id,
@@ -49,7 +52,7 @@ export const DocViewerSource = ({
   const [editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor>();
   const [editorHeight, setEditorHeight] = useState<number>();
   const [jsonValue, setJsonValue] = useState<string>('');
-  const { uiSettings } = useUnifiedDocViewerServices();
+  const { uiSettings } = getUnifiedDocViewerServices();
   const useNewFieldsApi = !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE);
   const useDocExplorer = !uiSettings.get(DOC_TABLE_LEGACY);
   const [requestState, hit] = useEsDocSearch({

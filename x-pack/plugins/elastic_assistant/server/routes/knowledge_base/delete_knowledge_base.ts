@@ -38,7 +38,9 @@ export const deleteKnowledgeBaseRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
         const kbResource =
@@ -46,7 +48,12 @@ export const deleteKnowledgeBaseRoute = (
 
         // Get a scoped esClient for deleting the Knowledge Base index, pipeline, and documents
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger);
+        const esStore = new ElasticsearchStore(
+          esClient,
+          KNOWLEDGE_BASE_INDEX_PATTERN,
+          logger,
+          telemetry
+        );
 
         if (kbResource === ESQL_RESOURCE) {
           // For now, tearing down the Knowledge Base is fine, but will want to support removing specific assets based

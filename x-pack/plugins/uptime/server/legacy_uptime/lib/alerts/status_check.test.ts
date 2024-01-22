@@ -129,7 +129,7 @@ const mockStatusAlertDocument = (
   return {
     fields: {
       ...mockCommonAlertDocumentFields(monitor.monitorInfo),
-      [ALERT_REASON]: `Monitor "First" from ${monitor.monitorInfo.observer?.geo?.name} failed ${count} times in the last ${interval}. Alert when > ${numTimes}. Checked at ${checkedAt}.`,
+      [ALERT_REASON]: `Monitor "First" from ${monitor.monitorInfo.observer?.geo?.name} failed ${count} times in the last ${interval}. Alert when >= ${numTimes}. Checked at ${checkedAt}.`,
     },
     id: getInstanceId(
       monitorInfo,
@@ -293,8 +293,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 15 mins. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when >= 5. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 15 mins. Alert when >= 5.",
           },
         ]
       `);
@@ -312,8 +312,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 15 mins. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when >= 5. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 15 mins. Alert when >= 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
         ]
@@ -375,8 +375,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 15m. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when >= 5. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 15m. Alert when >= 5.",
           },
         ]
       `);
@@ -394,8 +394,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when > 5. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 15m. Alert when > 5.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15m. Alert when >= 5. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 15m. Alert when >= 5.",
             "viewInAppUrl": "http://localhost:5601/hfe/app/uptime/monitor/Zmlyc3Q=?dateRangeEnd=now&dateRangeStart=2022-03-17T13%3A13%3A33.755Z&filters=%5B%5B%22observer.geo.name%22%2C%5B%22harrisburg%22%5D%5D%5D",
           },
         ]
@@ -448,8 +448,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 14h. Alert when > 4. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 14h. Alert when > 4.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 14h. Alert when >= 4. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 14h. Alert when >= 4.",
           },
         ]
       `);
@@ -665,8 +665,8 @@ describe('status check alert', () => {
             "monitorUrl": "localhost:8080",
             "observerHostname": undefined,
             "observerLocation": "harrisburg",
-            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when > 3. Checked at July 6, 2020 9:14 PM.",
-            "statusMessage": "failed 234 times in the last 15 mins. Alert when > 3.",
+            "reason": "Monitor \\"First\\" from harrisburg failed 234 times in the last 15 mins. Alert when >= 3. Checked at July 6, 2020 9:14 PM.",
+            "statusMessage": "failed 234 times in the last 15 mins. Alert when >= 3.",
           },
         ]
       `);
@@ -1476,7 +1476,7 @@ describe('status check alert', () => {
           numTimes: 10,
           interval: '30 days',
         })
-      ).toMatchInlineSnapshot(`"failed 235 times in the last 30 days. Alert when > 10."`);
+      ).toMatchInlineSnapshot(`"failed 235 times in the last 30 days. Alert when >= 10."`);
     });
 
     it('creates message for availability item', () => {
@@ -1539,7 +1539,7 @@ describe('status check alert', () => {
           }
         )
       ).toMatchInlineSnapshot(
-        `"failed 235 times in the last 30 days. Alert when > 10. The 5 mins availability is 58.04%. Alert when < 90%."`
+        `"failed 235 times in the last 30 days. Alert when >= 10. The 5 mins availability is 58.04%. Alert when < 90%."`
       );
     });
   });

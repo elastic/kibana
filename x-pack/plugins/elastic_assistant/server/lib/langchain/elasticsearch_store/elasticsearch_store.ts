@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Callbacks } from 'langchain/callbacks';
@@ -13,6 +13,7 @@ import { Document } from 'langchain/document';
 import { VectorStore } from 'langchain/vectorstores/base';
 import * as uuid from 'uuid';
 
+import { transformError } from '@kbn/securitysolution-es-utils';
 import { ElasticsearchEmbeddings } from '../embeddings/elasticsearch_embeddings';
 import { FlattenedHit, getFlattenedHits } from './helpers/get_flattened_hits';
 import { getMsearchQueryBody } from './helpers/get_msearch_query_body';
@@ -25,6 +26,10 @@ import {
   KNOWLEDGE_BASE_INGEST_PIPELINE,
 } from '../../../routes/knowledge_base/constants';
 import { getRequiredKbDocsTermsQueryDsl } from './helpers/get_required_kb_docs_terms_query_dsl';
+import {
+  KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT,
+  KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT,
+} from '../../telemetry/event_based_telemetry';
 
 interface CreatePipelineParams {
   id?: string;
@@ -37,7 +42,7 @@ interface CreateIndexParams {
 }
 
 /**
- * A fallback for the the query `size` that determines how many documents to
+ * A fallback for the query `size` that determines how many documents to
  * return from Elasticsearch when performing a similarity search.
  *
  * The size is typically determined by the implementation of LangChain's
@@ -59,6 +64,7 @@ export class ElasticsearchStore extends VectorStore {
   private readonly esClient: ElasticsearchClient;
   private readonly index: string;
   private readonly logger: Logger;
+  private readonly telemetry: AnalyticsServiceSetup;
   private readonly model: string;
   private readonly kbResource: string;
 
@@ -70,6 +76,7 @@ export class ElasticsearchStore extends VectorStore {
     esClient: ElasticsearchClient,
     index: string,
     logger: Logger,
+    telemetry: AnalyticsServiceSetup,
     model?: string,
     kbResource?: string | undefined
   ) {
@@ -77,6 +84,7 @@ export class ElasticsearchStore extends VectorStore {
     this.esClient = esClient;
     this.index = index ?? KNOWLEDGE_BASE_INDEX_PATTERN;
     this.logger = logger;
+    this.telemetry = telemetry;
     this.model = model ?? '.elser_model_2';
     this.kbResource = kbResource ?? ESQL_RESOURCE;
   }
@@ -122,7 +130,7 @@ export class ElasticsearchStore extends VectorStore {
         i.index?._id != null && i.index.error == null ? [i.index._id] : []
       );
     } catch (e) {
-      this.logger.error('Error loading data into KB', e);
+      this.logger.error(`Error loading data into KB\n ${e}`);
       return [];
     }
   };
@@ -222,8 +230,29 @@ export class ElasticsearchStore extends VectorStore {
         return getFlattenedHits(maybeEsqlMsearchResponse);
       });
 
+      this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_SUCCESS_EVENT.eventType, {
+        model: this.model,
+        resourceAccessed: this.kbResource,
+        resultCount: results.length,
+        responseTime: result.took ?? 0,
+      });
+
+      this.logger.debug(
+        `Similarity search metadata source:\n${JSON.stringify(
+          results.map((r) => r?.metadata?.source ?? '(missing metadata.source)'),
+          null,
+          2
+        )}`
+      );
+
       return results;
     } catch (e) {
+      const error = transformError(e);
+      this.telemetry.reportEvent(KNOWLEDGE_BASE_EXECUTION_ERROR_EVENT.eventType, {
+        model: this.model,
+        resourceAccessed: this.kbResource,
+        errorMessage: error.message,
+      });
       this.logger.error(e);
       return [];
     }
@@ -360,14 +389,17 @@ export class ElasticsearchStore extends VectorStore {
    * @param modelId ID of the model to check
    * @returns Promise<boolean> indicating whether the model is installed
    */
-  async isModelInstalled(modelId: string): Promise<boolean> {
+  async isModelInstalled(modelId?: string): Promise<boolean> {
     try {
-      const getResponse = await this.esClient.ml.getTrainedModels({
-        model_id: modelId,
-        include: 'definition_status',
+      const getResponse = await this.esClient.ml.getTrainedModelsStats({
+        model_id: modelId ?? this.model,
       });
 
-      return Boolean(getResponse.trained_model_configs[0]?.fully_defined);
+      return getResponse.trained_model_stats.some(
+        (stats) =>
+          stats.deployment_stats?.state === 'started' &&
+          stats.deployment_stats?.allocation_status.state === 'fully_allocated'
+      );
     } catch (e) {
       // Returns 404 if it doesn't exist
       return false;

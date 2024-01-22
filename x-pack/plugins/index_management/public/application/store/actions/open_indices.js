@@ -26,8 +26,8 @@ export const openIndices =
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.openIndicesAction.successfullyOpenedIndicesMessage', {
-        defaultMessage: 'Successfully opened: [{indexNames}]',
-        values: { indexNames: indexNames.join(', ') },
+        defaultMessage: 'Successfully opened {count, plural, one {# index} other {# indices} }',
+        values: { count: indexNames.length },
       })
     );
   };

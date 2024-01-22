@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
@@ -32,8 +33,9 @@ const OpenLensButtonComponent: React.FC<Props> = ({ attachmentId, attributes, ti
   }, [attachmentId, attributes, navigateToPrefilledEditor, timeRange]);
 
   const hasLensPermissions = canUseEditor();
+  const isESQLQuery = isOfAggregateQueryType(attributes.state.query);
 
-  if (!hasLensPermissions) {
+  if (!hasLensPermissions || isESQLQuery) {
     return null;
   }
 

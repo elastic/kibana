@@ -36,6 +36,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
@@ -43,7 +44,6 @@ import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import type { AuditServiceSetup } from '../audit';
 import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';

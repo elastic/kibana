@@ -43,6 +43,7 @@ import { savedObjectsManagementServiceFactory } from './saved_objects_management
 import { contentManagementServiceFactory } from './content_management/content_management_service.stub';
 import { serverlessServiceFactory } from './serverless/serverless_service.stub';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service.stub';
+import { uiActionsServiceFactory } from './ui_actions/ui_actions_service.stub';
 
 export const providers: PluginServiceProviders<DashboardServices> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory),
@@ -74,6 +75,7 @@ export const providers: PluginServiceProviders<DashboardServices> = {
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   serverless: new PluginServiceProvider(serverlessServiceFactory),
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
+  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 
 export const registry = new PluginServiceRegistry<DashboardServices>(providers);

@@ -174,6 +174,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {
@@ -206,6 +207,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         fleet: { all: true },
       },
+      enableQueryVersion: true,
     })
     .addVersion(
       {

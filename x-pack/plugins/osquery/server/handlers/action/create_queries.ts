@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, map, pickBy } from 'lodash';
+import { isEmpty, isNumber, map, pickBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
@@ -43,7 +43,7 @@ export const createDynamicQueries = async ({
             alert_ids: params.alert_ids,
             agents,
           },
-          (value) => !isEmpty(value) || value === true
+          (value) => !isEmpty(value) || value === true || isNumber(value)
         );
       })
     : [
@@ -61,10 +61,11 @@ export const createDynamicQueries = async ({
               : undefined,
             ecs_mapping: params.ecs_mapping,
             alert_ids: params.alert_ids,
+            timeout: params.timeout,
             agents,
             ...(error ? { error } : {}),
           },
-          (value) => !isEmpty(value)
+          (value) => !isEmpty(value) || isNumber(value)
         ),
       ];
 

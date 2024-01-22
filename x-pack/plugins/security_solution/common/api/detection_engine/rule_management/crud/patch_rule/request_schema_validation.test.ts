@@ -6,7 +6,7 @@
  */
 
 import type { ThresholdRulePatchProps } from '../../../model';
-import type { PatchRuleRequestBody } from './patch_rule_route';
+import type { PatchRuleRequestBody } from './patch_rule_route.gen';
 import { getPatchRulesSchemaMock, getPatchThresholdRulesSchemaMock } from './patch_rule_route.mock';
 import { validatePatchRuleRequestBody } from './request_schema_validation';
 

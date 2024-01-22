@@ -381,8 +381,9 @@ describe('suggestion_panel', () => {
       },
     ] as Suggestion[]);
 
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce(undefined);
-    (mockVisualization.toPreviewExpression as jest.Mock).mockReturnValueOnce('test | expression');
+    (mockVisualization.toPreviewExpression as jest.Mock)
+      .mockReturnValue(undefined)
+      .mockReturnValueOnce('test | expression');
     mockDatasource.toExpression.mockReturnValue('datasource_expression');
 
     mountWithProvider(<SuggestionPanel {...defaultProps} frame={createMockFramePublicAPI()} />);

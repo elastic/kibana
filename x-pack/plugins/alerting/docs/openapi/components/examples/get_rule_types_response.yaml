@@ -1,81 +1,322 @@
 summary: Retrieve rule types associated with Kibana machine learning features
 value:
-  - id: xpack.ml.anomaly_detection_alert
-    action_groups:
-      - id: anomaly_score_match
-        name: Anomaly score matched the condition
-      - id: recovered
-        name: Recovered
-    action_variables:
-      context:
-        - name: timestamp
-          description: The bucket timestamp of the anomaly
-        - name: timestampIso8601
-          description: The bucket time of the anomaly in ISO8601 format
-        - name: jobIds
-          description: List of job IDs that triggered the alert
-        - name: message
-          description: Alert info message
-        - name: isInterim
-          description: Indicate if top hits contain interim results
-        - name: score
-          description: Anomaly score at the time of the notification action
-        - name: topRecords
-          description: Top records
-        - name: topInfluencers
-          description: Top influencers
-        - name: anomalyExplorerUrl
-          description: URL to open in the Anomaly Explorer
-          useWithTripleBracesInTemplates: true
-      params: []
-      state: []
-    authorized_consumers:
-      alerts:
-        all: true
-        read: true
-      ml:
-        all: true
-        read: true
-    default_action_group_id: anomaly_score_match
-    does_set_recovery_context: true
-    enabled_in_license: true
-    is_exportable: true
-    minimum_license_required: platinum
-    name: Anomaly detection alert
-    producer: ml
-    recovery_action_group:
-      id: recovered
-      name: Recovered
-    rule_task_timeout: 5m
-  - id: xpack.ml.anomaly_detection_jobs_health
-    action_groups:
-      - id: anomaly_detection_realtime_issue
-        name: Issue detected
-      - id: recovered
-        name: Recovered
-    action_variables:
-      context:
-        - name: results
-          description: Results of the rule execution
-        - name: message
-          description: Alert info message
-      params: []
-      state: []
-    authorized_consumers:
-      alerts:
-        all: true
-        read: true
-      ml:
-        all: true
-        read: true
-    default_action_group_id: anomaly_detection_realtime_issue
-    does_set_recovery_context: true
-    enabled_in_license: true
-    is_exportable: true
-    minimum_license_required: platinum
-    name: Anomaly detection jobs health
-    producer: ml
-    recovery_action_group:
-      id: recovered
-      name: Recovered
-    rule_task_timeout: 5m
+  [
+    {
+      "id": "xpack.ml.anomaly_detection_alert",
+      "name": "Anomaly detection alert",
+      "category": "management",
+      "producer": "ml",
+      "alerts": {
+        "context": "ml.anomaly-detection",
+        "mappings": {
+          "fieldMap": {
+            "kibana.alert.job_id": {
+              "type": "keyword",
+              "array": false,
+              "required": true
+            },
+            "kibana.alert.anomaly_score": {
+              "type": "double",
+              "array": false,
+              "required": false
+            },
+            "kibana.alert.is_interim": {
+              "type": "boolean",
+              "array": false,
+              "required": false
+            },
+            "kibana.alert.anomaly_timestamp": {
+              "type": "date",
+              "array": false,
+              "required": false
+            },
+            "kibana.alert.top_records": {
+              "type": "object",
+              "array": true,
+              "required": false,
+              "dynamic": false,
+              "properties": {
+                "job_id": {
+                  "type": "keyword"
+                },
+                "record_score": {
+                  "type": "double"
+                },
+                "initial_record_score": {
+                  "type": "double"
+                },
+                "detector_index": {
+                  "type": "integer"
+                },
+                "is_interim": {
+                  "type": "boolean"
+                },
+                "timestamp": {
+                  "type": "date"
+                },
+                "partition_field_name": {
+                  "type": "keyword"
+                },
+                "partition_field_value": {
+                  "type": "keyword"
+                },
+                "over_field_name": {
+                  "type": "keyword"
+                },
+                "over_field_value": {
+                  "type": "keyword"
+                },
+                "by_field_name": {
+                  "type": "keyword"
+                },
+                "by_field_value": {
+                  "type": "keyword"
+                },
+                "function": {
+                  "type": "keyword"
+                },
+                "typical": {
+                  "type": "double"
+                },
+                "actual": {
+                  "type": "double"
+                },
+                "field_name": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "kibana.alert.top_influencers": {
+              "type": "object",
+              "array": true,
+              "required": false,
+              "dynamic": false,
+              "properties": {
+                "job_id": {
+                  "type": "keyword"
+                },
+                "influencer_field_name": {
+                  "type": "keyword"
+                },
+                "influencer_field_value": {
+                  "type": "keyword"
+                },
+                "influencer_score": {
+                  "type": "double"
+                },
+                "initial_influencer_score": {
+                  "type": "double"
+                },
+                "is_interim": {
+                  "type": "boolean"
+                },
+                "timestamp": {
+                  "type": "date"
+                }
+              }
+            }
+          }
+        },
+        "shouldWrite": true
+      },
+      "enabled_in_license": true,
+      "recovery_action_group": {
+        "id": "recovered",
+        "name": "Recovered"
+      },
+      "action_groups": [
+        {
+          "id": "anomaly_score_match",
+          "name": "Anomaly score matched the condition"
+        },
+        {
+          "id": "recovered",
+          "name": "Recovered"
+        }
+      ],
+      "default_action_group_id": "anomaly_score_match",
+      "minimum_license_required": "platinum",
+      "is_exportable": true,
+      "rule_task_timeout": "5m",
+      "action_variables": {
+        "context": [
+          {
+            "name": "timestamp",
+            "description": "The bucket timestamp of the anomaly"
+          },
+          {
+            "name": "timestampIso8601",
+            "description": "The bucket time of the anomaly in ISO8601 format"
+          },
+          {
+            "name": "jobIds",
+            "description": "List of job IDs that triggered the alert"
+          },
+          {
+            "name": "message",
+            "description": "Alert info message"
+          },
+          {
+            "name": "isInterim",
+            "description": "Indicate if top hits contain interim results"
+          },
+          {
+            "name": "score",
+            "description": "Anomaly score at the time of the notification action"
+          },
+          {
+            "name": "topRecords",
+            "description": "Top records"
+          },
+          {
+            "name": "topInfluencers",
+            "description": "Top influencers"
+          },
+          {
+            "name": "anomalyExplorerUrl",
+            "description": "URL to open in the Anomaly Explorer",
+            "useWithTripleBracesInTemplates": true
+          }
+        ],
+        "state": [],
+        "params": []
+      },
+      "authorized_consumers": {
+        "alerts": {
+          "read": true,
+          "all": true
+        },
+        "stackAlerts": {
+          "read": true,
+          "all": true
+        },
+        "slo": {
+          "read": true,
+          "all": true
+        },
+        "ml": {
+          "read": true,
+          "all": true
+        },
+        "uptime": {
+          "read": true,
+          "all": true
+        },
+        "infrastructure": {
+          "read": true,
+          "all": true
+        },
+        "logs": {
+          "read": true,
+          "all": true
+        },
+        "monitoring": {
+          "read": true,
+          "all": true
+        },
+        "siem": {
+          "read": true,
+          "all": true
+        },
+        "apm": {
+          "read": true,
+          "all": true
+        },
+        "discover": {
+          "read": true,
+          "all": true
+        }
+      },
+      "does_set_recovery_context": true,
+      "has_alerts_mappings": true,
+      "has_fields_for_a_a_d": false
+    },
+    {
+      "id": "xpack.ml.anomaly_detection_jobs_health",
+      "name": "Anomaly detection jobs health",
+      "category": "management",
+      "producer": "ml",
+      "enabled_in_license": true,
+      "recovery_action_group": {
+        "id": "recovered",
+        "name": "Recovered"
+      },
+      "action_groups": [
+        {
+          "id": "anomaly_detection_realtime_issue",
+          "name": "Issue detected"
+        },
+        {
+          "id": "recovered",
+          "name": "Recovered"
+        }
+      ],
+      "default_action_group_id": "anomaly_detection_realtime_issue",
+      "minimum_license_required": "platinum",
+      "is_exportable": true,
+      "rule_task_timeout": "5m",
+      "action_variables": {
+        "context": [
+          {
+            "name": "results",
+            "description": "Results of the rule execution"
+          },
+          {
+            "name": "message",
+            "description": "Alert info message"
+          }
+        ],
+        "state": [],
+        "params": []
+      },
+      "authorized_consumers": {
+        "alerts": {
+          "read": true,
+          "all": true
+        },
+        "stackAlerts": {
+          "read": true,
+          "all": true
+        },
+        "slo": {
+          "read": true,
+          "all": true
+        },
+        "ml": {
+          "read": true,
+          "all": true
+        },
+        "uptime": {
+          "read": true,
+          "all": true
+        },
+        "infrastructure": {
+          "read": true,
+          "all": true
+        },
+        "logs": {
+          "read": true,
+          "all": true
+        },
+        "monitoring": {
+          "read": true,
+          "all": true
+        },
+        "siem": {
+          "read": true,
+          "all": true
+        },
+        "apm": {
+          "read": true,
+          "all": true
+        },
+        "discover": {
+          "read": true,
+          "all": true
+        }
+      },
+      "does_set_recovery_context": true,
+      "has_alerts_mappings": false,
+      "has_fields_for_a_a_d": false
+    }
+  ]

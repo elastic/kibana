@@ -6,7 +6,7 @@
  */
 
 import { adminTestUser } from '@kbn/test';
-import { AuthenticatedUser, Role } from '@kbn/security-plugin/common/model';
+import { AuthenticatedUser, Role } from '@kbn/security-plugin/common';
 import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
@@ -40,6 +40,8 @@ export class SecurityPageObject extends FtrService {
   private readonly header = this.ctx.getPageObject('header');
   private readonly monacoEditor = this.ctx.getService('monacoEditor');
   private readonly es = this.ctx.getService('es');
+
+  delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
   public loginPage = Object.freeze({
     login: async (username?: string, password?: string, options: LoginOptions = {}) => {
@@ -316,7 +318,7 @@ export class SecurityPageObject extends FtrService {
       await this.waitForLoginPage();
     } else {
       this.log.debug('Waiting for logout to complete');
-      await this.retry.waitFor('Waiting for logout to complete', async () => {
+      await this.retry.waitFor('logout to complete', async () => {
         // There are cases when browser/Kibana would like users to confirm that they want to navigate away from the
         // current page and lose the state (e.g. unsaved changes) via native alert dialog.
         const alert = await this.browser.getAlert();
@@ -324,12 +326,19 @@ export class SecurityPageObject extends FtrService {
           await alert.accept();
         }
 
+        await this.retry.waitFor('URL redirects to finish', async () => {
+          const urlBefore = await this.browser.getCurrentUrl();
+          await this.delay(1000);
+          const urlAfter = await this.browser.getCurrentUrl();
+          return urlAfter === urlBefore;
+        });
+
+        const currentUrl = await this.browser.getCurrentUrl();
         if (this.config.get('serverless')) {
           // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
-          this.log.debug('Wait 5 sec for Cloud login page to be displayed');
-          return await this.find.existsByDisplayedByCssSelector('.login-form-password', 5000);
+          return currentUrl.includes('/login') || currentUrl.includes('/projects');
         } else {
-          return !(await this.browser.getCurrentUrl()).includes('/logout');
+          return !currentUrl.includes('/logout');
         }
       });
     }

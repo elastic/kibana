@@ -17,10 +17,6 @@ export const ENRICHMENT_QUERY_START_INPUT = '.start-picker';
 
 export const ENRICHMENT_QUERY_END_INPUT = '.end-picker';
 
-export const FIELD = (value: string) => {
-  return `[data-test-subj="event-field-${value}"]`;
-};
-
 export const FILTER_INPUT = '[data-test-subj="eventDetails"] .euiFieldSearch';
 
 export const INDICATOR_MATCH_ENRICHMENT_SECTION = '[data-test-subj="threat-match-detected"]';
@@ -32,13 +28,7 @@ export const JSON_VIEW_TAB = '[data-test-subj="jsonViewTab"]';
 
 export const JSON_TEXT = '[data-test-subj="jsonView"]';
 
-export const OVERVIEW_RISK_SCORE = '[data-test-subj="eventDetails"] [data-test-subj="riskScore"]';
-
 export const OVERVIEW_RULE = '[data-test-subj="eventDetails"] [data-test-subj="ruleName"]';
-
-export const OVERVIEW_RULE_TYPE = '[data-test-subj="event-field-kibana.alert.rule.type"]';
-
-export const OVERVIEW_SEVERITY = '[data-test-subj="eventDetails"] [data-test-subj="severity"]';
 
 export const OVERVIEW_STATUS = '[data-test-subj="eventDetails"] [data-test-subj="alertStatus"]';
 
@@ -69,8 +59,6 @@ export const THREAT_INTEL_TAB = '[data-test-subj="threatIntelTab"]';
 
 export const UPDATE_ENRICHMENT_RANGE_BUTTON = '[data-test-subj="enrichment-button"]';
 
-export const OVERVIEW_TAB = '[data-test-subj="overviewTab"]';
-
 export const SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON = `${SUMMARY_VIEW} [aria-label='Investigate in timeline']`;
 
 export const INSIGHTS_RELATED_ALERTS_BY_SESSION = `[data-test-subj='related-alerts-by-session']`;
@@ -82,7 +70,5 @@ export const INSIGHTS_RELATED_ALERTS_BY_ANCESTRY = `[data-test-subj='related-ale
 export const INSIGHTS_INVESTIGATE_ANCESTRY_ALERTS_IN_TIMELINE_BUTTON = `[data-test-subj='investigate-ancestry-in-timeline']`;
 
 export const ENRICHED_DATA_ROW = `[data-test-subj='EnrichedDataRow']`;
-
-export const OPEN_ALERT_DETAILS_PAGE = `[data-test-subj="open-alert-details-page"]`;
 
 export const COPY_ALERT_FLYOUT_LINK = `[data-test-subj="copy-alert-flyout-link"]`;

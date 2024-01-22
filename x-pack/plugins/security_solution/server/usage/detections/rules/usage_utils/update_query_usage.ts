@@ -44,5 +44,8 @@ export const updateQueryUsage = ({
     notifications_disabled: notificationDisabled
       ? usage[ruleType].notifications_disabled + 1
       : usage[ruleType].notifications_disabled,
+    legacy_investigation_fields: detectionRuleMetric.has_legacy_investigation_field
+      ? usage[ruleType].legacy_investigation_fields + 1
+      : usage[ruleType].legacy_investigation_fields,
   };
 };

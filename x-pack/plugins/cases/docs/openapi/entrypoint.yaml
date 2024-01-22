@@ -1,8 +1,8 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
-  version: '0.1'
+  version: '0.2'
   contact:
     name: Cases Team
   license:
@@ -12,8 +12,7 @@ tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
 # Paths in the default space
   '/api/cases':
@@ -91,7 +90,8 @@ components:
     apiKeyAuth:
       type: apiKey
       in: header
-      name: ApiKey
+      name: Authorization
+      description: 'e.g. Authorization: ApiKey base64AccessApiKey'
 security:
   - basicAuth: []
   - apiKeyAuth: []

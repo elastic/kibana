@@ -8,14 +8,15 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
+import { useParentBreadcrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
 
@@ -25,6 +26,7 @@ export const MetricDetailPage = () => {
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
   const inventoryModel = findInventoryModel(nodeType);
   const { sourceId, metricIndicesExist } = useSourceContext();
+  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
 
   const {
     timeRange,
@@ -50,6 +52,17 @@ export const MetricDetailPage = () => {
     timeRange: parsedTimeRange,
   });
 
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
+  useMetricsBreadcrumbs([
+    {
+      ...breadcrumbOptions.link,
+      text: breadcrumbOptions.text,
+    },
+    {
+      text: name,
+    },
+  ]);
+
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 
   const addNavItem = React.useCallback(
@@ -60,12 +73,6 @@ export const MetricDetailPage = () => {
     },
     [sideNav]
   );
-
-  useMetricsBreadcrumbs([
-    {
-      text: name,
-    },
-  ]);
 
   if (metadataLoading && !filteredRequiredMetrics.length) {
     return (

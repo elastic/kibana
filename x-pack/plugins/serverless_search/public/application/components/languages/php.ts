@@ -17,7 +17,7 @@ export const phpDefinition: LanguageDefinition = {
   $response = $client->search(index: "books", params: $params);
   print_r($response['hits']['hits']); # list of books`,
   configureClient: ({ url, apiKey }) => `$client = ClientBuilder::create()
-  ->setHosts(['${url}'])
+  ->setEndpoint('${url}')
   ->setApiKey('${apiKey}')
   ->build();`,
   docLink: docLinks.phpClient,
@@ -61,7 +61,7 @@ $response = $client->bulk(body: $body);
 echo $response->getStatusCode();
 echo (string) $response->getBody();
 `,
-  installClient: 'composer require elastic/elasticsearch-serverless:0.1.0-alpha1',
+  installClient: 'composer require elastic/elasticsearch-serverless:*@alpha',
   name: i18n.translate('xpack.serverlessSearch.languages.php', {
     defaultMessage: 'PHP',
   }),

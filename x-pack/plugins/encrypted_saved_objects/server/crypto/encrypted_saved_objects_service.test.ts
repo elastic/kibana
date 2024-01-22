@@ -202,7 +202,9 @@ describe('#stripOrDecryptAttributes', () => {
       );
 
       expect(decryptedAttributes).toEqual({ attrZero: 'zero', attrTwo: 'two', attrFour: 'four' });
-      expect(error).toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
+      expect(error).toMatchInlineSnapshot(
+        `[Error: Unable to decrypt attribute "attrThree" of saved object "known-type-1,object-id"]`
+      );
     });
   });
 
@@ -257,7 +259,9 @@ describe('#stripOrDecryptAttributes', () => {
 
       const encryptionError = error as EncryptionError;
       expect(encryptionError.attributeName).toBe('attrThree');
-      expect(encryptionError.message).toBe('Unable to decrypt attribute "attrThree"');
+      expect(encryptionError.message).toBe(
+        'Unable to decrypt attribute "attrThree" of saved object "known-type-1,object-id"'
+      );
       expect(encryptionError.cause).toEqual(
         new Error('Decryption is disabled because of missing decryption keys.')
       );
@@ -381,7 +385,9 @@ describe('#stripOrDecryptAttributesSync', () => {
       );
 
       expect(decryptedAttributes).toEqual({ attrZero: 'zero', attrTwo: 'two', attrFour: 'four' });
-      expect(error).toMatchInlineSnapshot(`[Error: Unable to decrypt attribute "attrThree"]`);
+      expect(error).toMatchInlineSnapshot(
+        `[Error: Unable to decrypt attribute "attrThree" of saved object "known-type-1,object-id"]`
+      );
     });
   });
 
@@ -436,7 +442,9 @@ describe('#stripOrDecryptAttributesSync', () => {
 
       const encryptionError = error as EncryptionError;
       expect(encryptionError.attributeName).toBe('attrThree');
-      expect(encryptionError.message).toBe('Unable to decrypt attribute "attrThree"');
+      expect(encryptionError.message).toBe(
+        'Unable to decrypt attribute "attrThree" of saved object "known-type-1,object-id"'
+      );
       expect(encryptionError.cause).toEqual(
         new Error('Decryption is disabled because of missing decryption keys.')
       );

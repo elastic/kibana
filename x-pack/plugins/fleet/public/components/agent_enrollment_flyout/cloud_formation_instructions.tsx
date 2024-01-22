@@ -58,6 +58,7 @@ export const CloudFormationInstructions: React.FunctionComponent<Props> = ({
       />
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="launchCloudFormationButtonAgentFlyoutTestId"
         color="primary"
         fill
         target="_blank"

@@ -119,7 +119,7 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLink1.id,
         title: link1.title,
-        path: [chromeNavLink1.id],
+        path: chromeNavLink1.id,
         deepLink: chromeNavLink1,
       },
     ]);
@@ -132,7 +132,7 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLink3.id,
         title: chromeNavLink3.title,
-        path: [chromeNavLink3.id],
+        path: chromeNavLink3.id,
         deepLink: chromeNavLink3,
       },
     ]);
@@ -145,13 +145,13 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLink1.id,
         title: link1.title,
-        path: [chromeNavLink1.id],
+        path: chromeNavLink1.id,
         deepLink: chromeNavLink1,
         children: [
           {
             id: chromeNavLink2.id,
             title: link2.title,
-            path: [chromeNavLink1.id, chromeNavLink2.id],
+            path: [chromeNavLink1.id, chromeNavLink2.id].join('.'),
             deepLink: chromeNavLink2,
           },
         ],
@@ -173,24 +173,24 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLinkTest.id,
         title: link1.title,
-        path: [chromeNavLinkTest.id],
+        path: chromeNavLinkTest.id,
         deepLink: chromeNavLinkTest,
         children: [
           {
             id: chromeNavLinkMl1.id,
             title: chromeNavLinkMl1.title,
-            path: [chromeNavLinkTest.id, chromeNavLinkMl1.id],
+            path: [chromeNavLinkTest.id, chromeNavLinkMl1.id].join('.'),
             deepLink: chromeNavLinkMl1,
           },
           {
             id: defaultNavCategory1.id,
             title: defaultNavCategory1.title,
-            path: [chromeNavLinkTest.id, defaultNavCategory1.id],
+            path: [chromeNavLinkTest.id, defaultNavCategory1.id].join('.'),
             children: [
               {
                 id: chromeNavLinkMl2.id,
                 title: 'Overridden ML SubLink 2',
-                path: [chromeNavLinkTest.id, defaultNavCategory1.id, chromeNavLinkMl2.id],
+                path: [chromeNavLinkTest.id, defaultNavCategory1.id, chromeNavLinkMl2.id].join('.'),
                 deepLink: chromeNavLinkMl2,
               },
             ],
@@ -208,7 +208,7 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLink2.id,
         title: link2.title,
-        path: [chromeNavLink2.id],
+        path: chromeNavLink2.id,
         deepLink: chromeNavLink2,
       },
     ]);
@@ -230,14 +230,14 @@ describe('formatChromeProjectNavNodes', () => {
       {
         id: chromeNavLinkTest.id,
         title: link1.title,
-        path: [chromeNavLinkTest.id],
+        path: chromeNavLinkTest.id,
         deepLink: chromeNavLinkTest,
         breadcrumbStatus: 'hidden',
       },
       {
         id: chromeNavLink2.id,
         title: link2.title,
-        path: [chromeNavLink2.id],
+        path: chromeNavLink2.id,
         deepLink: chromeNavLink2,
       },
     ]);

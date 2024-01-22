@@ -10,12 +10,18 @@ import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const configSchema = schema.object({
   api_polling_frequency: schema.duration({ defaultValue: '30s' }),
+  license_cache_duration: schema.duration({
+    defaultValue: '300s',
+    validate: (value) => {
+      if (value.asMinutes() > 15) {
+        return 'license cache duration must be shorter than 15 minutes';
+      }
+    },
+  }),
 });
 
 export type LicenseConfigType = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<LicenseConfigType> = {
-  schema: schema.object({
-    api_polling_frequency: schema.duration({ defaultValue: '30s' }),
-  }),
+  schema: configSchema,
 };

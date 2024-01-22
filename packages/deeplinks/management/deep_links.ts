@@ -27,6 +27,8 @@ export type IntegrationsDeepLinkId = IntegrationsAppId | FleetAppId | OsQueryApp
 // Management
 export type ManagementAppId = typeof MANAGEMENT_APP_ID;
 export type ManagementId =
+  | 'aiAssistantManagementSelection'
+  | 'aiAssistantManagementObservability'
   | 'api_keys'
   | 'cases'
   | 'cross_cluster_replication'

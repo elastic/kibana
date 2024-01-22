@@ -64,6 +64,14 @@ export class Instance extends Entity<ApmFields> {
     });
   }
 
+  crash({ message, type }: { message: string; type?: string }) {
+    return new ApmError({
+      ...this.fields,
+      'error.type': 'crash',
+      'error.exception': [{ message, ...(type ? { type } : {}) }],
+      'error.grouping_name': getErrorGroupingKey(message),
+    });
+  }
   error({ message, type }: { message: string; type?: string }) {
     return new ApmError({
       ...this.fields,

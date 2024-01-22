@@ -5,8 +5,22 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
+import { decodeOrThrow, indexPatternRt } from '@kbn/io-ts-utils';
+import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+
+const azureActivityDatasetSelection: DatasetSelectionPlain = {
+  selection: {
+    dataset: {
+      name: decodeOrThrow(indexPatternRt)('logs-azure.activitylogs-*'),
+      title: 'activitylogs',
+    },
+    name: 'azure',
+    title: 'Azure Logs',
+    version: '1.5.23',
+  },
+  selectionType: 'single',
+};
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -27,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('when the "index" query param does not exist', () => {
+    describe('when no dataset selection is given', () => {
       it('should initialize the "All logs" selection', async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -38,13 +52,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('when the "index" query param exists', () => {
+    describe('when a dataset selection is given', () => {
       it('should decode and restore the selection from a valid encoded index', async () => {
-        const azureActivitylogsIndex =
-          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: {
-            _a: rison.encode({ index: azureActivitylogsIndex }),
+          pageState: {
+            datasetSelection: azureActivityDatasetSelection,
           },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -56,10 +68,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should fallback to the "All logs" selection and notify the user of an invalid encoded index', async () => {
-        const invalidEncodedIndex = 'invalid-encoded-index';
-        await PageObjects.observabilityLogExplorer.navigateTo({
-          search: {
-            _a: rison.encode({ index: invalidEncodedIndex }),
+        await PageObjects.observabilityLogExplorer.navigateToWithUncheckedState({
+          pageState: {
+            v: 1,
+            datasetSelection: {
+              selectionType: 'invalid',
+            },
           },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();
@@ -80,12 +94,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.observabilityLogExplorer.getDatasetSelectorButtonText();
         expect(allDatasetSelectionTitle).to.be('All logs');
 
-        const azureActivitylogsIndex =
-          'BQZwpgNmDGAuCWB7AdgLmAEwIay+W6yWAtmKgOQSIDmIAtFgF4CuATmAHRZzwBu8sAJ5VadAFTkANAlhRU3BPyEiQASklFS8lu2kC55AII6wAAgAyNEFN5hWIJGnIBGDgFYOAJgDM5deCgeFAAVQQAHMgdkaihVIA===';
         await PageObjects.observabilityLogExplorer.navigateTo({
-          search: {
-            _a: rison.encode({ index: azureActivitylogsIndex }),
-            controlPanels: rison.encode({}),
+          pageState: {
+            datasetSelection: azureActivityDatasetSelection,
           },
         });
         await PageObjects.header.waitUntilLoadingHasFinished();

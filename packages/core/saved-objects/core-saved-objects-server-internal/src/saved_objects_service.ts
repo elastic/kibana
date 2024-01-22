@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, take, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -262,20 +262,25 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // The Elasticsearch service should already ensure that, but let's double check just in case.
-      // Should it be replaced with elasticsearch.status$ API instead?
-      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter((nodes) => nodes.isCompatible),
-        take(1)
-      ).toPromise();
-
-      // Running migrations only if we got compatible nodes.
-      // It may happen that the observable completes due to Kibana shutting down
-      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
-      if (compatibleNodes) {
-        this.logger.info('Starting saved objects migrations');
-        await migrator.runMigrations();
+      try {
+        // The Elasticsearch service should already ensure that, but let's double check just in case.
+        // Should it be replaced with elasticsearch.status$ API instead?
+        await firstValueFrom(
+          this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+            filter((nodes) => nodes.isCompatible)
+          )
+        );
+      } catch (e) {
+        // EmptyError means esNodesCompatibility$ was closed before emitting
+        // which should only occur if the server is shutdown before being fully started.
+        if (e.name === 'EmptyError') {
+          throw new Error('esNodesCompatibility$ was closed before emitting');
+        }
+        throw e;
       }
+
+      this.logger.info('Starting saved objects migrations');
+      await migrator.runMigrations();
     }
 
     const createRepository = (

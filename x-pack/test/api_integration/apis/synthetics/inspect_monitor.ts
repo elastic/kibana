@@ -41,8 +41,8 @@ export default function ({ getService }: FtrProviderContext) {
         ..._monitors[0],
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],
@@ -84,7 +84,9 @@ export default function ({ getService }: FtrProviderContext) {
                       'response.include_body_max_bytes': '1024',
                       ipv4: true,
                       ipv6: true,
-                      fields: {},
+                      fields: {
+                        meta: { space_id: 'default' },
+                      },
                       fields_under_root: true,
                     },
                   ],
@@ -109,8 +111,8 @@ export default function ({ getService }: FtrProviderContext) {
         }),
         locations: [
           {
-            id: 'localhost',
-            label: 'Local Synthetics Service',
+            id: 'dev',
+            label: 'Dev Service',
             isServiceManaged: true,
           },
         ],
@@ -147,6 +149,7 @@ export default function ({ getService }: FtrProviderContext) {
                       throttling: { download: 5, upload: 3, latency: 20 },
                       original_space: 'default',
                       fields: {
+                        meta: { space_id: 'default' },
                         'monitor.project.name': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                         'monitor.project.id': 'test-project-cb47c83a-45e7-416a-9301-cb476b5bff01',
                       },
@@ -223,6 +226,7 @@ export default function ({ getService }: FtrProviderContext) {
             add_fields: {
               target: '',
               fields: {
+                meta: { space_id: 'default' },
                 'monitor.fleet_managed': true,
               },
             },

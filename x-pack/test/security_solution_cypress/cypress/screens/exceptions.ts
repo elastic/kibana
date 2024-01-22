@@ -12,19 +12,20 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const FIELD_INPUT =
-  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"] input';
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
 export const FIELD_INPUT_PARENT =
-  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxSearchInput"]';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
 
 export const EXCEPTION_FLYOUT_LOADING_SPINNER = '[data-test-subj="loadingAddExceptionFlyout"]';
 
-export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
+export const OPERATOR_INPUT =
+  '[data-test-subj="operatorAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
 export const VALUES_INPUT =
-  '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
+  '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxSearchInput"]';
 
 export const VALUES_MATCH_ANY_INPUT =
   '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
@@ -243,7 +244,7 @@ export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuEmptyButton"]';
 
 export const EXCEPTION_LIST_DETAIL_LINKED_TO_RULES_HEADER_MENU_ITEM =
-  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] div button';
+  '[data-test-subj="exceptionListManagementRightSideMenuItemsLinkedRulesMenuMenuPanel"] .euiContextMenuItem';
 
 export const EXCEPTION_LIST_DETAIL_MENU_ITEMS =
   '[data-test-subj="exceptionListManagementRightSideMenuItemsMenuActionsButtonIcon"]';
@@ -270,3 +271,8 @@ export const EXCEPTION_ITEM_OVERFLOW_ACTION_DELETE =
 export const EXECPTION_ITEM_CARD_HEADER_TITLE = '[data-test-subj="exceptionItemCardHeaderTitle"]';
 
 export const EMPTY_EXCEPTIONS_VIEWER = '[data-test-subj="emptyViewerState"]';
+
+export const EXCEPTIONS_ITEM_ERROR_CALLOUT = '[data-test-subj="addExceptionErrorCallOut"]';
+
+export const EXCEPTIONS_ITEM_ERROR_DISMISS_BUTTON =
+  '[data-test-subj="addExceptionErrorDismissButton"]';

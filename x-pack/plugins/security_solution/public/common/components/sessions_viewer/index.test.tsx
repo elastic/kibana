@@ -11,21 +11,12 @@ import { TestProviders } from '../../mock';
 import { TEST_ID, SessionsView, defaultSessionsFilter } from '.';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import type { SessionsComponentsProps } from './types';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { licenseService } from '../../hooks/use_license';
 import { mount } from 'enzyme';
 import type { EventsViewerProps } from '../events_viewer';
 
 jest.mock('../../lib/kibana');
-
-const originalKibanaLib = jest.requireActual('../../lib/kibana');
-
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
-
 jest.mock('../../utils/normalize_time_range');
 
 const startDate = '2022-03-22T22:10:56.794Z';

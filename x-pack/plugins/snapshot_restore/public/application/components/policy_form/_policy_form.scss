@@ -4,7 +4,7 @@
 .snapshotRestore__policyForm__stepSettings {
   .euiFormRow--hasEmptyLabelSpace {
     min-height: auto;
-    margin-top: $euiFontSizeXS + $euiSizeS + ($euiSizeXXL / 4);
+    margin-top: $euiFontSizeXS + $euiSizeS + calc($euiSizeXXL / 4);
   }
 }
 

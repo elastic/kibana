@@ -104,12 +104,12 @@ describe('Unsaved listing', () => {
       {
         id: 'failCase1',
         status: 'error',
-        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+        error: { error: 'oh no', message: 'bwah', statusCode: 404 },
       },
       {
         id: 'failCase2',
         status: 'error',
-        error: { error: 'oh no', message: 'bwah', statusCode: 100 },
+        error: { error: 'oh no', message: 'bwah', statusCode: 404 },
       },
     ]);
 

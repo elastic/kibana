@@ -126,7 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const hasDocHit = await testSubjects.exists('doc-hit');
       expect(hasDocHit).to.be(true);
 
-      await testSubjects.click('breadcrumb first');
+      await testSubjects.click('~breadcrumb & ~first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
       await PageObjects.discover.waitForDocTableLoadingComplete();
     });

@@ -48,6 +48,9 @@ export const getTopHitMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.topHitTitle', {
       defaultMessage: 'Top Hit',
     }),
+    getValueType: (aggConfig) => {
+      return aggConfig.getParam('field')?.type;
+    },
     makeLabel(aggConfig) {
       const lastPrefixLabel = i18n.translate('data.search.aggs.metrics.topHit.lastPrefixLabel', {
         defaultMessage: 'Last',

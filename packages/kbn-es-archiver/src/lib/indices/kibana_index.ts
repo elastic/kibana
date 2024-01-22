@@ -85,7 +85,7 @@ export async function migrateSavedObjectIndices(kbnClient: KbnClient) {
 const LEGACY_INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})(:?_\\d*)?$`);
 const INDICES_REGEXP = new RegExp(`^(${ALL_SAVED_OBJECT_INDICES.join('|')})_(pre)?\\d+.\\d+.\\d+`);
 
-function isSavedObjectIndex(index?: string): index is string {
+export function isSavedObjectIndex(index?: string): index is string {
   return Boolean(index && (LEGACY_INDICES_REGEXP.test(index) || INDICES_REGEXP.test(index)));
 }
 

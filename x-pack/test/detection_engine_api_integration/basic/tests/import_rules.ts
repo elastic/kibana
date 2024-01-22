@@ -119,7 +119,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .attach('file', fileNdJson, 'rules.ndjson')
           .expect(200);
 
-        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+        expect(body.errors[0].error.message).to.eql('from: Failed to parse date-math expression');
       });
 
       it('should fail validation when importing two rules and one has a malformed "from" params', async () => {
@@ -141,7 +141,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // should result in one success and a failure message
         expect(body.success_count).to.eql(1);
-        expect(body.errors[0].error.message).to.eql('Failed to parse "from" on rule param');
+        expect(body.errors[0].error.message).to.eql('from: Failed to parse date-math expression');
       });
 
       it('should be able to import two rules', async () => {

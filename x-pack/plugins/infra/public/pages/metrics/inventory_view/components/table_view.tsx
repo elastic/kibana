@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import { last, first } from 'lodash';
 import React, { useState, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { createWaffleMapNode } from '../lib/nodes_to_wafflemap';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../lib/lib';
 import { fieldToName } from '../lib/field_to_display_name';
 import { NodeContextMenu } from './waffle/node_context_menu';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { SnapshotNode, SnapshotNodePath } from '../../../../../common/http_api/snapshot_api';
 
 interface Props {

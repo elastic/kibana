@@ -8,10 +8,9 @@
 
 import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
-
-const ES_TIMEOUT_IN_MS = 120000;
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 export const esqlSearchStrategyProvider = (
   logger: Logger,
@@ -21,31 +20,20 @@ export const esqlSearchStrategyProvider = (
    * @param request
    * @param options
    * @param deps
-   * @throws `KbnServerError`
+   * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
-    const abortController = new AbortController();
-    // We found out that there are cases where we are not aborting correctly
-    // For this reasons we want to manually cancel he abort signal after 2 mins
-
-    abortSignal?.addEventListener('abort', () => {
-      abortController.abort();
-    });
-
-    // Also abort after two mins
-    setTimeout(() => abortController.abort(), ES_TIMEOUT_IN_MS);
-
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
-      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
+      throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const { headers, body } = await esClient.asCurrentUser.transport.request(
+        const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
             path: '/_query',
@@ -54,20 +42,24 @@ export const esqlSearchStrategyProvider = (
             },
           },
           {
-            signal: abortController.signal,
+            signal: abortSignal,
             meta: true,
             // we don't want the ES client to retry (default value is 3)
             maxRetries: 0,
+            requestTimeout: options.transport?.requestTimeout,
           }
         );
         return {
           rawResponse: body,
           isPartial: false,
           isRunning: false,
+          ...(meta?.request?.params
+            ? { requestParams: sanitizeRequestParams(meta?.request?.params) }
+            : {}),
           warning: headers?.warning,
         };
       } catch (e) {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       }
     };
 

@@ -7,12 +7,12 @@
 
 import type { SecurityAppStore } from '../../../common/store/types';
 import { TimelineId } from '../../../../common/types';
-import { addProvider, showTimeline } from '../../../timelines/store/timeline/actions';
+import { addProvider, showTimeline } from '../../../timelines/store/actions';
 import { createInvestigateInNewTimelineCellActionFactory } from './investigate_in_new_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
-import { timelineActions } from '../../../timelines/store/timeline';
+import { timelineActions } from '../../../timelines/store';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();

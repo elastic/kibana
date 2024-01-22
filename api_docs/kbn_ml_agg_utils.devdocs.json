@@ -698,12 +698,12 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.isSignificantTerm",
+        "id": "def-common.isSignificantItem",
         "type": "Function",
         "tags": [],
-        "label": "isSignificantTerm",
+        "label": "isSignificantItem",
         "description": [
-          "\nType guard for a significant term.\nNote this is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not a generic significant terms\naggregation type."
+          "\nType guard for a significant item.\nNote this is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not a generic significant terms\naggregation type."
         ],
         "signature": [
           "(arg: unknown) => boolean"
@@ -714,7 +714,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.isSignificantTerm.$1",
+            "id": "def-common.isSignificantItem.$1",
             "type": "Unknown",
             "tags": [],
             "label": "arg",
@@ -731,7 +731,7 @@
           }
         ],
         "returnComment": [
-          "whether arg is of type SignificantTerm"
+          "whether arg is of type SignificantItem"
         ],
         "initialIsOpen": false
       },
@@ -1191,23 +1191,23 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTerm",
+        "id": "def-common.SignificantItem",
         "type": "Interface",
         "tags": [
           "interface",
           "extends"
         ],
-        "label": "SignificantTerm",
+        "label": "SignificantItem",
         "description": [
-          "\nRepresents significant term metadata for a field/value pair.\nThis interface is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not related to the generic\nsignificant terms aggregation type.\n"
+          "\nRepresents significant item metadata for a field/value pair.\nThis interface is used as a custom type within Log Rate Analysis\nfor a p-value based variant, not related to the generic\nsignificant terms aggregation type.\n"
         ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTerm",
-            "text": "SignificantTerm"
+            "section": "def-common.SignificantItem",
+            "text": "SignificantItem"
           },
           " extends ",
           {
@@ -1224,12 +1224,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.key",
+            "id": "def-common.SignificantItem.key",
             "type": "string",
             "tags": [],
             "label": "key",
             "description": [
-              "The key associated with the significant term."
+              "The key associated with the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1237,12 +1237,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.type",
+            "id": "def-common.SignificantItem.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "The type of the significant term."
+              "The type of the significant item."
             ],
             "signature": [
               "\"keyword\" | \"log_pattern\""
@@ -1253,12 +1253,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.doc_count",
+            "id": "def-common.SignificantItem.doc_count",
             "type": "number",
             "tags": [],
             "label": "doc_count",
             "description": [
-              "The document count for the significant term."
+              "The document count for the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1266,12 +1266,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.bg_count",
+            "id": "def-common.SignificantItem.bg_count",
             "type": "number",
             "tags": [],
             "label": "bg_count",
             "description": [
-              "The background count for the significant term."
+              "The background count for the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1279,12 +1279,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.total_doc_count",
+            "id": "def-common.SignificantItem.total_doc_count",
             "type": "number",
             "tags": [],
             "label": "total_doc_count",
             "description": [
-              "The total document count for all terms."
+              "The total document count for all items."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1292,12 +1292,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.total_bg_count",
+            "id": "def-common.SignificantItem.total_bg_count",
             "type": "number",
             "tags": [],
             "label": "total_bg_count",
             "description": [
-              "The total background count for all terms."
+              "The total background count for all items."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1305,12 +1305,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.score",
+            "id": "def-common.SignificantItem.score",
             "type": "number",
             "tags": [],
             "label": "score",
             "description": [
-              "The score associated with the significant term."
+              "The score associated with the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1318,12 +1318,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.pValue",
+            "id": "def-common.SignificantItem.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
             "description": [
-              "The p-value for the significant term, or null if not available."
+              "The p-value for the significant item, or null if not available."
             ],
             "signature": [
               "number | null"
@@ -1334,12 +1334,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.normalizedScore",
+            "id": "def-common.SignificantItem.normalizedScore",
             "type": "number",
             "tags": [],
             "label": "normalizedScore",
             "description": [
-              "The normalized score for the significant term."
+              "The normalized score for the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1347,20 +1347,20 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.histogram",
+            "id": "def-common.SignificantItem.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
             "description": [
-              "An optional histogram of significant term items."
+              "An optional histogram for the significant item."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[] | undefined"
             ],
@@ -1370,12 +1370,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTerm.unique",
+            "id": "def-common.SignificantItem.unique",
             "type": "CompoundType",
             "tags": [],
             "label": "unique",
             "description": [
-              "Indicates if the significant term is unique within a group."
+              "Indicates if the significant item is unique within a group."
             ],
             "signature": [
               "boolean | undefined"
@@ -1389,14 +1389,14 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroup",
+        "id": "def-common.SignificantItemGroup",
         "type": "Interface",
         "tags": [
           "interface"
         ],
-        "label": "SignificantTermGroup",
+        "label": "SignificantItemGroup",
         "description": [
-          "\nRepresents a significant term group."
+          "\nRepresents a significant item group."
         ],
         "path": "x-pack/packages/ml/agg_utils/src/types.ts",
         "deprecated": false,
@@ -1404,7 +1404,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.id",
+            "id": "def-common.SignificantItemGroup.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1417,20 +1417,20 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.group",
+            "id": "def-common.SignificantItemGroup.group",
             "type": "Array",
             "tags": [],
             "label": "group",
             "description": [
-              "An array of significant term group items."
+              "An array of significant item group items."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermGroupItem",
-                "text": "SignificantTermGroupItem"
+                "section": "def-common.SignificantItemGroupItem",
+                "text": "SignificantItemGroupItem"
               },
               "[]"
             ],
@@ -1440,7 +1440,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.docCount",
+            "id": "def-common.SignificantItemGroup.docCount",
             "type": "number",
             "tags": [],
             "label": "docCount",
@@ -1453,7 +1453,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.pValue",
+            "id": "def-common.SignificantItemGroup.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
@@ -1469,20 +1469,20 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroup.histogram",
+            "id": "def-common.SignificantItemGroup.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
             "description": [
-              "An optional array of significant term histogram items."
+              "An optional array of significant item histogram items."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[] | undefined"
             ],
@@ -1495,12 +1495,12 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroupHistogram",
+        "id": "def-common.SignificantItemGroupHistogram",
         "type": "Interface",
         "tags": [
           "interface"
         ],
-        "label": "SignificantTermGroupHistogram",
+        "label": "SignificantItemGroupHistogram",
         "description": [
           "\nRepresents histogram data for a group of field/value pairs."
         ],
@@ -1510,7 +1510,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupHistogram.id",
+            "id": "def-common.SignificantItemGroupHistogram.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -1523,20 +1523,20 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupHistogram.histogram",
+            "id": "def-common.SignificantItemGroupHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
             "description": [
-              "An array of significant term histogram items."
+              "An array of significant item histogram items."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[]"
             ],
@@ -1549,22 +1549,22 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermGroupItem",
+        "id": "def-common.SignificantItemGroupItem",
         "type": "Interface",
         "tags": [
           "interface"
         ],
-        "label": "SignificantTermGroupItem",
+        "label": "SignificantItemGroupItem",
         "description": [
-          "\nRepresents an item in a significant term group."
+          "\nRepresents an item in a significant item group."
         ],
         "signature": [
           {
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTermGroupItem",
-            "text": "SignificantTermGroupItem"
+            "section": "def-common.SignificantItemGroupItem",
+            "text": "SignificantItemGroupItem"
           },
           " extends ",
           {
@@ -1581,12 +1581,12 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.key",
+            "id": "def-common.SignificantItemGroupItem.key",
             "type": "string",
             "tags": [],
             "label": "key",
             "description": [
-              "The key associated with the significant term."
+              "The key associated with the significant item."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1594,12 +1594,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.type",
+            "id": "def-common.SignificantItemGroupItem.type",
             "type": "CompoundType",
             "tags": [],
             "label": "type",
             "description": [
-              "The type of the significant term."
+              "The type of the significant item."
             ],
             "signature": [
               "\"keyword\" | \"log_pattern\""
@@ -1610,7 +1610,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.docCount",
+            "id": "def-common.SignificantItemGroupItem.docCount",
             "type": "number",
             "tags": [],
             "label": "docCount",
@@ -1623,7 +1623,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.pValue",
+            "id": "def-common.SignificantItemGroupItem.pValue",
             "type": "CompoundType",
             "tags": [],
             "label": "pValue",
@@ -1639,7 +1639,7 @@
           },
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermGroupItem.duplicate",
+            "id": "def-common.SignificantItemGroupItem.duplicate",
             "type": "number",
             "tags": [],
             "label": "duplicate",
@@ -1658,12 +1658,12 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermHistogram",
+        "id": "def-common.SignificantItemHistogram",
         "type": "Interface",
         "tags": [
           "interface"
         ],
-        "label": "SignificantTermHistogram",
+        "label": "SignificantItemHistogram",
         "description": [
           "\nRepresents histogram data for a field/value pair."
         ],
@@ -1672,8 +1672,8 @@
             "pluginId": "@kbn/ml-agg-utils",
             "scope": "common",
             "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.SignificantTermHistogram",
-            "text": "SignificantTermHistogram"
+            "section": "def-common.SignificantItemHistogram",
+            "text": "SignificantItemHistogram"
           },
           " extends ",
           {
@@ -1690,92 +1690,22 @@
         "children": [
           {
             "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogram.histogram",
+            "id": "def-common.SignificantItemHistogram.histogram",
             "type": "Array",
             "tags": [],
             "label": "histogram",
             "description": [
-              "An array of significant term histogram items."
+              "An array of significant item histogram items."
             ],
             "signature": [
               {
                 "pluginId": "@kbn/ml-agg-utils",
                 "scope": "common",
                 "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.SignificantTermHistogramItem",
-                "text": "SignificantTermHistogramItem"
+                "section": "def-common.SignificantItemHistogramItem",
+                "text": "SignificantItemHistogramItem"
               },
               "[]"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermHistogramItem",
-        "type": "Interface",
-        "tags": [
-          "interface"
-        ],
-        "label": "SignificantTermHistogramItem",
-        "description": [
-          "\nRepresents a data item in a significant term histogram."
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.doc_count_overall",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count_overall",
-            "description": [
-              "The document count for this item in the overall context."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.doc_count_significant_term",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count_significant_term",
-            "description": [
-              "The document count for this item in the significant term context."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.key",
-            "type": "number",
-            "tags": [],
-            "label": "key",
-            "description": [
-              "The numeric key associated with this item."
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.SignificantTermHistogramItem.key_as_string",
-            "type": "string",
-            "tags": [],
-            "label": "key_as_string",
-            "description": [
-              "The string representation of the key."
             ],
             "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
@@ -1871,12 +1801,29 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SignificantTermType",
+        "id": "def-common.SignificantItemHistogramItem",
         "type": "Type",
         "tags": [],
-        "label": "SignificantTermType",
+        "label": "SignificantItemHistogramItem",
         "description": [
-          "\nRepresents the type of significant term as determined by the SIGNIFICANT_TERM_TYPE enumeration."
+          "\nRepresents a data item in a significant term histogram."
+        ],
+        "signature": [
+          "SignificantItemHistogramItemV1 | SignificantItemHistogramItemV2"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantItemType",
+        "type": "Type",
+        "tags": [],
+        "label": "SignificantItemType",
+        "description": [
+          "\nRepresents the type of significant item as determined by the SIGNIFICANT_ITEM_TYPE enumeration."
         ],
         "signature": [
           "\"keyword\" | \"log_pattern\""
@@ -1890,12 +1837,12 @@
     "objects": [
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.SIGNIFICANT_TERM_TYPE",
+        "id": "def-common.SIGNIFICANT_ITEM_TYPE",
         "type": "Object",
         "tags": [],
-        "label": "SIGNIFICANT_TERM_TYPE",
+        "label": "SIGNIFICANT_ITEM_TYPE",
         "description": [
-          "\nEnumeration of significant term types."
+          "\nEnumeration of significant item types."
         ],
         "signature": [
           "{ readonly KEYWORD: \"keyword\"; readonly LOG_PATTERN: \"log_pattern\"; }"

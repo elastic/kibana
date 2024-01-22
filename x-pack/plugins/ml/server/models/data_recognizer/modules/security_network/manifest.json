@@ -56,5 +56,8 @@
       "file": "datafeed_rare_destination_country.json",
       "job_id": "rare_destination_country"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

@@ -4,17 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema } from '@kbn/config-schema';
-import * as rt from 'io-ts';
-import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
-import { validateKQLStringFilter } from './utils';
-import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
-import { TimeUnitChar } from '../../../../common';
 
-export enum InfraRuleType {
-  MetricThreshold = 'metrics.alert.threshold',
-  InventoryThreshold = 'metrics.alert.inventory.threshold',
-}
+import {
+  ActionGroupIdsOf,
+  AlertInstanceContext as AlertContext,
+  AlertInstanceState as AlertState,
+  RecoveredActionGroup,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { TypeOf } from '@kbn/config-schema';
+import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { MissingGroupsRecord } from './lib/check_missing_group';
+import { AdditionalContext } from './utils';
+import { searchConfigurationSchema } from './register_custom_threshold_rule_type';
 
 export enum AlertStates {
   OK,
@@ -23,60 +26,54 @@ export enum AlertStates {
   ERROR,
 }
 
-const metricAnomalyNodeTypeRT = rt.union([rt.literal('hosts'), rt.literal('k8s')]);
-const metricAnomalyMetricRT = rt.union([
-  rt.literal('memory_usage'),
-  rt.literal('network_in'),
-  rt.literal('network_out'),
-]);
-const metricAnomalyInfluencerFilterRT = rt.type({
-  fieldName: rt.string,
-  fieldValue: rt.string,
-});
+// Executor types
+export type SearchConfigurationType = TypeOf<typeof searchConfigurationSchema>;
 
-export interface MetricAnomalyParams {
-  nodeType: rt.TypeOf<typeof metricAnomalyNodeTypeRT>;
-  metric: rt.TypeOf<typeof metricAnomalyMetricRT>;
-  alertInterval?: string;
-  spaceId?: string;
-  threshold: Exclude<ML_ANOMALY_THRESHOLD, ML_ANOMALY_THRESHOLD.LOW>;
-  influencerFilter: rt.TypeOf<typeof metricAnomalyInfluencerFilterRT> | undefined;
-}
+export type CustomThresholdRuleParams = Record<string, any>;
+export type CustomThresholdRuleTypeState = RuleTypeState & {
+  lastRunTimestamp?: number;
+  missingGroups?: Array<string | MissingGroupsRecord>;
+  groupBy?: string | string[];
+  searchConfiguration?: SearchConfigurationType;
+};
+export type CustomThresholdAlertState = AlertState; // no specific instance state used
+export type CustomThresholdAlertContext = AlertContext & {
+  alertDetailsUrl: string;
+  group?: object;
+  reason?: string;
+  timestamp: string; // ISO string
+  // String type is for [NO DATA]
+  value?: Array<number | string | null>;
+};
+export type CustomThresholdSpecificActionGroups = ActionGroupIdsOf<
+  typeof FIRED_ACTION | typeof NO_DATA_ACTION
+>;
+export type CustomThresholdActionGroup =
+  | typeof FIRED_ACTIONS_ID
+  | typeof NO_DATA_ACTIONS_ID
+  | typeof RecoveredActionGroup.id;
 
-// Types for the executor
+export type Group = Array<{
+  field: string;
+  value: string;
+}>;
 
-interface BaseMetricExpressionParams {
-  timeSize: number;
-  timeUnit: TimeUnitChar;
-  threshold: number[];
-  comparator: Comparator;
-}
+export type CustomThresholdAlertFactory = (
+  id: string,
+  reason: string,
+  actionGroup: CustomThresholdActionGroup,
+  additionalContext?: AdditionalContext | null,
+  evaluationValues?: Array<number | null>,
+  group?: Group
+) => CustomThresholdAlert;
 
-export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Exclude<Aggregators, [Aggregators.COUNT, Aggregators.CUSTOM]>;
-  metric: string;
-}
-
-export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
-  aggType: Aggregators.COUNT;
-}
-
-export type CustomMetricAggTypes = Exclude<
-  Aggregators,
-  Aggregators.CUSTOM | Aggregators.RATE | Aggregators.P95 | Aggregators.P99
+type CustomThresholdAlert = Alert<
+  CustomThresholdAlertState,
+  CustomThresholdAlertContext,
+  CustomThresholdSpecificActionGroups
 >;
 
 export interface AlertExecutionDetails {
   alertId: string;
   executionId: string;
 }
-
-export const searchConfigurationSchema = schema.object({
-  index: schema.string(),
-  query: schema.object({
-    language: schema.string({
-      validate: validateKQLStringFilter,
-    }),
-    query: schema.string(),
-  }),
-});

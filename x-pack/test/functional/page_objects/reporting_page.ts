@@ -192,6 +192,19 @@ export class ReportingPageObject extends FtrService {
     );
   }
 
+  async openReportFlyout(reportTitle: string) {
+    const table = await this.testSubjects.find(REPORT_TABLE_ID);
+    const allRows = await table.findAllByTestSubject(REPORT_TABLE_ROW_ID);
+    for (const row of allRows) {
+      const titleColumn = await row.findByTestSubject('reportingListItemObjectTitle');
+      const title = await titleColumn.getVisibleText();
+      if (title === reportTitle) {
+        titleColumn.click();
+        return;
+      }
+    }
+  }
+
   async writeSessionReport(name: string, reportExt: string, rawPdf: Buffer, folder: string) {
     const sessionDirectory = path.resolve(folder, 'session');
     await mkdirAsync(sessionDirectory, { recursive: true });

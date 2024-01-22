@@ -20,7 +20,8 @@ export const textBasedLanguagedEditorStyles = (
   hasErrors: boolean,
   hasWarning: boolean,
   isCodeEditorExpandedFocused: boolean,
-  hasReference: boolean
+  hasReference: boolean,
+  editorIsInline: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -33,7 +34,9 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
-      borderTopLeftRadius: isCodeEditorExpanded ? 0 : '6px',
+      borderLeft: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: isCodeEditorExpanded ? 0 : euiTheme.border.radius.medium,
       borderBottom: isCodeEditorExpanded
         ? 'none'
         : isCompactFocused
@@ -45,8 +48,8 @@ export const textBasedLanguagedEditorStyles = (
       width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 80 : 40}px)`,
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
-      borderTopLeftRadius: '6px',
-      borderBottomLeftRadius: '6px',
+      borderTopLeftRadius: euiTheme.border.radius.medium,
+      borderBottomLeftRadius: euiTheme.border.radius.medium,
       borderBottomWidth: hasErrors ? '2px' : '1px',
       borderBottomColor: hasErrors ? euiTheme.colors.danger : euiTheme.colors.lightShade,
     },
@@ -66,6 +69,8 @@ export const textBasedLanguagedEditorStyles = (
     },
     bottomContainer: {
       border: euiTheme.border.thin,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTop:
         isCodeEditorExpanded && !isCodeEditorExpandedFocused
           ? hasErrors
@@ -75,29 +80,29 @@ export const textBasedLanguagedEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
-      borderBottomLeftRadius: '6px',
-      borderBottomRightRadius: '6px',
+      borderBottomLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      borderBottomRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
     },
     topContainer: {
-      border: euiTheme.border.thin,
-      borderTopLeftRadius: '6px',
-      borderTopRightRadius: '6px',
+      border: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderTopLeftRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
+      borderTopRightRadius: editorIsInline ? 0 : euiTheme.border.radius.medium,
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? euiTheme.size.s : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,
-      marginTop: euiTheme.size.s,
+      marginTop: editorIsInline ? 0 : euiTheme.size.s,
     },
     dragResizeContainer: {
       width: '100%',

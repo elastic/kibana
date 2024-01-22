@@ -44,6 +44,8 @@ export {
 // eslint-disable-next-line @kbn/eslint/no_export_all
 export * from './log_entry';
 
+export { convertISODateToNanoPrecision } from './utils';
+
 // Http types
 export type { LogEntriesSummaryBucket, LogEntriesSummaryHighlightsBucket } from './http_api';
 
@@ -56,3 +58,15 @@ export {
   logEntriesSummaryRequestRT,
   logEntriesSummaryResponseRT,
 } from './http_api';
+
+// Locators
+export {
+  LOGS_LOCATOR_ID,
+  TRACE_LOGS_LOCATOR_ID,
+  NODE_LOGS_LOCATOR_ID,
+  INFRA_LOGS_LOCATOR_ID,
+  INFRA_NODE_LOGS_LOCATOR_ID,
+  getLogsLocatorsFromUrlService,
+} from './locators';
+export type { LogsLocatorParams, NodeLogsLocatorParams, TraceLogsLocatorParams } from './locators';
+export { createNodeLogsQuery } from './locators/helpers';

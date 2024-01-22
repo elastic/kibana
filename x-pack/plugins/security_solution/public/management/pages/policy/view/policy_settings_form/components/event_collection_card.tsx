@@ -109,6 +109,8 @@ export const EventCollectionCard = memo(
           defaultMessage: 'Event collection',
         })}
         supportedOss={[os]}
+        mode={mode}
+        selected={selectedCount > 0}
         rightCorner={
           <EuiText size="s" color="subdued" data-test-subj={getTestId('selectedCount')}>
             {i18n.translate(

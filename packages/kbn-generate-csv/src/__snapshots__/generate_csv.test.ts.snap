@@ -66,6 +66,77 @@ exports[`CsvGenerator formulas escapes formula values in a header, doesn't warn 
 `;
 
 exports[`CsvGenerator keeps order of the columns during the scroll 1`] = `
+Array [
+  Array [
+    "Requesting PIT for: [logstash-*]...",
+  ],
+  Array [
+    "Opened PIT ID: oju9fs3698s3[39 bytes]",
+  ],
+  Array [
+    "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received total hits: 3. Accuracy: unknown.",
+  ],
+  Array [
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
+  ],
+  Array [
+    "Received PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received search_after: [undefined]",
+  ],
+  Array [
+    "Building CSV header row",
+  ],
+  Array [
+    "Building 1 CSV data rows",
+  ],
+  Array [
+    "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received total hits: 3. Accuracy: unknown.",
+  ],
+  Array [
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
+  ],
+  Array [
+    "Received PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received search_after: [undefined]",
+  ],
+  Array [
+    "Building 1 CSV data rows",
+  ],
+  Array [
+    "Executing search request with PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received total hits: 3. Accuracy: unknown.",
+  ],
+  Array [
+    "Result details: {\\"rawResponse\\":{\\"took\\":1,\\"timed_out\\":false,\\"_shards\\":{\\"total\\":1,\\"successful\\":1,\\"failed\\":0,\\"skipped\\":0},\\"hits\\":{\\"total\\":3,\\"max_score\\":0},\\"pit_id\\":\\"oju9fs3698s3[39 bytes]\\"}}",
+  ],
+  Array [
+    "Received PIT ID: [oju9fs3698s3[39 bytes]]",
+  ],
+  Array [
+    "Received search_after: [undefined]",
+  ],
+  Array [
+    "Building 1 CSV data rows",
+  ],
+  Array [
+    "Closing PIT oju9fs3698s3[39 bytes]",
+  ],
+]
+`;
+
+exports[`CsvGenerator keeps order of the columns during the scroll 2`] = `
 "\\"_id\\",\\"_index\\",\\"_score\\",a,b
 \\"'-\\",\\"'-\\",\\"'-\\",a1,b1
 \\"'-\\",\\"'-\\",\\"'-\\",\\"'-\\",b2

@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import {
   ActionConnectorFieldsProps,
   SimpleConnectorForm,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { SelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { EuiLink, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import {
   UseField,
   useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import DashboardLink from './dashboard_link';
 import { OpenAiProviderType } from '../../../common/openai/constants';
-import { useGetDashboard } from './use_get_dashboard';
 import * as i18n from './translations';
 import {
   azureAiConfig,
@@ -36,24 +35,6 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
   const [{ config, id, name }] = useFormData({
     watch: ['config.apiProvider'],
   });
-
-  const {
-    services: {
-      application: { navigateToUrl },
-    },
-  } = useKibana();
-
-  const { dashboardUrl } = useGetDashboard({ connectorId: id });
-
-  const onClick = useCallback(
-    (e) => {
-      e.preventDefault();
-      if (dashboardUrl) {
-        navigateToUrl(dashboardUrl);
-      }
-    },
-    [dashboardUrl, navigateToUrl]
-  );
 
   const selectedProviderDefaultValue = useMemo(
     () =>
@@ -104,10 +85,12 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           secretsFormSchema={azureAiSecrets}
         />
       )}
-      {isEdit && dashboardUrl != null && (
-        <EuiLink data-test-subj="link-gen-ai-token-dashboard" onClick={onClick}>
-          {i18n.USAGE_DASHBOARD_LINK(selectedProviderDefaultValue, name)}
-        </EuiLink>
+      {isEdit && (
+        <DashboardLink
+          connectorId={id}
+          connectorName={name}
+          selectedProvider={selectedProviderDefaultValue}
+        />
       )}
     </>
   );

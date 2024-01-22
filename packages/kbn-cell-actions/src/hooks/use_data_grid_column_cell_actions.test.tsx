@@ -13,8 +13,8 @@ import {
   EuiDataGridRefProps,
   type EuiDataGridColumnCellAction,
 } from '@elastic/eui';
-import { render, waitFor } from '@testing-library/react';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { render, waitFor, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react-hooks';
 import { makeAction } from '../mocks/helpers';
 import {
   useDataGridColumnsCellActions,

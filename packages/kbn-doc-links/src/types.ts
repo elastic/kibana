@@ -168,7 +168,6 @@ export interface DocLinks {
     readonly machineLearningStart: string;
     readonly mailService: string;
     readonly mlDocumentEnrichment: string;
-    readonly mlDocumentEnrichmentUpdateMappings: string;
     readonly searchApplicationsTemplates: string;
     readonly searchApplicationsSearchApi: string;
     readonly searchApplications: string;
@@ -198,6 +197,7 @@ export interface DocLinks {
     readonly dropbox: string;
     readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
+    readonly gatedFormBlog: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
     readonly gmail: string;
@@ -349,6 +349,13 @@ export interface DocLinks {
     readonly privileges: string;
     readonly manageDetectionRules: string;
     readonly createEsqlRuleType: string;
+    readonly entityAnalytics: {
+      readonly riskScorePrerequisites: string;
+      readonly hostRiskScore: string;
+      readonly userRiskScore: string;
+      readonly entityRiskScoring: string;
+    };
+    readonly detectionEngineOverview: string;
   };
   readonly query: {
     readonly eql: string;
@@ -357,6 +364,7 @@ export interface DocLinks {
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
     readonly queryDsl: string;
+    readonly queryESQL: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -383,6 +391,7 @@ export interface DocLinks {
     cronExpressions: string;
     executeWatchActionModes: string;
     indexExists: string;
+    inferTrainedModel: string;
     multiSearch: string;
     openIndex: string;
     putComponentTemplate: string;
@@ -406,7 +415,7 @@ export interface DocLinks {
     infrastructureThreshold: string;
     logsThreshold: string;
     metricsThreshold: string;
-    threshold: string;
+    customThreshold: string;
     monitorStatus: string;
     monitorUptime: string;
     tlsCertificate: string;
@@ -466,6 +475,7 @@ export interface DocLinks {
   readonly security: Readonly<{
     apiKeyServiceSettings: string;
     clusterPrivileges: string;
+    definingRoles: string;
     elasticsearchSettings: string;
     elasticsearchEnableSecurity: string;
     elasticsearchEnableApiKeys: string;
@@ -525,6 +535,9 @@ export interface DocLinks {
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
+    policySecrets: string;
+    remoteESOoutput: string;
+    performancePresets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -566,12 +579,16 @@ export interface DocLinks {
     readonly rubyOverview: string;
     readonly rustGuide: string;
     readonly rustOverview: string;
+    readonly eland: string;
   };
   readonly endpoints: {
     readonly troubleshooting: string;
   };
   readonly legal: {
     readonly privacyStatement: string;
+    readonly generalPrivacyStatement: string;
+    readonly termsOfService: string;
+    readonly dataUse: string;
   };
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;
@@ -606,6 +623,8 @@ export interface DocLinks {
     readonly integrations: string;
     readonly integrationsBeats: string;
     readonly integrationsConnectorClient: string;
+    readonly integrationsConnectorClientRunFromSource: string;
+    readonly integrationsConnectorClientRunWithDocker: string;
     readonly integrationsLogstash: string;
   };
   readonly serverlessSecurity: {
@@ -618,3 +637,5 @@ export interface DocLinks {
     readonly settings: string;
   };
 }
+
+export type BuildFlavor = 'serverless' | 'traditional';

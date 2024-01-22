@@ -22,10 +22,11 @@ export const sendGetPermissionsCheck = (fleetServerSetup?: boolean) => {
   });
 };
 
-export const sendGenerateServiceToken = () => {
+export const sendGenerateServiceToken = (remote?: boolean) => {
   return sendRequest<GenerateServiceTokenResponse>({
     path: appRoutesService.getRegenerateServiceTokenPath(),
     method: 'post',
+    query: { remote },
     version: API_VERSIONS.public.v1,
   });
 };

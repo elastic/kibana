@@ -15,10 +15,16 @@ export interface MessagePresentation {
 }
 export interface Message {
   role: ConversationRole;
-  content: string;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+  replacements?: Record<string, string>;
+  content?: string;
   timestamp: string;
   isError?: boolean;
   presentation?: MessagePresentation;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export interface ConversationTheme {
@@ -61,8 +67,17 @@ export interface Conversation {
 
 export interface AssistantTelemetry {
   reportAssistantInvoked: (params: { invokedBy: string; conversationId: string }) => void;
-  reportAssistantMessageSent: (params: { conversationId: string; role: string }) => void;
+  reportAssistantMessageSent: (params: {
+    conversationId: string;
+    role: string;
+    isEnabledKnowledgeBase: boolean;
+    isEnabledRAGAlerts: boolean;
+  }) => void;
   reportAssistantQuickPrompt: (params: { conversationId: string; promptTitle: string }) => void;
+  reportAssistantSettingToggled: (params: {
+    isEnabledKnowledgeBase?: boolean;
+    isEnabledRAGAlerts?: boolean;
+  }) => void;
 }
 
 export interface AssistantAvailability {

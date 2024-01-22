@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ChartsServerPlugin } from './plugin';
 export type { CustomPaletteArguments, CustomPaletteState, SystemPaletteArguments } from '../common';
 export { paletteIds } from '../common';
 
-export const plugin = () => new ChartsServerPlugin();
+export const plugin = async () => {
+  const { ChartsServerPlugin } = await import('./plugin');
+  return new ChartsServerPlugin();
+};

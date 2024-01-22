@@ -191,3 +191,151 @@ export const NO_RULES_AVAILABLE_FOR_INSTALL_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForInstall"]';
 export const NO_RULES_AVAILABLE_FOR_UPGRADE_MESSAGE =
   '[data-test-subj="noPrebuiltRulesAvailableForUpgrade"]';
+
+export const INSTALL_PREBUILT_RULE_PREVIEW = '[data-test-subj="installPrebuiltRulePreview"]';
+export const INSTALL_PREBUILT_RULE_BUTTON =
+  '[data-test-subj="installPrebuiltRuleFromFlyoutButton"]';
+
+export const UPDATE_PREBUILT_RULE_PREVIEW = '[data-test-subj="updatePrebuiltRulePreview"]';
+export const UPDATE_PREBUILT_RULE_BUTTON = '[data-test-subj="updatePrebuiltRuleFromFlyoutButton"]';
+
+export const FLYOUT_CLOSE_BTN = '[data-test-subj="euiFlyoutCloseButton"]';
+
+export const AUTHOR_PROPERTY_TITLE = '[data-test-subj="authorPropertyTitle"]';
+export const AUTHOR_PROPERTY_VALUE_ITEM = '[data-test-subj="authorPropertyValueItem"]';
+
+export const BUILDING_BLOCK_TITLE = '[data-test-subj="buildingBlockPropertyTitle"]';
+export const BUILDING_BLOCK_VALUE = '[data-test-subj="buildingBlockPropertyValue"]';
+
+export const SEVERITY_TITLE = '[data-test-subj="severityPropertyTitle"]';
+export const SEVERITY_VALUE = '[data-test-subj="severityPropertyValue"]';
+
+export const SEVERITY_MAPPING_TITLE = '[data-test-subj="severityOverridePropertyTitle"]';
+export const SEVERITY_MAPPING_VALUE_FIELD = '[data-test-subj="severityOverrideField"]';
+export const SEVERITY_MAPPING_VALUE_VALUE = '[data-test-subj="severityOverrideValue"]';
+export const SEVERITY_MAPPING_VALUE_SEVERITY = '[data-test-subj="severityOverrideSeverity"]';
+
+export const RISK_SCORE_TITLE = '[data-test-subj="riskScorePropertyTitle"]';
+export const RISK_SCORE_VALUE = '[data-test-subj="riskScorePropertyValue"]';
+
+export const RISK_SCORE_MAPPING_TITLE = '[data-test-subj="riskScoreOverridePropertyTitle"]';
+export const RISK_SCORE_MAPPING_VALUE_FIELD_NAME =
+  '[data-test-subj="riskScoreOverridePropertyFieldName"]';
+export const RISK_SCORE_MAPPING_VALUE_OVERRIDE_NAME =
+  '[data-test-subj="riskScoreOverridePropertyOverride"]';
+
+export const REFERENCES_TITLE = '[data-test-subj="referencesPropertyTitle"]';
+export const REFERENCES_VALUE_ITEM = '[data-test-subj="urlsDescriptionReferenceLinkItem"]';
+
+export const FALSE_POSITIVES_TITLE = '[data-test-subj="falsePositivesPropertyTitle"]';
+export const FALSE_POSITIVES_VALUE_ITEM = '[data-test-subj="falsePositivesPropertyValueItem"]';
+
+export const INVESTIGATION_FIELDS_TITLE = '[data-test-subj="investigationFieldsPropertyTitle"]';
+export const INVESTIGATION_FIELDS_VALUE_ITEM =
+  '[data-test-subj="investigationFieldsPropertyValueItem"]';
+
+export const LICENSE_TITLE = '[data-test-subj="licensePropertyTitle"]';
+export const LICENSE_VALUE = '[data-test-subj="licensePropertyValue"]';
+
+export const RULE_NAME_OVERRIDE_TITLE = '[data-test-subj="ruleNameOverridePropertyTitle"]';
+export const RULE_NAME_OVERRIDE_VALUE = '[data-test-subj="ruleNameOverridePropertyValue"]';
+
+export const THREAT_TITLE = '[data-test-subj="threatPropertyTitle"]';
+export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
+
+export const TIMESTAMP_OVERRIDE_TITLE = '[data-test-subj="timestampOverridePropertyTitle"]';
+export const TIMESTAMP_OVERRIDE_VALUE = '[data-test-subj="timestampOverridePropertyValue"]';
+
+export const TAGS_PROPERTY_TITLE = '[data-test-subj="tagsPropertyTitle"]';
+export const TAGS_PROPERTY_VALUE_ITEM = '[data-test-subj="tagsPropertyValueItem"]';
+
+export const RELATED_INTEGRATIONS_TITLE = '[data-test-subj="relatedIntegrationsPropertyTitle"]';
+export const RELATED_INTEGRATIONS_VALUE = '[data-test-subj^="relatedIntegrationsPropertyValue"]';
+
+export const REQUIRED_FIELDS_PROPERTY_TITLE = '[data-test-subj="requiredFieldsPropertyTitle"]';
+export const REQUIRED_FIELDS_PROPERTY_VALUE_ITEM =
+  '[data-test-subj="requiredFieldsPropertyValueItem"]';
+
+export const TIMELINE_TEMPLATE_TITLE = '[data-test-subj="timelineTemplatePropertyTitle"]';
+export const TIMELINE_TEMPLATE_VALUE = '[data-test-subj="timelineTemplatePropertyValue"]';
+
+export const INTERVAL_TITLE = '[data-test-subj="intervalPropertyTitle"]';
+export const INTERVAL_VALUE = '[data-test-subj="intervalPropertyValue"]';
+
+export const FROM_TITLE = '[data-test-subj="fromPropertyTitle"]';
+export const FROM_VALUE = '[data-test-subj^="fromPropertyValue"]';
+
+export const INDEX_TITLE = '[data-test-subj="indexPropertyTitle"]';
+export const INDEX_VALUE_ITEM = '[data-test-subj="indexPropertyValueItem"]';
+
+export const CUSTOM_QUERY_TITLE = '[data-test-subj="customQueryPropertyTitle"]';
+export const CUSTOM_QUERY_VALUE = '[data-test-subj="customQueryPropertyValue"]';
+
+export const FILTERS_TITLE = '[data-test-subj="filtersPropertyTitle"]';
+export const FILTERS_VALUE_ITEM =
+  '[data-test-subj="filtersPropertyValue"] [data-test-subj^="filterItem-"]';
+
+export const ALERT_SUPPRESSION_GROUP_BY_TITLE =
+  '[data-test-subj="alertSuppressionGroupByPropertyTitle"]';
+export const ALERT_SUPPRESSION_GROUP_BY_VALUE_ITEM =
+  '[data-test-subj="alertSuppressionGroupByPropertyValueItem"]';
+
+export const ALERT_SUPPRESSION_DURATION_TITLE =
+  '[data-test-subj="alertSuppressionDurationPropertyTitle"]';
+export const ALERT_SUPPRESSION_DURATION_VALUE =
+  '[data-test-subj="alertSuppressionDurationPropertyValue"]';
+
+export const ALERT_SUPPRESSION_FIELD_TITLE =
+  '[data-test-subj="alertSuppressionSuppressionFieldPropertyTitle"]';
+export const ALERT_SUPPRESSION_FIELD_VALUE =
+  '[data-test-subj="alertSuppressionSuppressionFieldPropertyValue"]';
+
+export const DATA_VIEW_ID_TITLE = '[data-test-subj="dataViewIdPropertyTitle"]';
+export const DATA_VIEW_ID_VALUE = '[data-test-subj="dataViewIdPropertyValue"]';
+
+export const DATA_VIEW_INDEX_PATTERN_TITLE = '[data-test-subj="dataViewIndexPatternPropertyTitle"]';
+export const DATA_VIEW_INDEX_PATTERN_VALUE = '[data-test-subj="dataViewIndexPatternPropertyValue"]';
+
+export const SAVED_QUERY_CONTENT_TITLE = '[data-test-subj="savedQueryContentPropertyTitle"]';
+export const SAVED_QUERY_CONTENT_VALUE = '[data-test-subj="savedQueryContentPropertyValue"]';
+
+export const SAVED_QUERY_FILTERS_TITLE = '[data-test-subj="savedQueryFiltersPropertyTitle"]';
+export const SAVED_QUERY_FILTERS_VALUE =
+  '[data-test-subj="savedQueryFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+
+export const SAVED_QUERY_NAME_TITLE = '[data-test-subj="savedQueryNamePropertyTitle"]';
+export const SAVED_QUERY_NAME_VALUE = '[data-test-subj="savedQueryNamePropertyValue"]';
+
+export const ANOMALY_THRESHOLD_TITLE = '[data-test-subj="anomalyThresholdPropertyTitle"]';
+export const ANOMALY_THRESHOLD_VALUE = '[data-test-subj="anomalyThresholdPropertyValue"]';
+
+export const MACHINE_LEARNING_JOB_TITLE = '[data-test-subj="mlJobPropertyTitle"]';
+export const MACHINE_LEARNING_JOB_VALUE = '[data-test-subj="machineLearningJob"]';
+
+export const THRESHOLD_TITLE = '[data-test-subj="thresholdPropertyTitle"]';
+export const THRESHOLD_VALUE = '[data-test-subj="thresholdPropertyValue"]';
+
+export const EQL_QUERY_TITLE = '[data-test-subj="eqlQueryPropertyTitle"]';
+export const EQL_QUERY_VALUE = '[data-test-subj="eqlQueryPropertyValue"]';
+
+export const THREAT_INDEX_TITLE = '[data-test-subj="threatIndexPropertyTitle"]';
+export const THREAT_INDEX_VALUE_ITEM = '[data-test-subj="threatIndexPropertyValueItem"]';
+
+export const THREAT_MAPPING_TITLE = '[data-test-subj="threatMappingPropertyTitle"]';
+export const THREAT_MAPPING_VALUE = '[data-test-subj="threatMappingPropertyValue"]';
+
+export const THREAT_FILTERS_TITLE = '[data-test-subj="threatFiltersPropertyTitle"]';
+export const THREAT_FILTERS_VALUE_ITEM =
+  '[data-test-subj="threatFiltersPropertyValue"] [data-test-subj^="filterItem-"]';
+
+export const THREAT_QUERY_TITLE = '[data-test-subj="threatQueryPropertyTitle"]';
+export const THREAT_QUERY_VALUE = '[data-test-subj="threatQueryPropertyValue"]';
+
+export const NEW_TERMS_FIELDS_TITLE = '[data-test-subj="newTermsFieldsPropertyTitle"]';
+export const NEW_TERMS_FIELDS_VALUE_ITEM = '[data-test-subj="newTermsFieldsPropertyValueItem"]';
+
+export const NEW_TERMS_WINDOW_SIZE_TITLE = '[data-test-subj="newTermsWindowSizePropertyTitle"]';
+export const NEW_TERMS_WINDOW_SIZE_VALUE = '[data-test-subj^="newTermsWindowSizePropertyValue"]';
+
+export const ESQL_QUERY_TITLE = '[data-test-subj="esqlQueryPropertyTitle"]';
+export const ESQL_QUERY_VALUE = '[data-test-subj="esqlQueryPropertyValue"]';

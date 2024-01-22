@@ -135,6 +135,27 @@ export const CasePostRequestRt = rt.intersection([
   ),
 ]);
 
+/**
+ * Bulk create cases
+ */
+
+const CaseCreateRequestWithOptionalId = rt.intersection([
+  CasePostRequestRt,
+  rt.exact(rt.partial({ id: rt.string })),
+]);
+
+export const BulkCreateCasesRequestRt = rt.strict({
+  cases: rt.array(CaseCreateRequestWithOptionalId),
+});
+
+export const BulkCreateCasesResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+});
+
+/**
+ * Find cases
+ */
+
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
   title: null,
@@ -168,11 +189,11 @@ export const CasesFindRequestRt = rt.intersection([
       /**
        * The status of the case (open, closed, in-progress)
        */
-      status: CaseStatusRt,
+      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
       /**
        * The severity of the case
        */
-      severity: CaseSeverityRt,
+      severity: rt.union([CaseSeverityRt, rt.array(CaseSeverityRt)]),
       /**
        * The uids of the user profiles to filter by
        */
@@ -260,6 +281,21 @@ export const CasesFindRequestRt = rt.intersection([
     })
   ),
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
+]);
+
+export const CasesSearchRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  CasesFindRequestRt,
 ]);
 
 export const CasesFindResponseRt = rt.intersection([
@@ -466,6 +502,7 @@ export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
@@ -480,3 +517,5 @@ export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
 export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
+export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

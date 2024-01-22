@@ -67,6 +67,13 @@ export const Category = ({ isFiltered, category, isSavingEnabled }: FieldCategor
     <FieldCategoryProvider
       showDanger={action('showDanger')}
       links={{ deprecationKey: 'link/to/deprecation/docs' }}
+      validateChange={async (key, value) => {
+        action(`validateChange`)({
+          key,
+          value,
+        });
+        return { successfulValidation: true, valid: true };
+      }}
       {...{ isSavingEnabled, onFieldChange }}
     >
       <Component category={category} fieldCount={count} onClearQuery={onClearQuery}>

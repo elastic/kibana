@@ -29,7 +29,7 @@ import { getActionErrorLogRoute } from './get_action_error_log';
 import { getRuleExecutionKPIRoute } from './get_rule_execution_kpi';
 import { getRuleStateRoute } from './get_rule_state';
 import { healthRoute } from './health';
-import { resolveRuleRoute } from './resolve_rule';
+import { resolveRuleRoute } from './rule/apis/resolve';
 import { ruleTypesRoute } from './rule_types';
 import { muteAllRuleRoute } from './mute_all_rule';
 import { muteAlertRoute } from './rule/apis/mute_alert/mute_alert';
@@ -37,8 +37,8 @@ import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
 import { bulkEditInternalRulesRoute } from './rule/apis/bulk_edit/bulk_edit_rules_route';
-import { snoozeRuleRoute } from './snooze_rule';
-import { unsnoozeRuleRoute } from './unsnooze_rule';
+import { snoozeRuleRoute } from './rule/apis/snooze';
+import { unsnoozeRuleRoute } from './rule/apis/unsnooze';
 import { runSoonRoute } from './run_soon';
 import { bulkDeleteRulesRoute } from './rule/apis/bulk_delete/bulk_delete_rules_route';
 import { bulkEnableRulesRoute } from './bulk_enable_rules';
@@ -62,6 +62,8 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
+import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
+import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -133,4 +135,6 @@ export function defineRoutes(opts: RouteOptions) {
   bulkGetMaintenanceWindowRoute(router, licenseState);
   getScheduleFrequencyRoute(router, licenseState);
   bulkUntrackAlertRoute(router, licenseState);
+  getQueryDelaySettingsRoute(router, licenseState);
+  updateQueryDelaySettingsRoute(router, licenseState);
 }

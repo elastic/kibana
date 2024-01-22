@@ -58,6 +58,7 @@ describe('getSavedSearch', () => {
           description: 'description',
           grid: {},
           hideChart: false,
+          sampleSize: 100,
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -103,6 +104,7 @@ describe('getSavedSearch', () => {
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": 100,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],
@@ -208,6 +210,7 @@ describe('getSavedSearch', () => {
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],

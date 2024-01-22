@@ -989,7 +989,28 @@
       "path": "src/plugins/guided_onboarding/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "guidedOnboarding",
+          "id": "def-public.GuidedOnboardingPluginSetup.cloud",
+          "type": "Object",
+          "tags": [],
+          "label": "cloud",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "cloud",
+              "scope": "public",
+              "docId": "kibCloudPluginApi",
+              "section": "def-public.CloudSetup",
+              "text": "CloudSetup"
+            }
+          ],
+          "path": "src/plugins/guided_onboarding/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
       "lifecycle": "setup",
       "initialIsOpen": true
     },

@@ -23,6 +23,7 @@ import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constan
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
+import { isEndpointPackageV2 } from '../../../../common/endpoint/utils/package_v2';
 
 const SCOPE = ['securitySolution'];
 const INTERVAL = '2h';
@@ -46,6 +47,7 @@ export class CheckMetadataTransformsTask {
   private endpointAppContext: EndpointAppContext;
   private logger: Logger;
   private wasStarted: boolean = false;
+  private taskManagerStart: TaskManagerStartContract | undefined;
 
   constructor(setupContract: CheckMetadataTransformsTaskSetupContract) {
     const { endpointAppContext, core, taskManager } = setupContract;
@@ -75,6 +77,7 @@ export class CheckMetadataTransformsTask {
     }
 
     this.wasStarted = true;
+    this.taskManagerStart = taskManager;
 
     try {
       await taskManager.ensureScheduled({
@@ -108,6 +111,19 @@ export class CheckMetadataTransformsTask {
     const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
+    const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
+    const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
+    if (!installation) {
+      this.logger.info('no endpoint installation found');
+      return { state: taskInstance.state };
+    }
+
+    if (isEndpointPackageV2(installation.version)) {
+      this.logger.debug('endpoint package spec v2 detected, stopping health checks');
+      await this.taskManagerStart?.bulkDisable([taskInstance.id]);
+      return { state: taskInstance.state };
+    }
+
     let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
       transformStatsResponse = await esClient?.transform.getTransformStats(
@@ -124,12 +140,6 @@ export class CheckMetadataTransformsTask {
       return { state: taskInstance.state };
     }
 
-    const packageClient = this.endpointAppContext.service.getInternalFleetServices().packages;
-    const installation = await packageClient.getInstallation(FLEET_ENDPOINT_PACKAGE);
-    if (!installation) {
-      this.logger.info('no endpoint installation found');
-      return { state: taskInstance.state };
-    }
     const expectedTransforms = installation.installed_es.filter(
       (asset) => asset.type === ElasticsearchAssetType.transform
     );

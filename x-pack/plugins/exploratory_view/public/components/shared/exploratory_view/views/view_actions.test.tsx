@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor, fireEvent } from '@testing-library/dom';
+import { screen, waitFor, fireEvent } from '@testing-library/react';
 import { render } from '../rtl_helpers';
 import * as hooks from '../hooks/use_series_storage';
 import { ViewActions } from './view_actions';

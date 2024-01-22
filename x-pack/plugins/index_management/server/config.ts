@@ -47,6 +47,11 @@ const schemaLatest = schema.object(
         defaultValue: 'all',
       }),
     }),
+    enableDataStreamsStorageColumn: offeringBasedSchema({
+      // The Storage size column in Data streams is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
   },
   { defaultValue: undefined }
 );
@@ -58,6 +63,7 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableLegacyTemplates: true,
     enableIndexStats: true,
     editableIndexSettings: true,
+    enableDataStreamsStorageColumn: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

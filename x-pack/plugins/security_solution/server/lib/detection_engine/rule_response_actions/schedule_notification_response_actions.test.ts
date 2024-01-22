@@ -7,7 +7,7 @@
 
 import { getScheduleNotificationResponseActionsService } from './schedule_notification_response_actions';
 import type { RuleResponseAction } from '../../../../common/api/detection_engine/model/rule_response_actions';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 describe('ScheduleNotificationResponseActions', () => {
   const signalOne = { agent: { id: 'agent-id-1' }, _id: 'alert-id-1', user: { id: 'S-1-5-20' } };
@@ -68,7 +68,7 @@ describe('ScheduleNotificationResponseActions', () => {
   it('should handle osquery response actions with query', async () => {
     const responseActions: RuleResponseAction[] = [
       {
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+        actionTypeId: ResponseActionTypesEnum['.osquery'],
         params: {
           ...defaultQueryParams,
           query: simpleQuery,
@@ -86,7 +86,7 @@ describe('ScheduleNotificationResponseActions', () => {
   it('should handle osquery response actions with packs', async () => {
     const responseActions: RuleResponseAction[] = [
       {
-        actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
+        actionTypeId: ResponseActionTypesEnum['.osquery'],
         params: {
           ...defaultPackParams,
           queries: [

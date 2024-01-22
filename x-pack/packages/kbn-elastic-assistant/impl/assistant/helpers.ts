@@ -12,14 +12,17 @@ import type { Message } from '../assistant_context/types';
 import { enterpriseMessaging, WELCOME_CONVERSATION } from './use_conversation/sample_conversations';
 
 export const getMessageFromRawResponse = (rawResponse: FetchConnectorExecuteResponse): Message => {
-  const { response, isError } = rawResponse;
+  const { response, isStream, isError } = rawResponse;
   const dateTimeString = new Date().toLocaleString(); // TODO: Pull from response
   if (rawResponse) {
     return {
       role: 'assistant',
-      content: response,
+      ...(isStream
+        ? { reader: response as ReadableStreamDefaultReader<Uint8Array> }
+        : { content: response as string }),
       timestamp: dateTimeString,
       isError,
+      traceData: rawResponse.traceData,
     };
   } else {
     return {
@@ -84,3 +87,54 @@ export const getFormattedMessageContent = (content: string): string => {
 
   return content;
 };
+
+interface OptionalRequestParams {
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  replacements?: Record<string, string>;
+  size?: number;
+}
+
+export const getOptionalRequestParams = ({
+  isEnabledRAGAlerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  replacements,
+  size,
+}: {
+  isEnabledRAGAlerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  replacements?: Record<string, string>;
+  size?: number;
+}): OptionalRequestParams => {
+  const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
+  const optionalAllow = allow ? { allow } : undefined;
+  const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
+  const optionalReplacements = replacements ? { replacements } : undefined;
+  const optionalSize = size ? { size } : undefined;
+
+  // the settings toggle must be enabled:
+  if (!isEnabledRAGAlerts) {
+    return {}; // don't send any optional params
+  }
+
+  return {
+    ...optionalAlertsIndexPattern,
+    ...optionalAllow,
+    ...optionalAllowReplacement,
+    ...optionalReplacements,
+    ...optionalSize,
+  };
+};
+
+export const hasParsableResponse = ({
+  isEnabledRAGAlerts,
+  isEnabledKnowledgeBase,
+}: {
+  isEnabledRAGAlerts: boolean;
+  isEnabledKnowledgeBase: boolean;
+}): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;

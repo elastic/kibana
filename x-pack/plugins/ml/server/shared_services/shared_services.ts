@@ -18,6 +18,7 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { CompatibleModule } from '../../common/constants/app';
 import { MlLicense } from '../../common/license';
 
 import { licenseChecks } from './license_checks';
@@ -109,7 +110,8 @@ export function createSharedServices(
   getUiSettings: () => UiSettingsServiceStart | null,
   getFieldsFormat: () => FieldFormatsStart | null,
   getDataViews: () => DataViewsPluginStart,
-  isMlReady: () => Promise<void>
+  isMlReady: () => Promise<void>,
+  compatibleModuleType: CompatibleModule | null
 ): {
   sharedServicesProviders: SharedServices;
   internalServicesProviders: MlServicesProviders;
@@ -182,7 +184,7 @@ export function createSharedServices(
     sharedServicesProviders: {
       ...getJobServiceProvider(getGuards),
       ...getAnomalyDetectorsProvider(getGuards),
-      ...getModulesProvider(getGuards, getDataViews),
+      ...getModulesProvider(getGuards, getDataViews, compatibleModuleType),
       ...getResultsServiceProvider(getGuards),
       ...getMlSystemProvider(getGuards, mlLicense, getSpaces, cloud, resolveMlCapabilities),
       ...getAlertingServiceProvider(getGuards),

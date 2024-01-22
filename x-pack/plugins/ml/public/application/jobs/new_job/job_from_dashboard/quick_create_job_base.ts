@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardAppLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -69,21 +69,21 @@ export class QuickJobCreatorBase {
     datafeedConfig,
     jobConfig,
     createdByLabel,
-    dashboard,
     start,
     end,
     startJob,
     runInRealTime,
+    dashboard,
   }: {
     jobId: string;
     datafeedConfig: Datafeed;
     jobConfig: Job;
     createdByLabel: CREATED_BY_LABEL;
-    dashboard: Dashboard;
     start: number | undefined;
     end: number | undefined;
     startJob: boolean;
     runInRealTime: boolean;
+    dashboard?: Dashboard;
   }) {
     const datafeedId = createDatafeedId(jobId);
     const datafeed = { ...datafeedConfig, job_id: jobId, datafeed_id: datafeedId };
@@ -93,7 +93,7 @@ export class QuickJobCreatorBase {
       job_id: jobId,
       custom_settings: {
         created_by: createdByLabel,
-        ...(await this.getCustomUrls(dashboard, datafeed)),
+        ...(dashboard ? await this.getCustomUrls(dashboard, datafeed) : {}),
       },
     };
 
@@ -230,7 +230,7 @@ export class QuickJobCreatorBase {
     return mergedQueries;
   }
 
-  protected async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async createDashboardLink(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     const dashboardTitle = dashboard?.getTitle();
     if (dashboardTitle === undefined || dashboardTitle === '') {
       // embeddable may have not been in a dashboard
@@ -245,7 +245,7 @@ export class QuickJobCreatorBase {
       return null;
     }
 
-    const params: DashboardAppLocatorParams = {
+    const params: DashboardLocatorParams = {
       dashboardId: foundDashboard.id,
       timeRange: {
         from: '$earliest$',
@@ -274,7 +274,7 @@ export class QuickJobCreatorBase {
     return { url_name: urlName, url_value: url, time_range: 'auto' };
   }
 
-  protected async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
+  private async getCustomUrls(dashboard: Dashboard, datafeedConfig: estypes.MlDatafeed) {
     const customUrls = await this.createDashboardLink(dashboard, datafeedConfig);
     return dashboard !== undefined && customUrls !== null ? { custom_urls: [customUrls] } : {};
   }

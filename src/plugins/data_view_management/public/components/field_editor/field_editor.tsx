@@ -46,7 +46,8 @@ import {
   DataViewsPublicPluginStart,
   FieldSpec,
 } from '@kbn/data-views-plugin/public';
-import { context as contextType, CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { context as contextType } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   getEnabledScriptingLanguages,
   getDeprecatedScriptingLanguages,
@@ -822,16 +823,9 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
     }
 
     const { redirectAway, indexPatternService } = this.props.services;
-    const fieldExists = !!indexPattern.fields.getByName(field.name);
 
     let oldField: DataViewField['spec'];
-
-    if (fieldExists) {
-      oldField = indexPattern.fields.getByName(field.name)!.spec;
-      indexPattern.fields.update(field);
-    } else {
-      indexPattern.fields.add(field);
-    }
+    indexPattern.upsertScriptedField(field);
 
     if (fieldFormatId) {
       indexPattern.setFieldFormat(field.name, { id: fieldFormatId, params: fieldFormatParams });
@@ -841,7 +835,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
 
     if (field.customLabel !== customLabel) {
       field.customLabel = customLabel;
-      indexPattern.fields.update(field);
+      indexPattern.setFieldCustomLabel(field.name, customLabel);
     }
 
     return indexPatternService

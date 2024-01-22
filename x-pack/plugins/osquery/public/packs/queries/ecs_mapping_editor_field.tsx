@@ -47,8 +47,8 @@ import {
   convertECSMappingToArray,
   convertECSMappingToObject,
 } from '../../../common/utils/converters';
-import ECSSchema from '../../common/schemas/ecs/v8.7.0.json';
-import osquerySchema from '../../common/schemas/osquery/v5.7.0.json';
+import ECSSchema from '../../common/schemas/ecs/v8.11.0.json';
+import osquerySchema from '../../common/schemas/osquery/v5.10.2.json';
 
 import { FieldIcon } from '../../common/lib/kibana';
 import { OsqueryIcon } from '../../components/osquery_icon';
@@ -162,7 +162,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.field}
+            <b>{option.value.field}</b>
           </span>
         </EuiFlexItem>
 
@@ -394,7 +394,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       >
         <EuiFlexItem grow={false}>
           <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
-            {option.value.suggestion_label}
+            <b>{option.value.suggestion_label}</b>
           </span>
         </EuiFlexItem>
         <EuiFlexItem css={descriptionWrapperCss} grow={false}>

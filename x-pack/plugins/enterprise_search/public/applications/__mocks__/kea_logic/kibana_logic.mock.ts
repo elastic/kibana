@@ -34,6 +34,7 @@ export const mockKibanaValues = {
   },
   config: { host: 'http://localhost:3002' },
   data: dataPluginMock.createStartContract(),
+  esConfig: { elasticsearch_host: 'https://your_deployment_url' },
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
@@ -63,6 +64,7 @@ export const mockKibanaValues = {
   share: sharePluginMock.createStartContract(),
   ml: mlPluginMock.createStartContract(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  user: null,
 };
 
 jest.mock('../../shared/kibana', () => ({

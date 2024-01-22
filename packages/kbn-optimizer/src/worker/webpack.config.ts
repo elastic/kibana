@@ -15,7 +15,6 @@ import webpack from 'webpack';
 import TerserPlugin from 'terser-webpack-plugin';
 import webpackMerge from 'webpack-merge';
 import { CleanWebpackPlugin } from 'clean-webpack-plugin';
-import CompressionPlugin from 'compression-webpack-plugin';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
 
@@ -186,12 +185,12 @@ export function getWebpackConfig(
                         )
                       )};\n${content}`;
                     },
-                    webpackImporter: false,
-                    implementation: require('node-sass'),
+                    implementation: require('sass-embedded'),
                     sassOptions: {
-                      outputStyle: worker.dist ? 'compressed' : 'nested',
+                      outputStyle: worker.dist ? 'compressed' : 'expanded',
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
-                      sourceMapRoot: `/${bundle.type}:${bundle.id}`,
+                      sourceMap: true,
+                      quietDeps: true,
                     },
                   },
                 },
@@ -269,15 +268,6 @@ export function getWebpackConfig(
       new webpack.DefinePlugin({
         'process.env': {
           IS_KIBANA_DISTRIBUTABLE: `"true"`,
-        },
-      }),
-      new CompressionPlugin({
-        algorithm: 'brotliCompress',
-        filename: '[path].br',
-        test: /\.(js|css)$/,
-        cache: false,
-        compressionOptions: {
-          level: 11,
         },
       }),
     ],

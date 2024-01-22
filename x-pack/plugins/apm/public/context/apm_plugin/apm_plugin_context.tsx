@@ -15,11 +15,11 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { InfraClientStartExports } from '@kbn/infra-plugin/public';
 import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
+import type { KibanaEnvContext } from '../kibana_environment_context/kibana_environment_context';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
@@ -29,13 +29,13 @@ export interface ApmPluginContextValue {
   plugins: ApmPluginSetupDeps & { maps?: MapsStartApi };
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   observability: ObservabilityPublicStart;
-  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   uiActions: UiActionsStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   share: SharePluginSetup;
+  kibanaEnvironment: KibanaEnvContext;
 }
 
 export const ApmPluginContext = createContext({} as ApmPluginContextValue);

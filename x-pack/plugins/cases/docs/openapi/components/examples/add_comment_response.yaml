@@ -6,7 +6,7 @@ value:
       type: user
       owner: cases
       comment: A new comment.
-      created_at: '2022-06-02T00:49:47.716Z'
+      created_at: '2022-10-02T00:49:47.716Z'
       created_by:
         username: elastic
         email: null
@@ -19,6 +19,15 @@ value:
   tags:
     - tag 1
   description: A case description.
+  category: null
+  assignees: []
+  customFields:
+    - key: d312efda-ec2b-42ec-9e2c-84981795c581
+      type: text
+      value: Field value
+    - key: fcc6840d-eb14-42df-8aaf-232201a705ec
+      type: toggle
+      value: true
   settings:
     syncAlerts: false
   owner: cases
@@ -31,12 +40,14 @@ value:
     username: elastic
     full_name: null
     email: null
+    profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
   status: open
   updated_at: '2022-06-03T00:49:47.716Z'
   updated_by:
     username: elastic
     email: null
     full_name: null
+    profile_uid: u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0
   connector:
     id: none
     name: none

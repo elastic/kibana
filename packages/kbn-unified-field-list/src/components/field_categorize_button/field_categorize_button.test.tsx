@@ -14,9 +14,12 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldCategorizeButton } from './field_categorize_button';
-import { ACTION_CATEGORIZE_FIELD, CategorizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import {
+  CATEGORIZE_FIELD_TRIGGER,
+  ACTION_CATEGORIZE_FIELD,
+  type CategorizeFieldContext,
+} from '@kbn/ml-ui-actions';
 import { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
-import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser';
 
 const ORIGINATING_APP = 'test';
 const mockExecuteAction = jest.fn();

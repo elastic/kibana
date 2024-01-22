@@ -14,6 +14,7 @@ import {
 import React from 'react';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AgentIcon } from '@kbn/custom-icons';
 import type { CriticalPathResponse } from '../../../../server/routes/traces/get_aggregated_critical_path';
 import {
   AGENT_NAME,
@@ -25,7 +26,6 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../common/es_fields/apm';
 import { SpanIcon } from '../span_icon';
-import { AgentIcon } from '../agent_icon';
 import { asPercent } from '../../../../common/utils/formatters';
 
 export function CriticalPathFlamegraphTooltip({
@@ -86,7 +86,7 @@ export function CriticalPathFlamegraphTooltip({
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
-              <AgentIcon agentName={metadata[AGENT_NAME]} />
+              <AgentIcon agentName={metadata[AGENT_NAME]} size="l" />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>{metadata[SERVICE_NAME]}</EuiFlexItem>
           </EuiFlexGroup>

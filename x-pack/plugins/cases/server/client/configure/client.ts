@@ -69,7 +69,7 @@ export interface ConfigureSubClient {
   /**
    * Retrieves the external connector configuration for a particular case owner.
    */
-  get(params: GetConfigurationFindRequest): Promise<Configurations>;
+  get(params?: GetConfigurationFindRequest): Promise<Configurations>;
   /**
    * Retrieves the valid external connectors supported by the cases plugin.
    */
@@ -120,7 +120,7 @@ export const createConfigurationSubClient = (
   casesInternalClient: CasesClientInternal
 ): ConfigureSubClient => {
   return Object.freeze({
-    get: (params: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
+    get: (params?: GetConfigurationFindRequest) => get(params, clientArgs, casesInternalClient),
     getConnectors: () => getConnectors(clientArgs),
     update: (configurationId: string, configuration: ConfigurationPatchRequest) =>
       update(configurationId, configuration, clientArgs, casesInternalClient),
@@ -130,7 +130,7 @@ export const createConfigurationSubClient = (
 };
 
 export async function get(
-  params: GetConfigurationFindRequest,
+  params: GetConfigurationFindRequest = {},
   clientArgs: CasesClientArgs,
   casesClientInternal: CasesClientInternal
 ): Promise<Configurations> {

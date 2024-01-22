@@ -50,12 +50,14 @@ import {
   accordionButtonClassName,
 } from './solution_side_nav_panel.styles';
 
-export interface SolutionSideNavPanelProps {
-  onClose: () => void;
-  onOutsideClick: () => void;
+export interface SolutionSideNavPanelContentProps {
   title: string;
+  onClose: () => void;
   items: SolutionSideNavItem[];
   categories?: LinkCategories;
+}
+export interface SolutionSideNavPanelProps extends SolutionSideNavPanelContentProps {
+  onOutsideClick: () => void;
   bottomOffset?: string;
   topOffset?: string;
 }
@@ -85,7 +87,6 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
       $topOffset,
     });
     const panelClasses = classNames(panelClassName, 'eui-yScroll', solutionSideNavPanelStyles);
-    const titleClasses = classNames(SolutionSideNavTitleStyles(euiTheme));
 
     // ESC key closes PanelNav
     const onKeyDown = useCallback(
@@ -110,29 +111,44 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
                 paddingSize="m"
                 data-test-subj="solutionSideNavPanel"
               >
-                <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs" className={titleClasses}>
-                      <strong>{title}</strong>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem style={{ width: '100%' }}>
-                    {categories ? (
-                      <SolutionSideNavPanelCategories
-                        categories={categories}
-                        items={items}
-                        onClose={onClose}
-                      />
-                    ) : (
-                      <SolutionSideNavPanelItems items={items} onClose={onClose} />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SolutionSideNavPanelContent
+                  title={title}
+                  categories={categories}
+                  items={items}
+                  onClose={onClose}
+                />
               </EuiPanel>
             </EuiOutsideClickDetector>
           </EuiFocusTrap>
         </EuiPortal>
       </>
+    );
+  }
+);
+
+export const SolutionSideNavPanelContent: React.FC<SolutionSideNavPanelContentProps> = React.memo(
+  function SolutionSideNavPanelContent({ title, onClose, categories, items }) {
+    const { euiTheme } = useEuiTheme();
+    const titleClasses = classNames(SolutionSideNavTitleStyles(euiTheme));
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiTitle size="xs" className={titleClasses}>
+            <strong>{title}</strong>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ width: '100%' }}>
+          {categories ? (
+            <SolutionSideNavPanelCategories
+              categories={categories}
+              items={items}
+              onClose={onClose}
+            />
+          ) : (
+            <SolutionSideNavPanelItems items={items} onClose={onClose} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

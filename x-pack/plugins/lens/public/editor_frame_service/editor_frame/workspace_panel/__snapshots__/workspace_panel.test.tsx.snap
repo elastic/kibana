@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`workspace_panel should show an error message if the expression fails to parse 1`] = `
+exports[`workspace_panel enzyme tests should show an error message if the expression fails to parse 1`] = `
 Array [
   Array [
     Object {

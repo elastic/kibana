@@ -40,17 +40,21 @@ export const postKnowledgeBaseRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
+        const core = await context.core;
         // Get a scoped esClient for creating the Knowledge Base index, pipeline, and documents
-        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-        const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const elserId = await getElser(request, core.savedObjects.getClient());
         const kbResource = getKbResource(request);
         const esStore = new ElasticsearchStore(
           esClient,
           KNOWLEDGE_BASE_INDEX_PATTERN,
           logger,
+          telemetry,
           elserId,
           kbResource
         );

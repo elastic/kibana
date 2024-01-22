@@ -39,7 +39,7 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-icinga.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/icinga.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/icinga.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function icingaLogsSpecProvider(context: TutorialContext): TutorialSchema
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/icinga_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/icinga_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

@@ -1087,8 +1087,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
         selectedColumn &&
           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
             selectedColumn,
-            props.indexPatterns[state.layers[layerId].indexPatternId],
-            state.layers[layerId].columns
+            state.layers[layerId].columns,
+            props.indexPatterns[state.layers[layerId].indexPatternId]
           )
       ),
     [layerId, selectedColumn, props.indexPatterns, state.layers]
@@ -1263,8 +1263,8 @@ export function DimensionEditor(props: DimensionEditorProps) {
                         customLabel:
                           operationDefinitionMap[selectedColumn.operationType].getDefaultLabel(
                             selectedColumn,
-                            props.indexPatterns[state.layers[layerId].indexPatternId],
-                            state.layers[layerId].columns
+                            state.layers[layerId].columns,
+                            props.indexPatterns[state.layers[layerId].indexPatternId]
                           ) !== value,
                       },
                     },

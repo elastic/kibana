@@ -1,0 +1,91 @@
+[[try-esql]]
+== Try {esql}
+
+preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
+
+The Elasticsearch Query Language, {esql}, makes it easier to explore your data without leaving Discover. 
+
+In this tutorial we'll use the {kib} sample web logs in Discover and Lens to explore the data and create visualizations. 
+
+[float]
+[[prerequisite]]
+=== Prerequisite 
+
+To be able to select **Try {esql}** from the Data views menu the `discover:enableESQL` setting must be enabled from **Stack Management > Advanced Settings**. It is enabled by default. 
+
+[float]
+[[tutorial-try-esql]]
+=== Trying {esql}
+
+To load the sample data:
+
+. On the home page, click **Try sample data**.
+. Click **Other sample data sets**.
+. On the Sample web logs card, click **Add data**.
+. Open the main menu and select *Discover*.
+. From the Data views menu, select *Try {esql}*.
+
+Let's say we want to find out what operating system users have and how much RAM is on their machine.  
+
+. Set the time range to **Last 7 days**.
+. Expand image:images/expand-icon-2.png[An image of the expand icon] the query bar.
+. Put each processing command on a new line for better readability.
+. Copy the query below:
++
+[source,esql]
+----
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram
+----
++
+. Click **Update**.
++
+[role="screenshot"]
+image:images/esql-machine-os-ram.png[An image of the query result]
++
+[NOTE]
+====
+{esql} keywords are not case sensitive. 
+====
+
+Let's add `geo.dest` to our query, to find out the geographical destination of the visits, and limit the results. 
+
+. Copy the query below:
++
+[source,esql]
+----
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram, geo.dest
+| LIMIT 10
+----
++
+. Click **Update**.
++
+[role="screenshot"]
+image:images/esql-limit.png[An image of the extended query result]
+
+Let's sort the data by machine ram and filter out the destination GB. 
+
+. Copy the query below:
++
+[source,esql]
+----
+FROM kibana_sample_data_logs 
+| KEEP machine.os, machine.ram, geo.dest
+| SORT machine.ram desc
+| WHERE geo.dest != "GB"
+| LIMIT 10
+----
++
+. Click **Update**.
++
+[role="screenshot"]
+image:images/esql-full-query.png[]
++
+. Click **Save** to save the query and visualization to a dashboard. 
+
+To make changes to the visualization you can use the visualization drop-down. To make changes to the colors used or the axes, or click the pencil icon. This opens an in-line editor where you can change the colors and axes of the visualization. 
+
+To learn more about {esql}, try other tutorials, see more examples and reference material, refer to {ref}/esql.html[{esql}].
+
+

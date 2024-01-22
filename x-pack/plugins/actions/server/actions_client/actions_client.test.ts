@@ -43,7 +43,7 @@ import { actionsAuthorizationMock } from '../authorization/actions_authorization
 import { trackLegacyRBACExemption } from '../lib/track_legacy_rbac_exemption';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObject } from '@kbn/core/server';
 import { connectorTokenClientMock } from '../lib/connector_token_client.mock';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
@@ -51,6 +51,7 @@ import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_cr
 import { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
+import { estypes } from '@elastic/elasticsearch';
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -119,6 +120,14 @@ const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
 
 const connectorTokenClient = connectorTokenClientMock.create();
 const inMemoryMetrics = inMemoryMetricsMock.create();
+
+const actionTypeIdFromSavedObjectMock = (actionTypeId: string = 'my-action-type') => {
+  return {
+    attributes: {
+      actionTypeId,
+    },
+  } as SavedObject;
+};
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -2664,6 +2673,7 @@ describe('execute()', () => {
       (getAuthorizationModeBySource as jest.Mock).mockImplementationOnce(() => {
         return AuthorizationMode.RBAC;
       });
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
       await actionsClient.execute({
         actionId: 'action-id',
         params: {
@@ -2672,6 +2682,7 @@ describe('execute()', () => {
         source: asHttpRequestExecutionSource(request),
       });
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2685,6 +2696,8 @@ describe('execute()', () => {
         new Error(`Unauthorized to execute all actions`)
       );
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await expect(
         actionsClient.execute({
           actionId: 'action-id',
@@ -2696,6 +2709,7 @@ describe('execute()', () => {
       ).rejects.toMatchInlineSnapshot(`[Error: Unauthorized to execute all actions]`);
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2768,12 +2782,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'system-connector-.cases',
         params: {},
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -2832,12 +2849,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'testPreconfigured',
         params: {},
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: [],
       });
@@ -2895,12 +2915,15 @@ describe('execute()', () => {
         executor,
       });
 
+      unsecuredSavedObjectsClient.get.mockResolvedValueOnce(actionTypeIdFromSavedObjectMock());
+
       await actionsClient.execute({
         actionId: 'system-connector-.cases',
         params: { foo: 'bar' },
       });
 
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
         additionalPrivileges: ['test/create'],
       });
@@ -3032,6 +3055,7 @@ describe('bulkEnqueueExecution()', () => {
         },
       ]);
       expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
+        actionTypeId: 'my-action-type',
         operation: 'execute',
       });
     });
@@ -3396,6 +3420,10 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         executionUuidCardinality: { doc_count: 5, executionUuidCardinality: { value: 5 } },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
@@ -3451,6 +3479,10 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         },
       },
     },
+    hits: {
+      total: { value: 5, relation: 'eq' },
+      hits: [],
+    } as estypes.SearchHitsMetadata<unknown>,
   };
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {

@@ -8,7 +8,7 @@
 import { ALERT_REASON, ALERT_START } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeFormatter } from '@kbn/observability-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { LogsLocatorParams } from '../../../common/locators';
+import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 
 export const createRuleFormatter: (
   logsLocator: LocatorPublic<LogsLocatorParams>

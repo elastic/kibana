@@ -6,17 +6,16 @@
  */
 
 import { last } from 'lodash';
-import { InfraFormatterType } from '../../../../common/custom_threshold_rule/types';
-import { MetricsExplorerMetric } from '../../../../common/custom_threshold_rule/metrics_explorer';
+import {
+  CustomThresholdExpressionMetric,
+  InfraFormatterType,
+} from '../../../../common/custom_threshold_rule/types';
 
-export const metricToFormat = (metric?: MetricsExplorerMetric) => {
+export const metricToFormat = (metric?: CustomThresholdExpressionMetric) => {
   if (metric && metric.field) {
     const suffix = last(metric.field.split(/\./));
     if (suffix === 'pct') {
       return InfraFormatterType.percent;
-    }
-    if (suffix === 'bytes' && metric.aggregation === 'rate') {
-      return InfraFormatterType.bits;
     }
     if (suffix === 'bytes') {
       return InfraFormatterType.bytes;

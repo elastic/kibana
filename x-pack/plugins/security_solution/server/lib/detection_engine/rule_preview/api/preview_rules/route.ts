@@ -13,6 +13,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
+  RuleAction,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
 import { parseDuration, DISABLE_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
@@ -29,7 +30,7 @@ import type {
   PreviewResponse,
   RulePreviewLogs,
 } from '../../../../../../common/api/detection_engine';
-import { previewRulesSchema } from '../../../../../../common/api/detection_engine';
+import { PreviewRulesSchema } from '../../../../../../common/api/detection_engine';
 
 import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
@@ -39,7 +40,7 @@ import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logge
 import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
-import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -90,7 +91,7 @@ export const previewRulesRoute = async (
     .addVersion(
       {
         version: '2023-10-31',
-        validate: { request: { body: buildRouteValidation(previewRulesSchema) } },
+        validate: { request: { body: buildRouteValidationWithZod(PreviewRulesSchema) } },
       },
       async (context, request, response): Promise<IKibanaResponse<PreviewResponse>> => {
         const siemResponse = buildSiemResponse(response);
@@ -244,6 +245,10 @@ export const previewRulesRoute = async (
               updatedBy: username ?? 'preview-updated-by',
               muteAll: false,
               snoozeSchedule: [],
+              // In Security Solution, action params are typed as Record<string,
+              // unknown>, which is a correct type for action params, but we
+              // need to cast here to comply with the alerting types
+              actions: internalRule.actions as RuleAction[],
             };
 
             let invocationStartTime;
@@ -284,6 +289,10 @@ export const previewRulesRoute = async (
                 state: statePreview,
                 logger,
                 flappingSettings: DISABLE_FLAPPING_SETTINGS,
+                getTimeRange: () => {
+                  const date = startedAt.toISOString();
+                  return { dateStart: date, dateEnd: date };
+                },
               })) as { state: TState });
 
               const errors = loggedStatusChanges

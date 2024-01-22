@@ -15,7 +15,6 @@ import type {
   UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
-  Rule,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
@@ -51,7 +50,7 @@ export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promi
   Promise.resolve(true);
 
 export const fetchRuleById = jest.fn(
-  async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
+  async ({ id, signal }: FetchRuleProps): Promise<RuleResponse> => savedRuleMock
 );
 
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>

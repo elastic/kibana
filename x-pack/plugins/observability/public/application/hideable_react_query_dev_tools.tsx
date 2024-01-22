@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { EuiButtonIcon } from '@elastic/eui';
 
@@ -20,7 +21,10 @@ export function HideableReactQueryDevTools() {
         color="primary"
         style={{ zIndex: 99999, position: 'fixed', bottom: '40px', left: '40px' }}
         onClick={() => setIsHidden(!isHidden)}
-        aria-label="Hide react query"
+        aria-label={i18n.translate(
+          'xpack.observability.hideableReactQueryDevTools.euiButtonIcon.hideReactQueryLabel',
+          { defaultMessage: 'Hide react query' }
+        )}
       />
       <ReactQueryDevtools />
     </div>

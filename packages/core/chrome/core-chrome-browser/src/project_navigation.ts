@@ -8,7 +8,8 @@
 
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
-import { EuiAccordionProps, IconType } from '@elastic/eui';
+import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -27,6 +28,7 @@ import type {
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
+import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
 /** @public */
 export type AppId =
@@ -49,9 +51,27 @@ export type AppDeepLinkId =
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
 
+export interface CloudURLs {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}
+
+export interface CloudLink {
+  title: string;
+  href: string;
+}
+
+export type CloudLinks = {
+  [id in CloudLinkId]?: CloudLink;
+};
+
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+
+export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -81,11 +101,7 @@ interface NodeDefinitionBase {
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
-   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
-   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
-   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
-   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
-   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
@@ -94,15 +110,14 @@ interface NodeDefinitionBase {
    */
   getIsActive?: GetIsActiveFn;
   /**
+   * Add vertical space before this node
+   */
+  spaceBefore?: EuiThemeSize | null;
+  /**
    * ----------------------------------------------------------------------------------------------
    * ------------------------------- GROUP NODES ONLY PROPS ---------------------------------------
    * ----------------------------------------------------------------------------------------------
    */
-  /**
-   * ["group" nodes only] Optional flag to indicate if the node must be treated as a group title.
-   * Can not be used with `children`
-   */
-  isGroupTitle?: boolean;
   /**
    * ["group" nodes only] Property to indicate how the group should be rendered.
    * - Accordion: wraps the items in an EuiAccordion
@@ -112,15 +127,27 @@ interface NodeDefinitionBase {
    */
   renderAs?: RenderAs;
   /**
+   * ["group" nodes only] Flag to indicate if the group is initially collapsed or not.
+   *
+   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
+   *
+   * `false`: the group will be opened event if none of its children nodes matches the current URL.
+   *
+   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
+   */
+  defaultIsCollapsed?: boolean;
+  /**
    * ["group" nodes only] Optional flag to indicate if a horizontal rule should be rendered after the node.
    * Note: this property is currently only used for (1) "group" nodes and (2) in the navigation
    * panel opening on the right of the side nav.
    */
   appendHorizontalRule?: boolean;
   /**
-   * ["group" nodes only] Temp prop. Will be removed once the new navigation is fully implemented.
+   * ["group" nodes only] Flag to indicate if the accordion is collapsible.
+   * Must be used with `renderAs` set to `"accordion"`
+   * @default `true`
    */
-  accordionProps?: Partial<EuiAccordionProps>;
+  isCollapsible?: boolean;
   /**
    * ----------------------------------------------------------------------------------------------
    * -------------------------------- ITEM NODES ONLY PROPS ---------------------------------------
@@ -160,7 +187,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title: string;
   /** Path in the tree of the node */
-  path: string[];
+  path: string;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**
@@ -169,17 +196,14 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Flag to indicate if the node is currently active.
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
    */
-  isActive?: boolean;
-}
-
-/** @public */
-export interface ChromeProjectNavigation {
+  renderItem?: () => React.ReactNode;
   /**
-   * The navigation tree representation of the side bar navigation.
+   * Flag to indicate if the node is an "external" cloud link
    */
-  navigationTree: ChromeProjectNavigationNode[];
+  isElasticInternalLink?: boolean;
 }
 
 /** @public */
@@ -197,9 +221,6 @@ export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
-
-// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
-// ---       They are converted to the ChromeProjectNavigationNode type above.
 
 /**
  * @public
@@ -239,3 +260,116 @@ export type NodeDefinitionWithChildren<
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
+
+/** The preset that can be pass to the NavigationBucket component */
+export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+
+/**
+ * @public
+ *
+ *  Definition for the "Recently accessed" section of the side navigation.
+ */
+export interface RecentlyAccessedDefinition {
+  type: 'recentlyAccessed';
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
+  recentlyAccessed$?: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  /**
+   * If true, the recently accessed list will be collapsed by default.
+   * @default false
+   */
+  defaultIsCollapsed?: boolean;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition.
+ */
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navGroup';
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition built from a specific preset.
+ */
+export interface PresetDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
+  type: 'preset';
+  preset: NavigationGroupPreset;
+}
+
+/**
+ * @public
+ *
+ * An navigation item at root level.
+ */
+export interface ItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navItem';
+}
+
+/**
+ * @public
+ *
+ * The navigation definition for a root item in the side navigation.
+ */
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | RecentlyAccessedDefinition
+  | GroupDefinition<LinkId, Id, ChildrenId>
+  | PresetDefinition<LinkId, Id, ChildrenId>
+  | ItemDefinition<LinkId, Id, ChildrenId>;
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ */
+export interface NavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
+  /**
+   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  body: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ * that is used by the UI to render the navigation.
+ * This interface is the result of parsing the definition above (validating, replacing "link" props
+ * with their corresponding "deepLink"...)
+ */
+export interface NavigationTreeDefinitionUI {
+  body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}

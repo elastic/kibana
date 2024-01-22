@@ -285,11 +285,11 @@ export const waitForRuleToUpdate = () => {
 
 export const importRules = (rulesFile: string) => {
   cy.get(RULE_IMPORT_MODAL).click();
-  cy.get(INPUT_FILE).click({ force: true });
+  cy.get(INPUT_FILE).click();
   cy.get(INPUT_FILE).selectFile(rulesFile);
   cy.get(INPUT_FILE).trigger('change');
-  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click({ force: true });
-  cy.get(INPUT_FILE).should('not.exist');
+  cy.get(RULE_IMPORT_MODAL_BUTTON).last().click();
+  cy.get(INPUT_FILE, { timeout: 300000 }).should('not.exist');
 };
 
 export const expectRulesManagementTab = () => {

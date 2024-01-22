@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/profiling-data-access-plugin",
-  "owner": "@elastic/profiling-ui",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "profilingDataAccess",
     "server": true,
@@ -9,10 +9,8 @@
     "configPath": ["xpack", "profiling"],
     "requiredPlugins": [
       "data", 
-      "fleet",
-      "cloud"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["cloud",  "fleet"],
     "requiredBundles": []
   }
 }

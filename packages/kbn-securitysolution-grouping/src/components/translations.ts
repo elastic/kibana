@@ -32,6 +32,10 @@ export const SELECT_FIELD = (groupingLevelsCount: number) =>
     defaultMessage: 'Select up to {groupingLevelsCount} groupings',
   });
 
+export const SELECT_SINGLE_FIELD = i18n.translate('grouping.groupBySingleField', {
+  defaultMessage: 'Select grouping',
+});
+
 export const NONE = i18n.translate('grouping.noneGroupByOptionName', {
   defaultMessage: 'None',
 });

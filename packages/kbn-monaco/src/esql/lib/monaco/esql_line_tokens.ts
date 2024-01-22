@@ -11,11 +11,12 @@ import { ESQLState } from './esql_state';
 
 /** @internal **/
 export class ESQLLineTokens implements monaco.languages.ILineTokens {
-  endState: monaco.languages.IState;
+  endState: ESQLState;
   tokens: monaco.languages.IToken[];
 
-  constructor(tokens: monaco.languages.IToken[]) {
+  constructor(tokens: monaco.languages.IToken[], line: number) {
     this.endState = new ESQLState();
+    this.endState.setLineNumber(line);
     this.tokens = tokens;
   }
 }

@@ -43,8 +43,9 @@ For example, quickly view:
 [[distributed-tracing]]
 ==== Distributed tracing
 
-If your trace sample timeline is colorful, it's indicative of a distributed trace.
-Services in a distributed trace are separated by color and listed in the order they occur.
+When a trace travels through multiple services it is known as a _distributed trace_.
+In APM, the colors in a distributed trace represent different services and
+are listed in the order they occur.
 
 [role="screenshot"]
 image::apm/images/apm-services-trace.png[Example of distributed trace colors in the APM app in Kibana]

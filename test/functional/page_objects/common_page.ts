@@ -39,6 +39,22 @@ export class CommonPageObject extends FtrService {
     return url.toString();
   }
 
+  private async disableTours() {
+    const NEW_FEATURES_TOUR_STORAGE_KEYS = {
+      RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+      TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
+    };
+
+    const tourStorageKeys = Object.values(NEW_FEATURES_TOUR_STORAGE_KEYS);
+    const tourConfig = {
+      isTourActive: false,
+    };
+
+    for (const key of tourStorageKeys) {
+      await this.browser.setLocalStorageItem(key, JSON.stringify(tourConfig));
+    }
+  }
+
   /**
    * Logins to Kibana as default user and navigates to provided app
    * @param appUrl Kibana URL
@@ -54,6 +70,8 @@ export class CommonPageObject extends FtrService {
     if (disableWelcomePrompt) {
       await this.browser.setLocalStorageItem('home:welcome:show', 'false');
     }
+
+    await this.disableTours();
 
     let currentUrl = await this.browser.getCurrentUrl();
     this.log.debug(`currentUrl = ${currentUrl}\n    appUrl = ${appUrl}`);
@@ -387,6 +405,12 @@ export class CommonPageObject extends FtrService {
     this.log.debug('Clicking modal confirm');
     // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
     await this.testSubjects.exists('confirmModalTitleText');
+    // make sure button is enabled before clicking it
+    // (and conveniently give UI enough time to bind a handler to it)
+    const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
+    if (!isEnabled) {
+      throw new Error('Modal confirm button is not enabled');
+    }
     await this.testSubjects.click('confirmModalConfirmButton');
     if (ensureHidden) {
       await this.ensureModalOverlayHidden();

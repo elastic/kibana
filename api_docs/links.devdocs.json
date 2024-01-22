@@ -80,98 +80,14 @@
           },
           {
             "parentPluginId": "links",
-            "id": "def-public.LinksEmbeddable.select",
-            "type": "Function",
-            "tags": [],
-            "label": "select",
-            "description": [
-              "\nTODO: Keep track of the necessary state without the redux embeddable tools; it's kind of overkill here.\n      Related issue: https://github.com/elastic/kibana/issues/167577"
-            ],
-            "signature": [
-              "<Selected extends unknown>(selector: (state: ",
-              "LinksReduxState",
-              ") => Selected, equalityFn?: ((previous: Selected, next: Selected) => boolean) | undefined) => Selected"
-            ],
-            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.select.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "selector",
-                "description": [],
-                "signature": [
-                  "(state: ReduxStateType) => Selected"
-                ],
-                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "links",
-                    "id": "def-public.LinksEmbeddable.select.$1.$1",
-                    "type": "Uncategorized",
-                    "tags": [],
-                    "label": "state",
-                    "description": [],
-                    "signature": [
-                      "ReduxStateType"
-                    ],
-                    "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.select.$2",
-                "type": "Function",
-                "tags": [],
-                "label": "equalityFn",
-                "description": [],
-                "signature": [
-                  "((previous: Selected, next: Selected) => boolean) | undefined"
-                ],
-                "path": "src/plugins/presentation_util/public/redux_tools/types.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          },
-          {
-            "parentPluginId": "links",
-            "id": "def-public.LinksEmbeddable.getState",
-            "type": "Function",
-            "tags": [],
-            "label": "getState",
-            "description": [],
-            "signature": [
-              "() => ",
-              "LinksReduxState"
-            ],
-            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": []
-          },
-          {
-            "parentPluginId": "links",
-            "id": "def-public.LinksEmbeddable.dispatch",
+            "id": "def-public.LinksEmbeddable.attributes",
             "type": "Object",
             "tags": [],
-            "label": "dispatch",
+            "label": "attributes",
             "description": [],
             "signature": [
-              "{ setLoading: (payload: boolean) => void; setAttributes: (payload: ",
               "LinksAttributes",
-              ") => void; }"
+              " | undefined"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
@@ -179,37 +95,20 @@
           },
           {
             "parentPluginId": "links",
-            "id": "def-public.LinksEmbeddable.onStateChange",
-            "type": "Function",
+            "id": "def-public.LinksEmbeddable.attributes$",
+            "type": "Object",
             "tags": [],
-            "label": "onStateChange",
+            "label": "attributes$",
             "description": [],
             "signature": [
-              "(listener: () => void) => ",
-              "Unsubscribe"
+              "Subject",
+              "<",
+              "LinksAttributes",
+              ">"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
-            "trackAdoption": false,
-            "returnComment": [],
-            "children": [
-              {
-                "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.onStateChange.$1",
-                "type": "Function",
-                "tags": [],
-                "label": "listener",
-                "description": [],
-                "signature": [
-                  "() => void"
-                ],
-                "path": "node_modules/redux/index.d.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": []
-              }
-            ]
+            "trackAdoption": false
           },
           {
             "parentPluginId": "links",
@@ -230,27 +129,6 @@
                 "id": "def-public.LinksEmbeddable.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "reduxToolsPackage",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "presentationUtil",
-                    "scope": "public",
-                    "docId": "kibPresentationUtilPluginApi",
-                    "section": "def-public.ReduxToolsPackage",
-                    "text": "ReduxToolsPackage"
-                  }
-                ],
-                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
                 "label": "config",
                 "description": [],
                 "signature": [
@@ -263,7 +141,7 @@
               },
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.Unnamed.$3",
+                "id": "def-public.LinksEmbeddable.Unnamed.$2",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "initialInput",
@@ -278,7 +156,7 @@
               },
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.Unnamed.$4",
+                "id": "def-public.LinksEmbeddable.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
                 "label": "attributeService",
@@ -320,7 +198,7 @@
               },
               {
                 "parentPluginId": "links",
-                "id": "def-public.LinksEmbeddable.Unnamed.$5",
+                "id": "def-public.LinksEmbeddable.Unnamed.$4",
                 "type": "Object",
                 "tags": [],
                 "label": "parent",
@@ -335,6 +213,38 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onRender",
+            "type": "Function",
+            "tags": [],
+            "label": "onRender",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "onLoading",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -476,12 +386,28 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element | undefined"
+              "(domNode: HTMLElement) => JSX.Element | undefined"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

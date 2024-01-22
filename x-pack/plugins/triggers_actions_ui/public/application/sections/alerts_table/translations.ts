@@ -29,13 +29,6 @@ export const ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL = i18n.translate(
   }
 );
 
-export const ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails',
-  {
-    defaultMessage: 'View details',
-  }
-);
-
 export const ALERTS_TABLE_TITLE = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.title',
   {

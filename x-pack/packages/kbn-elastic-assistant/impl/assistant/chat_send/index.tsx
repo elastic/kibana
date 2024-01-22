@@ -8,11 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { useChatSend, UseChatSendProps } from './use_chat_send';
+import { UseChatSend } from './use_chat_send';
 import { ChatActions } from '../chat_actions';
 import { PromptTextArea } from '../prompt_textarea';
 
-export interface Props extends UseChatSendProps {
+export interface Props extends UseChatSend {
   isDisabled: boolean;
   shouldRefocusPrompt: boolean;
   userPrompt: string | null;
@@ -23,18 +23,15 @@ export interface Props extends UseChatSendProps {
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
+  handleButtonSendMessage,
+  handleOnChatCleared,
+  handlePromptChange,
+  handleSendMessage,
   isDisabled,
-  userPrompt,
+  isLoading,
   shouldRefocusPrompt,
-  ...rest
+  userPrompt,
 }) => {
-  const {
-    handleButtonSendMessage,
-    handleOnChatCleared,
-    handlePromptChange,
-    handleSendMessage,
-    isLoading,
-  } = useChatSend(rest);
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {

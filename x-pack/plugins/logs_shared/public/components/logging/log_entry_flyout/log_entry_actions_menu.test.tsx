@@ -24,6 +24,7 @@ const ProviderWrapper: React.FC = ({ children }) => {
 };
 
 describe('LogEntryActionsMenu component', () => {
+  const time = new Date().toISOString();
   describe('uptime link', () => {
     it('renders with a host ip filter when present in log entry', () => {
       const elementWrapper = mount(
@@ -34,7 +35,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -64,7 +65,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -94,7 +95,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -128,7 +129,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -160,7 +161,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -194,7 +195,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -228,7 +229,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}
@@ -258,7 +259,7 @@ describe('LogEntryActionsMenu component', () => {
               id: 'ITEM_ID',
               index: 'INDEX',
               cursor: {
-                time: 0,
+                time,
                 tiebreaker: 0,
               },
             }}

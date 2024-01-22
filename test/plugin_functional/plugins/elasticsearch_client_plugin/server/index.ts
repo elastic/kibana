@@ -8,4 +8,4 @@
 
 import { ElasticsearchClientPlugin } from './plugin';
 
-export const plugin = () => new ElasticsearchClientPlugin();
+export const plugin = async () => new ElasticsearchClientPlugin();

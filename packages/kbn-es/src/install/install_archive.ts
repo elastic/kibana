@@ -66,17 +66,15 @@ export async function installArchive(archive: string, options?: InstallArchiveOp
   fs.mkdirSync(tmpdir, { recursive: true });
   log.info('created %s', chalk.bold(tmpdir));
 
-  if (license !== 'oss') {
-    // starting in 6.3, security is disabled by default. Since we bootstrap
-    // the keystore, we can enable security ourselves.
-    await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  // starting in 6.3, security is disabled by default. Since we bootstrap
+  // the keystore, we can enable security ourselves.
+  await appendToConfig(installPath, 'xpack.security.enabled', 'true');
 
-    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-    await configureKeystore(installPath, log, [
-      ['bootstrap.password', password],
-      ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
-    ]);
-  }
+  await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
+  await configureKeystore(installPath, log, [
+    ['bootstrap.password', password],
+    ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
+  ]);
 
   return { installPath };
 }

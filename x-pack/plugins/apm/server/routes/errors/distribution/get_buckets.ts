@@ -10,8 +10,9 @@ import {
   kqlQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { ERROR_GROUP_ID, SERVICE_NAME } from '../../../../common/es_fields/apm';
+import { RollupInterval } from '../../../../common/rollup';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -36,13 +37,21 @@ export async function getBuckets({
 }) {
   const params = {
     apm: {
-      events: [ProcessorEvent.error],
+      sources: [
+        {
+          documentType: ApmDocumentType.ErrorEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,
       size: 0,
       query: {
         bool: {
+          must_not: {
+            term: { 'error.type': 'crash' },
+          },
           filter: [
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),

@@ -23,7 +23,7 @@ export const mathOperation: OperationDefinition<MathIndexPatternColumn, 'managed
   type: 'math',
   displayName: 'Math',
   hidden: true,
-  getDefaultLabel: (column, indexPattern) => 'Math',
+  getDefaultLabel: (column, columns, indexPattern) => 'Math',
   input: 'managedReference',
   getDisabledStatus(indexPattern: IndexPattern) {
     return undefined;
