@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-browser-mocks';
+import type { Logger } from '@kbn/core/server';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseConnectorRetryService } from './retry_service';
 import type { BackoffFactory } from './types';
@@ -17,13 +19,15 @@ describe('CryptoService', () => {
     create: () => ({ nextBackOff }),
   };
 
+  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
+
   let service: CaseConnectorRetryService;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
     nextBackOff.mockReturnValue(1);
-    service = new CaseConnectorRetryService(backOffFactory);
+    service = new CaseConnectorRetryService(mockLogger, backOffFactory);
   });
 
   it('should not retry if the error is not CasesConnectorError', async () => {
@@ -50,7 +54,7 @@ describe('CryptoService', () => {
 
   it('should not retry after trying more than the max attempts', async () => {
     const maxAttempts = 3;
-    service = new CaseConnectorRetryService(backOffFactory, maxAttempts);
+    service = new CaseConnectorRetryService(mockLogger, backOffFactory, maxAttempts);
 
     cb.mockRejectedValue(new CasesConnectorError('My transient error', 409));
 
@@ -66,7 +70,7 @@ describe('CryptoService', () => {
     'should retry and succeed retryable status code: %s',
     async (statusCode) => {
       const maxAttempts = 3;
-      service = new CaseConnectorRetryService(backOffFactory, maxAttempts);
+      service = new CaseConnectorRetryService(mockLogger, backOffFactory, maxAttempts);
 
       const error = new CasesConnectorError('My transient error', statusCode);
       cb.mockRejectedValueOnce(error)
@@ -82,7 +86,7 @@ describe('CryptoService', () => {
   );
 
   it('should succeed if cb does not throw', async () => {
-    service = new CaseConnectorRetryService(backOffFactory);
+    service = new CaseConnectorRetryService(mockLogger, backOffFactory);
 
     cb.mockResolvedValue({ status: 'ok' });
 
@@ -91,5 +95,38 @@ describe('CryptoService', () => {
     expect(nextBackOff).toBeCalledTimes(0);
     expect(cb).toBeCalledTimes(1);
     expect(res).toEqual({ status: 'ok' });
+  });
+
+  describe('Logging', () => {
+    it('should log a warning when retrying', async () => {
+      service = new CaseConnectorRetryService(mockLogger, backOffFactory, 2);
+
+      cb.mockRejectedValue(new CasesConnectorError('My transient error', 409));
+
+      await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"My transient error"`
+      );
+
+      expect(mockLogger.warn).toBeCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(
+        1,
+        '[CaseConnector] Case connector failed with status code 409. Attempt for retry: 1'
+      );
+
+      expect(mockLogger.warn).toHaveBeenNthCalledWith(
+        2,
+        '[CaseConnector] Case connector failed with status code 409. Attempt for retry: 2'
+      );
+    });
+
+    it('should not log a warning when the error is not supported', async () => {
+      cb.mockRejectedValue(new Error('My error'));
+
+      await expect(() => service.retryWithBackoff(cb)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"My error"`
+      );
+
+      expect(mockLogger.warn).not.toBeCalled();
+    });
   });
 });

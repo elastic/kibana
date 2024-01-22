@@ -31,6 +31,8 @@ import {
   expectCasesToHaveTheCorrectAlertsAttachedWithGrouping,
   expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter,
 } from './test_helpers';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { Logger } from '@kbn/core/server';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -49,6 +51,7 @@ describe('CasesConnectorExecutor', () => {
 
   const getCasesClient = jest.fn();
   const casesClientMock = createCasesClientMock();
+  const mockLogger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
   let connectorExecutor: CasesConnectorExecutor;
   let oracleIdCounter = 0;
@@ -90,6 +93,7 @@ describe('CasesConnectorExecutor', () => {
     getCasesClient.mockReturnValue(casesClientMock);
 
     connectorExecutor = new CasesConnectorExecutor({
+      logger: mockLogger,
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
@@ -1160,6 +1164,7 @@ describe('CasesConnectorExecutor', () => {
       getCasesClient.mockReturnValue(casesClientMock);
 
       connectorExecutor = new CasesConnectorExecutor({
+        logger: mockLogger,
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
@@ -2081,6 +2086,43 @@ describe('CasesConnectorExecutor', () => {
           },
         ],
       });
+    });
+  });
+
+  describe('Logging', () => {
+    it('logs a warning when parsing the time window results to error', async () => {
+      mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+      dateMathMock.parse.mockImplementation(() => undefined);
+
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow: 'invalid',
+        reopenClosedCases,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"'
+      );
+    });
+
+    it('logs a warning when the last updated date of the oracle record is not valid', async () => {
+      mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], updatedAt: 'invalid' }]);
+
+      await connectorExecutor.execute({
+        alerts,
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+      });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
+      );
     });
   });
 });

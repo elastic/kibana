@@ -21,7 +21,7 @@ import type {
 } from './types';
 
 export class CasesOracleService {
-  private readonly log: Logger;
+  private readonly logger: Logger;
   /**
    * TODO: Think about permissions etc.
    * Should we authorize based on the owner?
@@ -30,13 +30,13 @@ export class CasesOracleService {
   private cryptoService: CryptoService;
 
   constructor({
-    log,
+    logger,
     unsecuredSavedObjectsClient,
   }: {
-    log: Logger;
+    logger: Logger;
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
   }) {
-    this.log = log;
+    this.logger = logger;
     this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
     this.cryptoService = new CryptoService();
   }
@@ -59,7 +59,9 @@ export class CasesOracleService {
   }
 
   public async getRecord(recordId: string): Promise<OracleRecord> {
-    this.log.debug(`Getting oracle record with ID: ${recordId}`);
+    this.logger.debug(`Getting oracle record with ID: ${recordId}`, {
+      tags: ['cases-oracle-service', 'getRecord', recordId],
+    });
 
     const oracleRecord = await this.unsecuredSavedObjectsClient.get<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
@@ -70,7 +72,9 @@ export class CasesOracleService {
   }
 
   public async bulkGetRecords(ids: string[]): Promise<BulkGetOracleRecordsResponse> {
-    this.log.debug(`Getting oracle records with IDs: ${ids}`);
+    this.logger.debug(`Getting oracle records with IDs: ${ids}`, {
+      tags: ['cases-oracle-service', 'bulkGetRecords', ...ids],
+    });
 
     const oracleRecords = (await this.unsecuredSavedObjectsClient.bulkGet<OracleRecordAttributes>(
       ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
@@ -83,7 +87,9 @@ export class CasesOracleService {
     recordId: string,
     payload: OracleRecordCreateRequest
   ): Promise<OracleRecord> {
-    this.log.debug(`Creating oracle record with ID: ${recordId}`);
+    this.logger.debug(`Creating oracle record with ID: ${recordId}`, {
+      tags: ['cases-oracle-service', 'createRecord', recordId],
+    });
 
     const oracleRecord = await this.unsecuredSavedObjectsClient.create<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
@@ -99,7 +105,9 @@ export class CasesOracleService {
   ): Promise<BulkGetOracleRecordsResponse> {
     const recordIds = records.map((record) => record.recordId);
 
-    this.log.debug(`Creating oracle record with ID: ${recordIds}`);
+    this.logger.debug(`Creating oracle record with ID: ${recordIds}`, {
+      tags: ['cases-oracle-service', 'bulkCreateRecord', ...recordIds],
+    });
 
     const req = records.map((record) => ({
       id: record.recordId,
@@ -119,8 +127,11 @@ export class CasesOracleService {
     const { id: _, version, ...record } = await this.getRecord(recordId);
     const newCounter = record.counter + 1;
 
-    this.log.debug(
-      `Increasing the counter of oracle record with ID: ${recordId} from ${record.counter} to ${newCounter}`
+    this.logger.debug(
+      `Increasing the counter of oracle record with ID: ${recordId} from ${record.counter} to ${newCounter}`,
+      {
+        tags: ['cases-oracle-service', 'increaseCounter', recordId],
+      }
     );
 
     const oracleRecord = await this.unsecuredSavedObjectsClient.update<OracleRecordAttributes>(
@@ -142,7 +153,9 @@ export class CasesOracleService {
   ): Promise<BulkGetOracleRecordsResponse> {
     const recordIds = records.map((record) => record.recordId);
 
-    this.log.debug(`Updating oracle record with ID: ${recordIds}`);
+    this.logger.debug(`Updating oracle record with ID: ${recordIds}`, {
+      tags: ['cases-oracle-service', 'bulkUpdateRecord', ...recordIds],
+    });
 
     const req = records.map((record) => ({
       id: record.recordId,
