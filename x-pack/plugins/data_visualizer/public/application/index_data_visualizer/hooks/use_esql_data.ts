@@ -30,7 +30,7 @@ import { useDataVisualizerKibana } from '../../kibana_context';
 import { getInitialProgress, getReducer } from '../progress_utils';
 import { PERCENTILE_SPACING } from '../search_strategy/requests/constants';
 import {
-  escapeESQL,
+  getSafeESQLName,
   getESQLPercentileQueryArray,
   isESQLQuery,
 } from '../search_strategy/requests/esql_utils';
@@ -152,8 +152,10 @@ export const useESQLFieldStatsData = <T extends Column>({
                  */
                 return {
                   field,
-                  query: `${escapeESQL(`${field.name}_min`)} = MIN(${escapeESQL(field.name)}),
-                ${escapeESQL(`${field.name}_max`)} = MAX(${escapeESQL(field.name)}),
+                  query: `${getSafeESQLName(`${field.name}_min`)} = MIN(${getSafeESQLName(
+                    field.name
+                  )}),
+                ${getSafeESQLName(`${field.name}_max`)} = MAX(${getSafeESQLName(field.name)}),
               ${percentiles.join(',')}
               `,
                   startIndex: idx * (percentiles.length + 2),
@@ -214,11 +216,11 @@ export const useESQLFieldStatsData = <T extends Column>({
               .map((field) => {
                 return {
                   field,
-                  query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
-                    field.name
-                  )}) BY ${escapeESQL(field.name)}
+                  query: `| STATS ${getSafeESQLName(
+                    `${field.name}_terms`
+                  )} = count(${getSafeESQLName(field.name)}) BY ${getSafeESQLName(field.name)}
                   | LIMIT 10
-                  | SORT ${escapeESQL(`${field.name}_terms`)} DESC`,
+                  | SORT ${getSafeESQLName(`${field.name}_terms`)} DESC`,
                 };
               });
 
@@ -274,9 +276,9 @@ export const useESQLFieldStatsData = <T extends Column>({
               .map((field) => {
                 return {
                   field,
-                  query: `| STATS ${escapeESQL(`${field.name}_terms`)} = count(${escapeESQL(
-                    field.name
-                  )}) BY ${escapeESQL(field.name)}
+                  query: `| STATS ${getSafeESQLName(
+                    `${field.name}_terms`
+                  )} = count(${getSafeESQLName(field.name)}) BY ${getSafeESQLName(field.name)}
                   | LIMIT 3`,
                 };
               });
@@ -373,9 +375,11 @@ export const useESQLFieldStatsData = <T extends Column>({
               .map((field) => {
                 return {
                   field,
-                  query: `${escapeESQL(`${field.name}_earliest`)} = MIN(${escapeESQL(
+                  query: `${getSafeESQLName(`${field.name}_earliest`)} = MIN(${getSafeESQLName(
                     field.name
-                  )}), ${escapeESQL(`${field.name}_latest`)} = MAX(${escapeESQL(field.name)})`,
+                  )}), ${getSafeESQLName(`${field.name}_latest`)} = MAX(${getSafeESQLName(
+                    field.name
+                  )})`,
                 };
               });
 
@@ -620,11 +624,11 @@ export const useESQLOverallStatsData = (
           let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
           countQuery += aggregatableFieldsToQuery
             .map((field) => {
-              return `${escapeESQL(`${field.name}_count`)} = COUNT(${escapeESQL(
+              return `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
                 field.name
-              )}), ${escapeESQL(`${field.name}_cardinality`)} = COUNT_DISTINCT(${escapeESQL(
-                field.name
-              )})`;
+              )}), ${getSafeESQLName(
+                `${field.name}_cardinality`
+              )} = COUNT_DISTINCT(${getSafeESQLName(field.name)})`;
             })
             .join(',');
 

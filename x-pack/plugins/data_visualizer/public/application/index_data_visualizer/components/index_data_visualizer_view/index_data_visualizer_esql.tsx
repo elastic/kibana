@@ -61,7 +61,7 @@ import type {
 } from '../../../common/components/stats_table/components/field_count_stats';
 import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { getDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
+import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import {
   type Column,
@@ -183,7 +183,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
       const update = async () => {
         if (!indexPattern) return;
-        const dv = await getDataViewByIndexPattern(data.dataViews, indexPattern, currentDataView);
+        const dv = await getOrCreateDataViewByIndexPattern(
+          data.dataViews,
+          indexPattern,
+          currentDataView
+        );
 
         if (dv) {
           updateDataView(dv);

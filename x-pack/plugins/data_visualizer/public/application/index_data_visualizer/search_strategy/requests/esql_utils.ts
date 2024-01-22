@@ -18,7 +18,7 @@ export interface ESQLQuery {
  * @param str
  * @returns "`str`"
  **/
-export const escapeESQL = (str: string) => {
+export const getSafeESQLName = (str: string) => {
   return `\`${str}\``;
 };
 
@@ -32,5 +32,6 @@ const PERCENTS = Array.from(
 
 export const getESQLPercentileQueryArray = (fieldName: string, percents = PERCENTS) =>
   percents.map(
-    (p) => `${escapeESQL(`${fieldName}_p${p}`)} = PERCENTILE(${escapeESQL(fieldName)}, ${p})`
+    (p) =>
+      `${getSafeESQLName(`${fieldName}_p${p}`)} = PERCENTILE(${getSafeESQLName(fieldName)}, ${p})`
   );

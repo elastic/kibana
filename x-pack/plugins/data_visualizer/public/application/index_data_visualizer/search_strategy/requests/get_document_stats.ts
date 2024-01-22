@@ -19,7 +19,7 @@ import type {
   DocumentCountStats,
   OverallStatsSearchStrategyParams,
 } from '../../../../../common/types/field_stats';
-import { escapeESQL, isESQLQuery } from './esql_utils';
+import { getSafeESQLName, isESQLQuery } from './esql_utils';
 
 const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
@@ -40,7 +40,7 @@ export const getESQLDocumentCountStats = async (
   let latestMs = -Infinity;
 
   if (timeFieldName) {
-    const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${escapeESQL(
+    const aggQuery = ` | EVAL _timestamp_= TO_DOUBLE(DATE_TRUNC(${intervalMs} millisecond, ${getSafeESQLName(
       timeFieldName
     )}))
     | stats rows = count(*) by _timestamp_

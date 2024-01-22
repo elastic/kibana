@@ -15,7 +15,7 @@ import type {
   GetAdditionalLinksParams,
 } from '@kbn/data-visualizer-plugin/public';
 import { useTimefilter } from '@kbn/ml-date-picker';
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { useMlKibana, useMlLocator } from '../../contexts/kibana';
 import { HelpMenu } from '../../components/help_menu';
 import { ML_PAGES } from '../../../../common/constants/locator';
@@ -24,6 +24,7 @@ import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
 import { useEnabledFeatures } from '../../contexts/ml';
+import { TechnicalPreviewBadge } from '../../components/technical_preview_badge/technical_preview_badge';
 
 export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false }) => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -199,24 +200,7 @@ export const IndexDataVisualizerPage: FC<{ esql: boolean }> = ({ esql = false })
                     <FormattedMessage id="xpack.ml.datavisualizer" defaultMessage="(ES|QL)" />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false} css={{ marginTop: euiTheme.size.xs }}>
-                    <EuiBetaBadge
-                      label={i18n.translate(
-                        'xpack.ml.datavisualizer.selector.technicalPreviewBadge.label',
-                        {
-                          defaultMessage: 'Technical preview',
-                        }
-                      )}
-                      size="m"
-                      color="hollow"
-                      tooltipContent={i18n.translate(
-                        'xpack.ml.datavisualizer.selector.technicalPreviewBadge.tooltipMsg',
-                        {
-                          defaultMessage:
-                            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                        }
-                      )}
-                      tooltipPosition={'right'}
-                    />
+                    <TechnicalPreviewBadge />
                   </EuiFlexItem>
                 </>
               ) : null}

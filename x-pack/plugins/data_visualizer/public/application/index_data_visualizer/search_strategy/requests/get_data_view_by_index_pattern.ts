@@ -7,7 +7,15 @@
 
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
-export async function getDataViewByIndexPattern(
+/**
+ * Get a saved data view that matches the index pattern (as close as possible)
+ * or create a new adhoc data view if no matches found
+ * @param dataViews
+ * @param indexPatternFromQuery
+ * @param currentDataView
+ * @returns
+ */
+export async function getOrCreateDataViewByIndexPattern(
   dataViews: DataViewsContract,
   indexPatternFromQuery: string | undefined,
   currentDataView: DataView | undefined
