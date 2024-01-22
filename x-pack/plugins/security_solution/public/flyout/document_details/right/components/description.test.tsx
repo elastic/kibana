@@ -19,10 +19,10 @@ import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
-jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutContext: jest.fn() }));
+jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
 
 const ruleUuid = {
   category: 'kibana',
@@ -74,7 +74,7 @@ const NO_DATA_MESSAGE = "There's no description for this rule.";
 
 describe('<Description />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render the component', () => {
