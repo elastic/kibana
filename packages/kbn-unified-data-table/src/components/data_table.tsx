@@ -26,7 +26,6 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridCellValueElementProps,
   EuiDataGridCustomToolbarProps,
   EuiDataGridToolBarVisibilityOptions,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
@@ -47,10 +46,11 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type {
+import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
   DataTableColumnTypes,
+  CustomCellRenderer,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -126,6 +126,10 @@ export interface UnifiedDataTableProps {
    * Field tokens could be rendered in column header next to the field name.
    */
   showColumnTokens?: boolean;
+  /**
+   * Determines number of rows of a column header
+   */
+  headerRowHeight?: number;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -324,10 +328,7 @@ export interface UnifiedDataTableProps {
   /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
-  externalCustomRenderers?: Record<
-    string,
-    (props: EuiDataGridCellValueElementProps) => React.ReactNode
-  >;
+  externalCustomRenderers?: CustomCellRenderer;
   /**
    * Name of the UnifiedDataTable consumer component or application
    */
@@ -355,6 +356,7 @@ export const UnifiedDataTable = ({
   columns,
   columnTypes,
   showColumnTokens,
+  headerRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -665,6 +667,7 @@ export const UnifiedDataTable = ({
         visibleCellActions,
         columnTypes,
         showColumnTokens,
+        headerRowHeight,
       }),
     [
       onFilter,
@@ -684,6 +687,7 @@ export const UnifiedDataTable = ({
       visibleCellActions,
       columnTypes,
       showColumnTokens,
+      headerRowHeight,
     ]
   );
 

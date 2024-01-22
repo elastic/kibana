@@ -38,9 +38,9 @@ import {
   applyKqlFilterQuery as dispatchApplyKqlFilterQuery,
   addTimeline as dispatchAddTimeline,
   addNote as dispatchAddGlobalTimelineNote,
-} from '../../store/timeline/actions';
-import type { TimelineModel } from '../../store/timeline/model';
-import { timelineDefaults } from '../../store/timeline/defaults';
+} from '../../store/actions';
+import type { TimelineModel } from '../../store/model';
+import { timelineDefaults } from '../../store/defaults';
 
 import {
   defaultColumnHeaderType,

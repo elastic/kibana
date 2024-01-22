@@ -622,8 +622,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginSetup",
-                "text": "SharePluginSetup"
+                "section": "def-public.SharePublicSetup",
+                "text": "SharePublicSetup"
               },
               " | undefined"
             ],
@@ -743,8 +743,8 @@
                 "pluginId": "share",
                 "scope": "public",
                 "docId": "kibSharePluginApi",
-                "section": "def-public.SharePluginStart",
-                "text": "SharePluginStart"
+                "section": "def-public.SharePublicStart",
+                "text": "SharePublicStart"
               },
               " | undefined"
             ],

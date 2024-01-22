@@ -10,6 +10,6 @@ import { FtrProviderContext } from '../../../../../../common/ftr_provider_contex
 // eslint-disable-next-line import/no-default-export
 export default function alertingTests({ loadTestFile }: FtrProviderContext) {
   describe('transform_health', function () {
-    loadTestFile(require.resolve('./alert'));
+    loadTestFile(require.resolve('./rule'));
   });
 }

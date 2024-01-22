@@ -101,7 +101,7 @@ export function FilterQueryInput({
           <EuiPopover
             isOpen={filterPopoverOpen}
             closePopover={onClosePopup}
-            anchorClassName="eui-fullWidth"
+            display="block"
             panelClassName="filterQueryInput__popover"
             initialFocus={dataTestSubj ? `textarea[data-test-subj='${dataTestSubj}']` : undefined}
             button={

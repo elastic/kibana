@@ -6,9 +6,9 @@
  */
 
 import { IconType } from '@elastic/eui';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { IndexPattern } from '@kbn/io-ts-utils';
 import { TIMESTAMP_FIELD } from '../../constants';
+import { DataViewSpecWithId } from '../../dataset_selection';
 import { DatasetId, DatasetType, IntegrationType } from '../types';
 
 type IntegrationBase = Partial<Pick<IntegrationType, 'name' | 'title' | 'icons' | 'version'>>;
@@ -49,7 +49,7 @@ export class Dataset {
     return `${type}-${dataset}-*` as IndexPattern;
   }
 
-  toDataviewSpec(): DataViewSpec {
+  toDataviewSpec(): DataViewSpecWithId {
     // Invert the property because the API returns the index pattern as `name` and a readable name as `title`
     return {
       id: this.id,

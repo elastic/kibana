@@ -109,4 +109,8 @@ export type TestSubjects =
   | 'dataRetentionEnabledField.input'
   | 'enrichPoliciesInsuficientPrivileges'
   | 'dataRetentionDetail'
-  | 'createIndexSaveButton';
+  | 'createIndexSaveButton'
+  | 'createIndexMessage'
+  | 'indicesSearch'
+  | 'noIndicesMessage'
+  | 'clearIndicesSearch';

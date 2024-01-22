@@ -16,6 +16,8 @@ export * from './geo_bounding_box';
 export * from './geo_bounding_box_to_ast';
 export * from './geo_point';
 export * from './geo_point_to_ast';
+export * from './ip_prefix';
+export * from './ip_prefix_to_ast';
 export * from './ip_range';
 export * from './ip_range_to_ast';
 export * from './kibana';

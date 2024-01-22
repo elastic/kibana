@@ -13,9 +13,8 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 
 import type { MaybePromise } from '@kbn/utility-types';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
+import { renderSearchError } from '@kbn/search-errors';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { core } from '../kibana_services';
 
 import { EditPanelAction } from './panel_actions';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from '../lib/embeddables';
@@ -53,12 +52,9 @@ export function EmbeddablePanelError({
     [label, title]
   );
 
-  const overrideDisplay = getSearchErrorOverrideDisplay({
-    error,
-    application: core.application,
-  });
+  const searchErrorDisplay = renderSearchError(error);
 
-  const actions = overrideDisplay?.actions ?? [];
+  const actions = searchErrorDisplay?.actions ?? [];
   if (isEditable) {
     actions.push(
       <EuiButtonEmpty aria-label={ariaLabel} onClick={handleErrorClick} size="s">
@@ -81,7 +77,7 @@ export function EmbeddablePanelError({
   return (
     <EuiEmptyPrompt
       body={
-        overrideDisplay?.body ?? (
+        searchErrorDisplay?.body ?? (
           <EuiText size="s">
             <Markdown
               markdown={error.message}

@@ -125,6 +125,14 @@ export type DataType = typeof dataTypes;
 export type MonitoringType = typeof monitoringTypes;
 export type InstallablePackage = RegistryPackage | ArchivePackage;
 
+export type AssetsMap = Map<string, Buffer | undefined>;
+
+export interface PackageInstallContext {
+  packageInfo: InstallablePackage;
+  assetsMap: AssetsMap;
+  paths: string[];
+}
+
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
   Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
@@ -132,7 +140,7 @@ export type ArchivePackage = PackageSpecManifest &
 export interface BundledPackage {
   name: string;
   version: string;
-  buffer: Buffer;
+  getBuffer: () => Promise<Buffer>;
 }
 
 export type RegistryPackage = PackageSpecManifest &
@@ -618,6 +626,7 @@ export interface IndexTemplateMappings {
   properties: any;
   dynamic_templates?: any;
   runtime?: any;
+  subobjects?: boolean;
 }
 
 // This is an index template v2, see https://github.com/elastic/elasticsearch/issues/53101

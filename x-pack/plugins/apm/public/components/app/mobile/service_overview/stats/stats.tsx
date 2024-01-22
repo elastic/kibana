@@ -165,7 +165,7 @@ export function MobileStats({
   ];
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       {metrics.map((metric, key) => (
         <EuiFlexItem key={key}>
           <MetricItem id={key} data={[metric]} isLoading={loadingStats} />

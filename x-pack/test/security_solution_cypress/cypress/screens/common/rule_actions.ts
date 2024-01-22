@@ -42,7 +42,7 @@ export const EMAIL_CONNECTOR_SERVICE_SELECTOR = '[data-test-subj="emailServiceSe
 
 export const FORM_VALIDATION_ERROR = '.euiFormErrorText';
 
-export const JSON_EDITOR = "[data-test-subj='actionJsonEditor']";
+export const JSON_EDITOR = "[data-test-subj='documentToIndex']";
 
 export const INDEX_SELECTOR = "[data-test-subj='.index-siem-ActionTypeSelectOption']";
 

@@ -193,7 +193,7 @@ describe('fetchInfo', () => {
     mockGetBundledPackageByName.mockResolvedValueOnce({
       name: 'test-package',
       version: '1.0.0',
-      buffer: Buffer.from(''),
+      getBuffer: async () => Buffer.from(''),
     });
     MockArchive.generatePackageInfoFromArchiveBuffer.mockResolvedValueOnce({
       paths: [],

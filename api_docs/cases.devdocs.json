@@ -2964,6 +2964,21 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"generalCases\""
+        ],
+        "path": "x-pack/plugins/cases/common/constants/application.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.GENERAL_CASES_OWNER",
         "type": "string",
         "tags": [],

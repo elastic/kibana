@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const log = getService('log');
   const esDeleteAllIndices = getService('esDeleteAllIndices');
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
@@ -277,6 +277,31 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(96);
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.user?.risk?.calculated_score_norm).to.eql(11);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForAlertTesting(['auditbeat-*']),
+          query: `_id:${ID}`,
+        };
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+        expect(previewAlerts[0]?._source?.['kibana.alert.host.criticality_level']).to.eql(
+          'important'
+        );
+        expect(previewAlerts[0]?._source?.['kibana.alert.user.criticality_level']).to.eql(
+          'very_important'
+        );
       });
     });
 

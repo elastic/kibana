@@ -56,14 +56,14 @@ export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.
 export const NEW_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTimelineButtonLabel',
   {
-    defaultMessage: 'Create new timeline',
+    defaultMessage: 'Create new Timeline',
   }
 );
 
 export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
   {
-    defaultMessage: 'Create new timeline template',
+    defaultMessage: 'Create new Timeline template',
   }
 );
 

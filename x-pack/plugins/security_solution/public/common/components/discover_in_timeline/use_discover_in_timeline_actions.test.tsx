@@ -23,7 +23,7 @@ import { useKibana } from '../../lib/kibana';
 import type { State } from '../../store';
 import { createStore } from '../../store';
 import { TimelineId } from '../../../../common/types';
-import * as timelineActions from '../../../timelines/store/timeline/actions';
+import * as timelineActions from '../../../timelines/store/actions';
 import type { ComponentType, FC, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/common';

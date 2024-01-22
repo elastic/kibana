@@ -2517,10 +2517,10 @@
     ],
     "setup": {
       "parentPluginId": "uiActions",
-      "id": "def-public.UiActionsSetup",
+      "id": "def-public.UiActionsPublicSetup",
       "type": "Type",
       "tags": [],
-      "label": "UiActionsSetup",
+      "label": "UiActionsPublicSetup",
       "description": [],
       "signature": [
         "{ readonly registerTrigger: (trigger: ",
@@ -2565,10 +2565,10 @@
     },
     "start": {
       "parentPluginId": "uiActions",
-      "id": "def-public.UiActionsStart",
+      "id": "def-public.UiActionsPublicStart",
       "type": "Type",
       "tags": [],
-      "label": "UiActionsStart",
+      "label": "UiActionsPublicStart",
       "description": [],
       "signature": [
         "{ readonly registerTrigger: (trigger: ",

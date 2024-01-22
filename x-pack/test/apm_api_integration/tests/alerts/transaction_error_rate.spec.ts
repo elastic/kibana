@@ -249,7 +249,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         );
       });
 
-      it('shows alert count=1 for opbeans-node on service inventory', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/173419
+      it.skip('shows alert count=1 for opbeans-node on service inventory', async () => {
         const serviceInventoryAlertCounts = await fetchServiceInventoryAlertCounts(apmApiClient);
         expect(serviceInventoryAlertCounts).to.eql({
           'opbeans-node': 1,
@@ -257,7 +258,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
       });
 
-      it('shows alert count=0 in opbeans-java service', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/173439
+      it.skip('shows alert count=0 in opbeans-java service', async () => {
         const serviceTabAlertCount = await fetchServiceTabAlertCount({
           apmApiClient,
           serviceName: 'opbeans-java',

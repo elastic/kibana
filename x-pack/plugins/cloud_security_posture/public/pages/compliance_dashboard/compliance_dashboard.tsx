@@ -17,7 +17,7 @@ import type {
   PosturePolicyTemplate,
   ComplianceDashboardDataV2,
   BaseCspSetupStatus,
-} from '../../../common/types';
+} from '../../../common/types_old';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import {
   CloudPosturePage,
@@ -276,7 +276,7 @@ const TabContent = ({ posturetype }: { posturetype: PosturePolicyTemplate }) => 
   }
 
   if (shouldRenderNoFindings) {
-    return <NoFindingsStates posturetype={posturetype} />;
+    return <NoFindingsStates postureType={posturetype} />;
   }
 
   return (
@@ -384,7 +384,7 @@ export const ComplianceDashboard = () => {
         `}
       >
         {tabs.find((t) => t.isSelected)?.content}
-        {!isCloudSecurityPostureInstalled && <NoFindingsStates posturetype={POSTURE_TYPE_CSPM} />}
+        {!isCloudSecurityPostureInstalled && <NoFindingsStates postureType={POSTURE_TYPE_CSPM} />}
       </div>
     </CloudPosturePage>
   );

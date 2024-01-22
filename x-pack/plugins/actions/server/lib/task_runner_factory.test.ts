@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import { ActionExecutor } from './action_executor';
-import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, TaskErrorSource, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
 import { actionExecutorMock } from './action_executor.mock';
@@ -25,6 +25,7 @@ import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
 import {
+  getErrorSource,
   isRetryableError,
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
@@ -544,12 +545,13 @@ describe('Task Runner Factory', () => {
       message: 'Error message',
       data: { foo: true },
       retry: false,
+      errorSource: TaskErrorSource.USER,
     });
 
     try {
       await taskRunner.run();
-      throw new Error('Should have thrown');
     } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
       expect(isRetryableError(e)).toEqual(false);
     }
   });
@@ -853,6 +855,7 @@ describe('Task Runner Factory', () => {
       throw new Error('Should have thrown');
     } catch (e) {
       expect(isUnrecoverableError(e)).toEqual(true);
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
     }
   });
 
@@ -887,6 +890,7 @@ describe('Task Runner Factory', () => {
       message: 'Error message',
       data: { foo: true },
       retry: false,
+      errorSource: TaskErrorSource.FRAMEWORK,
     });
 
     let err;
@@ -900,6 +904,47 @@ describe('Task Runner Factory', () => {
     expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
       `Action '2' failed: Error message`
     );
+    expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
+  });
+
+  test(`fallbacks to FRAMEWORK error if ActionExecutor does not return any type of source'`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: '3',
+      type: 'action_task_params',
+      attributes: {
+        actionId: '2',
+        params: { baz: true },
+        executionId: '123abc',
+        apiKey: Buffer.from('123:abc').toString('base64'),
+      },
+      references: [
+        {
+          id: '2',
+          name: 'actionRef',
+          type: 'action',
+        },
+      ],
+    });
+    mockedActionExecutor.execute.mockResolvedValueOnce({
+      status: 'error',
+      actionId: '2',
+      message: 'Error message',
+      data: { foo: true },
+      retry: false,
+    });
+
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+    }
   });
 
   test('will rethrow the error if the error is thrown instead of returned', async () => {
@@ -941,6 +986,7 @@ describe('Task Runner Factory', () => {
       `Action '2' failed: Fail`
     );
     expect(thrownError).toEqual(err);
+    expect(getErrorSource(err)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   test('increments monitoring metrics after execution', async () => {
@@ -1158,6 +1204,11 @@ describe('Task Runner Factory', () => {
       ],
     });
 
-    await expect(taskRunner.run()).rejects.toThrow('test');
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+      expect(e).toEqual(error);
+    }
   });
 });

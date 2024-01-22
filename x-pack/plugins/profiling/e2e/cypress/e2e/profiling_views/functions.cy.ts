@@ -174,9 +174,8 @@ describe('Functions page', () => {
     cy.get(firstRowSelector).eq(2).contains('/');
   });
 
-  // skipping this for now until the values are passed to the ES plugin
-  describe.skip('Test changing CO2 settings', () => {
-    afterEach(() => {
+  describe('Test changing CO2 settings', () => {
+    after(() => {
       cy.updateAdvancedSettings({
         [profilingCo2PerKWH]: 0.000379069,
         [profilingDatacenterPUE]: 1.7,
@@ -190,7 +189,7 @@ describe('Functions page', () => {
       const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
       cy.get(firstRowSelector).eq(1).contains('1');
       cy.get(firstRowSelector).eq(2).contains('vmlinux');
-      cy.get(firstRowSelector).eq(5).contains('1.84 lbs / 0.84 kg');
+      cy.get(firstRowSelector).eq(5).contains('4.07 lbs / 1.84 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
       cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
@@ -209,22 +208,22 @@ describe('Functions page', () => {
       });
       cy.go('back');
       cy.wait('@getTopNFunctions');
-      cy.get(firstRowSelector).eq(5).contains('24.22k lbs / 10.99k');
+      cy.get(firstRowSelector).eq(5).contains('1.87k lbs / 847.83 kg');
       const firstRowSelectorActionButton =
         '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
       cy.get(firstRowSelectorActionButton).click();
       [
-        { parentKey: 'impactEstimates', key: 'co2Emission', value: '0.02 lbs / 0.01 kg' },
-        { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '0.02 lbs / 0.01 kg' },
+        { parentKey: 'impactEstimates', key: 'co2Emission', value: '~0.00 lbs / ~0.00 kg' },
+        { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '~0.00 lbs / ~0.00 kg' },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedCo2Emission',
-          value: '24.22k lbs / 10.99k kg',
+          value: '1.87k lbs / 847.83 kg',
         },
         {
           parentKey: 'impactEstimates',
           key: 'annualizedSelfCo2Emission',
-          value: '24.22k lbs / 10.99k kg',
+          value: '1.87k lbs / 847.83 kg',
         },
       ].forEach(({ parentKey, key, value }) => {
         cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);

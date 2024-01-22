@@ -13,15 +13,13 @@ import { RiskScoreEnableSection } from '../components/risk_score_enable_section'
 import { ENTITY_ANALYTICS_RISK_SCORE } from '../../app/translations';
 import { BETA } from '../../common/translations';
 import { RiskEnginePrivilegesCallOut } from '../components/risk_engine_privileges_callout';
-import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
+import { useMissingRiskEnginePrivileges } from '../hooks/use_missing_risk_engine_privileges';
 
 export const EntityAnalyticsManagementPage = () => {
-  const privilegesCalloutEnabled = useIsExperimentalFeatureEnabled(
-    'riskEnginePrivilegesRouteEnabled'
-  );
+  const privileges = useMissingRiskEnginePrivileges();
   return (
     <>
-      {privilegesCalloutEnabled && <RiskEnginePrivilegesCallOut />}
+      <RiskEnginePrivilegesCallOut privileges={privileges} />
       <EuiFlexGroup gutterSize="s" alignItems="baseline">
         <EuiFlexItem grow={false}>
           <EuiPageHeader
@@ -35,10 +33,10 @@ export const EntityAnalyticsManagementPage = () => {
       <EuiSpacer size="l" />
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem grow={2}>
-          <RiskScoreEnableSection />
+          <RiskScoreEnableSection privileges={privileges} />
         </EuiFlexItem>
         <EuiFlexItem grow={2}>
-          <RiskScorePreviewSection />
+          <RiskScorePreviewSection privileges={privileges} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </>

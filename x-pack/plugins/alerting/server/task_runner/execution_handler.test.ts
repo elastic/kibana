@@ -36,6 +36,7 @@ import { mockAAD } from './fixtures';
 import { schema } from '@kbn/config-schema';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 jest.mock('./inject_action_params', () => ({
   injectActionParams: jest.fn(),
@@ -359,13 +360,13 @@ describe('Execution Handler', () => {
         },
         source: asSavedObjectExecutionSource({
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
         }),
         relatedSavedObjects: [
           {
             id: '1',
             namespace: 'test1',
-            type: 'alert',
+            type: RULE_SAVED_OBJECT_TYPE,
             typeId: 'test',
           },
         ],
@@ -1683,8 +1684,10 @@ describe('Execution Handler', () => {
         executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
         id: '1',
         params: {},
-        relatedSavedObjects: [{ id: '1', namespace: 'test1', type: 'alert', typeId: 'test' }],
-        source: { source: { id: '1', type: 'alert' }, type: 'SAVED_OBJECT' },
+        relatedSavedObjects: [
+          { id: '1', namespace: 'test1', type: RULE_SAVED_OBJECT_TYPE, typeId: 'test' },
+        ],
+        source: { source: { id: '1', type: RULE_SAVED_OBJECT_TYPE }, type: 'SAVED_OBJECT' },
         spaceId: 'test1',
       },
     ]);

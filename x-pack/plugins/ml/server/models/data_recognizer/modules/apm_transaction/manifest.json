@@ -1,7 +1,7 @@
 {
   "id": "apm_transaction",
   "title": "APM",
-  "description": "Detect anomalies in transaction latency, throughput and failure rate from your APM services for metric data.",
+  "description": "Legacy job for detecting anomalies in transaction latency, throughput and failure rate from your APM services for metric data. The latest version can be installed from the APM app in Observability.",
   "type": "Transaction data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "apm-*-metric,metrics-apm*",

@@ -147,7 +147,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const isServerless = config.get('serverless');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
@@ -1621,6 +1621,50 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(fullAlert?.host?.risk?.calculated_level).to.eql('Critical');
         expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(70);
+      });
+    });
+
+    describe('with asset criticality', async () => {
+      before(async () => {
+        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      after(async () => {
+        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+      });
+
+      it('should be enriched alert with criticality_level', async () => {
+        const rule: ThreatMatchRuleCreateProps = createThreatMatchRule({
+          query: '*:*',
+          threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+          threat_mapping: [
+            // We match host.name against host.name
+            {
+              entries: [
+                {
+                  field: 'host.name',
+                  value: 'host.name',
+                  type: 'mapping',
+                },
+              ],
+            },
+          ],
+        });
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
+        expect(previewAlerts.length).equal(88);
+        const fullSource = previewAlerts.find(
+          (alert) =>
+            (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+        );
+        const fullAlert = fullSource?._source;
+        if (!fullAlert) {
+          return expect(fullAlert).to.be.ok();
+        }
+
+        expect(fullAlert?.['kibana.alert.host.criticality_level']).to.eql('low');
+        expect(fullAlert?.['kibana.alert.user.criticality_level']).to.eql('very_important');
       });
     });
   });

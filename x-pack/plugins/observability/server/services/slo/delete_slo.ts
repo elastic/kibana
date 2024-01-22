@@ -8,10 +8,13 @@
 import { RulesClientApi } from '@kbn/alerting-plugin/server/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 import {
+  getSLOSummaryPipelineId,
+  getSLOSummaryTransformId,
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../common/slo/constants';
+import { retryTransientEsErrors } from '../../utils/retry';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
 
@@ -19,6 +22,7 @@ export class DeleteSLO {
   constructor(
     private repository: SLORepository,
     private transformManager: TransformManager,
+    private summaryTransformManager: TransformManager,
     private esClient: ElasticsearchClient,
     private rulesClient: RulesClientApi
   ) {}
@@ -26,9 +30,20 @@ export class DeleteSLO {
   public async execute(sloId: string): Promise<void> {
     const slo = await this.repository.findById(sloId);
 
-    const sloTransformId = getSLOTransformId(slo.id, slo.revision);
-    await this.transformManager.stop(sloTransformId);
-    await this.transformManager.uninstall(sloTransformId);
+    const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
+    await this.summaryTransformManager.stop(summaryTransformId);
+    await this.summaryTransformManager.uninstall(summaryTransformId);
+
+    const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
+    await this.transformManager.stop(rollupTransformId);
+    await this.transformManager.uninstall(rollupTransformId);
+
+    await retryTransientEsErrors(() =>
+      this.esClient.ingest.deletePipeline(
+        { id: getSLOSummaryPipelineId(slo.id, slo.revision) },
+        { ignore: [404] }
+      )
+    );
 
     await this.deleteRollupData(slo.id);
     await this.deleteSummaryData(slo.id);

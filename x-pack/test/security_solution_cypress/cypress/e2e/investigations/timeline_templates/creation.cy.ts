@@ -8,23 +8,14 @@
 import { getTimeline } from '../../../objects/timeline';
 
 import {
-  FAVORITE_TIMELINE,
   LOCKED_ICON,
-  NOTES,
-  NOTES_TAB_BUTTON,
-  NOTES_TEXT_AREA,
   PIN_EVENT,
-  TIMELINE_DESCRIPTION,
   TIMELINE_FLYOUT_WRAPPER,
   TIMELINE_QUERY,
   TIMELINE_TITLE,
+  TIMELINE_DATE_PICKER_CONTAINER,
 } from '../../../screens/timeline';
-import {
-  TIMELINES_DESCRIPTION,
-  TIMELINES_PINNED_EVENT_COUNT,
-  TIMELINES_NOTES_COUNT,
-  TIMELINES_FAVORITE,
-} from '../../../screens/timelines';
+import { TIMELINES_DESCRIPTION, TIMELINES_FAVORITE } from '../../../screens/timelines';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { deleteTimelines } from '../../../tasks/api_calls/common';
 
@@ -32,23 +23,29 @@ import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
 import {
-  addDescriptionToTimeline,
   addFilter,
   addNameToTimelineAndSave,
-  addNotesToTimeline,
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
+  createTimelineTemplateOptionsPopoverBottomBar,
   expandEventAction,
   markAsFavorite,
-  openTimelineTemplateFromSettings,
+  openTimelineTemplate,
   populateTimeline,
+  addNameAndDescriptionToTimeline,
+  openTimelineTemplatesTab,
 } from '../../../tasks/timeline';
-import { openTimeline, waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
+import {
+  updateTimelineDates,
+  showStartEndDate,
+  setStartDate,
+  setEndDateNow,
+} from '../../../tasks/date_picker';
+import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165661
 describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
@@ -56,12 +53,24 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     cy.intercept('PATCH', '/api/timeline').as('timeline');
   });
 
-  it.skip('Creates a timeline template', () => {
+  it('Creates a timeline template', () => {
     visit(TIMELINES_URL);
+    waitForTimelinesPanelToBeLoaded();
     openTimelineUsingToggle();
+
     createNewTimelineTemplate();
     populateTimeline();
+
+    cy.log('Add filter');
     addFilter(getTimeline().filter);
+
+    cy.log('Update date range');
+    showStartEndDate(TIMELINE_DATE_PICKER_CONTAINER);
+    setEndDateNow(TIMELINE_DATE_PICKER_CONTAINER);
+    setStartDate('Jan 18, 2018 @ 00:00:00.000', TIMELINE_DATE_PICKER_CONTAINER);
+    updateTimelineDates();
+
+    cy.log('Try to pin an event');
     cy.get(PIN_EVENT).should(
       'have.attr',
       'aria-label',
@@ -69,36 +78,25 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     );
     cy.get(LOCKED_ICON).should('be.visible');
 
-    addNameToTimelineAndSave(getTimeline().title);
+    cy.log('Update title and description');
+    addNameAndDescriptionToTimeline(getTimeline());
 
     cy.wait('@timeline').then(({ response }) => {
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
 
-      addDescriptionToTimeline(getTimeline().description);
-      addNotesToTimeline(getTimeline().notes);
       markAsFavorite();
-      createNewTimelineTemplate();
       closeTimeline();
-      openTimelineTemplateFromSettings(timelineId);
 
+      cy.log('Open template from templates tab');
+      openTimelineTemplatesTab();
+      openTimelineTemplate(timelineId);
+
+      cy.log('Check that the template has been created correclty');
       cy.contains(getTimeline().title).should('exist');
-      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
-      cy.get(TIMELINES_PINNED_EVENT_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_NOTES_COUNT).first().should('have.text', '1');
-      cy.get(TIMELINES_FAVORITE).first().should('exist');
-
-      openTimeline(timelineId);
-
-      cy.get(FAVORITE_TIMELINE).should('exist');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
-      cy.get(TIMELINE_DESCRIPTION).should('have.text', getTimeline().description);
-      cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
-      // Comments this assertion until we agreed what to do with the filters.
-      // cy.get(TIMELINE_FILTER(timeline.filter)).should('exist');
-      // cy.get(NOTES_COUNT).should('have.text', '1');
-      cy.get(NOTES_TAB_BUTTON).click();
-      cy.get(NOTES_TEXT_AREA).should('exist');
-      cy.get(NOTES).should('have.text', getTimeline().notes);
+      cy.get(TIMELINES_DESCRIPTION).first().should('have.text', getTimeline().description);
+      cy.get(TIMELINES_FAVORITE).first().should('exist');
+      cy.get(TIMELINE_QUERY).should('contain.text', getTimeline().query);
     });
   });
 
@@ -112,5 +110,11 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
     cy.wait('@timeline', { timeout: 100000 });
     cy.get(TIMELINE_FLYOUT_WRAPPER).should('have.css', 'visibility', 'visible');
     cy.get(TIMELINE_QUERY).should('have.text', getTimeline().query);
+  });
+
+  it('should create timeline template from bottombar', () => {
+    visit(TIMELINES_URL);
+    createTimelineTemplateOptionsPopoverBottomBar();
+    cy.get(TIMELINE_TITLE).should('have.text', 'Untitled template');
   });
 });

@@ -21,14 +21,12 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
-import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
-import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   annualCO2KgsInclusive: number;
@@ -73,13 +71,6 @@ export function FlameGraphTooltip({
   totalSamples,
   totalSeconds,
 }: Props) {
-  const {
-    start: { core },
-  } = useProfilingDependencies();
-  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
-    profilingUseLegacyCo2Calculation
-  );
-
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
@@ -187,16 +178,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={
-              shouldUseLegacyCo2Calculation
-                ? impactEstimates.totalCPU.annualizedCo2
-                : annualCO2KgsInclusive
-            }
-            comparison={
-              shouldUseLegacyCo2Calculation
-                ? comparisonImpactEstimates?.totalCPU.annualizedCo2
-                : comparisonAnnualCO2KgsInclusive
-            }
+            value={annualCO2KgsInclusive}
+            comparison={comparisonAnnualCO2KgsInclusive}
             formatValue={(value) => asWeight(value, 'kgs')}
             showDifference
             formatDifferenceAsPercentage={false}
@@ -205,16 +188,8 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={
-              shouldUseLegacyCo2Calculation
-                ? impactEstimates.totalCPU.annualizedDollarCost
-                : annualCostsUSDInclusive
-            }
-            comparison={
-              shouldUseLegacyCo2Calculation
-                ? comparisonImpactEstimates?.totalCPU.annualizedDollarCost
-                : comparisonAnnualCostsUSDInclusive
-            }
+            value={annualCostsUSDInclusive}
+            comparison={comparisonAnnualCostsUSDInclusive}
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}

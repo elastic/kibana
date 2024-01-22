@@ -30,9 +30,7 @@ import {
   INGESTION_METHOD_IDS,
 } from '../../../../../common/constants';
 
-import apiLogo from '../../../../assets/images/api_cloud.svg';
-import connectorIcon from '../../../../assets/images/connector.svg';
-import crawlerIcon from '../../../../assets/images/crawler.svg';
+import apiLogo from '../../../../assets/images/api_image.png';
 import fileUploadLogo from '../../../../assets/images/file_upload_logo.svg';
 import sampleDataLogo from '../../../../assets/images/sample_data_logo.svg';
 import connectorLogo from '../../../../assets/images/search_connector.svg';
@@ -47,6 +45,9 @@ import {
 import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
+
+import { ConnectorIcon } from './icons/connector';
+import { CrawlerIcon } from './icons/crawler';
 
 export const IngestionSelector: React.FC = () => {
   const {
@@ -91,7 +92,7 @@ export const IngestionSelector: React.FC = () => {
                   defaultMessage: 'Crawl URL',
                 }
               )}
-              buttonIcon={crawlerIcon}
+              buttonIcon={CrawlerIcon}
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.crawler.description',
                 {
@@ -119,7 +120,7 @@ export const IngestionSelector: React.FC = () => {
                   defaultMessage: 'Create a connector',
                 }
               )}
-              buttonIcon={connectorIcon}
+              buttonIcon={ConnectorIcon}
               description={i18n.translate(
                 'xpack.enterpriseSearch.ingestSelector.method.connectors.description',
                 {

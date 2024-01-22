@@ -5,80 +5,108 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState, type FC } from 'react';
+import React, { useEffect, useMemo, type FC } from 'react';
 
 import { i18n } from '@kbn/i18n';
 
 import { EuiFormRow, EuiSelect, EuiSpacer, EuiSwitch } from '@elastic/eui';
-
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-
-import { useAppDependencies } from '../../../../app_dependencies';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
+import { ToastNotificationText } from '../../../../components';
+import { isLatestTransform, isPivotTransform } from '../../../../../../common/types/transform';
+import { useGetTransformsPreview } from '../../../../hooks';
 
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { useEditTransformFlyout } from './use_edit_transform_flyout';
+import { getErrorMessage } from '../../../../../../common/utils/errors';
 
 export const EditTransformRetentionPolicy: FC = () => {
-  const appDeps = useAppDependencies();
-  const dataViewsClient = appDeps.data.dataViews;
+  const { i18n: i18nStart, theme } = useAppDependencies();
+
+  const toastNotifications = useToastNotifications();
 
   const dataViewId = useEditTransformFlyout('dataViewId');
   const formSections = useEditTransformFlyout('stateFormSection');
   const retentionPolicyField = useEditTransformFlyout('retentionPolicyField');
   const { formField, formSection } = useEditTransformFlyout('actions');
+  const requestConfig = useEditTransformFlyout('config');
 
-  const [dateFieldNames, setDateFieldNames] = useState<string[]>([]);
+  const previewRequest = useMemo(() => {
+    return {
+      source: requestConfig.source,
+      ...(isPivotTransform(requestConfig) ? { pivot: requestConfig.pivot } : {}),
+      ...(isLatestTransform(requestConfig) ? { latest: requestConfig.latest } : {}),
+    };
+  }, [requestConfig]);
 
-  useEffect(
-    function getDateFields() {
-      let unmounted = false;
-      if (dataViewId !== undefined) {
-        dataViewsClient.get(dataViewId).then((dataView) => {
-          if (dataView) {
-            const dateTimeFields = dataView.fields
-              .filter((f) => f.type === KBN_FIELD_TYPES.DATE)
-              .map((f) => f.name)
-              .sort();
-            if (!unmounted) {
-              setDateFieldNames(dateTimeFields);
-            }
-          }
-        });
-        return () => {
-          unmounted = true;
-        };
-      }
-    },
-    [dataViewId, dataViewsClient]
-  );
+  const { error: transformsPreviewError, data: transformPreview } =
+    useGetTransformsPreview(previewRequest);
 
-  const isRetentionPolicyAvailable = dateFieldNames.length > 0;
+  const destIndexAvailableTimeFields = useMemo<string[]>(() => {
+    if (transformPreview?.generated_dest_index) {
+      const properties = transformPreview.generated_dest_index.mappings.properties;
+      const timeFields: string[] = Object.keys(properties).filter(
+        (col) => properties[col].type === 'date'
+      );
+
+      return timeFields;
+    }
+    return [];
+  }, [transformPreview]);
+
+  useEffect(() => {
+    if (transformsPreviewError !== null) {
+      toastNotifications.addDanger({
+        title: i18n.translate('xpack.transform.transformList.errorGettingTransformPreview', {
+          defaultMessage: 'An error occurred fetching the transform preview',
+        }),
+        text: toMountPoint(
+          <ToastNotificationText text={getErrorMessage(transformsPreviewError)} />,
+          { theme, i18n: i18nStart }
+        ),
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [transformsPreviewError]);
+
+  const isRetentionPolicyAvailable = destIndexAvailableTimeFields.length > 0;
   const retentionDateFieldOptions = useMemo(() => {
-    return Array.isArray(dateFieldNames)
-      ? dateFieldNames.map((text: string) => ({ text, value: text }))
+    return Array.isArray(destIndexAvailableTimeFields)
+      ? destIndexAvailableTimeFields.map((text: string) => ({ text, value: text }))
       : [];
-  }, [dateFieldNames]);
+  }, [destIndexAvailableTimeFields]);
 
   return (
     <>
-      <EuiSwitch
-        name="transformEditRetentionPolicySwitch"
-        label={i18n.translate(
-          'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
-          {
-            defaultMessage: 'Retention policy',
-          }
-        )}
-        checked={formSections.retentionPolicy.enabled}
-        onChange={(e) =>
-          formSection({
-            section: 'retentionPolicy',
-            enabled: e.target.checked,
-          })
+      <EuiFormRow
+        helpText={
+          isRetentionPolicyAvailable === false
+            ? i18n.translate('xpack.transform.transformList.editFlyoutFormEetentionPolicyError', {
+                defaultMessage:
+                  'Retention policy settings are not available for indices without date fields.',
+              })
+            : ''
         }
-        disabled={!isRetentionPolicyAvailable}
-        data-test-subj="transformEditRetentionPolicySwitch"
-      />
+      >
+        <EuiSwitch
+          name="transformEditRetentionPolicySwitch"
+          label={i18n.translate(
+            'xpack.transform.transformList.editFlyoutFormRetentionPolicySwitchLabel',
+            {
+              defaultMessage: 'Retention policy',
+            }
+          )}
+          checked={formSections.retentionPolicy.enabled}
+          onChange={(e) =>
+            formSection({
+              section: 'retentionPolicy',
+              enabled: e.target.checked,
+            })
+          }
+          disabled={!isRetentionPolicyAvailable}
+          data-test-subj="transformEditRetentionPolicySwitch"
+        />
+      </EuiFormRow>
       {formSections.retentionPolicy.enabled && (
         <div data-test-subj="transformEditRetentionPolicyContent">
           <EuiSpacer size="m" />

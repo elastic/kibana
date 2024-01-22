@@ -15,28 +15,40 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { MlModelDeploymentState } from '../../../../../../common/types/ml';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
+const modelNotDownloadedText = i18n.translate(
+  'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDownloaded',
+  {
+    defaultMessage: 'Not deployed',
+  }
+);
+const modelNotDownloadedTooltip = i18n.translate(
+  'xpack.enterpriseSearch.inferencePipelineCard.modelState.notDownloaded.tooltip',
+  {
+    defaultMessage: 'This trained model can be deployed',
+  }
+);
 const modelDownloadingText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloading',
   {
-    defaultMessage: 'Downloading',
+    defaultMessage: 'Deploying',
   }
 );
 const modelDownloadingTooltip = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloading.tooltip',
   {
-    defaultMessage: 'This trained model is downloading',
+    defaultMessage: 'This trained model is deploying',
   }
 );
 const modelDownloadedText = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloaded',
   {
-    defaultMessage: 'Downloaded',
+    defaultMessage: 'Deployed',
   }
 );
 const modelDownloadedTooltip = i18n.translate(
   'xpack.enterpriseSearch.inferencePipelineCard.modelState.downloaded.tooltip',
   {
-    defaultMessage: 'This trained model is downloaded and can be started',
+    defaultMessage: 'This trained model is deployed and can be started',
   }
 );
 const modelStartedText = i18n.translate(
@@ -100,11 +112,13 @@ const modelNotDeployedTooltip = i18n.translate(
 export interface TrainedModelHealthProps {
   modelState: TrainedModelState | MlModelDeploymentState;
   modelStateReason?: string;
+  isDownloadable?: boolean;
 }
 
 export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
   modelState,
   modelStateReason,
+  isDownloadable,
 }) => {
   let modelHealth: {
     healthColor: string;
@@ -115,9 +129,9 @@ export const TrainedModelHealth: React.FC<TrainedModelHealthProps> = ({
     case TrainedModelState.NotDeployed:
     case MlModelDeploymentState.NotDeployed:
       modelHealth = {
-        healthColor: 'danger',
-        healthText: modelNotDeployedText,
-        tooltipText: modelNotDeployedTooltip,
+        healthColor: isDownloadable ? 'subdued' : 'danger',
+        healthText: isDownloadable ? modelNotDownloadedText : modelNotDeployedText,
+        tooltipText: isDownloadable ? modelNotDownloadedTooltip : modelNotDeployedTooltip,
       };
       break;
     case MlModelDeploymentState.Downloading:

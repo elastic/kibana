@@ -25,7 +25,7 @@ export interface AlertSummaryTimeRange {
 }
 
 export interface ChartProps {
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
   onBrushEnd?: BrushEndListener;
 }

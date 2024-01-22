@@ -9,7 +9,7 @@ import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrService } from '../../../functional/ftr_provider_context';
 
-const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'flyoutBottomBar';
+const TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ = 'timeline-bottom-bar';
 const TIMELINE_CLOSE_BUTTON_TEST_SUBJ = 'close-timeline';
 const TIMELINE_MODAL_PAGE_TEST_SUBJ = 'timeline';
 const TIMELINE_TAB_QUERY_TEST_SUBJ = 'timeline-tab-content-query';
@@ -17,7 +17,7 @@ const TIMELINE_TAB_QUERY_TEST_SUBJ = 'timeline-tab-content-query';
 const TIMELINE_CSS_SELECTOR = Object.freeze({
   bottomBarTimelineTitle: `${testSubjSelector(
     TIMELINE_BOTTOM_BAR_CONTAINER_TEST_SUBJ
-  )} ${testSubjSelector('timeline-title')}`,
+  )} ${testSubjSelector('timeline-bottom-bar-title-button')}`,
   /** The refresh button on the timeline view (top of view, next to the date selector) */
   refreshButton: `${testSubjSelector(TIMELINE_TAB_QUERY_TEST_SUBJ)} ${testSubjSelector(
     'superDatePickerApplyTimeButton'

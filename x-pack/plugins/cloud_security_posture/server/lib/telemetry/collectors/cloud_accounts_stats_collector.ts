@@ -345,8 +345,6 @@ export const getCloudAccountsStats = (
     };
   });
 
-  logger.info('Cloud Account Stats telemetry: accounts stats was sent');
-
   return cloudAccountsStats;
 };
 

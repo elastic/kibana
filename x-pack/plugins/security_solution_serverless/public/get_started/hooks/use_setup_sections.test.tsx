@@ -11,8 +11,6 @@ import { useSetUpSections } from './use_setup_sections';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from '../types';
 import { CreateProjectSteps, QuickStartSectionCardsId, SectionId } from '../types';
 
-import { ProductLine } from '../../../common/product';
-
 const mockEuiTheme: EuiThemeComputed = {
   size: {
     l: '16px',
@@ -44,7 +42,6 @@ describe('useSetUpSections', () => {
     } as ActiveSections;
 
     const sections = result.current.setUpSections({
-      activeProducts: new Set([ProductLine.security]),
       activeSections,
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
@@ -62,7 +59,6 @@ describe('useSetUpSections', () => {
 
     const sections = result.current.setUpSections({
       activeSections,
-      activeProducts: new Set([ProductLine.security]),
       expandedCardSteps: {} as ExpandedCardSteps,
       onStepClicked,
       toggleTaskCompleteStatus,

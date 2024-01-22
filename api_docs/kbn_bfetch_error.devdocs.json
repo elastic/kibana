@@ -1,0 +1,101 @@
+{
+  "id": "@kbn/bfetch-error",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/bfetch-error",
+        "id": "def-common.BfetchRequestError",
+        "type": "Class",
+        "tags": [],
+        "label": "BfetchRequestError",
+        "description": [
+          "\nError thrown when xhr request fails"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/bfetch-error",
+            "scope": "common",
+            "docId": "kibKbnBfetchErrorPluginApi",
+            "section": "def-common.BfetchRequestError",
+            "text": "BfetchRequestError"
+          },
+          " extends Error"
+        ],
+        "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/bfetch-error",
+            "id": "def-common.BfetchRequestError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [
+              "\nconstructor"
+            ],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/bfetch-error",
+                "id": "def-common.BfetchRequestError.Unnamed.$1",
+                "type": "number",
+                "tags": [],
+                "label": "code",
+                "description": [
+                  "- Xhr error code"
+                ],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/bfetch-error",
+            "id": "def-common.BfetchRequestError.code",
+            "type": "number",
+            "tags": [],
+            "label": "code",
+            "description": [],
+            "path": "packages/kbn-bfetch-error/src/bfetch_error.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

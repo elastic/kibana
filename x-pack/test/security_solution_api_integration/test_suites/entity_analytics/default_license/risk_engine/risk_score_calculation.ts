@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
 import { RISK_SCORE_CALCULATION_URL } from '@kbn/security-solution-plugin/common/constants';
-import type { RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import {
   deleteAllAlerts,
@@ -23,14 +23,24 @@ import {
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
+  assetCriticalityRouteHelpersFactory,
+  cleanAssetCriticality,
+  waitForAssetCriticalityToBePresent,
+  getLatestRiskScoreIndexMapping,
+  riskEngineRouteHelpersFactory,
+  cleanRiskEngine,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
 
@@ -89,12 +99,17 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.init();
       });
 
       afterEach(async () => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
       });
 
       it('calculates and persists risk score', async () => {
@@ -116,17 +131,46 @@ export default ({ getService }: FtrProviderContext): void => {
         const scores = await readRiskScores(es);
 
         expect(scores.length).to.eql(1);
-        expect(normalizeScores(scores)).to.eql([
-          {
-            calculated_level: 'Unknown',
-            calculated_score: 21,
-            calculated_score_norm: 8.039816232771823,
-            category_1_score: 21,
-            category_1_count: 1,
-            id_field: 'host.name',
-            id_value: 'host-1',
-          },
-        ]);
+        const [score] = normalizeScores(scores);
+
+        expect(score).to.eql({
+          calculated_level: 'Unknown',
+          calculated_score: 21,
+          calculated_score_norm: 8.039816232771823,
+          category_1_score: 8.039816232771821,
+          category_1_count: 1,
+          id_field: 'host.name',
+          id_value: 'host-1',
+        });
+      });
+
+      it('upgrades latest risk score index dynamic setting before persisting risk scores', async () => {
+        const documentId = uuidv4();
+        await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+
+        await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+
+        const unmodifiedIndexMapping = await getLatestRiskScoreIndexMapping(es);
+        // by default, the dynamic mapping is set to false.
+        expect(unmodifiedIndexMapping?.dynamic).to.eql('false');
+
+        // set the 'dynamic' configuration to an undesirable value
+        await es.indices.putMapping({
+          index: 'risk-score.risk-score-latest-default',
+          dynamic: 'strict',
+        });
+
+        expect((await getLatestRiskScoreIndexMapping(es))?.dynamic).to.eql('strict');
+
+        // before re-running risk score persistence, the dynamic configuration should be reset to the desired value
+        await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+
+        const finalIndexMapping = await getLatestRiskScoreIndexMapping(es);
+
+        expect(finalIndexMapping?.dynamic).to.eql('false');
+
+        // after all processing is complete, the mapping should be exactly the same as before
+        expect(unmodifiedIndexMapping).to.eql(finalIndexMapping);
       });
 
       describe('paging through calculations', () => {
@@ -267,6 +311,60 @@ export default ({ getService }: FtrProviderContext): void => {
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
+        });
+      });
+
+      describe('@skipInServerless with asset criticality data', () => {
+        const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
+
+        beforeEach(async () => {
+          await assetCriticalityRoutes.upsert({
+            id_field: 'host.name',
+            id_value: 'host-1',
+            criticality_level: 'important',
+          });
+        });
+
+        afterEach(async () => {
+          await cleanAssetCriticality({ log, es });
+        });
+
+        it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+          await waitForAssetCriticalityToBePresent({ es, log });
+
+          const results = await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+          expect(results).to.eql({
+            after_keys: { host: { 'host.name': 'host-1' } },
+            errors: [],
+            scores_written: 1,
+          });
+
+          await waitForRiskScoresToBePresent({ es, log });
+          const scores = await readRiskScores(es);
+          expect(scores.length).to.eql(1);
+
+          const [score] = normalizeScores(scores);
+          expect(score).to.eql({
+            criticality_level: 'important',
+            criticality_modifier: 1.5,
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 11.59366948840633,
+            category_1_score: 8.039816232771821,
+            category_1_count: 1,
+            id_field: 'host.name',
+            id_value: 'host-1',
+          });
+          const [rawScore] = scores;
+
+          expect(
+            rawScore.host?.risk.category_1_score! + rawScore.host?.risk.category_2_score!
+          ).to.be.within(
+            score.calculated_score_norm! - 0.000000000000001,
+            score.calculated_score_norm! + 0.000000000000001
+          );
         });
       });
     });

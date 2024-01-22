@@ -15,6 +15,15 @@ import { sendUpgradeAgentsActions } from './upgrade';
 import { createClientMock } from './action.mock';
 import { getRollingUpgradeOptions, upgradeBatch } from './upgrade_action_runner';
 
+jest.mock('./versions', () => {
+  return {
+    getAvailableVersions: jest
+      .fn()
+      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getLatestAvailableVersion: jest.fn().mockResolvedValue('8.8.0'),
+  };
+});
+
 jest.mock('./action_status', () => {
   return {
     getCancelledActions: jest.fn().mockResolvedValue([
@@ -25,11 +34,7 @@ jest.mock('./action_status', () => {
   };
 });
 
-// FLAKY: https://github.com/elastic/kibana/issues/171052
-// FLAKY: https://github.com/elastic/kibana/issues/172114
-// FLAKY: https://github.com/elastic/kibana/issues/171536
-// FLAKY: https://github.com/elastic/kibana/issues/171160
-describe.skip('sendUpgradeAgentsActions (plural)', () => {
+describe('sendUpgradeAgentsActions (plural)', () => {
   beforeEach(async () => {
     appContextService.start(createAppContextStartContractMock());
   });

@@ -10,8 +10,20 @@ import { monaco } from '../../../monaco_imports';
 
 /** @internal **/
 export class ESQLState implements monaco.languages.IState {
+  private lastLine: number = 0;
+
+  setLineNumber(n: number) {
+    this.lastLine = n;
+  }
+
+  getLineNumber() {
+    return this.lastLine;
+  }
+
   clone(): monaco.languages.IState {
-    return new ESQLState();
+    const newState = new ESQLState();
+    newState.setLineNumber(this.lastLine);
+    return newState;
   }
 
   equals(other: monaco.languages.IState): boolean {

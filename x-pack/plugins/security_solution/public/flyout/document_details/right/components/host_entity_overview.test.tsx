@@ -8,7 +8,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { HostEntityOverview } from './host_entity_overview';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import {
@@ -25,6 +24,7 @@ import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/co
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const hostName = 'host';
 const osFamily = 'Windows';
@@ -63,7 +63,7 @@ const mockUseHostDetails = useHostDetails as jest.Mock;
 jest.mock('../../../../explore/hosts/containers/hosts/details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');

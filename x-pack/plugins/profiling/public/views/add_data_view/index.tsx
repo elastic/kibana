@@ -111,7 +111,6 @@ export function AddDataView() {
                 {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHost}" \\
---set "version=${stackVersion}" \\
 --version=${stackVersion} \\
 elastic/pf-host-agent`}
               </EuiCodeBlock>
@@ -272,15 +271,15 @@ docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-ag
               <EuiCodeBlock paddingSize="s" isCopyable>
                 {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
       cat <<EOF > /etc/yum.repos.d/elastic.repo
-      [elastic-${majorVersion}.x]
-      name=Elastic repository for ${majorVersion}.x packages
-      baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
-      gpgcheck=1
-      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-      enabled=1
-      autorefresh=1
-      type=rpm-md
-      EOF`}
+[elastic-${majorVersion}.x]
+name=Elastic repository for ${majorVersion}.x packages
+baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+EOF`}
               </EuiCodeBlock>
             ),
           },

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { cloneDeep } from 'lodash';
+
 import { DATASET_VAR_NAME } from '../../../../../../../common/constants';
 
 import type { NewPackagePolicy } from '../../../../types';
@@ -14,7 +16,7 @@ export function prepareInputPackagePolicyDataset(newPolicy: NewPackagePolicy): {
   forceCreateNeeded: boolean;
 } {
   let forceCreateNeeded = false;
-  const { inputs } = newPolicy;
+  const { inputs } = cloneDeep(newPolicy);
 
   if (!inputs || !inputs.length) {
     return { policy: newPolicy, forceCreateNeeded: false };

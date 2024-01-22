@@ -315,6 +315,7 @@ const RuleAdd = ({
                 onChangeMetaData={onChangeMetaData}
                 setConsumer={setSelectedConsumer}
                 useRuleProducer={useRuleProducer}
+                initialSelectedConsumer={initialSelectedConsumer}
               />
             </EuiFlyoutBody>
             <RuleAddFooter

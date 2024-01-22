@@ -162,14 +162,14 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
-      it('should return a 400 if the policy_id is not a valid policy', async () => {
+      it('should return a 404 if the policy_id does not exist', async () => {
         const { body: apiResponse } = await supertest
           .post(`/api/fleet/enrollment_api_keys`)
           .set('kbn-xsrf', 'xxx')
           .send({
             policy_id: 'idonotexists',
           })
-          .expect(400);
+          .expect(404);
 
         expect(apiResponse.message).to.be('Agent policy "idonotexists" not found');
       });
@@ -223,11 +223,11 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something',
           })
-          .expect(400);
+          .expect(409);
 
         expect(noSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something already exists for agent policy policy1',
         });
 
@@ -238,10 +238,10 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy1',
             name: 'something else',
           })
-          .expect(400);
+          .expect(409);
         expect(hasSpacesDupe).to.eql({
-          statusCode: 400,
-          error: 'Bad Request',
+          statusCode: 409,
+          error: 'Conflict',
           message: 'An enrollment key named something else already exists for agent policy policy1',
         });
       });

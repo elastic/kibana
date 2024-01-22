@@ -28,7 +28,6 @@ export const isDatasetSelection = (input: any): input is DatasetSelection => {
 export * from './all_dataset_selection';
 export * from './single_dataset_selection';
 export * from './unresolved_dataset_selection';
-export * from './encoding';
 export * from './errors';
 export * from './hydrate_dataset_selection.ts';
 export * from './types';

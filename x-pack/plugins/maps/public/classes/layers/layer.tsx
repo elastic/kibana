@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { Query } from '@kbn/es-query';
 import {
   getWarningsTitle,
@@ -46,6 +47,7 @@ import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
+import { isLayerGroup } from './layer_group';
 
 export const INCOMPLETE_RESULTS_WARNING = i18n.translate(
   'xpack.maps.layer.incompleteResultsWarning',
@@ -90,7 +92,7 @@ export interface ILayer {
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): LayerMessage[];
+  getErrors(inspectorAdapters: Adapters): LayerMessage[];
   hasWarnings(): boolean;
   getWarnings(): LayerMessage[];
 
@@ -411,7 +413,8 @@ export class AbstractLayer implements ILayer {
   }
 
   hasErrors(): boolean {
-    return this.getErrors().length > 0;
+    const inspectorAdapters = {}; // errors are not interacted with so empty Adapters can be passed to getErrors
+    return this.getErrors(inspectorAdapters).length > 0;
   }
 
   _getSourceErrorTitle() {
@@ -420,7 +423,7 @@ export class AbstractLayer implements ILayer {
     });
   }
 
-  getErrors(): LayerMessage[] {
+  getErrors(inspectorAdapters: Adapters): LayerMessage[] {
     const errors: LayerMessage[] = [];
 
     const sourceError = this.getSourceDataRequest()?.renderError();
@@ -436,7 +439,14 @@ export class AbstractLayer implements ILayer {
         title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
           defaultMessage: `An error occurred when loading layer tiles`,
         }),
-        body: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
+        body: (
+          <TileErrorsList
+            inspectorAdapters={inspectorAdapters}
+            isESSource={!isLayerGroup(this) && this.getSource().isESSource()}
+            layerId={this.getId()}
+            tileErrors={this._descriptor.__tileErrors}
+          />
+        ),
       });
     }
 

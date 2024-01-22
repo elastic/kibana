@@ -18,6 +18,8 @@ import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
 import { WelcomeHeader } from './welcome_header';
+import { Footer } from './footer';
+import { useScrollToHash } from './hooks/use_scroll';
 
 export interface GetStartedProps {
   indicesExist?: boolean;
@@ -41,6 +43,8 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
   const productTier = productTypes.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
+
+  useScrollToHash();
 
   return (
     <KibanaPageTemplate
@@ -88,7 +92,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
         restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
         css={css`
-          padding: 0 ${euiTheme.size.xxl} ${euiTheme.base * 3.5}px;
+          padding: 0 ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
           background-color: ${euiTheme.colors.lightestShade};
         `}
       >
@@ -101,6 +105,9 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes, i
         >
           <TogglePanel activeProducts={activeProducts} activeSections={activeSections} />
         </StepContextProvider>
+      </KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section grow={true} restrictWidth={CONTENT_WIDTH} paddingSize="none">
+        <Footer />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );

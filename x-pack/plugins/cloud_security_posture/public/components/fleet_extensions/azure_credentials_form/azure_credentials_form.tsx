@@ -29,7 +29,7 @@ import {
   AzureOptions,
   getAzureCredentialsFormManualOptions,
 } from './get_azure_credentials_form_options';
-import { AzureCredentialsType } from '../../../../common/types';
+import { AzureCredentialsType } from '../../../../common/types_old';
 import { SetupFormat, useAzureCredentialsForm } from './hooks';
 import { getPosturePolicy, NewPackagePolicyPostureInput } from '../utils';
 import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
@@ -247,18 +247,6 @@ const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) 
 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
 const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
-
-export const getDefaultAzureManualCredentialType = (packageInfo: PackageInfo) => {
-  const packageSemanticVersion = semverValid(packageInfo.version);
-  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
-
-  const isPackageVersionValidForManualFields = !semverLt(
-    cleanPackageVersion,
-    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
-  );
-
-  return isPackageVersionValidForManualFields ? 'managed_identity' : 'manual';
-};
 
 const AzureInputVarFields = ({
   fields,

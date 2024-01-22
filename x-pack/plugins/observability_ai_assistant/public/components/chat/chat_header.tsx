@@ -28,13 +28,17 @@ const minWidthClassName = css`
   min-width: 0;
 `;
 
+const chatHeaderClassName = css`
+  padding-top: 12px;
+  padding-bottom: 12px;
+`;
+
 export function ChatHeader({
   title,
   loading,
   licenseInvalid,
   connectors,
   connectorsManagementHref,
-  modelsManagementHref,
   conversationId,
   knowledgeBase,
   startedFrom,
@@ -46,7 +50,6 @@ export function ChatHeader({
   licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
   connectorsManagementHref: string;
-  modelsManagementHref: string;
   conversationId?: string;
   knowledgeBase: UseKnowledgeBaseResult;
   startedFrom?: StartedFrom;
@@ -70,7 +73,13 @@ export function ChatHeader({
   const inputRef = useRef<HTMLInputElement>(null);
 
   return (
-    <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false} borderRadius="none">
+    <EuiPanel
+      borderRadius="none"
+      hasBorder={false}
+      hasShadow={false}
+      paddingSize="m"
+      className={chatHeaderClassName}
+    >
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           {loading ? <EuiLoadingSpinner size="l" /> : <AssistantAvatar size="s" />}
@@ -103,12 +112,8 @@ export function ChatHeader({
         <EuiFlexItem grow={false}>
           <ChatActionsMenu
             connectors={connectors}
-            connectorsManagementHref={connectorsManagementHref}
             disabled={licenseInvalid}
-            modelsManagementHref={modelsManagementHref}
             conversationId={conversationId}
-            knowledgeBase={knowledgeBase}
-            startedFrom={startedFrom}
             onCopyConversationClick={onCopyConversation}
           />
         </EuiFlexItem>

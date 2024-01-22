@@ -18,78 +18,7 @@
   },
   "common": {
     "classes": [],
-    "functions": [
-      {
-        "parentPluginId": "@kbn/guided-onboarding",
-        "id": "def-common.GuideCards",
-        "type": "Function",
-        "tags": [],
-        "label": "GuideCards",
-        "description": [],
-        "signature": [
-          "(props: ",
-          "GuideCardsProps",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_cards.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/guided-onboarding",
-            "id": "def-common.GuideCards.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "GuideCardsProps"
-            ],
-            "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_cards.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/guided-onboarding",
-        "id": "def-common.GuideFilters",
-        "type": "Function",
-        "tags": [],
-        "label": "GuideFilters",
-        "description": [],
-        "signature": [
-          "({ activeFilter, setActiveFilter, application }: ",
-          "GuideFiltersProps",
-          ") => JSX.Element"
-        ],
-        "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_filters.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/guided-onboarding",
-            "id": "def-common.GuideFilters.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ activeFilter, setActiveFilter, application }",
-            "description": [],
-            "signature": [
-              "GuideFiltersProps"
-            ],
-            "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_filters.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      }
-    ],
+    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/guided-onboarding",
@@ -548,22 +477,6 @@
     ],
     "enums": [],
     "misc": [
-      {
-        "parentPluginId": "@kbn/guided-onboarding",
-        "id": "def-common.GuideFilterValues",
-        "type": "Type",
-        "tags": [],
-        "label": "GuideFilterValues",
-        "description": [],
-        "signature": [
-          "\"all\" | ",
-          "GuideCardSolutions"
-        ],
-        "path": "packages/kbn-guided-onboarding/src/components/landing_page/guide_filters.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/guided-onboarding",
         "id": "def-common.GuideId",

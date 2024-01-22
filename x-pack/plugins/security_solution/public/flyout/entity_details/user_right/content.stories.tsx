@@ -12,16 +12,18 @@ import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/co
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
-  mockManagedUser,
-  mockObservedUser,
+  mockManagedUserData,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { UserPanelContent } from './content';
+import { mockObservedUser } from './mocks';
 
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
   panels: {},
 } as unknown as ExpandableFlyoutContextValue;
+
+const riskScoreData = { ...mockRiskScoreState, data: [] };
 
 storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
@@ -35,61 +37,51 @@ storiesOf('Components/UserPanelContent', module)
   ))
   .add('default', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('integration disabled', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: false,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no managed data', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: false,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('no observed data', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -115,26 +107,20 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: false, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ))
   .add('loading', () => (
     <UserPanelContent
       managedUser={{
-        details: undefined,
+        data: undefined,
         isLoading: true,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: true,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: true,
-          date: undefined,
-        },
       }}
       observedUser={{
         details: {
@@ -161,9 +147,11 @@ storiesOf('Components/UserPanelContent', module)
         },
         anomalies: { isLoading: true, anomalies: null, jobNameById: {} },
       }}
-      riskScoreState={mockRiskScoreState}
+      riskScoreState={riskScoreData}
       contextID={'test-user-details'}
       scopeId={'test-scopeId'}
       isDraggable={false}
+      openDetailsPanel={() => {}}
+      userName={'test-user-name'}
     />
   ));

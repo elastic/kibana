@@ -8,7 +8,6 @@
 import { EuiFieldNumber, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { ChangeEvent, useState } from 'react';
-import numeral from '@elastic/numeral';
 
 interface Props {
   initialBurnRate?: number;
@@ -20,6 +19,7 @@ interface Props {
 export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }: Props) {
   const [burnRate, setBurnRate] = useState<number>(initialBurnRate);
   const hasError = errors !== undefined && errors.length > 0;
+  const [formattedValue, setFormattedValue] = useState<string>(burnRate.toFixed(2));
 
   const onBurnRateChange = (event: ChangeEvent<HTMLInputElement>) => {
     const value = Number(event.target.value);
@@ -51,8 +51,15 @@ export function BurnRate({ onChange, initialBurnRate = 1, maxBurnRate, errors }:
         step={0.01}
         min={0.01}
         max={maxBurnRate}
-        value={numeral(burnRate).format('0[.0]')}
-        onChange={(event) => onBurnRateChange(event)}
+        value={formattedValue}
+        onChange={(event) => {
+          onBurnRateChange(event);
+          setFormattedValue(event.target.value);
+        }}
+        onBlur={(event) => {
+          const value = event.target.value;
+          setFormattedValue(Number(value).toFixed(2));
+        }}
         data-test-subj="burnRate"
       />
     </EuiFormRow>

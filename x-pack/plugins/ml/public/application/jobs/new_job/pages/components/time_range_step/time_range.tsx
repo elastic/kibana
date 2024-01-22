@@ -113,7 +113,8 @@ export const TimeRangeStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) 
       const { toasts } = services.notifications;
       toasts.addDanger(
         i18n.translate('xpack.ml.newJob.wizard.timeRangeStep.fullTimeRangeError', {
-          defaultMessage: 'An error occurred obtaining the time range for the index',
+          defaultMessage:
+            'An error occurred obtaining the time range for the index. Please set the desired start and end times.',
         })
       );
     }

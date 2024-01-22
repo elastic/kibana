@@ -64,6 +64,23 @@
       },
       {
         "parentPluginId": "@kbn/xstate-utils",
+        "id": "def-common.getDevToolsOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getDevToolsOptions",
+        "description": [],
+        "signature": [
+          "() => boolean | object"
+        ],
+        "path": "packages/kbn-xstate-utils/src/dev_tools.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/xstate-utils",
         "id": "def-common.isDevMode",
         "type": "Function",
         "tags": [],

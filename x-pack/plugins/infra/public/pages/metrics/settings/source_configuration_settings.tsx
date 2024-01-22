@@ -17,7 +17,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
 import { Prompt, useEditableSettings } from '@kbn/observability-shared-plugin/public';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -61,7 +64,10 @@ export const SourceConfigurationSettings = ({
     formState,
     formStateChanges,
   } = useSourceConfigurationFormState(source && source.configuration);
-  const infraUiSettings = useEditableSettings('infra_metrics', [enableInfrastructureHostsView]);
+  const infraUiSettings = useEditableSettings('infra_metrics', [
+    enableInfrastructureHostsView,
+    enableInfrastructureProfilingIntegration,
+  ]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();

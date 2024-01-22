@@ -2,7 +2,7 @@ This is where you add code when you have rules which contain saved object refere
 when you have "joins" in the saved objects between one saved object and another one. This can be a 1 to M (1 to many)
 relationship for example where you have a rule which contains the "id" of another saved object.
 
-NOTE: This is the "legacy saved object references" and should only be for the "legacy_rules_notification_alert_type".
+NOTE: This is the "legacy saved object references" and should only be for the "legacy_rules_notification_rule_type".
 The legacy notification system is being phased out and deprecated in favor of using the newer alerting notification system.
 It would be considered wrong to see additional code being added here at this point. However, maintenance should be expected
 until we have all users moved away from the legacy system.

@@ -97,7 +97,7 @@ export const convertModelVersionTransformFn = ({
       const result = modelTransformFn(doc, context);
       return { transformedDoc: result.document, additionalDocs: [] };
     } catch (error) {
-      log.error(error);
+      log.error(`Error trying to transform document: ${error.message}`);
       throw new TransformSavedObjectDocumentError(error, virtualVersion);
     }
   };

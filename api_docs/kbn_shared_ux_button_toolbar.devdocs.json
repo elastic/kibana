@@ -78,7 +78,7 @@
           "\nA group of buttons each performing an action, represented by an icon."
         ],
         "signature": [
-          "({ buttons, legend, buttonSize }: ",
+          "({ buttons, legend, buttonSize, \"data-test-subj\": dataTestSubj, }: ",
           {
             "pluginId": "@kbn/shared-ux-button-toolbar",
             "scope": "common",
@@ -97,7 +97,7 @@
             "id": "def-common.IconButtonGroup.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ buttons, legend, buttonSize = 'm' }",
+            "label": "{\n  buttons,\n  legend,\n  buttonSize = 'm',\n  'data-test-subj': dataTestSubj,\n}",
             "description": [],
             "signature": [
               {
@@ -358,6 +358,54 @@
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.isDisabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isDisabled",
+            "description": [
+              "To disable the action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.ariaexpanded",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "'aria-expanded'",
+            "description": [
+              "A11y for button"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.IconButton.ariacontrols",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-controls'",
+            "description": [
+              "A11y for button"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -426,6 +474,22 @@
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-button-toolbar",
+            "id": "def-common.Props.datatestsubj",
+            "type": "string",
+            "tags": [],
+            "label": "'data-test-subj'",
+            "description": [
+              "Test subject for button group"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -471,7 +535,7 @@
         "label": "Props",
         "description": [],
         "signature": [
-          "{ fullWidth?: boolean | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
+          "{ fullWidth?: boolean | undefined; 'aria-label'?: string | undefined; onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined; onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; 'data-test-subj'?: string | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; size?: \"m\" | \"s\" | undefined; as?: \"standard\" | undefined; fontWeight?: ToolbarButtonFontWeights | undefined; iconSide?: ",
           "ButtonContentIconSide",
           "; groupPosition?: ButtonPositions | undefined; hasArrow?: boolean | undefined; }"
         ],

@@ -17,7 +17,7 @@ import {
 } from '../../public/modules/indicators/components/table/test_ids';
 
 export const INDICATORS_TABLE_INVESTIGATE_IN_TIMELINE_BUTTON_ICON = `[data-test-subj="${CELL_INVESTIGATE_IN_TIMELINE_TEST_ID}"]`;
-export const UNTITLED_TIMELINE_BUTTON = `[data-test-subj="flyoutOverlay"]`;
+export const UNTITLED_TIMELINE_BUTTON = `[data-test-subj="timeline-bottom-bar-title-button"]`;
 export const INDICATORS_TABLE_CELL_TIMELINE_BUTTON = `[data-test-subj="${CELL_TIMELINE_BUTTON_TEST_ID}"] button`;
 export const TIMELINE_DATA_PROVIDERS_WRAPPER = `[data-test-subj="dataProviders"]`;
 export const TIMELINE_DRAGGABLE_ITEM = `[data-test-subj="providerContainer"]`;

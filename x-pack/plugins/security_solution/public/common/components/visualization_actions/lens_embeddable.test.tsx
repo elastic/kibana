@@ -20,6 +20,7 @@ import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_me
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
+import { ACTION_CUSTOMIZE_PANEL } from '@kbn/embeddable-plugin/public';
 
 const mockActions = [
   { id: 'inspect' },
@@ -65,7 +66,7 @@ describe('LensEmbeddable', () => {
         queries: [
           {
             id: 'testId',
-            inspect: { dsl: [], response: [] },
+            inspect: { dsl: [], response: ['{"mockResponse": "mockResponse"}'] },
             isInspected: false,
             loading: false,
             selectedInspectIndex: 0,
@@ -127,5 +128,11 @@ describe('LensEmbeddable', () => {
   it('should not sync highlight state between visualizations', () => {
     expect(mockEmbeddableComponent.mock.calls[0][0].syncTooltips).toEqual(false);
     expect(mockEmbeddableComponent.mock.calls[0][0].syncCursor).toEqual(false);
+  });
+
+  it('should not render Panel settings action', () => {
+    expect(
+      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes(ACTION_CUSTOMIZE_PANEL)
+    ).toBeTruthy();
   });
 });

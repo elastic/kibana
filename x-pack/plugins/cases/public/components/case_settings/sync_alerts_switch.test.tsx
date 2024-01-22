@@ -11,7 +11,8 @@ import { waitFor } from '@testing-library/react';
 
 import { SyncAlertsSwitch } from './sync_alerts_switch';
 
-describe('SyncAlertsSwitch', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174259
+describe.skip('SyncAlertsSwitch', () => {
   it('it renders', async () => {
     const wrapper = mount(<SyncAlertsSwitch disabled={false} />);
 

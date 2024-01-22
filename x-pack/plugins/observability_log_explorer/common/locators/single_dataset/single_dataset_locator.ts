@@ -35,11 +35,9 @@ export class SingleDatasetLocatorDefinition
       },
     });
 
-    const index = unresolvedDatasetSelection.toDataviewSpec().id;
-
     return constructLocatorPath({
+      datasetSelection: unresolvedDatasetSelection.toPlainSelection(),
       locatorParams: params,
-      index,
       useHash,
     });
   };

@@ -6,7 +6,6 @@
  */
 
 import { LIGHT_THEME } from '@elastic/charts';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 
 import { render } from '@testing-library/react';
 import { Props, Threshold } from './custom_threshold';
@@ -16,7 +15,7 @@ import { Comparator } from '../../../../common/custom_threshold_rule/types';
 describe('Threshold', () => {
   const renderComponent = (props: Partial<Props> = {}) => {
     const defaultProps: Props = {
-      chartProps: { theme: EUI_CHARTS_THEME_LIGHT.theme, baseTheme: LIGHT_THEME },
+      chartProps: { baseTheme: LIGHT_THEME },
       comparator: Comparator.GT,
       id: 'componentId',
       threshold: [90],

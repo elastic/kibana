@@ -29,6 +29,9 @@ export type OutputSecret =
       id: string;
       hash?: string;
     };
+
+export type OutputPreset = 'custom' | 'balanced' | 'throughput' | 'scale' | 'latency';
+
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
@@ -49,6 +52,7 @@ interface NewBaseOutput {
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
   secrets?: {};
+  preset?: OutputPreset;
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {

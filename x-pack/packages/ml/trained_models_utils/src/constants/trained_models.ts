@@ -105,6 +105,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'E5 (EmbEddings from bidirEctional Encoder rEpresentations)',
     }),
     license: 'MIT',
+    licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small',
     type: ['pytorch', 'text_embedding'],
   },
   '.multilingual-e5-small_linux-x86_64': {
@@ -122,6 +123,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
         'E5 (EmbEddings from bidirEctional Encoder rEpresentations), optimized for linux-x86_64',
     }),
     license: 'MIT',
+    licenseUrl: 'https://huggingface.co/elastic/multilingual-e5-small_linux-x86_64',
     type: ['pytorch', 'text_embedding'],
   },
 } as const);
@@ -142,9 +144,13 @@ export interface ModelDefinition {
   os?: string;
   arch?: string;
   default?: boolean;
+  /** Indicates if model version is recommended for deployment based on the cluster configuration */
   recommended?: boolean;
   hidden?: boolean;
+  /** Software license of a model, e.g. MIT */
   license?: string;
+  /** Link to the external license/documentation page */
+  licenseUrl?: string;
   type?: readonly string[];
 }
 

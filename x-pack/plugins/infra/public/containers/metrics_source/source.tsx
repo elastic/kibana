@@ -8,8 +8,8 @@
 import createContainer from 'constate';
 import React, { useEffect, useState } from 'react';
 
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import type {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
@@ -34,11 +34,13 @@ export const pickIndexPattern = (
 };
 
 export const useSource = ({ sourceId }: { sourceId: string }) => {
-  const { services } = useKibana();
+  const {
+    services: { http, telemetry },
+  } = useKibanaContextForPlugin();
 
   const notify = useSourceNotifier();
 
-  const fetchService = services.http;
+  const fetchService = http;
   const API_URL = `/api/metrics/source/${sourceId}`;
 
   const [source, setSource] = useState<MetricsSourceConfiguration | undefined>(undefined);
@@ -46,12 +48,22 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   const [loadSourceRequest, loadSource] = useTrackedPromise(
     {
       cancelPreviousOn: 'resolution',
-      createPromise: () => {
+      createPromise: async () => {
         if (!fetchService) {
           throw new MissingHttpClientException();
         }
 
-        return fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' });
+        const start = performance.now();
+        const response = await fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, {
+          method: 'GET',
+        });
+        telemetry.reportPerformanceMetricEvent(
+          'infra_source_load',
+          performance.now() - start,
+          {},
+          {}
+        );
+        return response;
       },
       onResolve: (response) => {
         if (response) {

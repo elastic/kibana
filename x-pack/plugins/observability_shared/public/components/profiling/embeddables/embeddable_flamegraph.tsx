@@ -7,10 +7,14 @@
 
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import React from 'react';
-import { ProfilingEmbeddable, ProfilingEmbeddableProps } from './profiling_embeddable';
+import { ProfilingEmbeddable } from './profiling_embeddable';
 import { EMBEDDABLE_FLAMEGRAPH } from '.';
 
-type Props = Omit<ProfilingEmbeddableProps<BaseFlameGraph>, 'embeddableFactoryId'>;
+interface Props {
+  data?: BaseFlameGraph;
+  isLoading: boolean;
+  height?: string;
+}
 
 export function EmbeddableFlamegraph(props: Props) {
   return <ProfilingEmbeddable {...props} embeddableFactoryId={EMBEDDABLE_FLAMEGRAPH} />;

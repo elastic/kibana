@@ -17,7 +17,7 @@ import {
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
-import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
+import { useDarkMode } from '@kbn/kibana-react-plugin/public';
 import { getCoreVitalTooltipMessage, Thresholds } from './core_vital_item';
 import {
   LEGEND_NEEDS_IMPROVEMENT_LABEL,
@@ -50,8 +50,7 @@ interface Props {
 }
 
 export function PaletteLegends({ ranks, title, onItemHover, thresholds, isCls }: Props) {
-  const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
-
+  const darkMode = useDarkMode(false);
   const palette = euiPaletteForStatus(3);
   const labels = [LEGEND_GOOD_LABEL, LEGEND_NEEDS_IMPROVEMENT_LABEL, LEGEND_POOR_LABEL];
 

@@ -1467,6 +1467,14 @@
           "name": "format",
           "description": "Format of response - json or yaml",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "prerelease",
+          "description": "Specify if version is prerelease",
+          "in": "query"
         }
       ]
     },
@@ -7952,6 +7960,16 @@
           "config": {
             "type": "object"
           },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
+          },
           "config_yaml": {
             "type": "string"
           },
@@ -8441,6 +8459,16 @@
           },
           "config": {
             "type": "object"
+          },
+          "preset": {
+            "type": "string",
+            "enum": [
+              "balanced",
+              "custom",
+              "throughput",
+              "scale",
+              "latency"
+            ]
           },
           "config_yaml": {
             "type": "string"

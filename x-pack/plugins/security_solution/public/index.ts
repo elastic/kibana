@@ -8,7 +8,7 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { Plugin } from './plugin';
 import type { PluginSetup, PluginStart } from './types';
-export type { TimelineModel } from './timelines/store/timeline/model';
+export type { TimelineModel } from './timelines/store/model';
 export type { LinkItem } from './common/links';
 export type { FetchRulesResponse } from './detection_engine/rule_management/logic/types';
 

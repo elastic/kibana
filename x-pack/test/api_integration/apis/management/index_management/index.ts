@@ -18,6 +18,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./component_templates'));
     loadTestFile(require.resolve('./cluster_nodes'));
     loadTestFile(require.resolve('./index_details'));
+    loadTestFile(require.resolve('./enrich_policies'));
     loadTestFile(require.resolve('./create_enrich_policy'));
   });
 }

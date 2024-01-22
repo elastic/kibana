@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { transformRulesForExport } from './transform_rule_for_export';
 jest.mock('../lib/rule_execution_status', () => ({
   getRuleExecutionStatusPendingAttributes: () => ({
@@ -18,7 +19,7 @@ describe('transform rule for export', () => {
   const mockRules = [
     {
       id: '1',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: true,
         name: 'rule-name',
@@ -51,7 +52,7 @@ describe('transform rule for export', () => {
     },
     {
       id: '2',
-      type: 'alert',
+      type: RULE_SAVED_OBJECT_TYPE,
       attributes: {
         enabled: false,
         name: 'disabled-rule',

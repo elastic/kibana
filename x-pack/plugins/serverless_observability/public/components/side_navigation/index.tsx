@@ -29,16 +29,21 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('xpack.serverlessObservability.nav.logExplorer', {
-            defaultMessage: 'Log Explorer',
+          title: i18n.translate('xpack.serverlessObservability.nav.discover', {
+            defaultMessage: 'Discover',
           }),
           link: 'observability-log-explorer',
+          // avoid duplicate "Discover" breadcrumbs
+          breadcrumbStatus: 'hidden',
           renderAs: 'item',
           children: [
             {
-              // This is to show "discover" breadcrumbs when navigating from "log explorer" to "discover"
               link: 'discover',
-              sideNavStatus: 'hidden',
+              children: [
+                {
+                  link: 'observability-log-explorer',
+                },
+              ],
             },
           ],
         },

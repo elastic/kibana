@@ -16,7 +16,7 @@ import {
 import { UiActionsService } from './service';
 import { setTheme } from './services';
 
-export type UiActionsSetup = Pick<
+export type UiActionsPublicSetup = Pick<
   UiActionsService,
   | 'addTriggerAction'
   | 'attachAction'
@@ -26,14 +26,28 @@ export type UiActionsSetup = Pick<
   | 'unregisterAction'
 >;
 
-export type UiActionsStart = PublicMethodsOf<UiActionsService>;
+export type UiActionsPublicStart = PublicMethodsOf<UiActionsService>;
 
-export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UiActionsPublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface UiActionsPublicStartDependencies {}
+
+export class UiActionsPlugin
+  implements
+    Plugin<
+      UiActionsPublicSetup,
+      UiActionsPublicStart,
+      UiActionsPublicSetupDependencies,
+      UiActionsPublicStartDependencies
+    >
+{
   private readonly service = new UiActionsService();
 
-  constructor(initializerContext: PluginInitializerContext) {}
+  constructor(_initializerContext: PluginInitializerContext) {}
 
-  public setup(core: CoreSetup): UiActionsSetup {
+  public setup(core: CoreSetup): UiActionsPublicSetup {
     setTheme(core.theme);
     this.service.registerTrigger(rowClickTrigger);
     this.service.registerTrigger(visualizeFieldTrigger);
@@ -41,7 +55,7 @@ export class UiActionsPlugin implements Plugin<UiActionsSetup, UiActionsStart> {
     return this.service;
   }
 
-  public start(core: CoreStart): UiActionsStart {
+  public start(_core: CoreStart): UiActionsPublicStart {
     return this.service;
   }
 

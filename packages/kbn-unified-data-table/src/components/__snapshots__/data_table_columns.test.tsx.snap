@@ -43,24 +43,250 @@ Array [
       [Function],
       [Function],
     ],
-    "display": <div
-      aria-label="timestamp - this field represents the time that events occurred."
-    >
-      <EuiToolTip
-        content="This field represents the time that events occurred."
-        delay="regular"
-        display="inlineBlock"
-        position="top"
-      >
-        <React.Fragment>
-          timestamp
-           
-          <EuiIcon
-            type="clock"
-          />
-        </React.Fragment>
-      </EuiToolTip>
-    </div>,
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+    />,
     "displayAsText": "timestamp",
     "id": "timestamp",
     "initialWidth": 212,
@@ -346,6 +572,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "extension",
     "id": "extension",
@@ -629,6 +856,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "message",
     "id": "message",
@@ -952,6 +1180,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "extension",
     "id": "extension",
@@ -1268,6 +1497,7 @@ Array [
           "type": "default",
         }
       }
+      showColumnTokens={true}
     />,
     "displayAsText": "message",
     "id": "message",
@@ -1420,24 +1650,166 @@ Array [
       [Function],
       [Function],
     ],
-    "display": <div
-      aria-label="timestamp - this field represents the time that events occurred."
-    >
-      <EuiToolTip
-        content="This field represents the time that events occurred."
-        delay="regular"
-        display="inlineBlock"
-        position="top"
-      >
-        <React.Fragment>
-          timestamp
-           
-          <EuiIcon
-            type="clock"
-          />
-        </React.Fragment>
-      </EuiToolTip>
-    </div>,
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+    />,
     "displayAsText": "timestamp",
     "id": "timestamp",
     "initialWidth": 212,
@@ -1591,24 +1963,208 @@ Array [
       [Function],
       [Function],
     ],
-    "display": <div
-      aria-label="timestamp - this field represents the time that events occurred."
-    >
-      <EuiToolTip
-        content="This field represents the time that events occurred."
-        delay="regular"
-        display="inlineBlock"
-        position="top"
-      >
-        <React.Fragment>
-          timestamp
-           
-          <EuiIcon
-            type="clock"
-          />
-        </React.Fragment>
-      </EuiToolTip>
-    </div>,
+    "display": <Memo(DataTableTimeColumnHeader)
+      dataView={
+        Object {
+          "docvalueFields": Array [],
+          "fields": Array [
+            Object {
+              "filterable": true,
+              "name": "_index",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "timestamp",
+              "filterable": true,
+              "name": "timestamp",
+              "scripted": false,
+              "sortable": true,
+              "type": "date",
+            },
+            Object {
+              "displayName": "message",
+              "filterable": false,
+              "name": "message",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "extension",
+              "filterable": true,
+              "name": "extension",
+              "scripted": false,
+              "type": "string",
+            },
+            Object {
+              "aggregatable": true,
+              "displayName": "bytes",
+              "filterable": true,
+              "name": "bytes",
+              "scripted": false,
+              "type": "number",
+            },
+            Object {
+              "displayName": "scripted",
+              "filterable": false,
+              "name": "scripted",
+              "scripted": true,
+              "type": "number",
+            },
+          ],
+          "getComputedFields": [Function],
+          "getFieldByName": [MockFunction] {
+            "calls": Array [
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+              Array [
+                "timestamp",
+              ],
+              Array [
+                "extension",
+              ],
+              Array [
+                "message",
+              ],
+            ],
+            "results": Array [
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "timestamp",
+                  "filterable": true,
+                  "name": "timestamp",
+                  "scripted": false,
+                  "sortable": true,
+                  "type": "date",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "aggregatable": true,
+                  "displayName": "extension",
+                  "filterable": true,
+                  "name": "extension",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+              Object {
+                "type": "return",
+                "value": Object {
+                  "displayName": "message",
+                  "filterable": false,
+                  "name": "message",
+                  "scripted": false,
+                  "type": "string",
+                },
+              },
+            ],
+          },
+          "getFormatterForField": [MockFunction],
+          "getIndexPattern": [Function],
+          "getName": [Function],
+          "getSourceFiltering": [Function],
+          "getTimeField": [Function],
+          "id": "index-pattern-with-timefield-id",
+          "isPersisted": [Function],
+          "isTimeBased": [Function],
+          "isTimeNanosBased": [Function],
+          "metaFields": Array [
+            "_index",
+            "_score",
+          ],
+          "name": "index-pattern-with-timefield",
+          "timeFieldName": "timestamp",
+          "title": "index-pattern-with-timefield-title",
+          "toMinimalSpec": [Function],
+          "toSpec": [Function],
+          "type": "default",
+        }
+      }
+      dataViewField={
+        Object {
+          "aggregatable": true,
+          "displayName": "timestamp",
+          "filterable": true,
+          "name": "timestamp",
+          "scripted": false,
+          "sortable": true,
+          "type": "date",
+        }
+      }
+    />,
     "displayAsText": "timestamp",
     "id": "timestamp",
     "initialWidth": 212,

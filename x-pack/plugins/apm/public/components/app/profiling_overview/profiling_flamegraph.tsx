@@ -40,6 +40,8 @@ interface Props {
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
   kuery: string;
+  rangeFrom: string;
+  rangeTo: string;
 }
 
 export function ProfilingFlamegraph({
@@ -49,6 +51,8 @@ export function ProfilingFlamegraph({
   environment,
   dataSource,
   kuery,
+  rangeFrom,
+  rangeTo,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -93,6 +97,8 @@ export function ProfilingFlamegraph({
               data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
                 kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
+                rangeFrom,
+                rangeTo,
               })}
             >
               {i18n.translate('xpack.apm.profiling.flamegraph.link', {

@@ -32,6 +32,8 @@ export function scaleValue({ value, scaleFactor = 1 }: { value: number; scaleFac
   return value * scaleFactor;
 }
 
+export const getTotalCount = (topNFunctions?: TopNFunctions) => topNFunctions?.TotalCount ?? 0;
+
 export interface IFunctionRow {
   id: string;
   rank: number;
@@ -194,5 +196,23 @@ export function calculateBaseComparisonDiff({
     color,
     icon,
     label,
+  };
+}
+
+export function convertRowToFrame(row: IFunctionRow) {
+  return {
+    addressOrLine: row.frame.AddressOrLine,
+    countExclusive: row.selfCPU,
+    countInclusive: row.totalCPU,
+    exeFileName: row.frame.ExeFileName,
+    fileID: row.frame.FileID,
+    frameType: row.frame.FrameType,
+    functionName: row.frame.FunctionName,
+    sourceFileName: row.frame.SourceFilename,
+    sourceLine: row.frame.SourceLine,
+    selfAnnualCO2Kgs: row.selfAnnualCO2kgs,
+    totalAnnualCO2Kgs: row.totalAnnualCO2kgs,
+    selfAnnualCostUSD: row.selfAnnualCostUSD,
+    totalAnnualCostUSD: row.totalAnnualCostUSD,
   };
 }

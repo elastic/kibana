@@ -7,7 +7,7 @@
 
 import { EuiBadge, EuiBadgeProps, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, SLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import moment from 'moment';
 import React from 'react';
@@ -16,7 +16,7 @@ import { toDurationLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
   color?: EuiBadgeProps['color'];
-  slo: SLOWithSummaryResponse;
+  slo: SLOWithSummaryResponse | SLOResponse;
 }
 
 export function SloTimeWindowBadge({ slo, color }: Props) {

@@ -44,6 +44,7 @@ import type {
 } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import moment from 'moment';
+import type { ExperimentalFeatures } from '../../../common';
 import type { EndpointAppContextService } from '../../endpoint/endpoint_app_context_services';
 import {
   exceptionListItemToTelemetryEntry,
@@ -197,6 +198,8 @@ export interface ITelemetryReceiver {
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
 
   getAlertsIndex(): string | undefined;
+
+  getExperimentalFeatures(): ExperimentalFeatures | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -211,6 +214,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   private clusterInfo?: ESClusterInfo;
   private processTreeFetcher?: Fetcher;
   private packageService?: PackageService;
+  private experimentalFeatures: ExperimentalFeatures | undefined;
   private readonly maxRecords = 10_000 as const;
 
   constructor(logger: Logger) {
@@ -235,7 +239,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     this.soClient =
       core?.savedObjects.createInternalRepository() as unknown as SavedObjectsClientContract;
     this.clusterInfo = await this.fetchClusterInfo();
-
+    this.experimentalFeatures = endpointContextService?.experimentalFeatures;
     const elasticsearch = core?.elasticsearch.client as unknown as IScopedClusterClient;
     this.processTreeFetcher = new Fetcher(elasticsearch);
   }
@@ -246,6 +250,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getAlertsIndex(): string | undefined {
     return this.alertsIndex;
+  }
+
+  public getExperimentalFeatures(): ExperimentalFeatures | undefined {
+    return this.experimentalFeatures;
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {

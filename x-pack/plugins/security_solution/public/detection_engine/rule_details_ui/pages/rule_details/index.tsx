@@ -60,10 +60,10 @@ import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
+import { StepAboutRuleToggleDetails } from '../../../rule_creation/components/step_about_rule_details';
 import { AlertsHistogramPanel } from '../../../../detections/components/alerts_kpis/alerts_histogram_panel';
 import { useUserData } from '../../../../detections/components/user_info';
-import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
+import { StepRuleActionsReadOnly } from '../../../rule_creation/components/step_rule_actions';
 import {
   buildAlertsFilter,
   buildAlertStatusFilter,
@@ -71,7 +71,7 @@ import {
   buildThreatMatchFilter,
 } from '../../../../detections/components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { StepPanel } from '../../../../detections/components/rules/step_panel';
+import { StepPanel } from '../../../rule_creation/components/step_panel';
 import {
   getMachineLearningJobId,
   getStepsData,

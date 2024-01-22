@@ -18,7 +18,6 @@ import {
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { useState } from 'react';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
 import { useKibana } from '../../../utils/kibana_react';
@@ -32,6 +31,7 @@ export interface Props {
 }
 
 export type SortField = 'sli_value' | 'error_budget_consumed' | 'error_budget_remaining' | 'status';
+export type SortDirection = 'asc' | 'desc';
 
 export type Item<T> = EuiSelectableOption & {
   label: string;
@@ -69,8 +69,11 @@ const SORT_OPTIONS: Array<Item<SortField>> = [
 export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initialState }: Props) {
-  const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
-    useKibana().services;
+  const {
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useKibana().services;
   const { dataView } = useCreateDataView({ indexPatternString: '.slo-observability.summary-*' });
 
   const [query, setQuery] = useState(initialState.kqlQuery);
@@ -96,16 +99,6 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
         <QueryStringInput
           appName="Observability"
           bubbleSubmitEvent={false}
-          deps={{
-            data,
-            dataViews,
-            docLinks,
-            http,
-            notifications,
-            storage,
-            uiSettings,
-            unifiedSearch,
-          }}
           disableAutoFocus
           onSubmit={(value: Query) => {
             setQuery(String(value.query));
