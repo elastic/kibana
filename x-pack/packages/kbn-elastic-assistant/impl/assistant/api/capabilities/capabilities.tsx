@@ -6,14 +6,12 @@
  */
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
 
 export interface GetCapabilitiesParams {
   http: HttpSetup;
   signal?: AbortSignal | undefined;
 }
-
-export type GetCapabilitiesResponse = AssistantFeatures;
 
 /**
  * API call for fetching assistant capabilities
