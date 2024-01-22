@@ -46,6 +46,7 @@ import {
   TRUSTED_APPS_URL,
   EVENT_FILTERS_URL,
   NETWORK_URL,
+  HOSTS_URL,
   OVERVIEW_URL,
   TIMELINES_URL,
   EXCEPTIONS_URL,
@@ -364,7 +365,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(ServerlessHeaders.HOSTS, true);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {
