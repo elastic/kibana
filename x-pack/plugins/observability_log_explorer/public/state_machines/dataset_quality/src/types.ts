@@ -41,11 +41,11 @@ export type ObservabilityDatasetQualityEvent =
 
 export type ObservabilityDatasetQualityTypeState =
   | {
-      value: 'uninitialized' | 'initializingFromUrl' | 'creatingController';
+      value: 'initializingFromUrl' | 'creatingController';
       context: CommonObservabilityDatasetQualityContext;
     }
   | {
-      value: 'initialized' | { initialized: 'unknownLogExplorerDatasetQualityState' };
+      value: 'initialized' | { initialized: 'unknownDatasetQualityState' };
       context: CommonObservabilityDatasetQualityContext & WithController;
     }
   | {

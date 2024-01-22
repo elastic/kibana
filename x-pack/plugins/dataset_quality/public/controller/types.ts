@@ -6,6 +6,7 @@
  */
 
 import { Observable } from 'rxjs';
+import { DIRECTION, SORT_FIELD } from '../hooks';
 import { DatasetQualityControllerStateService } from '../state_machines/dataset_quality_controller';
 
 export interface DatasetQualityController {
@@ -16,6 +17,10 @@ export interface DatasetQualityController {
 export interface DatasetQualityTableOptions {
   page: number;
   rowsPerPage: number;
+  sort: {
+    field: SORT_FIELD;
+    direction: DIRECTION;
+  };
 }
 
 export interface DatasetQualityPublicState {

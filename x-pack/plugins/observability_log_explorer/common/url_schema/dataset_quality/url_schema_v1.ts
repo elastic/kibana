@@ -7,9 +7,15 @@
 
 import * as rt from 'io-ts';
 
+export const sortRT = rt.strict({
+  field: rt.string,
+  direction: rt.string,
+});
+
 export const tableRT = rt.strict({
   page: rt.number,
   rowsPerPage: rt.number,
+  sort: sortRT,
 });
 
 export const urlSchemaRT = rt.exact(

@@ -39,13 +39,12 @@ export const createPureObservabilityDatasetQualityStateMachine = (
           },
           on: {
             INITIALIZED_FROM_URL: {
-              target: '#creatingController',
+              target: 'creatingController',
               actions: ['storeInitialUrlState'],
             },
           },
         },
         creatingController: {
-          id: 'creatingController',
           invoke: {
             src: 'createController',
           },

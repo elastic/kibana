@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { DIRECTION, SORT_FIELD } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
   DataStreamDegradedDocsStatServiceResponse,
@@ -17,13 +18,16 @@ interface WithTableOptions {
   table: {
     page: number;
     rowsPerPage: number;
+    sort: {
+      field: SORT_FIELD;
+      direction: DIRECTION;
+    };
   };
 }
 
 interface WithDataStreamStats {
   dataStreamStats: DataStreamStat[];
 }
-
 interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
@@ -36,15 +40,19 @@ type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
 
 export type DatasetQualityControllerTypeState =
   | {
-      value: 'uninitialized';
+      value: 'fetchingData';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'loadingDatasets';
+      value: 'idle';
       context: DefaultDatasetQualityStateContext;
     }
   | {
-      value: 'loadingDegradedDocs';
+      value: 'fetchingData.loadingDatasets';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'fetchingData.loadingDegradedDocs';
       context: DefaultDatasetQualityStateContext;
     };
 
@@ -58,6 +66,13 @@ export type DatasetQualityControllerEvent =
   | {
       type: 'CHANGE_ROWS_PER_PAGE';
       rowsPerPage: number;
+    }
+  | {
+      type: 'CHANGE_SORT';
+      sort: {
+        field: SORT_FIELD;
+        direction: DIRECTION;
+      };
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>;

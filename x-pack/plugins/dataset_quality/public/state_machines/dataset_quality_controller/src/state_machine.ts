@@ -85,6 +85,10 @@ export const createPureDatasetQualityControllerStateMachine = (
               target: 'idle',
               actions: ['storeTableRowsPerPage'],
             },
+            CHANGE_SORT: {
+              target: 'idle',
+              actions: ['storeSortOptions'],
+            },
           },
         },
       },
@@ -107,6 +111,16 @@ export const createPureDatasetQualityControllerStateMachine = (
                 table: {
                   ...context.table,
                   rowsPerPage: event.rowsPerPage,
+                },
+              }
+            : {};
+        }),
+        storeSortOptions: assign((context, event) => {
+          return 'sort' in event
+            ? {
+                table: {
+                  ...context.table,
+                  sort: event.sort,
                 },
               }
             : {};

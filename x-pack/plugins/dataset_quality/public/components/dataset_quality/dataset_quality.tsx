@@ -7,7 +7,6 @@
 import React, { useMemo } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
@@ -28,16 +27,11 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
   return ({ controller }: DatasetQualityProps) => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
-    const dataStreamsStatsServiceClient = new DataStreamsStatsService().start({
-      http: core.http,
-    }).client;
-
     const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
       () => ({
-        dataStreamsStatsServiceClient,
         service: controller.service,
       }),
-      [controller.service, dataStreamsStatsServiceClient]
+      [controller.service]
     );
 
     return (
