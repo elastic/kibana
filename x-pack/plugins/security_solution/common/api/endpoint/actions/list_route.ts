@@ -9,6 +9,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import {
+  RESPONSE_ACTION_AGENT_TYPE,
   RESPONSE_ACTION_API_COMMANDS_NAMES,
   RESPONSE_ACTION_STATUS,
   RESPONSE_ACTION_TYPE,
@@ -32,6 +33,30 @@ export const EndpointActionListRequestSchema = {
       schema.oneOf([
         schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
         schema.string({ minLength: 1 }),
+      ])
+    ),
+    agentTypes: schema.maybe(
+      schema.oneOf([
+        schema.arrayOf(
+          schema.oneOf(
+            // @ts-expect-error TS2769: No overload matches this call
+            RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
+          ),
+          {
+            minSize: 1,
+            validate: (agentTypes) => {
+              if (
+                !agentTypes.every((agentType) => RESPONSE_ACTION_AGENT_TYPE.includes(agentType))
+              ) {
+                return 'agentType must contain valid agent type value';
+              }
+            },
+          }
+        ),
+        schema.oneOf(
+          // @ts-expect-error TS2769: No overload matches this call
+          RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
+        ),
       ])
     ),
     commands: schema.maybe(
