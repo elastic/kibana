@@ -10,36 +10,31 @@ import { pick } from 'lodash';
 import moment, { Moment } from 'moment';
 
 import {
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
   controlGroupInputToRawControlGroupAttributes,
   generateNewControlIds,
+  getDefaultControlGroupInput,
+  PersistableControlGroupInput,
+  persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
-import { isFilterPinned } from '@kbn/es-query';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
+import { isFilterPinned } from '@kbn/es-query';
 
+import { convertPanelMapToSavedPanels, extractReferences } from '../../../../common';
+import { DashboardAttributes, DashboardCrudTypes } from '../../../../common/content_management';
+import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
+import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
+import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
+import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
+import { DashboardStartDependencies } from '../../../plugin';
+import { dashboardContentManagementCache } from '../dashboard_content_management_service';
 import {
-  extractReferences,
-  DashboardContainerInput,
-  convertPanelMapToSavedPanels,
-} from '../../../../common';
-import {
+  DashboardContentManagementRequiredServices,
   SaveDashboardProps,
   SaveDashboardReturn,
-  DashboardContentManagementRequiredServices,
 } from '../types';
-import { DashboardStartDependencies } from '../../../plugin';
-import { DASHBOARD_CONTENT_ID } from '../../../dashboard_constants';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
-import { LATEST_DASHBOARD_CONTAINER_VERSION } from '../../../dashboard_container';
-import { generateNewPanelIds } from '../../../../common/lib/dashboard_panel_converters';
-import { dashboardContentManagementCache } from '../dashboard_content_management_service';
-import { DashboardCrudTypes, DashboardAttributes } from '../../../../common/content_management';
-import { dashboardSaveToastStrings } from '../../../dashboard_container/_dashboard_container_strings';
 
-export const serializeControlGroupInput = (
-  controlGroupInput: DashboardContainerInput['controlGroupInput']
-) => {
+export const serializeControlGroupInput = (controlGroupInput?: PersistableControlGroupInput) => {
   // only save to saved object if control group is not default
   if (
     !controlGroupInput ||

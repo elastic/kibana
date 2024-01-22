@@ -8,13 +8,9 @@
 
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription, distinctUntilChanged } from 'rxjs';
 import React, { createContext, useContext } from 'react';
 
-import {
-  getDefaultControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
@@ -220,27 +216,6 @@ export class DashboardContainer
       .subscribe((hasChanges) => {
         this.dispatch.setHasUnsavedChanges(hasChanges);
       });
-
-    // this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
-    //   .pipe(
-    //     distinctUntilChanged(),
-    //     combineLatestWith(this.controlGroup?.hasUnsavedChanges ?? new BehaviorSubject(false))
-    //   )
-    //   .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
-    //     console.log(
-    //       'dashboardHasChanges',
-    //       dashboardHasChanges,
-    //       'controlGroupHasChanges',
-    //       controlGroupHasChanges
-    //     );
-    //     this.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
-    //   });
-
-    // this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
-    //   .pipe(distinctUntilChanged(), merge(this.controlGroup?.hasUnsavedChanges))
-    // .subscribe((hasChanges) => {
-    //   this.dispatch.setHasUnsavedChanges(hasChanges);
-    // });
   }
 
   public getAppContext() {
@@ -443,18 +418,12 @@ export class DashboardContainer
     const {
       explicitInput: { timeRange, refreshInterval },
       componentState: {
-        lastSavedInput: {
-          controlGroupInput: lastSavedControlGroupInput,
-          timeRestore: lastSavedTimeRestore,
-        },
+        lastSavedInput: { timeRestore: lastSavedTimeRestore },
       },
     } = this.getState();
 
-    if (
-      this.controlGroup &&
-      !persistableControlGroupInputIsEqual(this.controlGroup.getInput(), lastSavedControlGroupInput)
-    ) {
-      this.controlGroup.updateInput(lastSavedControlGroupInput ?? getDefaultControlGroupInput());
+    if (this.controlGroup) {
+      this.controlGroup.resetToLastSavedState();
     }
 
     // if we are using the unified search integration, we need to force reset the time picker.

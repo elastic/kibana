@@ -18,7 +18,11 @@ import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
-import { PersistableControlGroupInput } from '../../../common';
+import {
+  getDefaultControlGroupInput,
+  PersistableControlGroupInput,
+  persistableControlGroupInputIsEqual,
+} from '../../../common';
 import { pluginServices } from '../../services';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
@@ -205,6 +209,15 @@ export class ControlGroupContainer extends Container<
       })
     );
   };
+
+  public resetToLastSavedState() {
+    const {
+      componentState: { lastSavedInput },
+    } = this.getState();
+    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
+      this.updateInput(lastSavedInput);
+    }
+  }
 
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
     const input = this.getInput();

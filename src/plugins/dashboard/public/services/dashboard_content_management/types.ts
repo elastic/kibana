@@ -6,25 +6,26 @@
  * Side Public License, v 1.
  */
 
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
+import { DashboardContainerInput } from '../../../common';
+import { DashboardCrudTypes } from '../../../common/content_management';
+import { DashboardStartDependencies } from '../../plugin';
+import { DashboardBackupServiceType } from '../dashboard_backup/types';
+import { DashboardDataService } from '../data/types';
+import { DashboardEmbeddableService } from '../embeddable/types';
+import { DashboardInitializerContextService } from '../initializer_context/types';
+import { DashboardNotificationsService } from '../notifications/types';
+import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
+import { DashboardScreenshotModeService } from '../screenshot_mode/types';
+import { DashboardSpacesService } from '../spaces/types';
+import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 import {
   FindDashboardsByIdResponse,
   SearchDashboardsArgs,
   SearchDashboardsResponse,
 } from './lib/find_dashboards';
-import { DashboardDataService } from '../data/types';
-import { DashboardSpacesService } from '../spaces/types';
-import { DashboardContainerInput } from '../../../common';
-import { DashboardStartDependencies } from '../../plugin';
-import { DashboardEmbeddableService } from '../embeddable/types';
-import { DashboardNotificationsService } from '../notifications/types';
-import { DashboardCrudTypes } from '../../../common/content_management';
-import { DashboardScreenshotModeService } from '../screenshot_mode/types';
-import { DashboardInitializerContextService } from '../initializer_context/types';
-import { DashboardSavedObjectsTaggingService } from '../saved_objects_tagging/types';
-import { DashboardBackupServiceType } from '../dashboard_backup/types';
-import { DashboardDuplicateTitleCheckProps } from './lib/check_for_duplicate_dashboard_title';
 
 export interface DashboardContentManagementRequiredServices {
   data: DashboardDataService;
@@ -67,7 +68,7 @@ export interface LoadDashboardReturn {
   dashboardId?: string;
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
-  dashboardInput: DashboardContainerInput;
+  dashboardInput: DashboardContainerInput & { controlGroupInput?: ControlGroupInput };
   anyMigrationRun?: boolean;
 }
 
@@ -77,7 +78,7 @@ export interface LoadDashboardReturn {
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export interface SaveDashboardProps {
-  currentState: DashboardContainerInput;
+  currentState: DashboardContainerInput & { controlGroupInput?: PersistableControlGroupInput };
   saveOptions: SavedDashboardSaveOpts;
   lastSavedId?: string;
 }

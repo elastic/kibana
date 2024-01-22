@@ -131,9 +131,6 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
     return fastIsEqual(currentValue, lastValue);
   },
 
-  // controlGroupInput: ({ currentValue, lastValue }) =>
-  //   persistableControlGroupInputIsEqual(currentValue, lastValue),
-
   viewMode: () => false, // When compared view mode is always considered unequal so that it gets backed up.
 };
 

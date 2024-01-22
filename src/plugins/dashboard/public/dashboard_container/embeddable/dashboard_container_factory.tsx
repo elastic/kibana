@@ -6,27 +6,28 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
   Container,
-  ErrorEmbeddable,
   ContainerOutput,
+  EmbeddableAppContext,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
-  EmbeddableAppContext,
+  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import type { DashboardContainer } from './dashboard_container';
+import { createExtract, createInject, DashboardContainerInput } from '../../../common';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import { createInject, createExtract, DashboardContainerInput } from '../../../common';
 import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import type { DashboardContainer } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -35,7 +36,9 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<DashboardContainerInput> & {
+    controlGroupInput?: Partial<ControlGroupInput>;
+  };
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 

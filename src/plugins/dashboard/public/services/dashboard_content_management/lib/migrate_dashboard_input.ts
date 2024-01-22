@@ -22,7 +22,7 @@ import { DashboardContainerInput, DashboardPanelState } from '../../../../common
  * get skipped at Embeddable create time - unless states with older versions are saved in the URL or session storage.
  */
 export const migrateDashboardInput = (
-  dashboardInput: DashboardContainerInput,
+  dashboardInput: DashboardContainerInput & { controlGroupInput?: ControlGroupInput },
   embeddable: DashboardEmbeddableService
 ) => {
   let anyMigrationRun = false;
