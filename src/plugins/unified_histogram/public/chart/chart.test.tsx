@@ -13,9 +13,11 @@ import type { Capabilities } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { UnifiedHistogramFetchStatus } from '../types';
-import { Chart } from './chart';
+import { UnifiedHistogramSuggestionType } from '../types';
+import { Chart, type ChartProps } from './chart';
 import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { getLensVisMock } from '../__mocks__/lens_vis';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of } from 'rxjs';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
@@ -23,8 +25,7 @@ import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
 import { checkChartAvailability } from './check_chart_availability';
-
-import { currentSuggestionMock, allSuggestionsMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock, currentSuggestionMock } from '../__mocks__/suggestions';
 
 let mockUseEditVisualization: jest.Mock | undefined = jest.fn();
 
@@ -85,25 +86,49 @@ async function mountComponent({
         },
       };
 
-  const props = {
-    dataView,
-    query: {
-      language: 'kuery',
-      query: '',
-    },
+  const requestParams = {
+    query: isPlainRecord
+      ? { esql: 'from logs | limit 10' }
+      : {
+          language: 'kuery',
+          query: '',
+        },
     filters: [],
-    timeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    relativeTimeRange: { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' },
+    getTimeRange: () => ({ from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' }),
+    updateTimeRange: () => {},
+  };
+
+  const lensVisService = (
+    await getLensVisMock({
+      query: requestParams.query,
+      filters: requestParams.filters,
+      isPlainRecord: Boolean(isPlainRecord),
+      timeInterval: 'auto',
+      dataView,
+      breakdownField: undefined,
+      columns: [],
+      suggestionContext: {
+        type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+        suggestion: currentSuggestion,
+        suggestionDeps: [dataView.id, [], requestParams.query],
+      },
+    })
+  ).lensService;
+
+  const props: ChartProps = {
+    lensVisService,
+    dataView,
+    requestParams,
     services,
     hits: noHits
       ? undefined
       : {
           status: 'complete' as UnifiedHistogramFetchStatus,
-          number: 2,
+          total: 2,
         },
     chart,
     breakdown: noBreakdown ? undefined : { field: undefined },
-    currentSuggestion,
-    allSuggestions,
     isChartLoading: Boolean(isChartLoading),
     isPlainRecord,
     appendHistogram,

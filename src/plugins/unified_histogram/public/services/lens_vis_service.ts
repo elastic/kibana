@@ -55,7 +55,7 @@ interface LensVisServiceState {
   lensAttributesContext: LensAttributesContext | undefined;
 }
 
-interface QueryParams {
+export interface QueryParams {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters: Filter[] | undefined;

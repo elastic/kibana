@@ -12,26 +12,32 @@ import { Subject } from 'rxjs';
 import type { UnifiedHistogramInputMessage } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { currentSuggestionMock } from '../../__mocks__/suggestions';
-import { getLensAttributes } from '../utils/get_lens_attributes';
+import { getLensVisMock } from '../../__mocks__/lens_vis';
 import { getLensProps, useLensProps } from './use_lens_props';
+import { UnifiedHistogramSuggestionType } from '../../types';
 
 describe('useLensProps', () => {
-  it('should return lens props', () => {
+  it('should return lens props', async () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
-    const attributesContext = getLensAttributes({
-      title: 'test',
-      filters: [],
-      query: {
-        language: 'kuery',
-        query: '',
-      },
-      dataView: dataViewWithTimefieldMock,
-      timeInterval: 'auto',
-      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      suggestion: undefined,
-    });
+    const query = {
+      language: 'kuery',
+      query: '',
+    };
+    const attributesContext = (
+      await getLensVisMock({
+        chartTitle: 'test',
+        filters: [],
+        query,
+        columns: [],
+        isPlainRecord: false,
+        dataView: dataViewWithTimefieldMock,
+        timeInterval: 'auto',
+        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+        suggestionContext: undefined,
+      })
+    ).lensAttributesContext;
     const lensProps = renderHook(() => {
       return useLensProps({
         request: {
@@ -40,7 +46,7 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributesContext,
+        attributesContext: attributesContext!,
         onLoad,
       });
     });
@@ -48,28 +54,37 @@ describe('useLensProps', () => {
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
-        attributes: attributesContext.attributes,
+        attributes: attributesContext!.attributes,
         onLoad,
       })
     );
   });
 
-  it('should return lens props for text based languages', () => {
+  it('should return lens props for text based languages', async () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
-    const attributesContext = getLensAttributes({
-      title: 'test',
-      filters: [],
-      query: {
-        language: 'kuery',
-        query: '',
-      },
-      dataView: dataViewWithTimefieldMock,
-      timeInterval: 'auto',
-      breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-      suggestion: currentSuggestionMock,
-    });
+    const query = {
+      language: 'kuery',
+      query: '',
+    };
+    const attributesContext = (
+      await getLensVisMock({
+        chartTitle: 'test',
+        filters: [],
+        query,
+        columns: [],
+        isPlainRecord: false,
+        dataView: dataViewWithTimefieldMock,
+        timeInterval: 'auto',
+        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+        suggestionContext: {
+          type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+          suggestion: currentSuggestionMock,
+          suggestionDeps: [dataViewWithTimefieldMock.id, [], query],
+        },
+      })
+    ).lensAttributesContext;
     const lensProps = renderHook(() => {
       return useLensProps({
         request: {
@@ -78,7 +93,7 @@ describe('useLensProps', () => {
         },
         getTimeRange,
         refetch$,
-        attributesContext,
+        attributesContext: attributesContext!,
         onLoad,
       });
     });
@@ -86,16 +101,33 @@ describe('useLensProps', () => {
       getLensProps({
         searchSessionId: 'id',
         getTimeRange,
-        attributes: attributesContext.attributes,
+        attributes: attributesContext!.attributes,
         onLoad,
       })
     );
   });
 
-  it('should only update lens props when refetch$ is triggered', () => {
+  it('should only update lens props when refetch$ is triggered', async () => {
     const getTimeRange = jest.fn();
     const refetch$ = new Subject<UnifiedHistogramInputMessage>();
     const onLoad = jest.fn();
+    const query = {
+      language: 'kuery',
+      query: '',
+    };
+    const attributesContext = (
+      await getLensVisMock({
+        chartTitle: 'test',
+        filters: [],
+        query,
+        columns: [],
+        isPlainRecord: false,
+        dataView: dataViewWithTimefieldMock,
+        timeInterval: 'auto',
+        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
+        suggestionContext: undefined,
+      })
+    ).lensAttributesContext;
     const lensProps = {
       request: {
         searchSessionId: '123',
@@ -103,18 +135,7 @@ describe('useLensProps', () => {
       },
       getTimeRange,
       refetch$,
-      attributesContext: getLensAttributes({
-        title: 'test',
-        filters: [],
-        query: {
-          language: 'kuery',
-          query: '',
-        },
-        dataView: dataViewWithTimefieldMock,
-        timeInterval: 'auto',
-        breakdownField: dataViewWithTimefieldMock.getFieldByName('extension'),
-        suggestion: undefined,
-      }),
+      attributesContext: attributesContext!,
       onLoad,
     };
     const hook = renderHook(
