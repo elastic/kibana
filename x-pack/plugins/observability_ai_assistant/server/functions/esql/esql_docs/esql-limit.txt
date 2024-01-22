@@ -19,6 +19,8 @@ settings:
 esql.query.result_truncation_default_size
 esql.query.result_truncation_max_size
 Example
+```esql
 FROM employees
 | SORT emp_no ASC
 | LIMIT 5
+```

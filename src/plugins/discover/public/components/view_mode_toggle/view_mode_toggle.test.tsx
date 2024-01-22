@@ -11,12 +11,18 @@ import { VIEW_MODE } from '../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { findTestSubject } from '@elastic/eui/lib/test';
 import { DocumentViewModeToggle } from './view_mode_toggle';
+import { BehaviorSubject } from 'rxjs';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { DataTotalHits$ } from '../../application/main/services/discover_data_state_container';
+import { FetchStatus } from '../../application/types';
 
 describe('Document view mode toggle component', () => {
   const mountComponent = ({
     showFieldStatistics = true,
     viewMode = VIEW_MODE.DOCUMENT_LEVEL,
+    isTextBasedQuery = false,
     setDiscoverViewMode = jest.fn(),
   } = {}) => {
     const serivces = {
@@ -25,21 +31,40 @@ describe('Document view mode toggle component', () => {
       },
     };
 
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.dataState.data$.totalHits$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.COMPLETE,
+      result: 10,
+    }) as DataTotalHits$;
+
     return mountWithIntl(
       <KibanaContextProvider services={serivces}>
-        <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
+        <DocumentViewModeToggle
+          viewMode={viewMode}
+          isTextBasedQuery={isTextBasedQuery}
+          stateContainer={stateContainer}
+          setDiscoverViewMode={setDiscoverViewMode}
+        />
       </KibanaContextProvider>
     );
   };
 
   it('should render if SHOW_FIELD_STATISTICS is true', () => {
     const component = mountComponent();
-    expect(component.isEmptyRender()).toBe(false);
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(true);
+    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });
 
   it('should not render if SHOW_FIELD_STATISTICS is false', () => {
     const component = mountComponent({ showFieldStatistics: false });
-    expect(component.isEmptyRender()).toBe(true);
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
+    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
+  });
+
+  it('should not render if text-based', () => {
+    const component = mountComponent({ isTextBasedQuery: true });
+    expect(findTestSubject(component, 'dscViewModeToggle').exists()).toBe(false);
+    expect(findTestSubject(component, 'discoverQueryTotalHits').exists()).toBe(true);
   });
 
   it('should set the view mode to VIEW_MODE.DOCUMENT_LEVEL when dscViewModeDocumentButton is clicked', () => {
