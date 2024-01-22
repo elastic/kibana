@@ -43,6 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await security.testUser.setRoles(['kibana_admin', 'long_window_logstash']);
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
     after(async () => {
@@ -65,13 +66,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should modify the time range when the histogram is brushed', async function () {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
       // this is the number of renderings of the histogram needed when new data is fetched
       let renderingCountInc = 1;
       const prevRenderingCount = await elasticChart.getVisualizationRenderingCount();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await queryBar.submitQuery();
       await retry.waitFor('chart rendering complete', async () => {
         const actualCount = await elasticChart.getVisualizationRenderingCount();
         const expectedCount = prevRenderingCount + renderingCountInc;
@@ -106,8 +104,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should update correctly when switching data views and brushing the histogram', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.discover.selectIndexPattern('logstash-*');
       await PageObjects.discover.waitUntilSearchingHasFinished();
@@ -160,6 +156,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const chartCanvasExist = await elasticChart.canvasExists();
       expect(chartCanvasExist).to.be(true);
       const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
+      expect(chartIntervalIconTip).to.be(false);
+    });
+    it('should visualize monthly data with different years scaled to seconds', async () => {
+      const from = 'Jan 1, 2010 @ 00:00:00.000';
+      const to = 'Mar 21, 2019 @ 00:00:00.000';
+      await prepareTest({ from, to }, 'Second');
+      const chartCanvasExist = await elasticChart.canvasExists();
+      expect(chartCanvasExist).to.be(true);
+      const chartIntervalIconTip = await PageObjects.discover.getChartIntervalWarningIcon();
       expect(chartIntervalIconTip).to.be(true);
     });
     it('should allow hide/show histogram, persisted in url state', async () => {
@@ -168,8 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await prepareTest({ from, to });
       let canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(true);
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
         expect(canvasExists).to.be(false);
@@ -178,8 +182,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.refresh();
       canvasExists = await elasticChart.canvasExists();
       expect(canvasExists).to.be(false);
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
@@ -193,8 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await prepareTest({ from, to });
 
       // close chart for saved search
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       let canvasExists: boolean;
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
@@ -216,8 +218,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(false);
 
       // open chart for saved search
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await retry.waitFor(`Discover histogram to be displayed`, async () => {
         canvasExists = await elasticChart.canvasExists();
         return canvasExists;
@@ -239,8 +240,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
     it('should show permitted hidden histogram state when returning back to discover', async () => {
       // close chart
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       let canvasExists: boolean;
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
@@ -252,8 +252,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // open chart
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
         expect(canvasExists).to.be(true);
@@ -270,8 +269,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(canvasExists).to.be(true);
 
       // close chart
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await retry.try(async () => {
         canvasExists = await elasticChart.canvasExists();
         expect(canvasExists).to.be(false);
@@ -281,10 +279,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should recover from broken query search when clearing the query bar', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       // Make sure the chart is visible
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');

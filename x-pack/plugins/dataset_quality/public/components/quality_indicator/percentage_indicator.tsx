@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isNil } from 'lodash';
+import { EuiText } from '@elastic/eui';
+import { FormattedNumber } from '@kbn/i18n-react';
 import React from 'react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
@@ -13,11 +14,7 @@ import {
 } from '../../../common/constants';
 import { QualityIndicator } from './indicator';
 
-export function QualityPercentageIndicator({ percentage }: { percentage?: number }) {
-  if (isNil(percentage)) {
-    return <></>;
-  }
-
+export function QualityPercentageIndicator({ percentage = 0 }: { percentage?: number }) {
   const quality =
     percentage > POOR_QUALITY_MINIMUM_PERCENTAGE
       ? 'poor'
@@ -25,5 +22,11 @@ export function QualityPercentageIndicator({ percentage }: { percentage?: number
       ? 'degraded'
       : 'good';
 
-  return <QualityIndicator quality={quality} />;
+  const description = (
+    <EuiText>
+      <FormattedNumber value={percentage} />%
+    </EuiText>
+  );
+
+  return <QualityIndicator quality={quality} description={description} />;
 }

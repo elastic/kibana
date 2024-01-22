@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
 import { createLogExplorer } from './components/log_explorer';
-import {
+import { createLogExplorerControllerLazyFactory } from './controller/lazy_create_controller';
+import type {
   LogExplorerPluginSetup,
   LogExplorerPluginStart,
   LogExplorerSetupDeps,
@@ -48,8 +49,14 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
       plugins,
     });
 
+    const createLogExplorerController = createLogExplorerControllerLazyFactory({
+      core,
+      plugins,
+    });
+
     return {
       LogExplorer,
+      createLogExplorerController,
     };
   }
 }

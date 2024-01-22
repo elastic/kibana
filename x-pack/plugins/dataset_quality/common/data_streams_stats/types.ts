@@ -19,10 +19,10 @@ export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats']
   integration?: IntegrationType;
 };
 
-export type GetDataStreamsMalformedDocsStatsParams =
-  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/malformed_docs`>['params'];
-export type GetDataStreamsMalformedDocsStatsQuery = GetDataStreamsMalformedDocsStatsParams['query'];
-export type GetDataStreamsMalformedDocsStatsResponse =
-  APIReturnType<`GET /internal/dataset_quality/data_streams/malformed_docs`>;
-export type DataStreamMalformedDocsStatServiceResponse = MalformedDocsStatType[];
-export type MalformedDocsStatType = GetDataStreamsMalformedDocsStatsResponse['malformedDocs'][0];
+export type GetDataStreamsDegradedDocsStatsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
+export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
+export type GetDataStreamsDegradedDocsStatsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
+export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
+export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];

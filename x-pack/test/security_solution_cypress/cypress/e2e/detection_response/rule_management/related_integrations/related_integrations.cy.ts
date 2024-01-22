@@ -18,7 +18,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import {
   installPrebuiltRuleAssets,
-  installAllPrebuiltRulesRequest,
+  installSpecificPrebuiltRulesRequest,
   SAMPLE_PREBUILT_RULE,
 } from '../../../../tasks/api_calls/prebuilt_rules';
 import { cleanFleet } from '../../../../tasks/api_calls/fleet';
@@ -63,7 +63,13 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServe
       installed: true,
       enabled: false,
     },
-    { package: 'aws', version: '1.17.0', integration: 'unknown', installed: false, enabled: false },
+    {
+      package: 'aws',
+      version: '1.17.0',
+      integration: 'unknown',
+      installed: false,
+      enabled: false,
+    },
     { package: 'system', version: '1.17.0', installed: true, enabled: true },
   ];
   const PREBUILT_RULE = createRuleAssetSavedObject({
@@ -276,7 +282,7 @@ const INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS = 'prebuiltRules';
 
 function addAndInstallPrebuiltRules(rules: Array<typeof SAMPLE_PREBUILT_RULE>): void {
   installPrebuiltRuleAssets(rules);
-  installAllPrebuiltRulesRequest().as(INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS);
+  installSpecificPrebuiltRulesRequest(rules).as(INSTALLED_PREBUILT_RULES_RESPONSE_ALIAS);
 }
 
 function visitFirstInstalledPrebuiltRuleDetailsPage(): void {

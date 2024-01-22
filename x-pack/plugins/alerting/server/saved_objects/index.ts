@@ -23,7 +23,7 @@ import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
-export { partiallyUpdateAlert } from './partially_update_alert';
+export { partiallyUpdateRule } from './partially_update_rule';
 export { getLatestRuleVersion, getMinimumCompatibleVersion } from './rule_model_versions';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
@@ -31,10 +31,12 @@ import {
 } from '../../common';
 import { ruleModelVersions } from './rule_model_versions';
 
+export const RULE_SAVED_OBJECT_TYPE = 'alert';
+
 // Use caution when removing items from this array! Any field which has
 // ever existed in the rule SO must be included in this array to prevent
 // decryption failures during migration.
-export const AlertAttributesExcludedFromAAD = [
+export const RuleAttributesExcludedFromAAD = [
   'scheduledTaskId',
   'muteAll',
   'mutedInstanceIds',
@@ -51,11 +53,11 @@ export const AlertAttributesExcludedFromAAD = [
   'running',
 ];
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
+// useful for Pick<RawAlert, RuleAttributesExcludedFromAAD> which is a
 // type which is a subset of RawAlert with just attributes excluded from AAD
 
-// useful for Pick<RawAlert, AlertAttributesExcludedFromAADType>
-export type AlertAttributesExcludedFromAADType =
+// useful for Pick<RawAlert, RuleAttributesExcludedFromAAD>
+export type RuleAttributesExcludedFromAADType =
   | 'scheduledTaskId'
   | 'muteAll'
   | 'mutedInstanceIds'
@@ -80,7 +82,7 @@ export function setupSavedObjects(
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
-    name: 'alert',
+    name: RULE_SAVED_OBJECT_TYPE,
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
@@ -146,9 +148,9 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'alert',
+    type: RULE_SAVED_OBJECT_TYPE,
     attributesToEncrypt: new Set(['apiKey']),
-    attributesToExcludeFromAAD: new Set(AlertAttributesExcludedFromAAD),
+    attributesToExcludeFromAAD: new Set(RuleAttributesExcludedFromAAD),
   });
 
   // Encrypted attributes

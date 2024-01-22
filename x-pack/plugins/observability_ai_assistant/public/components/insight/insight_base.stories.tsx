@@ -47,6 +47,7 @@ const defaultProps: InsightBaseProps = {
       selectedConnector="gpt-4"
       loading={false}
       selectConnector={() => {}}
+      reloadConnectors={() => {}}
     />
   ),
   onToggle: () => {},

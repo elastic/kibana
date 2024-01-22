@@ -10,6 +10,7 @@ import {
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { RuleAttributes } from '../types';
 
 export interface UpdateRuleSoParams {
@@ -25,7 +26,7 @@ export const updateRuleSo = (
   const { savedObjectsClient, id, updateRuleAttributes, savedObjectsUpdateOptions } = params;
 
   return savedObjectsClient.update<RuleAttributes>(
-    'alert',
+    RULE_SAVED_OBJECT_TYPE,
     id,
     updateRuleAttributes,
     savedObjectsUpdateOptions

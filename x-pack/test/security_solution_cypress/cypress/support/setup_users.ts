@@ -39,7 +39,7 @@ function createUser(username: string, password: string, roles: string[] = []): v
     password,
     roles,
     full_name: username,
-    email: '',
+    email: `${username}@elastic.co`,
   };
 
   rootRequest({

@@ -31,6 +31,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
+// Flaky: https://github.com/elastic/kibana/issues/171168
 describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 

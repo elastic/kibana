@@ -52,11 +52,11 @@ jest.mock('../../../containers/all', () => {
 });
 
 jest.mock('../../timeline/properties/new_template_timeline', () => ({
-  NewTemplateTimeline: jest.fn(() => <div>{'Create new timeline template'}</div>),
+  NewTemplateTimeline: jest.fn(() => <div>{'Create new Timeline template'}</div>),
 }));
 
 jest.mock('../../timeline/properties/helpers', () => ({
-  NewTimeline: jest.fn().mockReturnValue(<div>{'Create new timeline'}</div>),
+  NewTimeline: jest.fn().mockReturnValue(<div>{'Create new Timeline'}</div>),
 }));
 
 jest.mock('../../../../common/containers/source', () => ({

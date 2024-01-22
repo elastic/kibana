@@ -86,7 +86,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.visit(FLEET_AGENT_POLICIES);
         cy.contains(AGENT_POLICY_NAME).click();
         cy.get('.euiTableCellContent')
-          .get('.euiPopover__anchor')
+          .get('.euiPopover')
           .get(`[aria-label="Open"]`)
           .first()
           .click();
@@ -308,14 +308,12 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         cy.get('#shardsPercentage0').should('have.value', '15');
         cy.getBySel('packShardsForm-1').within(() => {
-          cy.getBySel('shards-field-policy').contains(OSQUERY_POLICY);
+          cy.getBySel('shards-field-policy').find('input').should('value', OSQUERY_POLICY);
           cy.get('#shardsPercentage1').should('have.value', '0');
         });
-        cy.getBySel(POLICY_SELECT_COMBOBOX).within(() => {
-          cy.contains(OSQUERY_POLICY).should('not.exist');
-        });
+        cy.getBySel(POLICY_SELECT_COMBOBOX).find('input').should('not.have.value', OSQUERY_POLICY);
 
-        cy.getBySel('comboBoxInput').contains(OSQUERY_POLICY).should('exist');
+        cy.getBySel('shards-field-policy').find(`input[value="${OSQUERY_POLICY}"]`).should('exist');
         cy.getBySel(POLICY_SELECT_COMBOBOX).click();
         cy.get('[data-test-subj="packShardsForm-1"]').within(() => {
           cy.get(`[aria-label="Delete shards row"]`).click();

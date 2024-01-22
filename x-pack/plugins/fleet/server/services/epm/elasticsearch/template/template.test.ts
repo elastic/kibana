@@ -755,6 +755,84 @@ describe('EPM template', () => {
     expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
   });
 
+  it('tests processing object field with subobjects set to false (case B)', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: b.labels.*
+  type: object
+  object_type: keyword
+  subobjects: false
+  `;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'b.labels.*': {
+            path_match: 'b.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        b: {
+          type: 'object',
+          dynamic: true,
+          properties: {
+            labels: {
+              dynamic: true,
+              type: 'object',
+              subobjects: false,
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
+  it('tests processing object field with subobjects set to false (case D)', () => {
+    const objectFieldWithPropertyReversedLiteralYml = `
+- name: d.labels
+  type: object
+  object_type: keyword
+  subobjects: false
+  `;
+    const objectFieldWithPropertyReversedMapping = {
+      dynamic_templates: [
+        {
+          'd.labels': {
+            path_match: 'd.labels.*',
+            match_mapping_type: 'string',
+            mapping: {
+              type: 'keyword',
+            },
+          },
+        },
+      ],
+      properties: {
+        d: {
+          type: 'object',
+          dynamic: true,
+          properties: {
+            labels: {
+              dynamic: true,
+              type: 'object',
+              subobjects: false,
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(objectFieldWithPropertyReversedLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(objectFieldWithPropertyReversedMapping);
+  });
+
   it('tests processing nested field with property', () => {
     const nestedYaml = `
   - name: a.b
@@ -1533,7 +1611,14 @@ describe('EPM template', () => {
         },
       ]);
 
-      expect(esClient.indices.rollover).toHaveBeenCalled();
+      expect(esClient.transport.request).toHaveBeenCalledWith(
+        expect.objectContaining({
+          path: '/test.prefix1-default/_rollover',
+          querystring: {
+            lazy: true,
+          },
+        })
+      );
     });
     it('should skip rollover on expected error when flag is on', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();

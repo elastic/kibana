@@ -13,7 +13,7 @@ import { DocViewerError } from './doc_viewer_error';
 import type { DocViewRenderFn, DocViewRenderProps } from '../../types';
 
 interface Props {
-  id: number;
+  id: string;
   renderProps: DocViewRenderProps;
   title: string;
   render?: DocViewRenderFn;

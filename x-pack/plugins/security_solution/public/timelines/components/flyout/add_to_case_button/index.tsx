@@ -12,15 +12,15 @@ import { useDispatch } from 'react-redux';
 
 import type { CaseUI } from '@kbn/cases-plugin/common';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
-import { timelineSelectors } from '../../../store/timeline';
-import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
+import { timelineSelectors } from '../../../store';
+import { setInsertTimeline, showTimeline } from '../../../store/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
-import { timelineDefaults } from '../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../store/defaults';
 import * as i18n from '../../timeline/properties/translations';
 
 interface Props {

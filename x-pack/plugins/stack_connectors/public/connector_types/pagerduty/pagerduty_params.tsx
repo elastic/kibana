@@ -373,7 +373,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                   editAction('customDetails', '', index);
                 }
               }}
-              data-test-subj="customDetailsJsonEditor"
+              dataTestSubj="customDetailsJsonEditor"
             />
           </EuiFormRow>
           <LinksList

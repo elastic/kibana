@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { SlosView } from './slos_view';
-import { SLO_LIST_IS_COMPACT } from './slo_view_settings';
-import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListSearchBar, SortField } from './slo_list_search_bar';
+import { SlosView } from './slos_view';
+import { SloListSearchBar, SortDirection, SortField } from './slo_list_search_bar';
+import { SLOView, ToggleSLOView } from './toggle_slo_view';
 
 export interface Props {
   autoRefresh: boolean;
@@ -23,10 +21,12 @@ export interface Props {
 export function SloList({ autoRefresh }: Props) {
   const { state, store: storeState } = useUrlSearchState();
   const [page, setPage] = useState(state.page);
+  const [perPage, setPerPage] = useState(state.perPage);
   const [query, setQuery] = useState(state.kqlQuery);
   const [sort, setSort] = useState<SortField>(state.sort.by);
-  const [direction] = useState<'asc' | 'desc'>(state.sort.direction);
-  const [sloView, setSLOView] = useState<SLOViewType>('cardView');
+  const [direction] = useState<SortDirection>(state.sort.direction);
+  const [view, setView] = useState<SLOView>(state.view);
+  const [isCompact, setCompact] = useState<boolean>(state.compact);
 
   const {
     isLoading,
@@ -34,6 +34,7 @@ export function SloList({ autoRefresh }: Props) {
     isError,
     data: sloList,
   } = useFetchSloList({
+    perPage,
     page: page + 1,
     kqlQuery: query,
     sortBy: sort,
@@ -41,14 +42,12 @@ export function SloList({ autoRefresh }: Props) {
     shouldRefetch: autoRefresh,
   });
 
-  const { results = [], total = 0, perPage = 0 } = sloList ?? {};
+  const { results = [], total = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [isCompact, setIsCompact] = useLocalStorage<'true' | 'false'>(SLO_LIST_IS_COMPACT, 'true');
-  const isCompactView = isCompact === 'true';
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -67,6 +66,17 @@ export function SloList({ autoRefresh }: Props) {
     storeState({ page: 0, sort: { by: newSort, direction: state.sort.direction } });
   };
 
+  const handleChangeView = (newView: SLOView) => {
+    setView(newView);
+    storeState({ view: newView });
+  };
+
+  const handleToggleCompactView = () => {
+    const newCompact = !isCompact;
+    setCompact(newCompact);
+    storeState({ compact: newCompact });
+  };
+
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -79,33 +89,33 @@ export function SloList({ autoRefresh }: Props) {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <ToggleSLOView
-          sloView={sloView}
-          setSLOView={setSLOView}
-          toggleCompactView={() =>
-            isCompact === 'true' ? setIsCompact('false') : setIsCompact('true')
-          }
-          isCompact={isCompactView}
+          sloView={view}
+          onChangeView={handleChangeView}
+          onToggleCompactView={handleToggleCompactView}
+          isCompact={isCompact}
         />
       </EuiFlexItem>
       <SlosView
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        isCompact={isCompactView}
-        sloView={sloView}
+        isCompact={isCompact}
+        sloView={view}
       />
 
       {total > 0 ? (
         <EuiFlexItem>
-          <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexEnd">
-            <EuiFlexItem>
-              <EuiPagination
-                pageCount={Math.ceil(total / perPage)}
-                activePage={page}
-                onPageClick={handlePageClick}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiTablePagination
+            pageCount={Math.ceil(total / perPage)}
+            activePage={page}
+            onChangePage={handlePageClick}
+            itemsPerPage={perPage}
+            itemsPerPageOptions={[10, 25, 50, 100]}
+            onChangeItemsPerPage={(newPerPage) => {
+              setPerPage(newPerPage);
+              storeState({ perPage: newPerPage });
+            }}
+          />
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

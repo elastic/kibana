@@ -212,7 +212,7 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                   <EuiText color={'subdued'} size={'s'}>
                     <FormattedMessage
                       id="xpack.ml.trainedModels.addModelFlyout.e5Description"
-                      defaultMessage="E5 is an NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
+                      defaultMessage="E5 is a third party NLP model that enables you to perform multi-lingual semantic search by using dense vector representations. This model performs best for non-English language documents and queries."
                     />
                   </EuiText>
                 </p>
@@ -225,18 +225,6 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                         defaultMessage="View documentation"
                       />
                     </EuiLink>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="hollow"
-                      target={'_blank'}
-                      href={'https://huggingface.co/elastic/multilingual-e5-small-optimized'}
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
-                        defaultMessage="License: MIT"
-                      />
-                    </EuiBadge>
                   </EuiFlexItem>
                 </EuiFlexGroup>
                 <EuiSpacer size={'l'} />
@@ -286,25 +274,45 @@ const ClickToDownloadTabContent: FC<ClickToDownloadTabContentProps> = ({
                               {model.model_id}
                             </EuiText>
                           </EuiFlexItem>
-                          {model.recommended ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                                  />
-                                }
-                              >
-                                <EuiBadge color="hollow">
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
-                                    defaultMessage="Recommended"
-                                  />
-                                </EuiBadge>
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                          ) : null}
+                          <EuiFlexItem grow={false}>
+                            <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                              {model.recommended ? (
+                                <EuiFlexItem grow={false}>
+                                  <EuiToolTip
+                                    content={
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                        defaultMessage="Recommended model version for your cluster's hardware configuration"
+                                      />
+                                    }
+                                  >
+                                    <EuiBadge color="hollow">
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
+                                        defaultMessage="Recommended"
+                                      />
+                                    </EuiBadge>
+                                  </EuiToolTip>
+                                </EuiFlexItem>
+                              ) : null}
+                              {model.licenseUrl && model.softwareLicense ? (
+                                <EuiFlexItem grow={false}>
+                                  <EuiBadge
+                                    color="hollow"
+                                    target={'_blank'}
+                                    href={model.licenseUrl}
+                                  >
+                                    {model.softwareLicense === 'MIT' ? (
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.modelsList.mitLicenseLabel"
+                                        defaultMessage="License: MIT"
+                                      />
+                                    ) : null}
+                                  </EuiBadge>
+                                </EuiFlexItem>
+                              ) : null}
+                            </EuiFlexGroup>
+                          </EuiFlexItem>
                         </EuiFlexGroup>
                       }
                       name={model.model_id}

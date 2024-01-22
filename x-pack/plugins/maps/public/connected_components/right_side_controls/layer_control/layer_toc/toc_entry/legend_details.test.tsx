@@ -34,7 +34,7 @@ describe('LegendDetails', () => {
   } as unknown as ILayer;
 
   test('Should only render errors when layer contains errors', () => {
-    render(<LegendDetails layer={mockLayer} />);
+    render(<LegendDetails inspectorAdapters={{}} layer={mockLayer} />);
     screen.getByTestId('layer-error');
     const error = screen.queryByTestId('layer-error');
     expect(error).not.toBeNull();
@@ -47,6 +47,7 @@ describe('LegendDetails', () => {
   test('Should render warnings and legend when layer contains warnings', () => {
     render(
       <LegendDetails
+        inspectorAdapters={{}}
         layer={{
           ...mockLayer,
           getErrors: () => {

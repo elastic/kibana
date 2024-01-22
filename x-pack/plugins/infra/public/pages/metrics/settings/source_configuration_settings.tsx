@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback } from 'react';
-import { Prompt, useEditableSettings } from '@kbn/observability-shared-plugin/public';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import {
+  BottomBarActions,
+  Prompt,
+  useEditableSettings,
+} from '@kbn/observability-shared-plugin/public';
+import {
+  enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
@@ -56,12 +55,15 @@ export const SourceConfigurationSettings = ({
     indicesConfigurationProps,
     errors,
     resetForm,
-    isFormDirty,
     isFormValid,
     formState,
     formStateChanges,
-  } = useSourceConfigurationFormState(source && source.configuration);
-  const infraUiSettings = useEditableSettings('infra_metrics', [enableInfrastructureHostsView]);
+    getUnsavedChanges,
+  } = useSourceConfigurationFormState(source?.configuration);
+  const infraUiSettings = useEditableSettings('infra_metrics', [
+    enableInfrastructureHostsView,
+    enableInfrastructureProfilingIntegration,
+  ]);
 
   const resetAllUnsavedChanges = useCallback(() => {
     resetForm();
@@ -86,7 +88,12 @@ export const SourceConfigurationSettings = ({
     formState,
   ]);
 
-  const hasUnsavedChanges = isFormDirty || Object.keys(infraUiSettings.unsavedChanges).length > 0;
+  const unsavedChangesCount = Object.keys(getUnsavedChanges()).length;
+  const infraUiSettingsUnsavedChangesCount = Object.keys(infraUiSettings.unsavedChanges).length;
+  // Count changes from the feature section settings and general infra settings
+  const unsavedFormChangesCount = infraUiSettingsUnsavedChangesCount + unsavedChangesCount;
+
+  const isFormDirty = infraUiSettingsUnsavedChangesCount > 0 || unsavedChangesCount > 0;
 
   const isWriteable = shouldAllowEdit && (!Boolean(source) || source?.origin !== 'internal');
 
@@ -165,54 +172,18 @@ export const SourceConfigurationSettings = ({
       <EuiFlexGroup>
         {isWriteable && (
           <EuiFlexItem>
-            {isLoading || infraUiSettings.isSaving ? (
-              <EuiFlexGroup justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="infraSourceConfigurationSettingsLoadingButton"
-                    color="primary"
-                    isLoading
-                    fill
-                  >
-                    {i18n.translate('xpack.infra.sourceConfiguration.loadingButtonLabel', {
-                      defaultMessage: 'Loading',
-                    })}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : (
-              <>
-                <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="discardSettingsButton"
-                      color="danger"
-                      iconType="cross"
-                      isDisabled={!hasUnsavedChanges}
-                      onClick={resetAllUnsavedChanges}
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                        defaultMessage="Discard"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButton
-                      data-test-subj="applySettingsButton"
-                      color="primary"
-                      isDisabled={!hasUnsavedChanges || !isFormValid}
-                      fill
-                      onClick={persistUpdates}
-                    >
-                      <FormattedMessage
-                        id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                        defaultMessage="Apply"
-                      />
-                    </EuiButton>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
+            {isFormDirty && (
+              <BottomBarActions
+                areChangesInvalid={!isFormValid}
+                isLoading={infraUiSettings.isSaving}
+                onDiscardChanges={resetAllUnsavedChanges}
+                onSave={persistUpdates}
+                saveLabel={i18n.translate('xpack.infra.sourceConfiguration.saveButton', {
+                  defaultMessage: 'Save changes',
+                })}
+                unsavedChangesCount={unsavedFormChangesCount}
+                appTestSubj="infra"
+              />
             )}
           </EuiFlexItem>
         )}

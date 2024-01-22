@@ -213,7 +213,7 @@ export const RuleEdit = ({
         aria-labelledby="flyoutRuleEditTitle"
         size="m"
         maxWidth={620}
-        ownFocus={false}
+        ownFocus
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s" data-test-subj="editRuleFlyoutTitle">

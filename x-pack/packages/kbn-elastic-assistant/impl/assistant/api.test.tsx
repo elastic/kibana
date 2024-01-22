@@ -35,11 +35,13 @@ const messages: Message[] = [
   { content: 'This is a test', role: 'user', timestamp: new Date().toLocaleString() },
 ];
 const fetchConnectorArgs: FetchConnectorExecuteAction = {
-  assistantLangChain: true,
+  isEnabledRAGAlerts: false,
+  apiConfig,
+  isEnabledKnowledgeBase: true,
+  assistantStreamingEnabled: true,
   http: mockHttp,
   messages,
-  apiConfig,
-  assistantStreamingEnabled: true,
+  onNewReplacements: jest.fn(),
 };
 describe('API tests', () => {
   beforeEach(() => {
@@ -47,13 +49,13 @@ describe('API tests', () => {
   });
 
   describe('fetchConnectorExecuteAction', () => {
-    it('calls the internal assistant API when assistantLangChain is true', async () => {
+    it('calls the internal assistant API when isEnabledKnowledgeBase is true', async () => {
       await fetchConnectorExecuteAction(fetchConnectorArgs);
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":true}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -61,10 +63,10 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api with streaming when assistantStreamingEnabled is true when assistantLangChain is false', async () => {
+    it('calls the actions connector api with streaming when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
       };
 
       await fetchConnectorExecuteAction(testProps);
@@ -72,7 +74,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"assistantLangChain":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -81,10 +83,36 @@ describe('API tests', () => {
       );
     });
 
-    it('calls the actions connector api with invoke when assistantStreamingEnabled is false when assistantLangChain is false', async () => {
+    it('calls the actions connector with the expected optional request parameters', async () => {
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
+        isEnabledRAGAlerts: true,
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        replacements: { auuid: 'real.hostname' },
+        size: 30,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"replacements":{"auuid":"real.hostname"},"size":30}',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          signal: undefined,
+        }
+      );
+    });
+
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is false when isEnabledKnowledgeBase is false', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
         assistantStreamingEnabled: false,
       };
 
@@ -93,7 +121,29 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"assistantLangChain":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: true,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -118,7 +168,7 @@ describe('API tests', () => {
       });
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
         assistantStreamingEnabled: false,
       };
 
@@ -136,7 +186,7 @@ describe('API tests', () => {
 
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
       };
 
       const result = await fetchConnectorExecuteAction(testProps);
@@ -155,7 +205,7 @@ describe('API tests', () => {
       });
       const testProps: FetchConnectorExecuteAction = {
         ...fetchConnectorArgs,
-        assistantLangChain: false,
+        isEnabledKnowledgeBase: false,
       };
 
       const result = await fetchConnectorExecuteAction(testProps);
@@ -175,7 +225,7 @@ describe('API tests', () => {
       expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
-    it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
+    it('returns the value of the action_input property when isEnabledKnowledgeBase is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
       const response = '```json\n{"action_input": "value from action_input"}\n```';
 
       (mockHttp.fetch as jest.Mock).mockResolvedValue({
@@ -192,7 +242,7 @@ describe('API tests', () => {
       });
     });
 
-    it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
+    it('returns the original content when isEnabledKnowledgeBase is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
       const response = '```json\n{"some_key": "some value"}\n```';
 
       (mockHttp.fetch as jest.Mock).mockResolvedValue({
@@ -205,7 +255,7 @@ describe('API tests', () => {
       expect(result).toEqual({ response, isStream: false, isError: false });
     });
 
-    it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
+    it('returns the original when isEnabledKnowledgeBase is true, and `content` is not JSON', async () => {
       const response = 'plain text content';
 
       (mockHttp.fetch as jest.Mock).mockResolvedValue({

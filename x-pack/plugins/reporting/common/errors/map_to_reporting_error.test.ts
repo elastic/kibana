@@ -36,4 +36,10 @@ describe('mapToReportingError', () => {
       BrowserCouldNotLaunchError
     );
   });
+
+  test('unknown error', () => {
+    const error = mapToReportingError(new Error('Test error msg'));
+    expect(error).toBeInstanceOf(UnknownError);
+    expect(error.message).toBe('ReportingError(code: unknown_error) "Test error msg"');
+  });
 });

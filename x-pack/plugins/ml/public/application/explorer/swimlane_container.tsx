@@ -31,6 +31,7 @@ import {
   TooltipProps,
   TooltipValue,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
@@ -449,8 +450,9 @@ export const SwimlaneContainer: FC<SwimlaneProps> = ({
                     <Chart className={'mlSwimLaneContainer'} ref={chartRef}>
                       <Tooltip {...tooltipOptions} />
                       <Settings
-                        // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                         theme={themeOverrides}
+                        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+                        baseTheme={LEGACY_LIGHT_THEME}
                         onElementClick={onElementClick}
                         onPointerUpdate={handleCursorUpdate}
                         showLegend={showLegend}

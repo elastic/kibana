@@ -36,7 +36,7 @@ export const IntegrationPreference = () => {
     <Component
       initialType="recommended"
       onChange={action('onChange')}
-      onPrereleaseEnabledChange={() => {}}
+      prereleaseIntegrationsEnabled={false}
     />
   );
 };

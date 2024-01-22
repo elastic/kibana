@@ -1,5 +1,5 @@
 Kibana source code with Kibana X-Pack source code
-Copyright 2012-2023 Elasticsearch B.V.
+Copyright 2012-2024 Elasticsearch B.V.
 
 ---
 Pretty handling of logarithmic axes.
@@ -226,11 +226,6 @@ OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 ---
-Portions of this code are licensed under the following license:
-Gainsight PX Agent Wrapper Agent Version: 0.46.0 Installed: 2022-08-25 08:07
-https://www.gainsight.com/policy/gainsight-px-license-agreement/
-
----
 This code includes a copy of the `normalize-path`
 https://github.com/jonschlinkert/normalize-path/blob/52c3a95ebebc2d98c1ad7606cbafa7e658656899/index.js
 
@@ -346,10 +341,4 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
 LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
----
-Copyright (c) 2013 HubSpot, Inc.
-Released under the MIT license
-
-https://github.com/HubSpot/vex/blob/master/LICENSE
 

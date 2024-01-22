@@ -7,7 +7,12 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type { FilesClient, FilesClientFactory } from './types';
+import type {
+  FilesClient,
+  FilesClientFactory,
+  FilesPublicSetupDependencies,
+  FilesPublicStartDependencies,
+} from './types';
 import { FileKindsRegistryImpl } from '../common/file_kinds_registry';
 import { createFilesClient } from './files_client';
 import { FileKindBrowser } from '../common';
@@ -17,7 +22,7 @@ import * as DefaultImageFileKind from '../common/default_image_file_kind';
 /**
  * Public setup-phase contract
  */
-export interface FilesSetup {
+export interface FilesPublicSetup {
   /**
    * A factory for creating an {@link FilesClient} instance. This requires a
    * registered {@link FileKindBrowser}.
@@ -35,7 +40,7 @@ export interface FilesSetup {
   registerFileKind(fileKind: FileKindBrowser): void;
 }
 
-export type FilesStart = Pick<FilesSetup, 'filesClientFactory'> & {
+export type FilesPublicStart = Pick<FilesPublicSetup, 'filesClientFactory'> & {
   getFileKindDefinition: (id: string) => FileKindBrowser;
   getAllFindKindDefinitions: () => FileKindBrowser[];
 };
@@ -43,11 +48,19 @@ export type FilesStart = Pick<FilesSetup, 'filesClientFactory'> & {
 /**
  * Bringing files to Kibana
  */
-export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
+export class FilesPlugin
+  implements
+    Plugin<
+      FilesPublicSetup,
+      FilesPublicStart,
+      FilesPublicSetupDependencies,
+      FilesPublicStartDependencies
+    >
+{
   private registry = new FileKindsRegistryImpl<FileKindBrowser>();
   private filesClientFactory?: FilesClientFactory;
 
-  setup(core: CoreSetup): FilesSetup {
+  setup(core: CoreSetup): FilesPublicSetup {
     this.registry.register({
       ...DefaultImageFileKind.kind,
       maxSizeBytes: DefaultImageFileKind.maxSize,
@@ -77,7 +90,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart> {
     };
   }
 
-  start(core: CoreStart): FilesStart {
+  start(core: CoreStart): FilesPublicStart {
     return {
       filesClientFactory: this.filesClientFactory!,
       getFileKindDefinition: (id: string): FileKindBrowser => {

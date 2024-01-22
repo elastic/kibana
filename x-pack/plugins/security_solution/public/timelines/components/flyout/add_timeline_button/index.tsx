@@ -39,10 +39,10 @@ const AddTimelineButtonComponent: React.FC<AddTimelineButtonComponentProps> = ({
     () => (
       <EuiButtonIcon
         className={ADD_TIMELINE_BUTTON_CLASS_NAME}
-        data-test-subj="settings-plus-in-circle"
+        data-test-subj="timeline-create-open-control"
         iconType="plusInCircle"
+        iconSize="m"
         color="primary"
-        size="m"
         onClick={onButtonClick}
         aria-label={i18n.ADD_TIMELINE}
       />

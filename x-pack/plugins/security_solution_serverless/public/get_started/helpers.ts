@@ -7,7 +7,16 @@
 
 import type { ProductLine } from '../../common/product';
 import { getSections } from './sections';
-import type { ActiveCard, ActiveSections, Card, CardId, SectionId, Step, StepId } from './types';
+import type {
+  ActiveCard,
+  ActiveSections,
+  Card,
+  CardId,
+  Section,
+  SectionId,
+  Step,
+  StepId,
+} from './types';
 import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
 
 export const CONTENT_WIDTH = 1150;
@@ -53,14 +62,30 @@ const getfinishedActiveSteps = (
   return new Set(finishedActiveSteps);
 };
 
-export const findCardByStepId = (
+export const findCardSectionByStepId = (
   stepId: string
-): { matchedCard: Card | null; matchedStep: Step | null } => {
+): { matchedCard: Card | null; matchedStep: Step | null; matchedSection: Section | null } => {
   const cards = getSections().flatMap((s) => s.cards);
-  const matchedStep: Step | null = null;
-  const matchedCard = cards.find((c) => !!c.steps?.find((step) => stepId === step.id)) ?? null;
+  let matchedStep: Step | null = null;
 
-  return { matchedCard, matchedStep };
+  const matchedCard =
+    cards.find(
+      (c) =>
+        !!c.steps?.find((step) => {
+          if (stepId === step.id) {
+            matchedStep = step;
+            return true;
+          } else {
+            return false;
+          }
+        })
+    ) ?? null;
+
+  const matchedSection = matchedCard
+    ? getSections().find((s) => s.cards?.includes(matchedCard)) ?? null
+    : null;
+
+  return { matchedCard, matchedStep, matchedSection };
 };
 
 export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {

@@ -51,3 +51,5 @@ export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
+
+export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';

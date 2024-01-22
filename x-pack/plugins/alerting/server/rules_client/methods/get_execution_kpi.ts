@@ -20,6 +20,7 @@ import {
 import { RulesClientContext } from '../types';
 import { parseDate } from '../common';
 import { get } from './get';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export interface GetRuleExecutionKPIParams {
   id: string;
@@ -54,7 +55,7 @@ export async function getRuleExecutionKPI(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );
@@ -64,7 +65,7 @@ export async function getRuleExecutionKPI(
   context.auditLogger?.log(
     ruleAuditEvent({
       action: RuleAuditAction.GET_RULE_EXECUTION_KPI,
-      savedObject: { type: 'alert', id },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
     })
   );
 
@@ -77,7 +78,7 @@ export async function getRuleExecutionKPI(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsBySavedObjectIds(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       [id],
       {
         start: parsedDateStart.toISOString(),
@@ -138,7 +139,7 @@ export async function getGlobalExecutionKpiWithAuth(
 
   try {
     const aggResult = await eventLogClient.aggregateEventsWithAuthFilter(
-      'alert',
+      RULE_SAVED_OBJECT_TYPE,
       authorizationTuple.filter as KueryNode,
       {
         start: parsedDateStart.toISOString(),

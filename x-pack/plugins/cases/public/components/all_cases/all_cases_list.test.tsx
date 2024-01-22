@@ -47,6 +47,7 @@ import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
@@ -63,6 +64,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
+jest.mock('../../containers/user_profiles/use_suggest_user_profiles');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -74,6 +76,7 @@ const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
+const useSuggestUserProfilesMock = useSuggestUserProfiles as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -164,6 +167,7 @@ describe('AllCasesListGeneric', () => {
     useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+    useSuggestUserProfilesMock.mockReturnValue({ data: userProfiles, isLoading: false });
     mockKibana();
     moment.tz.setDefault('UTC');
     window.localStorage.clear();
@@ -512,7 +516,6 @@ describe('AllCasesListGeneric', () => {
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
           searchFields: ['title', 'description'],
-          owner: ['securitySolution'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,
@@ -641,82 +644,6 @@ describe('AllCasesListGeneric', () => {
   });
 
   describe('Solutions', () => {
-    it('should set the owner to all available solutions when deselecting all solutions', async () => {
-      const { getByTestId } = render(
-        <TestProviders owner={[]}>
-          <AllCasesList />
-        </TestProviders>
-      );
-
-      expect(useGetCasesMock).toHaveBeenCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution', 'observability'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-
-      userEvent.click(getByTestId('options-filter-popover-button-owner'));
-
-      await waitForEuiPopoverOpen();
-
-      userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
-
-      expect(useGetCasesMock).toBeCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-
-      userEvent.click(
-        getByTestId(`options-filter-popover-item-${SECURITY_SOLUTION_OWNER}`),
-        undefined,
-        {
-          skipPointerEventsCheck: true,
-        }
-      );
-
-      expect(useGetCasesMock).toHaveBeenLastCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution', 'observability'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
-    });
-
     it('should hide the solutions filter if the owner is provided', async () => {
       const { queryByTestId } = render(
         <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
@@ -725,30 +652,6 @@ describe('AllCasesListGeneric', () => {
       );
 
       expect(queryByTestId('options-filter-popover-button-owner')).toBeFalsy();
-    });
-
-    it('should call useGetCases with the correct owner on initial render', async () => {
-      render(
-        <TestProviders owner={[SECURITY_SOLUTION_OWNER]}>
-          <AllCasesList />
-        </TestProviders>
-      );
-
-      expect(useGetCasesMock).toHaveBeenCalledWith({
-        filterOptions: {
-          search: '',
-          searchFields: ['title', 'description'],
-          severity: [],
-          reporters: [],
-          status: [],
-          tags: [],
-          assignees: [],
-          owner: ['securitySolution'],
-          category: [],
-          customFields: {},
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      });
     });
   });
 
@@ -1077,6 +980,42 @@ describe('AllCasesListGeneric', () => {
             screen.queryAllByTestId('options-filter-popover-button-assignees').length
           ).toBeGreaterThan(0);
         });
+      });
+
+      it('should reset the assignees when deactivating the filter', async () => {
+        useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+
+        appMockRenderer.render(<AllCasesList />);
+
+        // Opens assignees filter and checks an option
+        const assigneesButton = screen.getByTestId('options-filter-popover-button-assignees');
+        userEvent.click(assigneesButton);
+        userEvent.click(screen.getByText('Damaged Raccoon'));
+        expect(within(assigneesButton).getByLabelText('1 active filters')).toBeInTheDocument();
+
+        // Deactivates assignees filter
+        userEvent.click(screen.getByRole('button', { name: 'More' }));
+        await waitForEuiPopoverOpen();
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+
+        expect(useGetCasesMock).toHaveBeenLastCalledWith({
+          filterOptions: {
+            ...DEFAULT_FILTER_OPTIONS,
+            assignees: [],
+          },
+          queryParams: DEFAULT_QUERY_PARAMS,
+        });
+
+        // Reopens assignees filter
+        userEvent.click(screen.getByRole('option', { name: 'Assignees' }));
+        // Opens the assignees popup
+        userEvent.click(assigneesButton);
+        expect(screen.getByLabelText('click to filter assignees')).toBeInTheDocument();
+        expect(
+          within(screen.getByTestId('options-filter-popover-button-assignees')).queryByLabelText(
+            '1 active filters'
+          )
+        ).not.toBeInTheDocument();
       });
     });
   });

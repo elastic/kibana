@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewOutput } from '../types';
+import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
@@ -118,6 +118,21 @@ export const kafkaSupportedVersions = [
   '2.5.0',
   '2.5.1',
   '2.6.0',
+];
+
+export const RESERVED_CONFIG_YML_KEYS = [
+  'bulk_max_size',
+  'workers',
+  'queue.mem.events',
+  'flush.min_events',
+  'flush.timeout',
+  'compression',
+  'idle_timeout',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
 ];
 
 export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';

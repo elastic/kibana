@@ -13,7 +13,7 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
-
+export { SamlSessionManager, type SamlSessionManagerOptions, type HostOptions } from './src/auth';
 export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
 export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 
@@ -51,6 +51,8 @@ export * from './src/functional_test_runner';
 export { getUrl } from './src/jest/get_url';
 
 export { runCheckJestConfigsCli } from './src/jest/run_check_jest_configs_cli';
+
+export { runCheckFtrCodeOwnersCli } from './src/functional_test_runner/run_check_ftr_code_owners';
 
 export { runJest } from './src/jest/run';
 

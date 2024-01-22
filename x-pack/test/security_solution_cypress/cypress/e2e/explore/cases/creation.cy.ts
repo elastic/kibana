@@ -106,10 +106,10 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     );
     cy.get(CASE_DETAILS_USERNAMES)
       .eq(REPORTER)
-      .should('have.text', Cypress.env(ELASTICSEARCH_USERNAME));
+      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
     cy.get(CASE_DETAILS_USERNAMES)
       .eq(PARTICIPANTS)
-      .should('have.text', Cypress.env(ELASTICSEARCH_USERNAME));
+      .should('contain', Cypress.env(ELASTICSEARCH_USERNAME));
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {

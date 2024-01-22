@@ -21,6 +21,7 @@ import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
 import { createSecuritySolutionStorageMock } from './mock_local_storage';
 import type { StartServices } from '../../types';
+import { ReactQueryClientProvider } from '../containers/query_client/query_client_provider';
 
 export const kibanaObservable = new BehaviorSubject({} as unknown as StartServices);
 
@@ -106,13 +107,15 @@ export const StorybookProviders: React.FC = ({ children }) => {
     <I18nProvider>
       <KibanaReactContext.Provider>
         <NavigationProvider core={coreMock}>
-          <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
-            <ReduxStoreProvider store={store}>
-              <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-                {children}
-              </ThemeProvider>
-            </ReduxStoreProvider>
-          </CellActionsProvider>
+          <ReactQueryClientProvider>
+            <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
+              <ReduxStoreProvider store={store}>
+                <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+                  {children}
+                </ThemeProvider>
+              </ReduxStoreProvider>
+            </CellActionsProvider>
+          </ReactQueryClientProvider>
         </NavigationProvider>
       </KibanaReactContext.Provider>
     </I18nProvider>

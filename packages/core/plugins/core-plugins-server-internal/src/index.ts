@@ -13,7 +13,5 @@ export type {
   DiscoveredPlugins,
 } from './plugins_service';
 export { config } from './plugins_config';
-/** @internal */
-export { isNewPlatformPlugin } from './discovery';
 export type { PluginDependencies } from './types';
 export { PluginWrapper } from './plugin';

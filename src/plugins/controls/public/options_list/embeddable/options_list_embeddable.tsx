@@ -25,7 +25,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
@@ -434,7 +434,7 @@ export class OptionsListEmbeddable
     this.node = node;
 
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <OptionsListEmbeddableContext.Provider value={this}>
           <OptionsListControl
             typeaheadSubject={this.typeaheadSubject}

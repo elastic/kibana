@@ -7,7 +7,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { timelineDefaults } from '../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../timelines/store/defaults';
 import { APP_UI_ID } from '../../common/constants';
 import type { DataProvider } from '../../common/types';
 import { TimelineId } from '../../common/types/timeline';
@@ -15,7 +15,7 @@ import { TimelineType } from '../../common/api/timeline';
 import { useDeepEqualSelector } from '../common/hooks/use_selector';
 import { useKibana } from '../common/lib/kibana';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
-import { timelineActions, timelineSelectors } from '../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../timelines/store';
 import { useCreateTimeline } from '../timelines/components/timeline/properties/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
 import { dispatchUpdateTimeline } from '../timelines/components/open_timeline/helpers';

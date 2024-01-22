@@ -50,6 +50,7 @@ export const request = <T = unknown>({
 const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
 };
 
 const disableNewFeaturesTours = (window: Window) => {

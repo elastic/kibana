@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
-import { AzureCredentialsType } from '../../../../common/types';
+import { AzureCredentialsType } from '../../../../common/types_old';
 
 export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
 
@@ -31,7 +31,12 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
       value: key as AzureCredentialsType,
       text: value.label,
     }))
-    .filter(({ value }) => value !== 'arm_template');
+    .filter(
+      ({ value }) =>
+        value !== 'arm_template' && // we remove this in order to hide it from the selectable options in the manual drop down
+        value !== 'manual' && // TODO: remove 'manual' for stack version 8.13
+        value !== 'service_principal_with_client_username_and_password' // this option is temporarily hidden
+    );
 };
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCredentialsFields) =>
@@ -72,6 +77,12 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   },
   arm_template: {
     label: 'ARM Template',
+    info: [],
+    fields: {},
+  },
+  // TODO: remove for stack version 8.13
+  manual: {
+    label: 'Manual',
     info: [],
     fields: {},
   },
@@ -130,19 +141,5 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         }),
       },
     },
-  },
-  manual: {
-    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
-      defaultMessage: 'Manual',
-    }),
-    info: (
-      <EuiText color="subdued" size="s">
-        <FormattedMessage
-          id="xpack.csp.azureIntegration.credentialType.manualInfo"
-          defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication."
-        />
-      </EuiText>
-    ),
-    fields: {},
   },
 });

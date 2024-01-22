@@ -24,11 +24,14 @@ import {
   ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { APP_ID as CASE_APP_ID, FEATURE_ID as CASE_GENERAL_ID } from '@kbn/cases-plugin/common';
+import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 import { getAlertFlyout } from './use_alerts_flyout';
 import {
   ALERT_ANOMALY_DETECTION_JOB_ID,
   ALERT_ANOMALY_SCORE,
   ALERT_ANOMALY_TIMESTAMP,
+  ML_ALERT_TYPES,
 } from '../../../common/constants/alerts';
 import { getAlertFormatters, getRenderCellValue } from './render_cell_value';
 import { AlertActions } from './alert_actions';
@@ -119,6 +122,12 @@ export function registerAlertsTableConfiguration(
 
   const config: AlertsTableConfigurationRegistry = {
     id: ML_ALERTS_CONFIG_ID,
+    cases: {
+      appId: MANAGEMENT_APP_ID,
+      featureId: CASE_GENERAL_ID,
+      owner: [CASE_APP_ID],
+      syncAlerts: false,
+    },
     columns,
     useInternalFlyout: getAlertFlyout(columns, getAlertFormatters(fieldFormats)),
     getRenderCellValue: getRenderCellValue(fieldFormats),
@@ -128,6 +137,7 @@ export function registerAlertsTableConfiguration(
         return <AlertActions {...props} />;
       },
     }),
+    ruleTypeIds: [ML_ALERT_TYPES.ANOMALY_DETECTION],
   };
 
   triggersActionsUi.alertsTableConfigurationRegistry.register(config);

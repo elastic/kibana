@@ -28,7 +28,6 @@ const TogglePanelComponent: React.FC<{
 
   const { setUpSections } = useSetUpSections({ euiTheme });
   const sectionNodes = setUpSections({
-    activeProducts,
     activeSections,
     expandedCardSteps,
     finishedSteps,

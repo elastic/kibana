@@ -283,7 +283,41 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "observabilityLogExplorer",
+        "id": "def-common.deepCompactObject",
+        "type": "Function",
+        "tags": [],
+        "label": "deepCompactObject",
+        "description": [],
+        "signature": [
+          "<Value extends Record<string, any>>(obj: Value) => Value"
+        ],
+        "path": "x-pack/plugins/observability_log_explorer/common/utils/deep_compact_object.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityLogExplorer",
+            "id": "def-common.deepCompactObject.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "obj",
+            "description": [],
+            "signature": [
+              "Value"
+            ],
+            "path": "x-pack/plugins/observability_log_explorer/common/utils/deep_compact_object.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "observabilityLogExplorer",
@@ -359,7 +393,23 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "observabilityLogExplorer",
+        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "description": [],
+        "signature": [
+          "\"pageState\""
+        ],
+        "path": "x-pack/plugins/observability_log_explorer/common/url_schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

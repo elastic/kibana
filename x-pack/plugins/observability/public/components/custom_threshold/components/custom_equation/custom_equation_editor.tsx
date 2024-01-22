@@ -16,7 +16,7 @@ import {
   EuiExpression,
   EuiPopover,
 } from '@elastic/eui';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,8 +64,13 @@ export function CustomEquationEditor({
     expression?.metrics ?? [NEW_METRIC]
   );
   const [customEqPopoverOpen, setCustomEqPopoverOpen] = useState(false);
-  const [equation, setEquation] = useState<string | undefined>(expression?.equation || undefined);
+  const [equation, setEquation] = useState<string | undefined>(expression?.equation);
   const debouncedOnChange = useMemo(() => debounce(onChange, 500), [onChange]);
+
+  useEffect(() => {
+    setCustomMetrics(expression?.metrics ?? [NEW_METRIC]);
+    setEquation(expression?.equation);
+  }, [expression?.metrics, expression?.equation]);
 
   const handleAddNewRow = useCallback(() => {
     setCustomMetrics((previous) => {

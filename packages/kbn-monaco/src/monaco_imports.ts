@@ -28,4 +28,18 @@ import 'monaco-editor/esm/vs/basic-languages/javascript/javascript.contribution.
 import 'monaco-editor/esm/vs/basic-languages/xml/xml.contribution.js'; // Needed for basic xml support
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'; // Needed for yaml support
 
+// config for supported base languages
+export {
+  conf as cssConf,
+  language as cssLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/css/css';
+export {
+  conf as markdownConf,
+  language as markdownLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
+export {
+  conf as yamlConf,
+  language as yamlLanguage,
+} from 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
+
 export { monaco };

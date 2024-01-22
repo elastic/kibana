@@ -74,7 +74,7 @@ export const addExceptionEntryFieldValueOfItemX = (
     .eq(itemIndex)
     .find(FIELD_INPUT)
     .eq(fieldIndex)
-    .type(`${field}{enter}`);
+    .type(`{selectall}${field}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
@@ -99,7 +99,7 @@ export const selectCurrentEntryField = (index = 0) => {
 };
 
 export const addExceptionEntryFieldValue = (field: string, index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).type(`${field}{enter}`);
+  cy.get(FIELD_INPUT).eq(index).type(`{selectall}${field}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
@@ -109,23 +109,23 @@ export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, in
 };
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
-  cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
+  cy.get(OPERATOR_INPUT).eq(index).type(`{selectall}${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryFieldValueValue = (value: string, index = 0) => {
-  cy.get(VALUES_INPUT).eq(index).type(`${value}{enter}`);
+  cy.get(VALUES_INPUT).eq(index).type(`{selectall}${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryFieldMatchAnyValue = (values: string[], index = 0) => {
   values.forEach((value) => {
-    cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`${value}{enter}`);
+    cy.get(VALUES_MATCH_ANY_INPUT).eq(index).type(`{selectall}${value}{enter}`);
   });
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 export const addExceptionEntryFieldMatchIncludedValue = (value: string, index = 0) => {
-  cy.get(VALUES_MATCH_INCLUDED_INPUT).eq(index).type(`${value}{enter}`);
+  cy.get(VALUES_MATCH_INCLUDED_INPUT).eq(index).type(`{selectall}${value}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
@@ -148,13 +148,13 @@ export const addExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).scrollIntoView();
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('be.visible');
   cy.get(EXCEPTION_ITEM_NAME_INPUT).first().focus();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`, { force: true });
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`{selectall}${name}{enter}`, { force: true });
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
 export const editExceptionFlyoutItemName = (name: string) => {
   cy.get(EXCEPTION_ITEM_NAME_INPUT).clear();
-  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`${name}{enter}`);
+  cy.get(EXCEPTION_ITEM_NAME_INPUT).type(`{selectall}${name}{enter}`);
   cy.get(EXCEPTION_ITEM_NAME_INPUT).should('have.value', name);
 };
 
@@ -169,12 +169,12 @@ export const selectCloseSingleAlerts = () => {
 
 export const addExceptionConditions = (exception: Exception) => {
   cy.get(FIELD_INPUT).type(`${exception.field}{downArrow}{enter}`);
-  cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
+  cy.get(OPERATOR_INPUT).type(`{selectall}${exception.operator}{enter}`);
   if (exception.operator === 'is one of') {
     addExceptionEntryFieldMatchAnyValue(exception.values, 0);
   } else {
     exception.values.forEach((value) => {
-      cy.get(VALUES_INPUT).type(`${value}{enter}`);
+      cy.get(VALUES_INPUT).type(`{selectall}${value}{enter}`);
     });
   }
 };
@@ -189,7 +189,7 @@ export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('exist');
   /* Sometimes a toaster error message unrelated with the test performed is displayed.
    The toaster is blocking the confirm button we have to click. Using force true would solve the issue, but should not be used.
-   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page. 
+   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page.
    In this case we check if a toaster is displayed and if so, close it to continue with the test.
    */
   cy.root().then(($page) => {

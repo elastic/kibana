@@ -17,8 +17,8 @@ import type { OpenTimelineResult } from '../../timelines/components/open_timelin
 import type { TimelineEventsDetailsItem } from '../../../common/search_strategy';
 import { Direction } from '../../../common/search_strategy';
 import type { CreateTimelineProps } from '../../detections/components/alerts_table/types';
-import type { TimelineModel } from '../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../timelines/store/timeline/defaults';
+import type { TimelineModel } from '../../timelines/store/model';
+import { timelineDefaults } from '../../timelines/store/defaults';
 
 export const mockOpenTimelineQueryResults = {
   totalCount: 11,
@@ -1945,6 +1945,11 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
   {
     columnHeaderType: 'not-filtered',
     id: 'user.name',
+    initialWidth: 180,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'kibana.alert.workflow_assignee_ids',
     initialWidth: 180,
   },
 ];

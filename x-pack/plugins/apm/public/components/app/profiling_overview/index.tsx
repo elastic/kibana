@@ -78,6 +78,8 @@ export function ProfilingOverview() {
               environment={environment}
               dataSource={preferred?.source}
               kuery={kuery}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
             />
           </>
         ),
@@ -99,12 +101,23 @@ export function ProfilingOverview() {
               endIndex={10}
               dataSource={preferred?.source}
               kuery={kuery}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
             />
           </>
         ),
       },
     ];
-  }, [end, environment, kuery, preferred?.source, serviceName, start]);
+  }, [
+    end,
+    environment,
+    kuery,
+    preferred?.source,
+    rangeFrom,
+    rangeTo,
+    serviceName,
+    start,
+  ]);
 
   if (isLoading) {
     return (

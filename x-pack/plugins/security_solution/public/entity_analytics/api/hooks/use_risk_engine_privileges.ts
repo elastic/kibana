@@ -5,8 +5,9 @@
  * 2.0.
  */
 import { useQuery } from '@tanstack/react-query';
-import { fetchRiskEnginePrivileges } from '../api';
+import { useEntityAnalyticsRoutes } from '../api';
 
 export const useRiskEnginePrivileges = () => {
+  const { fetchRiskEnginePrivileges } = useEntityAnalyticsRoutes();
   return useQuery(['GET', 'FETCH_RISK_ENGINE_PRIVILEGES'], fetchRiskEnginePrivileges);
 };

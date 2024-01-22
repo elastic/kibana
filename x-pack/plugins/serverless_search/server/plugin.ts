@@ -27,6 +27,8 @@ import type {
   StartDependencies,
 } from './types';
 import { registerConnectorsRoutes } from './routes/connectors_routes';
+import { registerTelemetryUsageCollector } from './collectors/connectors/telemetry';
+import { registerMappingRoutes } from './routes/mapping_routes';
 
 export interface RouteDependencies {
   http: CoreSetup<StartDependencies>['http'];
@@ -77,7 +79,7 @@ export class ServerlessSearchPlugin
 
   public setup(
     { getStartServices, http }: CoreSetup<StartDependencies>,
-    pluginsSetup: SetupDependencies
+    { serverless, usageCollection }: SetupDependencies
   ) {
     const router = http.createRouter();
     getStartServices().then(([, { security }]) => {
@@ -92,9 +94,16 @@ export class ServerlessSearchPlugin
       registerApiKeyRoutes(dependencies);
       registerConnectorsRoutes(dependencies);
       registerIndicesRoutes(dependencies);
+      registerMappingRoutes(dependencies);
     });
 
-    pluginsSetup.serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
+    if (usageCollection) {
+      getStartServices().then(() => {
+        registerTelemetryUsageCollector(usageCollection);
+      });
+    }
+
+    serverless.setupProjectSettings(SEARCH_PROJECT_SETTINGS);
     return {};
   }
 

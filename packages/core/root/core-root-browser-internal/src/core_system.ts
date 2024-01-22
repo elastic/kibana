@@ -140,8 +140,9 @@ export class CoreSystem {
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      coreContext: this.coreContext,
     });
-    this.docLinks = new DocLinksService();
+    this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();

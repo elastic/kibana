@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getAbbreviatedNumber } from '../../../common/utils/get_abbreviated_number';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { statusColors } from '../../../common/constants';
-import type { Evaluation } from '../../../../common/types';
+import type { Evaluation } from '../../../../common/types_old';
 
 interface Props {
   passed: number;

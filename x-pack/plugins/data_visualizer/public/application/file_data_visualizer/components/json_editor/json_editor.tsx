@@ -7,7 +7,7 @@
 
 import React, { FC } from 'react';
 
-import { CodeEditor, type CodeEditorProps } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor, type CodeEditorProps } from '@kbn/code-editor';
 import { expandLiteralStrings, XJsonMode } from '../../../shared_imports';
 
 export const EDITOR_MODE = { TEXT: 'text', JSON: 'json', XJSON: new XJsonMode() };

@@ -94,14 +94,16 @@ Cypress.Commands.add(
       .nextAll()
       .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .clear({ force: true })
-      .type(moment(start).format(format), { force: true });
+      .type(moment(start).format(format), { force: true })
+      .type('{enter}');
 
     cy.getByTestSubj('superDatePickerendDatePopoverButton').click();
     cy.contains('End date')
       .nextAll()
       .find('[data-test-subj="superDatePickerAbsoluteDateInput"]')
       .clear({ force: true })
-      .type(moment(end).format(format), { force: true });
+      .type(moment(end).format(format), { force: true })
+      .type('{enter}');
   }
 );
 

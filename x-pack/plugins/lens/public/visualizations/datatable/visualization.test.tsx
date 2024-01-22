@@ -759,6 +759,47 @@ describe('Datatable Visualization', () => {
         }).headerRowHeightLines
       ).toEqual([2]);
     });
+
+    it('sets alignment correctly', () => {
+      datasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
+        dataType: 'string',
+        isBucketed: false, // <= make them metrics
+        label: 'label',
+        isStaticValue: false,
+        hasTimeShift: false,
+        hasReducedTimeRange: false,
+      });
+      const expression = datatableVisualization.toExpression(
+        {
+          ...defaultExpressionTableState,
+          columns: [
+            { columnId: 'b', alignment: 'center' },
+            { columnId: 'c', alignment: 'left' },
+            { columnId: 'a' },
+          ],
+        },
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
+      ) as Ast;
+
+      const columnArgs = buildExpression(expression).findFunction('lens_datatable_column');
+      expect(columnArgs[0].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['left'],
+        })
+      );
+      expect(columnArgs[1].arguments).toEqual(
+        expect.objectContaining({
+          alignment: ['center'],
+        })
+      );
+      expect(columnArgs[2].arguments).toEqual(
+        expect.not.objectContaining({
+          alignment: [],
+        })
+      );
+    });
   });
 
   describe('#onEditAction', () => {

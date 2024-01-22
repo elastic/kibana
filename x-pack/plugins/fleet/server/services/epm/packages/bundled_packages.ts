@@ -8,13 +8,36 @@
 import fs from 'fs/promises';
 import path from 'path';
 
+import { once } from 'lodash';
+
 import type { BundledPackage, Installation } from '../../../types';
 import { BundledPackageLocationNotFoundError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey, pkgToPkgKey } from '../registry';
 
+let CACHE_BUNDLED_PACKAGES: BundledPackage[] | undefined;
+
+export function _purgeBundledPackagesCache() {
+  CACHE_BUNDLED_PACKAGES = undefined;
+}
+
+function bundledPackagesFromCache() {
+  if (!CACHE_BUNDLED_PACKAGES) {
+    throw new Error('CACHE_BUNDLED_PACKAGES is not populated');
+  }
+
+  return CACHE_BUNDLED_PACKAGES.map(({ name, version, getBuffer }) => ({
+    name,
+    version,
+    getBuffer: once(getBuffer),
+  }));
+}
+
 export async function getBundledPackages(): Promise<BundledPackage[]> {
   const config = appContextService.getConfig();
+  if (config?.developer?.disableBundledPackagesCache !== true && CACHE_BUNDLED_PACKAGES) {
+    return bundledPackagesFromCache();
+  }
 
   const bundledPackageLocation = config?.developer?.bundledPackageLocation;
 
@@ -38,19 +61,21 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
     const result = await Promise.all(
       zipFiles.map(async (zipFile) => {
-        const file = await fs.readFile(path.join(bundledPackageLocation, zipFile));
-
         const { pkgName, pkgVersion } = splitPkgKey(zipFile.replace(/\.zip$/, ''));
+
+        const getBuffer = () => fs.readFile(path.join(bundledPackageLocation, zipFile));
 
         return {
           name: pkgName,
           version: pkgVersion,
-          buffer: file,
+          getBuffer,
         };
       })
     );
 
-    return result;
+    CACHE_BUNDLED_PACKAGES = result;
+
+    return bundledPackagesFromCache();
   } catch (err) {
     const logger = appContextService.getLogger();
     logger.warn(`Unable to read bundled packages from ${bundledPackageLocation}`);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import pRetry from 'p-retry';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -67,7 +68,6 @@ export default function (providerContext: FtrProviderContext) {
       })
       .catch(() => {});
 
-  // FLAKY: https://github.com/elastic/kibana/issues/161624
   describe.skip('When installing system integration in multiple spaces', async () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
@@ -89,15 +89,24 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install kibana assets', async function () {
       // These are installed from Fleet along with every package
-      const resIndexPatternLogs = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'logs-*',
-      });
+      const resIndexPatternLogs = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'logs-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternLogs.id).equal('logs-*');
-      const resIndexPatternMetrics = await kibanaServer.savedObjects.get({
-        type: 'index-pattern',
-        id: 'metrics-*',
-      });
+
+      const resIndexPatternMetrics = await pRetry(
+        () =>
+          kibanaServer.savedObjects.get({
+            type: 'index-pattern',
+            id: 'metrics-*',
+          }),
+        { retries: 3 }
+      );
       expect(resIndexPatternMetrics.id).equal('metrics-*');
     });
 

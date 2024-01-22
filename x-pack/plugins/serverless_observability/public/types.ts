@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
 import { ObservabilityPublicSetup } from '@kbn/observability-plugin/public';
@@ -16,22 +15,21 @@ import {
 import { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessObservabilityPluginSetup {}
+export interface ServerlessObservabilityPublicSetup {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ServerlessObservabilityPluginStart {}
+export interface ServerlessObservabilityPublicStart {}
 
-export interface ServerlessObservabilityPluginSetupDependencies {
+export interface ServerlessObservabilityPublicSetupDependencies {
   observability: ObservabilityPublicSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   serverless: ServerlessPluginSetup;
   management: ManagementSetup;
 }
 
-export interface ServerlessObservabilityPluginStartDependencies {
+export interface ServerlessObservabilityPublicStartDependencies {
   observabilityShared: ObservabilitySharedPluginStart;
   serverless: ServerlessPluginStart;
   management: ManagementStart;
-  cloud: CloudStart;
   data: DataPublicPluginStart;
 }

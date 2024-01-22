@@ -9,6 +9,10 @@ import React from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+
+import { CRAWLER_SERVICE_TYPE } from '@kbn/search-connectors';
+
 import { CONNECTORS } from '../search_index/connector/constants';
 
 export interface ConnectorTypeProps {
@@ -26,7 +30,13 @@ export const ConnectorType: React.FC<ConnectorTypeProps> = ({ serviceType }) => 
       )}
       <EuiFlexItem>
         <EuiText size="s">
-          <p>{connector?.name ?? '-'}</p>
+          <p>
+            {serviceType === CRAWLER_SERVICE_TYPE
+              ? i18n.translate('xpack.enterpriseSearch.content.connectors.connectorType.crawler', {
+                  defaultMessage: 'Web crawler',
+                })
+              : connector?.name ?? '-'}
+          </p>
         </EuiText>
       </EuiFlexItem>
     </EuiFlexGroup>

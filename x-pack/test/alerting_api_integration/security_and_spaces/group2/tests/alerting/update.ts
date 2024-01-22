@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Response as SupertestResponse } from 'supertest';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios } from '../../../scenarios';
 import {
   checkAAD,
@@ -146,7 +147,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -238,7 +239,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -330,7 +331,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -429,7 +430,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
@@ -526,7 +527,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               await checkAAD({
                 supertest,
                 spaceId: space.id,
-                type: 'alert',
+                type: RULE_SAVED_OBJECT_TYPE,
                 id: createdAlert.id,
               });
               break;
