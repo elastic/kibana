@@ -16,14 +16,14 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
 import { i18n } from '@kbn/i18n';
 
-import { type ExpandableFlyoutApi, useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
 } as unknown as ExpandableFlyoutApi;
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -48,7 +48,7 @@ const NO_DATA_MESSAGE = "There's no source event information for this alert.";
 
 describe('<Reason />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render the component for alert', () => {
