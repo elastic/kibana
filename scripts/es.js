@@ -25,4 +25,4 @@ kbnEs
   .catch(function (e) {
     console.error(e);
     process.exitCode = 1;
-  });
+  })
