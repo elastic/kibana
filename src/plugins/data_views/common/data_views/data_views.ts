@@ -11,7 +11,6 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { createSHA256Hash } from '@kbn/crypto';
 import { PersistenceAPI } from '../types';
 
 import { createDataViewCache } from '.';
@@ -956,7 +955,6 @@ export class DataViewsService {
     displayErrors = true,
     generateIdBySpec = true
   ): Promise<DataView> {
-    console.log('createFromSpec', restOfSpec);
     const shortDotsEnable = await this.config.get<boolean>(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
@@ -974,11 +972,7 @@ export class DataViewsService {
       metaFields,
     });
     if (!id && generateIdBySpec) {
-      const newSpec = dataView.toSpec(false);
-      delete newSpec.id;
-      const specId = createSHA256Hash(JSON.stringify(newSpec));
-      dataView.id = specId;
-      console.log('create', spec, generateIdBySpec, id);
+      dataView.id = dataView.toSpecId();
     }
 
     if (!skipFetchFields) {

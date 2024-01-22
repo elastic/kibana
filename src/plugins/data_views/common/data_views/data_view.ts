@@ -12,6 +12,7 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import type { DataViewBase } from '@kbn/es-query';
 import { cloneDeep, each, mapValues, omit, pickBy, reject } from 'lodash';
+import { createSHA256Hash } from '@kbn/crypto';
 import type { DataViewField, IIndexPatternFieldList } from '../fields';
 import { fieldList } from '../fields';
 import type {
@@ -169,6 +170,30 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
     // Filter undefined values from the spec
     return Object.fromEntries(Object.entries(spec).filter(([, v]) => typeof v !== 'undefined'));
+  }
+
+  public toSpecId(): string {
+    const spec = this.toSpec(false);
+
+    const minimizedSpec = Object.fromEntries(
+      Object.entries(spec).filter(([key, val]) => {
+        if (
+          key === 'id' ||
+          val === null ||
+          val === '' ||
+          (Array.isArray(val) && val.length === 0) ||
+          (typeof val === 'object' && Object.keys(val).length === 0) ||
+          (key === 'allowNoIndex' && val === false) ||
+          (key === 'allowHidden' && val === false)
+        ) {
+          return false;
+        }
+
+        return true;
+      })
+    );
+
+    return createSHA256Hash(JSON.stringify(minimizedSpec));
   }
 
   /**
