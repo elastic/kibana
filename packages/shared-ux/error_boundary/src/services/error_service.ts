@@ -75,10 +75,7 @@ export class KibanaErrorService {
   /**
    * Creates a decorated error object
    */
-  public registerError(
-    error: Error,
-    errorInfo?: React.ErrorInfo
-  ): ErrorServiceError {
+  public registerError(error: Error, errorInfo?: React.ErrorInfo): ErrorServiceError {
     const isFatal = this.getIsFatal(error);
     const name = this.getErrorComponentName(errorInfo);
 

@@ -107,7 +107,13 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')).toBe(true);
-    expect(mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith('Error: This is an error to show the test user!')).toBe(true);
+    expect(
+      mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack.includes('at BadComponent')
+    ).toBe(true);
+    expect(
+      mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack.startsWith(
+        'Error: This is an error to show the test user!'
+      )
+    ).toBe(true);
   });
 });
