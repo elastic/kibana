@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { ReplacePanelSOFinder } from '.';
 import { ReplacePanelAction, ReplacePanelActionApi } from './replace_panel_action';
@@ -27,12 +26,12 @@ describe('replace panel action', () => {
     action = new ReplacePanelAction(savedObjectFinder);
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('superId'),
+        uuid: 'superId',
         viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: new BehaviorSubject<PresentationContainer>({
+        parentApi: {
           removePanel: jest.fn(),
           replacePanel: jest.fn(),
-        }),
+        },
       },
     };
   });
@@ -49,7 +48,7 @@ describe('replace panel action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

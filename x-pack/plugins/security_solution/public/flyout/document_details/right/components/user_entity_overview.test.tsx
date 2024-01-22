@@ -23,7 +23,7 @@ import { RightPanelContext } from '../context';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
-import { type ExpandableFlyoutApi, useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 const userName = 'user';
 const domain = 'n54bg2lfc7';
@@ -41,7 +41,7 @@ const panelContextValue = {
 };
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -83,7 +83,7 @@ const renderUserEntityOverview = () =>
 
 describe('<UserEntityOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   describe('license is valid', () => {

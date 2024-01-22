@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
+  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -146,7 +147,24 @@ export class UptimePlugin
       title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
-      deepLinks: [],
+      deepLinks: [
+        {
+          id: 'overview',
+          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
+            defaultMessage: 'Overview',
+          }),
+          path: '/',
+          navLinkStatus: AppNavLinkStatus.visible,
+        },
+        {
+          id: 'management',
+          title: i18n.translate('xpack.synthetics.managementPage.linkText', {
+            defaultMessage: 'Management',
+          }),
+          path: '/monitors',
+          navLinkStatus: AppNavLinkStatus.visible,
+        },
+      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 

@@ -86,7 +86,7 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 const DEFAULT_PACKAGE_POLICY = {
   name: '',
   description: '',
-  namespace: 'default',
+  namespace: '',
   policy_id: '',
   enabled: true,
   inputs: [],
@@ -221,7 +221,7 @@ export function useOnSubmit({
         packageToPackagePolicy(
           packageInfo,
           agentPolicy?.id || '',
-          agentPolicy?.namespace || DEFAULT_PACKAGE_POLICY.namespace,
+          '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
@@ -236,7 +236,6 @@ export function useOnSubmit({
     if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
       updatePackagePolicy({
         policy_id: agentPolicy.id,
-        namespace: agentPolicy.namespace,
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);
