@@ -7,6 +7,12 @@
 
 import { PassThrough, Readable } from 'stream';
 import { Logger } from '@kbn/logging';
+import { Stream } from 'openai/streaming';
+import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import {
+  InvokeAsyncIteratorBody,
+  getTokenCountFromInvokeAsyncIterator,
+} from './get_token_count_from_invoke_async_iterator';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { ActionTypeExecutorRawResult } from '../../common';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
@@ -37,6 +43,38 @@ export const getGenAiTokenTracking = async ({
   prompt_tokens: number;
   completion_tokens: number;
 } | null> => {
+  // this is an async iterator from the OpenAI sdk
+  if (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') {
+    try {
+      const data = result.data as Array<Stream<ChatCompletionChunk>>;
+      if (data.length === 2) {
+        const { total, prompt, completion } = await getTokenCountFromInvokeAsyncIterator({
+          streamIterable: data[1],
+          body: (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams,
+          logger,
+        });
+        return {
+          total_tokens: total,
+          prompt_tokens: prompt,
+          completion_tokens: completion,
+        };
+      }
+      logger.error(
+        'Failed to calculate tokens from Invoke Async Iterator subaction streaming response - unexpected response from actions client'
+      );
+      return {
+        total_tokens: 0,
+        prompt_tokens: 0,
+        completion_tokens: 0,
+      };
+    } catch (e) {
+      logger.error(
+        'Failed to calculate tokens from Invoke Async Iterator subaction streaming response'
+      );
+      logger.error(e);
+    }
+  }
+
   // this is a streamed OpenAI or Bedrock response, using the subAction invokeStream to stream the response as a simple string
   if (validatedParams.subAction === 'invokeStream' && result.data instanceof Readable) {
     try {

@@ -4,13 +4,19 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OpenAI as OpenAIClient } from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 
 import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { Stream } from 'openai/streaming';
+import {
+  ChatCompletionChunk,
+  ChatCompletionContentPart,
+  ChatCompletionCreateParamsNonStreaming,
+  ChatCompletionCreateParamsStreaming,
+} from 'openai/resources/chat/completions';
 import { RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
@@ -86,8 +92,8 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async completionWithRetry(
-    completionRequest: OpenAIClient.Chat.ChatCompletionCreateParamsStreaming
-  ): Promise<AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>> {
+    completionRequest: ChatCompletionCreateParamsStreaming
+  ): Promise<Stream<ChatCompletionChunk>> {
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
       // stream
@@ -104,27 +110,17 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       }
 
       // cast typing as this is the contract of the actions client
-      const result = get(
-        'data',
-        actionResult
-      ) as AsyncIterable<OpenAIClient.Chat.Completions.ChatCompletionChunk>;
+      const result = get('data', actionResult) as Array<Stream<ChatCompletionChunk>>;
 
-      return result;
-      // TODO validation
-      // if (typeof content !== 'string') {
-      //   throw new Error(
-      //     `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
-      //   );
-      // }
-      // this.#actionResultData = result; // save the raw response from the connector, because that's what the assistant expects
-      // The type you're expecting from OpenAI is AsyncIterable where I am expecting IncomingMessage.
-      // return (result as unknown as IncomingMessage).pipe(new PassThrough());
+      if (result.length === 0) {
+        throw new Error(`${LLM_TYPE}: action result data is empty ${actionResult}`);
+      }
+
+      return result[0];
     });
   }
   formatRequestForActionsClient(
-    completionRequest:
-      | OpenAIClient.Chat.ChatCompletionCreateParamsStreaming
-      | OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming
+    completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
   ): {
     actionId: string;
     params: {
@@ -174,7 +170,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
 interface InvokeAIActionParamsSchema {
   messages: Array<{
     role: string;
-    content: string | OpenAIClient.Chat.ChatCompletionContentPart[];
+    content: string | ChatCompletionContentPart[];
     name?: string;
     function_call?: {
       arguments: string;
@@ -192,9 +188,9 @@ interface InvokeAIActionParamsSchema {
     }>;
     tool_call_id?: string;
   }>;
-  model?: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming['model'];
-  n?: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming['n'];
-  stop?: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming['stop'];
-  temperature?: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming['temperature'];
-  functions?: OpenAIClient.Chat.ChatCompletionCreateParamsNonStreaming['functions'];
+  model?: ChatCompletionCreateParamsNonStreaming['model'];
+  n?: ChatCompletionCreateParamsNonStreaming['n'];
+  stop?: ChatCompletionCreateParamsNonStreaming['stop'];
+  temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
+  functions?: ChatCompletionCreateParamsNonStreaming['functions'];
 }

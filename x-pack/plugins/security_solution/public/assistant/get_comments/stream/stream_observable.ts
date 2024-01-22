@@ -62,7 +62,6 @@ export const getStreamObservable = ({
               return;
             }
             const decoded = decoder.decode(value);
-            console.log('CLIENT CHUNK', decoded);
             let nextChunks;
             if (isError) {
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];

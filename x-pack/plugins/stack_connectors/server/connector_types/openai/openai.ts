@@ -225,9 +225,10 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
+   * Streamed security solution AI Assistant requests (non-langchain)
    * Responsible for invoking the streamApi method with the provided body and
-   * stream parameters set to true. It then returns a Transform stream that processes
-   * the response from the streamApi method and returns the response string alone.
+   * stream parameters set to true. It then returns a ReadableStream, meant to be
+   * returned directly to the client for streaming
    * @param body - the OpenAI Invoke request body
    */
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
@@ -239,9 +240,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return res.pipe(new PassThrough());
   }
 
+  /**
+   * Streamed security solution AI Assistant requests (langchain)
+   * Responsible for invoking the streamApi method with the provided body and
+   * stream parameters set to true. It then returns an array of
+   * Stream<ChatCompletionChunk>, an extension of AsyncIterator,
+   * meant to be read/transformed on the server and sent to the client via Server Sent Events
+   * @param body - the OpenAI Invoke request body
+   * @returns a Stream<ChatCompletionChunk> array "teed", teed[0] is used for the UI and teed[1] for token tracking
+   */
   public async invokeAsyncIterator(
     body: InvokeAIActionParams
-  ): Promise<Stream<ChatCompletionChunk>> {
+  ): Promise<Array<Stream<ChatCompletionChunk>>> {
     const messages = body.messages as unknown as ChatCompletionMessageParam[];
     const requestBody: ChatCompletionCreateParamsStreaming = {
       ...body,
@@ -251,13 +261,18 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
         body.model ??
         ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
     };
-    return this.openAI.chat.completions.create(requestBody);
+    const stream = await this.openAI.chat.completions.create(requestBody);
+    // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
+    const teed = stream.tee();
+    return teed;
   }
 
   /**
-   * Deprecated. Use invokeStream instead.
-   * TODO: remove once streaming work is implemented in langchain mode for security solution
-   * tracked here: https://github.com/elastic/security-team/issues/7363
+   * Non-streamed security solution AI Assistant requests
+   * Responsible for invoking the runApi method with the provided body.
+   * It then formats the response into a string
+   * @param body - the OpenAI chat completion request body
+   * @returns an object with the response string and the usage object
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });

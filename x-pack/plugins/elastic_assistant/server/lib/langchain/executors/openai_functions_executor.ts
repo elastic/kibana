@@ -117,9 +117,14 @@ export const callOpenAIFunctionsExecutor = async ({
   });
 
   return {
-    connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
-    trace_data: traceData,
-    status: 'ok',
+    body: {
+      connector_id: connectorId,
+      data: llm.getActionResultData(), // the response from the actions framework
+      trace_data: traceData,
+      status: 'ok',
+    },
+    headers: {
+      'content-type': 'application/json',
+    },
   };
 };
