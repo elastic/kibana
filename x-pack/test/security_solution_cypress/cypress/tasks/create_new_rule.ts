@@ -23,7 +23,7 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
-import type { Actions } from '../objects/types';
+import type { Actions, AlertsFilter } from '../objects/types';
 // For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
@@ -55,6 +55,7 @@ import {
   EQL_TYPE,
   ESQL_TYPE,
   ESQL_QUERY_BAR,
+  ESQL_QUERY_BAR_EXPAND_BTN,
   ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
@@ -124,6 +125,13 @@ import {
   INDEX_SELECTOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
+  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
+  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
@@ -463,6 +471,25 @@ export const fillRuleAction = (actions: Actions) => {
   });
 };
 
+export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_BUTTON).click();
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_INPUT()).type(alertsFilter.query.kql);
+
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON).click();
+  alertsFilter.timeframe.days.forEach((day) =>
+    cy.get(ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON(day)).click()
+  );
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_START_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.start}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_END_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.end}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
+};
+
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
   const thresholdField = 0;
   const threshold = 1;
@@ -535,6 +562,14 @@ export const clearEsqlQueryBar = () => {
 
 export const fillEsqlQueryBar = (query: string) => {
   cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query);
+};
+
+/**
+ * expands query bar, so query is not obscured on narrow screens
+ * and validation message is not covered by input menu tooltip
+ */
+export const expandEsqlQueryBar = () => {
+  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
 };
 
 export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {

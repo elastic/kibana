@@ -12,6 +12,8 @@ import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@k
 import {
   PostMessageParamsSchema,
   PostMessageSubActionParamsSchema,
+  PostBlockkitSubActionParamsSchema,
+  PostBlockkitParamsSchema,
   SlackApiSecretsSchema,
   SlackApiParamsSchema,
   SlackApiConfigSchema,
@@ -23,6 +25,8 @@ export type SlackApiConfig = TypeOf<typeof SlackApiConfigSchema>;
 
 export type PostMessageParams = TypeOf<typeof PostMessageParamsSchema>;
 export type PostMessageSubActionParams = TypeOf<typeof PostMessageSubActionParamsSchema>;
+export type PostBlockkitSubActionParams = TypeOf<typeof PostBlockkitSubActionParamsSchema>;
+export type PostBlockkitParams = TypeOf<typeof PostBlockkitParamsSchema>;
 export type ValidChannelIdSubActionParams = TypeOf<typeof ValidChannelIdSubActionParamsSchema>;
 export type SlackApiParams = TypeOf<typeof SlackApiParamsSchema>;
 export type SlackApiConnectorType = ConnectorType<
@@ -87,4 +91,9 @@ export interface SlackApiService {
     channelIds,
     text,
   }: PostMessageSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
+  postBlockkit: ({
+    channels,
+    channelIds,
+    text,
+  }: PostBlockkitSubActionParams) => Promise<ConnectorTypeExecutorResult<unknown>>;
 }

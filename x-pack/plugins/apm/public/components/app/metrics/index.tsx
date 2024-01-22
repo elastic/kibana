@@ -17,11 +17,12 @@ import { ServiceMetrics } from './service_metrics';
 import { JvmMetricsOverview } from './jvm_metrics_overview';
 import { JsonMetricsDashboard } from './static_dashboard';
 import { hasDashboardFile } from './static_dashboard/helper';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
   const isAWSLambda = isAWSLambdaAgentName(serverlessType);
-
+  const { dataView } = useAdHocApmDataView();
   if (isAWSLambda) {
     return <ServerlessMetrics />;
   }
@@ -32,12 +33,13 @@ export function Metrics() {
     serverlessType,
   });
 
-  if (hasStaticDashboard) {
+  if (hasStaticDashboard && dataView) {
     return (
       <JsonMetricsDashboard
         agentName={agentName}
         runtimeName={runtimeName}
         serverlessType={serverlessType}
+        dataView={dataView}
       />
     );
   }

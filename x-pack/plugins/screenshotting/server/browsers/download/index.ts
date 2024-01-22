@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { existsSync } from 'fs';
+import { access } from 'fs/promises';
 import del from 'del';
 import type { Logger } from '@kbn/core/server';
 import type { ChromiumArchivePaths, PackageInfo } from '../chromium';
@@ -42,7 +42,13 @@ export async function download(
   const resolvedPath = paths.resolvePath(pkg);
   const foundChecksum = await sha256(resolvedPath).catch(() => 'MISSING');
 
-  const pathExists = existsSync(resolvedPath);
+  let pathExists = null;
+  try {
+    await access(resolvedPath);
+    pathExists = true;
+  } catch (e) {
+    pathExists = false;
+  }
   if (pathExists && foundChecksum === archiveChecksum) {
     logger?.debug(
       `Browser archive for ${pkg.platform}/${pkg.architecture} already found in ${resolvedPath} with matching checksum.`

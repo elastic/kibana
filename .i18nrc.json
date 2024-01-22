@@ -30,6 +30,7 @@
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
+    "presentationPanel": "src/plugins/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
     "esUi": "src/plugins/es_ui_shared",
@@ -79,6 +80,7 @@
     "kibana_utils": "src/plugins/kibana_utils",
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
+    "lensFormulaDocs": "packages/kbn-lens-formula-docs",
     "lists": "packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": [

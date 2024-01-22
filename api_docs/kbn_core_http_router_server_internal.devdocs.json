@@ -124,10 +124,9 @@
               "(kibanaResponse: ",
               "KibanaResponse",
               "<any>) => ",
-              "ResponseObject",
-              " | ",
               "Boom",
-              "<any>"
+              "<any> | ",
+              "ResponseObject"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
@@ -337,6 +336,20 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
           {
             "parentPluginId": "@kbn/core-http-router-server-internal",
             "id": "def-common.kibanaResponseFactory.Unnamed",

@@ -19,4 +19,8 @@ export type {
   ESFilter,
   MaybeReadonlyArray,
   ClusterDetails,
+  ESQLColumn,
+  ESQLRow,
+  ESQLSearchReponse,
+  ESQLSearchParams,
 } from './src';

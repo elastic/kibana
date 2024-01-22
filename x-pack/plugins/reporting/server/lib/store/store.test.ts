@@ -221,6 +221,7 @@ describe('ReportingStore', () => {
         "completed_at": undefined,
         "created_at": "some time",
         "created_by": "some security person",
+        "error": undefined,
         "execution_time_ms": undefined,
         "jobtype": "csv_searchsource",
         "kibana_id": undefined,
@@ -312,6 +313,35 @@ describe('ReportingStore', () => {
     expect(updateCall.if_primary_term).toBe(10002);
   });
 
+  it('setReportError sets the if_seq_no, if_primary_term & migration_version of a saved report', async () => {
+    const store = new ReportingStore(mockCore, mockLogger);
+    const report = new SavedReport({
+      _id: 'id-of-failure',
+      _index: '.reporting-test-index-12345',
+      _seq_no: 43,
+      _primary_term: 10002,
+      jobtype: 'test-report',
+      created_by: 'created_by_test_string',
+      max_attempts: 50,
+      payload: {
+        title: 'test report',
+        headers: 'rp_test_headers',
+        objectType: 'testOt',
+        browserTimezone: 'BCD',
+        version: '7.14.0',
+      },
+      timeout: 30000,
+    });
+
+    await store.setReportError(report, { errors: 'yes' } as any);
+
+    const [[updateCall]] = mockEsClient.update.mock.calls;
+    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
+    expect(response.migration_version).toBe(`7.14.0`);
+    expect(updateCall.if_seq_no).toBe(43);
+    expect(updateCall.if_primary_term).toBe(10002);
+  });
+
   it('setReportCompleted sets the status of a saved report to completed', async () => {
     const store = new ReportingStore(mockCore, mockLogger);
     const report = new SavedReport({
@@ -383,39 +413,6 @@ describe('ReportingStore', () => {
         ],
       }
     `);
-  });
-
-  it('prepareReportForRetry resets the expiration and status on the report document', async () => {
-    const store = new ReportingStore(mockCore, mockLogger);
-    const report = new SavedReport({
-      _id: 'pretty-good-report-id',
-      _index: '.reporting-test-index-94058763',
-      _seq_no: 46,
-      _primary_term: 10002,
-      jobtype: 'test-report-2',
-      created_by: 'created_by_test_string',
-      status: JOB_STATUS.PROCESSING,
-      process_expiration: '2002',
-      max_attempts: 3,
-      payload: {
-        title: 'test report',
-        headers: 'rp_test_headers',
-        objectType: 'testOt',
-        browserTimezone: 'utc',
-        version: '7.14.0',
-      },
-      timeout: 30000,
-    });
-
-    await store.prepareReportForRetry(report);
-
-    const [[updateCall]] = mockEsClient.update.mock.calls;
-    const response = (updateCall as estypes.UpdateRequest).body?.doc as Report;
-
-    expect(response.migration_version).toBe(`7.14.0`);
-    expect(response.status).toBe(`pending`);
-    expect(updateCall.if_seq_no).toBe(46);
-    expect(updateCall.if_primary_term).toBe(10002);
   });
 
   describe('start', () => {

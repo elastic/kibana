@@ -173,29 +173,29 @@ download_artifact() {
 
 
 vault_get() {
-  path=$1
+  key_path=$1
   field=$2
 
-  fullPath="secret/ci/elastic-kibana/$path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
-    fullPath="secret/kibana-issues/dev/$path"
+    fullPath="secret/kibana-issues/dev/$key_path"
   fi
 
-  if [[ -z "${2:-}" ]]; then
-    retry 5 5 vault read "$fullPath"
+  if [[ -z "${2:-}" || "${2:-}" =~ ^-.* ]]; then
+    retry 5 5 vault read "$fullPath" "${@:2}"
   else
-    retry 5 5 vault read -field="$field" "$fullPath"
+    retry 5 5 vault read -field="$field" "$fullPath" "${@:3}"
   fi
 }
 
 vault_set() {
-  path=$1
+  key_path=$1
   shift
   fields=("$@")
 
-  fullPath="secret/ci/elastic-kibana/$path"
+  fullPath="secret/ci/elastic-kibana/$key_path"
   if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
-    fullPath="secret/kibana-issues/dev/$path"
+    fullPath="secret/kibana-issues/dev/$key_path"
   fi
 
   # shellcheck disable=SC2068

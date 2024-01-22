@@ -29,6 +29,7 @@ export const convertHighlightedFieldsToTableRow = (
       field,
       description: {
         field,
+        ...(overrideFieldName ? { originalField: fieldName } : {}),
         values,
         scopeId,
         isPreview,
