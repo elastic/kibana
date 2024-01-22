@@ -58,7 +58,7 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
   };
   const threshold = burnRateOption.threshold;
   const burnRate = data?.burnRates.find(
-    (burnRate) => burnRate.name === burnRateOption.windowName
+    (curr) => curr.name === burnRateOption.windowName
   )?.burnRate;
 
   return (
