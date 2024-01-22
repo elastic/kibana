@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
@@ -18,6 +18,7 @@ import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
+import { PersistableControlGroupInput } from '../../../common';
 import { pluginServices } from '../../services';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
@@ -203,6 +204,11 @@ export class ControlGroupContainer extends Container<
         console.log('controlGroupHasChanges 1', controlGroupHasChanges);
       })
     );
+  };
+
+  public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
+    const input = this.getInput();
+    return pick(input, ['id', 'panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']);
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {

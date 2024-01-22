@@ -405,7 +405,6 @@ export const initializeDashboard = async ({
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
-      console.log(initialComponentState);
       const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
         lastSavedInput: {
           ...fullControlGroupInput,

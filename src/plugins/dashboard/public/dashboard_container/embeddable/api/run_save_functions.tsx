@@ -102,7 +102,7 @@ export function runSaveAs(this: DashboardContainer) {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
           if (this.controlGroup) {
-            this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getInput());
+            this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getPersistableInput());
           }
         });
       }
@@ -149,7 +149,8 @@ export async function runQuickSave(this: DashboardContainer) {
 
   this.dispatch.setLastSavedInput(currentState);
   if (this.controlGroup) {
-    this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getInput());
+    console.log('SET LAST SAVED INPUT', this.controlGroup.getPersistableInput());
+    this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getPersistableInput());
   }
 
   return saveResult;

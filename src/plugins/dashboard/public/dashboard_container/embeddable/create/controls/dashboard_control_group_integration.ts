@@ -12,10 +12,7 @@ import { isEqual } from 'lodash';
 import { Observable } from 'rxjs';
 import { distinctUntilChanged, skip } from 'rxjs/operators';
 
-import {
-  ControlGroupInput,
-  persistableControlGroupInputIsEqual,
-} from '@kbn/controls-plugin/common';
+import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 
 import { DashboardContainerInput } from '../../../../../common';
@@ -37,40 +34,6 @@ type DashboardControlGroupCommonKeys = keyof Pick<
 
 export function startSyncingDashboardControlGroup(this: DashboardContainer) {
   if (!this.controlGroup) return;
-  const isControlGroupInputEqual = () =>
-    persistableControlGroupInputIsEqual(
-      this.controlGroup!.getInput(),
-      this.getInput().controlGroupInput
-    );
-
-  // Because dashboard container stores control group state, certain control group changes need to be passed up dashboard container
-  const controlGroupDiff: DiffChecks = {
-    panels: deepEqual,
-    controlStyle: deepEqual,
-    chainingSystem: deepEqual,
-    ignoreParentSettings: deepEqual,
-  };
-  this.integrationSubscriptions.add(
-    this.controlGroup
-      .getInput$()
-      .pipe(
-        distinctUntilChanged((a, b) =>
-          distinctUntilDiffCheck<ControlGroupInput>(a, b, controlGroupDiff)
-        )
-      )
-      .subscribe(() => {
-        const { panels, controlStyle, chainingSystem, ignoreParentSettings } =
-          this.controlGroup!.getInput();
-        if (!isControlGroupInputEqual()) {
-          this.dispatch.setControlGroupState({
-            panels,
-            controlStyle,
-            chainingSystem,
-            ignoreParentSettings,
-          });
-        }
-      })
-  );
 
   const compareAllFilters = (a?: Filter[], b?: Filter[]) =>
     compareFilters(a ?? [], b ?? [], COMPARE_ALL_OPTIONS);
