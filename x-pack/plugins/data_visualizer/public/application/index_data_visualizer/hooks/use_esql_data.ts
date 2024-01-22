@@ -14,6 +14,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { chunk } from 'lodash';
+import { useCancellableSearch } from '@kbn/ml-cancellable-search';
 import { OMIT_FIELDS } from '../../../../common/constants';
 import type { TimeBucketsInterval } from '../../../../common/services/time_buckets';
 import type {
@@ -37,7 +38,6 @@ import { getESQLDocumentCountStats } from '../search_strategy/requests/get_docum
 import type { NonAggregatableField } from '../types/overall_stats';
 import { getESQLSupportedAggs } from '../utils/get_supported_aggs';
 import { processDistributionData } from '../utils/process_distribution_data';
-import { useCancellableSearch } from './use_cancellable_hooks';
 
 export interface AggregatableField {
   fieldName: string;
@@ -101,13 +101,14 @@ export const useESQLFieldStatsData = <T extends Column>({
     getInitialProgress()
   );
 
-  const { runRequest, cancelRequest } = useCancellableSearch();
-
   const {
     services: {
+      data,
       notifications: { toasts },
     },
   } = useDataVisualizerKibana();
+
+  const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   useEffect(
     function updateFieldStats() {
@@ -453,16 +454,16 @@ export const useESQLFieldStatsData = <T extends Column>({
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-        earliest: number | undefined;
-        latest: number | undefined;
-        aggInterval: TimeBucketsInterval;
-        intervalMs: number;
-        searchQuery: AggregateQuery;
-        indexPattern: string | undefined;
-        timeFieldName: string | undefined;
-        lastRefresh: number;
-        filter?: QueryDslQueryContainer;
-      }
+      earliest: number | undefined;
+      latest: number | undefined;
+      aggInterval: TimeBucketsInterval;
+      intervalMs: number;
+      searchQuery: AggregateQuery;
+      indexPattern: string | undefined;
+      timeFieldName: string | undefined;
+      lastRefresh: number;
+      filter?: QueryDslQueryContainer;
+    }
     | undefined
 ) => {
   const {
