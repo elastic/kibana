@@ -18,6 +18,7 @@ interface Props {
   dataTimeRange: TimeRange;
   threshold: number;
   alertTimeRange?: TimeRange;
+  showErrorRateAsLine?: boolean;
   annotations?: AlertAnnotation[];
 }
 
@@ -26,12 +27,19 @@ export function ErrorRateChart({
   dataTimeRange,
   threshold,
   alertTimeRange,
+  showErrorRateAsLine,
   annotations,
 }: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(slo, threshold, alertTimeRange, annotations);
+  const lensDef = useLensDefinition(
+    slo,
+    threshold,
+    alertTimeRange,
+    annotations,
+    showErrorRateAsLine
+  );
   const delayInSeconds = getDelayInSecondsFromSLO(slo);
 
   const from = moment(dataTimeRange.from).subtract(delayInSeconds, 'seconds').toISOString();

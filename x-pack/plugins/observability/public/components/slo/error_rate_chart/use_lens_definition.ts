@@ -28,7 +28,8 @@ export function useLensDefinition(
   slo: SLOResponse,
   threshold: number,
   alertTimeRange?: TimeRange,
-  annotations?: AlertAnnotation[]
+  annotations?: AlertAnnotation[],
+  showErrorRateAsLine?: boolean
 ): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
@@ -75,14 +76,14 @@ export function useLensDefinition(
             layerId: '8730e8af-7dac-430e-9cef-3b9989ff0866',
             accessors: ['9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14'],
             position: 'top',
-            seriesType: !!alertTimeRange ? 'line' : 'area',
+            seriesType: !!showErrorRateAsLine ? 'line' : 'area',
             showGridlines: false,
             layerType: 'data',
             xAccessor: '627ded04-eae0-4437-83a1-bbb6138d2c3b',
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: !!alertTimeRange ? euiTheme.colors.primary : euiTheme.colors.danger,
+                color: !!showErrorRateAsLine ? euiTheme.colors.primary : euiTheme.colors.danger,
               },
             ],
           },
@@ -122,9 +123,12 @@ export function useLensDefinition(
                     },
                     {
                       type: 'manual',
-                      label: i18n.translate('xpack.observability.slo.errorRateChart.alertLabel', {
-                        defaultMessage: 'Alert',
-                      }),
+                      label: i18n.translate(
+                        'xpack.observability.slo.errorRateChart.activeAlertLabel',
+                        {
+                          defaultMessage: 'Active alert',
+                        }
+                      ),
                       key: {
                         type: 'range',
                         timestamp: moment(alertTimeRange.from).toISOString(),

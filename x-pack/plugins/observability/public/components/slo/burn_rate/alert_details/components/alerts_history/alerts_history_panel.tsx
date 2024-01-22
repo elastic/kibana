@@ -196,6 +196,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                     date: new Date(a.key_as_string!),
                     total: a.doc_count,
                   }))}
+                showErrorRateAsLine
               />
             )}
           </EuiFlexItem>
