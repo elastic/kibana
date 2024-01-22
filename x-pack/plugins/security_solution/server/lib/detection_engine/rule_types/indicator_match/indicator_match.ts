@@ -7,6 +7,7 @@
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 import type {
   AlertInstanceContext,
@@ -43,6 +44,7 @@ export const indicatorMatchExecutor = async ({
   inputIndexFields,
   wrapSuppressedHits,
   runOpts,
+  licensing,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -63,6 +65,7 @@ export const indicatorMatchExecutor = async ({
   inputIndexFields: DataViewFieldBase[];
   wrapSuppressedHits: WrapSuppressedHits;
   runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }) => {
   const ruleParams = completeRule.ruleParams;
 
@@ -101,6 +104,7 @@ export const indicatorMatchExecutor = async ({
       unprocessedExceptions,
       inputIndexFields,
       runOpts,
+      licensing,
     });
   });
 };

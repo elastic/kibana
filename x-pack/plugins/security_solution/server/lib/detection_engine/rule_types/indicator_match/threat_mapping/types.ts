@@ -17,6 +17,7 @@ import type {
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -77,6 +78,7 @@ export interface CreateThreatSignalsOptions {
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }
 
 export interface CreateThreatSignalOptions {
@@ -118,6 +120,7 @@ export interface CreateThreatSignalOptions {
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }
 
 export interface CreateEventSignalOptions {
@@ -160,6 +163,7 @@ export interface CreateEventSignalOptions {
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }
 
 type EntryKey = 'field' | 'value';

@@ -20,7 +20,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { eventsTelemetry, version } = createOptions;
+  const { eventsTelemetry, version, licensing } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
@@ -74,8 +74,6 @@ export const createIndicatorMatchAlertType = (
           exceptionFilter,
           unprocessedExceptions,
           inputIndexFields,
-          alertTimestampOverride,
-          alertWithSuppression,
         },
         services,
         spaceId,
@@ -119,6 +117,7 @@ export const createIndicatorMatchAlertType = (
         inputIndexFields,
         wrapSuppressedHits,
         runOpts,
+        licensing,
       });
       return { ...result, state };
     },

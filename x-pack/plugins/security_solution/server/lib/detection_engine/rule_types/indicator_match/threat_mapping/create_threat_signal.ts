@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -52,6 +54,7 @@ export const createThreatSignal = async ({
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
+  licensing,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -59,6 +62,9 @@ export const createThreatSignal = async ({
     entryKey: 'value',
     allowedFieldsForTermsQuery,
   });
+
+  const license = await firstValueFrom(licensing.license$);
+  const hasPlatinumLicense = license.hasAtLeast('platinum');
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
@@ -107,7 +113,11 @@ export const createThreatSignal = async ({
 
     let result: SearchAfterAndBulkCreateReturnType;
 
-    if (isAlertSuppressionEnabled) {
+    if (
+      isAlertSuppressionEnabled &&
+      runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled &&
+      hasPlatinumLicense
+    ) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         buildReasonMessage: buildReasonMessageForThreatMatchAlert,
         bulkCreate,
