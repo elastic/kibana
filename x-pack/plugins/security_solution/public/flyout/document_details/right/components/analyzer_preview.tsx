@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ANALYZER_PREVIEW_TEST_ID, ANALYZER_PREVIEW_LOADING_TEST_ID } from './test_ids';
 import { getTreeNodes } from '../utils/analyzer_helpers';
-import { ANCESTOR_ID, RULE_INDICES } from '../../shared/constants/field_names';
+import { RULE_INDICES } from '../../shared/constants/field_names';
 import { useRightPanelContext } from '../context';
 import { useAlertPrevalenceFromProcessTree } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
 import type { StatsNode } from '../../../../common/containers/alerts/use_alert_prevalence_from_process_tree';
@@ -33,18 +33,14 @@ interface Cache {
  */
 export const AnalyzerPreview: React.FC = () => {
   const [cache, setCache] = useState<Partial<Cache>>({});
-  const { dataFormattedForFieldBrowser: data, scopeId } = useRightPanelContext();
-
-  const documentId = find({ category: 'kibana', field: ANCESTOR_ID }, data);
-  const processDocumentId =
-    documentId && Array.isArray(documentId.values) ? documentId.values[0] : '';
+  const { dataFormattedForFieldBrowser: data, scopeId, eventId } = useRightPanelContext();
 
   const index = find({ category: 'kibana', field: RULE_INDICES }, data);
   const indices = index?.values ?? [];
 
   const { statsNodes, loading, error } = useAlertPrevalenceFromProcessTree({
     isActiveTimeline: isActiveTimeline(scopeId),
-    documentId: processDocumentId,
+    documentId: eventId,
     indices,
   });
 
@@ -59,7 +55,7 @@ export const AnalyzerPreview: React.FC = () => {
     [cache.statsNodes]
   );
 
-  const showAnalyzerTree = documentId && index && items && items.length > 0 && !error;
+  const showAnalyzerTree = eventId && index && items && items.length > 0 && !error;
 
   return loading ? (
     <EuiSkeletonText

@@ -24,21 +24,9 @@ export interface PerformGetParams {
 
 export const performGet = async <T>(
   { type, id, options }: PerformGetParams,
-  {
-    registry,
-    helpers,
-    allowedTypes,
-    client,
-    migrator,
-    serializer,
-    extensions = {},
-  }: ApiExecutionContext
+  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const {
-    common: commonHelper,
-    encryption: encryptionHelper,
-    migration: migrationHelper,
-  } = helpers;
+  const { common: commonHelper, migration: migrationHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -84,18 +72,8 @@ export const performGet = async <T>(
     migrationVersionCompatibility,
   });
 
-  let migrated: SavedObject<T>;
-  try {
-    migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
-  } catch (error) {
-    throw SavedObjectsErrorHelpers.decorateGeneralError(
-      error,
-      'Failed to migrate document to the latest version.'
-    );
-  }
-
-  return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    migrated,
-    authorizationResult?.typeMap
-  );
+  return await migrationHelper.migrateAndDecryptStorageDocument({
+    document,
+    typeMap: authorizationResult?.typeMap,
+  });
 };

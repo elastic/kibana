@@ -16,11 +16,13 @@ import {
 import { Description } from './description';
 import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { DocumentDetailsPreviewPanelKey } from '../../preview';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/types';
 import { i18n } from '@kbn/i18n';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+
+jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
 
 const ruleUuid = {
   category: 'kibana',
@@ -48,7 +50,7 @@ const ruleName = {
 
 const flyoutContextValue = {
   openPreviewPanel: jest.fn(),
-} as unknown as ExpandableFlyoutContextValue;
+} as unknown as ExpandableFlyoutApi;
 
 const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsItem[]) =>
   ({
@@ -62,17 +64,19 @@ const panelContextValue = (dataFormattedForFieldBrowser: TimelineEventsDetailsIt
 const renderDescription = (panelContext: RightPanelContext) =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
-        <RightPanelContext.Provider value={panelContext}>
-          <Description />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={panelContext}>
+        <Description />
+      </RightPanelContext.Provider>
     </IntlProvider>
   );
 
 const NO_DATA_MESSAGE = "There's no description for this rule.";
 
 describe('<Description />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
+  });
+
   it('should render the component', () => {
     const { getByTestId } = renderDescription(
       panelContextValue([ruleUuid, ruleDescription, ruleName])
