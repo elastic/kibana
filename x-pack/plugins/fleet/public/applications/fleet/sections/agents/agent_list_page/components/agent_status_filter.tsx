@@ -173,7 +173,7 @@ export const AgentStatusFilter: React.FC<{
 
   useEffect(() => {
     setOptions(getOptions());
-  }, [getOptions, newlyInactiveAgentsCount]);
+  }, [getOptions]);
 
   const onOptionsChange = useCallback(
     (newOptions: EuiSelectableOption[]) => {

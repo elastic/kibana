@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
-import { EuiFilterButton, EuiFilterSelectItem, EuiPopover, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { AgentPolicy } from '../../../../../../../../common';
@@ -22,8 +23,6 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
   onSelectedAgentPoliciesChange,
   agentPolicies,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -38,6 +37,21 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
       selectedAgentPolicies.filter((agentPolicy) => agentPolicy !== policyId)
     );
   };
+
+  const getOptions = useCallback((): EuiSelectableOption[] => {
+    return agentPolicies.map((agentPolicy, index) => ({
+      label: agentPolicy.name,
+      checked: selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined,
+      key: agentPolicy.id,
+      'data-test-subj': 'agentList.agentPolicyFilterOption',
+    }));
+  }, [agentPolicies, selectedAgentPolicies]);
+
+  const [options, setOptions] = useState<EuiSelectableOption[]>(getOptions());
+
+  useEffect(() => {
+    setOptions(getOptions());
+  }, [getOptions]);
 
   return (
     <EuiPopover
@@ -63,44 +77,32 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
       closePopover={() => setIsAgentPoliciesFilterOpen(false)}
       panelPaddingSize="none"
     >
-      {/*  EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
-            instead of EuiFilterSelectItem (which is pending deprecation).
-            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
-      <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
-        {agentPolicies.map((agentPolicy, index) => (
-          <EuiFilterSelectItem
-            checked={selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined}
-            key={index}
-            onClick={() => {
-              if (selectedAgentPolicies.includes(agentPolicy.id)) {
-                removeAgentPolicyFilter(agentPolicy.id);
-              } else {
-                addAgentPolicyFilter(agentPolicy.id);
-              }
-            }}
-          >
-            {agentPolicy.name}
-          </EuiFilterSelectItem>
-        ))}
-      </div>
-      {/* <EuiSelectable
+      <EuiSelectable
         options={options}
-        onChange={(newOptions) => {
+        onChange={(newOptions: EuiSelectableOption[]) => {
           setOptions(newOptions);
           newOptions.forEach((option, index) => {
             if (option.checked !== options[index].checked) {
-              onToggleLevel(option.label);
+              const agentPolicyId = option.key!;
+              if (option.checked !== 'on') {
+                removeAgentPolicyFilter(agentPolicyId);
+              } else {
+                addAgentPolicyFilter(agentPolicyId);
+              }
               return;
             }
           });
         }}
-        data-test-subj="agentList.logLevelFilterOptions"
+        data-test-subj="agentList.agentPolicyFilterOptions"
         listProps={{
           paddingSize: 's',
+          style: {
+            minWidth: 200,
+          },
         }}
       >
         {(list) => list}
-      </EuiSelectable> */}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
