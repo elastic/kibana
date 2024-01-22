@@ -12,7 +12,6 @@ import { pick } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
-import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage, UnifiedHistogramRequestContext } from '../types';
 import {
@@ -142,37 +141,6 @@ export const UnifiedHistogramContainer = forwardRef<
   // Don't render anything until the container is initialized
   if (!layoutProps || !lensSuggestionsApi || !api) {
     return null;
-  }
-
-  if (
-    containerProps.table &&
-    currentSuggestion &&
-    currentSuggestion.datasourceId === 'textBased' &&
-    currentSuggestion.datasourceState &&
-    (currentSuggestion.datasourceState as TextBasedPersistedState).layers &&
-    Object.values((currentSuggestion.datasourceState as TextBasedPersistedState).layers).some(
-      (l) => l.table && l.table !== containerProps.table
-    )
-  ) {
-    const layerIds = Object.keys(
-      (currentSuggestion.datasourceState as TextBasedPersistedState).layers
-    );
-
-    const newLayers: TextBasedPersistedState['layers'] = {};
-    layerIds.forEach((layerId) => {
-      newLayers[layerId] = {
-        ...(currentSuggestion!.datasourceState as TextBasedPersistedState).layers[layerId],
-        table: containerProps.table,
-      };
-    });
-
-    stateService?.setCurrentSuggestion({
-      ...currentSuggestion,
-      datasourceState: {
-        ...(currentSuggestion.datasourceState as TextBasedPersistedState),
-        layers: newLayers,
-      },
-    });
   }
 
   return (

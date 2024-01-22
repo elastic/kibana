@@ -125,7 +125,7 @@ export const useLensSuggestions = ({
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
-    const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
+    const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns, table });
 
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
@@ -136,6 +136,7 @@ export const useLensSuggestions = ({
   }, [
     columns,
     dataView,
+    table,
     onSuggestionChange,
     query,
     suggestions.firstSuggestion,
@@ -155,8 +156,10 @@ const getSuggestionDeps = ({
   dataView,
   query,
   columns,
+  table,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
   columns?: DatatableColumn[];
-}) => [dataView.id, columns, query];
+  table?: Datatable;
+}) => [dataView.id, columns, query, table];
