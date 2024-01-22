@@ -264,7 +264,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         );
 
         this.logger.l('Telemetry is not opted-in.');
-        return Promise.reject(newFailure('Telemetry is not opted-in', channel, events.length));
+        throw newFailure('Telemetry is not opted-in', channel, events.length);
       }
 
       const isElasticTelemetryReachable = await senderMetadata.isTelemetryServicesReachable();
@@ -326,9 +326,12 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           throw newFailure(`Error posting events: ${err}`, channel, events.length);
         });
     } catch (err: unknown) {
-      this.senderUtils?.incrementCounter(TelemetryCounter.FATAL_ERROR, events.length, channel);
-
-      throw newFailure(`Unexpected error posting events: ${err}`, channel, events.length);
+      if (isFailure(err)) {
+        throw err;
+      } else {
+        this.senderUtils?.incrementCounter(TelemetryCounter.FATAL_ERROR, events.length, channel);
+        throw newFailure(`Unexpected error posting events: ${err}`, channel, events.length);
+      }
     }
   }
 
@@ -369,8 +372,15 @@ function newFailure(message: string, channel: TelemetryChannel, events: number):
   return failure;
 }
 
-function isFailure(result: Result): result is Failure {
-  return 'name' in result && 'message' in result && 'events' in result && 'channel' in result;
+function isFailure(result: unknown): result is Failure {
+  return (
+    result !== null &&
+    typeof result === 'object' &&
+    'name' in result &&
+    'message' in result &&
+    'events' in result &&
+    'channel' in result
+  );
 }
 
 interface Event {

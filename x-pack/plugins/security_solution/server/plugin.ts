@@ -135,7 +135,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
-  private readonly telemetryEventsSenderV2: IAsyncTelemetryEventsSender;
+  private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -157,7 +157,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
-    this.telemetryEventsSenderV2 = new AsyncTelemetryEventsSender(this.logger);
+    this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
@@ -453,7 +453,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
-    this.telemetryEventsSenderV2.setup(
+    this.asyncTelemetryEventsSender.setup(
       DEFAULT_RETRY_CONFIG,
       DEFAULT_QUEUE_CONFIG,
       this.telemetryReceiver,
@@ -466,7 +466,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       plugins.telemetry,
       plugins.taskManager,
       this.telemetryUsageCounter,
-      this.telemetryEventsSenderV2
+      this.asyncTelemetryEventsSender
     );
 
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
@@ -630,7 +630,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     artifactService.start(this.telemetryReceiver);
 
-    this.telemetryEventsSenderV2.start(plugins.telemetry);
+    this.asyncTelemetryEventsSender.start(plugins.telemetry);
 
     this.telemetryEventsSender.start(
       plugins.telemetry,
@@ -661,7 +661,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
-    this.telemetryEventsSenderV2.stop();
+    this.asyncTelemetryEventsSender.stop();
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();

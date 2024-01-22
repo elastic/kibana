@@ -331,6 +331,33 @@ describe('AsyncTelemetryEventsSender', () => {
       // check that no more events are sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
     });
+
+    it('should catch fatal errors', async () => {
+      mockedAxiosPost.mockImplementation(() => {
+        throw Error('fatal error');
+      });
+      const bufferTimeSpanMillis = 100;
+
+      service.setup(DEFAULT_RETRY_CONFIG, DEFAULT_QUEUE_CONFIG, receiver, telemetryPluginSetup);
+      service.updateQueueConfig(ch1, { ...ch1Config, bufferTimeSpanMillis });
+      service.start(telemetryPluginStart);
+
+      // send some events
+      service.send(ch1, ['a']);
+
+      // advance time by more than the buffer time span
+      await jest.advanceTimersByTimeAsync(
+        (DEFAULT_RETRY_CONFIG.retryCount + 1) * DEFAULT_RETRY_CONFIG.retryDelayMillis * 1.2
+      );
+
+      // check that the events are sent
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+
+      await service.stop();
+
+      // check that no more events are sent
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(DEFAULT_RETRY_CONFIG.retryCount + 1);
+    });
   });
 
   describe('throttling', () => {
@@ -897,6 +924,66 @@ describe('AsyncTelemetryEventsSender', () => {
 
       // check that no more events are sent
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+    });
+
+    it('should increment runtime error counter for expected errors', async () => {
+      mockedAxiosPost.mockReturnValue(Promise.resolve({ status: 401 }));
+
+      service.setup(
+        DEFAULT_RETRY_CONFIG,
+        DEFAULT_QUEUE_CONFIG,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+
+      service.start(telemetryPluginStart);
+
+      service.send(ch1, ['a']);
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
+      await service.stop();
+
+      const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.FATAL_ERROR && param.incrementBy === 1
+      );
+      expect(foundFatal).toBeFalsy();
+
+      const foundRuntime = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.RUNTIME_ERROR && param.incrementBy === 1
+      );
+      expect(foundRuntime).not.toBeFalsy();
+    });
+
+    it('should increment fatal error counter when applies', async () => {
+      mockedAxiosPost.mockImplementation(() => {
+        throw Error('fatal error');
+      });
+
+      service.setup(
+        DEFAULT_RETRY_CONFIG,
+        DEFAULT_QUEUE_CONFIG,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+
+      service.start(telemetryPluginStart);
+
+      service.send(ch1, ['a']);
+
+      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 10);
+      await service.stop();
+
+      const foundFatal = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.FATAL_ERROR && param.incrementBy === 1
+      );
+      expect(foundFatal).not.toBeFalsy();
+
+      const foundRuntime = telemetryUsageCounter.incrementCounter.mock.calls.some(
+        ([param]) => param.counterType === TelemetryCounter.RUNTIME_ERROR && param.incrementBy === 1
+      );
+      expect(foundRuntime).toBeFalsy();
     });
   });
 
