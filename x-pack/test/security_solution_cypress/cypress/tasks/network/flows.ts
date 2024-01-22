@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import {
   ADD_TO_TIMELINE,
   COPY,
@@ -50,3 +51,23 @@ export const clickOnCopyValue = () => {
   cy.get(COPY).first().focus();
   cy.focused().click(); // eslint-disable-line cypress/unsafe-to-chain-command
 };
+
+export function withHoverActionsReady() {
+  const actionsButtonInPortal = '[data-euiportal="true"] button[data-test-subj*="cellActions"]';
+  recurse(
+    () => {
+      openHoverActions();
+      mouseoverOnToOverflowItem();
+      return cy.get('body').then(($body) => {
+        return $body.find(actionsButtonInPortal);
+      });
+    },
+    // Check if actions portal element is visible
+    ($el) => {
+      return $el.length > 0;
+    },
+    {
+      delay: 500,
+    }
+  );
+}
