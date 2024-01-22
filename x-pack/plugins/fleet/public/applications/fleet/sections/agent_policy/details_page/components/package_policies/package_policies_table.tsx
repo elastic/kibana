@@ -19,6 +19,7 @@ import {
   EuiIcon,
   EuiToolTip,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../../common';
@@ -79,7 +80,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         if (packagePolicy.namespace) {
           namespacesValues.add(packagePolicy.namespace);
         }
-
         const hasUpgrade = isPackagePolicyUpgradable(packagePolicy);
 
         return {
@@ -95,7 +95,6 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
     const namespaceFilterOptions = [...namespacesValues]
       .sort(stringSortAscending)
       .map(toFilterOption);
-
     return [mappedPackagePolicies, namespaceFilterOptions];
   }, [originalPackagePolicies, isPackagePolicyUpgradable]);
 
@@ -225,7 +224,19 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
           }
         ),
         render: (namespace: InMemoryPackagePolicy['namespace']) => {
-          return namespace ? <EuiBadge color="hollow">{namespace}</EuiBadge> : '';
+          return namespace ? (
+            <EuiBadge color="hollow">{namespace}</EuiBadge>
+          ) : (
+            <>
+              <EuiBadge color="default">{agentPolicy.namespace}</EuiBadge>
+              <EuiIconTip
+                content="Namespace defined in parent agent policy"
+                position="right"
+                type="iInCircle"
+                color="subdued"
+              />
+            </>
+          );
         },
       },
       {
