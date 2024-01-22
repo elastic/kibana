@@ -21,6 +21,7 @@ const queryOptions = Object.freeze({
 });
 
 export const getActions = async ({
+  agentTypes,
   commands,
   elasticAgentIds,
   esClient,
@@ -43,6 +44,10 @@ export const getActions = async ({
         'data.command': commands,
       },
     });
+  }
+
+  if (agentTypes?.length) {
+    additionalFilters.push({ terms: { input_type: agentTypes } });
   }
 
   if (elasticAgentIds?.length) {

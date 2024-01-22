@@ -19,6 +19,7 @@ import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { errorHandler } from '../error_handler';
 import type {
+  ResponseActionAgentType,
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
 } from '../../../../common/endpoint/service/response_actions/constants';
@@ -30,6 +31,10 @@ const formatStringIds = (value: string | string[] | undefined): undefined | stri
 const formatCommandValues = (
   value: ResponseActionsApiCommandNames | ResponseActionsApiCommandNames[] | undefined
 ): undefined | ResponseActionsApiCommandNames[] => (typeof value === 'string' ? [value] : value);
+
+const formatAgentTypeValues = (
+  value: ResponseActionAgentType | ResponseActionAgentType[] | undefined
+): undefined | ResponseActionAgentType[] => (typeof value === 'string' ? [value] : value);
 
 const formatStatusValues = (
   value: ResponseActionStatus | ResponseActionStatus[]
@@ -49,6 +54,7 @@ export const actionListHandler = (
     const {
       query: {
         agentIds: elasticAgentIds,
+        agentTypes,
         page,
         pageSize,
         startDate,
@@ -74,6 +80,7 @@ export const actionListHandler = (
       }
 
       const requestParams = {
+        agentTypes: formatAgentTypeValues(agentTypes),
         withOutputs: formatStringIds(withOutputs),
         types: formatStringIds(types),
         commands: formatCommandValues(commands),
