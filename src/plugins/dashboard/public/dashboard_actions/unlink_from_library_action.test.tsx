@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { pluginServices } from '../services/plugin_services';
 import {
@@ -43,7 +43,7 @@ describe('Unlink from library action', () => {
   });
 
   it('is incompatible when view mode is view', async () => {
-    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

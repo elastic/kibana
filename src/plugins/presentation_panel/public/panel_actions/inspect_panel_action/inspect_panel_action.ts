@@ -12,7 +12,7 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import {
   EmbeddableApiContext,
   PublishesPanelTitle,
-  PublishesParentApi,
+  HasParentApi,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { inspector } from '../../kibana_services';
@@ -20,7 +20,7 @@ import { inspector } from '../../kibana_services';
 export const ACTION_INSPECT_PANEL = 'openInspector';
 
 export type InspectPanelActionApi = HasInspectorAdapters &
-  Partial<PublishesPanelTitle & PublishesParentApi>;
+  Partial<PublishesPanelTitle & HasParentApi>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);
 };
@@ -67,11 +67,10 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
       },
     });
     session.onClose.finally(() => {
-      if (tracksOverlays(embeddable.parentApi?.value)) embeddable.parentApi?.value.clearOverlays();
+      if (tracksOverlays(embeddable.parentApi)) embeddable.parentApi.clearOverlays();
     });
 
     // send the overlay ref to the parent API if it is capable of tracking overlays
-    if (tracksOverlays(embeddable.parentApi?.value))
-      embeddable.parentApi?.value.openOverlay(session);
+    if (tracksOverlays(embeddable.parentApi)) embeddable.parentApi?.openOverlay(session);
   }
 }

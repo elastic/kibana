@@ -10,7 +10,6 @@ import { Filter, FilterStateStore, type AggregateQuery, type Query } from '@kbn/
 
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import {
   FiltersNotificationAction,
   FiltersNotificationActionApi,
@@ -56,12 +55,12 @@ describe('filters notification action', () => {
     action = new FiltersNotificationAction();
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('testId'),
+        uuid: 'testId',
         viewMode: viewModeSubject,
-        parentApi: new BehaviorSubject<DashboardPluginInternalFunctions>({
+        parentApi: {
           getAllDataViews: jest.fn(),
           getDashboardPanelFromId: jest.fn(),
-        }),
+        },
         localFilters: filtersSubject,
         localQuery: querySubject,
       },
