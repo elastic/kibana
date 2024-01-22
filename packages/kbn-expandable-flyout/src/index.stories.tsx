@@ -19,7 +19,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ExpandableFlyout } from '.';
-import { ExpandableFlyoutContext, ExpandableFlyoutContextValue } from './context';
+import { ExpandableFlyoutContextValue } from './context';
+import { TestProvider } from './test/provider';
 
 export default {
   component: ExpandableFlyout,
@@ -108,13 +109,12 @@ export const Right: Story<void> = () => {
       left: {},
       preview: [],
     },
-    closeFlyout: () => window.alert('closeFlyout api'),
   } as unknown as ExpandableFlyoutContextValue;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={context.panels}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
@@ -129,13 +129,12 @@ export const Left: Story<void> = () => {
       },
       preview: [],
     },
-    closeFlyout: () => window.alert('closeFlyout api'),
   } as unknown as ExpandableFlyoutContextValue;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={context.panels}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
@@ -154,14 +153,12 @@ export const Preview: Story<void> = () => {
         },
       ],
     },
-    closePreviewPanel: () => window.alert('closePreviewPanel api'),
-    closeFlyout: () => window.alert('closeFlyout api'),
   } as unknown as ExpandableFlyoutContextValue;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={context.panels}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };
 
@@ -183,14 +180,11 @@ export const MultiplePreviews: Story<void> = () => {
         },
       ],
     },
-    closePreviewPanel: () => window.alert('closePreviewPanel api'),
-    previousPreviewPanel: () => window.alert('previousPreviewPanel api'),
-    closeFlyout: () => window.alert('closeFlyout api'),
   } as unknown as ExpandableFlyoutContextValue;
 
   return (
-    <ExpandableFlyoutContext.Provider value={context}>
+    <TestProvider state={context.panels}>
       <ExpandableFlyout registeredPanels={registeredPanels} />
-    </ExpandableFlyoutContext.Provider>
+    </TestProvider>
   );
 };

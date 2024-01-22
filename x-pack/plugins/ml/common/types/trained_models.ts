@@ -203,8 +203,8 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
-    number_of_allocations: number;
-    threads_per_allocation: number;
+    number_of_allocations?: number;
+    threads_per_allocation?: number;
     error_count?: number;
   };
 }

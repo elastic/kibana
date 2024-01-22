@@ -29,7 +29,7 @@ import { combineQueries } from '../../../../common/lib/kuery';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
-import { AddToFavoritesButton } from '../../timeline/properties/helpers';
+import { AddToFavoritesButton } from '../../add_to_favorites';
 import { TimelineSaveStatus } from '../../save_status';
 import { timelineDefaults } from '../../../store/defaults';
 import { AddTimelineButton } from '../add_timeline_button';
@@ -127,7 +127,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
-              <AddToFavoritesButton timelineId={timelineId} compact />
+              <AddToFavoritesButton timelineId={timelineId} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText grow={false} data-test-subj="timeline-title" css={whiteSpaceNoWrapCSS}>

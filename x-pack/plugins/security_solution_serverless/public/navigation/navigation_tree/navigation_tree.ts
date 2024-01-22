@@ -7,10 +7,11 @@
 import { partition } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
 import type {
+  AppDeepLinkId,
+  NodeDefinition,
   NavigationTreeDefinition,
   RootNavigationItemDefinition,
-} from '@kbn/shared-ux-chrome-navigation';
-import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
+} from '@kbn/core-chrome-browser';
 import type { LinkCategory } from '@kbn/security-solution-navigation';
 import {
   isSeparatorLinkCategory,
