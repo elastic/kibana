@@ -20,6 +20,7 @@ import { enableAwsLambdaMetrics } from '@kbn/observability-plugin/common';
 import { omit } from 'lodash';
 import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
+import { useProfilingIntegrationSetting } from '../../../../hooks/use_profiling_integration_setting';
 import {
   isAWSLambdaAgentName,
   isAzureFunctionsAgentName,
@@ -224,6 +225,8 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     ApmFeatureFlagName.InfrastructureTabAvailable
   );
 
+  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
+
   const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
     enableAwsLambdaMetrics,
     true
@@ -404,6 +407,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
         defaultMessage: 'Universal Profiling',
       }),
       hidden:
+        !isProfilingIntegrationEnabled ||
         isRumOrMobileAgentName(agentName) ||
         isAWSLambdaAgentName(serverlessType),
       append: (

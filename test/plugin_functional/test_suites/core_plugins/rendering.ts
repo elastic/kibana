@@ -213,6 +213,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.featureFlags.profilingIntegrationAvailable (any)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
