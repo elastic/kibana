@@ -57,7 +57,7 @@ export class QueueProcessor<T = unknown> {
     key = 'QueueProcessor',
   }: QueueProcessorOptions<T>) {
     if (batchSize < 1 || !Number.isFinite(batchSize)) {
-      throw new Error(`batchSize must be a number greater than zerro`);
+      throw new Error(`batchSize must be a number greater than zero`);
     }
 
     this.batchSize = batchSize;
@@ -95,7 +95,7 @@ export class QueueProcessor<T = unknown> {
 
             try {
               this.log(
-                `Processing batch [${this.batchCount}] with [${batchPageSize}] items. Remaining in queue: [${remainingItemsSize}]`,
+                `Processing batch [${this.batchCount}] with [${batchPageSize}] items. Items remaining in queue: [${remainingItemsSize}]`,
                 'debug'
               );
               await this.batchHandler({ batch: this.batchCount, data: batchPage });

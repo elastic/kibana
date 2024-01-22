@@ -424,6 +424,8 @@ export class ManifestManager {
       errors.push(...createErrors);
     }
 
+    const newArtifactsAddedToManifest: string[] = [];
+
     if (fleetArtifacts) {
       const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
       fleetArtifacts.forEach((fleetArtifact) => {
@@ -435,8 +437,14 @@ export class ManifestManager {
 
         if (!fleetArtifact) return;
         newManifest.replaceArtifact(fleetArtifact);
-        this.logger.debug(`New created artifact ${artifactId} added to the manifest`);
+        newArtifactsAddedToManifest.push(artifactId);
       });
+    }
+
+    if (newArtifactsAddedToManifest.length !== 0) {
+      this.logger.debug(
+        `Newly created artifacts added to the manifest:\n${newArtifactsAddedToManifest.join('\n')}`
+      );
     }
 
     return errors;
@@ -512,11 +520,13 @@ export class ManifestManager {
       }
 
       if (invalidArtifactIds.length) {
+        manifest.needsUpdate = true;
+
         this.logger.warn(
-          'Missing artifacts detected! The following artifact IDs, in ' +
-            `manifest v${
-              manifestSo.version
-            }, are not valid (point to a non-existent Artifact):\n${stringify(invalidArtifactIds)}`
+          `Missing artifacts detected! Internal artifact manifest (SavedObject version [${manifestSo.version}]) references [${invalidArtifactIds.length}] artifact IDs that don't exist`
+        );
+        this.logger.debug(
+          `Artifact references that are missing:\n${stringify(invalidArtifactIds)}`
         );
       }
 
@@ -587,10 +597,11 @@ export class ManifestManager {
     const updatedPolicies: string[] = [];
     const unChangedPolicies: string[] = [];
     const manifestVersion = manifest.getSemanticVersion();
+    const execId = Math.random().toString(32).substring(3, 8);
     const policyUpdateBatchProcessor = new QueueProcessor<PackagePolicy>({
       batchSize: this.packagerTaskPackagePolicyUpdateBatchSize,
       logger: this.logger,
-      key: 'tryDispatch',
+      key: `tryDispatch.${execId}`,
       batchHandler: async ({ data: currentBatch }) => {
         const response = await this.packagePolicyService.bulkUpdate(
           this.savedObjectsClient,
@@ -693,6 +704,8 @@ export class ManifestManager {
       });
     }
 
+    // eslint-disable-next-line require-atomic-updates
+    manifest.needsUpdate = false;
     this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 

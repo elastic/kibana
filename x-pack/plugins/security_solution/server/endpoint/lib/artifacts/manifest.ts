@@ -59,6 +59,13 @@ export class Manifest {
   private readonly policySpecificEntries: Map<string, Map<string, ManifestEntry>>;
   private version: ManifestVersion;
 
+  /**
+   * Property is set to `true` when Manifest needs an update - regardless if artifacts actually changed or not.
+   * Something like this can happen when the manifest might be holding on to manifest entries that no longer
+   * exit.
+   */
+  public needsUpdate: boolean = false;
+
   constructor(version?: Partial<ManifestVersion>) {
     this.allEntries = new Map();
     this.defaultEntries = new Map();

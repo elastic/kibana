@@ -48,10 +48,11 @@ export class ManifestTask {
   constructor(setupContract: ManifestTaskSetupContract) {
     this.endpointAppContext = setupContract.endpointAppContext;
     this.logger = this.endpointAppContext.logFactory.get(this.getTaskId());
-    const { packagerTaskInterval, packagerTaskTimeout } = this.endpointAppContext.serverConfig;
+    const { packagerTaskInterval, packagerTaskTimeout, packagerTaskPackagePolicyUpdateBatchSize } =
+      this.endpointAppContext.serverConfig;
 
     this.logger.info(
-      `Registering ${ManifestTaskConstants.TYPE} task with timeout of [${packagerTaskTimeout}] and interval of [${packagerTaskInterval}]`
+      `Registering ${ManifestTaskConstants.TYPE} task with timeout of [${packagerTaskTimeout}], interval of [${packagerTaskInterval}] and policy update batch size of [${packagerTaskPackagePolicyUpdateBatchSize}]`
     );
 
     setupContract.taskManager.registerTaskDefinitions({
@@ -156,7 +157,7 @@ export class ManifestTask {
         // Lets recover from a failure in getting the internal manifest map by creating an empty default manifest
         if (e instanceof InvalidInternalManifestError) {
           this.logger.error(e);
-          this.logger.info('recovering from invalid internal manifest');
+          this.logger.warn('recovering from invalid internal manifest');
           oldManifest = ManifestManager.createDefaultManifest();
         }
 
@@ -175,10 +176,17 @@ export class ManifestTask {
 
       const diff = newManifest.diff(oldManifest);
 
+      this.logger.debug(
+        `New -vs- old manifest diff counts:\n${Object.entries(diff).map(
+          ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
+        )}`
+      );
+
       const persistErrors = await manifestManager.pushArtifacts(
         diff.additions as InternalArtifactCompleteSchema[],
         newManifest
       );
+
       if (persistErrors.length) {
         reportErrors(this.logger, persistErrors);
         throw new Error('Unable to persist new artifacts.');
@@ -188,9 +196,12 @@ export class ManifestTask {
         // Commit latest manifest state
         newManifest.bumpSemanticVersion();
         await manifestManager.commit(newManifest);
+      } else if (newManifest.needsUpdate || oldManifest.needsUpdate) {
+        // Looks like an update to the manifest is still needed. In this case, we don't bump the version - only save it
+        await manifestManager.commit(newManifest);
       }
 
-      // Try dispatching to ingest-manager package policies
+      // Dispatch updates to Fleet integration policies with new manifest info
       const dispatchErrors = await manifestManager.tryDispatch(newManifest);
 
       if (dispatchErrors.length) {
