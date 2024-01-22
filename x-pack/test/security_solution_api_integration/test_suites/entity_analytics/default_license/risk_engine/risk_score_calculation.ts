@@ -26,14 +26,21 @@ import {
   assetCriticalityRouteHelpersFactory,
   cleanAssetCriticality,
   waitForAssetCriticalityToBePresent,
+  getLatestRiskScoreIndexMapping,
+  riskEngineRouteHelpersFactory,
+  cleanRiskEngine,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
+
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
 
   const createAndSyncRuleAndAlerts = createAndSyncRuleAndAlertsFactory({ supertest, log });
 
@@ -92,12 +99,17 @@ export default ({ getService }: FtrProviderContext): void => {
       beforeEach(async () => {
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
+        await riskEngineRoutes.init();
       });
 
       afterEach(async () => {
         await deleteAllRiskScores(log, es);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
+
+        await cleanRiskEngine({ kibanaServer, es, log });
       });
 
       it('calculates and persists risk score', async () => {
@@ -130,6 +142,35 @@ export default ({ getService }: FtrProviderContext): void => {
           id_field: 'host.name',
           id_value: 'host-1',
         });
+      });
+
+      it('upgrades latest risk score index dynamic setting before persisting risk scores', async () => {
+        const documentId = uuidv4();
+        await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
+
+        await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+
+        const unmodifiedIndexMapping = await getLatestRiskScoreIndexMapping(es);
+        // by default, the dynamic mapping is set to false.
+        expect(unmodifiedIndexMapping?.dynamic).to.eql('false');
+
+        // set the 'dynamic' configuration to an undesirable value
+        await es.indices.putMapping({
+          index: 'risk-score.risk-score-latest-default',
+          dynamic: 'strict',
+        });
+
+        expect((await getLatestRiskScoreIndexMapping(es))?.dynamic).to.eql('strict');
+
+        // before re-running risk score persistence, the dynamic configuration should be reset to the desired value
+        await calculateRiskScoreAfterRuleCreationAndExecution(documentId);
+
+        const finalIndexMapping = await getLatestRiskScoreIndexMapping(es);
+
+        expect(finalIndexMapping?.dynamic).to.eql('false');
+
+        // after all processing is complete, the mapping should be exactly the same as before
+        expect(unmodifiedIndexMapping).to.eql(finalIndexMapping);
       });
 
       describe('paging through calculations', () => {

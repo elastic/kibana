@@ -63,6 +63,17 @@ export interface DashboardCreationOptions {
   getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
 
+export const dashboardTypeDisplayName = i18n.translate('dashboard.factory.displayName', {
+  defaultMessage: 'Dashboard',
+});
+
+export const dashboardTypeDisplayLowercase = i18n.translate(
+  'dashboard.factory.displayNameLowercase',
+  {
+    defaultMessage: 'dashboard',
+  }
+);
+
 export class DashboardContainerFactoryDefinition
   implements
     EmbeddableFactoryDefinition<DashboardContainerInput, ContainerOutput, DashboardContainer>
@@ -83,11 +94,7 @@ export class DashboardContainerFactoryDefinition
     return false;
   };
 
-  public readonly getDisplayName = () => {
-    return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'Dashboard',
-    });
-  };
+  public readonly getDisplayName = () => dashboardTypeDisplayName;
 
   public getDefaultInput(): Partial<DashboardContainerInput> {
     return DEFAULT_DASHBOARD_INPUT;

@@ -9,8 +9,8 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { HostPanelKey } from '../../../../../flyout/entity_details/host_right';
 import type { ExpandedDetailType } from '../../../../../../common/types';
@@ -51,7 +51,7 @@ const HostNameComponent: React.FC<Props> = ({
   value,
 }) => {
   const isNewHostDetailsFlyoutEnabled = useIsExperimentalFeatureEnabled('newHostDetailsFlyout');
-  const { openRightPanel } = useExpandableFlyoutContext();
+  const { openRightPanel } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
   const eventContext = useContext(StatefulEventContext);
