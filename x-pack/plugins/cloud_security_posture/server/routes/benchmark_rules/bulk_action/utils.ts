@@ -138,7 +138,3 @@ export const setRulesStates = (
   });
   return rulesStates;
 };
-
-export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
-  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
-};

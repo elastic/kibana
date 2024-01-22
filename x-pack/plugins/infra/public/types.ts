@@ -102,7 +102,7 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  telemetry: ITelemetryClient;
+  telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
 }
