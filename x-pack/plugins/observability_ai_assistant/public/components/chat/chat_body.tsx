@@ -20,6 +20,7 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { findLastIndex } from 'lodash';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useLicense } from '../../hooks/use_license';
@@ -263,8 +264,7 @@ export function ChatBody({
                   }}
                   onFeedback={handleFeedback}
                   onRegenerate={(message) => {
-                    const indexOf = messages.indexOf(message);
-                    next(messages.slice(0, indexOf));
+                    next(reverseToLastUserMessage(messages, message));
                   }}
                   onSendTelemetry={(eventWithPayload) =>
                     sendEvent(chatService.analytics, eventWithPayload)
@@ -409,4 +409,20 @@ export function ChatBody({
       {footer}
     </EuiFlexGroup>
   );
+}
+
+// Exported for testing only
+export function reverseToLastUserMessage(messages: Message[], message: Message) {
+  // Drop messages after and including the one marked for regeneration
+  const indexOf = messages.indexOf(message);
+  const previousMessages = messages.slice(0, indexOf);
+
+  // Go back to the last written user message to fully regenerate function calls
+  const lastUserMessageIndex = findLastIndex(
+    previousMessages,
+    (aMessage: Message) => aMessage.message.role === 'user' && !aMessage.message.name
+  );
+  const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
+
+  return nextMessages;
 }

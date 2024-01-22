@@ -26,8 +26,6 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt';
-import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
-import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { HttpLogic } from '../../../shared/http/http_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 import { EuiButtonTo, EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -81,15 +79,12 @@ export const SearchIndices: React.FC = () => {
     showHiddenIndices,
   ]);
 
-  const pageTitle = isLoading
-    ? ''
-    : hasNoIndices
-    ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle', {
-        defaultMessage: 'Welcome to Search',
-      })
-    : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
-        defaultMessage: 'Elasticsearch indices',
-      });
+  const pageTitle =
+    isLoading || hasNoIndices
+      ? ''
+      : i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+          defaultMessage: 'Elasticsearch indices',
+        });
 
   return (
     <>
@@ -98,28 +93,32 @@ export const SearchIndices: React.FC = () => {
         pageChrome={baseBreadcrumbs}
         pageViewTelemetry="Search indices"
         isLoading={isLoading}
-        pageHeader={{
-          pageTitle,
-          rightSideItems: isLoading
-            ? []
-            : [
-                <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-                  <EuiButton
-                    iconType="plusInCircle"
-                    color="primary"
-                    fill
-                    data-test-subj="entSearchContent-searchIndices-createButton"
-                  >
-                    {i18n.translate(
-                      'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
-                      {
-                        defaultMessage: 'Create a new index',
-                      }
-                    )}
-                  </EuiButton>
-                </EuiLinkTo>,
-              ],
-        }}
+        pageHeader={
+          hasNoIndices
+            ? undefined
+            : {
+                pageTitle,
+                rightSideItems: isLoading
+                  ? []
+                  : [
+                      <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
+                        <EuiButton
+                          iconType="plusInCircle"
+                          color="primary"
+                          fill
+                          data-test-subj="entSearchContent-searchIndices-createButton"
+                        >
+                          {i18n.translate(
+                            'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
+                            {
+                              defaultMessage: 'Create a new index',
+                            }
+                          )}
+                        </EuiButton>
+                      </EuiLinkTo>,
+                    ],
+              }
+        }
       >
         {config.host && config.canDeployEntSearch && errorConnectingMessage && (
           <>
@@ -244,31 +243,7 @@ export const SearchIndices: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ) : (
-          <>
-            <AddContentEmptyPrompt />
-            <EuiSpacer size="xxl" />
-            <>
-              <EuiTitle data-test-subj="search-indices-empty-title">
-                <h2>
-                  {i18n.translate(
-                    'xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle',
-                    {
-                      defaultMessage: 'Build beautiful search experiences with Search',
-                    }
-                  )}
-                </h2>
-              </EuiTitle>
-              <EuiSpacer size="l" />
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <GettingStartedSteps step={indices.length === 0 ? 'first' : 'second'} />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <ElasticsearchResources />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </>
-          </>
+          <AddContentEmptyPrompt />
         )}
       </EnterpriseSearchContentPageTemplate>
     </>
