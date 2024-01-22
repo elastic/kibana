@@ -24,8 +24,8 @@ import {
   GetDataStreamDetailsParams,
   GetDataStreamDetailsResponse,
 } from '../../../common/data_streams_stats';
+import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { DataStreamDetails } from '../../../common/data_streams_stats/data_stream_details';
 import { IDataStreamsStatsClient } from './types';
 
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
@@ -85,11 +85,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     return degradedDocs;
   }
 
-  public async getDataStreamDetails(queryParams: GetDataStreamDetailsParams) {
+  public async getDataStreamDetails({ dataStream }: GetDataStreamDetailsParams) {
     const response = await this.http
-      .get<GetDataStreamDetailsResponse>(`/internal/dataset_quality/data_streams/details`, {
-        query: queryParams,
-      })
+      .get<GetDataStreamDetailsResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/details`
+      )
       .catch((error) => {
         throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);
       });
@@ -100,6 +100,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         new GetDataStreamsStatsError(`Failed to decode data stream details response: ${message}"`)
     )(response);
 
-    return DataStreamDetails.create(dataStreamDetails);
+    return dataStreamDetails as DataStreamDetails;
   }
 }

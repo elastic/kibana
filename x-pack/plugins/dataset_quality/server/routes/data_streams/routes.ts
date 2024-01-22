@@ -14,7 +14,6 @@ import {
   DegradedDocs,
   Integration,
 } from '../../../common/api_types';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreamDetails } from './get_data_stream_details';
@@ -101,32 +100,29 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
 });
 
 const dataStreamDetailsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/details',
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
   params: t.type({
-    query: t.intersection([
-      typeRt,
-      t.type({
-        datasetQuery: t.string,
-      }),
-    ]),
+    path: t.type({
+      dataStream: t.string,
+    }),
   }),
   options: {
     tags: [],
   },
   async handler(resources): Promise<DataStreamDetails> {
     const { context, params } = resources;
-    const { type = DEFAULT_DATASET_TYPE, datasetQuery } = params.query;
+    const { dataStream } = params.path;
     const coreContext = await context.core;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     try {
-      return await getDataStreamDetails({ esClient, type, datasetQuery });
+      return await getDataStreamDetails({ esClient, dataStream });
     } catch (e) {
       if (e) {
         if (e?.message?.indexOf('index_not_found_exception') > -1) {
-          throw Boom.notFound(`Data stream ${type}-${datasetQuery} not found.`);
+          throw Boom.notFound(`Data stream "${dataStream}" not found.`);
         }
       }
 

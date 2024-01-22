@@ -6,12 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataStreamTypes } from '../../../types/default_api_types';
+import { DataStreamType } from '../../../../common/types';
 import { dataStreamService } from '../../../services';
 
 export async function getDataStreams(options: {
   esClient: ElasticsearchClient;
-  type?: DataStreamTypes;
+  type?: DataStreamType;
   datasetQuery?: string;
   uncategorisedOnly: boolean;
 }) {

@@ -23,6 +23,7 @@ import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { Dispatch, SetStateAction } from 'react';
+import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
@@ -133,6 +134,11 @@ export const getDatasetQualityTableColumns = ({
         );
       },
       width: '40px',
+      css: css`
+        &.euiTableCellContent {
+          padding: 0;
+        }
+      `,
     },
     {
       name: nameColumnName,

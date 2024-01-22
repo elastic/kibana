@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export interface DataStreamDetails {
-  createdOn?: number;
-}
+export * from './dataset_name';

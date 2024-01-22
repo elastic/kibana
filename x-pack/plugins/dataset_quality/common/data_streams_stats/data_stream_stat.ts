@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { DataStreamType } from '../types';
+import { indexNameToDataStreamParts } from '../utils';
 import { Integration } from './integration';
 import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
   rawName: string;
-  type: string;
+  type: DataStreamType;
   name: DataStreamStatType['name'];
   namespace: string;
   title: string;
@@ -34,9 +36,7 @@ export class DataStreamStat {
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
-    const [type, ...dataStreamParts] = dataStreamStat.name.split('-');
-    const namespace = dataStreamParts[dataStreamParts.length - 1];
-    const dataset = dataStreamParts.slice(0, dataStreamParts.length - 1).join('-');
+    const { type, dataset, namespace } = indexNameToDataStreamParts(dataStreamStat.name);
 
     const dataStreamStatProps = {
       rawName: dataStreamStat.name,

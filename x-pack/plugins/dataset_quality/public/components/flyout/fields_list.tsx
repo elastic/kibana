@@ -13,6 +13,8 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiHorizontalRule,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
 } from '@elastic/eui';
 
 export function FieldsList({
@@ -43,6 +45,37 @@ export function FieldsList({
             {index < fields.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
           </Fragment>
         ))}
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+}
+
+export function FieldsListLoading() {
+  return (
+    <EuiPanel hasBorder grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="none">
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiSkeletonTitle size="s" />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiSkeletonText size="m" lines={1} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiSkeletonText lines={1} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexGroup>
+          <EuiFlexItem grow={1}>
+            <EuiSkeletonText size="m" lines={1} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <EuiSkeletonText lines={1} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );

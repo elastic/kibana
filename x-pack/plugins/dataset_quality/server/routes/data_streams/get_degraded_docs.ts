@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
+import { DataStreamType } from '../../../common/types';
 import { DegradedDocs } from '../../../common/api_types';
 import {
   DATA_STREAM_DATASET,
@@ -15,12 +16,11 @@ import {
   DATA_STREAM_TYPE,
   _IGNORED,
 } from '../../../common/es_fields';
-import { DataStreamTypes } from '../../types/default_api_types';
 import { createDatasetQualityESClient, wildcardQuery } from '../../utils';
 
 export async function getDegradedDocsPaginated(options: {
   esClient: ElasticsearchClient;
-  type?: DataStreamTypes;
+  type?: DataStreamType;
   start: number;
   end: number;
   datasetQuery?: string;

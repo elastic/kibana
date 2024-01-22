@@ -13,13 +13,12 @@ import {
   flyoutDatasetDetailsText,
   flyoutDatasetLastActivityText,
 } from '../../../common/translations';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { DataStreamDetails } from '../../../common/data_streams_stats/data_stream_details';
-import { FieldsList } from './fields_list';
+import { DataStreamStat, DataStreamDetails } from '../../../common/data_streams_stats';
+import { FieldsList, FieldsListLoading } from './fields_list';
 
 interface DatasetSummaryProps {
   fieldFormats: FieldFormatsStart;
-  dataStreamDetails: DataStreamDetails;
+  dataStreamDetails?: DataStreamDetails;
   dataStreamStat: DataStreamStat;
 }
 
@@ -32,9 +31,9 @@ export function DatasetSummary({
     ES_FIELD_TYPES.DATE,
   ]);
   const formattedLastActivity = dataFormatter.convert(dataStreamStat.lastActivity);
-  const formattedCreatedOn = dataStreamDetails.createdOn
+  const formattedCreatedOn = dataStreamDetails?.createdOn
     ? dataFormatter.convert(dataStreamDetails.createdOn)
-    : '';
+    : '-';
 
   return (
     <FieldsList
@@ -51,4 +50,8 @@ export function DatasetSummary({
       ]}
     />
   );
+}
+
+export function DatasetSummaryLoading() {
+  return <FieldsListLoading />;
 }

@@ -19,15 +19,16 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const datasetQualityApiClient = getService('datasetQualityApiClient');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
-  const dataStream = 'nginx.access';
+  const type = 'logs';
+  const dataset = 'nginx.access';
   const namespace = 'default';
 
-  async function callApiAs(user: DatasetQualityApiClientKey, datasetQuery: string) {
+  async function callApiAs(user: DatasetQualityApiClientKey, dataStream: string) {
     return await datasetQualityApiClient[user]({
-      endpoint: 'GET /internal/dataset_quality/data_streams/details',
+      endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
       params: {
-        query: {
-          datasetQuery,
+        path: {
+          dataStream,
         },
       },
     });
@@ -45,7 +46,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 .create()
                 .message('This is a log message')
                 .timestamp(timestamp)
-                .dataset(dataStream)
+                .dataset(dataset)
                 .namespace(namespace)
                 .defaults({
                   'log.file.path': '/my-service.log',
@@ -54,17 +55,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('returns error when dataset query arg is not provided', async () => {
+      it('returns error when dataStream param is not provided', async () => {
         expect(
-          (await expectToReject(() => callApiAs('datasetQualityLogsUser', ''))).message
-        ).to.contain('Dataset query cannot be empty');
+          (await expectToReject(() => callApiAs('datasetQualityLogsUser', encodeURIComponent(' '))))
+            .message
+        ).to.contain('Data Stream name cannot be empty');
       });
 
       it('returns 404 if matching data stream is not available', async () => {
-        const nonExistentDataStream = 'Non-existent';
-        const expectedMessage = `logs-${nonExistentDataStream}-${namespace} not found`;
+        const nonExistentDataSet = 'Non-existent';
+        const nonExistentDataStream = `${type}-${nonExistentDataSet}-${namespace}`;
+        const expectedMessage = `"${nonExistentDataStream}" not found`;
         const err = await expectToReject<DatasetQualityApiError>(() =>
-          callApiAs('datasetQualityLogsUser', `${nonExistentDataStream}-${namespace}`)
+          callApiAs('datasetQualityLogsUser', nonExistentDataStream)
         );
         expect(err.res.status).to.be(404);
         expect(err.res.body.message.indexOf(expectedMessage)).to.greaterThan(-1);
@@ -73,9 +76,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       it('returns data stream details correctly', async () => {
         const dataStreamSettings = await getDataStreamSettingsOfFirstIndex(
           esClient,
-          `logs-${dataStream}-${namespace}`
+          `logs-${dataset}-${namespace}`
         );
-        const resp = await callApiAs('datasetQualityLogsUser', `${dataStream}-${namespace}`);
+        const resp = await callApiAs('datasetQualityLogsUser', `${type}-${dataset}-${namespace}`);
         expect(resp.body.createdOn).to.be(Number(dataStreamSettings?.index?.creation_date));
       });
 

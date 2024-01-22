@@ -12,14 +12,14 @@ import {
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutFooter,
-  EuiLoadingLogo,
   EuiSpacer,
 } from '@elastic/eui';
-import React from 'react';
+import React, { Fragment } from 'react';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
-import { DatasetSummary } from './dataset_summary';
+import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 
@@ -29,33 +29,40 @@ interface FlyoutProps {
 }
 
 export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
-  const { dataStreamStat, dataStreamDetails, loading, fieldFormats } = useDatasetQualityFlyout({
-    datasetQuery: `${dataset.name}-${dataset.namespace}`,
+  const {
+    dataStreamStat,
+    dataStreamDetails,
+    dataStreamStatLoading,
+    dataStreamDetailsLoading,
+    fieldFormats,
+  } = useDatasetQualityFlyout({
+    type: DEFAULT_DATASET_TYPE,
+    dataset: dataset.name,
+    namespace: dataset.namespace,
   });
 
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false} data-component-name={'datasetQualityFlyout'}>
       <>
         <Header dataStreamStat={dataset} />
-        {loading ? (
-          <EuiFlyoutBody>
-            <EuiFlexGroup justifyContent="center">
-              <EuiLoadingLogo logo="logoObservability" size="l" />
-            </EuiFlexGroup>
-          </EuiFlyoutBody>
-        ) : (
-          <EuiFlyoutBody>
-            <DatasetSummary
-              dataStreamStat={dataStreamStat}
-              dataStreamDetails={dataStreamDetails}
-              fieldFormats={fieldFormats}
-            />
-            <EuiSpacer />
-            {dataStreamStat.integration && (
-              <IntegrationSummary integration={dataStreamStat.integration} />
-            )}
-          </EuiFlyoutBody>
-        )}
+        <EuiFlyoutBody>
+          {dataStreamStatLoading || dataStreamDetailsLoading ? (
+            <DatasetSummaryLoading />
+          ) : dataStreamStat ? (
+            <Fragment>
+              <DatasetSummary
+                dataStreamStat={dataStreamStat}
+                dataStreamDetails={dataStreamDetails}
+                fieldFormats={fieldFormats}
+              />
+              <EuiSpacer />
+              {dataStreamStat.integration && (
+                <IntegrationSummary integration={dataStreamStat.integration} />
+              )}
+            </Fragment>
+          ) : null}
+        </EuiFlyoutBody>
+
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>

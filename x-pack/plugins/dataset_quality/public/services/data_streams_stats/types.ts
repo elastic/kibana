@@ -12,8 +12,8 @@ import {
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamDetailsParams,
-  DataStreamDetailsServiceResponse,
 } from '../../../common/data_streams_stats';
+import { DataStreamDetails } from '../../../common/data_streams_stats/data_stream_details';
 
 export type DataStreamsStatsServiceSetup = void;
 
@@ -30,7 +30,5 @@ export interface IDataStreamsStatsClient {
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery
   ): Promise<DataStreamDegradedDocsStatServiceResponse>;
-  getDataStreamDetails(
-    queryParams: GetDataStreamDetailsParams
-  ): Promise<DataStreamDetailsServiceResponse>;
+  getDataStreamDetails(params: GetDataStreamDetailsParams): Promise<DataStreamDetails>;
 }

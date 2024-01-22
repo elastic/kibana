@@ -39,6 +39,7 @@ export const Table = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        tableLayout="auto"
         sorting={sort}
         onChange={onTableChange}
         pagination={pagination}

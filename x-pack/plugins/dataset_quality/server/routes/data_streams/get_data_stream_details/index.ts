@@ -6,25 +6,20 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { DataStreamTypes } from '../../../types/default_api_types';
 import { DataStreamDetails } from '../../../../common/api_types';
 import { dataStreamService } from '../../../services';
 
 export async function getDataStreamDetails(args: {
   esClient: ElasticsearchClient;
-  type: DataStreamTypes;
-  datasetQuery: string;
+  dataStream: string;
 }): Promise<DataStreamDetails> {
-  const { esClient, type, datasetQuery } = args;
+  const { esClient, dataStream } = args;
 
-  if (!datasetQuery) {
-    throw new Error(`Dataset query cannot be empty. Received value '${datasetQuery}'`);
+  if (!dataStream?.trim()) {
+    throw new Error(`Data Stream name cannot be empty. Received value "${dataStream}"`);
   }
 
-  const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, {
-    type,
-    dataset: `${datasetQuery}`,
-  });
+  const indexSettings = await dataStreamService.getDataSteamIndexSettings(esClient, dataStream);
 
   const indexesList = Object.values(indexSettings);
   if (indexesList.length < 1) {
