@@ -52,7 +52,7 @@ export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorRespon
 export type AgentExecutorEvaluator = (
   langChainMessages: BaseMessage[],
   exampleId?: string
-) => AgentExecutorResponse;
+) => Promise<AgentExecutorResponse>;
 
 export interface AgentExecutorEvaluatorWithMetadata {
   agentEvaluator: AgentExecutorEvaluator;

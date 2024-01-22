@@ -159,8 +159,9 @@ export const postEvaluateRoute = (
               getConnectorName(connectorId, connectors) ?? '[unknown connector]';
             const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
             agents.push({
-              agentEvaluator: (langChainMessages, exampleId) =>
-                AGENT_EXECUTOR_MAP[agentName]({
+              // TODO ask @spong for help with type?
+              agentEvaluator: async (langChainMessages, exampleId) => {
+                const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                   actions,
                   isEnabledKnowledgeBase: true,
                   assistantTools,
@@ -185,7 +186,9 @@ export const postEvaluateRoute = (
                     ],
                     tracers: getLangSmithTracer(detailedRunName, exampleId, logger),
                   },
-                }),
+                });
+                return evalResult.body;
+              },
               metadata: {
                 connectorName,
                 runName: detailedRunName,

@@ -13,11 +13,9 @@ import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Stream } from 'openai/streaming';
 import {
   ChatCompletionChunk,
-  ChatCompletionContentPart,
-  ChatCompletionCreateParamsNonStreaming,
   ChatCompletionCreateParamsStreaming,
 } from 'openai/resources/chat/completions';
-import { RequestBody } from '../types';
+import { InvokeAIActionParamsSchema, RequestBody } from '../types';
 
 const LLM_TYPE = 'ActionsClientChatOpenAI';
 
@@ -33,7 +31,7 @@ interface ActionsClientChatOpenAIParams {
 
 export class ActionsClientChatOpenAI extends ChatOpenAI {
   // ChatOpenAI variables
-  streaming = false;
+  streaming = true;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
   protected llmType: string;
@@ -55,7 +53,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     llmType,
     logger,
     request,
-    streaming,
   }: ActionsClientChatOpenAIParams) {
     super({
       azureOpenAIApiKey: 'nothing',
@@ -73,7 +70,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#logger = logger;
     this.#request = request;
     this.#actionResultData = '';
-    this.streaming = streaming ?? this.streaming;
+    this.streaming = true;
   }
 
   getActionResultData(): string {
@@ -119,9 +116,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       return result[0];
     });
   }
-  formatRequestForActionsClient(
-    completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
-  ): {
+  formatRequestForActionsClient(completionRequest: ChatCompletionCreateParamsStreaming): {
     actionId: string;
     params: {
       // InvokeAIActionParamsSchema
@@ -130,9 +125,9 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     };
   } {
     this.#logger.debug(
-      `ActionsClientChatOpenAI#formatRequestForActionsClient assistantMessage:\n${JSON.stringify(
-        'todo'
-      )} `
+      `ActionsClientChatOpenAI#formatRequestForActionsClient ${
+        this.#traceId
+      } assistantMessage:\n${JSON.stringify('todo')} `
     );
 
     // create a new connector request body with the assistant message:
@@ -140,7 +135,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       actionId: this.#connectorId,
       params: {
         ...this.#request.body.params, // the original request body params
-        // TODO make dynamic
+        // stream must already be true here
         subAction: 'invokeAsyncIterator',
         subActionParams: {
           model: completionRequest.model,
@@ -165,32 +160,4 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       },
     };
   }
-}
-
-interface InvokeAIActionParamsSchema {
-  messages: Array<{
-    role: string;
-    content: string | ChatCompletionContentPart[];
-    name?: string;
-    function_call?: {
-      arguments: string;
-      name: string;
-    };
-    tool_calls?: Array<{
-      id: string;
-
-      function: {
-        arguments: string;
-        name: string;
-      };
-
-      type: string;
-    }>;
-    tool_call_id?: string;
-  }>;
-  model?: ChatCompletionCreateParamsNonStreaming['model'];
-  n?: ChatCompletionCreateParamsNonStreaming['n'];
-  stop?: ChatCompletionCreateParamsNonStreaming['stop'];
-  temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
-  functions?: ChatCompletionCreateParamsNonStreaming['functions'];
 }
