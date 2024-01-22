@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { inputConsoleCommand, submitCommand } from './response_console';
@@ -25,11 +26,19 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
+  const config = Cypress.config();
+  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled =
+    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+
+  const enabledActions = [
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+  ];
+
+  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
+  enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };

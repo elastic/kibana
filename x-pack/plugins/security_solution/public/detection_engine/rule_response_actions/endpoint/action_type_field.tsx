@@ -13,6 +13,7 @@ import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/componen
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
 import { EndpointActionText } from './utils';
@@ -42,9 +43,22 @@ const ActionTypeFieldComponent = ({
     },
   } = useKibana().services;
 
+  const automatedProcessActionsEnabled = useIsExperimentalFeatureEnabled(
+    'automatedProcessActionsEnabled'
+  );
+
+  const enabledActions = useMemo(
+    () =>
+      [
+        ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+        ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+      ] as ['isolate', 'kill-process', 'suspend-process'],
+    [automatedProcessActionsEnabled]
+  );
+
   const fieldOptions = useMemo(
     () =>
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
+      enabledActions.map((name) => {
         const missingRbac = !getRbacControl({
           commandName: getUiCommand(name),
           privileges: endpointPrivileges,
@@ -62,7 +76,7 @@ const ActionTypeFieldComponent = ({
           'data-test-subj': `command-type-${name}`,
         };
       }),
-    [data.responseActions, endpointPrivileges]
+    [data.responseActions, enabledActions, endpointPrivileges]
   );
 
   return (

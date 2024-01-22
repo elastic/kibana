@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { PolicyData } from '../../../../../common/endpoint/types';
@@ -91,9 +92,6 @@ describe(
       });
 
       it('should have generated endpoint and rule', () => {
-        const hostname = new URL(Cypress.env('FLEET_SERVER_URL')).port;
-        const fleetHostname = `dev-fleet-server.${hostname}`;
-
         loadPage(APP_ENDPOINTS_PATH);
         cy.contains(createdHost.hostname).should('exist');
 
@@ -109,6 +107,7 @@ describe(
 
         cy.contains(/isolate is pending|isolate completed successfully/g);
         cy.contains(/kill-process is pending|kill-process completed successfully/g);
+        cy.contains('The action was called with non-existing field name: entity_id');
       });
     });
   }
