@@ -457,7 +457,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ACTIVE_ALERTS = 6;
         const RECOVERED_ALERTS = 4;
         const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-        const COLUMNS = 6;
+        const COLUMNS = 11;
 
         before(async () => {
           await browser.scrollTop();
@@ -574,7 +574,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 2;
           const RECOVERED_ALERTS = 2;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 6;
+          const COLUMNS = 11;
 
           await pageObjects.infraHostsView.visitAlertTab();
 
