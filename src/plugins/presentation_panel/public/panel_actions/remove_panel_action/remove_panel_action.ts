@@ -8,11 +8,12 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  apiPublishesUniqueId,
-  apiPublishesViewMode,
+  apiCanAccessViewMode,
+  apiHasUniqueId,
   EmbeddableApiContext,
-  PublishesUniqueId,
-  PublishesParentApi,
+  getInheritedViewMode,
+  HasParentApi,
+  HasUniqueId,
   PublishesViewMode,
 } from '@kbn/presentation-publishing';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -22,11 +23,11 @@ import { getContainerParentFromAPI, PresentationContainer } from '@kbn/presentat
 export const ACTION_REMOVE_PANEL = 'deletePanel';
 
 export type RemovePanelActionApi = PublishesViewMode &
-  PublishesUniqueId &
-  PublishesParentApi<PresentationContainer>;
+  HasUniqueId &
+  HasParentApi<PresentationContainer>;
 
 const isApiCompatible = (api: unknown | null): api is RemovePanelActionApi =>
-  Boolean(apiPublishesUniqueId(api) && apiPublishesViewMode(api) && getContainerParentFromAPI(api));
+  Boolean(apiHasUniqueId(api) && apiCanAccessViewMode(api) && getContainerParentFromAPI(api));
 
 export class RemovePanelAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_REMOVE_PANEL;
@@ -50,12 +51,12 @@ export class RemovePanelAction implements Action<EmbeddableApiContext> {
 
     // any parent can disallow panel removal by implementing canRemovePanels. If this method
     // is not implemented, panel removal is always allowed.
-    const parentAllowsPanelRemoval = embeddable.parentApi.value.canRemovePanels?.() ?? true;
-    return Boolean(embeddable.viewMode.value === 'edit' && parentAllowsPanelRemoval);
+    const parentAllowsPanelRemoval = embeddable.parentApi.canRemovePanels?.() ?? true;
+    return Boolean(getInheritedViewMode(embeddable) === 'edit' && parentAllowsPanelRemoval);
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!isApiCompatible(embeddable)) throw new IncompatibleActionError();
-    embeddable.parentApi?.value.removePanel(embeddable.uuid.value);
+    embeddable.parentApi?.removePanel(embeddable.uuid);
   }
 }

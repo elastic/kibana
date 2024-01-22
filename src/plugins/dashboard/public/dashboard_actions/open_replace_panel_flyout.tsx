@@ -31,7 +31,7 @@ export const openReplacePanelFlyout = async ({
   } = pluginServices.getServices();
 
   // send the overlay ref to the parent if it is capable of tracking overlays
-  const overlayTracker = tracksOverlays(api.parentApi.value) ? api.parentApi.value : undefined;
+  const overlayTracker = tracksOverlays(api.parentApi) ? api.parentApi : undefined;
 
   const flyoutSession = openFlyout(
     toMountPoint(
