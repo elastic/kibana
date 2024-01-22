@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { serializeUrlParams } from './serialize_url_params';
+import { stringifyUrlParams } from './stringify_url_params';
 
-describe('serializeUrlParams', () => {
+describe('stringifyUrlParams', () => {
   const commonProps = {
     page: '1',
     perPage: '5',
@@ -22,7 +22,7 @@ describe('serializeUrlParams', () => {
       severity: [],
     };
 
-    expect(serializeUrlParams(urlParams).toString()).toEqual(
+    expect(stringifyUrlParams(urlParams)).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=&severity='
     );
   });
@@ -34,7 +34,7 @@ describe('serializeUrlParams', () => {
       severity: ['low'],
     };
 
-    expect(serializeUrlParams(urlParams).toString()).toEqual(
+    expect(stringifyUrlParams(urlParams)).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=open&severity=low'
     );
   });
@@ -46,7 +46,7 @@ describe('serializeUrlParams', () => {
       severity: ['low', 'high'],
     };
 
-    expect(serializeUrlParams(urlParams).toString()).toEqual(
+    expect(stringifyUrlParams(urlParams)).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc&status=open&status=closed&severity=low&severity=high'
     );
   });
@@ -58,7 +58,7 @@ describe('serializeUrlParams', () => {
       severity: undefined,
     };
 
-    expect(serializeUrlParams(urlParams).toString()).toEqual(
+    expect(stringifyUrlParams(urlParams)).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc'
     );
   });
@@ -70,7 +70,7 @@ describe('serializeUrlParams', () => {
       ...commonProps,
     };
 
-    expect(serializeUrlParams(urlParams).toString()).toEqual(
+    expect(stringifyUrlParams(urlParams)).toEqual(
       'page=1&perPage=5&sortField=createdAt&sortOrder=desc'
     );
   });

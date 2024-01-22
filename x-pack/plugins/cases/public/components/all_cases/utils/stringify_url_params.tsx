@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export function serializeUrlParams(urlParams: {
+export function stringifyUrlParams(urlParams: {
   [key in string]: string[] | string | undefined;
-}) {
+}): string {
   const urlSearchParams = new URLSearchParams();
+
   for (const [key, value] of Object.entries(urlParams)) {
     if (value) {
       if (Array.isArray(value)) {
@@ -23,5 +24,5 @@ export function serializeUrlParams(urlParams: {
     }
   }
 
-  return urlSearchParams;
+  return urlSearchParams.toString();
 }
