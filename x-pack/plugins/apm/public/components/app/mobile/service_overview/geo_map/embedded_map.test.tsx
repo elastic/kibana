@@ -6,6 +6,7 @@
  */
 
 import { render } from '@testing-library/react';
+import { DataView } from '@kbn/data-views-plugin/common';
 import React from 'react';
 import { EmbeddedMap } from './embedded_map';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -37,6 +38,17 @@ describe('Embedded Map', () => {
         .mockImplementation(() => ({ id: 'mockSpaceId' })),
     };
 
+    const mockDataView = {
+      id: 'mock-id',
+      title: 'mock-title',
+      timeFieldName: '@timestamp',
+      isPersisted: () => false,
+      getName: () => 'mock-data-view',
+      toSpec: () => ({}),
+      fields: [],
+      metaFields: [],
+    } as unknown as DataView;
+
     const { findByTestId } = render(
       <MemoryRouter
         initialEntries={[
@@ -52,6 +64,7 @@ describe('Embedded Map', () => {
               filters={[]}
               start="2022-12-20T10:00:00.000Z"
               end="2022-12-20T10:15:00.000Z"
+              dataView={mockDataView}
             />
           </KibanaContextProvider>
         </MockApmPluginContextWrapper>
