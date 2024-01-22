@@ -59,45 +59,43 @@ export const DocumentStatus: FC = () => {
   }, [browserFields, dataFormattedForFieldBrowser, eventId, scopeId]);
 
   return (
-    <>
-      <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs" data-test-subj={STATUS_TITLE_TEST_ID}>
-            <h3>
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.header.statusTitle"
-                defaultMessage="Status"
-              />
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {!statusData || !hasData(statusData) || isPreview ? (
-            getEmptyTagValue()
-          ) : (
-            <SecurityCellActions
-              data={{
-                field: SIGNAL_STATUS_FIELD_NAME,
-                value: statusData.values[0],
-              }}
-              mode={CellActionsMode.HOVER_RIGHT}
-              triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-              visibleCellActions={6}
-              sourcererScopeId={getSourcererScopeId(scopeId)}
-              metadata={{ scopeId }}
-            >
-              <StatusPopoverButton
-                eventId={eventId}
-                contextId={scopeId}
-                enrichedFieldInfo={statusData}
-                scopeId={scopeId}
-                handleOnEventClosed={closeFlyout}
-              />
-            </SecurityCellActions>
-          )}
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </>
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxs" data-test-subj={STATUS_TITLE_TEST_ID}>
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.right.header.statusTitle"
+              defaultMessage="Status"
+            />
+          </h3>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        {!statusData || !hasData(statusData) || isPreview ? (
+          getEmptyTagValue()
+        ) : (
+          <SecurityCellActions
+            data={{
+              field: SIGNAL_STATUS_FIELD_NAME,
+              value: statusData.values[0],
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
+            visibleCellActions={6}
+            sourcererScopeId={getSourcererScopeId(scopeId)}
+            metadata={{ scopeId }}
+          >
+            <StatusPopoverButton
+              eventId={eventId}
+              contextId={scopeId}
+              enrichedFieldInfo={statusData}
+              scopeId={scopeId}
+              handleOnEventClosed={closeFlyout}
+            />
+          </SecurityCellActions>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
