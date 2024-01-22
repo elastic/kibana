@@ -40,13 +40,17 @@ export const getTopNavBadges = ({
   const defaultBadges = topNavCustomization?.defaultBadges;
   const entries = [...(topNavCustomization?.getBadges?.() ?? [])];
 
+  const isManaged = stateContainer.savedSearchState.getState().managed;
+
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push({
       data: getTopNavUnsavedChangesBadge({
         onRevert: stateContainer.actions.undoSavedSearchChanges,
-        onSave: async () => {
-          await saveSearch();
-        },
+        onSave: !isManaged
+          ? async () => {
+              await saveSearch();
+            }
+          : undefined,
         onSaveAs: async () => {
           await saveSearch(true);
         },
@@ -55,7 +59,7 @@ export const getTopNavBadges = ({
     });
   }
 
-  if (stateContainer.savedSearchState.getState().managed) {
+  if (isManaged) {
     entries.push({
       data: getManagedContentBadge(
         i18n.translate('discover.topNav.managedContentLabel', {
