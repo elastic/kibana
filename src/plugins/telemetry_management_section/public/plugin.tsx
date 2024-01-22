@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import type { AdvancedSettingsSetup } from '@kbn/advanced-settings-plugin/public';
+import { ManagementSetup } from '@kbn/management-plugin/public';
 import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { CoreStart, CoreSetup, DocLinksStart } from '@kbn/core/public';
@@ -17,7 +17,7 @@ import { SEARCH_TERMS } from '../common';
 
 export interface TelemetryManagementSectionPluginDepsSetup {
   telemetry: TelemetryPluginSetup;
-  advancedSettings: AdvancedSettingsSetup;
+  management: ManagementSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -25,7 +25,7 @@ export class TelemetryManagementSectionPlugin {
   public setup(
     core: CoreSetup,
     {
-      advancedSettings,
+      management,
       telemetry: { telemetryService },
       usageCollection,
     }: TelemetryManagementSectionPluginDepsSetup
@@ -47,7 +47,7 @@ export class TelemetryManagementSectionPlugin {
       );
     };
 
-    advancedSettings.addGlobalSection((props) => {
+    management.settingsSectionRegistry.addGlobalSection((props) => {
       return (
         <ApplicationUsageTrackingProvider>
           {telemetryManagementSectionWrapper(telemetryService, docLinksLinks)(props)}

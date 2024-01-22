@@ -20,9 +20,13 @@ import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { Subscription } from 'rxjs';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
+import { ToastsStart } from '@kbn/core-notifications-browser';
 
 export interface Services {
   getAllowlistedSettings: (scope: UiSettingsScope) => Record<string, UiSettingMetadata>;
+  getSections: (scope: UiSettingsScope) => RegistryEntry[];
+  getToastsService: () => ToastsStart;
   subscribeToUpdates: (fn: () => void, scope: UiSettingsScope) => Subscription;
   isCustomSetting: (key: string, scope: UiSettingsScope) => boolean;
   isOverriddenSetting: (key: string, scope: UiSettingsScope) => boolean;
@@ -43,6 +47,10 @@ export interface KibanaDependencies {
     >;
   };
   history: ScopedHistory;
+  sectionRegistry: SectionRegistryStart;
+  notifications: {
+    toasts: ToastsStart;
+  };
 }
 
 export type SettingsApplicationKibanaDependencies = KibanaDependencies & FormKibanaDependencies;
@@ -65,6 +73,8 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
     links,
     showDanger,
     getAllowlistedSettings,
+    getSections,
+    getToastsService,
     subscribeToUpdates,
     isCustomSetting,
     isOverriddenSetting,
@@ -75,6 +85,8 @@ export const SettingsApplicationProvider: FC<SettingsApplicationServices> = ({
     <SettingsApplicationContext.Provider
       value={{
         getAllowlistedSettings,
+        getSections,
+        getToastsService,
         subscribeToUpdates,
         isCustomSetting,
         isOverriddenSetting,
@@ -97,7 +109,7 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
   children,
   ...dependencies
 }) => {
-  const { docLinks, notifications, theme, i18n, settings, history } = dependencies;
+  const { docLinks, notifications, theme, i18n, settings, history, sectionRegistry } = dependencies;
   const { client, globalClient } = settings;
 
   const getScopeClient = (scope: UiSettingsScope) => {
@@ -112,6 +124,12 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
       )
     );
     return normalizeSettings(rawSettings);
+  };
+
+  const getSections = (scope: UiSettingsScope) => {
+    return scope === 'namespace'
+      ? sectionRegistry.getSpacesSections()
+      : sectionRegistry.getGlobalSections();
   };
 
   const isCustomSetting = (key: string, scope: UiSettingsScope) => {
@@ -131,6 +149,8 @@ export const SettingsApplicationKibanaProvider: FC<SettingsApplicationKibanaDepe
 
   const services: Services = {
     getAllowlistedSettings,
+    getSections,
+    getToastsService: () => notifications.toasts,
     isCustomSetting,
     isOverriddenSetting,
     subscribeToUpdates,

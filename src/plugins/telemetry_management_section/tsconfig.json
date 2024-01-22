@@ -13,7 +13,6 @@
     "@kbn/core",
     "@kbn/usage-collection-plugin",
     "@kbn/telemetry-plugin",
-    "@kbn/advanced-settings-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/i18n",

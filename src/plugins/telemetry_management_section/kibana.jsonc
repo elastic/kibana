@@ -8,7 +8,7 @@
     "browser": true,
     "requiredPlugins": [
       "telemetry",
-      "advancedSettings"
+      "management"
     ],
     "optionalPlugins": [
       "usageCollection"

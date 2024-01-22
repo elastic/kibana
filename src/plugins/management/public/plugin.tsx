@@ -27,6 +27,7 @@ import {
 } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { withSuspense } from '@kbn/shared-ux-utility';
+import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -46,6 +47,8 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
 }
+
+const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
 
 const LazyKibanaSettingsApplication = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-application')).KibanaSettingsApplication,
@@ -158,6 +161,7 @@ export class ManagementPlugin
     return {
       sections: this.managementSections.setup(),
       locator,
+      settingsSectionRegistry: sectionRegistrySetup,
     };
   }
 
@@ -176,32 +180,30 @@ export class ManagementPlugin
       });
     }
 
-    // Register the Settings app only if in serverless, until we integrate the SettingsApplication into the Advanced settings plugin
-    // Otherwise, it will be double registered from the Advanced settings plugin
-    if (plugins.serverless) {
-      const title = kbnI18n.translate('management.settings.settingsLabel', {
-        defaultMessage: 'Advanced Settings',
-      });
+    const title = kbnI18n.translate('management.settings.settingsLabel', {
+      defaultMessage: 'Advanced Settings',
+    });
 
-      this.managementSections.definedSections.kibana.registerApp({
-        id: 'settings',
-        title,
-        order: 3,
-        async mount({ element, setBreadcrumbs, history }) {
-          setBreadcrumbs([{ text: title }]);
+    this.managementSections.definedSections.kibana.registerApp({
+      id: 'settings',
+      title,
+      order: 3,
+      async mount({ element, setBreadcrumbs, history }) {
+        setBreadcrumbs([{ text: title }]);
 
-          ReactDOM.render(
-            <KibanaRenderContextProvider {...core}>
-              <KibanaSettingsApplication {...{ ...core, history }} />
-            </KibanaRenderContextProvider>,
-            element
-          );
-          return () => {
-            ReactDOM.unmountComponentAtNode(element);
-          };
-        },
-      });
-    }
+        ReactDOM.render(
+          <KibanaRenderContextProvider {...core}>
+            <KibanaSettingsApplication
+              {...{ ...core, history, sectionRegistry: sectionRegistryStart }}
+            />
+          </KibanaRenderContextProvider>,
+          element
+        );
+        return () => {
+          ReactDOM.unmountComponentAtNode(element);
+        };
+      },
+    });
 
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>

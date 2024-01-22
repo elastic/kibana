@@ -12,12 +12,14 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
 import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import { AppNavLinkStatus } from '@kbn/core/public';
+import { SectionRegistrySetup } from '@kbn/management-settings-section-registry';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
   locator: LocatorPublic<ManagementAppLocatorParams>;
+  settingsSectionRegistry: SectionRegistrySetup;
 }
 
 export interface DefinedSections {

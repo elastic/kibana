@@ -53,7 +53,7 @@ function getQueryParam(url: string) {
  * Component for displaying the {@link SettingsApplication} component.
  */
 export const SettingsApplication = () => {
-  const { addUrlToHistory } = useServices();
+  const { addUrlToHistory, getSections, getToastsService } = useServices();
 
   const queryParam = getQueryParam(window.location.href);
   const [query, setQuery] = useState<Query>(Query.parse(queryParam));
@@ -77,6 +77,7 @@ export const SettingsApplication = () => {
       categoryCounts: getCategoryCounts(spaceAllFields),
       callOutTitle: i18nTexts.spaceCalloutTitle,
       callOutText: i18nTexts.spaceCalloutText,
+      sections: getSections('namespace'),
     },
   };
   // Only add a Global settings tab if there are any global settings
@@ -87,6 +88,7 @@ export const SettingsApplication = () => {
       categoryCounts: getCategoryCounts(globalAllFields),
       callOutTitle: i18nTexts.globalCalloutTitle,
       callOutText: i18nTexts.globalCalloutText,
+      sections: getSections('global'),
     };
   }
 
@@ -130,13 +132,28 @@ export const SettingsApplication = () => {
       )}
       <EuiSpacer size="xl" />
       {selectedTab.fields.length ? (
-        <Form
-          fields={selectedTab.fields}
-          categoryCounts={selectedTab.categoryCounts}
-          isSavingEnabled={true}
-          onClearQuery={() => onQueryChange()}
-          scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
-        />
+        <>
+          <Form
+            fields={selectedTab.fields}
+            categoryCounts={selectedTab.categoryCounts}
+            isSavingEnabled={true}
+            onClearQuery={() => onQueryChange()}
+            scope={selectedTabId === SPACE_SETTINGS_TAB_ID ? 'namespace' : 'global'}
+          />
+          <EuiSpacer size="l" />
+          {selectedTab.sections.length > 0 &&
+            selectedTab.sections.map(({ Component, queryMatch }, index) => {
+              if (queryMatch(query.text)) {
+                return (
+                  <Component
+                    key={`component-${index}`}
+                    toasts={getToastsService()}
+                    enableSaving={{ global: true, namespace: true }}
+                  />
+                );
+              }
+            })}
+        </>
       ) : (
         <EmptyState {...{ queryText: query?.text, onClearQuery: () => onQueryChange() }} />
       )}
