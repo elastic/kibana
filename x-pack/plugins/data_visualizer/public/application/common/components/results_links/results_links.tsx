@@ -209,6 +209,7 @@ export const ResultsLinks: FC<Props> = ({
       {createDataView && discoverLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`discoverApp`} />}
             title={
               <FormattedMessage
@@ -225,6 +226,7 @@ export const ResultsLinks: FC<Props> = ({
       {indexManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -241,6 +243,7 @@ export const ResultsLinks: FC<Props> = ({
       {dataViewsManagementLink && (
         <EuiFlexItem>
           <EuiCard
+            hasBorder
             icon={<EuiIcon size="xxl" type={`managementApp`} />}
             title={
               <FormattedMessage
@@ -255,6 +258,7 @@ export const ResultsLinks: FC<Props> = ({
       )}
       <EuiFlexItem>
         <EuiCard
+          hasBorder
           icon={<EuiIcon size="xxl" type={`filebeatApp`} />}
           data-test-subj="fileDataVisFilebeatConfigLink"
           title={
@@ -271,6 +275,7 @@ export const ResultsLinks: FC<Props> = ({
         asyncHrefCards.map((link) => (
           <EuiFlexItem key={link.title}>
             <EuiCard
+              hasBorder
               icon={<EuiIcon size="xxl" type={link.icon} />}
               data-test-subj="fileDataVisLink"
               title={link.title}
