@@ -8,6 +8,8 @@
 
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
+import { getManagedContentBadge } from '@kbn/managed-content-badge';
+import { i18n } from '@kbn/i18n';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
@@ -50,6 +52,18 @@ export const getTopNavBadges = ({
         },
       }),
       order: defaultBadges?.unsavedChangesBadge?.order ?? 100,
+    });
+  }
+
+  if (stateContainer.savedSearchState.getState().managed) {
+    entries.push({
+      data: getManagedContentBadge(
+        i18n.translate('discover.topNav.managedContentLabel', {
+          defaultMessage:
+            'This saved search is managed by Elastic. Changes here must be saved to a new saved search.',
+        })
+      ),
+      order: -100,
     });
   }
 
