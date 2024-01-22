@@ -23,17 +23,10 @@ export const flyoutHostNameLabel = i18n.translate('xpack.logExplorer.flyoutDetai
   defaultMessage: 'Host name',
 });
 
-export const serviceAccordionTitle = i18n.translate(
-  'xpack.logExplorer.flyoutDetail.accordion.title.service',
+export const serviceInfraAccordionTitle = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.accordion.title.serviceInfra',
   {
-    defaultMessage: 'Service',
-  }
-);
-
-export const infraAccordionTitle = i18n.translate(
-  'xpack.logExplorer.flyoutDetail.accordion.title.infrastructure',
-  {
-    defaultMessage: 'Infrastructure',
+    defaultMessage: 'Service & Infrastructure',
   }
 );
 

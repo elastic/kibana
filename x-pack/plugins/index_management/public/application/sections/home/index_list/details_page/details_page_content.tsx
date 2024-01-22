@@ -77,6 +77,7 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
 }
@@ -84,6 +85,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
   navigateToIndicesList,
 }) => {
@@ -111,9 +113,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(getIndexDetailsLink(index.name, search, newSection));
     },
-    [history, index]
+    [history, index.name, search]
   );
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {

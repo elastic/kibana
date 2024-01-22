@@ -93,3 +93,4 @@ export {
 
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
 export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';
+export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
