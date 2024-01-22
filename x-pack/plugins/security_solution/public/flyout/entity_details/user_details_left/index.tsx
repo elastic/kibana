@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -18,17 +18,13 @@ import type {
 import { LeftPanelHeader } from '../shared/components/left_panel/left_panel_header';
 import { LeftPanelContent } from '../shared/components/left_panel/left_panel_content';
 
-interface RiskInputsParam {
-  alertIds: string[];
-}
-
 interface UserParam {
   name: string;
   email: string[];
 }
 
 export interface UserDetailsPanelProps extends Record<string, unknown> {
-  riskInputs: RiskInputsParam;
+  isRiskScoreExist: boolean;
   user: UserParam;
   path?: PanelPath;
 }
@@ -38,10 +34,10 @@ export interface UserDetailsExpandableFlyoutProps extends FlyoutPanelProps {
 }
 export const UserDetailsPanelKey: UserDetailsExpandableFlyoutProps['key'] = 'user_details';
 
-export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelProps) => {
+export const UserDetailsPanel = ({ isRiskScoreExist, user, path }: UserDetailsPanelProps) => {
   const managedUser = useManagedUser(user.name, user.email);
-  const tabs = useTabs(managedUser.data, riskInputs.alertIds);
-  const { selectedTabId, setSelectedTabId } = useSelectedTab(riskInputs, user, tabs, path);
+  const tabs = useTabs(managedUser.data, user.name, isRiskScoreExist);
+  const { selectedTabId, setSelectedTabId } = useSelectedTab(isRiskScoreExist, user, tabs, path);
 
   if (managedUser.isLoading) return <FlyoutLoading />;
 
@@ -58,12 +54,12 @@ export const UserDetailsPanel = ({ riskInputs, user, path }: UserDetailsPanelPro
 };
 
 const useSelectedTab = (
-  riskInputs: RiskInputsParam,
+  isRiskScoreExist: boolean,
   user: UserParam,
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
 ) => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;
@@ -79,8 +75,8 @@ const useSelectedTab = (
         tab: tabId,
       },
       params: {
-        riskInputs,
         user,
+        isRiskScoreExist,
       },
     });
   };

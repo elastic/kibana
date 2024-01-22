@@ -16,7 +16,10 @@
     flex-grow: 1;
   }
 
-  .mkdEditor {
-    height: 100%;
+  .mkdEditor,
+  .euiFormControlLayout__childrenWrapper,
+  .euiFormControlLayout--euiTextArea,
+  .visEditor--markdown__textarea {
+    height: 100%
   }
 }

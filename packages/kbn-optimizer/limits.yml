@@ -18,7 +18,6 @@ pageLoadAssetSize:
   cloudDefend: 18697
   cloudExperiments: 59358
   cloudFullStory: 18493
-  cloudGainsight: 18710
   cloudLinks: 55984
   cloudSecurityPosture: 19109
   console: 46091
@@ -34,7 +33,7 @@ pageLoadAssetSize:
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5136
-  dataViews: 48300
+  dataViews: 51000
   dataVisualizer: 27530
   devTools: 38637
   discover: 99999
@@ -53,7 +52,7 @@ pageLoadAssetSize:
   expressionLegacyMetricVis: 23121
   expressionMetric: 22238
   expressionMetricVis: 23121
-  expressionPartitionVis: 28000
+  expressionPartitionVis: 29000
   expressionRepeatImage: 22341
   expressionRevealImage: 25675
   expressions: 140958
@@ -86,12 +85,12 @@ pageLoadAssetSize:
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
   kubernetesSecurity: 77234
-  lens: 43000
+  lens: 57135
   licenseManagement: 41817
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 54342
+  logExplorer: 44977
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -99,6 +98,7 @@ pageLoadAssetSize:
   mapsEms: 26072
   metricsDataAccess: 73287
   ml: 82187
+  mockIdpPlugin: 30000
   monitoring: 80000
   navigation: 37269
   newsfeed: 42228
@@ -107,9 +107,10 @@ pageLoadAssetSize:
   observabilityAIAssistant: 25000
   observabilityLogExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 52256
+  observabilityShared: 72039
   osquery: 107090
   painlessLab: 179748
+  presentationPanel: 55463
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327

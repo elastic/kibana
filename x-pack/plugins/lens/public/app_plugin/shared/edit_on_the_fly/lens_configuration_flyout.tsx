@@ -28,6 +28,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
   useLensSelector,
   selectFramePublicAPI,
@@ -42,6 +43,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -76,6 +78,7 @@ export function LensEditConfigurationFlyout({
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
@@ -87,7 +90,6 @@ export function LensEditConfigurationFlyout({
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
-  const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -101,6 +103,11 @@ export function LensEditConfigurationFlyout({
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        const columns = Object.keys(table.rows?.[0]) ?? [];
+        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
         layers.forEach((layer) => {
           activeData[layer] = table;
         });
@@ -224,9 +231,24 @@ export function LensEditConfigurationFlyout({
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
+
+    // check if visualization type changed, if it did, don't pass the previous visualization state
+    const prevVisState =
+      previousAttributes.current.visualizationType === visualization.activeId
+        ? previousAttributes.current.state.visualization
+        : undefined;
+    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+      visualization.state,
+      prevVisState
+    );
+    if (telemetryEvents && telemetryEvents.length) {
+      trackUiCounterEvents(telemetryEvents);
+    }
+
     onApplyCb?.();
     closeFlyout?.();
   }, [
+    visualization.activeId,
     savedObjectId,
     closeFlyout,
     onApplyCb,
