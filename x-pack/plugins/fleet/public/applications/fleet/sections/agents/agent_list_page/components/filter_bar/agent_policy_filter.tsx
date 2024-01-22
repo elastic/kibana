@@ -39,7 +39,7 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
   };
 
   const getOptions = useCallback((): EuiSelectableOption[] => {
-    return agentPolicies.map((agentPolicy, index) => ({
+    return agentPolicies.map((agentPolicy) => ({
       label: agentPolicy.name,
       checked: selectedAgentPolicies.includes(agentPolicy.id) ? 'on' : undefined,
       key: agentPolicy.id,

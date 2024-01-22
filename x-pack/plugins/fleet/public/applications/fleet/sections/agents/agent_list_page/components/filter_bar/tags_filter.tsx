@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import styled from 'styled-components';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 import {
   EuiFilterButton,
-  EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
-  EuiToolTip,
-  useEuiTheme,
+  EuiSelectable,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import styled from 'styled-components';
 
-import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../../utils';
-
-const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
+const ClearAllTagsEl = styled.span`
   padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
@@ -37,8 +35,6 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
   selectedTags,
   onSelectedTagsChange,
 }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
   const [isTagsFilterOpen, setIsTagsFilterOpen] = useState<boolean>(false);
 
   const addTagsFilter = (tag: string) => {
@@ -47,6 +43,53 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
 
   const removeTagsFilter = (tag: string) => {
     onSelectedTagsChange(selectedTags.filter((t) => t !== tag));
+  };
+
+  const CLEAR_ALL = 'clear_all';
+
+  const getOptions = useCallback((): EuiSelectableOption[] => {
+    const clearAllOption: EuiSelectableOption = {
+      label: CLEAR_ALL,
+      key: CLEAR_ALL,
+      checked: undefined,
+      'data-test-subj': 'agentList.tagFilterClearAllOption',
+      css: {
+        'margin-left': '-20px', // hiding the checkbox space
+      },
+    };
+    const newOptions: EuiSelectableOption[] = tags.map((tag) => ({
+      label: tag,
+      checked: selectedTags.includes(tag) ? 'on' : undefined,
+      key: tag,
+      'data-test-subj': 'agentList.tagFilterOption',
+    }));
+
+    newOptions.push(clearAllOption);
+    return newOptions;
+  }, [tags, selectedTags]);
+
+  const [options, setOptions] = useState<EuiSelectableOption[]>(getOptions());
+
+  useEffect(() => {
+    setOptions(getOptions());
+  }, [getOptions]);
+
+  const renderTagOption = (option: EuiSelectableOption<string>): ReactNode => {
+    const tag = option.label;
+    if (tag === CLEAR_ALL) {
+      return (
+        <ClearAllTagsEl>
+          <EuiHorizontalRule margin="none" />
+          <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="error" color="danger" size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
+          </EuiFlexGroup>
+        </ClearAllTagsEl>
+      );
+    }
+    return <span className="euiSelectableListItem__content">{tag}</span>;
   };
 
   return (
@@ -70,50 +113,37 @@ export const TagsFilter: React.FunctionComponent<Props> = ({
       closePopover={() => setIsTagsFilterOpen(false)}
       panelPaddingSize="none"
     >
-      {/* EUI NOTE: Please use EuiSelectable (which already has height/scrolling built in)
-            instead of EuiFilterSelectItem (which is pending deprecation).
-            @see https://elastic.github.io/eui/#/forms/filter-group#multi-select */}
-      <div className="eui-yScroll" css={{ maxHeight: euiTheme.base * 30 }}>
-        <>
-          {tags.map((tag, index) => (
-            <EuiFilterSelectItem
-              checked={selectedTags.includes(tag) ? 'on' : undefined}
-              key={index}
-              onClick={() => {
-                if (selectedTags.includes(tag)) {
-                  removeTagsFilter(tag);
-                } else {
-                  addTagsFilter(tag);
-                }
-              }}
-            >
-              {tag.length > MAX_TAG_DISPLAY_LENGTH ? (
-                <EuiToolTip content={tag}>
-                  <span>{truncateTag(tag)}</span>
-                </EuiToolTip>
-              ) : (
-                tag
-              )}
-            </EuiFilterSelectItem>
-          ))}
-
-          <EuiHorizontalRule margin="none" />
-
-          <ClearAllTagsFilterItem
-            showIcons={false}
-            onClick={() => {
-              onSelectedTagsChange([]);
-            }}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="error" color="danger" size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
-            </EuiFlexGroup>
-          </ClearAllTagsFilterItem>
-        </>
-      </div>
+      <EuiSelectable
+        options={options as any}
+        onChange={(newOptions: EuiSelectableOption[]) => {
+          setOptions(newOptions);
+          newOptions.forEach((option, index) => {
+            if (option.checked !== options[index].checked) {
+              const tag = option.key!;
+              if (tag === CLEAR_ALL) {
+                onSelectedTagsChange([]);
+                return;
+              }
+              if (option.checked !== 'on') {
+                removeTagsFilter(tag);
+              } else {
+                addTagsFilter(tag);
+              }
+              return;
+            }
+          });
+        }}
+        data-test-subj="agentList.agentPolicyFilterOptions"
+        listProps={{
+          paddingSize: 's',
+          style: {
+            minWidth: 140,
+          },
+        }}
+        renderOption={renderTagOption}
+      >
+        {(list) => list}
+      </EuiSelectable>
     </EuiPopover>
   );
 };
