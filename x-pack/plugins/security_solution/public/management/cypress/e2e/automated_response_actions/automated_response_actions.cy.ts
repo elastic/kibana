@@ -24,6 +24,15 @@ describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'automatedProcessActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -98,17 +107,8 @@ describe(
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
-        // TODO: TC - swap these when feature flag automatedProcessActionsEnabled is set to true
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`)
-          .should('contain', 'isolate completed successfully')
-          .and('contain', createdHost.hostname);
-
-        cy.getByTestSubj(`response-results-${fleetHostname}-details-tray`)
-          .should('contain', 'The host does not have Elastic Defend integration installed')
-          .and('contain', 'dev-fleet-server');
-
-        // cy.contains(/isolate is pending|isolate completed successfully/g);
-        // cy.contains(/kill-process is pending|kill-process completed successfully/g);
+        cy.contains(/isolate is pending|isolate completed successfully/g);
+        cy.contains(/kill-process is pending|kill-process completed successfully/g);
       });
     });
   }
