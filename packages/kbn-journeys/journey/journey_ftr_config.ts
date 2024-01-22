@@ -86,7 +86,7 @@ export function makeFtrConfigProvider(
 
         serverArgs: [
           ...baseConfig.kbnTestServer.serverArgs,
-          `--telemetry.optIn=${enableTelemetry && process.env.TEST_PERFORMANCE_PHASE === 'TEST'}`,
+          `--telemetry.optIn=true`,
           `--telemetry.labels=${JSON.stringify(telemetryLabels)}`,
           '--csp.strict=false',
           '--csp.warnLegacyBrowsers=false',

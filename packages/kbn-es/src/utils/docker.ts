@@ -59,8 +59,9 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
+const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
 const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
-  return value === 'es' || value === 'oblt' || value === 'security';
+  return serverlessProjectTypes.has(value);
 };
 
 export type ServerlessProjectType = 'es' | 'oblt' | 'security';
@@ -600,7 +601,11 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
 
   // Check if projectType is valid
   if (projectType && !isServerlessProjectType(projectType)) {
-    throw new Error(`Incorrect serverless project type: ${projectType}`);
+    throw new Error(
+      `Incorrect serverless project type: ${projectType}, use one of ${Array.from(
+        serverlessProjectTypes
+      ).join(', ')}`
+    );
   }
   // Read roles for the specified projectType, 'es' if it is not defined
   const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType ?? 'es', 'roles.yml');
