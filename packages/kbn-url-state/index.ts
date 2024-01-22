@@ -9,20 +9,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { encode, decode, RisonValue } from '@kbn/rison';
 import { stringify, parse } from 'query-string';
-
-interface StateCache<T> {
-  namespaces: Record<string, Record<string, T | undefined>>;
-  timeoutHandle: number;
-}
-
-/**
- * Temporary cache for state stored in the URL. This will be serialized to the URL
- * in a single batched update to avoid excessive history entries.
- */
-const cache: StateCache<unknown> = {
-  namespaces: {},
-  timeoutHandle: 0,
-};
+import { merge } from 'lodash';
 
 const CUSTOM_URL_EVENT = 'url:update' as const;
 
@@ -45,10 +32,6 @@ const URL_CHANGE_EVENTS: string[] = ['popstate', CUSTOM_URL_EVENT];
  * @param key sub key of the query param
  */
 export const useUrlState = <T = unknown>(urlNamespace: string, key: string) => {
-  if (!cache.namespaces[urlNamespace]) {
-    cache.namespaces[urlNamespace] = {};
-  }
-
   const [internalValue, setInternalValue] = useState<T | undefined>(undefined);
 
   useEffect(() => {
@@ -60,7 +43,6 @@ export const useUrlState = <T = unknown>(urlNamespace: string, key: string) => {
 
       const decodedState = param ? decode(param) : ({} as Record<string, RisonValue>);
       const decodedValue = (decodedState as Record<string, RisonValue> | undefined)?.[key];
-      cache.namespaces[urlNamespace][key] = decodedValue;
       setInternalValue(decodedValue as unknown as T);
     };
 
@@ -72,50 +54,45 @@ export const useUrlState = <T = unknown>(urlNamespace: string, key: string) => {
   }, [key, urlNamespace]);
 
   const setValue = useCallback(
-    (updatedValue: T | undefined) => {
-      const currentValue = cache.namespaces[urlNamespace][key];
+    (newValue: T | undefined) => {
+      const queryParams = parse(location.search) as any;
+      const currentNsValue = (
+        queryParams?.[urlNamespace] ? decode(queryParams?.[urlNamespace]) : {}
+      ) as any;
+
+      const currentValue = currentNsValue?.[key];
 
       const canSpread =
-        typeof updatedValue === 'object' &&
+        typeof newValue === 'object' &&
         typeof currentValue === 'object' &&
-        !Array.isArray(updatedValue) &&
+        !Array.isArray(newValue) &&
         !Array.isArray(currentValue);
 
-      cache.namespaces[urlNamespace][key] = canSpread
-        ? ({ ...currentValue, ...updatedValue } as unknown as T)
-        : (updatedValue as unknown as T);
+      const upatedValueToStoreAtKey = canSpread
+        ? (merge(currentValue, newValue) as unknown as T)
+        : (newValue as unknown as T);
 
-      // This batches updates to the URL state to avoid excessive history entries
-      if (cache.timeoutHandle) {
-        window.clearTimeout(cache.timeoutHandle);
+      if (upatedValueToStoreAtKey) {
+        currentNsValue[key] = upatedValueToStoreAtKey;
+      } else {
+        delete currentNsValue[key];
       }
 
-      // The push state call is delayed to make sure that multiple calls to setValue
-      // within a short period of time are batched together.
-      cache.timeoutHandle = window.setTimeout(() => {
-        const searchParams = parse(location.search);
+      queryParams[urlNamespace] = encodeURIComponent(encode(currentNsValue));
 
-        for (const ns in cache.namespaces) {
-          if (!Object.prototype.hasOwnProperty.call(cache.namespaces, ns)) {
-            continue;
-          }
-          searchParams[ns] = encodeURIComponent(encode(cache.namespaces[ns]));
-        }
+      // NOTE: don't re-encode the entire url params string
+      const newSearch = stringify(queryParams, { encode: false });
 
-        // NOTE: don't re-encode the entire url params string
-        const newSearch = stringify(searchParams, { encode: false });
+      if (window.location.search === newSearch) {
+        return;
+      }
 
-        if (window.location.search === newSearch) {
-          return;
-        }
+      const newUrl = `${window.location.hash}?${newSearch}`;
 
-        const newUrl = `${window.location.hash}?${newSearch}`;
-
-        window.history.pushState({}, '', newUrl);
-        // This custom event is used to notify other instances
-        // of this hook that the URL has changed.
-        window.dispatchEvent(new Event(CUSTOM_URL_EVENT));
-      }, 0);
+      window.history.pushState({}, '', newUrl);
+      // This custom event is used to notify other instances
+      // of this hook that the URL has changed.
+      window.dispatchEvent(new Event(CUSTOM_URL_EVENT));
     },
     [key, urlNamespace]
   );

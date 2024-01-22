@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
@@ -81,6 +82,11 @@ export interface BasePayload extends BaseParams {
   spaceId?: string;
   isDeprecated?: boolean;
 }
+
+/**
+ * Timestamp metrics about the task lifecycle
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
 
