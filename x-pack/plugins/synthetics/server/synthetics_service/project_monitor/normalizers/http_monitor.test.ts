@@ -43,6 +43,7 @@ describe('http normalizers', () => {
     const monitors = [
       {
         privateLocations: ['Germany'],
+        locations: ['dev'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-2',
@@ -81,6 +82,7 @@ describe('http normalizers', () => {
       },
       {
         privateLocations: ['Germany'],
+        locations: ['dev'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-3',

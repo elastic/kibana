@@ -10,3 +10,4 @@ export { riskEngineEnableRoute } from './enable';
 export { riskEngineDisableRoute } from './disable';
 export { riskEngineStatusRoute } from './status';
 export { riskEnginePrivilegesRoute } from './privileges';
+export { riskEngineSettingsRoute } from './settings';

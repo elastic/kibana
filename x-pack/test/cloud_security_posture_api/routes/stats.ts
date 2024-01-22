@@ -141,7 +141,7 @@ export default function (providerContext: FtrProviderContext) {
         await index.removeScores();
 
         await waitForPluginInitialized();
-        await index.addScores(getBenchmarkScoreMockData('cspm'));
+        await index.addScores(getBenchmarkScoreMockData('cspm', true));
         await index.addFindings([findingsMockData[1]]);
       });
 
@@ -186,7 +186,7 @@ export default function (providerContext: FtrProviderContext) {
         await index.removeScores();
 
         await waitForPluginInitialized();
-        await index.addScores(getBenchmarkScoreMockData('kspm'));
+        await index.addScores(getBenchmarkScoreMockData('kspm', true));
         await index.addFindings([findingsMockData[0]]);
       });
 
@@ -207,7 +207,77 @@ export default function (providerContext: FtrProviderContext) {
         }).to.eql(kspmComplianceDashboardDataMockV1);
       });
 
-      it('should return KSPM benchmarks V2 ', async () => {
+      it('should return KSPM benchmarks V2', async () => {
+        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/kspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
+
+        const trends = removeRealtimeCalculatedFields(res.trend);
+
+        expect({
+          ...res,
+          benchmarks: resBenchmarks,
+          trend: trends,
+        }).to.eql(kspmComplianceDashboardDataMockV2);
+      });
+
+      it('should return KSPM benchmarks V2', async () => {
+        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/kspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
+
+        const trends = removeRealtimeCalculatedFields(res.trend);
+
+        expect({
+          ...res,
+          benchmarks: resBenchmarks,
+          trend: trends,
+        }).to.eql(kspmComplianceDashboardDataMockV2);
+      });
+    });
+
+    describe('Compliance dashboard based on enabled rules', async () => {
+      beforeEach(async () => {
+        await index.removeFindings();
+        await index.removeScores();
+
+        await waitForPluginInitialized();
+      });
+      it('should calculate cspm benchmarks posture score based only on enabled rules', async () => {
+        await index.addScores(getBenchmarkScoreMockData('cspm', true));
+        await index.addScores(getBenchmarkScoreMockData('cspm', false));
+        await index.addFindings([findingsMockData[1]]);
+
+        const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
+          .get(`/internal/cloud_security_posture/stats/cspm`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+          .set('kbn-xsrf', 'xxxx')
+          .expect(200);
+
+        const resBenchmarks = removeRealtimeBenchmarkFields(res.benchmarks);
+
+        const trends = removeRealtimeCalculatedFields(res.trend);
+
+        expect({
+          ...res,
+          benchmarks: resBenchmarks,
+          trend: trends,
+        }).to.eql(cspmComplianceDashboardDataMockV2);
+      });
+
+      it('should calculate kspm benchmarks posture score based only on enabled rules', async () => {
+        await index.addScores(getBenchmarkScoreMockData('kspm', true));
+        await index.addScores(getBenchmarkScoreMockData('kspm', false));
+        await index.addFindings([findingsMockData[0]]);
+
         const { body: res }: { body: ComplianceDashboardDataV2 } = await kibanaHttpClient
           .get(`/internal/cloud_security_posture/stats/kspm`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '2')

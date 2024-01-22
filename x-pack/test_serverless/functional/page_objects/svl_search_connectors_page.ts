@@ -40,6 +40,12 @@ export function SvlSearchConnectorsPageProvider({ getService }: FtrProviderConte
         await testSubjects.existOrFail('serverlessSearchCancelNameButton');
         await testSubjects.setValue('serverlessSearchEditNameFieldText', name);
         await testSubjects.click('serverlessSearchSaveNameButton');
+        await retry.waitForWithTimeout('edit name form to disappear', 2000, () =>
+          testSubjects
+            .missingOrFail('serverlessSearchSaveNameButton')
+            .then(() => true)
+            .catch(() => false)
+        );
         await testSubjects.exists('serverlessSearchConnectorName');
         expect(await testSubjects.getVisibleText('serverlessSearchConnectorName')).to.be(name);
       },

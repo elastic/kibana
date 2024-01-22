@@ -371,22 +371,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCommonlyUsedTimeRanges.legend': i18n.translate('core.euiCommonlyUsedTimeRanges.legend', {
       defaultMessage: 'Commonly used',
     }),
-    'euiControlBar.screenReaderHeading': i18n.translate('core.euiControlBar.screenReaderHeading', {
-      defaultMessage: 'Page level controls',
-    }),
-    'euiControlBar.screenReaderAnnouncement': i18n.translate(
-      'core.euiControlBar.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'There is a new region landmark with page level controls at the end of the document.',
-      }
-    ),
-    'euiControlBar.customScreenReaderAnnouncement': ({ landmarkHeading }: EuiValues) =>
-      i18n.translate('core.euiControlBar.customScreenReaderAnnouncement', {
-        defaultMessage:
-          'There is a new region landmark called {landmarkHeading} with page level controls at the end of the document.',
-        values: { landmarkHeading },
-      }),
     'euiGlobalToastList.clearAllToastsButtonAriaLabel': i18n.translate(
       'core.euiGlobalToastList.clearAllToastsButtonAriaLabel',
       {
@@ -938,56 +922,10 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiModal.closeModal': i18n.translate('core.euiModal.closeModal', {
       defaultMessage: 'Closes this modal window',
     }),
-    'euiNotificationEventMessages.accordionButtonText': ({ messagesLength }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionButtonText', {
-        defaultMessage: '+ {messagesLength} more',
-        values: { messagesLength },
-      }),
     'euiErrorBoundary.error': i18n.translate('core.euiErrorBoundary.error', {
       defaultMessage: 'Error',
       description: 'Error boundary for uncaught exceptions when rendering part of the application',
     }),
-    'euiNotificationEventMessages.accordionAriaLabelButtonText': ({
-      messagesLength,
-      eventName,
-    }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMessages.accordionAriaLabelButtonText', {
-        defaultMessage: '+ {messagesLength} messages for {eventName}',
-        values: { messagesLength, eventName },
-      }),
-    'euiNotificationEventMeta.contextMenuButton': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventMeta.contextMenuButton', {
-        defaultMessage: 'Menu for {eventName}',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsReadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadButton.markAsReadAria', {
-        defaultMessage: 'Mark {eventName} as read',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsUnreadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadButton.markAsUnreadAria', {
-        defaultMessage: 'Mark {eventName} as unread',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadButton.markAsRead': i18n.translate(
-      'core.euiNotificationEventReadButton.markAsRead',
-      {
-        defaultMessage: 'Mark as read',
-      }
-    ),
-    'euiNotificationEventReadButton.markAsUnread': i18n.translate(
-      'core.euiNotificationEventReadButton.markAsUnread',
-      {
-        defaultMessage: 'Mark as unread',
-      }
-    ),
-    'euiNotificationEventMessages.accordionHideText': i18n.translate(
-      'core.euiNotificationEventMessages.accordionHideText',
-      {
-        defaultMessage: 'hide',
-      }
-    ),
     'euiPagination.pageOfTotalCompressed': ({ page, total }: EuiValues) => (
       <FormattedMessage
         id="core.euiPagination.pageOfTotalCompressed"
@@ -1802,25 +1740,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'You can quickly navigate this list using arrow keys.',
       }
     ),
-    'euiNotificationEventReadIcon.read': i18n.translate('core.euiNotificationEventReadIcon.read', {
-      defaultMessage: 'Read',
-    }),
-    'euiNotificationEventReadIcon.readAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.readAria', {
-        defaultMessage: '{eventName} is read',
-        values: { eventName },
-      }),
-    'euiNotificationEventReadIcon.unread': i18n.translate(
-      'core.euiNotificationEventReadIcon.unread',
-      {
-        defaultMessage: 'Unread',
-      }
-    ),
-    'euiNotificationEventReadIcon.unreadAria': ({ eventName }: EuiValues) =>
-      i18n.translate('core.euiNotificationEventReadIcon.unreadAria', {
-        defaultMessage: '{eventName} is unread',
-        values: { eventName },
-      }),
     'euiSkeletonLoading.loadingAriaText': ({ contentAriaLabel }: EuiValues) =>
       i18n.translate('core.euiSkeletonLoading.loadingAriaText', {
         defaultMessage: 'Loading {contentAriaLabel}',
