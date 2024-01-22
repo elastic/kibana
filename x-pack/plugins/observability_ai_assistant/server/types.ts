@@ -17,7 +17,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
+import type {
+  DataViewsServerPluginSetup,
+  DataViewsServerPluginStart,
+} from '@kbn/data-views-plugin/server';
+import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import { ObservabilityAIAssistantService } from './service';
 
 export interface ObservabilityAIAssistantPluginSetup {
@@ -39,6 +44,9 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   security: SecurityPluginSetup;
   features: FeaturesPluginSetup;
   taskManager: TaskManagerSetupContract;
+  dataViews: DataViewsServerPluginSetup;
+  ml: MlPluginSetup;
+  licensing: LicensingPluginSetup;
 }
 export interface ObservabilityAIAssistantPluginStartDependencies {
   actions: ActionsPluginStart;
@@ -46,4 +54,6 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   features: FeaturesPluginStart;
   taskManager: TaskManagerStartContract;
   dataViews: DataViewsServerPluginStart;
+  ml: MlPluginStart;
+  licensing: LicensingPluginStart;
 }

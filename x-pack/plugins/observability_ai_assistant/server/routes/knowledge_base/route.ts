@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type {
+  MlDeploymentAllocationState,
+  MlDeploymentState,
+} from '@elastic/elasticsearch/lib/api/types';
 import { notImplemented } from '@hapi/boom';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
@@ -20,8 +25,9 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   ): Promise<{
     ready: boolean;
     error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
+    deployment_state?: MlDeploymentState;
+    allocation_state?: MlDeploymentAllocationState;
+    model_name?: string;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
 

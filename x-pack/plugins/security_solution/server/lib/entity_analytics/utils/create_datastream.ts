@@ -6,8 +6,7 @@
  */
 
 // This file is a copy of x-pack/plugins/alerting/server/alerts_service/lib/create_concrete_write_index.ts
-// original function create index instead of datastream, and their have plan to use datastream in the future
-// so we probably should remove this file and use the original when datastream will be supported
+// The original function created an index, while here we create a datastream. If and when responseOps develops first-party code to work with datastreams (https://github.com/elastic/kibana/issues/140403), this file should be removed.
 
 import { get } from 'lodash';
 import type { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';

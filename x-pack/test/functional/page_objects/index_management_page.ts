@@ -22,11 +22,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async reloadIndicesButton() {
       return await testSubjects.find('reloadIndicesButton');
     },
-    async toggleRollupIndices() {
-      await testSubjects.click('checkboxToggles-rollupToggle');
-    },
     async toggleHiddenIndices() {
-      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+      await testSubjects.click('checkboxToggles-includeHiddenIndices');
     },
 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
@@ -34,9 +31,8 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
-    async clickDataStreamAt(indexOfRow: number): Promise<void> {
-      const dataStreamLinks = await testSubjects.findAll('nameLink');
-      await dataStreamLinks[indexOfRow].click();
+    async clickDataStreamNameLink(name: string): Promise<void> {
+      await find.clickByLinkText(name);
     },
 
     async clickDeleteEnrichPolicyAt(indexOfRow: number): Promise<void> {

@@ -8,10 +8,29 @@
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
-// Note: this logic is duplicated in tutorials/apm/envs/on_prem
 export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
+  const hasDataInWarmOrHotDataTiers = await hasDataRequest(apmEventClient, [
+    'data_hot',
+    'data_warm',
+  ]);
+
+  if (hasDataInWarmOrHotDataTiers) {
+    return true;
+  }
+
+  const hasDataUnbounded = await hasDataRequest(apmEventClient);
+
+  return hasDataUnbounded;
+}
+
+type DataTier = 'data_hot' | 'data_warm' | 'data_cold' | 'data_frozen';
+async function hasDataRequest(
+  apmEventClient: APMEventClient,
+  dataTiers?: DataTier[]
+) {
+  const query = dataTiers ? { terms: { _tier: dataTiers } } : undefined;
+
   const params = {
-    terminate_after: 1,
     apm: {
       events: [
         ProcessorEvent.error,
@@ -20,8 +39,10 @@ export async function hasHistoricalAgentData(apmEventClient: APMEventClient) {
       ],
     },
     body: {
+      terminate_after: 1,
       track_total_hits: 1,
       size: 0,
+      query,
     },
   };
 

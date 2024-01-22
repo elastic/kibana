@@ -20,6 +20,7 @@ export const SLOS_WELCOME_PATH = '/slos/welcome' as const;
 export const SLO_DETAIL_PATH = '/slos/:sloId' as const;
 export const SLO_CREATE_PATH = '/slos/create' as const;
 export const SLO_EDIT_PATH = '/slos/edit/:sloId' as const;
+export const SLOS_OUTDATED_DEFINITIONS_PATH = '/slos/outdated-definitions' as const;
 export const CASES_PATH = '/cases' as const;
 
 export const paths = {
@@ -31,6 +32,7 @@ export const paths = {
     ruleDetails: (ruleId: string) => `${OBSERVABILITY_BASE_PATH}${RULES_PATH}/${encodeURI(ruleId)}`,
     slos: `${OBSERVABILITY_BASE_PATH}${SLOS_PATH}`,
     slosWelcome: `${OBSERVABILITY_BASE_PATH}${SLOS_WELCOME_PATH}`,
+    slosOutdatedDefinitions: `${OBSERVABILITY_BASE_PATH}${SLOS_OUTDATED_DEFINITIONS_PATH}`,
     sloCreate: `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}`,
     sloCreateWithEncodedForm: (encodedParams: string) =>
       `${OBSERVABILITY_BASE_PATH}${SLO_CREATE_PATH}?_a=${encodedParams}`,

@@ -925,6 +925,11 @@ paths:
         name: format
         description: Format of response - json or yaml
         in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -4927,8 +4932,10 @@ components:
           example: my description
         namespace:
           type: string
-          description: namespace by default "default"
-          example: default
+          description: >-
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
+          example: customnamespace
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added

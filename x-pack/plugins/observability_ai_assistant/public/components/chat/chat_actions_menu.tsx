@@ -71,6 +71,15 @@ export function ChatActionsMenu({
             }),
             items: [
               {
+                name: i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.settings', {
+                  defaultMessage: 'AI Assistant Settings',
+                }),
+                onClick: () => {
+                  toggleActionsMenu();
+                  handleNavigateToSettings();
+                },
+              },
+              {
                 name: (
                   <div className="eui-textTruncate">
                     {i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.connector', {
@@ -85,15 +94,6 @@ export function ChatActionsMenu({
                   </div>
                 ),
                 panel: 1,
-              },
-              {
-                name: i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.settings', {
-                  defaultMessage: 'AI Assistant Settings',
-                }),
-                onClick: () => {
-                  toggleActionsMenu();
-                  handleNavigateToSettings();
-                },
               },
               {
                 name: i18n.translate(

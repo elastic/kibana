@@ -10,14 +10,26 @@ import { EuiSpacer } from '@elastic/eui';
 import { EuiForm } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
+
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
 
 type Props = Pick<
   ReturnType<typeof useEditableSettings>,
-  'handleFieldChange' | 'settingsEditableConfig' | 'unsavedChanges'
+  'handleFieldChange' | 'fields' | 'unsavedChanges'
 > & {
   readOnly: boolean;
 };
@@ -25,12 +37,19 @@ type Props = Pick<
 export function FeaturesConfigurationPanel({
   readOnly,
   handleFieldChange,
-  settingsEditableConfig,
+  fields,
   unsavedChanges,
 }: Props) {
   const {
     services: { docLinks, notifications },
   } = useKibanaContextForPlugin();
+  const { featureFlags } = usePluginConfig();
+
+  // We don't validate the user input on these settings
+  const settingsValidationResponse: ValueValidation = {
+    successfulValidation: true,
+    valid: true,
+  };
 
   return (
     <EuiForm>
@@ -43,15 +62,28 @@ export function FeaturesConfigurationPanel({
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <LazyField
-        key={enableInfrastructureHostsView}
-        setting={settingsEditableConfig[enableInfrastructureHostsView]}
-        handleChange={handleFieldChange}
-        enableSaving={!readOnly}
-        docLinks={docLinks.links}
-        toasts={notifications.toasts}
-        unsavedChanges={unsavedChanges[enableInfrastructureHostsView]}
-      />
+      <FieldRowProvider
+        {...{
+          links: docLinks.links.management,
+          showDanger: (message: string) => notifications.toasts.addDanger(message),
+          validateChange: async () => settingsValidationResponse,
+        }}
+      >
+        <FieldRow
+          field={fields[enableInfrastructureHostsView]}
+          isSavingEnabled={true}
+          onFieldChange={handleFieldChange}
+          unsavedChange={unsavedChanges[enableInfrastructureHostsView]}
+        />
+        {featureFlags.profilingEnabled && (
+          <FieldRow
+            field={fields[enableInfrastructureProfilingIntegration]}
+            isSavingEnabled={true}
+            onFieldChange={handleFieldChange}
+            unsavedChange={unsavedChanges[enableInfrastructureProfilingIntegration]}
+          />
+        )}
+      </FieldRowProvider>
     </EuiForm>
   );
 }

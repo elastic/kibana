@@ -13,12 +13,16 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
+import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+  CSPM_FINDINGS_STATS_INTERVAL,
+  INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULNERABILITIES_SEVERITY,
@@ -36,7 +40,6 @@ import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
-export const CSPM_FINDINGS_STATS_INTERVAL = 5;
 
 export async function scheduleFindingsStatsTask(
   taskManager: TaskManagerStartContract,
@@ -93,8 +96,13 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
       async run(): Promise<FindingsStatsTaskResult> {
         try {
           logger.info(`Runs task: ${CSPM_FINDINGS_STATS_TASK_TYPE}`);
-          const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          const status = await aggregateLatestFindings(esClient, logger);
+          const startServices = await coreStartServices;
+          const esClient = startServices[0].elasticsearch.client.asInternalUser;
+          const encryptedSoClient = startServices[0].savedObjects.createInternalRepository([
+            INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
+          ]);
+
+          const status = await aggregateLatestFindings(esClient, encryptedSoClient, logger);
 
           const updatedState: LatestTaskStateSchema = {
             runs: state.runs + 1,
@@ -119,13 +127,15 @@ export function taskRunner(coreStartServices: CspServerPluginStartServices, logg
   };
 }
 
-const getScoreQuery = (): SearchRequest => ({
+const getScoreQuery = (filteredRules: QueryDslQueryContainer[]): SearchRequest => ({
   index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   size: 0,
   // creates the safe_posture_type and asset_identifier runtime fields
   runtime_mappings: { ...getIdentifierRuntimeMapping(), ...getSafePostureTypeRuntimeMapping() },
   query: {
-    match_all: {},
+    bool: {
+      must_not: filteredRules,
+    },
   },
   aggs: {
     score_by_policy_template: {
@@ -271,7 +281,8 @@ const getVulnStatsTrendQuery = (): SearchRequest => ({
 
 const getFindingsScoresDocIndexingPromises = (
   esClient: ElasticsearchClient,
-  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets']
+  scoresByPolicyTemplatesBuckets: ScoreByPolicyTemplateBucket['score_by_policy_template']['buckets'],
+  isCustomScore: boolean
 ) =>
   scoresByPolicyTemplatesBuckets.map((policyTemplateTrend) => {
     // creating score per cluster id objects
@@ -321,6 +332,7 @@ const getFindingsScoresDocIndexingPromises = (
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
         score_by_benchmark_id: benchmarkStats,
+        is_enabled_rules_score: isCustomScore,
       },
     });
   });
@@ -364,18 +376,27 @@ const getVulnStatsTrendDocIndexingPromises = (
 
 export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
+  encryptedSoClient: ISavedObjectsRepository,
   logger: Logger
 ): Promise<TaskHealthStatus> => {
   try {
     const startAggTime = performance.now();
-    const scoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
-      getScoreQuery()
+
+    const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
+
+    const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery(rulesFilter)
     );
+
+    const fullScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
+      getScoreQuery([])
+    );
+
     const vulnStatsTrendIndexQueryResult = await esClient.search<unknown, VulnSeverityAggs>(
       getVulnStatsTrendQuery()
     );
 
-    if (!scoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
+    if (!customScoreIndexQueryResult.aggregations && !vulnStatsTrendIndexQueryResult.aggregations) {
       logger.warn(`No data found in latest findings index`);
       return 'warning';
     }
@@ -388,13 +409,23 @@ export const aggregateLatestFindings = async (
     );
 
     // getting score per policy template buckets
-    const scoresByPolicyTemplatesBuckets =
-      scoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+    const customScoresByPolicyTemplatesBuckets =
+      customScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
+
+    const fullScoresByPolicyTemplatesBuckets =
+      fullScoreIndexQueryResult.aggregations?.score_by_policy_template.buckets || [];
 
     // iterating over the buckets and return promises which will index a modified document into the scores index
-    const findingsScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+    const findingsCustomScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
       esClient,
-      scoresByPolicyTemplatesBuckets
+      customScoresByPolicyTemplatesBuckets,
+      true
+    );
+
+    const findingsFullScoresDocIndexingPromises = getFindingsScoresDocIndexingPromises(
+      esClient,
+      fullScoresByPolicyTemplatesBuckets,
+      false
     );
 
     const vulnStatsTrendDocIndexingPromises = getVulnStatsTrendDocIndexingPromises(
@@ -406,7 +437,11 @@ export const aggregateLatestFindings = async (
 
     // executing indexing commands
     await Promise.all(
-      [...findingsScoresDocIndexingPromises, vulnStatsTrendDocIndexingPromises].filter(Boolean)
+      [
+        ...findingsCustomScoresDocIndexingPromises,
+        findingsFullScoresDocIndexingPromises,
+        vulnStatsTrendDocIndexingPromises,
+      ].filter(Boolean)
     );
 
     const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
