@@ -12,7 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import {
   RULES_BULK_ACTION_OPTION_DISABLE,
   RULES_BULK_ACTION_OPTION_ENABLE,
-  // RULE_NUMBER_FILTER_SEARCH_FIELD,
+  RULE_NUMBER_FILTER_SEARCH_FIELD,
 } from '../page_objects/rule_page';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,8 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  describe('Cloud Posture Dashboard Page', function () {
-    this.tags(['cloud_security_posture_compliance_dashboard']);
+  describe('Cloud Posture Rules Page', function () {
+    this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
 
     let agentPolicyId: string;
@@ -140,31 +140,31 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // describe('Rules Page - CIS Section & Rule Number filters', () => {
-    //   it('Table should only show result that has the same section as in the Section filter', async () => {
-    //     await rule.rulePage.clickFilterPopover('section');
-    //     await rule.rulePage.clickFilterPopOverOption('etcd');
-    //     await rule.rulePage.clickFilterPopOverOption('Scheduler');
-    //     expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
-    //   });
+    describe('Rules Page - CIS Section & Rule Number filters', () => {
+      it('Table should only show result that has the same section as in the Section filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('etcd');
+        await rule.rulePage.clickFilterPopOverOption('Scheduler');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) < 10).to.be(true);
+      });
 
-    //   it('Table should only show result that has the same section as in the Rule number filter', async () => {
-    //     await rule.rulePage.clickFilterPopover('ruleNumber');
-    //     await rule.rulePage.clickFilterPopOverOption('1.1.1');
-    //     await rule.rulePage.clickFilterPopOverOption('1.1.2');
-    //     expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 2).to.be(true);
-    //   });
+      it('Table should only show result that has the same section as in the Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.clickFilterPopOverOption('1.1.1');
+        await rule.rulePage.clickFilterPopOverOption('1.1.2');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 2).to.be(true);
+      });
 
-    //   it('Table should only show result that passes both Section and Rule number filter', async () => {
-    //     await rule.rulePage.clickFilterPopover('section');
-    //     await rule.rulePage.clickFilterPopOverOption('Control-Plane-Node-Configuration-Files');
-    //     await rule.rulePage.clickFilterPopover('section');
-    //     await rule.rulePage.clickFilterPopover('ruleNumber');
-    //     await rule.rulePage.filterTextInput(RULE_NUMBER_FILTER_SEARCH_FIELD, '1.1.5');
-    //     await pageObjects.header.waitUntilLoadingHasFinished();
-    //     await rule.rulePage.clickFilterPopOverOption('1.1.5');
-    //     expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
-    //   });
-    // });
+      it('Table should only show result that passes both Section and Rule number filter', async () => {
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopOverOption('Control-Plane-Node-Configuration-Files');
+        await rule.rulePage.clickFilterPopover('section');
+        await rule.rulePage.clickFilterPopover('ruleNumber');
+        await rule.rulePage.filterTextInput(RULE_NUMBER_FILTER_SEARCH_FIELD, '1.1.5');
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        await rule.rulePage.clickFilterPopOverOption('1.1.5');
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      });
+    });
   });
 }
