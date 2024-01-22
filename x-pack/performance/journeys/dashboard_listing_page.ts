@@ -31,7 +31,6 @@ export const journey = new Journey({
       subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')
     );
     await deletedDashboard.click();
-    //await page.click(subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'));
     await page.click(subj('deleteSelectedItems'));
     await page.click(subj('confirmModalConfirmButton'));
     await kibanaPage.waitForListViewTable();
