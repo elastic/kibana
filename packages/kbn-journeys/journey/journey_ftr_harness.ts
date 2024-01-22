@@ -176,17 +176,14 @@ export class JourneyFtrHarness {
 
   private async tearDownBrowserAndPage() {
     if (this.page) {
-      console.log('telemetryTracker start');
       const telemetryTracker = this.telemetryTrackerSubs.get(this.page);
       this.telemetryTrackerSubs.delete(this.page);
 
       if (telemetryTracker && !telemetryTracker.closed) {
-        console.log('telemetryTracker is not closed');
         this.log.info(`Waiting for telemetry requests, including starting within next 3 secs`);
         this.pageTeardown$.next(this.page);
         await new Promise<void>((resolve) => telemetryTracker.add(resolve));
       }
-      console.log('telemetryTracker closed');
 
       this.log.info('destroying page');
       await this.client?.detach();
@@ -195,7 +192,6 @@ export class JourneyFtrHarness {
     }
 
     if (this.browser) {
-      console.log('closing browser');
       await this.browser.close();
     }
   }
@@ -342,12 +338,6 @@ export class JourneyFtrHarness {
         this.pageTeardown$.pipe(
           Rx.first((p) => p === page),
           Rx.delay(3000)
-          // If EBT client buffers:
-          // Rx.mergeMap(async () => {
-          //  await page.waitForFunction(() => {
-          //    // return window.kibana_ebt_client.buffer_size == 0
-          //  });
-          // })
         )
       ),
       Rx.mergeMap((request: Request) => {
@@ -356,20 +346,19 @@ export class JourneyFtrHarness {
         }
 
         const id = ++this.telemetryTrackerCount;
-        this.log.debug(`Waiting for telemetry request #${id} to complete`);
-        console.log(`Waiting for telemetry request #${id} to complete`);
+        this.log.info(`Waiting for telemetry request #${id} to complete`);
         return Rx.of(requestSuccess$).pipe(
           Rx.timeout(60_000),
           Rx.catchError((error) => {
             if (error instanceof Error && error.name === 'TimeoutError') {
-              console.log(`Timeout error occurred: ${error.message}`);
+              this.log.error(`Timeout error occurred: ${error.message}`);
             }
             // Rethrow the error if it's not a TimeoutError
             return Rx.throwError(() => new Error(error));
           }),
           Rx.tap({
-            complete: () => console.log(`Telemetry request #${id} complete`),
-            error: (err) => console.log(err),
+            complete: () => this.log.info(`Telemetry request #${id} complete`),
+            error: (err) => this.log.error(`Telemetry request was not processed: ${err.message}`),
           })
         );
       })
@@ -463,8 +452,15 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
-      if (url.includes('kbn-ui-shared-deps-npm.dll.js')) {
-        // ignore errors/warning from kbn-ui-shared-deps-npm.dll.js
+      if (text.includes(`Unrecognized feature: 'web-share'`)) {
+        // ignore Error with Permissions-Policy header: Unrecognized feature: 'web-share'
+        return;
+      }
+      if (
+        url.includes('kbn-ui-shared-deps-npm.dll.js') ||
+        url.includes('kbn-ui-shared-deps-src.js')
+      ) {
+        // ignore messages from kbn-ui-shared-deps-npm.dll.js & kbn-ui-shared-deps-src.js
         return;
       }
 
