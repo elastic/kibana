@@ -10,7 +10,11 @@ import type {
   EuiDataGridSchemaDetector,
   EuiDataGridSorting,
 } from '@elastic/eui';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableColumnMeta,
+} from '@kbn/expressions-plugin/common';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
@@ -23,7 +27,6 @@ import type {
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
-import { getColumnType } from './columns';
 
 export const createGridResizeHandler =
   (
@@ -165,6 +168,30 @@ export const createGridSortingConfig = (
   },
 });
 
+function isRange(meta: { params?: { id?: string } } | undefined) {
+  return meta?.params?.id === 'range';
+}
+
+function getColumnType({
+  columnConfig,
+  columnId,
+  lookup,
+}: {
+  columnConfig: ColumnConfig;
+  columnId: string;
+  lookup: Record<
+    string,
+    {
+      name: string;
+      index: number;
+      meta?: DatatableColumnMeta | undefined;
+    }
+  >;
+}) {
+  const sortingHint = columnConfig.columns.find((col) => col.columnId === columnId)?.sortingHint;
+  return sortingHint ?? (isRange(lookup[columnId]?.meta) ? 'range' : lookup[columnId]?.meta?.type);
+}
+
 export const buildSchemaDetectors = (
   columns: EuiDataGridColumn[],
   columnConfig: {
@@ -192,7 +219,7 @@ export const buildSchemaDetectors = (
         defaultMessage: 'Sort Descending',
       }),
       icon: '',
-      type: schemaType || '',
+      type: column.id,
       detector: () => 1,
       // This is the actual logic that is used to sort the table
       comparator: (_a, _b, direction, { aIndex, bIndex }) =>

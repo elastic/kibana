@@ -13,11 +13,7 @@ import {
   EuiDataGridColumnCellActionProps,
   EuiListGroupItemProps,
 } from '@elastic/eui';
-import type {
-  Datatable,
-  DatatableColumn,
-  DatatableColumnMeta,
-} from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
@@ -28,30 +24,6 @@ import { buildColumnsMetaLookup } from './helpers';
 const hasFilterCellAction = (actions: LensCellValueAction[]) => {
   return actions.some(({ type }) => type === FILTER_CELL_ACTION_TYPE);
 };
-
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
-}
-
-export function getColumnType({
-  columnConfig,
-  columnId,
-  lookup,
-}: {
-  columnConfig: ColumnConfig;
-  columnId: string;
-  lookup: Record<
-    string,
-    {
-      name: string;
-      index: number;
-      meta?: DatatableColumnMeta | undefined;
-    }
-  >;
-}) {
-  const sortingHint = columnConfig.columns.find((col) => col.columnId === columnId)?.sortingHint;
-  return sortingHint ?? (isRange(lookup[columnId]?.meta) ? 'range' : lookup[columnId]?.meta?.type);
-}
 
 export const createGridColumns = (
   bucketColumns: string[],
@@ -308,7 +280,7 @@ export const createGridColumns = (
       visibleCellActions: 5,
       display: <div css={columnStyle}>{name}</div>,
       displayAsText: name,
-      schema: getColumnType({ columnConfig, columnId: field, lookup: columnsReverseLookup }),
+      schema: field,
       actions: {
         showHide: false,
         showMoveLeft: false,
