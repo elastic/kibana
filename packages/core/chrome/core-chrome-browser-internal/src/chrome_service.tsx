@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
 import { mergeMap, map, takeUntil } from 'rxjs/operators';
 import { parse } from 'url';
 import { EuiLink } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { type DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -29,8 +31,10 @@ import type {
   ChromeHelpExtension,
   ChromeUserBanner,
   ChromeStyle,
-  ChromeProjectNavigation,
   ChromeSetProjectBreadcrumbsParams,
+  NavigationTreeDefinition,
+  AppDeepLinkId,
+  CloudURLs,
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type {
@@ -38,12 +42,13 @@ import type {
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
 
+import { Logger } from '@kbn/logging';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
 import { NavLinksService } from './nav_links';
 import { ProjectNavigationService } from './project_navigation';
 import { RecentlyAccessedService } from './recently_accessed';
-import { Header, LoadingIndicator, ProjectHeader, ProjectSideNavigation } from './ui';
+import { Header, LoadingIndicator, ProjectHeader } from './ui';
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 import type { InternalChromeStart } from './types';
 import { HeaderTopBanner } from './ui/header/header_top_banner';
@@ -54,6 +59,7 @@ const SNAPSHOT_REGEX = /-snapshot/i;
 interface ConstructorParams {
   browserSupportsCsp: boolean;
   kibanaVersion: string;
+  coreContext: CoreContext;
 }
 
 export interface SetupDeps {
@@ -81,8 +87,11 @@ export class ChromeService {
   private readonly projectNavigation = new ProjectNavigationService();
   private mutationObserver: MutationObserver | undefined;
   private readonly isSideNavCollapsed$ = new BehaviorSubject<boolean>(true);
+  private logger: Logger;
 
-  constructor(private readonly params: ConstructorParams) {}
+  constructor(private readonly params: ConstructorParams) {
+    this.logger = params.coreContext.logger.get('chrome-browser');
+  }
 
   /**
    * These observables allow consumers to toggle the chrome visibility via either:
@@ -225,9 +234,10 @@ export class ChromeService {
     const navLinks = this.navLinks.start({ application, http });
     const projectNavigation = this.projectNavigation.start({
       application,
-      navLinks,
+      navLinksService: navLinks,
       http,
       chromeBreadcrumbs$: breadcrumbs$,
+      logger: this.logger,
     });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
@@ -265,13 +275,20 @@ export class ChromeService {
 
     const setProjectSideNavComponent = (component: ISideNavComponent | null) => {
       validateChromeStyle();
-      projectNavigation.setProjectSideNavComponent(component);
+      projectNavigation.setSideNavComponent(component);
     };
 
-    const setProjectNavigation = (config: ChromeProjectNavigation) => {
+    function initProjectNavigation<
+      LinkId extends AppDeepLinkId = AppDeepLinkId,
+      Id extends string = string,
+      ChildrenId extends string = Id
+    >(
+      navigationTree$: Observable<NavigationTreeDefinition<LinkId, Id, ChildrenId>>,
+      deps: { cloudUrls: CloudURLs }
+    ) {
       validateChromeStyle();
-      projectNavigation.setProjectNavigation(config);
-    };
+      projectNavigation.initNavigation(navigationTree$, deps);
+    }
 
     const setProjectBreadcrumbs = (
       breadcrumbs: ChromeBreadcrumb[] | ChromeBreadcrumb,
@@ -362,20 +379,19 @@ export class ChromeService {
           const activeNodes$ = projectNavigation.getActiveNodes$();
 
           const ProjectHeaderWithNavigationComponent = () => {
-            const CustomSideNavComponent = useObservable(projectNavigationComponent$, undefined);
+            const CustomSideNavComponent = useObservable(projectNavigationComponent$, {
+              current: null,
+            });
             const activeNodes = useObservable(activeNodes$, []);
 
             const currentProjectBreadcrumbs$ = projectBreadcrumbs$;
 
-            let SideNavComponent: ISideNavComponent = () => null;
-
-            if (CustomSideNavComponent !== undefined) {
-              // We have the state from the Observable
-              SideNavComponent =
-                CustomSideNavComponent.current !== null
-                  ? CustomSideNavComponent.current
-                  : ProjectSideNavigation;
-            }
+            const SideNavComponent = useMemo<ISideNavComponent>(() => {
+              if (CustomSideNavComponent.current) {
+                return CustomSideNavComponent.current;
+              }
+              return () => null;
+            }, [CustomSideNavComponent]);
 
             return (
               <ProjectHeader
@@ -526,7 +542,8 @@ export class ChromeService {
         setProjectsUrl,
         setProjectUrl,
         setProjectName,
-        setNavigation: setProjectNavigation,
+        initNavigation: initProjectNavigation,
+        getNavigationTreeUi$: () => projectNavigation.getNavigationTreeUi$(),
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,
         getActiveNavigationNodes$: () => projectNavigation.getActiveNodes$(),
