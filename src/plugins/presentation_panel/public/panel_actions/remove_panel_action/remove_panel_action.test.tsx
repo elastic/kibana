@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { PresentationContainer } from '@kbn/presentation-containers';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { RemovePanelAction, RemovePanelActionApi } from './remove_panel_action';
@@ -19,13 +18,13 @@ describe('Remove panel action', () => {
     action = new RemovePanelAction();
     context = {
       embeddable: {
-        uuid: new BehaviorSubject<string>('superId'),
+        uuid: 'superId',
         viewMode: new BehaviorSubject<ViewMode>('edit'),
-        parentApi: new BehaviorSubject<PresentationContainer>({
+        parentApi: {
           removePanel: jest.fn(),
           canRemovePanels: jest.fn().mockReturnValue(true),
           replacePanel: jest.fn(),
-        }),
+        },
       },
     };
   });
@@ -48,6 +47,6 @@ describe('Remove panel action', () => {
 
   it('calls the parent removePanel method on execute', async () => {
     action.execute(context);
-    expect(context.embeddable.parentApi.value.removePanel).toHaveBeenCalled();
+    expect(context.embeddable.parentApi.removePanel).toHaveBeenCalled();
   });
 });
