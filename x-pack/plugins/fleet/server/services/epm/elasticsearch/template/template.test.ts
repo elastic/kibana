@@ -21,6 +21,7 @@ import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
 import {
   FLEET_COMPONENT_TEMPLATES,
+  FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
   FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
 } from '../../../../constants';
 
@@ -82,6 +83,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
       ...composedOfTemplates,
+      FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -101,6 +103,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'metrics@tsdb-settings',
       ...composedOfTemplates,
+      FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
@@ -125,6 +128,7 @@ describe('EPM template', () => {
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
       ...composedOfTemplates,
+      FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
       FLEET_GLOBALS_COMPONENT_TEMPLATE_NAME,
     ]);
   });
@@ -143,6 +147,7 @@ describe('EPM template', () => {
     });
     expect(template.composed_of).toStrictEqual([
       'logs@settings',
+      FLEET_ECS_MAPPINGS_COMPONENT_TEMPLATE_NAME,
       ...FLEET_COMPONENT_TEMPLATES_NAMES,
     ]);
   });
