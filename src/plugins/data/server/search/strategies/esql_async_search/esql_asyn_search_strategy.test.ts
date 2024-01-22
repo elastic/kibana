@@ -30,7 +30,7 @@ const mockAsyncResponse = {
   },
 };
 
-describe.skip('ES|QL async search strategy', () => {
+describe('ES|QL async search strategy', () => {
   const mockApiCaller = jest.fn();
   const mockLogger: any = {
     debug: () => {},
@@ -63,39 +63,49 @@ describe.skip('ES|QL async search strategy', () => {
       it('makes a POST request with params when no ID provided', async () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = { index: 'logstash-*', body: { query: {} } };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch.search({ id: undefined, params: {} }, {}, mockDeps).toPromise();
+        const params = {
+          query: 'from logs* | limit 10',
+        };
+        await esSearch
+          .search(
+            {
+              id: undefined,
+              params,
+            },
+            {},
+            mockDeps
+          )
+          .toPromise();
 
         expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        expect(request.index).toEqual(params.index);
-        expect(request.body).toEqual(params.body);
+        const request = mockApiCaller.mock.calls[0][0].body;
+        expect(request.query).toEqual(params.query);
         expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('makes a GET request to async search with ID', async () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = {};
+        const params = {
+          query: 'from logs* | limit 10',
+        };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
         expect(mockApiCaller).toBeCalled();
         const request = mockApiCaller.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '60000ms');
+        expect(request.path).toContain('foo');
+        expect(request.querystring).toHaveProperty('wait_for_completion_timeout');
+        expect(request.querystring).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
         const params = {
-          index: 'logstash-*',
-          body: { query: {} },
+          query: 'from logs* | limit 10',
           wait_for_completion_timeout: '10s',
           keep_alive: '5m',
         };
@@ -105,9 +115,9 @@ describe.skip('ES|QL async search strategy', () => {
 
         expect(mockApiCaller).toBeCalled();
         const request = mockApiCaller.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
-        expect(request).toHaveProperty('keep_alive', '5m');
+        expect(request.path).toContain('foo');
+        expect(request.querystring).toHaveProperty('wait_for_completion_timeout', '10s');
+        expect(request.querystring).toHaveProperty('keep_alive', '5m');
       });
 
       it('sets transport options on POST requests', async () => {
@@ -123,15 +133,13 @@ describe.skip('ES|QL async search strategy', () => {
         expect(mockApiCaller).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
-            batched_reduce_size: 64,
-            body: { query: {} },
-            ignore_unavailable: true,
-            index: 'logstash-*',
-            keep_alive: '60000ms',
-            keep_on_completion: false,
-            max_concurrent_shard_requests: undefined,
-            track_total_hits: true,
-            wait_for_completion_timeout: '100ms',
+            method: 'POST',
+            path: '/_query/async',
+            body: {
+              keep_alive: '60000ms',
+              wait_for_completion_timeout: '100ms',
+              keep_on_completion: false,
+            },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
         );
@@ -139,7 +147,9 @@ describe.skip('ES|QL async search strategy', () => {
 
       it('sets transport options on GET requests', async () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-        const params = {};
+        const params = {
+          query: 'from logs* | limit 10',
+        };
         const esSearch = esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await firstValueFrom(
@@ -149,9 +159,11 @@ describe.skip('ES|QL async search strategy', () => {
         expect(mockApiCaller).toHaveBeenNthCalledWith(
           1,
           expect.objectContaining({
-            id: 'foo',
-            keep_alive: '60000ms',
-            wait_for_completion_timeout: '100ms',
+            path: '/_query/async/foo',
+            querystring: {
+              keep_alive: '60000ms',
+              wait_for_completion_timeout: '100ms',
+            },
           }),
           expect.objectContaining({ maxRetries: 1, meta: true, signal: undefined })
         );
@@ -160,13 +172,15 @@ describe.skip('ES|QL async search strategy', () => {
       it('sets wait_for_completion_timeout and keep_alive in the request', async () => {
         mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
 
-        const params = {};
+        const params = {
+          query: 'from logs* | limit 10',
+        };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
         expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
+        const request = mockApiCaller.mock.calls[0][0].body;
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
       });
@@ -180,7 +194,9 @@ describe.skip('ES|QL async search strategy', () => {
           },
         });
 
-        const params = {};
+        const params = {
+          query: 'from logs* | limit 10',
+        };
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
         const abortController = new AbortController();
         const abortSignal = abortController.signal;
@@ -200,127 +216,6 @@ describe.skip('ES|QL async search strategy', () => {
       });
     });
 
-    describe('with sessionId', () => {
-      it('Submit search with session id that is not saved creates a search with short keep_alive', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch.search({ params }, { sessionId: '1' }, mockDeps).toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        // expect(request.index).toEqual(params.index);
-        // expect(request.body).toEqual(params.body);
-
-        expect(request).toHaveProperty('keep_alive', '60000ms');
-      });
-
-      it('Submit search with session id and session is saved creates a search with long keep_alive', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch.search({ params }, { sessionId: '1', isStored: true }, mockDeps).toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        // expect(request.index).toEqual(params.index);
-        // expect(request.body).toEqual(params.body);
-
-        expect(request).toHaveProperty('keep_alive', '604800000ms');
-      });
-
-      it('makes a GET request to async search with short keepalive, if session is not saved', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch.search({ id: 'foo', params }, { sessionId: '1' }, mockDeps).toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '60000ms');
-      });
-
-      it('makes a GET request to async search with long keepalive, if session is saved', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch
-          .search({ id: 'foo', params }, { sessionId: '1', isStored: true }, mockDeps)
-          .toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '604800000ms');
-      });
-
-      it('makes a GET request to async search with no keepalive, if session is session saved and search is stored', async () => {
-        mockApiCaller.mockResolvedValueOnce(mockAsyncResponse);
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-
-        await esSearch
-          .search(
-            { id: 'foo', params },
-            { sessionId: '1', isSearchStored: true, isStored: true },
-            mockDeps
-          )
-          .toPromise();
-
-        expect(mockApiCaller).toBeCalled();
-        const request = mockApiCaller.mock.calls[0][0];
-        expect(request.id).toEqual('foo');
-        expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).not.toHaveProperty('keep_alive');
-      });
-
-      it('should not delete a saved session when aborted', async () => {
-        mockApiCaller.mockResolvedValueOnce({
-          ...mockAsyncResponse,
-          body: {
-            ...mockAsyncResponse.body,
-            is_running: true,
-          },
-        });
-
-        const params = {};
-        const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
-        const abortController = new AbortController();
-        const abortSignal = abortController.signal;
-
-        // Abort after an incomplete first response is returned
-        setTimeout(() => abortController.abort(), 100);
-
-        let err: KbnServerError | undefined;
-        try {
-          await esSearch
-            .search(
-              { params },
-              { abortSignal, sessionId: '1', isSearchStored: true, isStored: true },
-              mockDeps
-            )
-            .toPromise();
-        } catch (e) {
-          err = e;
-        }
-        expect(mockApiCaller).toBeCalled();
-        expect(err).not.toBeUndefined();
-        expect(mockApiCaller).not.toBeCalled();
-      });
-    });
-
     it('throws normalized error if ResponseError is thrown', async () => {
       const errResponse = new errors.ResponseError({
         body: indexNotFoundException,
@@ -332,7 +227,9 @@ describe.skip('ES|QL async search strategy', () => {
 
       mockApiCaller.mockRejectedValue(errResponse);
 
-      const params = {};
+      const params = {
+        query: 'from logs* | limit 10',
+      };
       const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
       let err: KbnSearchError | undefined;
@@ -353,7 +250,9 @@ describe.skip('ES|QL async search strategy', () => {
 
       mockApiCaller.mockRejectedValue(errResponse);
 
-      const params = {};
+      const params = {
+        query: 'from logs* | limit 10',
+      };
       const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
 
       let err: KbnSearchError | undefined;
@@ -381,7 +280,7 @@ describe.skip('ES|QL async search strategy', () => {
 
       expect(mockApiCaller).toBeCalled();
       const request = mockApiCaller.mock.calls[0][0];
-      expect(request).toEqual({ id });
+      expect(request.path).toContain(id);
     });
 
     it('throws normalized error on ResponseError', async () => {
@@ -424,7 +323,7 @@ describe.skip('ES|QL async search strategy', () => {
 
       expect(mockApiCaller).toBeCalled();
       const request = mockApiCaller.mock.calls[0][0];
-      expect(request).toEqual({ id, keep_alive: keepAlive });
+      expect(request.body).toEqual({ id, keep_alive: keepAlive });
     });
 
     it('throws normalized error on ElasticsearchClientError', async () => {
