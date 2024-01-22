@@ -38,7 +38,7 @@ export const NoDataButtonLink = ({
     tryEsqlPrompt = (
       <EuiText size="s">
         <FormattedMessage
-          id="sharedUx.no_data_views.button"
+          id="sharedUXPackages.no_data_views.button"
           defaultMessage="Query your data directly with ES|QL (Beta).  "
         />
         <EuiLink onClick={onTryEsql}>Try ES|QL</EuiLink>
