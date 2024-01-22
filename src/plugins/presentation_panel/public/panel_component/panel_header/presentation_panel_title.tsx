@@ -38,7 +38,7 @@ export const PresentationPanelTitle = ({
       embPanel__placeholderTitleText: !panelTitle,
     });
 
-    if (viewMode !== 'edit' && isApiCompatibleWithCustomizePanelAction(api)) {
+    if (viewMode !== 'edit' || !isApiCompatibleWithCustomizePanelAction(api)) {
       return <span className={titleClassNames}>{panelTitle}</span>;
     }
 

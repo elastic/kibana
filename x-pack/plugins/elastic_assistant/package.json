@@ -5,9 +5,6 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
-    "evaluate-model": "node ./scripts/model_evaluator",
-    "openapi:generate": "node scripts/openapi/generate",
-    "openapi:generate:debug": "node --inspect-brk scripts/openapi/generate",
-    "openapi:bundle": "node scripts/openapi/bundle"
+    "evaluate-model": "node ./scripts/model_evaluator"
   }
 }
