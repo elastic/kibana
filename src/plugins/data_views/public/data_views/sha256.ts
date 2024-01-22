@@ -6,13 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { sha1 } from './sha1_rusha';
-import { createHash } from 'crypto';
+import { Sha256 } from '@kbn/crypto-browser';
 
-describe('Rusha package', () => {
-  test('sha1 equals built in sha1', async function () {
-    const content = 'hello world';
-
-    expect(await sha1(content)).toEqual(createHash('sha1').update(content).digest('hex'));
-  });
-});
+export const sha256 = async (str: string) => new Sha256().update(str).digest('hex');
