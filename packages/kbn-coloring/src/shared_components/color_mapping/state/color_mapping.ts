@@ -22,7 +22,6 @@ export interface RootState {
 }
 
 const initialState: RootState['colorMapping'] = {
-  assignmentMode: 'auto',
   assignments: [],
   specialAssignments: [],
   paletteId: 'eui',
@@ -34,7 +33,6 @@ export const colorMappingSlice = createSlice({
   initialState,
   reducers: {
     updateModel: (state, action: PayloadAction<ColorMapping.Config>) => {
-      state.assignmentMode = action.payload.assignmentMode;
       state.assignments = [...action.payload.assignments];
       state.specialAssignments = [...action.payload.specialAssignments];
       state.paletteId = action.payload.paletteId;
@@ -53,11 +51,9 @@ export const colorMappingSlice = createSlice({
       state.colorMode = { ...action.payload.colorMode };
     },
     assignStatically: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
-      state.assignmentMode = 'manual';
       state.assignments = [...action.payload];
     },
     assignAutomatically: (state) => {
-      state.assignmentMode = 'auto';
       state.assignments = [];
     },
 
@@ -66,6 +62,9 @@ export const colorMappingSlice = createSlice({
       action: PayloadAction<ColorMapping.Config['assignments'][number]>
     ) => {
       state.assignments.push({ ...action.payload });
+    },
+    addNewAssignments: (state, action: PayloadAction<ColorMapping.Config['assignments']>) => {
+      state.assignments.push(...action.payload);
     },
     updateAssignment: (
       state,
@@ -120,6 +119,9 @@ export const colorMappingSlice = createSlice({
     },
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
+    },
+    removeAllAssignments: (state) => {
+      state.assignments = [];
     },
     changeColorMode: (state, action: PayloadAction<ColorMapping.Config['colorMode']>) => {
       state.colorMode = { ...action.payload };
@@ -209,11 +211,13 @@ export const {
   assignStatically,
   assignAutomatically,
   addNewAssignment,
+  addNewAssignments,
   updateAssignment,
   updateAssignmentColor,
   updateSpecialAssignmentColor,
   updateAssignmentRule,
   removeAssignment,
+  removeAllAssignments,
   changeColorMode,
   updateGradientColorStep,
   removeGradientColorStep,

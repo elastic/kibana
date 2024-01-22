@@ -67,37 +67,38 @@ export function Gradient({
   const middleMostColorStopIndex = colorMode.steps.length === 3 ? 1 : NaN;
 
   return (
-    <>
-      {assignmentsSize > 1 && (
-        <div
-          className="gradientLine"
-          css={css`
-            position: relative;
-            grid-column: 1;
-            grid-row: 1;
-            width: 6px;
-            margin-left: 5px;
-            top: 16px;
-            height: calc(100% - 12px);
-            border-top-left-radius: 6px;
-            border-top-right-radius: 6px;
-            background-image: linear-gradient(
-              to bottom,
-              ${[gradientColorScale(0), gradientColorScale(1 / assignmentsSize)].join(',')}
-            );
-            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-            border-top: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          `}
-        />
-      )}
+    <div
+      css={css`
+        position: relative;
+        height: 24px;
+      `}
+    >
+      <div
+        className="gradientLine"
+        css={css`
+          position: absolute;
+          left: 6px;
+          right: 6px;
+          height: 6px;
+          top: 12px;
+          border-top-left-radius: 6px;
+          border-top-right-radius: 6px;
+          border-bottom-left-radius: 6px;
+          border-bottom-right-radius: 6px;
+          background-image: linear-gradient(
+            to right,
+            ${[gradientColorScale(0), gradientColorScale(0.5), gradientColorScale(1)].join(',')}
+          );
+          border: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
+        `}
+      />
+
       <div
         className="gradientStop"
         css={css`
-          position: relative;
-          grid-column: 1;
-          grid-row: 1;
-          margin-top: 8px;
+          position: absolute;
+          left: 0;
+          top: 6px;
         `}
       >
         {topMostColorStop ? (
@@ -114,92 +115,35 @@ export function Gradient({
         )}
       </div>
 
-      {assignmentsSize > 1 && (
-        <div
-          className="gradientLine"
-          css={css`
-            position: relative;
-            z-index: 1;
-            grid-column: 1;
-            grid-row-start: 2;
-            grid-row-end: ${assignmentsSize};
-            background-image: linear-gradient(
-              to bottom,
-              ${[
-                gradientColorScale(1 / assignmentsSize),
-                gradientColorScale((assignmentsSize - 1) / assignmentsSize),
-              ].join(',')}
-            );
-            margin: -4px 0;
-            width: 6px;
-            margin-left: 5px;
-            ${assignmentsSize === 2 ? 'height: 0;' : ''};
-            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          `}
-        >
-          <div
-            css={css`
-              position: absolute;
-              width: 16px;
-              height: 16px;
-              top: calc(50% - 5px);
-              margin-left: -6px;
-              margin-top: -3px;
-            `}
-          >
-            {middleMostColorSep ? (
-              <ColorStop
-                colorMode={colorMode}
-                step={middleMostColorSep}
-                index={middleMostColorStopIndex}
-                currentPalette={currentPalette}
-                getPaletteFn={getPaletteFn}
-                isDarkMode={isDarkMode}
-              />
-            ) : colorMode.steps.length === 2 ? (
-              <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
-            ) : undefined}
-          </div>
-        </div>
-      )}
-      {assignmentsSize > 1 && (
-        <div
-          className="gradientLine"
-          css={css`
-            position: relative;
-
-            grid-column: 1;
-            grid-row: ${assignmentsSize};
-            background-image: linear-gradient(
-              to bottom,
-
-              ${[
-                gradientColorScale((assignmentsSize - 1) / assignmentsSize),
-                gradientColorScale(1),
-              ].join(',')}
-            );
-            top: -4px;
-            height: 24px;
-            width: 6px;
-            margin-left: 5px;
-            border-bottom-left-radius: 6px;
-            border-bottom-right-radius: 6px;
-            border-left: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-            border-bottom: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-            border-right: 1px solid ${changeAlpha(euiThemeVars.euiColorDarkestShade, 0.2)};
-          `}
-        />
-      )}
-
       <div
         css={css`
-          position: relative;
-          grid-column: 1;
-          grid-row: ${assignmentsSize};
+          position: absolute;
           width: 16px;
           height: 16px;
-          margin-top: 8px;
+          left: 50%;
+          top: 6px;
+        `}
+      >
+        {middleMostColorSep ? (
+          <ColorStop
+            colorMode={colorMode}
+            step={middleMostColorSep}
+            index={middleMostColorStopIndex}
+            currentPalette={currentPalette}
+            getPaletteFn={getPaletteFn}
+            isDarkMode={isDarkMode}
+          />
+        ) : colorMode.steps.length === 2 ? (
+          <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
+        ) : undefined}
+      </div>
+      <div
+        css={css`
+          position: absolute;
+          width: 16px;
+          height: 50%;
+          top: 6px;
+          right: 0;
         `}
       >
         {bottomMostColorStop ? (
@@ -215,7 +159,7 @@ export function Gradient({
           <AddStop colorMode={colorMode} currentPalette={currentPalette} at={1} />
         )}
       </div>
-    </>
+    </div>
   );
 }
 

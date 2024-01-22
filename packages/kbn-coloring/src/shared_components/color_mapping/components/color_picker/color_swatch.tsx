@@ -29,9 +29,7 @@ import { getValidColor } from '../../color/color_math';
 
 interface ColorPickerSwatchProps {
   colorMode: ColorMapping.Config['colorMode'];
-  assignmentColor:
-    | ColorMapping.Config['assignments'][number]['color']
-    | ColorMapping.Config['specialAssignments'][number]['color'];
+  assignmentColor: ColorMapping.Config['assignments'][number]['color'];
   getPaletteFn: ReturnType<typeof getPalette>;
   canPickColor: boolean;
   index: number;
