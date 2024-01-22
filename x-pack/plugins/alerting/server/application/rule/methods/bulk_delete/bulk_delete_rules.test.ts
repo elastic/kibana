@@ -6,7 +6,11 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../../../../rules_client/rules_client';
-import { savedObjectsClientMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { schema } from '@kbn/config-schema';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -82,6 +86,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 const getBulkOperationStatusErrorResponse = (statusCode: number) => ({

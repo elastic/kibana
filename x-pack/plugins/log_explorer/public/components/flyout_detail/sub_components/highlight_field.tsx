@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTextTruncate } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiTextTruncate,
+  EuiTitle,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import React, { ReactNode } from 'react';
 import { dynamic } from '../../../utils/dynamic';
 import { HoverActionPopover } from './hover_popover_action';
@@ -13,15 +22,17 @@ import { HoverActionPopover } from './hover_popover_action';
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));
 
 interface HighlightFieldProps {
+  useBadge?: boolean;
   field: string;
   formattedValue: string;
   icon?: ReactNode;
-  label: string | ReactNode;
+  label: string;
   value?: string;
   width: number;
 }
 
 export function HighlightField({
+  useBadge = false,
   field,
   formattedValue,
   icon,
@@ -30,14 +41,21 @@ export function HighlightField({
   width,
   ...props
 }: HighlightFieldProps) {
+  const { euiTheme } = useEuiTheme();
+
   return formattedValue && value ? (
     <EuiFlexGroup direction="column" gutterSize="none" {...props}>
       <EuiFlexItem>
         <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiText color="subdued" size="xs">
-              {label}
-            </EuiText>
+            <EuiTitle
+              css={css`
+                color: ${euiTheme.colors.darkShade};
+              `}
+              size="xxxs"
+            >
+              <span>{label}</span>
+            </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <HighlightFieldDescription fieldName={field} />
@@ -55,13 +73,17 @@ export function HighlightField({
             {icon && <EuiFlexItem grow={false}>{icon}</EuiFlexItem>}
             <EuiFlexItem grow={false}>
               <EuiTextTruncate text={formattedValue} truncation="end" width={width}>
-                {(truncatedText: string) => (
-                  <EuiText
-                    size="s"
-                    // Value returned from formatFieldValue is always sanitized
-                    dangerouslySetInnerHTML={{ __html: truncatedText }}
-                  />
-                )}
+                {(truncatedText: string) =>
+                  useBadge ? (
+                    <EuiBadge color="hollow">{truncatedText}</EuiBadge>
+                  ) : (
+                    <EuiText
+                      size="s"
+                      // Value returned from formatFieldValue is always sanitized
+                      dangerouslySetInnerHTML={{ __html: truncatedText }}
+                    />
+                  )
+                }
               </EuiTextTruncate>
             </EuiFlexItem>
           </EuiFlexGroup>

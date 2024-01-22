@@ -22,7 +22,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import {
   JobParamsPDFV2,
@@ -78,6 +78,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
   public runTask = (
     jobId: string,
     payload: TaskPayloadPDFV2,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -130,6 +131,8 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
                 ? url
                 : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
             ),
+            taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {

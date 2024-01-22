@@ -21,6 +21,19 @@ const generateNetworkData = lodash.memoize(() => {
   return networkDataCount;
 });
 
+let currentStatic = 0;
+
+const staticBetween = (end = 1, step = 0.1) => {
+  {
+    if (currentStatic + step > end) {
+      currentStatic = 0;
+    } else {
+      currentStatic = currentStatic + step;
+    }
+    return currentStatic;
+  }
+};
+
 export const generateEvent = (index: number, timestamp: Moment, interval: number) => {
   const groupIndex = createGroupIndex(index);
   return [
@@ -142,13 +155,14 @@ export const generateEvent = (index: number, timestamp: Moment, interval: number
             },
           },
           user: {
-            pct: randomBetween(1, 4),
+            pct: staticBetween(1, 1),
           },
           system: {
             pct: randomBetween(1, 4),
           },
         },
       },
+      tags: [`${randomBetween(1, 4, 1)}`],
     },
   ];
 };
