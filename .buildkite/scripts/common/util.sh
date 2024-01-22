@@ -171,6 +171,7 @@ download_artifact() {
   retry 3 1 timeout 3m buildkite-agent artifact download "$@"
 }
 
+# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
 if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
   VAULT_PATH_PREFIX="secret/kibana-issues/dev"
   VAULT_KV_PREFIX="secret/kibana-issues/dev"
