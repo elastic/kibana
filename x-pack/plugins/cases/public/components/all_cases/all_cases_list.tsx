@@ -19,7 +19,7 @@ import type { CaseStatuses } from '../../../common/types/domain';
 import { caseStatuses } from '../../../common/types/domain';
 import { useCasesColumns } from './use_cases_columns';
 import { CasesTableFilters } from './table_filters';
-import { CASES_TABLE_PERPAGE_VALUES } from './types';
+import { CASES_TABLE_PER_PAGE_VALUES } from './types';
 import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
@@ -167,7 +167,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
         pageIndex: queryParams.page - 1,
         pageSize: queryParams.perPage,
         totalItemCount: data.total ?? 0,
-        pageSizeOptions: CASES_TABLE_PERPAGE_VALUES,
+        pageSizeOptions: CASES_TABLE_PER_PAGE_VALUES,
       }),
       [data, queryParams]
     );

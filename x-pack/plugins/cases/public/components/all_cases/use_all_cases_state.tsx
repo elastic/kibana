@@ -5,31 +5,18 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useHistory } from 'react-router-dom';
-import { isEqual } from 'lodash';
 
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-
-import { removeLegacyValuesFromOptions, getStorableFilters } from './utils/sanitize_filter_options';
-import type {
-  FilterOptions,
-  PartialFilterOptions,
-  LocalStorageQueryParams,
-  QueryParams,
-  PartialQueryParams,
-  ParsedUrlQueryParams,
-} from '../../../common/ui/types';
+import type { FilterOptions, PartialFilterOptions, QueryParams } from '../../../common/ui/types';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../containers/constants';
-import { parseUrlQueryParams } from './utils';
-import { stringifyToURL, parseURL } from '../utils';
 import { LOCAL_STORAGE_KEYS } from '../../../common/constants';
-import { SORT_ORDER_VALUES } from '../../../common/ui/types';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { CASES_TABLE_PERPAGE_VALUES } from './types';
-import { parseURLWithFilterOptions } from './utils/parse_url_with_filter_options';
-import { serializeUrlParams } from './utils/serialize_url_params';
+import type { AllCasesTableState, AllCasesURLState } from './types';
+import { stringifyUrlParams } from './utils/stringify_url_params';
+import { allCasesUrlStateDeserializer } from './utils/all_cases_url_state_deserializer';
+import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializer';
+import { parseUrlParams } from './utils/parse_url_params';
 
 export const getQueryParamsLocalStorageKey = (appId: string) => {
   const filteringKey = LOCAL_STORAGE_KEYS.casesQueryParams;
@@ -41,208 +28,80 @@ export const getFilterOptionsLocalStorageKey = (appId: string) => {
   return `${appId}.${filteringKey}`;
 };
 
-const getQueryParams = (
-  params: PartialQueryParams,
-  urlParams: PartialQueryParams,
-  localStorageQueryParams?: LocalStorageQueryParams
-): QueryParams => {
-  const result = { ...DEFAULT_QUERY_PARAMS };
-
-  result.perPage =
-    params.perPage ??
-    urlParams.perPage ??
-    localStorageQueryParams?.perPage ??
-    DEFAULT_QUERY_PARAMS.perPage;
-
-  result.sortField =
-    params.sortField ??
-    urlParams.sortField ??
-    localStorageQueryParams?.sortField ??
-    DEFAULT_QUERY_PARAMS.sortField;
-
-  result.sortOrder =
-    params.sortOrder ??
-    urlParams.sortOrder ??
-    localStorageQueryParams?.sortOrder ??
-    DEFAULT_QUERY_PARAMS.sortOrder;
-
-  result.page = params.page ?? urlParams.page ?? DEFAULT_QUERY_PARAMS.page;
-
-  return result;
-};
-
-const validateQueryParams = (queryParams: QueryParams): QueryParams => {
-  const perPage = Math.min(
-    queryParams.perPage,
-    CASES_TABLE_PERPAGE_VALUES[CASES_TABLE_PERPAGE_VALUES.length - 1]
-  );
-  const sortOrder = !SORT_ORDER_VALUES.includes(queryParams.sortOrder)
-    ? DEFAULT_QUERY_PARAMS.sortOrder
-    : queryParams.sortOrder;
-
-  return { ...queryParams, perPage, sortOrder };
-};
-
-/**
- * Previously, 'status' and 'severity' were represented as single options (strings).
- * To maintain backward compatibility while transitioning to the new type of string[],
- * we map the legacy type to the new type.
- */
-const convertToFilterOptionArray = (value: string | string[] | undefined) => {
-  if (typeof value === 'string') {
-    return [value];
-  }
-  return value;
-};
-
-const getFilterOptions = (
-  filterOptions: FilterOptions,
-  params: FilterOptions,
-  urlParams: PartialFilterOptions,
-  localStorageFilterOptions?: PartialFilterOptions
-): FilterOptions => {
-  const severity =
-    params?.severity ??
-    urlParams?.severity ??
-    convertToFilterOptionArray(localStorageFilterOptions?.severity) ??
-    DEFAULT_FILTER_OPTIONS.severity;
-
-  const status =
-    params?.status ??
-    urlParams?.status ??
-    convertToFilterOptionArray(localStorageFilterOptions?.status) ??
-    DEFAULT_FILTER_OPTIONS.status;
-
-  return {
-    ...filterOptions,
-    ...params,
-    ...removeLegacyValuesFromOptions({ status, severity }),
-  };
-};
+interface UseAllCasesStateReturn {
+  filterOptions: FilterOptions;
+  setQueryParams: (queryParam: QueryParams) => void;
+  setFilterOptions: (filterOptions: FilterOptions) => void;
+  queryParams: QueryParams;
+}
 
 export function useAllCasesState(
   isModalView: boolean = false,
   initialFilterOptions?: PartialFilterOptions
-) {
-  const { appId } = useCasesContext();
-  const location = useLocation();
-  const history = useHistory();
-  const isFirstRenderRef = useRef(true);
+): UseAllCasesStateReturn {
+  // TODO: Handle initial filters
+  // TODO: Use React state to handle modal that do not support filters
+  const [urlState, setUrlState] = useAllCasesUrlState();
 
-  const [queryParams, setQueryParams] = useState<QueryParams>({ ...DEFAULT_QUERY_PARAMS });
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    ...DEFAULT_FILTER_OPTIONS,
-    ...initialFilterOptions,
-  });
-
-  const [localStorageQueryParams, setLocalStorageQueryParams] =
-    useLocalStorage<LocalStorageQueryParams>(getQueryParamsLocalStorageKey(appId));
-
-  const [localStorageFilterOptions, setLocalStorageFilterOptions] =
-    useLocalStorage<PartialFilterOptions>(getFilterOptionsLocalStorageKey(appId));
-
-  const persistAndUpdateQueryParams = useCallback(
-    (params) => {
-      if (isModalView) {
-        setQueryParams((prevParams) => ({ ...prevParams, ...params }));
-        return;
-      }
-
-      const parsedUrlParams: ParsedUrlQueryParams = parseURL(location.search);
-      const urlParams: PartialQueryParams = parseUrlQueryParams(parsedUrlParams);
-
-      let newQueryParams: QueryParams = getQueryParams(params, urlParams, localStorageQueryParams);
-
-      newQueryParams = validateQueryParams(newQueryParams);
-
-      const newLocalStorageQueryParams = {
-        perPage: newQueryParams.perPage,
-        sortField: newQueryParams.sortField,
-        sortOrder: newQueryParams.sortOrder,
-      };
-      setLocalStorageQueryParams(newLocalStorageQueryParams);
-      setQueryParams(newQueryParams);
+  const setState = useCallback(
+    (state: AllCasesTableState) => {
+      setUrlState(state);
     },
-    [isModalView, location.search, localStorageQueryParams, setLocalStorageQueryParams]
+    [setUrlState]
   );
-
-  const persistAndUpdateFilterOptions = useCallback(
-    (params) => {
-      if (isModalView) {
-        setFilterOptions((prevParams) => ({ ...prevParams, ...params }));
-        return;
-      }
-
-      const newFilterOptions: FilterOptions = getFilterOptions(
-        filterOptions,
-        params,
-        parseURLWithFilterOptions(location.search),
-        localStorageFilterOptions
-      );
-
-      const newPersistedFilterOptions: PartialFilterOptions = getStorableFilters(newFilterOptions);
-
-      const newLocalStorageFilterOptions: PartialFilterOptions = {
-        ...localStorageFilterOptions,
-        ...newPersistedFilterOptions,
-      };
-      setLocalStorageFilterOptions(newLocalStorageFilterOptions);
-      setFilterOptions(newFilterOptions);
-    },
-    [
-      filterOptions,
-      isModalView,
-      localStorageFilterOptions,
-      location.search,
-      setLocalStorageFilterOptions,
-    ]
-  );
-
-  const updateLocation = useCallback(() => {
-    const parsedUrlParams = parseURLWithFilterOptions(location.search);
-    const stateUrlParams = {
-      ...parsedUrlParams,
-      ...queryParams,
-      ...getStorableFilters(filterOptions),
-      page: queryParams.page.toString(),
-      perPage: queryParams.perPage.toString(),
-    };
-
-    if (!isEqual(parsedUrlParams, stateUrlParams)) {
-      try {
-        const urlParams = serializeUrlParams({
-          ...parsedUrlParams,
-          ...stateUrlParams,
-        });
-
-        const newHistory = {
-          ...location,
-          search: stringifyToURL(urlParams),
-        };
-        history.replace(newHistory);
-      } catch {
-        // silently fail
-      }
-    }
-  }, [filterOptions, history, location, queryParams]);
-
-  if (isFirstRenderRef.current) {
-    persistAndUpdateQueryParams(isModalView ? queryParams : {});
-    persistAndUpdateFilterOptions(isModalView ? filterOptions : initialFilterOptions);
-
-    isFirstRenderRef.current = false;
-  }
-
-  useEffect(() => {
-    if (!isModalView) {
-      updateLocation();
-    }
-  }, [isModalView, updateLocation]);
 
   return {
-    queryParams,
-    setQueryParams: persistAndUpdateQueryParams,
-    filterOptions,
-    setFilterOptions: persistAndUpdateFilterOptions,
+    queryParams: { ...DEFAULT_QUERY_PARAMS, ...urlState.queryParams },
+    setQueryParams: (newQueryParams: QueryParams) => {
+      // TODO: Set only the new changes and not the defaults by removing empty values
+      setState({
+        filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...urlState.filterOptions },
+        queryParams: newQueryParams,
+      });
+    },
+    filterOptions: { ...DEFAULT_FILTER_OPTIONS, ...urlState.filterOptions },
+    setFilterOptions: (newFilterOptions: FilterOptions) => {
+      // TODO: Set only the new changes and not the defaults by removing empty values
+      setState({
+        filterOptions: newFilterOptions,
+        queryParams: { ...DEFAULT_QUERY_PARAMS, ...urlState.queryParams },
+      });
+    },
   };
 }
+
+const useAllCasesUrlState = (): [AllCasesURLState, (updated: AllCasesTableState) => void] => {
+  const history = useHistory();
+  const { search } = useLocation();
+  const [urlState, setUrlState] = useState<AllCasesURLState>({
+    queryParams: {},
+    filterOptions: {},
+  });
+
+  const urlParams = useMemo(
+    () => parseUrlParams(new URLSearchParams(decodeURIComponent(search))),
+    [search]
+  );
+
+  const parsedUrlParams = useMemo(() => allCasesUrlStateDeserializer(urlParams), [urlParams]);
+
+  const updateQueryParams = useCallback(
+    (updated: AllCasesTableState) => {
+      const updatedQuery = allCasesUrlStateSerializer(updated);
+
+      // TODO: Change with useAllCasesNavigate??
+      history.push({
+        // TODO: Change with encodeUriQuery?
+        // src/plugins/kibana_utils/common/url/encode_uri_query.ts
+        search: encodeURIComponent(stringifyUrlParams(updatedQuery)),
+      });
+    },
+    [history]
+  );
+
+  useEffect(() => {
+    setUrlState(parsedUrlParams);
+  }, [parsedUrlParams]);
+
+  return [urlState, updateQueryParams];
+};
