@@ -12,19 +12,21 @@ import { useIndicesConfigurationFormState } from './indices_configuration_form_s
 export const useSourceConfigurationFormState = (
   configuration?: MetricsSourceConfigurationProperties
 ) => {
+  const initialFormState = useMemo(
+    () =>
+      configuration
+        ? {
+            name: configuration.name,
+            description: configuration.description,
+            metricAlias: configuration.metricAlias,
+            anomalyThreshold: configuration.anomalyThreshold,
+          }
+        : undefined,
+    [configuration]
+  );
+
   const indicesConfigurationFormState = useIndicesConfigurationFormState({
-    initialFormState: useMemo(
-      () =>
-        configuration
-          ? {
-              name: configuration.name,
-              description: configuration.description,
-              metricAlias: configuration.metricAlias,
-              anomalyThreshold: configuration.anomalyThreshold,
-            }
-          : undefined,
-      [configuration]
-    ),
+    initialFormState,
   });
 
   const errors = useMemo(
@@ -35,11 +37,6 @@ export const useSourceConfigurationFormState = (
   const resetForm = useCallback(() => {
     indicesConfigurationFormState.resetForm();
   }, [indicesConfigurationFormState]);
-
-  const isFormDirty = useMemo(
-    () => indicesConfigurationFormState.isFormDirty,
-    [indicesConfigurationFormState.isFormDirty]
-  );
 
   const isFormValid = useMemo(
     () => indicesConfigurationFormState.isFormValid,
@@ -66,13 +63,20 @@ export const useSourceConfigurationFormState = (
     [indicesConfigurationFormState.formStateChanges]
   );
 
+  const getUnsavedChanges = useCallback(() => {
+    return indicesConfigurationFormState.getUnsavedChanges({
+      changedConfig: formState,
+      existingConfig: initialFormState,
+    });
+  }, [formState, indicesConfigurationFormState, initialFormState]);
+
   return {
     errors,
     formState,
     formStateChanges,
-    isFormDirty,
     isFormValid,
     indicesConfigurationProps: indicesConfigurationFormState.fieldProps,
     resetForm,
+    getUnsavedChanges,
   };
 };

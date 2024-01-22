@@ -18,6 +18,10 @@ export interface PublishesViewMode {
   viewMode: PublishingSubject<ViewMode>;
 }
 
+/**
+ * This API publishes a writable universal view mode which can change compatibility of actions and the
+ * visibility of components.
+ */
 export type PublishesWritableViewMode = PublishesViewMode & {
   setViewMode: (viewMode: ViewMode) => void;
 };
