@@ -7,8 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
-import { compact } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
@@ -115,14 +114,10 @@ function useServicesMainStatisticsFetcher(searchQuery: string | undefined) {
 
 function useServicesDetailedStatisticsFetcher({
   mainStatisticsFetch,
-  initialSortField,
-  initialSortDirection,
-  tiebreakerField,
+  renderedItems,
 }: {
   mainStatisticsFetch: ReturnType<typeof useServicesMainStatisticsFetcher>;
-  initialSortField: ServiceInventoryFieldName;
-  initialSortDirection: 'asc' | 'desc';
-  tiebreakerField: ServiceInventoryFieldName;
+  renderedItems: ServiceListItem[];
 }) {
   const {
     query: {
@@ -132,10 +127,6 @@ function useServicesDetailedStatisticsFetcher({
       kuery,
       offset,
       comparisonEnabled,
-      page = 0,
-      pageSize = INITIAL_PAGE_SIZE,
-      sortDirection = initialSortDirection,
-      sortField = initialSortField,
     },
   } = useApmParams('/services');
 
@@ -151,18 +142,10 @@ function useServicesDetailedStatisticsFetcher({
 
   const { mainStatisticsData, mainStatisticsStatus } = mainStatisticsFetch;
 
-  const currentPageItems = orderServiceItems({
-    items: mainStatisticsData.items,
-    primarySortField: sortField as ServiceInventoryFieldName,
-    sortDirection,
-    tiebreakerField,
-  }).slice(page * pageSize, (page + 1) * pageSize);
-
   const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      const serviceNames = compact(
-        currentPageItems.map(({ serviceName }) => serviceName)
-      );
+      const serviceNames = renderedItems.map(({ serviceName }) => serviceName);
+
       if (
         start &&
         end &&
@@ -186,10 +169,8 @@ function useServicesDetailedStatisticsFetcher({
               bucketSizeInSeconds: dataSourceOptions.bucketSizeInSeconds,
             },
             body: {
-              serviceNames: JSON.stringify(
-                // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-                serviceNames.sort()
-              ),
+              // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
+              serviceNames: JSON.stringify(serviceNames.sort()),
             },
           },
         });
@@ -197,7 +178,7 @@ function useServicesDetailedStatisticsFetcher({
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [mainStatisticsData.requestId, offset, comparisonEnabled],
+    [mainStatisticsData.requestId, renderedItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
 
@@ -209,6 +190,8 @@ export function ServiceInventory() {
     '',
     200
   );
+
+  const [renderedItems, setRenderedItems] = useState<ServiceListItem[]>([]);
 
   const mainStatisticsFetch =
     useServicesMainStatisticsFetcher(debouncedSearchQuery);
@@ -234,9 +217,7 @@ export function ServiceInventory() {
 
   const { comparisonFetch } = useServicesDetailedStatisticsFetcher({
     mainStatisticsFetch,
-    initialSortField,
-    initialSortDirection,
-    tiebreakerField,
+    renderedItems,
   });
 
   const { anomalyDetectionSetupState } = useAnomalyDetectionJobsContext();
@@ -310,6 +291,7 @@ export function ServiceInventory() {
             serviceOverflowCount={serviceOverflowCount}
             onChangeSearchQuery={setDebouncedSearchQuery}
             maxCountExceeded={mainStatisticsData?.maxCountExceeded ?? false}
+            onChangeRenderedItems={setRenderedItems}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

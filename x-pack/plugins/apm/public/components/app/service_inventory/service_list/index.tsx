@@ -298,6 +298,7 @@ interface Props {
   serviceOverflowCount: number;
   maxCountExceeded: boolean;
   onChangeSearchQuery: (searchQuery: string) => void;
+  onChangeRenderedItems: (renderedItems: ServiceListItem[]) => void;
 }
 export function ServiceList({
   status,
@@ -314,6 +315,7 @@ export function ServiceList({
   serviceOverflowCount,
   maxCountExceeded,
   onChangeSearchQuery,
+  onChangeRenderedItems,
 }: Props) {
   const breakpoints = useBreakpoints();
   const { link } = useApmRouter();
@@ -353,7 +355,7 @@ export function ServiceList({
     serviceOverflowCount,
   ]);
 
-  const tableSearchBar: TableSearchBar = useMemo(() => {
+  const tableSearchBar: TableSearchBar<ServiceListItem> = useMemo(() => {
     return {
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
@@ -432,6 +434,7 @@ export function ServiceList({
           initialSortDirection={initialSortDirection}
           initialPageSize={initialPageSize}
           sortFn={sortFn}
+          onChangeRenderedItems={onChangeRenderedItems}
           tableSearchBar={tableSearchBar}
         />
       </EuiFlexItem>

@@ -22,7 +22,8 @@ type DetailedStatistics =
 
 export type ErrorGroupItem = MainStatistics['errorGroups'][0];
 
-const INITIAL_MAIN_STATISTICS: MainStatistics = {
+const INITIAL_MAIN_STATISTICS: MainStatistics & { requestId: string } = {
+  requestId: '',
   errorGroups: [],
   maxCountExceeded: false,
 };
@@ -80,7 +81,12 @@ export function useErrorGroupListData({
               },
             },
           }
-        );
+        ).then((response) => {
+          return {
+            ...response,
+            requestId: uuidv4(),
+          };
+        });
       }
     },
     [
@@ -100,7 +106,7 @@ export function useErrorGroupListData({
     status: detailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
-      if (renderedItems.length && start && end) {
+      if (mainStatistics.requestId && renderedItems.length && start && end) {
         return callApmApi(
           'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
           {
@@ -124,17 +130,12 @@ export function useErrorGroupListData({
               },
             },
           }
-        ).then((response) => {
-          return {
-            ...response,
-            requestId: uuidv4(),
-          };
-        });
+        );
       }
     },
-    // only fetches agg results when currentPageGroupIds changes
+    // only fetches agg results when main statistics are ready
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [renderedItems],
+    [mainStatistics.requestId, renderedItems, comparisonEnabled, offset],
     { preservePreviousData: false }
   );
 

@@ -7,6 +7,7 @@
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact } from 'lodash';
 import React, { useMemo, useState } from 'react';
@@ -36,7 +37,8 @@ import { getColumns } from './get_columns';
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
 
-const INITIAL_STATE: ApiResponse = {
+const INITIAL_STATE: ApiResponse & { requestId: string } = {
+  requestId: '',
   transactionGroups: [],
   maxCountExceeded: false,
   transactionOverflowCount: 0,
@@ -322,7 +324,9 @@ function useTableData({
               },
             },
           }
-        );
+        ).then((mainStatisticsData) => {
+          return { requestId: uuidv4(), ...mainStatisticsData };
+        });
       },
       [
         searchQuery,
@@ -382,7 +386,7 @@ function useTableData({
       },
       // only fetches detailed statistics when `currentPageItems` is updated.
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [currentPageItems, offset, comparisonEnabled],
+      [mainStatistics.requestId, currentPageItems, offset, comparisonEnabled],
       { preservePreviousData: false }
     );
 
