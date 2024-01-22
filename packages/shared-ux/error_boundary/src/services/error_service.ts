@@ -15,7 +15,7 @@ const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
 
 interface ErrorServiceError {
   error: Error;
-  errorInfo?: Partial<React.ErrorInfo> | null;
+  errorInfo?: React.ErrorInfo;
   name: string | null;
   isFatal: boolean;
 }
@@ -48,7 +48,7 @@ export class KibanaErrorService {
   /**
    * Derive the name of the component that threw the error
    */
-  private getErrorComponentName(errorInfo: Partial<React.ErrorInfo> | null) {
+  private getErrorComponentName(errorInfo?: React.ErrorInfo) {
     let errorComponentName: string | null = null;
     const stackLines = errorInfo?.componentStack?.split('\n');
     const errorIndicator = /^    at (\S+).*/;
@@ -77,7 +77,7 @@ export class KibanaErrorService {
    */
   public registerError(
     error: Error,
-    errorInfo: Partial<React.ErrorInfo> | null
+    errorInfo?: React.ErrorInfo
   ): ErrorServiceError {
     const isFatal = this.getIsFatal(error);
     const name = this.getErrorComponentName(errorInfo);
