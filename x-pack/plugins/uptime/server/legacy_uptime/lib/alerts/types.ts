@@ -5,8 +5,14 @@
  * 2.0.
  */
 import { AlertTypeWithExecutor } from '@kbn/rule-registry-plugin/server';
-import { AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RecoveredActionGroupId,
+} from '@kbn/alerting-plugin/common';
+import { RuleType } from '@kbn/alerting-plugin/server';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
+import { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import { UMServerLibs } from '../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../adapters';
 
@@ -28,3 +34,18 @@ export type UptimeAlertTypeFactory<TActionGroupIds extends string> = (
   libs: UMServerLibs,
   plugins: UptimeCorePluginsSetup
 ) => DefaultUptimeAlertInstance<TActionGroupIds>;
+
+export type LegacyUptimeRuleTypeFactory<TActionGroupIds extends string> = (
+  server: UptimeServerSetup,
+  libs: UMServerLibs,
+  plugins: UptimeCorePluginsSetup
+) => RuleType<
+  Record<string, any>,
+  never,
+  Record<string, any>,
+  AlertInstanceState,
+  AlertInstanceContext,
+  TActionGroupIds,
+  RecoveredActionGroupId,
+  DefaultAlert
+>;

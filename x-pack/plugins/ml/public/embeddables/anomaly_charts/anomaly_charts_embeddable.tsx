@@ -60,7 +60,7 @@ export class AnomalyChartsEmbeddable extends AnomalyDetectionEmbeddable<
 
   public onRenderComplete() {
     this.renderComplete.dispatchComplete();
-    this.updateOutput({ loading: false, error: undefined });
+    this.updateOutput({ loading: false, rendered: true, error: undefined });
   }
 
   public render(node: HTMLElement) {

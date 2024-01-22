@@ -21,6 +21,7 @@ export const enableInfrastructureProfilingIntegration =
   'observability:enableInfrastructureProfilingIntegration';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
+export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
 export const apmAWSLambdaRequestCostPerMillion = 'observability:apmAWSLambdaRequestCostPerMillion';
 export const enableCriticalPath = 'observability:apmEnableCriticalPath';

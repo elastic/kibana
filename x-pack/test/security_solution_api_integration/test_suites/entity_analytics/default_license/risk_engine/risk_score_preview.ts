@@ -18,10 +18,13 @@ import {
   dataGeneratorFactory,
 } from '../../../detections_response/utils';
 import {
+  assetCriticalityRouteHelpersFactory,
   buildDocument,
+  cleanAssetCriticality,
   createAndSyncRuleAndAlertsFactory,
   deleteAllRiskScores,
   sanitizeScores,
+  waitForAssetCriticalityToBePresent,
 } from '../../utils';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -99,18 +102,23 @@ export default ({ getService }: FtrProviderContext): void => {
           await indexListOfDocuments([buildDocument({ host: { name: 'host-1' } }, documentId)]);
 
           const body = await getRiskScoreAfterRuleCreationAndExecution(documentId);
+          const [score] = sanitizeScores(body.scores.host!);
+          const [rawScore] = body.scores.host!;
 
-          expect(sanitizeScores(body.scores.host!)).to.eql([
-            {
-              calculated_level: 'Unknown',
-              calculated_score: 21,
-              calculated_score_norm: 8.039816232771823,
-              category_1_count: 1,
-              category_1_score: 21,
-              id_field: 'host.name',
-              id_value: 'host-1',
-            },
-          ]);
+          expect(score).to.eql({
+            calculated_level: 'Unknown',
+            calculated_score: 21,
+            calculated_score_norm: 8.039816232771823,
+            category_1_count: 1,
+            category_1_score: 8.039816232771821,
+            id_field: 'host.name',
+            id_value: 'host-1',
+          });
+
+          expect(rawScore.category_1_score! + rawScore.category_2_score!).to.be.within(
+            score.calculated_score_norm! - 0.000000000000001,
+            score.calculated_score_norm! + 0.000000000000001
+          );
         });
 
         it('calculates risk from two alerts, each representing a unique host', async () => {
@@ -130,7 +138,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 21,
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
-              category_1_score: 21,
+              category_1_score: 8.039816232771821,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -139,7 +147,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 21,
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
-              category_1_score: 21,
+              category_1_score: 8.039816232771821,
               id_field: 'host.name',
               id_value: 'host-2',
             },
@@ -163,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 28.42462120245875,
               calculated_score_norm: 10.88232052161514,
               category_1_count: 2,
-              category_1_score: 28,
+              category_1_score: 10.882320521615142,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -185,7 +193,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 47.25513506055279,
               calculated_score_norm: 18.091552473412246,
               category_1_count: 30,
-              category_1_score: 37,
+              category_1_score: 18.091552473412246,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -210,7 +218,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 47.25513506055279,
               calculated_score_norm: 18.091552473412246,
               category_1_count: 30,
-              category_1_score: 37,
+              category_1_score: 18.091552473412246,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -219,7 +227,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 21,
               calculated_score_norm: 8.039816232771823,
               category_1_count: 1,
-              category_1_score: 21,
+              category_1_score: 8.039816232771821,
               id_field: 'host.name',
               id_value: 'host-2',
             },
@@ -241,7 +249,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 50.67035607277805,
               calculated_score_norm: 19.399064346392823,
               category_1_count: 100,
-              category_1_score: 37,
+              category_1_score: 19.399064346392823,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -266,7 +274,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 241.2874098703716,
               calculated_score_norm: 92.37649688758484,
               category_1_count: 100,
-              category_1_score: 209,
+              category_1_score: 92.37649688758484,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -297,7 +305,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 254.91456029175757,
               calculated_score_norm: 97.59362951445543,
               category_1_count: 1000,
-              category_1_score: 209,
+              category_1_score: 97.59362951445543,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -393,7 +401,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 225.1106801442913,
               calculated_score_norm: 86.18326192354185,
               category_1_count: 100,
-              category_1_score: 203,
+              category_1_score: 86.18326192354185,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -422,7 +430,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 120.6437049351858,
               calculated_score_norm: 46.18824844379242,
               category_1_count: 100,
-              category_1_score: 209,
+              category_1_score: 92.37649688758484,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -449,7 +457,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 168.9011869092601,
               calculated_score_norm: 64.66354782130938,
               category_1_count: 100,
-              category_1_score: 209,
+              category_1_score: 92.37649688758484,
               id_field: 'user.name',
               id_value: 'user-1',
             },
@@ -478,7 +486,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 93.23759116471251,
               calculated_score_norm: 35.695861854790394,
               category_1_count: 50,
-              category_1_score: 209,
+              category_1_score: 89.23965463697598,
               id_field: 'host.name',
               id_value: 'host-1',
             },
@@ -490,7 +498,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_score: 186.47518232942502,
               calculated_score_norm: 71.39172370958079,
               category_1_count: 50,
-              category_1_score: 209,
+              category_1_score: 89.23965463697598,
               id_field: 'user.name',
               id_value: 'user-1',
             },
@@ -527,7 +535,7 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_level: 'Low',
               calculated_score: 93.2375911647125,
               calculated_score_norm: 35.695861854790394,
-              category_1_score: 77,
+              category_1_score: 35.69586185479039,
               category_1_count: 50,
               id_field: 'host.name',
               id_value: 'host-1',
@@ -539,10 +547,62 @@ export default ({ getService }: FtrProviderContext): void => {
               calculated_level: 'High',
               calculated_score: 186.475182329425,
               calculated_score_norm: 71.39172370958079,
-              category_1_score: 165,
+              category_1_score: 71.39172370958077,
               category_1_count: 50,
               id_field: 'user.name',
               id_value: 'user-1',
+            },
+          ]);
+        });
+      });
+
+      describe('@skipInServerless with asset criticality data', () => {
+        const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
+
+        beforeEach(async () => {
+          await assetCriticalityRoutes.upsert({
+            id_field: 'host.name',
+            id_value: 'host-1',
+            criticality_level: 'very_important',
+          });
+        });
+
+        afterEach(async () => {
+          await cleanAssetCriticality({ log, es });
+        });
+
+        it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([
+            buildDocument({ host: { name: 'host-1' } }, documentId),
+            buildDocument({ host: { name: 'host-2' } }, documentId),
+          ]);
+          await waitForAssetCriticalityToBePresent({ es, log });
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 2,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              criticality_level: 'very_important',
+              criticality_modifier: 2.0,
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 14.8830616583983,
+              category_1_count: 1,
+              category_1_score: 8.039816232771821,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+            {
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 8.039816232771821,
+              id_field: 'host.name',
+              id_value: 'host-2',
             },
           ]);
         });

@@ -28,7 +28,7 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
@@ -49,7 +49,10 @@ export function ServiceDashboards() {
   const {
     path: { serviceName },
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
-  } = useApmParams('/services/{serviceName}/dashboards');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/dashboards',
+    '/mobile-services/{serviceName}/dashboards'
+  );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<
     MergedServiceDashboard[]
@@ -209,11 +212,13 @@ export function ServiceDashboards() {
                       emptyButton={true}
                       onRefresh={refetch}
                       serviceDashboards={serviceDashboards}
+                      serviceName={serviceName}
                     />,
                     <GotoDashboard currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={refetch}
+                      serviceName={serviceName}
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
@@ -238,7 +243,11 @@ export function ServiceDashboards() {
           </EuiFlexItem>
         </>
       ) : (
-        <EmptyDashboards actions={<LinkDashboard onRefresh={refetch} />} />
+        <EmptyDashboards
+          actions={
+            <LinkDashboard onRefresh={refetch} serviceName={serviceName} />
+          }
+        />
       )}
     </EuiPanel>
   );

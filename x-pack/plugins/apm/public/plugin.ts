@@ -73,6 +73,7 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
+import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import type { ConfigSchema } from '.';
 import { registerApmRuleTypes } from './components/alerting/rule_types/register_apm_rule_types';
 import {
@@ -106,6 +107,7 @@ export interface ApmPluginSetupDeps {
   share: SharePluginSetup;
   uiActions: UiActionsSetup;
   profiling?: ProfilingPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface ApmServices {
@@ -190,11 +192,16 @@ const apmTutorialTitle = i18n.translate(
 
 export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
   private telemetry: TelemetryService;
+  private kibanaVersion: string;
+  private isServerlessEnv: boolean;
   constructor(
     private readonly initializerContext: PluginInitializerContext<ConfigSchema>
   ) {
     this.initializerContext = initializerContext;
     this.telemetry = new TelemetryService();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
+    this.isServerlessEnv =
+      initializerContext.env.packageInfo.buildFlavor === 'serverless';
   }
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
@@ -396,17 +403,25 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
         { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
 
-      async mount(appMountParameters: AppMountParameters<unknown>) {
+      mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
+        const isCloudEnv = !!pluginSetupDeps.cloud?.isCloudEnabled;
+        const isServerlessEnv =
+          pluginSetupDeps.cloud?.isServerlessEnabled || this.isServerlessEnv;
         return renderApp({
           coreStart,
-          pluginsSetup: pluginSetupDeps,
+          pluginsSetup: pluginSetupDeps as ApmPluginSetupDeps,
           appMountParameters,
           config,
+          kibanaEnvironment: {
+            isCloudEnv,
+            isServerlessEnv,
+            kibanaVersion: this.kibanaVersion,
+          },
           pluginsStart: pluginsStart as ApmPluginStartDeps,
           observabilityRuleTypeRegistry,
           apmServices: {

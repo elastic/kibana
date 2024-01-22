@@ -565,7 +565,6 @@ describe('getLensAttributes', () => {
           "state": Object {
             "datasourceStates": Object {
               "textBased": Object {
-                "fieldList": Array [],
                 "indexPatternRefs": Array [],
                 "initialContext": Object {
                   "contextualFields": Array [
@@ -644,22 +643,6 @@ describe('getLensAttributes', () => {
                 },
                 "layers": Object {
                   "46aa21fa-b747-4543-bf90-0b40007c546d": Object {
-                    "allColumns": Array [
-                      Object {
-                        "columnId": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
-                        "fieldName": "Dest",
-                        "meta": Object {
-                          "type": "string",
-                        },
-                      },
-                      Object {
-                        "columnId": "5b9b8b76-0836-4a12-b9c0-980c9900502f",
-                        "fieldName": "AvgTicketPrice",
-                        "meta": Object {
-                          "type": "number",
-                        },
-                      },
-                    ],
                     "columns": Array [
                       Object {
                         "columnId": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",

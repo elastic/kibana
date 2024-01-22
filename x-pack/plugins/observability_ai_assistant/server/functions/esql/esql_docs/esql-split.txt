@@ -1,0 +1,10 @@
+SPLIT
+
+Split a single valued string into multiple strings. For example:
+```esql
+ROW words="foo;bar;baz;qux;quux;corge"
+| EVAL word = SPLIT(words, ";")
+```
+
+Which splits "foo;bar;baz;qux;quux;corge" on ; and returns an array:
+Only single byte delimiters are currently supported.

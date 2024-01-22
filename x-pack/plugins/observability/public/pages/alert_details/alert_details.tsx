@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { ALERT_RULE_CATEGORY, ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  AlertStatus,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  ALERT_STATUS,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
@@ -62,10 +69,12 @@ export function AlertDetails() {
     ruleId: alert?.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
+  const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
     if (alert) {
       setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
+      setAlertStatus(alert?.fields[ALERT_STATUS] as AlertStatus);
     }
   }, [alert, ruleTypeRegistry]);
   useBreadcrumbs([
@@ -80,6 +89,10 @@ export function AlertDetails() {
       text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
     },
   ]);
+
+  const onUntrackAlert = () => {
+    setAlertStatus(ALERT_STATUS_UNTRACKED);
+  };
 
   if (isLoading) {
     return <CenterJustifiedSpinner />;
@@ -120,7 +133,11 @@ export function AlertDetails() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: (
-          <PageTitle alert={alert} dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'} />
+          <PageTitle
+            alert={alert}
+            alertStatus={alertStatus}
+            dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
+          />
         ),
         rightSideItems: [
           <CasesContext
@@ -128,7 +145,11 @@ export function AlertDetails() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <HeaderActions alert={alert} />
+            <HeaderActions
+              alert={alert}
+              alertStatus={alertStatus}
+              onUntrackAlert={onUntrackAlert}
+            />
           </CasesContext>,
         ],
         bottomBorder: true,
