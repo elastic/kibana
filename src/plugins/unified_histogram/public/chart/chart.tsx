@@ -227,9 +227,17 @@ export function Chart({
   }
 
   const LensSaveModalComponent = services.lens.SaveModalComponent;
+  const hasLensSuggestions = Boolean(
+    isPlainRecord &&
+      lensVisServiceCurrentSuggestionContext?.type ===
+        UnifiedHistogramSuggestionType.supportedLensSuggestion
+  );
   const canSaveVisualization =
-    chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
-  const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
+    chartVisible &&
+    hasLensSuggestions &&
+    currentSuggestion &&
+    services.capabilities.dashboard?.showWriteControls;
+  const canEditVisualizationOnTheFly = hasLensSuggestions && currentSuggestion && chartVisible;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
@@ -382,10 +390,7 @@ export function Chart({
               disableTriggers={disableTriggers}
               disabledActions={disabledActions}
               onTotalHitsChange={onTotalHitsChange}
-              hasLensSuggestions={
-                lensVisServiceCurrentSuggestionContext?.type ===
-                UnifiedHistogramSuggestionType.supportedLensSuggestion
-              }
+              hasLensSuggestions={hasLensSuggestions}
               onChartLoad={onChartLoad}
               onFilter={onFilter}
               onBrushEnd={onBrushEnd}

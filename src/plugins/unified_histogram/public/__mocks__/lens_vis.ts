@@ -8,6 +8,7 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 import { LensVisService, type QueryParams } from '../services/lens_vis_service';
 import { unifiedHistogramServicesMock } from './services';
 import { CurrentSuggestionContext, LensAttributesContext } from '../types';
@@ -22,6 +23,7 @@ export const getLensVisMock = async ({
   timeInterval,
   breakdownField,
   dataView,
+  allSuggestions,
 }: {
   chartTitle?: string;
   filters: QueryParams['filters'];
@@ -30,8 +32,9 @@ export const getLensVisMock = async ({
   columns: DatatableColumn[];
   isPlainRecord: boolean;
   timeInterval: string;
-  breakdownField?: DataViewField;
-  suggestionContext?: CurrentSuggestionContext;
+  breakdownField: DataViewField | undefined;
+  suggestionContext: CurrentSuggestionContext;
+  allSuggestions?: Suggestion[];
 }): Promise<{
   lensService: LensVisService;
   lensAttributesContext: LensAttributesContext | undefined;
@@ -39,7 +42,7 @@ export const getLensVisMock = async ({
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
   const lensService = new LensVisService({
     services: unifiedHistogramServicesMock,
-    lensSuggestionsApi: lensApi.suggestions,
+    lensSuggestionsApi: allSuggestions ? () => allSuggestions : lensApi.suggestions,
   });
 
   let lensAttributesContext: LensAttributesContext | undefined;

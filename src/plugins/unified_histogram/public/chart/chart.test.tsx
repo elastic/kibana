@@ -113,6 +113,7 @@ async function mountComponent({
         suggestion: currentSuggestion,
         suggestionDeps: [dataView.id, [], requestParams.query],
       },
+      allSuggestions,
     })
   ).lensService;
 
@@ -273,6 +274,7 @@ describe('Chart', () => {
 
   it('should render the Lens SuggestionsSelector when chart is visible and suggestions exist', async () => {
     const component = await mountComponent({
+      isPlainRecord: true,
       currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
     });
@@ -293,7 +295,7 @@ describe('Chart', () => {
   it('should not render the edit on the fly button when chart is visible and suggestions dont exist', async () => {
     const component = await mountComponent({
       currentSuggestion: undefined,
-      allSuggestions: undefined,
+      allSuggestions: [],
       isPlainRecord: true,
     });
     expect(
@@ -305,6 +307,7 @@ describe('Chart', () => {
     const component = await mountComponent({
       currentSuggestion: currentSuggestionMock,
       allSuggestions: allSuggestionsMock,
+      isPlainRecord: true,
     });
     expect(
       component.find('[data-test-subj="unifiedHistogramSaveVisualization"]').exists()

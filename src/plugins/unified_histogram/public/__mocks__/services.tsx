@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { of } from 'rxjs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -43,7 +44,17 @@ export const unifiedHistogramServicesMock = {
     remove: jest.fn(),
     clear: jest.fn(),
   },
-  expressions: expressionsPluginMock.createStartContract(),
+  expressions: {
+    ...expressionsPluginMock.createStartContract(),
+    run: jest.fn(() =>
+      of({
+        partial: false,
+        result: {
+          rows: [{}, {}, {}],
+        },
+      })
+    ),
+  },
   capabilities: {
     dashboard: {
       showWriteControls: true,

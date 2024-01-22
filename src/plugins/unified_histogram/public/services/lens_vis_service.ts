@@ -239,7 +239,9 @@ export class LensVisService {
     let type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
     let currentSuggestion: Suggestion | undefined = allSuggestions[0];
 
-    if (suggestionContextSelectedPreviously) {
+    console.log('first suggestion', currentSuggestion);
+
+    if (suggestionContextSelectedPreviously?.suggestion) {
       currentSuggestion = suggestionContextSelectedPreviously.suggestion;
       type = suggestionContextSelectedPreviously.type;
     }
@@ -262,7 +264,7 @@ export class LensVisService {
     let shouldUpdateSelectedSuggestionDueToDepsChange = false;
 
     if (
-      suggestionContextSelectedPreviously &&
+      suggestionContextSelectedPreviously?.suggestion &&
       prevSuggestionDeps &&
       !isEqual(prevSuggestionDeps, nextSuggestionDeps)
     ) {
@@ -270,6 +272,13 @@ export class LensVisService {
       type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
       shouldUpdateSelectedSuggestionDueToDepsChange = true;
     }
+
+    console.log(
+      'next suggestion',
+      currentSuggestion,
+      type,
+      shouldUpdateSelectedSuggestionDueToDepsChange
+    );
 
     if (!currentSuggestion) {
       currentSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
