@@ -120,6 +120,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.unsetTime();
     });
+    afterEach(async () => {
+      await PageObjects.share.closeShareModal();
+    });
 
     describe('snapshot share', async () => {
       describe('test local state', async () => {
