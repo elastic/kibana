@@ -20,7 +20,7 @@ import {
 import { RightPanelContext } from '../context';
 import { mockContextValue } from '../mocks/mock_context';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
-import { useExpandableFlyoutContext, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -41,7 +41,7 @@ const panelContextValue = {
 };
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -83,7 +83,7 @@ const renderHostEntityContent = () =>
 
 describe('<HostEntityContent />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   describe('license is valid', () => {

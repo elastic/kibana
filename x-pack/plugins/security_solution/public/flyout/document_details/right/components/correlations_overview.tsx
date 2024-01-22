@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useShowRelatedAlertsBySession } from '../../shared/hooks/use_show_related_alerts_by_session';
@@ -39,7 +39,7 @@ export const CorrelationsOverview: React.FC = () => {
     getFieldsData,
     scopeId,
   } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const goToCorrelationsTab = useCallback(() => {
     openLeftPanel({
