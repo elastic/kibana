@@ -141,6 +141,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "string",
             "visibleCellActions": 5,
           },
           Object {
@@ -191,6 +192,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "date",
             "visibleCellActions": 5,
           },
           Object {
@@ -241,6 +243,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "number",
             "visibleCellActions": 5,
           },
         ]
@@ -274,7 +277,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "string",
           },
           Object {
             "comparator": [Function],
@@ -283,7 +286,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "date",
           },
           Object {
             "comparator": [Function],
@@ -292,7 +295,7 @@ exports[`DatatableComponent it renders actions column when there are row actions
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "number",
           },
         ]
       }
@@ -455,6 +458,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "string",
             "visibleCellActions": 5,
           },
           Object {
@@ -505,6 +509,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "date",
             "visibleCellActions": 5,
           },
           Object {
@@ -555,6 +560,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "number",
             "visibleCellActions": 5,
           },
         ]
@@ -590,7 +596,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "string",
           },
           Object {
             "comparator": [Function],
@@ -599,7 +605,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "date",
           },
           Object {
             "comparator": [Function],
@@ -608,7 +614,7 @@ exports[`DatatableComponent it renders custom row height if set to another value
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "number",
           },
         ]
       }
@@ -762,6 +768,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "string",
             "visibleCellActions": 5,
           },
           Object {
@@ -812,6 +819,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "date",
             "visibleCellActions": 5,
           },
           Object {
@@ -862,6 +870,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "number",
             "visibleCellActions": 5,
           },
         ]
@@ -895,7 +904,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "string",
           },
           Object {
             "comparator": [Function],
@@ -904,7 +913,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "date",
           },
           Object {
             "comparator": [Function],
@@ -913,7 +922,7 @@ exports[`DatatableComponent it renders the title and value 1`] = `
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "number",
           },
         ]
       }
@@ -1071,6 +1080,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "a",
             "id": "a",
+            "schema": "string",
             "visibleCellActions": 5,
           },
           Object {
@@ -1121,6 +1131,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "b",
             "id": "b",
+            "schema": "date",
             "visibleCellActions": 5,
           },
           Object {
@@ -1171,6 +1182,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             </div>,
             "displayAsText": "c",
             "id": "c",
+            "schema": "number",
             "visibleCellActions": 5,
           },
         ]
@@ -1204,7 +1216,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "string",
           },
           Object {
             "comparator": [Function],
@@ -1213,7 +1225,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "date",
           },
           Object {
             "comparator": [Function],
@@ -1222,7 +1234,7 @@ exports[`DatatableComponent it should render hide, reset, and sort actions on he
             "icon": "",
             "sortTextAsc": "Sort Ascending",
             "sortTextDesc": "Sort Descending",
-            "type": "",
+            "type": "number",
           },
         ]
       }
