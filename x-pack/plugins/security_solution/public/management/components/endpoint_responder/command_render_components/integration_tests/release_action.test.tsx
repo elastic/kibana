@@ -20,6 +20,7 @@ import { getDeferred } from '../../../../mocks/utils';
 import { getEndpointAuthzInitialState } from '../../../../../../common/endpoint/service/authz';
 import type { EndpointCapabilities } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { ENDPOINT_CAPABILITIES } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -75,7 +76,7 @@ describe('When using the release action from response actions console', () => {
     enterConsoleCommand(renderResult, 'release');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support release. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'release')
     );
   });
 

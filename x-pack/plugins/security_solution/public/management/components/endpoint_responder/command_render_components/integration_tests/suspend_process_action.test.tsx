@@ -24,6 +24,7 @@ import type {
   KillProcessActionOutputContent,
 } from '../../../../../../common/endpoint/types';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
+import { UPGRADE_AGENT_FOR_RESPONDER } from '../../../../../common/translations';
 
 jest.mock('../../../../../common/experimental_features_service');
 
@@ -81,7 +82,7 @@ describe('When using the suspend-process action from response actions console', 
     enterConsoleCommand(renderResult, 'suspend-process --pid 123');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support suspend-process. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'suspend-process')
     );
   });
 

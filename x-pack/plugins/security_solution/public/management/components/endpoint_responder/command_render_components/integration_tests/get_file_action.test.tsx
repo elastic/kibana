@@ -25,7 +25,10 @@ import type {
   EndpointPrivileges,
   ResponseActionGetFileOutputContent,
 } from '../../../../../../common/endpoint/types';
-import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
@@ -82,7 +85,7 @@ describe('When using get-file action from response actions console', () => {
     enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support get-file. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'get-file')
     );
   });
 

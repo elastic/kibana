@@ -21,7 +21,10 @@ import { waitFor } from '@testing-library/react';
 import { EXECUTE_ROUTE } from '../../../../../../common/endpoint/constants';
 import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpoint/service/authz/mocks';
 import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
-import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
@@ -79,7 +82,7 @@ describe('When using execute action from response actions console', () => {
     enterConsoleCommand(renderResult, 'execute --command="ls -al"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Endpoint Agent does not support execute. Upgrade your Elastic Agent through Fleet to the latest version to enable this response action.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'execute')
     );
   });
 
