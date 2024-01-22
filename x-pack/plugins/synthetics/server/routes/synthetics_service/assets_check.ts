@@ -54,9 +54,7 @@ export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup
 
   const hasAllAssets = missingIndexTemplates.length === 0 && missingPipelines.length === 0;
   if (!hasAllAssets) {
-    server.logger.error(
-      `Synthetics assets are missing. Attempting to reinstall assets.`
-    );
+    server.logger.error(`Synthetics assets are missing. Attempting to reinstall assets.`);
 
     // reinstall synthetics integration
 
