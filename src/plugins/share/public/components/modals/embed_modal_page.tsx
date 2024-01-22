@@ -492,19 +492,6 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
     );
     const radioOptions = [
       {
-        id: 'savedObject',
-        disabled: this.isNotSaved(),
-        label: this.renderWithIconTip(
-          <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
-          <FormattedMessage
-            id="share.urlPanel.savedObjectDescription"
-            defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
-            values={{ objectType: this.props.objectType }}
-          />
-        ),
-        ['data-test-subj']: 'exportAsSavedObject',
-      },
-      {
         id: 'snapshot',
         label: (
           <>
@@ -520,6 +507,19 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
           </>
         ),
         ['data-test-subj']: 'exportAsSnapshot',
+      },
+      {
+        id: 'savedObject',
+        disabled: this.isNotSaved(),
+        label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
+          <FormattedMessage
+            id="share.urlPanel.savedObjectDescription"
+            defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+            values={{ objectType: this.props.objectType }}
+          />
+        ),
+        ['data-test-subj']: 'exportAsSavedObject',
       },
     ];
 
