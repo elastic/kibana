@@ -20,8 +20,7 @@ export const entityStoreInitRoute = (router: SecuritySolutionPluginRouter) => {
     })
     .addVersion(
       { version: '1', validate: {} },
-      // TODO Implement entity store privileges
-      // withRiskEnginePrivilegeCheck(getStartServices, async (context, request, response) => {
+      // TODO Implement entity store privileges like `withRiskEnginePrivilegeCheck` in risk_engine_privileges.ts
       async (context, request, response) => {
         const siemResponse = buildSiemResponse(response);
         const securitySolution = await context.securitySolution;
@@ -47,7 +46,6 @@ export const entityStoreInitRoute = (router: SecuritySolutionPluginRouter) => {
             bypassErrorFormat: true,
           });
         }
-        // })
       }
     );
 };
