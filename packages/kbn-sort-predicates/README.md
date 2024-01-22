@@ -32,7 +32,10 @@ Basic usage with EUI DataGrid schemaDetector:
 
 ```tsx
 const [data, setData] = useState(table);
-const dataGridColumns: EuiDataGridColumn[] = data.columns.map( ... );
+const dataGridColumns: EuiDataGridColumn[] = data.columns.map( (column) => ({
+    ...
+    schema: getColumnType(column)
+}));
 const [sortingColumns, setSortingColumns] = useState([
   { id: 'custom', direction: 'asc' },
 ]);

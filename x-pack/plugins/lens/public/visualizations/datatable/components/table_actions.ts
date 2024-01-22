@@ -23,6 +23,7 @@ import type {
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';
+import { getColumnType } from './columns';
 
 export const createGridResizeHandler =
   (
@@ -164,10 +165,6 @@ export const createGridSortingConfig = (
   },
 });
 
-function isRange(meta: { params?: { id?: string } } | undefined) {
-  return meta?.params?.id === 'range';
-}
-
 export const buildSchemaDetectors = (
   columns: EuiDataGridColumn[],
   columnConfig: {
@@ -181,15 +178,12 @@ export const buildSchemaDetectors = (
   const columnsReverseLookup = buildColumnsMetaLookup(table);
 
   return columns.map((column) => {
-    const sortingHint = columnConfig.columns.find((col) => col.columnId === column.id)?.sortingHint;
-    const sortingCriteria = getSortingCriteria(
-      sortingHint ??
-        (isRange(columnsReverseLookup[column.id]?.meta)
-          ? 'range'
-          : columnsReverseLookup[column.id]?.meta?.type),
-      column.id,
-      formatters?.[column.id]
-    );
+    const schemaType = getColumnType({
+      columnConfig,
+      columnId: column.id,
+      lookup: columnsReverseLookup,
+    });
+    const sortingCriteria = getSortingCriteria(schemaType, column.id, formatters?.[column.id]);
     return {
       sortTextAsc: i18n.translate('xpack.lens.datatable.sortTextAsc', {
         defaultMessage: 'Sort Ascending',
@@ -198,7 +192,7 @@ export const buildSchemaDetectors = (
         defaultMessage: 'Sort Descending',
       }),
       icon: '',
-      type: sortingHint || '',
+      type: schemaType || '',
       detector: () => 1,
       // This is the actual logic that is used to sort the table
       comparator: (_a, _b, direction, { aIndex, bIndex }) =>
