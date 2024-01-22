@@ -38,6 +38,7 @@ export const getLensVisMock = async ({
 }): Promise<{
   lensService: LensVisService;
   lensAttributesContext: LensAttributesContext | undefined;
+  currentSuggestionContext: CurrentSuggestionContext | undefined;
 }> => {
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
   const lensService = new LensVisService({
@@ -48,6 +49,11 @@ export const getLensVisMock = async ({
   let lensAttributesContext: LensAttributesContext | undefined;
   lensService.lensAttributesContext$.subscribe((nextAttributesContext) => {
     lensAttributesContext = nextAttributesContext;
+  });
+
+  let currentSuggestionContext: CurrentSuggestionContext | undefined;
+  lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
+    currentSuggestionContext = nextSuggestionContext;
   });
 
   lensService.update({
@@ -65,5 +71,5 @@ export const getLensVisMock = async ({
     externalVisContext: undefined,
   });
 
-  return { lensService, lensAttributesContext };
+  return { lensService, lensAttributesContext, currentSuggestionContext };
 };
