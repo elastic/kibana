@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useMemo, useEffect } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { EventKind } from '../shared/constants/event_kinds';
 import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
@@ -36,7 +36,7 @@ export interface RightPanelProps extends FlyoutPanelProps {
  * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
-  const { openRightPanel, closeFlyout } = useExpandableFlyoutContext();
+  const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
   const { eventId, getFieldsData, indexName, scopeId, isPreview } = useRightPanelContext();
 
   // for 8.10, we only render the flyout in its expandable mode if the document viewed is of type signal
