@@ -204,5 +204,4 @@ describe('getAvailableVersions', () => {
     // Should sort, uniquify and filter out versions < 7.17
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
   });
-
 });
