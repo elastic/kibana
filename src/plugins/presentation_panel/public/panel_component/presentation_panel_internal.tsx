@@ -7,12 +7,16 @@
  */
 
 import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
+import { PanelLoader } from '@kbn/panel-loader';
+import {
+  apiFiresPhaseEvents,
+  apiHasParentApi,
+  apiPublishesViewMode,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { Subscription } from 'rxjs';
-
-import { PanelLoader } from '@kbn/panel-loader';
-import { apiFiresPhaseEvents, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
 import { PresentationPanelError } from './presentation_panel_error';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
@@ -38,9 +42,13 @@ export const PresentationPanelInternal = <
   const [api, setApi] = useState<ApiType | null>(null);
   const headerId = useMemo(() => htmlIdGenerator()(), []);
 
+  const viewModeSubject = (() => {
+    if (apiPublishesViewMode(api)) return api.viewMode;
+    if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
+  })();
+
   const {
-    uuid,
-    viewMode,
+    rawViewMode,
     blockingError,
     panelTitle,
     dataLoading,
@@ -51,18 +59,19 @@ export const PresentationPanelInternal = <
   } = useBatchedPublishingSubjects({
     dataLoading: api?.dataLoading,
     blockingError: api?.blockingError,
-    viewMode: api?.viewMode,
-    uuid: api?.uuid,
 
     panelTitle: api?.panelTitle,
     hidePanelTitle: api?.hidePanelTitle,
     panelDescription: api?.panelDescription,
     defaultPanelTitle: api?.defaultPanelTitle,
-    parentHidePanelTitle: (api?.parentApi?.value as DefaultPresentationPanelApi)?.hidePanelTitle,
+
+    rawViewMode: viewModeSubject,
+    parentHidePanelTitle: api?.parentApi?.hidePanelTitle,
   });
+  const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (dataLoading === false && !initialLoadComplete) {
+  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
     setInitialLoadComplete(true);
   }
 
@@ -91,11 +100,11 @@ export const PresentationPanelInternal = <
       role="figure"
       paddingSize="none"
       className={classNames('embPanel', {
-        'embPanel--editing': viewMode !== 'view',
+        'embPanel--editing': viewMode === 'edit',
       })}
       hasShadow={showShadow}
       aria-labelledby={headerId}
-      data-test-embeddable-id={uuid}
+      data-test-embeddable-id={api?.uuid}
       data-test-subj="embeddablePanel"
     >
       {!hideHeader && api && (

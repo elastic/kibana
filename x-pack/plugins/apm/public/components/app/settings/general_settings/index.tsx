@@ -25,13 +25,13 @@ import {
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
+  BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { BottomBarActions } from '../bottom_bar_actions';
 
 const LazyFieldRow = React.lazy(async () => ({
   default: (await import('@kbn/management-settings-components-field-row'))
@@ -126,6 +126,7 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
         />
       )}
     </>
