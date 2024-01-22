@@ -443,9 +443,6 @@ export class JourneyFtrHarness {
   }
 
   private onConsoleEvent = async (message: playwright.ConsoleMessage) => {
-    // logging only events realted to performance metrics
-    const trackedEvents = ['performance_metric', 'Loaded Kibana'];
-
     try {
       const { url, lineNumber, columnNumber } = message.location();
 
@@ -472,9 +469,9 @@ export class JourneyFtrHarness {
       if (
         url.includes('core.entry.js') &&
         args.length > 1 &&
-        ![trackedEvents].includes(args[1]?.ebt_event?.event_type)
+        !('performance_metric' === args[1]?.ebt_event?.event_type)
       ) {
-        // ignore events like "click"
+        // ignore events like "click", log to console only 'event_type: performance_metric'
         return;
       }
 
