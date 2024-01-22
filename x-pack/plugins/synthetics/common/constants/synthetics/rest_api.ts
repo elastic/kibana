@@ -11,7 +11,6 @@ export enum SYNTHETICS_API_URLS {
   PARAMS = `/api/synthetics/params`,
 
   // Service end points
-  INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/synthetics/service/monitors',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
