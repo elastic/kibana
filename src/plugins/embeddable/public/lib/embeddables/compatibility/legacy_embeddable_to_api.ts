@@ -93,9 +93,8 @@ export const legacyEmbeddableToApi = (
     })
   );
 
-  // legacy embeddables don't support ID changing or parent changing, so we don't need to subscribe to anything.
-  const uuid = new BehaviorSubject<string>(embeddable.id);
-  const parentApi = new BehaviorSubject<unknown>(embeddable.parent ?? undefined);
+  const uuid = embeddable.id;
+  const parentApi = embeddable.parent;
 
   /**
    * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
@@ -144,14 +143,14 @@ export const legacyEmbeddableToApi = (
       (embeddable as VisualizeEmbeddable).getOutput().visTypeName === 'markdown';
 
     const isImage = embeddable.type === 'image';
-    const isNavigation = embeddable.type === 'navigation';
-    return !isInputControl && !isMarkdown && !isImage && !isNavigation;
+    const isLinks = embeddable.type === 'links';
+    return !isInputControl && !isMarkdown && !isImage && !isLinks;
   };
 
   return {
     api: {
+      parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
-      parentApi,
       viewMode,
       dataLoading,
       blockingError,

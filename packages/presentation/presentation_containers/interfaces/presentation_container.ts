@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { apiPublishesParentApi } from '@kbn/presentation-publishing';
+import { apiHasParentApi, PublishesViewMode } from '@kbn/presentation-publishing';
 
 export interface PanelPackage {
   panelType: string;
   initialState: unknown;
 }
-export interface PresentationContainer {
+export interface PresentationContainer extends Partial<PublishesViewMode> {
   removePanel: (panelId: string) => void;
   canRemovePanels?: () => boolean;
   replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
@@ -27,7 +27,7 @@ export const apiIsPresentationContainer = (
 export const getContainerParentFromAPI = (
   api: null | unknown
 ): PresentationContainer | undefined => {
-  const apiParent = apiPublishesParentApi(api) ? api.parentApi.value : null;
+  const apiParent = apiHasParentApi(api) ? api.parentApi : null;
   if (!apiParent) return undefined;
   return apiIsPresentationContainer(apiParent) ? apiParent : undefined;
 };

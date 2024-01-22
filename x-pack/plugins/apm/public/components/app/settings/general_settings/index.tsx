@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
   apmLabsButton,
@@ -25,11 +25,20 @@ import {
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
+  BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { BottomBarActions } from '../bottom_bar_actions';
+
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row'))
+    .FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
 
 const apmSettingsKeys = [
   enableComparisonByDefault,
@@ -50,8 +59,8 @@ export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
   const {
+    fields,
     handleFieldChange,
-    settingsEditableConfig,
     unsavedChanges,
     saveAll,
     isSaving,
@@ -61,7 +70,7 @@ export function GeneralSettings() {
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return settingsEditableConfig[key].requiresPageReload;
+        return fields[key].requiresPageReload;
       });
       await saveAll();
       trackApmEvent({ metric: 'general_settings_save' });
@@ -79,21 +88,33 @@ export function GeneralSettings() {
     }
   }
 
+  // We don't validate the user input on these settings
+  const settingsValidationResponse: ValueValidation = {
+    successfulValidation: true,
+    valid: true,
+  };
+
   return (
     <>
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
-        const editableConfig = settingsEditableConfig[settingKey];
+        const field = fields[settingKey];
         return (
-          <LazyField
-            key={settingKey}
-            setting={editableConfig}
-            handleChange={handleFieldChange}
-            enableSaving
-            docLinks={docLinks.links}
-            toasts={notifications.toasts}
-            unsavedChanges={unsavedChanges[settingKey]}
-          />
+          <FieldRowProvider
+            {...{
+              links: docLinks.links.management,
+              showDanger: (message: string) =>
+                notifications.toasts.addDanger(message),
+              validateChange: async () => settingsValidationResponse,
+            }}
+          >
+            <FieldRow
+              field={field}
+              isSavingEnabled={true}
+              onFieldChange={handleFieldChange}
+              unsavedChange={unsavedChanges[settingKey]}
+            />
+          </FieldRowProvider>
         );
       })}
       {!isEmpty(unsavedChanges) && (
@@ -105,6 +126,7 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
         />
       )}
     </>
