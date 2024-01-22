@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { Action, buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import { PublishesViewMode, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { getViewModeSubject, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { uiActions } from '../../kibana_services';
 import { contextMenuTrigger, CONTEXT_MENU_TRIGGER } from '../../panel_actions';
 import { getContextMenuAriaLabel } from '../presentation_panel_strings';
@@ -44,7 +44,7 @@ export const PresentationPanelContextMenu = ({
   const [contextMenuPanels, setContextMenuPanels] = useState<EuiContextMenuPanelDescriptor[]>([]);
 
   const { title, parentViewMode } = useBatchedPublishingSubjects({
-    title: api?.panelTitle,
+    title: api.panelTitle,
 
     /**
      * View mode changes often have the biggest influence over which actions will be compatible,
@@ -52,7 +52,7 @@ export const PresentationPanelContextMenu = ({
      * actions should eventually all be Frequent Compatibility Change Actions which can track their
      * own dependencies.
      */
-    parentViewMode: (api?.parentApi?.value as Partial<PublishesViewMode>)?.viewMode,
+    parentViewMode: getViewModeSubject(api),
   });
 
   useEffect(() => {

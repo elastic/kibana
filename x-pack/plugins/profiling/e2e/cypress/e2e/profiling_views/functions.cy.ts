@@ -192,13 +192,13 @@ describe('Functions page', () => {
       cy.get(firstRowSelector).eq(5).contains('4.07 lbs / 1.84 kg');
       cy.contains('Settings').click();
       cy.contains('Advanced Settings');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
+      cy.get(`[data-test-subj="management-settings-editField-${profilingCo2PerKWH}"]`)
         .clear()
         .type('0.12345');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
+      cy.get(`[data-test-subj="management-settings-editField-${profilingDatacenterPUE}"]`)
         .clear()
         .type('2.4');
-      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPervCPUWattX86}"]`)
+      cy.get(`[data-test-subj="management-settings-editField-${profilingPervCPUWattX86}"]`)
         .clear()
         .type('20');
       cy.contains('Save changes').click();
