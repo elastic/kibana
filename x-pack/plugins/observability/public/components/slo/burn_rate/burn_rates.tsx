@@ -57,7 +57,9 @@ export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
     to: new Date(),
   };
   const threshold = burnRateOption.threshold;
-  const burnRate = data?.burnRates.find((br) => br.name === burnRateOption.windowName)?.burnRate;
+  const burnRate = data?.burnRates.find(
+    (burnRate) => burnRate.name === burnRateOption.windowName
+  )?.burnRate;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
