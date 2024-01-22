@@ -197,6 +197,9 @@ export interface CasesTelemetry {
         manually: number;
         automatic: number;
       };
+      customFields: {
+        totalsByType: Record<string, number>;
+      };
     };
   };
 }

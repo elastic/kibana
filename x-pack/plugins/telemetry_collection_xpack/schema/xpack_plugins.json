@@ -7000,6 +7000,13 @@
                       "type": "long"
                     }
                   }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "DYNAMIC_KEY": "long"
+                    }
+                  }
                 }
               }
             }

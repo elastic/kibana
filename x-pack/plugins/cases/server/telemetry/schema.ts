@@ -128,6 +128,11 @@ export const casesSchema: CasesTelemetrySchema = {
         manually: long,
         automatic: long,
       },
+      customFields: {
+        totalsByType: {
+          DYNAMIC_KEY: long,
+        },
+      },
     },
   },
 };

@@ -7,19 +7,20 @@
 
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { findValueInBuckets } from './utils';
 
 export const getConfigurationTelemetryData = async ({
   savedObjectsClient,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['configuration']> => {
   const res = await savedObjectsClient.find<
-    unknown,
+    { customFields: ConfigurationPersistedAttributes['customFields'] },
     {
       closureType: Buckets;
     }
   >({
-    page: 0,
-    perPage: 0,
+    page: 1,
+    perPage: 1,
     type: CASE_CONFIGURE_SAVED_OBJECT,
     aggs: {
       closureType: {
@@ -28,6 +29,18 @@ export const getConfigurationTelemetryData = async ({
     },
   });
 
+  let customFiledTypes: Record<string, number> = {};
+
+  const totalsByType = res.saved_objects[0].attributes.customFields?.reduce((a, c) => {
+    if (c.type) {
+      customFiledTypes = { ...customFiledTypes, [c.type]: (customFiledTypes[c.type] ?? 0) + 1 };
+    }
+
+    return { ...customFiledTypes };
+  }, {});
+
+  console.log({ totalsByType });
+
   const closureBuckets = res.aggregations?.closureType?.buckets ?? [];
 
   return {
@@ -35,6 +48,9 @@ export const getConfigurationTelemetryData = async ({
       closure: {
         manually: findValueInBuckets(closureBuckets, 'close-by-user'),
         automatic: findValueInBuckets(closureBuckets, 'close-by-pushing'),
+      },
+      customFields: {
+        totalsByType: totalsByType ?? {},
       },
     },
   };
