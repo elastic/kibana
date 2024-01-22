@@ -5,6 +5,48 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
+export { dataStreamRT, dataStreamTypeRT } from './data_stream';
+export type { DataStream, DataStreamType } from './data_stream';
+export {
+  checkErrorResultRT,
+  checkFailedResultRT,
+  checkPassedResultRT,
+  checkPlanRT,
+  checkPlanStepRT,
+  checkResultRT,
+  checkSkippedResultRT,
+  dataStreamQualityCheckArgumentsRT,
+  dataStreamQualityCheckExecutionRT,
+  failReasonRT,
+  ignoredFieldFailReasonRT,
+  ingestPipelineErrorFailReasonRT,
+} from './data_stream_quality_checks';
+export type {
+  CheckPlan,
+  CheckPlanStep,
+  CheckResult,
+  CheckTimeRange,
+  DataStreamQualityCheckArguments,
+  DataStreamQualityCheckExecution,
+  FailReason,
+} from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
-export type { APIClientRequestParamsOf, APIReturnType } from './rest';
+export type { DatasetQualityConfig } from './plugin_config';
+export {
+  DATA_STREAM_CHECKS_PATH,
+  DATA_STREAM_CHECK_PATH,
+  getDataStreamCheckPath,
+  getDatastreamCheckRequestParamsRT,
+  getDatastreamCheckRequestPayloadRT,
+  getDatastreamCheckResponsePayloadRT,
+  getDataStreamChecksPath,
+  getDatastreamChecksRequestParamsRT,
+  getDatastreamChecksRequestPayloadRT,
+  getDatastreamChecksResponsePayloadRT,
+} from './rest';
+export type {
+  APIClientRequestParamsOf,
+  APIReturnType,
+  GetDatastreamCheckResponsePayload,
+  GetDatastreamChecksResponsePayload,
+} from './rest';

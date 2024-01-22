@@ -17,12 +17,12 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
-import { discoverLinkTitle } from '../../common/translations';
+import { discoverLinkTitle } from '../../../common/translations';
 import {
   ObservabilityLogExplorerService,
   useObservabilityLogExplorerPageStateContext,
-} from '../state_machines/observability_log_explorer/src';
-import { useKibanaContextForPlugin } from '../utils/use_kibana';
+} from '../../state_machines/observability_log_explorer/src';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {
   const {

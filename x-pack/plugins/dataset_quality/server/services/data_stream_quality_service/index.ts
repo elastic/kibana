@@ -5,7 +5,5 @@
  * 2.0.
  */
 
-export * from './call_api';
-export * from './create_call_dataset_quality_api';
-export * from './data_stream_quality_check';
-export * from './data_stream_quality_checks';
+export type { DataStreamQualityCheckArguments, DataStreamQualityCheckDependencies } from './checks';
+export * from './data_stream_quality_service';

@@ -8,7 +8,7 @@
 import { EuiPageSectionProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { useKibanaContextForPlugin } from '../utils/use_kibana';
+import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
 export const ObservabilityLogExplorerPageTemplate = ({
   children,
@@ -31,8 +31,9 @@ export const ObservabilityLogExplorerPageTemplate = ({
 
 const fullHeightContentStyles = css`
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1 0 auto;
+  align-items: stretch;
   width: 100%;
   height: 100%;
 `;

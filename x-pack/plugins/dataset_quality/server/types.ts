@@ -6,13 +6,16 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import { FleetSetupContract, FleetStartContract } from '@kbn/fleet-plugin/server';
+import { type DataStreamQualityService } from './services/data_stream_quality_service';
 
 export interface DatasetQualityPluginSetupDependencies {
   fleet: FleetSetupContract;
 }
 
 export interface DatasetQualityPluginStartDependencies {
+  data: DataPluginStart;
   fleet: FleetStartContract;
 }
 
@@ -21,4 +24,8 @@ export interface DatasetQualityPluginSetup {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginStart {}
 
-export type DatasetQualityRequestHandlerContext = CustomRequestHandlerContext<{}>;
+export type DatasetQualityRequestHandlerContext = CustomRequestHandlerContext<{
+  datasetQuality: {
+    dataStreamQualityService: DataStreamQualityService;
+  };
+}>;

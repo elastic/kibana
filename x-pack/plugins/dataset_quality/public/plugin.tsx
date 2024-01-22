@@ -7,6 +7,8 @@
 
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createDatasetQuality } from './components/dataset_quality';
+import { createDataStreamQualityChecker } from './components/dataset_quality_checker';
+import { DataStreamQualityService } from './services/data_stream_quality';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -17,9 +19,13 @@ import {
 export class DatasetQualityPlugin
   implements Plugin<DatasetQualityPluginSetup, DatasetQualityPluginStart>
 {
+  dataStreamQualityService = new DataStreamQualityService();
+
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
+    this.dataStreamQualityService.setup();
+
     return {};
   }
 
@@ -29,6 +35,18 @@ export class DatasetQualityPlugin
       plugins,
     });
 
-    return { DatasetQuality };
+    const dataStreamQualityServiceStart = this.dataStreamQualityService.start({
+      http: core.http,
+    });
+
+    const DataStreamQualityChecker = createDataStreamQualityChecker({
+      dataStreamQualityClient: dataStreamQualityServiceStart.client,
+    });
+
+    return {
+      DatasetQuality,
+      DataStreamQualityChecker,
+      dataStreamQualityService: dataStreamQualityServiceStart,
+    };
   }
 }

@@ -28,12 +28,15 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
   } = plugins;
 
   return ({ scopedHistory, controller }: LogExplorerProps) => {
-    const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ controller, core, plugins })],
-      [controller]
-    );
+    const logExplorerCustomizations = useMemo(() => {
+      return [createLogExplorerProfileCustomizations({ controller, core, plugins })];
+    }, [controller]);
 
-    const { urlStateStorage, ...overrideServices } = controller.discoverServices;
+    const { urlStateStorage, overrideServices } = useMemo(() => {
+      const { urlStateStorage: _urlStateStorage, ..._overrideServices } =
+        controller.discoverServices;
+      return { urlStateStorage: _urlStateStorage, overrideServices: _overrideServices };
+    }, [controller.discoverServices]);
 
     return (
       <DiscoverContainer
