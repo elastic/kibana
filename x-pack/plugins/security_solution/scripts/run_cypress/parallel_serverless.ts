@@ -552,8 +552,8 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             }
 
             context.addCleanupTask(() => {
-              // const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
-              // exec(command);
+              const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+              exec(command);
             });
 
             // Reset credentials for elastic user
@@ -597,6 +597,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
               CLOUD_SERVERLESS: true,
               IS_SERVERLESS: true,
+              TEST_CLOUD: 1,
             };
 
             if (process.env.DEBUG && !process.env.CI) {
@@ -639,7 +640,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                 });
                 // Delete serverless project
                 log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-                // await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
+                await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
               } catch (error) {
                 result = error;
               }
