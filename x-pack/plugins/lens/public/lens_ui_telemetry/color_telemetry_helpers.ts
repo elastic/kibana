@@ -40,33 +40,28 @@ export const getColorMappingTelemetryEvents = (
   const gradientData =
     colorMode.type === 'gradient' && prevColorMode?.type !== 'gradient' ? `gradient` : undefined;
 
-  const unassignedTermsData = getUnassignedTermsDiffData(
-    specialAssignments,
-    prevSpecialAssignments
-  );
+  const unassignedTermsType = getUnassignedTermsType(specialAssignments, prevSpecialAssignments);
 
-  const diffData = [assignmentModeData, gradientData, paletteData, unassignedTermsData].filter(
+  const diffData = [assignmentModeData, gradientData, paletteData, unassignedTermsType].filter(
     nonNullable
   );
-  if (assignmentMode === 'manual') {
-    const colorCount = assignments.length;
-    const prevColorCount = prevAssignments?.length;
 
-    const colorCountEvent =
-      colorCount && colorCount !== prevColorCount
-        ? `colors_${getRangeText(colorCount)}`
+  if (assignmentMode === 'manual') {
+    const colorCount =
+      assignments.length && !isEqual(assignments, prevAssignments)
+        ? `colors_${getRangeText(assignments.length)}`
         : undefined;
 
     const prevCustomColors = prevAssignments?.filter((a) => isCustomColor(a.color));
     const customColors = assignments.filter((a) => isCustomColor(a.color));
     const customColorEvent =
       customColors.length && !isEqual(prevCustomColors, customColors)
-        ? `custom_colors_${getRangeText(customColors.length, 0)}`
+        ? `custom_colors_${getRangeText(customColors.length, 1)}`
         : undefined;
 
-    const avgTermsPerColorData = getAvgCountTermsPerColor(assignments, prevAssignments);
+    const avgTermsPerColor = getAvgCountTermsPerColor(assignments, prevAssignments);
 
-    diffData.push(...[colorCountEvent, customColorEvent, avgTermsPerColorData].filter(nonNullable));
+    diffData.push(...[colorCount, customColorEvent, avgTermsPerColor].filter(nonNullable));
   }
   return diffData.map(constructName);
 };
@@ -78,7 +73,7 @@ const isCustomColor = (color: CategoricalColor | ColorCode | GradientColor): col
 };
 
 function getRangeText(n: number, min = 2, max = 16) {
-  if (n === 1 || n === 2) {
+  if (n >= min && (n === 1 || n === 2)) {
     return String(n);
   }
   if (n <= min) {
@@ -91,25 +86,11 @@ function getRangeText(n: number, min = 2, max = 16) {
   return `${lowerBound}_to_${upperBound}`;
 }
 
-const getUnassignedTermsValue = (assignments?: ColorMapping.Config['specialAssignments']) => {
-  return (
-    (assignments &&
-      (isCustomColor(assignments?.[0].color)
-        ? assignments?.[0].color.colorCode
-        : assignments?.[0].color.paletteId === NeutralPalette.id
-        ? NeutralPalette.id
-        : 'palette')) ||
-    undefined
-  );
-};
-const getUnassignedTermsDiffData = (
+const getUnassignedTermsType = (
   specialAssignments: ColorMapping.Config['specialAssignments'],
   prevSpecialAssignments?: ColorMapping.Config['specialAssignments']
 ) => {
-  const prevUnassignedTermsColor = getUnassignedTermsValue(prevSpecialAssignments);
-  const unassignedTermsColor = getUnassignedTermsValue(specialAssignments);
-
-  return prevUnassignedTermsColor !== unassignedTermsColor
+  return !isEqual(prevSpecialAssignments, specialAssignments)
     ? `unassigned_terms_${
         isCustomColor(specialAssignments?.[0].color)
           ? 'custom'

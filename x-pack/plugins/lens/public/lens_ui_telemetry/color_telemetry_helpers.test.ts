@@ -199,7 +199,7 @@ describe('color_telemetry_helpers', () => {
 
       config.assignments = [exampleAssignment(4, 'custom')];
       expect(getColorMappingTelemetryEvents(config, MANUAL_COLOR_MAPPING_CONFIG)).toEqual([
-        'lens_color_mapping_colors_1',
+        'lens_color_mapping_colors_up_to_2',
         'lens_color_mapping_custom_colors_1',
         'lens_color_mapping_avg_count_terms_per_color_2_to_4',
       ]);
