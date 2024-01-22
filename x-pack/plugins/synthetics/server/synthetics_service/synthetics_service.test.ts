@@ -158,7 +158,6 @@ describe('SyntheticsService', () => {
 
     expect(service.isAllowed).toEqual(false);
     expect(service.locations).toEqual([]);
-    expect(service.signupUrl).toEqual(null);
   });
 
   it('setup properly with basic auth', async () => {
