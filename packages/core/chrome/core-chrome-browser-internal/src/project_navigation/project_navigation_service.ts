@@ -7,14 +7,14 @@
  */
 
 import { InternalApplicationStart } from '@kbn/core-application-browser-internal';
-import {
+import type {
   ChromeNavLinks,
-  ChromeProjectNavigation,
   SideNavComponent,
   ChromeProjectBreadcrumb,
   ChromeBreadcrumb,
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
+  NavigationTreeDefinition,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -27,21 +27,33 @@ import {
   skip,
   distinctUntilChanged,
   skipWhile,
+  filter,
 } from 'rxjs';
 import type { Location } from 'history';
 import deepEqual from 'react-fast-compare';
 
-import { findActiveNodes, flattenNav, stripQueryParams } from './utils';
+import {
+  AppDeepLinkId,
+  ChromeNavLink,
+  CloudURLs,
+  NavigationTreeDefinitionUI,
+} from '@kbn/core-chrome-browser/src';
+import type { Logger } from '@kbn/logging';
+
+import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';
 import { buildBreadcrumbs } from './breadcrumbs';
+import { getCloudLinks } from './cloud_links';
 
 interface StartDeps {
   application: InternalApplicationStart;
-  navLinks: ChromeNavLinks;
+  navLinksService: ChromeNavLinks;
   http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
+  logger: Logger;
 }
 
 export class ProjectNavigationService {
+  private logger: Logger | undefined;
   private customProjectSideNavComponent$ = new BehaviorSubject<{
     current: SideNavComponent | null;
   }>({ current: null });
@@ -49,9 +61,14 @@ export class ProjectNavigationService {
   private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
   private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
-  private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
-  private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
+  private navigationTree$ = new BehaviorSubject<ChromeProjectNavigationNode[] | undefined>(
+    undefined
+  );
+  // The flattened version of the navigation tree for quicker access
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
+  // The navigation tree for the Side nav UI that still contains layout information (body, footer, etc.)
+  private navigationTreeUi$ = new BehaviorSubject<NavigationTreeDefinitionUI | null>(null);
+  private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
 
   private projectBreadcrumbs$ = new BehaviorSubject<{
     breadcrumbs: ChromeProjectBreadcrumb[];
@@ -62,9 +79,10 @@ export class ProjectNavigationService {
   private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
 
-  public start({ application, navLinks, http, chromeBreadcrumbs$ }: StartDeps) {
+  public start({ application, navLinksService, http, chromeBreadcrumbs$, logger }: StartDeps) {
     this.application = application;
     this.http = http;
+    this.logger = logger;
     this.onHistoryLocationChange(application.history.location);
     this.unlistenHistory = application.history.listen(this.onHistoryLocationChange.bind(this));
 
@@ -72,7 +90,7 @@ export class ProjectNavigationService {
       .pipe(
         takeUntil(this.stop$),
         // skip while the project navigation is not set
-        skipWhile(() => !this.projectNavigation$.getValue()),
+        skipWhile(() => !this.navigationTree$.getValue()),
         // only reset when the active breadcrumb path changes, use ids to get more stable reference
         distinctUntilChanged((prevNodes, nextNodes) =>
           deepEqual(
@@ -110,18 +128,17 @@ export class ProjectNavigationService {
       setProjectUrl: (projectUrl: string) => {
         this.projectUrl$.next(projectUrl);
       },
-      setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
-        this.projectNavigation$.next(projectNavigation);
-        this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
-        this.setActiveProjectNavigationNodes();
+      initNavigation: <LinkId extends AppDeepLinkId = AppDeepLinkId>(
+        navTreeDefinition: Observable<NavigationTreeDefinition<LinkId>>,
+        { cloudUrls }: { cloudUrls: CloudURLs }
+      ) => {
+        this.initNavigation(navTreeDefinition, { navLinksService, cloudUrls });
       },
-      getProjectNavigation$: () => {
-        return this.projectNavigation$.asObservable();
-      },
+      getNavigationTreeUi$: this.getNavigationTreeUi$.bind(this),
       getActiveNodes$: () => {
         return this.activeNodes$.pipe(takeUntil(this.stop$));
       },
-      setProjectSideNavComponent: (component: SideNavComponent | null) => {
+      setSideNavComponent: (component: SideNavComponent | null) => {
         this.customProjectSideNavComponent$.next({ current: component });
       },
       getProjectSideNavComponent$: () => {
@@ -167,6 +184,54 @@ export class ProjectNavigationService {
         );
       },
     };
+  }
+
+  private initNavigation(
+    navTreeDefinition: Observable<NavigationTreeDefinition>,
+    { navLinksService, cloudUrls }: { navLinksService: ChromeNavLinks; cloudUrls: CloudURLs }
+  ) {
+    if (this.navigationTree$.getValue() !== undefined) {
+      throw new Error('Project navigation has already been initiated.');
+    }
+
+    const deepLinksMap$ = navLinksService.getNavLinks$().pipe(
+      map((navLinks) => {
+        return navLinks.reduce((acc, navLink) => {
+          acc[navLink.id] = navLink;
+          return acc;
+        }, {} as Record<string, ChromeNavLink>);
+      })
+    );
+
+    const cloudLinks = getCloudLinks(cloudUrls);
+
+    combineLatest([navTreeDefinition.pipe(takeUntil(this.stop$)), deepLinksMap$])
+      .pipe(
+        map(([def, deepLinksMap]) => {
+          return parseNavigationTree(def, {
+            deepLinks: deepLinksMap,
+            cloudLinks,
+          });
+        })
+      )
+      .subscribe({
+        next: ({ navigationTree, navigationTreeUI }) => {
+          this.navigationTree$.next(navigationTree);
+          this.navigationTreeUi$.next(navigationTreeUI);
+
+          this.projectNavigationNavTreeFlattened = flattenNav(navigationTree);
+          this.setActiveProjectNavigationNodes();
+        },
+        error: (err) => {
+          this.logger?.error(err);
+        },
+      });
+  }
+
+  private getNavigationTreeUi$(): Observable<NavigationTreeDefinitionUI> {
+    return this.navigationTreeUi$
+      .asObservable()
+      .pipe(filter((v): v is NavigationTreeDefinitionUI => v !== null));
   }
 
   private setActiveProjectNavigationNodes(_location?: Location) {
