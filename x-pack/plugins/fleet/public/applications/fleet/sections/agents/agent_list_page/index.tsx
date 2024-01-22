@@ -169,7 +169,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   }, [selectedStatus]);
 
   // filters kuery
-  const kuery = useMemo(() => {
+  const filteredKuery = useMemo(() => {
     return getKuery({
       search,
       selectedAgentPolicies,
@@ -177,6 +177,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       selectedStatus,
     });
   }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
+  const allTagsKuery = useMemo(() => {
+    return getKuery({});
+  }, []);
 
   const [agentsOnCurrentPage, setAgentsOnCurrentPage] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
@@ -244,12 +248,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentsResponse,
             totalInactiveAgentsResponse,
             managedAgentPoliciesResponse,
-            agentTagsResponse,
+            allAgentTagsResponse,
           ] = await Promise.all([
             sendGetAgents({
               page: pagination.currentPage,
               perPage: pagination.pageSize,
-              kuery: kuery && kuery !== '' ? kuery : undefined,
+              kuery: filteredKuery && filteredKuery !== '' ? filteredKuery : undefined,
               sortField: getSortFieldForAPI(sortField),
               sortOrder,
               showInactive,
@@ -266,7 +270,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               full: false,
             }),
             sendGetAgentTags({
-              kuery: kuery && kuery !== '' ? kuery : undefined,
+              kuery: allTagsKuery && allTagsKuery !== '' ? allTagsKuery : undefined,
               showInactive,
             }),
           ]);
@@ -287,10 +291,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           if (managedAgentPoliciesResponse.error) {
             throw new Error(managedAgentPoliciesResponse.error.message);
           }
-          if (agentTagsResponse.error) {
-            throw agentTagsResponse.error;
+          if (allAgentTagsResponse.error) {
+            throw allAgentTagsResponse.error;
           }
-          if (!agentTagsResponse.data) {
+          if (!allAgentTagsResponse.data) {
             throw new Error('Invalid GET /agent/tags response');
           }
 
@@ -300,7 +304,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }
           setAgentsStatus(agentStatusesToSummary(statusSummary));
 
-          const newAllTags = agentTagsResponse.data.items;
+          const newAllTags = allAgentTagsResponse.data.items;
           // We only want to update the list of available tags if
           // - We haven't set any tags yet
           // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
@@ -357,7 +361,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     [
       pagination.currentPage,
       pagination.pageSize,
-      kuery,
+      filteredKuery,
       sortField,
       sortOrder,
       showInactive,
@@ -607,7 +611,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         totalInactiveAgents={totalInactiveAgents}
         totalManagedAgentIds={totalManagedAgentIds}
         selectionMode={selectionMode}
-        currentQuery={kuery}
+        currentQuery={filteredKuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
