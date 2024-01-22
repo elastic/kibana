@@ -73,10 +73,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await kibanaServer.savedObjects.cleanStandardList();
       });
 
+      // share.doneButton data-test-subj isn't existing in oblt serverless
       xit('is available if new', async () => {
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await PageObjects.share.closeShareModal();
+        // await PageObjects.share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
