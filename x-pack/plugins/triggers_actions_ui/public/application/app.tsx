@@ -140,7 +140,6 @@ export const AppWithoutRouter = ({ sectionsRegex }: { sectionsRegex: string }) =
         />
 
         <Redirect from={'/'} to="rules" />
-        <Redirect from={'/alerts'} to="rules" />
       </Routes>
     </ConnectorProvider>
   );

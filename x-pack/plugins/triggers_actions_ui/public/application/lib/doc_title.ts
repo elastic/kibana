@@ -26,6 +26,11 @@ export const getCurrentDocTitle = (page: string): string => {
         defaultMessage: 'Rules',
       });
       break;
+    case 'alerts':
+      updatedTitle = i18n.translate('xpack.triggersActionsUI.alerts.breadcrumbTitle', {
+        defaultMessage: 'Alerts',
+      });
+      break;
     default:
       updatedTitle = i18n.translate('xpack.triggersActionsUI.home.breadcrumbTitle', {
         defaultMessage: 'Rules',

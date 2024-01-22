@@ -6,72 +6,25 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
-import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-
-export const OBSERVABILITY_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.observability',
-  {
-    defaultMessage: 'Observability',
-  }
-);
-
-export const SECURITY_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.security',
-  {
-    defaultMessage: 'Security',
-  }
-);
-
-export const STACK_MANAGEMENT_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.stackManagement',
-  {
-    defaultMessage: 'Stack management',
-  }
-);
-
-export const UPTIME_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.uptime',
-  {
-    defaultMessage: 'Uptime',
-  }
-);
-
-export const APM_DISPLAY_NAME = i18n.translate('xpack.triggersActionsUI.sections.alertsTable.apm', {
-  defaultMessage: 'APM',
-});
-
-export const INFRASTRUCTURE_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.infrastructure',
-  {
-    defaultMessage: 'Infrastructure',
-  }
-);
-
-export const SLO_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.slos',
-  {
-    defaultMessage: 'SLOs',
-  }
-);
-
-export const LOGS_DISPLAY_NAME = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.logs',
-  {
-    defaultMessage: 'Logs',
-  }
-);
-
-export const ML_DISPLAY_NAME = i18n.translate('xpack.triggersActionsUI.sections.alertsTable.ml', {
-  defaultMessage: 'Machine Learning',
-});
+import {
+  APM_DISPLAY_NAME,
+  INFRASTRUCTURE_DISPLAY_NAME,
+  LOGS_DISPLAY_NAME,
+  ML_DISPLAY_NAME,
+  OBSERVABILITY_DISPLAY_NAME,
+  SECURITY_DISPLAY_NAME,
+  SLO_DISPLAY_NAME,
+  STACK_MANAGEMENT_DISPLAY_NAME,
+  UPTIME_DISPLAY_NAME,
+} from '../translations';
 
 interface AlertProducerData {
   displayName: string;
   icon: EuiIconType;
 }
 
-export const observabilityProducers = [
+export const observabilityFeatureIds: AlertConsumers[] = [
   AlertConsumers.OBSERVABILITY,
   AlertConsumers.APM,
   AlertConsumers.INFRASTRUCTURE,
@@ -80,7 +33,7 @@ export const observabilityProducers = [
   AlertConsumers.UPTIME,
 ];
 
-export const [_, ...observabilityApps] = observabilityProducers;
+export const [_, ...observabilityApps] = observabilityFeatureIds;
 
 export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
   [AlertConsumers.OBSERVABILITY]: {

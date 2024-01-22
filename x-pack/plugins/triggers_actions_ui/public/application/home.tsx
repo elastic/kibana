@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { getIsExperimentalFeatureEnabled } from '../common/get_experimental_features';
-import { Section, routeToRules, routeToInternalAlerts, routeToLogs } from './constants';
+import { Section, routeToRules, routeToAlerts, routeToLogs } from './constants';
 import { getAlertingSectionBreadcrumb } from './lib/breadcrumb';
 import { getCurrentDocTitle } from './lib/doc_title';
 
@@ -144,7 +144,7 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
             {isInternalAlertsTableEnabled ? (
               <Route
                 exact
-                path={routeToInternalAlerts}
+                path={routeToAlerts}
                 component={() => (
                   <EuiPageTemplate.Section grow={false} paddingSize="none">
                     {suspendedComponentWithProps(AlertsPage, 'xl')({})}

@@ -8,26 +8,24 @@
 import React, { useCallback, useEffect } from 'react';
 import { BoolQuery, FILTERS, PhraseFilter } from '@kbn/es-query';
 import { ALERT_RULE_PRODUCER, AlertConsumers } from '@kbn/rule-data-utils';
-import { buildEsQuery } from '../global_alerts';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
-import { ALERTS_URL_STORAGE_KEY, NON_SIEM_FEATURE_IDS } from './constants';
+import { ALERTS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
+import { buildEsQuery } from '../global_alerts_page/global_alerts_page';
 
 export type UrlSyncedAlertsSearchBarProps = Omit<
   AlertsSearchBarProps,
   'query' | 'rangeFrom' | 'rangeTo' | 'filters' | 'onQuerySubmit'
 > & {
   onEsQueryChange: (esQuery: { bool: BoolQuery }) => void;
-  onFeatureIdsChange: (featureIds: AlertConsumers[]) => void;
-  onFilteringBySolutionChange?: (value: boolean) => void;
+  onActiveFeatureFiltersChange?: (value: AlertConsumers[]) => void;
 };
 
 export const UrlSyncedAlertsSearchBar = ({
   onEsQueryChange,
-  onFeatureIdsChange,
-  onFilteringBySolutionChange,
+  onActiveFeatureFiltersChange,
   ...rest
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
@@ -55,15 +53,17 @@ export const UrlSyncedAlertsSearchBar = ({
           f.meta.key === ALERT_RULE_PRODUCER &&
           (f.meta.type === FILTERS.PHRASE || f.meta.type === FILTERS.PHRASES)
       );
-      onFilteringBySolutionChange?.(solutionFilters.length > 0);
-      onFeatureIdsChange(
-        !solutionFilters.length ||
-          solutionFilters.filter(
-            (f) => (f as PhraseFilter).meta.params?.query !== AlertConsumers.SIEM
-          ).length > 0
-          ? NON_SIEM_FEATURE_IDS
-          : [AlertConsumers.SIEM]
-      );
+      onActiveFeatureFiltersChange?.([
+        ...new Set(
+          solutionFilters
+            .flatMap((f) =>
+              f.meta.type === FILTERS.PHRASES
+                ? (f.meta.params as AlertConsumers[])
+                : [(f as PhraseFilter).meta.params?.query as AlertConsumers]
+            )
+            .filter(Boolean)
+        ),
+      ]);
       const newQuery = buildEsQuery({
         timeRange: {
           to: rangeTo,
@@ -76,15 +76,7 @@ export const UrlSyncedAlertsSearchBar = ({
     } catch (e) {
       // TODO show message?
     }
-  }, [
-    filters,
-    kuery,
-    onEsQueryChange,
-    onFeatureIdsChange,
-    onFilteringBySolutionChange,
-    rangeFrom,
-    rangeTo,
-  ]);
+  }, [filters, kuery, onActiveFeatureFiltersChange, onEsQueryChange, rangeFrom, rangeTo]);
 
   useEffect(() => {
     syncEsQuery();

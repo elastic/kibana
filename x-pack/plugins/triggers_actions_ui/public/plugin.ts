@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin as CorePlugin,
-} from '@kbn/core/public';
+import { CoreSetup, CoreStart, Plugin as CorePlugin } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 import { ReactElement } from 'react';
@@ -85,7 +79,7 @@ import type {
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
-import { PLUGIN_ID, CONNECTORS_PLUGIN_ID } from './common/constants';
+import { PLUGIN_ID, CONNECTORS_PLUGIN_ID, ALERTS_PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { getAlertsSearchBarLazy } from './common/get_alerts_search_bar';
@@ -234,7 +228,7 @@ export class Plugin
     const alertsFeatureDescription = i18n.translate(
       'xpack.triggersActionsUI.managementSection.alerts.displayDescription',
       {
-        defaultMessage: 'TODO', // TODO
+        defaultMessage: 'Monitor all of your alerts in one place',
       }
     );
     const connectorsFeatureTitle = i18n.translate(
@@ -251,15 +245,15 @@ export class Plugin
     );
 
     if (plugins.home) {
-      // plugins.home.featureCatalogue.register({
-      //   id: 'alerts',
-      //   title: alertsFeatureTitle,
-      //   description: alertsFeatureDescription,
-      //   icon: 'watchesApp',
-      //   path: '/app/management',
-      //   showOnHomePage: false,
-      //   category: 'admin',
-      // });
+      plugins.home.featureCatalogue.register({
+        id: ALERTS_PLUGIN_ID,
+        title: alertsFeatureTitle,
+        description: alertsFeatureDescription,
+        icon: 'watchesApp',
+        path: triggersActionsRoute,
+        showOnHomePage: false,
+        category: 'admin',
+      });
       plugins.home.featureCatalogue.register({
         id: PLUGIN_ID,
         title: featureTitle,
@@ -280,14 +274,11 @@ export class Plugin
       });
     }
 
-    core.application.register({
-      id: 'alerts',
+    plugins.management.sections.section.insightsAndAlerting.registerApp({
+      id: ALERTS_PLUGIN_ID,
       title: alertsFeatureTitle,
-      order: 8080,
-      euiIconType: 'watchesApp',
-      category: DEFAULT_APP_CATEGORIES.management,
-      // updater$: this.appUpdater,
-      async mount(params: AppMountParameters) {
+      order: 0,
+      async mount(params: ManagementAppMountParams) {
         const { renderApp } = await import('./application/alerts_app');
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
@@ -316,11 +307,16 @@ export class Plugin
           element: params.element,
           theme$: params.theme$,
           storage: new Storage(window.localStorage),
+          setBreadcrumbs: params.setBreadcrumbs,
           history: params.history,
           actionTypeRegistry,
           ruleTypeRegistry,
           alertsTableConfigurationRegistry,
           kibanaFeatures,
+          licensing: pluginsStart.licensing,
+          expressions: pluginsStart.expressions,
+          isServerless: !!pluginsStart.serverless,
+          fieldFormats: pluginsStart.fieldFormats,
         });
       },
     });
@@ -328,7 +324,7 @@ export class Plugin
     plugins.management.sections.section.insightsAndAlerting.registerApp({
       id: PLUGIN_ID,
       title: featureTitle,
-      order: 0,
+      order: 1,
       async mount(params: ManagementAppMountParams) {
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,
@@ -440,9 +436,9 @@ export class Plugin
 
   public start(_: CoreStart, plugins: PluginsStart): TriggersAndActionsUIPublicPluginStart {
     import('./application/sections/alerts_table/configuration').then(
-      ({ getAlertsTableConfiguration }) => {
-        this.alertsTableConfigurationRegistry.register(
-          getAlertsTableConfiguration(plugins.fieldFormats)
+      ({ createGenericAlertsTableConfigurations }) => {
+        createGenericAlertsTableConfigurations(plugins.fieldFormats).forEach((c) =>
+          this.alertsTableConfigurationRegistry.register(c)
         );
       }
     );
