@@ -22,7 +22,7 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import url from 'url';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -54,25 +54,25 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  useEffect(() => {
-    setAbsoluteReportGenerationUrl();
-  });
-
-  function getAbsoluteReportGenerationUrl() {
+  const getAbsoluteReportGenerationUrl = useCallback(() => {
     const relativePath = apiClient.getReportingPublicJobPath(
       'csv',
       apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
     );
     return url.resolve(window.location.href, relativePath);
-  }
+  }, [apiClient, getJobParams]);
 
-  const setAbsoluteReportGenerationUrl = () => {
+  const setAbsoluteReportGenerationUrl = useCallback(() => {
     if (!isMounted || !getAbsoluteReportGenerationUrl()) {
       return;
     } else {
       setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
     }
-  };
+  }, [isMounted, getAbsoluteReportGenerationUrl]);
+
+  useEffect(() => {
+    setAbsoluteReportGenerationUrl();
+  }, [setAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());

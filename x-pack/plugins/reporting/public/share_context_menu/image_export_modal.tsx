@@ -27,7 +27,7 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
@@ -81,46 +81,49 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const isMounted = useMountedState();
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  const getJobsParams = (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
-    if (!opts) {
-      return { ...props.getJobParams };
-    }
+  const getJobsParams = useCallback(
+    (type: AllowedImageExportType, opts?: JobParamsProviderOptions) => {
+      if (!opts) {
+        return { ...props.getJobParams };
+      }
 
-    const {
-      sharingData: { title, layout, locatorParams },
-    } = opts;
+      const {
+        sharingData: { title, layout, locatorParams },
+      } = opts;
 
-    const baseParams = {
-      objectType,
-      layout,
-      title,
-    };
+      const baseParams = {
+        objectType,
+        layout,
+        title,
+      };
 
-    if (type === 'printablePdfV2') {
-      // multi locator for PDF V2
-      return { ...baseParams, locatorParams: [locatorParams] };
-    } else if (type === 'pngV2') {
-      // single locator for PNG V2
-      return { ...baseParams, locatorParams };
-    }
+      if (type === 'printablePdfV2') {
+        // multi locator for PDF V2
+        return { ...baseParams, locatorParams: [locatorParams] };
+      } else if (type === 'pngV2') {
+        // single locator for PNG V2
+        return { ...baseParams, locatorParams };
+      }
 
-    // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
-    // Replace hashes with original RISON values.
-    const relativeUrl = opts?.shareableUrl.replace(
-      window.location.origin + apiClient.getServerBasePath(),
-      ''
-    );
+      // Relative URL must have URL prefix (Spaces ID prefix), but not server basePath
+      // Replace hashes with original RISON values.
+      const relativeUrl = opts?.shareableUrl.replace(
+        window.location.origin + apiClient.getServerBasePath(),
+        ''
+      );
 
-    if (type === 'printablePdf') {
-      // multi URL for PDF
-      return { ...baseParams, relativeUrls: [relativeUrl] };
-    }
+      if (type === 'printablePdf') {
+        // multi URL for PDF
+        return { ...baseParams, relativeUrls: [relativeUrl] };
+      }
 
-    // single URL for PNG
-    return { ...baseParams, relativeUrl };
-  };
+      // single URL for PNG
+      return { ...baseParams, relativeUrl };
+    },
+    [apiClient, objectType, props.getJobParams]
+  );
 
-  const getLayout = (): LayoutParams => {
+  const getLayout = useCallback((): LayoutParams => {
     const { layout } = getJobsParams(selectedRadio, jobProviderOptions);
 
     let dimensions = layout?.dimensions;
@@ -139,41 +142,42 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     }
 
     return { id: 'preserve_layout', dimensions };
-  };
+  }, [getJobsParams, jobProviderOptions, selectedRadio, useCanvasLayout, usePrintLayout]);
 
-  const getJobParams = (shareableUrl?: boolean) => {
-    return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
-  };
-  function getAbsoluteReportGenerationUrl() {
-    if (
-      getJobsParams(selectedRadio, jobProviderOptions) !== undefined &&
-      objectType !== 'canvas workpad'
-    ) {
+  const getJobParams = useCallback(
+    (shareableUrl?: boolean) => {
+      return { ...getJobsParams(selectedRadio, jobProviderOptions), layout: getLayout() };
+    },
+    [getJobsParams, getLayout, jobProviderOptions, selectedRadio]
+  );
+
+  const getAbsoluteReportGenerationUrl = useCallback(() => {
+    if (getJobsParams(selectedRadio, jobProviderOptions) !== undefined && objectType !== 'Canvas') {
       const relativePath = apiClient.getReportingPublicJobPath(
         selectedRadio,
         apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
       );
       return url.resolve(window.location.href, relativePath);
     }
-  }
+  }, [apiClient, getJobParams, getJobsParams, jobProviderOptions, objectType, selectedRadio]);
 
-  const setAbsoluteReportGenerationUrl = () => {
+  const setAbsoluteReportGenerationUrl = useCallback(() => {
     if (!isMounted || !getAbsoluteReportGenerationUrl()) {
       return;
     } else {
       setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
     }
-  };
+  }, [isMounted, getAbsoluteReportGenerationUrl]);
 
-  const markAsStale = () => {
+  const markAsStale = useCallback(() => {
     if (!isMounted) return;
     setIsStale(true);
-  };
+  }, [isMounted]);
 
   useEffect(() => {
     setAbsoluteReportGenerationUrl();
     markAsStale();
-  });
+  }, [markAsStale, setAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(
