@@ -13,23 +13,28 @@ import { getSettingsHref } from '../../utils/get_settings_href';
 import { getSettingsKnowledgeBaseHref } from '../../utils/get_settings_kb_href';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 
 export function ChatActionsMenu({
   connectors,
   conversationId,
   disabled,
   onCopyConversationClick,
+  showLinkToConversationsApp = false,
 }: {
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
   disabled: boolean;
   onCopyConversationClick: () => void;
+  showLinkToConversationsApp?: boolean;
 }) {
   const {
     application: { navigateToUrl },
     http,
   } = useKibana().services;
   const [isOpen, setIsOpen] = useState(false);
+
+  const router = useObservabilityAIAssistantRouter();
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
@@ -120,6 +125,30 @@ export function ChatActionsMenu({
                   onCopyConversationClick();
                 },
               },
+              ...(showLinkToConversationsApp
+                ? [
+                    {
+                      name: conversationId
+                        ? i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.openInConversationsApp',
+                            {
+                              defaultMessage: 'Open in Conversations app',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.goToConversationsApp',
+                            {
+                              defaultMessage: 'Go to Conversations app',
+                            }
+                          ),
+                      href: conversationId
+                        ? router.link('/conversations/{conversationId}', {
+                            path: { conversationId },
+                          })
+                        : router.link('/conversations/new'),
+                    },
+                  ]
+                : []),
             ],
           },
           {

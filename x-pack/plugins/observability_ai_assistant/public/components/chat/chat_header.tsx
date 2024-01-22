@@ -44,6 +44,7 @@ export function ChatHeader({
   startedFrom,
   onSaveTitle,
   onCopyConversation,
+  showLinkToConversationsApp = false,
 }: {
   title: string;
   loading: boolean;
@@ -54,6 +55,7 @@ export function ChatHeader({
   knowledgeBase: UseKnowledgeBaseResult;
   startedFrom?: StartedFrom;
   onCopyConversation: () => void;
+  showLinkToConversationsApp?: boolean;
   onSaveTitle?: (title: string) => void;
 }) {
   const hasTitle = !!title;
@@ -115,6 +117,7 @@ export function ChatHeader({
             disabled={licenseInvalid}
             conversationId={conversationId}
             onCopyConversationClick={onCopyConversation}
+            showLinkToConversationsApp={showLinkToConversationsApp}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

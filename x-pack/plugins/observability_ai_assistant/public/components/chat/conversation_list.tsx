@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { MouseEventHandler } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -33,6 +33,7 @@ const titleClassName = css`
 
 const panelClassName = css`
   max-height: 100%;
+  height: 100%;
 `;
 
 const overflowScrollClassName = (scrollBarStyles: string) => css`
@@ -55,7 +56,12 @@ export function ConversationList({
   selected: string;
   loading: boolean;
   error?: any;
-  conversations?: Array<{ id: string; label: string; href?: string }>;
+  conversations?: Array<{
+    id: string;
+    label: string;
+    href?: string;
+    onClick?: MouseEventHandler<HTMLButtonElement>;
+  }>;
   onClickNewChat: () => void;
   onClickDeleteConversation: (id: string) => void;
 }) {
@@ -119,6 +125,7 @@ export function ConversationList({
                       isActive={conversation.id === selected}
                       isDisabled={loading}
                       href={conversation.href}
+                      onClick={conversation.onClick}
                       wrapText
                       extraAction={
                         conversation.id

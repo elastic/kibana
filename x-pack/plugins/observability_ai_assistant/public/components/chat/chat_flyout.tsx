@@ -4,25 +4,32 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiLink, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiResizableContainer } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { v4 } from 'uuid';
 import type { Message } from '../../../common/types';
+import { useAbortableAsync } from '../../hooks/use_abortable_async';
+import { useConfirmModal } from '../../hooks/use_confirm_modal';
 import { useCurrentUser } from '../../hooks/use_current_user';
+import { useForceUpdate } from '../../hooks/use_force_update';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
-import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
+import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
+import { ConversationList } from './conversation_list';
 
 const containerClassName = css`
   max-height: 100%;
 `;
 
 const bodyClassName = css`
+  padding-top: 36px;
   overflow-y: auto;
 `;
 
@@ -40,80 +47,170 @@ export function ChatFlyout({
   onClose: () => void;
 }) {
   const {
-    services: { http },
+    services: { http, notifications },
   } = useKibana();
-
-  const { euiTheme } = useEuiTheme();
 
   const currentUser = useCurrentUser();
 
   const connectors = useGenAIConnectors();
 
-  const router = useObservabilityAIAssistantRouter();
-
   const knowledgeBase = useKnowledgeBase();
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const service = useObservabilityAIAssistant();
 
-  const conversationsHeaderClassName = css`
-    padding-top: 12px;
-    padding-bottom: 12px;
-    border-bottom: solid 1px ${euiTheme.border.color};
-  `;
+  const chatBodyKeyRef = useRef(v4());
+  const forceUpdate = useForceUpdate();
+  const reloadConversation = useCallback(() => {
+    chatBodyKeyRef.current = v4();
+    forceUpdate();
+  }, [forceUpdate]);
+
+  const [isUpdatingList, setIsUpdatingList] = useState(false);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const conversations = useAbortableAsync(
+    ({ signal }) => {
+      return service.callApi('POST /internal/observability_ai_assistant/conversations', {
+        signal,
+      });
+    },
+    [service]
+  );
+  const displayedConversations = useMemo(() => {
+    return [
+      ...(!conversationId ? [{ id: '', label: EMPTY_CONVERSATION_TITLE }] : []),
+      ...(conversations.value?.conversations ?? []).map(({ conversation }) => ({
+        id: conversation.id,
+        label: conversation.title,
+        onClick: () => {
+          setConversationId(conversation.id);
+          reloadConversation();
+        },
+      })),
+    ];
+  }, [conversationId, conversations.value?.conversations, reloadConversation]);
+
+  const { element: confirmDeleteElement, confirm: confirmDeleteFunction } = useConfirmModal({
+    title: i18n.translate('xpack.observabilityAiAssistant.flyout.confirmDeleteConversationTitle', {
+      defaultMessage: 'Delete this conversation?',
+    }),
+    children: i18n.translate(
+      'xpack.observabilityAiAssistant.flyout.confirmDeleteConversationContent',
+      {
+        defaultMessage: 'This action cannot be undone.',
+      }
+    ),
+    confirmButtonText: i18n.translate(
+      'xpack.observabilityAiAssistant.flyout.confirmDeleteButtonText',
+      {
+        defaultMessage: 'Delete conversation',
+      }
+    ),
+  });
 
   return isOpen ? (
-    <EuiFlyout onClose={onClose}>
-      <EuiFlexGroup
-        responsive={false}
-        gutterSize="none"
-        direction="column"
-        className={containerClassName}
-      >
-        <EuiFlexItem grow={false}>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder={false}
-            borderRadius="none"
-            className={conversationsHeaderClassName}
-          >
-            {conversationId ? (
-              <EuiLink
-                data-test-subj="observabilityAiAssistantChatFlyoutOpenConversationLink"
-                href={router.link('/conversations/{conversationId}', {
-                  path: { conversationId },
-                })}
+    <EuiFlyout onClose={onClose} closeButtonProps={{ css: { marginRight: '8px' } }}>
+      {confirmDeleteElement}
+      <EuiResizableContainer css={{ height: '100%' }}>
+        {(EuiResizablePanel, EuiResizableButton) => (
+          <>
+            <EuiResizablePanel mode="collapsible" initialSize={20} minSize="20%">
+              <ConversationList
+                selected={conversationId ?? ''}
+                conversations={displayedConversations}
+                loading={conversations.loading || isUpdatingList}
+                error={conversations.error}
+                onClickNewChat={() => {
+                  if (conversationId) {
+                    setConversationId(undefined);
+                  }
+                  reloadConversation();
+                }}
+                onClickDeleteConversation={(id) => {
+                  confirmDeleteFunction()
+                    .then(async (confirmed) => {
+                      if (!confirmed) {
+                        return;
+                      }
+
+                      setIsUpdatingList(true);
+
+                      await service.callApi(
+                        'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
+                        {
+                          params: {
+                            path: {
+                              conversationId: id,
+                            },
+                          },
+                          signal: null,
+                        }
+                      );
+
+                      const isCurrentConversation = id === conversationId;
+                      const hasOtherConversations = conversations.value?.conversations.find(
+                        (conversation) =>
+                          'id' in conversation.conversation && conversation.conversation.id !== id
+                      );
+
+                      if (isCurrentConversation) {
+                        setConversationId(
+                          hasOtherConversations ? hasOtherConversations.conversation.id : undefined
+                        );
+                        reloadConversation();
+                      }
+
+                      conversations.refresh();
+                    })
+                    .catch((error) => {
+                      notifications.toasts.addError(error, {
+                        title: i18n.translate(
+                          'xpack.observabilityAiAssistant.flyout.failedToDeleteConversation',
+                          {
+                            defaultMessage: 'Could not delete conversation',
+                          }
+                        ),
+                      });
+                    })
+                    .finally(() => {
+                      setIsUpdatingList(false);
+                    });
+                }}
+              />
+            </EuiResizablePanel>
+
+            <EuiResizableButton alignIndicator="center" />
+
+            <EuiResizablePanel mode="main" initialSize={80} minSize="40%" paddingSize="none">
+              <EuiFlexGroup
+                css={{ height: '100%' }}
+                responsive={false}
+                gutterSize="none"
+                direction="column"
+                className={containerClassName}
               >
-                {i18n.translate('xpack.observabilityAiAssistant.conversationDeepLinkLabel', {
-                  defaultMessage: 'Open conversation',
-                })}
-              </EuiLink>
-            ) : (
-              <EuiLink
-                data-test-subj="observabilityAiAssistantChatFlyoutGoToConversationsLink"
-                href={router.link('/conversations/new')}
-              >
-                {i18n.translate('xpack.observabilityAiAssistant.conversationListDeepLinkLabel', {
-                  defaultMessage: 'Go to conversations',
-                })}
-              </EuiLink>
-            )}
-          </EuiPanel>
-        </EuiFlexItem>
-        <EuiFlexItem grow className={bodyClassName}>
-          <ChatBody
-            connectors={connectors}
-            initialTitle={initialTitle}
-            initialMessages={initialMessages}
-            currentUser={currentUser}
-            connectorsManagementHref={getConnectorsManagementHref(http)}
-            knowledgeBase={knowledgeBase}
-            startedFrom={startedFrom}
-            onConversationUpdate={(conversation) => {
-              setConversationId(conversation.conversation.id);
-            }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+                <EuiFlexItem grow className={bodyClassName}>
+                  <ChatBody
+                    key={chatBodyKeyRef.current}
+                    connectors={connectors}
+                    initialTitle={initialTitle}
+                    initialMessages={initialMessages}
+                    initialConversationId={conversationId}
+                    currentUser={currentUser}
+                    connectorsManagementHref={getConnectorsManagementHref(http)}
+                    knowledgeBase={knowledgeBase}
+                    startedFrom={startedFrom}
+                    onConversationUpdate={(conversation) => {
+                      conversations.refresh();
+                      setConversationId(conversation.conversation.id);
+                    }}
+                    showLinkToConversationsApp={true}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiResizablePanel>
+          </>
+        )}
+      </EuiResizableContainer>
     </EuiFlyout>
   ) : null;
 }

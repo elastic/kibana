@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css, keyframes } from '@emotion/css';
 import {
   EuiCallOut,
@@ -97,6 +97,7 @@ export function ChatBody({
   currentUser,
   startedFrom,
   onConversationUpdate,
+  showLinkToConversationsApp = false,
 }: {
   initialTitle?: string;
   initialMessages?: Message[];
@@ -107,6 +108,7 @@ export function ChatBody({
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
+  showLinkToConversationsApp?: boolean;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
@@ -161,13 +163,13 @@ export function ChatBody({
     }
   };
 
-  const handleChangeHeight = (editorHeight: number) => {
+  const handleChangeHeight = useCallback((editorHeight: number) => {
     if (editorHeight === 0) {
       setPromptEditorHeight(0);
     } else {
       setPromptEditorHeight(editorHeight + PADDING_AND_BORDER);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -398,6 +400,7 @@ export function ChatBody({
           startedFrom={startedFrom}
           title={conversation.value?.conversation.title || initialTitle || EMPTY_CONVERSATION_TITLE}
           onCopyConversation={handleCopyConversation}
+          showLinkToConversationsApp={showLinkToConversationsApp}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}

@@ -187,9 +187,7 @@ export function ConversationView() {
 
                   if (isCurrentConversation) {
                     navigateToConversation(
-                      hasOtherConversations
-                        ? conversations.value!.conversations[0].conversation.id
-                        : undefined
+                      hasOtherConversations ? hasOtherConversations.conversation.id : undefined
                     );
                   }
 
