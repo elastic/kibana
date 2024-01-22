@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useCancellableSearch } from './src/use_cancellable_search';
+export { useCancellableSearch, type UseCancellableSearch } from './src/use_cancellable_search';

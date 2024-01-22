@@ -12,8 +12,8 @@ import { DataPublicPluginStart, ISearchOptions } from '@kbn/data-plugin/public';
 import seedrandom from 'seedrandom';
 import { isDefined } from '@kbn/ml-is-defined';
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
-import { lastValueFrom } from 'rxjs';
 import { AggregateQuery } from '@kbn/es-query';
+import { type UseCancellableSearch } from '@kbn/ml-cancellable-search';
 import { RANDOM_SAMPLER_PROBABILITIES } from '../../constants/random_sampler';
 import type {
   DocumentCountStats,
@@ -25,7 +25,7 @@ const MINIMUM_RANDOM_SAMPLER_DOC_COUNT = 100000;
 const DEFAULT_INITIAL_RANDOM_SAMPLER_PROBABILITY = 0.000001;
 
 export const getESQLDocumentCountStats = async (
-  search: DataPublicPluginStart['search'],
+  runRequest: UseCancellableSearch['runRequest'],
   query: AggregateQuery,
   filter?: estypes.QueryDslQueryContainer,
   timeFieldName?: string,
@@ -46,22 +46,20 @@ export const getESQLDocumentCountStats = async (
     | stats rows = count(*) by _timestamp_
     | LIMIT 10000`;
 
-    const esqlResults = await lastValueFrom(
-      search.search(
-        {
-          params: {
-            query: esqlBaseQuery + aggQuery,
-            ...(filter ? { filter } : {}),
-          },
+    const esqlResults = await runRequest(
+      {
+        params: {
+          query: esqlBaseQuery + aggQuery,
+          ...(filter ? { filter } : {}),
         },
-        { ...(searchOptions ?? {}), strategy: 'esql' }
-      )
+      },
+      { ...(searchOptions ?? {}), strategy: 'esql' }
     );
 
     let totalCount = 0;
     const _buckets: Record<string, number> = {};
     // @ts-expect-error ES types needs to be updated with columns and values as part of esql response
-    esqlResults.rawResponse.values.forEach((val) => {
+    esqlResults?.rawResponse.values.forEach((val) => {
       const [count, bucket] = val;
       _buckets[bucket] = count;
       totalCount += count;
@@ -84,15 +82,13 @@ export const getESQLDocumentCountStats = async (
     return { documentCountStats: result, totalCount };
   } else {
     //  If not time field, get the total count
-    const esqlResults = await lastValueFrom(
-      search.search(
-        {
-          params: {
-            query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
-          },
+    const esqlResults = await runRequest(
+      {
+        params: {
+          query: esqlBaseQuery + ' | STATS _count_ = COUNT(*)  | LIMIT 1',
         },
-        { ...searchOptions, strategy: 'esql' }
-      )
+      },
+      { ...(searchOptions ?? {}), strategy: 'esql' }
     );
 
     // @ts-expect-error ES types needs to be updated with columns and values as part of esql response

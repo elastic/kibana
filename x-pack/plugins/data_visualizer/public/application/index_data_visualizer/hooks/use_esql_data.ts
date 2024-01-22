@@ -11,8 +11,7 @@ import type { AggregateQuery } from '@kbn/es-query';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { isDefined } from '@kbn/ml-is-defined';
-import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
-import { lastValueFrom, Subscription } from 'rxjs';
+import { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { chunk } from 'lodash';
 import { useCancellableSearch } from '@kbn/ml-cancellable-search';
 import { OMIT_FIELDS } from '../../../../common/constants';
@@ -477,22 +476,18 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const { runRequest, cancelRequest } = useCancellableSearch(data);
+
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
   const [overallStatsProgress, setOverallStatsProgress] = useReducer(
     getReducer<DataStatsFetchProgress>(),
     getInitialProgress()
   );
 
-  const abortCtrl = useRef(new AbortController());
-
-  const searchSubscription$ = useRef<Subscription>();
-
   const startFetch = useCallback(
     async function fetchOverallStats() {
       try {
-        searchSubscription$.current?.unsubscribe();
-        abortCtrl.current.abort();
-        abortCtrl.current = new AbortController();
+        cancelRequest();
 
         if (!fieldStatsRequest) {
           return;
@@ -506,11 +501,6 @@ export const useESQLOverallStatsData = (
 
         const { searchQuery, intervalMs, filter } = fieldStatsRequest;
 
-        const searchOptions = {
-          abortSignal: abortCtrl.current.signal,
-          // No sessionId here because ES|QL not yet supported (?)
-        };
-
         if (!isESQLQuery(searchQuery)) {
           return;
         }
@@ -518,18 +508,15 @@ export const useESQLOverallStatsData = (
         const intervalInMs = intervalMs === 0 ? 60 * 60 * 60 * 10 : intervalMs;
         const esqlBaseQuery = searchQuery.esql;
 
-        const columnsResp = await lastValueFrom(
-          data.search.search(
-            {
-              params: {
-                query: esqlBaseQuery + '| LIMIT 0',
-                ...(filter ? { filter } : {}),
-              },
+        const columnsResp = await runRequest(
+          {
+            params: {
+              query: esqlBaseQuery + '| LIMIT 0',
+              ...(filter ? { filter } : {}),
             },
-            { ...searchOptions, strategy: ESQL_SEARCH_STRATEGY }
-          )
+          },
+          { strategy: ESQL_SEARCH_STRATEGY }
         );
-
         // @ts-expect-error ES types need to be updated with columns for ESQL queries
         const columns = columnsResp.rawResponse.columns.map((c) => ({
           ...c,
@@ -557,12 +544,11 @@ export const useESQLOverallStatsData = (
         setTableData({ columns, timeFieldName });
 
         const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
-          data.search,
+          runRequest,
           searchQuery,
           filter,
           timeFieldName,
-          intervalInMs,
-          searchOptions
+          intervalInMs
         );
 
         setTableData({ totalCount, documentCountStats });
@@ -632,18 +618,15 @@ export const useESQLOverallStatsData = (
             })
             .join(',');
 
-          const esqlResults = await lastValueFrom(
-            data.search.search(
-              {
-                params: {
-                  query: searchQuery.esql + countQuery,
-                  ...(filter ? { filter } : {}),
-                },
+          const esqlResults = await runRequest(
+            {
+              params: {
+                query: searchQuery.esql + countQuery,
+                ...(filter ? { filter } : {}),
               },
-              { strategy: ESQL_SEARCH_STRATEGY }
-            )
+            },
+            { strategy: ESQL_SEARCH_STRATEGY }
           );
-
           const stats = {
             aggregatableExistsFields: [] as AggregatableField[],
             aggregatableNotExistsFields: [] as AggregatableField[],
@@ -651,6 +634,9 @@ export const useESQLOverallStatsData = (
             nonAggregatableNotExistsFields: [] as NonAggregatableField[],
           };
 
+          if (!esqlResults) {
+            return;
+          }
           const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
 
           aggregatableFieldsToQuery.forEach((field, idx) => {
@@ -716,7 +702,7 @@ export const useESQLOverallStatsData = (
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data.search, toasts, JSON.stringify({ fieldStatsRequest })]
+    [runRequest, toasts, JSON.stringify({ fieldStatsRequest })]
   );
 
   // auto-update

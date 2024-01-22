@@ -10,6 +10,15 @@ import { type IKibanaSearchResponse, isRunningResponse } from '@kbn/data-plugin/
 import { tap } from 'rxjs/operators';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+export interface UseCancellableSearch {
+  runRequest: <RequestBody, ResponseType extends IKibanaSearchResponse>(
+    requestBody: RequestBody,
+    options?: object
+  ) => Promise<ResponseType | null>;
+  cancelRequest: () => void;
+  isLoading: boolean;
+}
+
 // Similar to aiops/hooks/use_cancellable_search.ts
 export function useCancellableSearch(data: DataPublicPluginStart) {
   const abortController = useRef(new AbortController());
