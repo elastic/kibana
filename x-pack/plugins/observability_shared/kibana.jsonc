@@ -9,7 +9,7 @@
     "configPath": ["xpack", "observability_shared"],
     "requiredPlugins": ["cases", "uiActions", "embeddable", "share"],
     "optionalPlugins": ["guidedOnboarding"],
-    "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils", "advancedSettings"],
+    "requiredBundles": ["data", "inspector", "kibanaReact", "kibanaUtils"],
     "extraPublicDirs": ["common"]
   }
 }

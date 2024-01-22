@@ -629,7 +629,15 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.FrequentCompatibilityChangeAction",
+                    "text": "FrequentCompatibilityChangeAction"
+                  },
+                  "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -1335,25 +1343,55 @@
         "signature": [
           "(app: ",
           "ObservabilityApp",
-          ", settingsKeys: string[]) => { settingsEditableConfig: Record<string, ",
-          "FieldSetting",
-          ">; unsavedChanges: Record<string, ",
+          ", settingsKeys: string[]) => { fields: Record<string, ",
           {
-            "pluginId": "advancedSettings",
-            "scope": "public",
-            "docId": "kibAdvancedSettingsPluginApi",
-            "section": "def-public.FieldState",
-            "text": "FieldState"
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
           },
-          ">; handleFieldChange: (key: string, fieldState: ",
+          "<",
           {
-            "pluginId": "advancedSettings",
-            "scope": "public",
-            "docId": "kibAdvancedSettingsPluginApi",
-            "section": "def-public.FieldState",
-            "text": "FieldState"
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
           },
-          ") => void; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+          ", string | number | boolean | (string | number)[] | null | undefined>>; unsavedChanges: Record<string, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">>; handleFieldChange: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.OnFieldChangeFn",
+            "text": "OnFieldChangeFn"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
         "deprecated": false,
