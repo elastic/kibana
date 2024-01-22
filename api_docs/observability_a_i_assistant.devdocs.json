@@ -868,7 +868,7 @@
               "ChatCompletion",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
-              "; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; }>) => Promise<",
+              "; }, TEndpoint> & Omit<FetchOptions, \"body\" | \"query\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; }>) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository",
                 "scope": "common",
@@ -2635,7 +2635,15 @@
           "ChatCompletion",
           ">; } & ",
           "ObservabilityAIAssistantRouteCreateOptions",
-          "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
+          "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
           " ? TRouteParamsRT extends ",
           {

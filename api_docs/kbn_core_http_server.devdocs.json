@@ -10155,6 +10155,79 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.KibanaNotModifiedResponseFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaNotModifiedResponseFactory",
+        "description": [],
+        "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaNotModifiedResponseFactory.notModified",
+            "type": "Function",
+            "tags": [],
+            "label": "notModified",
+            "description": [
+              "\nContent not modified.\nStatus code: `304`."
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<any>) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.KibanaNotModifiedResponseFactory.notModified.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.HttpResponseOptions",
+                    "text": "HttpResponseOptions"
+                  },
+                  "<any>"
+                ],
+                "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.KibanaRedirectionResponseFactory",
         "type": "Interface",
         "tags": [],
@@ -12179,10 +12252,10 @@
               ", responseToolkit: ",
               "ResponseToolkit",
               ") => Promise<",
-              "ResponseObject",
-              " | ",
               "Boom",
-              "<any>>"
+              "<any> | ",
+              "ResponseObject",
+              ">"
             ],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
@@ -13060,6 +13133,10 @@
               {
                 "plugin": "dataViews",
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
+              },
+              {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
               },
               {
                 "plugin": "bfetch",
@@ -16038,7 +16115,7 @@
             "section": "def-common.HandlerFunction",
             "text": "HandlerFunction"
           },
-          "<infer U> ? U : never"
+          "<infer U extends object> ? U : never"
         ],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
         "deprecated": false,
@@ -16348,6 +16425,14 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-common.KibanaRedirectionResponseFactory",
             "text": "KibanaRedirectionResponseFactory"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaNotModifiedResponseFactory",
+            "text": "KibanaNotModifiedResponseFactory"
           },
           " & ",
           {
@@ -17208,7 +17293,15 @@
             "section": "def-common.HttpResponseOptions",
             "text": "HttpResponseOptions"
           },
-          "<any> & { headers: { location: string; }; }"
+          "<any> & { headers?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseHeaders",
+            "text": "ResponseHeaders"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,

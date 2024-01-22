@@ -23,6 +23,7 @@ let mockPdfExportType: PdfExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = new CancellationToken();
+const taskInstanceFields = { startedAt: null, retryAt: null };
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';
@@ -64,7 +65,9 @@ beforeEach(async () => {
     screenshotting: screenshottingMock,
   });
 
-  getScreenshotsSpy.mockImplementation(() => {
+  getScreenshotsSpy.mockImplementation((opts) => {
+    const { logger } = opts;
+    logger?.get('screenshotting');
     return Rx.of({
       metrics: { cpu: 0, pages: 1 },
       data: Buffer.from(testContent),
@@ -74,7 +77,7 @@ beforeEach(async () => {
   });
 });
 
-test(`passes browserTimezone to generatePdf`, async () => {
+test(`passes browserTimezone to getScreenshots`, async () => {
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
     'pdfJobId',
@@ -86,24 +89,14 @@ test(`passes browserTimezone to generatePdf`, async () => {
       browserTimezone,
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
 
-  expect(getScreenshotsSpy).toHaveBeenCalledWith({
-    browserTimezone: 'UTC',
-    format: 'pdf',
-    headers: {},
-    layout: { dimensions: {} },
-    logo: false,
-    title: 'PDF Params Timezone Test',
-    urls: [
-      [
-        'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
-        { __REPORTING_REDIRECT_LOCATOR_STORE_KEY__: { id: 'test', version: 'test' } },
-      ],
-    ],
-  });
+  expect(getScreenshotsSpy).toHaveBeenCalledWith(
+    expect.objectContaining({ browserTimezone: 'UTC' })
+  );
 });
 
 test(`returns content_type of application/pdf`, async () => {
@@ -114,13 +107,14 @@ test(`returns content_type of application/pdf`, async () => {
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
   expect(contentType).toBe('application/pdf');
 });
 
-test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
+test(`returns buffer content base64 encoded`, async () => {
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({
@@ -128,9 +122,28 @@ test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
       locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       headers: encryptedHeaders,
     }),
+    taskInstanceFields,
     cancellationToken,
     stream
   );
 
   expect(content).toEqual(testContent);
+});
+
+test(`screenshotting plugin uses the logger provided by the PDF export-type`, async () => {
+  const logSpy = jest.spyOn(mockLogger, 'get');
+
+  await mockPdfExportType.runTask(
+    'pdfJobId',
+    getBasePayload({
+      layout: { dimensions: {} },
+      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
+      headers: encryptedHeaders,
+    }),
+    taskInstanceFields,
+    cancellationToken,
+    stream
+  );
+
+  expect(logSpy).toHaveBeenCalledWith('screenshotting');
 });
