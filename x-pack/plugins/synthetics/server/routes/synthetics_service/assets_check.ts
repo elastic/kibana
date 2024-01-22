@@ -17,15 +17,7 @@ const EXPECTED_PIPELINES = [
   'synthetics-browser.network',
 ];
 
-const EXPECTED_INDEX_TEMPLATES = [
-  'synthetics',
-  'synthetics-tcp',
-  'synthetics-http',
-  'synthetics-icmp',
-  'synthetics-browser',
-  'synthetics-browser.screenshot',
-  'synthetics-browser.network',
-];
+const EXPECTED_INDEX_TEMPLATES = ['synthetics', ...EXPECTED_PIPELINES];
 
 export const getSyntheticsAssetsCheckRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -41,7 +33,6 @@ export const getSyntheticsAssetsCheckRoute: SyntheticsRestApiRouteFactory = () =
 export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup) => {
   const esClient = server.coreStart.elasticsearch.client.asInternalUser;
 
-  let hasAllAssets = true;
   const [pipelines, indexTemplates] = await Promise.all([
     esClient.ingest.getPipeline({
       id: 'synthetics-*',
@@ -54,18 +45,14 @@ export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup
   const missingPipelines = EXPECTED_PIPELINES.filter(
     (pipeline) => !pipelineIds.some((id) => id.startsWith(pipeline))
   );
-  if (missingPipelines.length > 0) {
-    hasAllAssets = false;
-  }
 
   const indexTemplateNames = indexTemplates.index_templates ?? [];
   // all index templates should be present
   const missingIndexTemplates = EXPECTED_INDEX_TEMPLATES.filter(
     (template) => !indexTemplateNames.some(({ name }) => name === template)
   );
-  if (missingIndexTemplates.length > 0) {
-    hasAllAssets = false;
-  }
+
+  const hasAllAssets = missingIndexTemplates.length === 0 && missingPipelines.length === 0;
   if (!hasAllAssets) {
     server.logger.error(
       `Synthetics assets are missing. Assets check route will try to reinstall assets.`
@@ -84,7 +71,7 @@ export const verifySyntheticsAssetsChecks = async (server: SyntheticsServerSetup
     if (!installed) {
       server.logger.error(`Synthetics package is not installed, installation failed.`);
       return {
-        hasAllAssets: false,
+        hasAllAssets,
         error: 'Synthetics package is not installed, installation failed.',
       };
     } else {
