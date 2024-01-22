@@ -129,7 +129,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                 )
               }
               titleColor="danger"
-              titleSize="l"
+              titleSize="m"
               textAlign="left"
               isLoading={isLoading}
               data-test-subj="alertsTriggeredStats"
@@ -162,7 +162,7 @@ export function AlertsHistoryPanel({ rule, slo, alert, isLoading }: Props) {
                 )
               }
               titleColor="default"
-              titleSize="l"
+              titleSize="m"
               textAlign="left"
               isLoading={isLoading}
               data-test-subj="avgTimeToRecoverStat"
