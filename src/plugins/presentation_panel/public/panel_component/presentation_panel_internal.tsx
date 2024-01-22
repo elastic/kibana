@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
-  apiFiresPhaseEvents,
+  apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedPublishingSubjects,
@@ -82,7 +82,7 @@ export const PresentationPanelInternal = <
 
   useEffect(() => {
     let subscription: Subscription;
-    if (api && onPanelStatusChange && apiFiresPhaseEvents(api)) {
+    if (api && onPanelStatusChange && apiPublishesPhaseEvents(api)) {
       subscription = api.onPhaseChange.subscribe((phase) => {
         if (phase) onPanelStatusChange(phase);
       });

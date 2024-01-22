@@ -17,7 +17,6 @@ import {
   MockFilter,
   FilterableEmbeddable,
 } from '../test_samples/embeddables/filterable_embeddable';
-import e from 'express';
 
 class TestClass {
   constructor() {}
