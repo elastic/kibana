@@ -4,27 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
-import { i18n } from '@kbn/i18n';
+import * as i18n from './translations';
 import type { State } from '../../../common/store';
 import { selectTitleByTimelineById } from '../../store/selectors';
-import { AddTimelineButton } from '../flyout/add_timeline_button';
+import { AddTimelineButton } from './add_timeline_button';
 import { timelineActions } from '../../store';
 import { TimelineSaveStatus } from '../save_status';
 import { AddToFavoritesButton } from '../add_to_favorites';
 import { TimelineEventsCountBadge } from '../../../common/hooks/use_timeline_events_count';
 
-const openTimelineButton = (title: string) =>
-  i18n.translate('xpack.securitySolution.timeline.bottomBar.toggleButtonAriaLabel', {
-    values: { title },
-    defaultMessage: 'Open timeline {title}',
-  });
-
 interface TimelineBottomBarProps {
   /**
-   * Id of the timeline to be displayed in the bottom bar and within the portal
+   * Id of the timeline to be displayed in the bottom bar and within the modal
    */
   timelineId: string;
   /**
@@ -39,7 +34,7 @@ interface TimelineBottomBarProps {
 export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(({ show, timelineId }) => {
   const dispatch = useDispatch();
 
-  const handleToggleOpen = useCallback(
+  const openTimeline = useCallback(
     () => dispatch(timelineActions.showTimeline({ id: timelineId, show: true })),
     [dispatch, timelineId]
   );
@@ -57,8 +52,8 @@ export const TimelineBottomBar = React.memo<TimelineBottomBarProps>(({ show, tim
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiLink
-            aria-label={openTimelineButton(title)}
-            onClick={handleToggleOpen}
+            aria-label={i18n.OPEN_TIMELINE_BUTTON(title)}
+            onClick={openTimeline}
             data-test-subj="timeline-bottom-bar-title-button"
           >
             {title}
