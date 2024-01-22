@@ -49,7 +49,7 @@ export class ReplacePanelFlyout extends React.Component<Props> {
   };
 
   public onReplacePanel = async (savedObjectId: string, type: string, name: string) => {
-    this.props.api.parentApi.value.replacePanel(this.props.api.uuid.value, {
+    this.props.api.parentApi.replacePanel(this.props.api.uuid, {
       panelType: type,
       initialState: { savedObjectId },
     });

@@ -8,7 +8,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { PublishesDataViews, ViewMode } from '@kbn/presentation-publishing';
+import { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
@@ -153,7 +153,7 @@ describe('Presentation panel', () => {
     });
 
     it('does not render a title when in view mode when the provided title is blank', async () => {
-      const api: DefaultPresentationPanelApi = {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>(''),
         viewMode: new BehaviorSubject<ViewMode>('view'),
       };
@@ -164,9 +164,10 @@ describe('Presentation panel', () => {
     });
 
     it('renders a placeholder title when in edit mode and the provided title is blank', async () => {
-      const api: DefaultPresentationPanelApi = {
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>(''),
         viewMode: new BehaviorSubject<ViewMode>('edit'),
+        dataViews: new BehaviorSubject<DataView[] | undefined>([]),
       };
       await renderPresentationPanel({ api });
       await waitFor(() => {
@@ -177,7 +178,7 @@ describe('Presentation panel', () => {
     it('opens customize panel flyout on title click when in edit mode', async () => {
       const spy = jest.spyOn(openCustomizePanel, 'openCustomizePanelFlyout');
 
-      const api: DefaultPresentationPanelApi & PublishesDataViews = {
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>('TITLE'),
         viewMode: new BehaviorSubject<ViewMode>('edit'),
         dataViews: new BehaviorSubject<DataView[] | undefined>([]),
@@ -193,7 +194,7 @@ describe('Presentation panel', () => {
     });
 
     it('does not show title customize link in view mode', async () => {
-      const api: DefaultPresentationPanelApi & PublishesDataViews = {
+      const api: DefaultPresentationPanelApi & PublishesDataViews & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode: new BehaviorSubject<ViewMode>('view'),
         dataViews: new BehaviorSubject<DataView[] | undefined>([]),
@@ -206,7 +207,7 @@ describe('Presentation panel', () => {
     });
 
     it('hides title when API hide title option is true', async () => {
-      const api: DefaultPresentationPanelApi = {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
         viewMode: new BehaviorSubject<ViewMode>('view'),
@@ -216,12 +217,14 @@ describe('Presentation panel', () => {
     });
 
     it('hides title when parent hide title option is true', async () => {
-      const api: DefaultPresentationPanelApi = {
+      const api: DefaultPresentationPanelApi & PublishesViewMode = {
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode: new BehaviorSubject<ViewMode>('view'),
-        parentApi: new BehaviorSubject<unknown>({
-          hidePanelTitle: new BehaviorSubject<boolean | undefined>(true),
-        }),
+        parentApi: {
+          removePanel: jest.fn(),
+          replacePanel: jest.fn(),
+          viewMode: new BehaviorSubject<ViewMode>('view'),
+        },
       };
       await renderPresentationPanel({ api });
       expect(screen.queryByTestId('presentationPanelTitle')).not.toBeInTheDocument();
