@@ -75,4 +75,5 @@ export type DatasetQualityControllerEvent =
       };
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
-  | DoneInvokeEvent<DataStreamStatServiceResponse>;
+  | DoneInvokeEvent<DataStreamStatServiceResponse>
+  | DoneInvokeEvent<Error>;

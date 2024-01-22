@@ -6,7 +6,7 @@
  */
 
 import { IToasts } from '@kbn/core/public';
-import { assign, createMachine, InterpreterFrom } from 'xstate';
+import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { getDefaultTimeRange } from '../../../utils';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
@@ -17,6 +17,7 @@ import {
   DatasetQualityControllerTypeState,
 } from './types';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
+import { fetchDatasetStatsFailedNotifier } from './notifications';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
@@ -46,6 +47,10 @@ export const createPureDatasetQualityControllerStateMachine = (
                       target: 'complete',
                       actions: ['storeDataStreamStats'],
                     },
+                    onError: {
+                      target: 'complete',
+                      actions: ['notifyFetchDatasetStatsFailed'],
+                    },
                   },
                 },
                 complete: {
@@ -62,6 +67,10 @@ export const createPureDatasetQualityControllerStateMachine = (
                     onDone: {
                       target: 'complete',
                       actions: ['storeDegradedDocStats'],
+                    },
+                    onError: {
+                      target: 'complete',
+                      actions: ['notifyFetchDegradedStatsFailed'],
                     },
                   },
                 },
@@ -155,7 +164,12 @@ export const createDatasetQualityControllerStateMachine = ({
   dataStreamStatsClient,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
-    actions: {},
+    actions: {
+      notifyFetchDatasetStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDatasetStatsFailedNotifier(toasts, event.data),
+      notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDatasetStatsFailedNotifier(toasts, event.data),
+    },
     services: {
       loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
       loadDegradedDocs: (_context) => {
