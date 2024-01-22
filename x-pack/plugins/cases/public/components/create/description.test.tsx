@@ -18,94 +18,92 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
-for (let i = 0; i < 100; i++) {
-  describe('Description', () => {
-    let globalForm: FormHook;
-    let appMockRender: AppMockRenderer;
-    const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
-    const defaultProps = {
-      draftStorageKey,
-      isLoading: false,
-    };
+describe('Description', () => {
+  let globalForm: FormHook;
+  let appMockRender: AppMockRenderer;
+  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
+  const defaultProps = {
+    draftStorageKey,
+    isLoading: false,
+  };
 
-    const MockHookWrapperComponent: React.FC = ({ children }) => {
-      const { form } = useForm<FormProps>({
-        defaultValue: { description: 'My description' },
-        schema: {
-          description: schema.description,
-        },
-      });
-
-      globalForm = form;
-
-      return <Form form={form}>{children}</Form>;
-    };
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      appMockRender = createAppMockRenderer();
+  const MockHookWrapperComponent: React.FC = ({ children }) => {
+    const { form } = useForm<FormProps>({
+      defaultValue: { description: 'My description' },
+      schema: {
+        description: schema.description,
+      },
     });
 
-    it('it renders', async () => {
-      appMockRender.render(
-        <MockHookWrapperComponent>
-          <Description {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+    globalForm = form;
 
-      expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
-    });
+    return <Form form={form}>{children}</Form>;
+  };
 
-    it('it changes the description', async () => {
-      appMockRender.render(
-        <MockHookWrapperComponent>
-          <Description {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+  beforeEach(() => {
+    jest.clearAllMocks();
+    appMockRender = createAppMockRenderer();
+  });
 
-      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+  it('it renders', async () => {
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
 
-      userEvent.clear(description);
-      userEvent.paste(description, 'My new description');
+    expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
+  });
 
-      await waitFor(() => {
-        expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
-      });
-    });
+  it('it changes the description', async () => {
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
 
-    it('shows an error when description is empty', async () => {
-      appMockRender.render(
-        <MockHookWrapperComponent>
-          <Description {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
+    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+    userEvent.clear(description);
+    userEvent.paste(description, 'My new description');
 
-      userEvent.clear(description);
-      userEvent.paste(description, '  ');
-
-      expect(await screen.findByText('A description is required.')).toBeInTheDocument();
-    });
-
-    it('shows an error when description is too long', async () => {
-      const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
-
-      appMockRender.render(
-        <MockHookWrapperComponent>
-          <Description {...defaultProps} />
-        </MockHookWrapperComponent>
-      );
-
-      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
-
-      userEvent.paste(description, longDescription);
-
-      expect(
-        await screen.findByText(
-          'The length of the description is too long. The maximum length is 30000 characters.'
-        )
-      ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
     });
   });
-}
+
+  it('shows an error when description is empty', async () => {
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+
+    userEvent.clear(description);
+    userEvent.paste(description, '  ');
+
+    expect(await screen.findByText('A description is required.')).toBeInTheDocument();
+  });
+
+  it('shows an error when description is too long', async () => {
+    const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+    appMockRender.render(
+      <MockHookWrapperComponent>
+        <Description {...defaultProps} />
+      </MockHookWrapperComponent>
+    );
+
+    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+
+    userEvent.paste(description, longDescription);
+
+    expect(
+      await screen.findByText(
+        'The length of the description is too long. The maximum length is 30000 characters.'
+      )
+    ).toBeInTheDocument();
+  });
+});
