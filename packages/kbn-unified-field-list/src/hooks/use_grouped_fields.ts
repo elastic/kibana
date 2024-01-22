@@ -307,11 +307,15 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       },
     };
 
-    // ToDO: this is not a good check for ESQL, should change it
-    // do not show empty field accordion if there is no existence information
-    // if (fieldsExistenceInfoUnavailable) {
-    //   delete fieldGroupDefinitions.EmptyFields;
-    // }
+    // dataViewId is null for text based queries
+    // the fieldsExistenceInfoUnavailable check should happen only for dataview based
+    // for textbased queries, rely on the empty fields length
+    if (
+      (fieldsExistenceInfoUnavailable && dataViewId) ||
+      (!dataViewId && !groupedFields.emptyFields.length)
+    ) {
+      delete fieldGroupDefinitions.EmptyFields;
+    }
 
     if (onOverrideFieldGroupDetails) {
       fieldGroupDefinitions = Object.keys(fieldGroupDefinitions).reduce<FieldListGroups<T>>(

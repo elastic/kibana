@@ -125,7 +125,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
         aliases: ['dropNulls'],
         types: ['boolean'],
         help: i18n.translate('data.search.essql.dropNull.help', {
-          defaultMessage: 'If true adds the null columns to a separate property',
+          defaultMessage: 'If true adds all_columns in a separate property',
         }),
       },
     },
@@ -248,6 +248,9 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               meta: { type: normalizeType(type) },
             })) ?? [];
 
+          // all_columns in the response means that there is a separation between
+          // columns with data and empty columns
+          // columns contain only columns with data while all_columns everything
           const difference =
             body.all_columns?.filter((col1) => {
               return !body.columns.some((col2) => {
