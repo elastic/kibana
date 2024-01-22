@@ -15,7 +15,7 @@ export const validateCustomFieldTypesInRequest = ({
   requestCustomFields,
   originalCustomFields,
 }: {
-  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes }>;
+  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes; label: string }>;
   originalCustomFields: Array<{ key: string; type: CustomFieldTypes }>;
 }) => {
   if (!Array.isArray(requestCustomFields) || !originalCustomFields.length) {
@@ -28,7 +28,7 @@ export const validateCustomFieldTypesInRequest = ({
     const originalField = originalCustomFields.find((item) => item.key === requestField.key);
 
     if (originalField && originalField.type !== requestField.type) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`'${requestField.label}'`);
     }
   });
 
@@ -49,6 +49,7 @@ export const validateRequiredCustomFieldsInRequest = ({
     key: string;
     required: boolean;
     defaultValue?: string | boolean | null;
+    label: string;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -62,7 +63,7 @@ export const validateRequiredCustomFieldsInRequest = ({
       requestField.required &&
       (requestField.defaultValue === undefined || requestField.defaultValue === null)
     ) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`'${requestField.label}'`);
     }
   });
 
@@ -83,6 +84,7 @@ export const validateOptionalCustomFieldsInRequest = ({
     key: string;
     required: boolean;
     defaultValue?: unknown;
+    label: string;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -93,7 +95,7 @@ export const validateOptionalCustomFieldsInRequest = ({
 
   requestCustomFields.forEach((requestField) => {
     if (!requestField.required && requestField.defaultValue !== undefined) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`'${requestField.label}'`);
     }
   });
 

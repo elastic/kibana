@@ -333,7 +333,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'wrong_type_key',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: false,
               },
@@ -343,7 +343,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: wrong_type_key'
+        "Failed to get patch configure in route: Error: Invalid custom field types in request for the following keys: 'text label'"
       );
     });
 
@@ -356,7 +356,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'missing_default',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: true,
               },
@@ -366,7 +366,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: The following required custom fields are missing the default value: missing_default'
+        "Failed to get patch configure in route: Error: The following required custom fields are missing the default value: 'text label'"
       );
     });
 
@@ -379,7 +379,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'extra_default',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: false,
                 defaultValue: 'foobar',
@@ -390,7 +390,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: extra_default'
+        "Failed to get patch configure in route: Error: The following optional custom fields try to define a default value: 'text label'"
       );
     });
   });
@@ -463,7 +463,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'missing_default',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: true,
               },
@@ -473,7 +473,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to create case configuration: Error: The following required custom fields are missing the default value: missing_default'
+        "Failed to create case configuration: Error: The following required custom fields are missing the default value: 'text label'"
       );
     });
 
@@ -485,7 +485,7 @@ describe('client', () => {
             customFields: [
               {
                 key: 'extra_default',
-                label: 'text',
+                label: 'text label',
                 type: CustomFieldTypes.TEXT,
                 required: false,
                 defaultValue: 'foobar',
@@ -496,7 +496,7 @@ describe('client', () => {
           casesClientInternal
         )
       ).rejects.toThrow(
-        'Failed to create case configuration: Error: The following optional custom fields try to define a default value: extra_default'
+        "Failed to create case configuration: Error: The following optional custom fields try to define a default value: 'text label'"
       );
     });
   });

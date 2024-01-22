@@ -18,16 +18,17 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TEXT },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TEXT, label: 'label 2' },
           ],
+
           originalCustomFields: [
             { key: '1', type: CustomFieldTypes.TEXT },
             { key: '2', type: CustomFieldTypes.TOGGLE },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 1,2"`
+        `"Invalid custom field types in request for the following keys: 'label 1','label 2'"`
       );
     });
 
@@ -35,16 +36,17 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TOGGLE },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TOGGLE, label: 'label 2' },
           ],
+
           originalCustomFields: [
             { key: '1', type: CustomFieldTypes.TEXT },
             { key: '2', type: CustomFieldTypes.TOGGLE },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Invalid custom field types in request for the following keys: 1"`
+        `"Invalid custom field types in request for the following keys: 'label 1'"`
       );
     });
 
@@ -63,8 +65,8 @@ describe('validators', () => {
       expect(() =>
         validateCustomFieldTypesInRequest({
           requestCustomFields: [
-            { key: '1', type: CustomFieldTypes.TOGGLE },
-            { key: '2', type: CustomFieldTypes.TEXT },
+            { key: '1', type: CustomFieldTypes.TOGGLE, label: 'label 1' },
+            { key: '2', type: CustomFieldTypes.TEXT, label: 'label 2' },
           ],
           originalCustomFields: [],
         })
@@ -77,8 +79,8 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: false },
-            { key: '2', required: false },
+            { key: '1', required: false, label: 'label 1' },
+            { key: '2', required: false, label: 'label 2' },
           ],
         })
       ).not.toThrow();
@@ -88,8 +90,8 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, defaultValue: false },
-            { key: '2', required: true, defaultValue: 'foobar' },
+            { key: '1', required: true, defaultValue: false, label: 'label 1' },
+            { key: '2', required: true, defaultValue: 'foobar', label: 'label 2' },
           ],
         })
       ).not.toThrow();
@@ -107,7 +109,7 @@ describe('validators', () => {
     it('does not throw an error for other falsy defaultValues (empty string)', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: true, defaultValue: '' }],
+          requestCustomFields: [{ key: '1', required: true, defaultValue: '', label: 'label' }],
         })
       ).not.toThrow();
     });
@@ -116,13 +118,13 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, defaultValue: null },
-            { key: '2', required: true },
-            { key: '3', required: false },
+            { key: '1', required: true, defaultValue: null, label: 'label 1' },
+            { key: '2', required: true, label: 'label 2' },
+            { key: '3', required: false, label: 'label 3' },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following required custom fields are missing the default value: 1,2"`
+        `"The following required custom fields are missing the default value: 'label 1','label 2'"`
       );
     });
   });
@@ -132,8 +134,8 @@ describe('validators', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: false },
-            { key: '2', required: false },
+            { key: '1', required: false, label: 'label 1' },
+            { key: '2', required: false, label: 'label 2' },
           ],
         })
       ).not.toThrow();
@@ -143,8 +145,8 @@ describe('validators', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: true, defaultValue: false },
-            { key: '2', required: true, defaultValue: 'foobar' },
+            { key: '1', required: true, defaultValue: false, label: 'label 1' },
+            { key: '2', required: true, defaultValue: 'foobar', label: 'label 2' },
           ],
         })
       ).not.toThrow();
@@ -154,42 +156,44 @@ describe('validators', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
           requestCustomFields: [
-            { key: '1', required: false, defaultValue: false },
-            { key: '2', required: false, defaultValue: 'foobar' },
+            { key: '1', required: false, defaultValue: false, label: 'label 1' },
+            { key: '2', required: false, defaultValue: 'foobar', label: 'label 2' },
           ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 1,2"`
+        `"The following optional custom fields try to define a default value: 'label 1','label 2'"`
       );
     });
 
     it('throws an error for other falsy defaultValues (null)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, defaultValue: null }],
+          requestCustomFields: [
+            { key: '1', required: false, defaultValue: null, label: 'label 1' },
+          ],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 1"`
+        `"The following optional custom fields try to define a default value: 'label 1'"`
       );
     });
 
     it('throws an error for other falsy defaultValues (0)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, defaultValue: 0 }],
+          requestCustomFields: [{ key: '1', required: false, defaultValue: 0, label: 'label 1' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 1"`
+        `"The following optional custom fields try to define a default value: 'label 1'"`
       );
     });
 
     it('throws an error for other falsy defaultValues (empty string)', () => {
       expect(() =>
         validateOptionalCustomFieldsInRequest({
-          requestCustomFields: [{ key: '1', required: false, defaultValue: '' }],
+          requestCustomFields: [{ key: '1', required: false, defaultValue: '', label: 'label 1' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following optional custom fields try to define a default value: 1"`
+        `"The following optional custom fields try to define a default value: 'label 1'"`
       );
     });
   });
