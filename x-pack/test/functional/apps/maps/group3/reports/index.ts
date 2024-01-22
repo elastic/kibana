@@ -64,7 +64,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
       await PageObjects.reporting.openImageReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
+      await PageObjects.reporting.clickGeneratePngReportButton();
 
       const percentDiff = await measurePngDifference('geo_map_report');
       expect(percentDiff).to.be.lessThan(0.03);

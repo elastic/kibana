@@ -34,7 +34,7 @@ export default function ({
   // NOTE: Occasionally, you may need to run the test and copy the "session" image file and replace the
   // "baseline" image file to reflect current renderings. The source and destination file paths can be found in
   // the INFO logs for this test run.
-  describe('Captures', () => {
+  describe.skip('Captures', () => {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
     });

@@ -391,7 +391,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
               <EuiRadioGroup
                 options={[
                   { id: 'printablePdfV2', label: 'PDF' },
-                  { id: 'pngV2', label: 'PNG' },
+                  { id: 'pngV2', label: 'PNG', 'data-test-subj': 'pngReportOption' },
                 ]}
                 onChange={(id) => {
                   setSelectedRadio(id as Exclude<AllowedImageExportType, 'printablePdf'>);

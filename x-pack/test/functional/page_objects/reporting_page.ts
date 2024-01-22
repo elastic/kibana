@@ -215,4 +215,10 @@ export class ReportingPageObject extends FtrService {
     this.log.debug(`baselineReportPath (${fullPath})`);
     return fullPath;
   }
+
+  async clickGeneratePngReportButton() {
+    // image report modal is open but need to generate PNG
+    await this.testSubjects.click('pngReportOption');
+    await this.testSubjects.click('generateReportButton');
+  }
 }

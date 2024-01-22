@@ -16,7 +16,7 @@ export default function ({
   getService,
   updateBaselines,
 }: FtrProviderContext & { updateBaselines: boolean }) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const browser = getService('browser');
@@ -97,6 +97,7 @@ export default function ({
         await PageObjects.dashboard.saveDashboard('My PDF Dashboard');
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
     });
 
@@ -146,6 +147,7 @@ export default function ({
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
     });
 

@@ -74,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
         await PageObjects.share.openShareMenuItem('CSVDownload');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
     });
 

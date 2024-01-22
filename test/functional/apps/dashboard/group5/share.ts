@@ -60,6 +60,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl(mode)).to.not.contain('filters');
+        await PageObjects.share.closeShareModal();
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {

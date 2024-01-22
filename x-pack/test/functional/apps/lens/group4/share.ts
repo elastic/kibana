@@ -18,10 +18,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
     });
-    afterEach(async () => {
-      // modal blocks clicking outside the modal to close it
-      await PageObjects.share.closeShareModal();
-    });
 
     after(async () => {
       await PageObjects.lens.setCSVDownloadDebugFlag(false);
@@ -42,6 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: '@timestamp',
       });
       expect(await PageObjects.lens.isShareable()).to.eql(false);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should make the share button avaialble as soon as a valid configuration is generated', async () => {
@@ -52,6 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       expect(await PageObjects.lens.isShareable()).to.eql(true);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should enable both download and URL sharing for valid configuration', async () => {
@@ -59,6 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
       expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
+      await PageObjects.share.closeShareModal();
     });
 
     it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
@@ -66,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const options = await PageObjects.lens.getAvailableUrlSharingOptions();
       expect(options).eql(['snapshot']);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should basically work for snapshot', async () => {
@@ -82,6 +82,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should provide also saved object url sharing if the visualization is shared', async () => {
@@ -90,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const options = await PageObjects.lens.getAvailableUrlSharingOptions();
       expect(options).eql(['snapshot', 'savedObject']);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should preserve filter and query when sharing', async () => {
@@ -110,6 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await queryBar.getQueryString()).to.be('host.keyword www.elastic.co');
       await browser.closeCurrentWindow();
       await browser.switchToWindow(lensWindowHandler);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should be able to download CSV data of the current visualization', async () => {
@@ -119,6 +122,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const csv = await PageObjects.lens.getCSVContent();
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);
+      await PageObjects.share.closeShareModal();
     });
 
     it('should be able to download CSV of multi layer visualization', async () => {
@@ -141,6 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const csv = await PageObjects.lens.getCSVContent();
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(2);
+      await PageObjects.share.closeShareModal();
     });
   });
 }
