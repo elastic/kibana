@@ -7,8 +7,8 @@
  */
 
 import expect from '@kbn/expect';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 export class DiscoverPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
@@ -215,12 +215,26 @@ export class DiscoverPageObject extends FtrService {
     );
   }
 
-  public async chooseBreakdownField(field: string) {
-    await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  public async chooseBreakdownField(field: string, value?: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('unifiedHistogramBreakdownSelectorButton');
+      await this.testSubjects.existOrFail('unifiedHistogramBreakdownSelectorSelectable');
+    });
+
+    await (
+      await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
+    ).type(field);
+
+    const option = await this.find.byCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
+        value ?? field
+      }"]`
+    );
+    await option.click();
   }
 
   public async clearBreakdownField() {
-    await this.comboBox.clear('unifiedHistogramBreakdownFieldSelector');
+    await this.chooseBreakdownField('No breakdown', '__EMPTY_SELECTOR_OPTION__');
   }
 
   public async chooseLensChart(chart: string) {
@@ -248,36 +262,52 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
-    await this.testSubjects.moveMouseTo('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.exists('unifiedHistogramChartToggle');
-    await this.testSubjects.click('unifiedHistogramChartToggle');
+    if (await this.isChartVisible()) {
+      await this.testSubjects.click('dscHideHistogramButton');
+    } else {
+      await this.testSubjects.click('dscShowHistogramButton');
+    }
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async openHistogramPanel() {
+    await this.testSubjects.click('dscShowHistogramButton');
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async closeHistogramPanel() {
+    await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getChartInterval() {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
-    const selectedOption = await this.find.byCssSelector(`.unifiedHistogramIntervalSelected`);
-    return selectedOption.getVisibleText();
+    const button = await this.testSubjects.find('unifiedHistogramTimeIntervalSelectorButton');
+    return await button.getAttribute('data-selected-value');
   }
 
   public async getChartIntervalWarningIcon() {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
     await this.header.waitUntilLoadingHasFinished();
-    return await this.find.existsByCssSelector('.euiToolTipAnchor');
+    return await this.find.existsByCssSelector(
+      '[data-test-subj="unifiedHistogramRendered"] .euiToolTipAnchor'
+    );
   }
 
-  public async setChartInterval(interval: string) {
-    await this.testSubjects.click('unifiedHistogramChartOptionsToggle');
-    await this.testSubjects.click('unifiedHistogramTimeIntervalPanel');
-    await this.testSubjects.click(`unifiedHistogramTimeInterval-${interval}`);
+  public async setChartInterval(intervalTitle: string) {
+    await this.retry.try(async () => {
+      await this.testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
+      await this.testSubjects.existOrFail('unifiedHistogramTimeIntervalSelectorSelectable');
+    });
+
+    const option = await this.find.byCssSelector(
+      `[data-test-subj="unifiedHistogramTimeIntervalSelectorSelectable"] .euiSelectableListItem[title="${intervalTitle}"]`
+    );
+    await option.click();
     return await this.header.waitUntilLoadingHasFinished();
   }
 
   public async getHitCount() {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    return await this.testSubjects.getVisibleText('discoverQueryHits');
   }
 
   public async getHitCountInt() {
@@ -398,8 +428,12 @@ export class DiscoverPageObject extends FtrService {
     return await Promise.all(marks.map((mark) => mark.getVisibleText()));
   }
 
-  public async toggleSidebarCollapse() {
-    return await this.testSubjects.click('unifiedFieldListSidebar__toggle');
+  public async openSidebar() {
+    await this.testSubjects.click('dscShowSidebarButton');
+
+    await this.retry.waitFor('sidebar to appear', async () => {
+      return await this.isSidebarPanelOpen();
+    });
   }
 
   public async closeSidebar() {
@@ -408,6 +442,13 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
       await this.testSubjects.missingOrFail('fieldList');
     });
+  }
+
+  public async isSidebarPanelOpen() {
+    return (
+      (await this.testSubjects.exists('fieldList')) &&
+      (await this.testSubjects.exists('unifiedFieldListSidebar__toggle-collapse'))
+    );
   }
 
   public async editField(field: string) {

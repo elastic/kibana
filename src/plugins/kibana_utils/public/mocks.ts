@@ -12,9 +12,7 @@ export type Setup = jest.Mocked<KibanaUtilsPublicSetup>;
 export type Start = jest.Mocked<KibanaUtilsPublicStart>;
 
 const createSetupContract = (): Setup => {
-  return {
-    setVersion: jest.fn(),
-  };
+  return undefined;
 };
 
 const createStartContract = (): Start => {

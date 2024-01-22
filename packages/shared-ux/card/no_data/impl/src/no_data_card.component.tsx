@@ -56,6 +56,7 @@ export const NoDataCard = ({
   description: descriptionProp,
   canAccessFleet,
   button,
+  href,
   ...props
 }: Props) => {
   const styles = NoDataCardStyles();
@@ -72,7 +73,11 @@ export const NoDataCard = ({
     }
 
     // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || titleProp || defaultTitle}</EuiButton>;
+    return (
+      <EuiButton fill href={href} data-test-subj="noDataDefaultFooterAction">
+        {button || titleProp || defaultTitle}
+      </EuiButton>
+    );
   };
 
   const title = () => {
@@ -103,6 +108,7 @@ export const NoDataCard = ({
       description={description()}
       footer={footer()}
       isDisabled={!canAccessFleet}
+      href={href}
       image={<Image />}
       {...props}
     />

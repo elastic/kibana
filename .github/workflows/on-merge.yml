@@ -24,7 +24,7 @@ jobs:
       )
     steps:
       - name: Checkout Actions
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           repository: 'elastic/kibana-github-actions'
           ref: main

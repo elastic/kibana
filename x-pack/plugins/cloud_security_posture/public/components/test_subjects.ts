@@ -44,6 +44,11 @@ export const CSP_GROUPING = 'cloudSecurityGrouping';
 export const CSP_GROUPING_LOADING = 'cloudSecurityGroupingLoading';
 export const CSP_FINDINGS_COMPLIANCE_SCORE = 'cloudSecurityFindingsComplianceScore';
 
+export const CSP_FIELDS_SELECTOR_MODAL = 'cloudSecurityFieldsSelectorModal';
+export const CSP_FIELDS_SELECTOR_OPEN_BUTTON = 'cloudSecurityFieldsSelectorOpenButton';
+export const CSP_FIELDS_SELECTOR_RESET_BUTTON = 'cloudSecurityFieldsSelectorResetButton';
+export const CSP_FIELDS_SELECTOR_CLOSE_BUTTON = 'cloudSecurityFieldsSelectorCloseButton';
+
 export const AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'aws-credentials-type-selector';
 export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
   CLOUDFORMATION: 'aws-cloudformation-setup-option',

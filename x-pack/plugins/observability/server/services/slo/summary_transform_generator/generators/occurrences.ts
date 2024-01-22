@@ -127,6 +127,7 @@ export function generateSummaryTransformForOccurrences(slo: SLO): TransformPutTr
       deduce_mappings: false,
       unattended: true,
     },
+    defer_validation: true,
     _meta: {
       version: SLO_RESOURCES_VERSION,
       managed: true,

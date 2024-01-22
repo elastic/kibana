@@ -73,6 +73,7 @@ import { omit, set } from 'lodash';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import { responseActionsClientMock } from '../../services/actions/clients/mocks';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
+import { sentinelOneMock } from '../../services/actions/clients/sentinelone/mock';
 
 jest.mock('../../services', () => {
   const realModule = jest.requireActual('../../services');
@@ -1184,7 +1185,7 @@ describe('Response actions', () => {
       };
 
       httpHandlerContextMock.actions = Promise.resolve({
-        getActionsClient: () => responseActionsClientMock.createConnectorActionsClient(),
+        getActionsClient: () => sentinelOneMock.createConnectorActionsClient(),
       } as unknown as jest.Mocked<ActionsApiRequestHandlerContext>);
 
       // Set the esClient to be used in the handler context

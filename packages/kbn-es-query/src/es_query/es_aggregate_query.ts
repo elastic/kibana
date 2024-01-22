@@ -5,9 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
 import type { Query, AggregateQuery } from '../filters';
 
 type Language = keyof AggregateQuery;
+
+const DEFAULT_ESQL_LIMIT = 500;
 
 // Checks if the query is of type Query
 export function isOfQueryType(arg?: Query | AggregateQuery): arg is Query {
@@ -65,6 +68,17 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
     return matches[1]?.trim();
   }
   return '';
+}
+
+export function getLimitFromESQLQuery(esql: string): number {
+  const limitCommands = esql.match(new RegExp(/LIMIT\s[0-9]+/, 'ig'));
+  if (!limitCommands) {
+    return DEFAULT_ESQL_LIMIT;
+  }
+
+  const lastIndex = limitCommands.length - 1;
+  const split = limitCommands[lastIndex].split(' ');
+  return parseInt(split[1], 10);
 }
 
 export function cleanupESQLQueryForLensSuggestions(esql?: string): string {

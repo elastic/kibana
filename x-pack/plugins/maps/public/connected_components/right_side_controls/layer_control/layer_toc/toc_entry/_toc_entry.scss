@@ -128,7 +128,7 @@
   background-color: $euiColorEmptyShade;
   border: $euiBorderThin;
   color: $euiTextColor;
-  border-radius: $euiBorderRadius / 2;
+  border-radius: calc($euiBorderRadius / 2);
   height: $euiSize;
   width: $euiSizeXL;
   line-height: $euiSize;

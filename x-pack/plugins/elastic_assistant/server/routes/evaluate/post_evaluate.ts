@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
+import { IRouter, KibanaRequest } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -29,6 +29,7 @@ import {
 } from '../../lib/model_evaluator/output_index/utils';
 import { fetchLangSmithDataset, getConnectorName, getLangSmithTracer, getLlmType } from './utils';
 import { RequestBody } from '../../lib/langchain/types';
+import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 
 /**
  * To support additional Agent Executors from the UI, add them to this map
@@ -54,8 +55,21 @@ export const postEvaluateRoute = (
       },
     },
     async (context, request, response) => {
-      // TODO: Limit route based on experimental feature
-      const logger: Logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
+
+      // Validate evaluation feature is enabled
+      const pluginName = getPluginNameFromRequest({
+        request,
+        defaultPluginName: DEFAULT_PLUGIN_NAME,
+        logger,
+      });
+      const registeredFeatures = assistantContext.getRegisteredFeatures(pluginName);
+      if (!registeredFeatures.assistantModelEvaluation) {
+        return response.notFound();
+      }
+
       try {
         const evaluationId = uuidv4();
         const {
@@ -112,7 +126,8 @@ export const postEvaluateRoute = (
         // Default ELSER model
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
 
-        // Skeleton request to satisfy `subActionParams` spread in `ActionsClientLlm`
+        // Skeleton request from route to pass to the agents
+        // params will be passed to the actions executor
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
           body: {
@@ -127,7 +142,8 @@ export const postEvaluateRoute = (
             },
             replacements: {},
             size: DEFAULT_SIZE,
-            assistantLangChain: true,
+            isEnabledKnowledgeBase: true,
+            isEnabledRAGAlerts: true,
           },
         };
 
@@ -146,7 +162,7 @@ export const postEvaluateRoute = (
               agentEvaluator: (langChainMessages, exampleId) =>
                 AGENT_EXECUTOR_MAP[agentName]({
                   actions,
-                  assistantLangChain: true,
+                  isEnabledKnowledgeBase: true,
                   assistantTools,
                   connectorId,
                   esClient,
@@ -156,6 +172,7 @@ export const postEvaluateRoute = (
                   logger,
                   request: skeletonRequest,
                   kbResource: ESQL_RESOURCE,
+                  telemetry,
                   traceOptions: {
                     exampleId,
                     projectName,

@@ -16,8 +16,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const endpointTestResources = getService('endpointTestResources');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/171481
-  describe.skip('When on the Trusted Apps list', function () {
+  describe('When on the Trusted Apps list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
@@ -34,8 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.missingOrFail('header-page-title');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171481
-    it.skip('should be able to add a new trusted app and remove it', async () => {
+    it('should be able to add a new trusted app and remove it', async () => {
       const SHA256 = 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476';
 
       // Add it

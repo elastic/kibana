@@ -19,6 +19,7 @@
     "@kbn/monaco",
     "@kbn/i18n-react",
     "@kbn/config-schema",
+    "@kbn/code-editor",
   ],
   "exclude": [
     "target/**/*",

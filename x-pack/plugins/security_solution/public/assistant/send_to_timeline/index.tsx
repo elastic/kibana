@@ -36,6 +36,7 @@ import {
 } from '../../timelines/store/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -59,6 +60,8 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
   const { showAssistantOverlay } = useAssistantContext();
   const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer } = useDiscoverInTimelineContext();
+
+  const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
 
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
@@ -225,6 +228,13 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     ? ACTION_INVESTIGATE_IN_TIMELINE
     : ACTION_CANNOT_INVESTIGATE_IN_TIMELINE;
   const isDisabled = !isTimelineBottomBarVisible;
+
+  if (
+    (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') &&
+    isEsqlTabInTimelineDisabled
+  ) {
+    return null;
+  }
 
   return asEmptyButton ? (
     <EuiButtonEmpty

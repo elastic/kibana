@@ -15,7 +15,7 @@ import { TransformListRow } from '../../../../common';
 import { useCloneAction } from '../action_clone';
 import { useDeleteAction, DeleteActionModal } from '../action_delete';
 import { useDiscoverAction } from '../action_discover';
-import { EditTransformFlyout } from '../edit_transform_flyout';
+import { EditTransformFlyout } from '../../../edit_transform';
 import { useEditAction } from '../action_edit';
 import { useResetAction, ResetActionModal } from '../action_reset';
 import { useScheduleNowAction } from '../action_schedule_now';

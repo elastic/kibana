@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
 import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
@@ -1187,6 +1187,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
+      await el.moveMouseTo({ xOffset: 0, yOffset: -20 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       await el.click();
       let buttonEl;
       if (direction !== 'none') {
@@ -1945,6 +1946,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.closePaletteEditor();
 
       await this.closeDimensionEditor();
+    },
+
+    async getWorkspaceVisContainerDimensions() {
+      const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
+      const [width, height] = await Promise.all([
+        visContainer.getComputedStyle('width'),
+        visContainer.getComputedStyle('height'),
+      ]);
+
+      return { width, height };
+    },
+
+    async getWorkspaceVisContainerStyles() {
+      const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
+      const [maxWidth, maxHeight, minWidth, minHeight, aspectRatio] = await Promise.all([
+        visContainer.getComputedStyle('max-width'),
+        visContainer.getComputedStyle('max-height'),
+        visContainer.getComputedStyle('min-width'),
+        visContainer.getComputedStyle('min-height'),
+        visContainer.getComputedStyle('aspect-ratio'),
+      ]);
+
+      return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
     },
   });
 }

@@ -12,7 +12,7 @@ import { SHOW_RELATED_INTEGRATIONS_SETTING } from '../../../../../../common/cons
 import { PopoverItems } from '../../../../../common/components/popover_items';
 import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import { IntegrationsPopover } from '../../../../../detections/components/rules/related_integrations/integrations_popover';
-import { SeverityBadge } from '../../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../../common/components/severity_badge';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 import type { Rule } from '../../../../rule_management/logic';
 import { useUserData } from '../../../../../detections/components/user_info';

@@ -34,6 +34,7 @@ export const registerFunctions: ChatRegistrationFunction = async ({
     resources,
     signal,
   };
+
   return client.getKnowledgeBaseStatus().then((response) => {
     const isReady = response.ready;
 

@@ -7,7 +7,7 @@
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import type { CreateChatCompletionResponse } from 'openai';
+import type OpenAI from 'openai';
 import { Readable } from 'stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
@@ -38,7 +38,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }),
     t.partial({ query: t.type({ stream: toBooleanRt }) }),
   ]),
-  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
+  handler: async (resources): Promise<Readable | OpenAI.ChatCompletion> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
@@ -93,7 +93,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       }),
     ]),
   }),
-  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
+  handler: async (resources): Promise<Readable | OpenAI.Chat.ChatCompletion> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });

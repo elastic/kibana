@@ -21,12 +21,14 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
 import { useFetchIndices } from '../../hooks/use_fetch_indices';
-import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { BehaviorSubject } from 'rxjs';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -34,7 +36,6 @@ jest.mock('react-router-dom', () => ({
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('../../hooks/use_license');
 jest.mock('../../hooks/use_fetch_indices');
 jest.mock('../../hooks/use_fetch_data_views');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
@@ -51,7 +52,6 @@ jest.mock('../../utils/kibana_react', () => ({
 }));
 
 const useKibanaMock = useKibana as jest.Mock;
-const useLicenseMock = useLicense as jest.Mock;
 const useFetchIndicesMock = useFetchIndices as jest.Mock;
 const useFetchDataViewsMock = useFetchDataViews as jest.Mock;
 const useFetchSloMock = useFetchSloDetails as jest.Mock;
@@ -65,8 +65,9 @@ const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 const mockNavigate = jest.fn();
 const mockBasePathPrepend = jest.fn();
+const licenseMock = licensingMock.createLicenseMock();
 
-const mockKibana = () => {
+const mockKibana = (license: ILicense | null = licenseMock) => {
   useKibanaMock.mockReturnValue({
     services: {
       theme: {},
@@ -82,10 +83,13 @@ const mockKibana = () => {
         dataViews: {
           find: jest.fn().mockReturnValue([]),
           get: jest.fn().mockReturnValue([]),
+          getDefault: jest.fn(),
         },
       },
       dataViews: {
-        create: jest.fn().mockResolvedValue(42),
+        create: jest.fn().mockResolvedValue({
+          getIndexPattern: jest.fn().mockReturnValue('some-index'),
+        }),
       },
       docLinks: {
         links: {
@@ -110,16 +114,21 @@ const mockKibana = () => {
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {
         get: () => {},
       },
       unifiedSearch: {
+        ui: {
+          QueryStringInput: () => <div>Query String Input</div>,
+        },
         autocomplete: {
           hasQuerySuggestions: () => {},
         },
+      },
+      licensing: {
+        license$: new BehaviorSubject(license),
       },
     },
   });
@@ -181,7 +190,7 @@ describe('SLO Edit Page', () => {
         hasWriteCapabilities: true,
         hasReadCapabilities: true,
       });
-      useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
+      licenseMock.hasAtLeast.mockReturnValue(false);
     });
 
     it('navigates to the SLO List page', async () => {
@@ -198,13 +207,36 @@ describe('SLO Edit Page', () => {
     });
   });
 
+  describe('when the license is null', () => {
+    beforeEach(() => {
+      useCapabilitiesMock.mockReturnValue({
+        hasWriteCapabilities: true,
+        hasReadCapabilities: true,
+      });
+      mockKibana(null);
+    });
+
+    it('does not navigate to the SLO List page', async () => {
+      jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
+      jest
+        .spyOn(Router, 'useLocation')
+        .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+
+      useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
+
+      render(<SloEditPage />);
+
+      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.observability.slos));
+    });
+  });
+
   describe('when the correct license is found', () => {
     beforeEach(() => {
       useCapabilitiesMock.mockReturnValue({
         hasWriteCapabilities: true,
         hasReadCapabilities: true,
       });
-      useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      licenseMock.hasAtLeast.mockReturnValue(true);
     });
 
     describe('with no write permission', () => {

@@ -83,10 +83,14 @@ export {
   EMBEDDABLE_FLAMEGRAPH,
   EMBEDDABLE_FUNCTIONS,
   EMBEDDABLE_PROFILING_SEARCH_BAR,
+  EMBEDDABLE_STACK_TRACES,
   EmbeddableFlamegraph,
   EmbeddableFunctions,
   EmbeddableProfilingSearchBar,
+  EmbeddableStackTraces,
   type EmbeddableProfilingSearchBarProps,
 } from './components/profiling/embeddables';
 
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
+export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';
+export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';

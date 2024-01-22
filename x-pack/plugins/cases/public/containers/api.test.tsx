@@ -84,7 +84,8 @@ const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../common/lib/kibana');
 
 const fetchMock = jest.fn();
-mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
+const postMock = jest.fn();
+mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock, post: postMock } });
 
 describe('Cases API', () => {
   describe('deleteCases', () => {
@@ -1051,22 +1052,43 @@ describe('Cases API', () => {
 
   describe('getFeatureIds', () => {
     beforeEach(() => {
-      fetchMock.mockClear();
-      fetchMock.mockResolvedValue(['siem', 'observability']);
+      postMock.mockClear();
+      postMock.mockResolvedValue({
+        consumer: {
+          buckets: [{ key: 'observability', doc_count: 1 }],
+        },
+        producer: {
+          buckets: [],
+        },
+        ruleTypeIds: {
+          buckets: [{ key: 'apm.threshold', doc_count: 1 }],
+        },
+      });
     });
 
     it('should be called with correct check url, method, signal', async () => {
       const resp = await getFeatureIds({
-        query: { registrationContext: ['security', 'observability.logs'] },
+        query: { ids: { values: ['alert_id_1', 'alert_id_2'] } },
         signal: abortCtrl.signal,
       });
 
-      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
-        query: { registrationContext: ['security', 'observability.logs'] },
+      expect(postMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/find`, {
+        body: '{"aggs":{"consumer":{"terms":{"field":"kibana.alert.rule.consumer","size":100}},"producer":{"terms":{"field":"kibana.alert.rule.producer","size":100}},"ruleTypeIds":{"terms":{"field":"kibana.alert.rule.rule_type_id","size":100}}},"query":{"ids":{"values":["alert_id_1","alert_id_2"]}}}',
+        method: 'POST',
         signal: abortCtrl.signal,
       });
 
-      expect(resp).toEqual(['siem', 'observability']);
+      expect(resp).toEqual({
+        consumer: {
+          buckets: [{ key: 'observability', doc_count: 1 }],
+        },
+        producer: {
+          buckets: [],
+        },
+        ruleTypeIds: {
+          buckets: [{ key: 'apm.threshold', doc_count: 1 }],
+        },
+      });
     });
   });
 

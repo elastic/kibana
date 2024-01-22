@@ -10,8 +10,9 @@ import { groupBy } from 'lodash';
 import { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { type CoreStart } from '@kbn/core-lifecycle-browser';
-import { type DataView, type DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
+import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
 import {
   type FieldListGroups,
   type FieldsGroup,
@@ -41,6 +42,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onOverrideFieldGroupDetails?: OverrideFieldGroupDetails;
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
+  getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -52,6 +54,8 @@ export interface GroupedFieldsResult<T extends FieldListItem> {
     fieldsExistInIndex: boolean;
     screenReaderDescriptionId?: string;
   };
+  allFieldsModified: T[] | null; // `null` is for loading indicator
+  hasNewFields: boolean;
 }
 
 export function useGroupedFields<T extends FieldListItem = DataViewField>({
@@ -65,6 +69,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onOverrideFieldGroupDetails,
   onSupportedFieldFilter,
   onSelectedFieldFilter,
+  getNewFieldsBySpec,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -73,6 +78,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     getCustomFieldType,
     onSupportedFieldFilter,
   });
+
   const onFilterFieldList = fieldListFilters.onFilterField;
   const [dataView, setDataView] = useState<DataView | null>(null);
   const isAffectedByTimeFilter = Boolean(dataView?.timeFieldName);
@@ -101,6 +107,13 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     // if field existence information changed, reload the data view too
   }, [dataViewId, services.dataViews, setDataView, hasFieldDataHandler]);
 
+  const { allFieldsModified, hasNewFields } = useNewFields<T>({
+    dataView,
+    allFields,
+    getNewFieldsBySpec,
+    fieldsExistenceReader,
+  });
+
   // important when switching from a known dataViewId to no data view (like in text-based queries)
   useEffect(() => {
     if (dataView && !dataViewId) {
@@ -120,13 +133,16 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     };
 
     const selectedFields = sortedSelectedFields || [];
-    const sortedFields = [...(allFields || [])].sort(sortFields);
+
+    const sortedFields = [...(allFieldsModified || [])].sort(sortFields);
+
     const groupedFields = {
       ...getDefaultFieldGroups(),
       ...groupBy(sortedFields, (field) => {
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
         }
+
         if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
           return 'skippedFields';
         }
@@ -311,7 +327,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     return fieldGroupDefinitions;
   }, [
-    allFields,
+    allFieldsModified,
     onSupportedFieldFilter,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
@@ -381,6 +397,8 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   return {
     fieldListGroupedProps,
     fieldListFiltersProps: fieldListFilters.fieldListFiltersProps,
+    allFieldsModified,
+    hasNewFields,
   };
 }
 
