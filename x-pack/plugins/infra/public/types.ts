@@ -88,9 +88,6 @@ export interface InfraClientStartDeps {
   dataViews: DataViewsPublicPluginStart;
   discover: DiscoverStart;
   embeddable?: EmbeddableStart;
-  kibanaVersion?: string;
-  isCloudEnv: boolean;
-  isServerlessEnv: boolean;
   lens: LensPublicStart;
   logsShared: LogsSharedClientStartExports;
   ml: MlPluginStart;
@@ -105,7 +102,7 @@ export interface InfraClientStartDeps {
   uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection: UsageCollectionStart;
-  telemetry: ITelemetryClient;
+  telemetry?: ITelemetryClient;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
 }

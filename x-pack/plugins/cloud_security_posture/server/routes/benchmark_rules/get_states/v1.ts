@@ -4,13 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import {
+  ISavedObjectsRepository,
+  SavedObjectsClientContract,
+} from '@kbn/core-saved-objects-api-server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v3';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { CspBenchmarkRulesStates, CspSettings } from '../../../../common/types/rules/v4';
 import {
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
   INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
 } from '../../../../common/constants';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 export const createCspSettingObject = async (soClient: SavedObjectsClientContract) => {
   return soClient.create<CspSettings>(
@@ -23,7 +28,7 @@ export const createCspSettingObject = async (soClient: SavedObjectsClientContrac
 };
 
 export const getCspBenchmarkRulesStatesHandler = async (
-  encryptedSoClient: SavedObjectsClientContract
+  encryptedSoClient: SavedObjectsClientContract | ISavedObjectsRepository
 ): Promise<CspBenchmarkRulesStates> => {
   try {
     const getSoResponse = await encryptedSoClient.get<CspSettings>(
@@ -42,4 +47,12 @@ export const getCspBenchmarkRulesStatesHandler = async (
       `An error occurred while trying to fetch csp settings: ${error.message}, ${error.statusCode}`
     );
   }
+};
+
+export const getMutedRulesFilterQuery = async (
+  encryptedSoClient: ISavedObjectsRepository | SavedObjectsClientContract
+): Promise<QueryDslQueryContainer[]> => {
+  const rulesStates = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+  const mutedRulesFilterQuery = buildMutedRulesFilter(rulesStates);
+  return mutedRulesFilterQuery;
 };
