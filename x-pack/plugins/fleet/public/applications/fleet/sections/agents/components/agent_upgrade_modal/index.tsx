@@ -45,11 +45,11 @@ import {
   useConfig,
   sendGetAgentStatus,
   useAgentVersion,
-  differsOnlyInPatch,
 } from '../../../../hooks';
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
+  differsOnlyInPatch,
   getNotUpgradeableMessage,
   isAgentUpgradeableToVersion,
 } from '../../../../../../../common/services/is_agent_upgradeable';
