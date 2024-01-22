@@ -261,7 +261,7 @@ const getColumns = ({
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
-        /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+        /* Rule number always exists* from 8.7 */
         rule_number: rule?.metadata.benchmark.rule_number!,
         rule_id: rule?.metadata.id,
       };

@@ -116,7 +116,7 @@ export const RulesContainer = () => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
           rule.metadata.benchmark.version,
-          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+          /* Rule number always exists* from 8.7 */
           rule.metadata.benchmark.rule_number!
         );
 
