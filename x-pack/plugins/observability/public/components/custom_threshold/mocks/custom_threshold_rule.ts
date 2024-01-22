@@ -6,6 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { CustomThresholdAlertFields } from '../types';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
 import {
@@ -145,7 +147,8 @@ export const buildCustomThresholdRule = (
 };
 
 export const buildCustomThresholdAlert = (
-  alert: Partial<CustomThresholdAlert> = {}
+  alert: Partial<CustomThresholdAlert> = {},
+  alertFields: Partial<ParsedTechnicalFields & CustomThresholdAlertFields> = {}
 ): CustomThresholdAlert => {
   return {
     link: '/app/metrics/explorer',
@@ -187,6 +190,7 @@ export const buildCustomThresholdAlert = (
         alertOnGroupDisappear: true,
       },
       'kibana.alert.evaluation.values': [2500, 5],
+      'kibana.alert.group': [{ field: 'host.name', value: 'host-1' }],
       'kibana.alert.rule.category': 'Custom threshold (Beta)',
       'kibana.alert.rule.consumer': 'alerts',
       'kibana.alert.rule.execution.uuid': '62dd07ef-ead9-4b1f-a415-7c83d03925f7',
@@ -199,7 +203,7 @@ export const buildCustomThresholdAlert = (
       '@timestamp': '2023-03-28T14:40:00.000Z',
       'kibana.alert.reason': 'system.cpu.user.pct reported no data in the last 1m for ',
       'kibana.alert.action_group': 'custom_threshold.nodata',
-      tags: [],
+      tags: ['tag 1', 'tag 2'],
       'kibana.alert.duration.us': 248391946000,
       'kibana.alert.time_range': {
         gte: '2023-03-13T14:06:23.695Z',
@@ -214,6 +218,7 @@ export const buildCustomThresholdAlert = (
       'kibana.version': '8.8.0',
       'kibana.alert.flapping': false,
       'kibana.alert.rule.revision': 1,
+      ...alertFields,
     },
     active: true,
     start: 1678716383695,

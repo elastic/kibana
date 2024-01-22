@@ -6,52 +6,59 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { AppMockRenderer } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 
 import { SyncAlertsSwitch } from './sync_alerts_switch';
 
 describe('SyncAlertsSwitch', () => {
-  it('it renders', async () => {
-    const wrapper = mount(<SyncAlertsSwitch disabled={false} />);
+  let appMockRender: AppMockRenderer;
 
-    expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+  });
+
+  it('it renders', async () => {
+    appMockRender.render(<SyncAlertsSwitch disabled={false} />);
+
+    expect(await screen.findByTestId('sync-alerts-switch')).toBeInTheDocument();
   });
 
   it('it toggles the switch', async () => {
-    const wrapper = mount(<SyncAlertsSwitch disabled={false} />);
+    appMockRender.render(<SyncAlertsSwitch disabled={false} />);
 
-    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
 
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="sync-alerts-switch"]').first().prop('checked')).toBe(
-        false
-      );
-    });
-  });
-
-  it('it disables the switch', async () => {
-    const wrapper = mount(<SyncAlertsSwitch disabled={true} />);
-
-    expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).first().prop('disabled')).toBe(
-      true
+    expect(await screen.findByTestId('sync-alerts-switch')).toHaveAttribute(
+      'aria-checked',
+      'false'
     );
   });
 
-  it('it start as off', async () => {
-    const wrapper = mount(<SyncAlertsSwitch disabled={false} isSynced={false} showLabel={true} />);
+  it('it disables the switch', async () => {
+    appMockRender.render(<SyncAlertsSwitch disabled={true} />);
 
-    expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).first().text()).toBe('Off');
+    expect(await screen.findByTestId('sync-alerts-switch')).toHaveProperty('disabled', true);
+  });
+
+  it('it start as off', async () => {
+    appMockRender.render(<SyncAlertsSwitch disabled={false} isSynced={false} showLabel={true} />);
+
+    expect(await screen.findByText('Off')).toBeInTheDocument();
+    expect(screen.queryByText('On')).not.toBeInTheDocument();
   });
 
   it('it shows the correct labels', async () => {
-    const wrapper = mount(<SyncAlertsSwitch disabled={false} showLabel={true} />);
+    appMockRender.render(<SyncAlertsSwitch disabled={false} showLabel={true} />);
 
-    expect(wrapper.find('[data-test-subj="sync-alerts-switch"]').first().text()).toBe('On');
-    wrapper.find('button[data-test-subj="sync-alerts-switch"]').first().simulate('click');
+    expect(await screen.findByText('On')).toBeInTheDocument();
+    expect(screen.queryByText('Off')).not.toBeInTheDocument();
 
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).first().text()).toBe('Off');
-    });
+    userEvent.click(await screen.findByTestId('sync-alerts-switch'));
+
+    expect(await screen.findByText('Off')).toBeInTheDocument();
+    expect(screen.queryByText('On')).not.toBeInTheDocument();
   });
 });

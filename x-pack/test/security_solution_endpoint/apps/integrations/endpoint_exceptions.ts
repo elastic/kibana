@@ -28,8 +28,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const unzipPromisify = promisify(unzip);
   const comboBox = getService('comboBox');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/173184
-  describe.skip('Endpoint Exceptions', function () {
+  describe('Endpoint Exceptions', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(10 * 60_000);
