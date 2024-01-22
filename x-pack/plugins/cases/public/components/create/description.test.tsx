@@ -19,6 +19,8 @@ import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
 // FLAKY: https://github.com/elastic/kibana/issues/174133
+// FLAKY: https://github.com/elastic/kibana/issues/174134
+// FLAKY: https://github.com/elastic/kibana/issues/174135
 describe.skip('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
