@@ -41,6 +41,7 @@ import {
 } from '../data_views_service/service';
 import { replaceIndexpattern } from '../state_management/lens_slice';
 import { useApplicationUserMessages } from './get_application_user_messages';
+import { trackUiCounterEvents } from '../lens_ui_telemetry';
 
 export type SaveProps = Omit<OnSaveProps, 'onTitleDuplicate' | 'newDescription'> & {
   returnToOrigin: boolean;
@@ -111,6 +112,10 @@ export function App({
     visualization,
     annotationGroups,
   } = useLensSelector((state) => state.lens);
+
+  const activeVisualization = visualization.activeId
+    ? visualizationMap[visualization.activeId]
+    : undefined;
 
   const selectorDependencies = useMemo(
     () => ({
@@ -319,6 +324,17 @@ export function App({
   const runSave = useCallback(
     (saveProps: SaveProps, options: { saveToLibrary: boolean }) => {
       dispatch(applyChanges());
+      const prevVisState =
+        persistedDoc?.visualizationType === visualization.activeId
+          ? persistedDoc?.state.visualization
+          : undefined;
+      const telemetryEvents = activeVisualization?.getTelemetryEventsOnSave?.(
+        visualization.state,
+        prevVisState
+      );
+      if (telemetryEvents && telemetryEvents.length) {
+        trackUiCounterEvents(telemetryEvents);
+      }
       return runSaveLensVisualization(
         {
           lastKnownDoc,
@@ -351,6 +367,9 @@ export function App({
       );
     },
     [
+      visualization.activeId,
+      visualization.state,
+      activeVisualization,
       dispatch,
       lastKnownDoc,
       getIsByValueMode,
@@ -520,7 +539,7 @@ export function App({
         ? datasourceMap[activeDatasourceId]
         : null,
     dispatch,
-    visualization: visualization.activeId ? visualizationMap[visualization.activeId] : undefined,
+    visualization: activeVisualization,
     visualizationType: visualization.activeId,
     visualizationState: visualization,
   });

@@ -88,5 +88,6 @@
     "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/saved-objects-management-plugin",
   ]
 }
