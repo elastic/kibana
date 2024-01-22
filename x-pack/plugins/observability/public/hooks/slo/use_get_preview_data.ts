@@ -21,7 +21,8 @@ export interface UseGetPreviewData {
 export function useGetPreviewData(
   isValid: boolean,
   indicator: Indicator,
-  range: { start: number; end: number }
+  range: { start: number; end: number },
+  filter?: string
 ): UseGetPreviewData {
   const { http } = useKibana().services;
 
@@ -31,7 +32,10 @@ export function useGetPreviewData(
       const response = await http.post<GetPreviewDataResponse>(
         '/internal/observability/slos/_preview',
         {
-          body: JSON.stringify({ indicator, range }),
+          body: JSON.stringify({
+            indicator: { ...indicator, params: { ...indicator.params, filter } },
+            range,
+          }),
           signal,
         }
       );
