@@ -186,7 +186,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
             {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiButtonEmpty onClick={props.onClose}>
+            <EuiButtonEmpty onClick={props.onClose} data-test-subj="share.doneButton">
               <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />
             </EuiButtonEmpty>
           </EuiFlexItem>

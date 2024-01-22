@@ -410,7 +410,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           <EuiFlexItem grow={0}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>
-                <EuiButtonEmpty onClick={onClose}>
+                <EuiButtonEmpty onClick={onClose} data-test-subj="share.doneButton">
                   <FormattedMessage id="xpack.reporting.doneButton" defaultMessage="Done" />
                 </EuiButtonEmpty>
               </EuiFlexItem>
