@@ -84,9 +84,22 @@ export class KibanaErrorService {
 
     try {
       if (isFatal) {
+        let componentStack = '';
+        let errorStack = '';
+
+        if (errorInfo && errorInfo.componentStack) {
+          componentStack = errorInfo.componentStack;
+        }
+
+        if (error instanceof Error && typeof error.stack === 'string') {
+          errorStack = error.stack;
+        }
+
         this.analytics?.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
           component_name: name,
+          component_stack: componentStack,
           error_message: error.toString(),
+          error_stack: errorStack,
         });
       }
     } catch (e) {
