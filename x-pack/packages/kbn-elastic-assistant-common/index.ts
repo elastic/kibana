@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+export { GetCapabilitiesResponse } from './impl/schemas/capabilities/get_capabilities_route.gen';
+
+export { defaultAssistantFeatures } from './impl/capabilities';
+export type { AssistantFeatures } from './impl/capabilities';
+
 export { getAnonymizedValue } from './impl/data_anonymization/get_anonymized_value';
 
 export {

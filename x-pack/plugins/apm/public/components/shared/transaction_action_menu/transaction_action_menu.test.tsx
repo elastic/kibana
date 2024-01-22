@@ -13,13 +13,14 @@ import { License } from '@kbn/licensing-plugin/common/license';
 import {
   LOGS_LOCATOR_ID,
   NODE_LOGS_LOCATOR_ID,
+  TRACE_LOGS_LOCATOR_ID,
 } from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
-  infraLocatorsMock,
+  logsLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 import { LicenseContext } from '../../../context/license/license_context';
 import * as hooks from '../../../hooks/use_fetcher';
@@ -43,11 +44,15 @@ const apmContextMock = {
       locators: {
         get: (id: string) => {
           if (id === LOGS_LOCATOR_ID) {
-            return infraLocatorsMock.logsLocator;
+            return logsLocatorsMock.logsLocator;
           }
 
           if (id === NODE_LOGS_LOCATOR_ID) {
-            return infraLocatorsMock.nodeLogsLocator;
+            return logsLocatorsMock.nodeLogsLocator;
+          }
+
+          if (id === TRACE_LOGS_LOCATOR_ID) {
+            return logsLocatorsMock.traceLogsLocator;
           }
         },
       },
@@ -102,9 +107,9 @@ const renderTransaction = async (transaction: Record<string, any>) => {
   return rendered;
 };
 
-const expectInfraLocatorsToBeCalled = () => {
-  expect(infraLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
-  expect(infraLocatorsMock.logsLocator.getRedirectUrl).toBeCalled();
+const expectLogsLocatorsToBeCalled = () => {
+  expect(logsLocatorsMock.nodeLogsLocator.getRedirectUrl).toBeCalled();
+  expect(logsLocatorsMock.traceLogsLocator.getRedirectUrl).toBeCalled();
 };
 
 let useAdHocApmDataViewSpy: jest.SpyInstance;
@@ -144,10 +149,10 @@ describe('TransactionActionMenu ', () => {
     expect(findByText('View transaction in Discover')).not.toBeNull();
   });
 
-  it('should call infra locators getRedirectUrl function', async () => {
+  it('should call logs locators getRedirectUrl function', async () => {
     await renderTransaction(Transactions.transactionWithMinimalData);
 
-    expectInfraLocatorsToBeCalled();
+    expectLogsLocatorsToBeCalled();
   });
 
   describe('when there is no pod id', () => {
@@ -169,10 +174,10 @@ describe('TransactionActionMenu ', () => {
   });
 
   describe('when there is a pod id', () => {
-    it('should call infra locators getRedirectUrl function', async () => {
+    it('should call logs locators getRedirectUrl function', async () => {
       await renderTransaction(Transactions.transactionWithKubernetesData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the pod metrics link', async () => {
@@ -206,11 +211,11 @@ describe('TransactionActionMenu ', () => {
     });
   });
 
-  describe('should call infra locators getRedirectUrl function', () => {
+  describe('should call logs locators getRedirectUrl function', () => {
     it('renders the Container logs link', async () => {
       await renderTransaction(Transactions.transactionWithContainerData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the Container metrics link', async () => {
@@ -245,10 +250,10 @@ describe('TransactionActionMenu ', () => {
   });
 
   describe('when there is a hostname', () => {
-    it('should call infra locators getRedirectUrl function', async () => {
+    it('should call logs locators getRedirectUrl function', async () => {
       await renderTransaction(Transactions.transactionWithHostData);
 
-      expectInfraLocatorsToBeCalled();
+      expectLogsLocatorsToBeCalled();
     });
 
     it('renders the Host metrics link', async () => {

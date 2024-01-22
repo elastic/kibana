@@ -15,7 +15,7 @@ import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import { buildMutedRulesFilter } from '../routes/benchmark_rules/get_states/v1';
+import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
 import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
@@ -382,7 +382,7 @@ export const aggregateLatestFindings = async (
   try {
     const startAggTime = performance.now();
 
-    const rulesFilter = await buildMutedRulesFilter(encryptedSoClient);
+    const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
     const customScoreIndexQueryResult = await esClient.search<unknown, ScoreByPolicyTemplateBucket>(
       getScoreQuery(rulesFilter)

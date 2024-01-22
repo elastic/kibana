@@ -12,13 +12,13 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-interface UseTableSettingsReturnValue<T> {
+interface UseTableSettingsReturnValue<T extends object> {
   onTableChange: EuiBasicTableProps<T>['onChange'];
   pagination: Pagination;
   sorting: { sort: PropertySort };
 }
 
-export function useTableSettings<TypeOfItem>(
+export function useTableSettings<TypeOfItem extends object>(
   items: TypeOfItem[],
   pageState: DataVisualizerTableState,
   updatePageState: (update: DataVisualizerTableState) => void

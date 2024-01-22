@@ -1,0 +1,13 @@
+COSH
+
+Syntax
+Parameters
+n
+Numeric expression. If null, the function returns null.
+Supported types
+DescriptionReturns the hyperbolic
+cosine.Example
+```esql
+ROW a=1.8
+| EVAL cosh=COSH(a)
+```

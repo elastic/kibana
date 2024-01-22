@@ -35,6 +35,7 @@ export {
   enableInfrastructureProfilingIntegration,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
   apmEnableServiceMetrics,

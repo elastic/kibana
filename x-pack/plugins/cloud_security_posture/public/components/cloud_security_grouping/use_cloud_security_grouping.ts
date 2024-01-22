@@ -19,7 +19,6 @@ import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
-const GROUPING_ID = 'cspLatestFindings';
 const MAX_GROUPING_LEVELS = 1;
 
 /*
@@ -33,6 +32,7 @@ export const useCloudSecurityGrouping = ({
   unit,
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLocalStorageKey,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -41,6 +41,7 @@ export const useCloudSecurityGrouping = ({
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
   groupStatsRenderer?: GroupStatsRenderer<any>;
+  groupingLocalStorageKey: string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -48,7 +49,6 @@ export const useCloudSecurityGrouping = ({
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { query, error } = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
   });
@@ -69,7 +69,7 @@ export const useCloudSecurityGrouping = ({
     },
     defaultGroupingOptions,
     fields: dataView.fields,
-    groupingId: GROUPING_ID,
+    groupingId: groupingLocalStorageKey,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: () => {

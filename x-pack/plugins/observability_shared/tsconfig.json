@@ -34,10 +34,12 @@
     "@kbn/shared-ux-router",
     "@kbn/embeddable-plugin",
     "@kbn/profiling-utils",
-    "@kbn/advanced-settings-plugin",
     "@kbn/utility-types",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-utilities"
   ],
   "exclude": ["target/**/*"]
 }
