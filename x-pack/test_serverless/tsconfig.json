@@ -83,7 +83,11 @@
     "@kbn/io-ts-utils",
     "@kbn/log-explorer-plugin",
     "@kbn/index-management-plugin",
+    "@kbn/transform-plugin",
+    "@kbn/slo-schema",
+    "@kbn/core",
     "@kbn/alerting-plugin",
     "@kbn/ftr-common-functional-ui-services",
+    "@kbn/saved-objects-management-plugin",
   ]
 }

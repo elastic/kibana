@@ -1,16 +1,4 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless
-    label: 'Serverless MKI QA Security Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
-    timeout_in_minutes: 300
-    parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
     label: 'Serverless MKI QA Explore - Security Solution Cypress Tests'
     agents:
@@ -53,7 +41,7 @@ steps:
       queue: n2-4-spot
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
         - exit_status: '*'
@@ -93,7 +81,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1   
+          limit: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:entity_analytics
     label: 'Serverless MKI QA Entity Analytics - Security Solution Cypress Tests'
@@ -105,4 +93,4 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1                    
+          limit: 1

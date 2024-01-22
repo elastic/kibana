@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAdvancedButton } from '../screens/integrations';
 import { RESULTS_TABLE_BUTTON, RESULTS_TABLE_COLUMNS_BUTTON } from '../screens/live_query';
 import { closeToastIfVisible, generateRandomStringName } from './integrations';
 import {
@@ -14,11 +15,14 @@ import {
   inputQuery,
   selectAllAgents,
   submitQuery,
+  fillInQueryTimeout,
+  verifyQueryTimeout,
 } from './live_query';
 import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = () =>
   describe('Saved queries Complex Test', () => {
+    const timeout = '601';
     const suffix = generateRandomStringName(1)[0];
     const savedQueryId = `Saved-Query-Id-${suffix}`;
     const savedQueryDescription = `Test saved query description ${suffix}`;
@@ -32,6 +36,8 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery(BIG_QUERY);
+        getAdvancedButton().click();
+        fillInQueryTimeout(timeout);
         submitQuery();
         checkResults();
         // enter fullscreen
@@ -92,6 +98,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.contains(savedQueryId);
         cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
         selectAllAgents();
+        verifyQueryTimeout(timeout);
         submitQuery();
 
         // edit saved query
@@ -104,6 +111,7 @@ export const getSavedQueriesComplexTest = () =>
         // Run in test configuration
         cy.contains('Test configuration').click();
         selectAllAgents();
+        verifyQueryTimeout(timeout);
         submitQuery();
         checkResults();
 

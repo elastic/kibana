@@ -109,7 +109,7 @@ export interface FleetServerHostSOAttributes {
 
 export interface PackagePolicySOAttributes {
   name: string;
-  namespace: string;
+  namespace?: string;
   enabled: boolean;
   revision: number;
   created_at: string;

@@ -20,10 +20,7 @@ import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 
-import { SO_SEARCH_LIMIT } from '../constants';
-
 import { appContextService } from './app_context';
-import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import {
   ensurePreconfiguredOutputs,
@@ -36,7 +33,6 @@ import {
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
@@ -54,6 +50,7 @@ import {
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
 import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
+import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 
 export interface SetupStatus {
   isInitialized: boolean;
@@ -227,8 +224,10 @@ async function createSetupSideEffects(
   stepSpan?.end();
 
   stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
-  logger.debug('Setting up Fleet enrollment keys for preconfigured policies');
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  logger.debug(
+    'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
+  );
+  await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
   stepSpan?.end();
 
   const nonFatalErrors = [
@@ -291,34 +290,6 @@ export async function ensureFleetGlobalEsAssets(
       { concurrency: 10 }
     );
   }
-}
-
-async function ensureDefaultEnrollmentAPIKeysExists(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options?: { forceRecreate?: boolean }
-) {
-  const security = appContextService.getSecurity();
-  if (!security) {
-    return;
-  }
-
-  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
-    return;
-  }
-
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-  });
-
-  await pMap(
-    agentPolicies,
-    (agentPolicy) =>
-      ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
-    {
-      concurrency: 20,
-    }
-  );
 }
 
 /**
