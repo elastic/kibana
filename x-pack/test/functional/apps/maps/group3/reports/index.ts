@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
       await PageObjects.reporting.openImageReportingPanel();
-      await PageObjects.reporting.clickGenerateReportButton();
+      await PageObjects.reporting.clickGeneratePngReportButton();
 
       const percentDiff = await measurePngDifference('example_map_report');
       expect(percentDiff).to.be.lessThan(0.03);

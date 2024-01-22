@@ -88,7 +88,7 @@ export default function ({
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        await PageObjects.share.closeShareModal();
       });
 
       it('is available when saved', async () => {
@@ -139,13 +139,15 @@ export default function ({
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.reporting.openImageReportingPanel();
+        await testSubjects.click('pngReportOption');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
-        await (await testSubjects.find('kibanaChrome')).clickMouseButton(); // close popover
+        await PageObjects.share.closeShareModal();
       });
 
       it('is available when saved', async () => {
         await PageObjects.dashboard.saveDashboard('My PNG Dash');
         await PageObjects.reporting.openImageReportingPanel();
+        await testSubjects.click('pngReportOption');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();
       });

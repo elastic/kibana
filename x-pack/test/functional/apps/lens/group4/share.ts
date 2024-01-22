@@ -38,7 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: '@timestamp',
       });
       expect(await PageObjects.lens.isShareable()).to.eql(false);
-      await PageObjects.share.closeShareModal();
     });
 
     it('should make the share button avaialble as soon as a valid configuration is generated', async () => {
