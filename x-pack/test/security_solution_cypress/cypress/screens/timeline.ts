@@ -30,8 +30,6 @@ export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
 
-export const CREATE_NEW_TIMELINE_WITH_BORDER = '[data-test-subj="timeline-new-with-border"]';
-
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
 
 export const DATA_PROVIDERS = '.field-value';
@@ -55,6 +53,8 @@ export const ID_HOVER_ACTION_OVERFLOW_BTN =
 export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]';
 
 export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
+
+export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
 
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
@@ -218,6 +218,8 @@ export const TIMELINE_EXIT_FULL_SCREEN_BUTTON = '[data-test-subj="exit-full-scre
 
 export const TIMELINE_FLYOUT_WRAPPER = '[data-test-subj="flyout-pane"]';
 
+export const TIMELINE_WRAPPER = '[data-test-subj="timeline-wrapper"]';
+
 export const TIMELINE_FULL_SCREEN_BUTTON = '[data-test-subj="full-screen-active"]';
 
 export const TIMELINE_PROGRESS_BAR = '[data-test-subj="progress-bar"]';
@@ -262,8 +264,7 @@ export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.ale
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
 
-export const ACTIVE_TIMELINE_BOTTOM_BAR =
-  '[data-test-subj="flyoutBottomBar"]  .active-timeline-button';
+export const ACTIVE_TIMELINE_BOTTOM_BAR = '[data-test-subj="timeline-bottom-bar-title-button"]';
 
 export const GET_TIMELINE_GRID_CELL = (fieldName: string) =>
   `[data-test-subj="draggable-content-${fieldName}"]`;

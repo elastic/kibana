@@ -1,0 +1,17 @@
+MV_CONCAT
+
+
+Converts a multivalued string field into a single valued field containing the
+concatenation of all values separated by a delimiter:
+```esql
+ROW a=["foo", "zoo", "bar"]
+| EVAL j = MV_CONCAT(a, ", ")
+```
+
+If you want to concat non-string fields call TO_STRING on them first:
+```esql
+ROW a=[10, 9, 8]
+| EVAL j = MV_CONCAT(TO_STRING(a), ", ")
+```
+
+Supported types:
