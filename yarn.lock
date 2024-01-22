@@ -15630,10 +15630,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.3.0.tgz#449cd3d3154858fbe0bbf223d3a1442aa5a354bd"
-  integrity sha512-LLB+RH12cFIdKZxxW6oOt3aL+8oEYNaHILol31dFb2SFdCKCWceMfUSzESTuPiImdyRTi5A+2Iw+46Fgt4caPQ==
+elastic-apm-node@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.4.0.tgz#41452d8c0b040e6df99da71704c3d62783bb0f78"
+  integrity sha512-/CFP1DjK0eM8i4pSt8k10fX8I2UWh9u0Ycr1SXdy3t7ZQfI1FbM18IKFeMjktJIHbk2W+6XOxAY1RN8QhDj+bA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -15653,7 +15653,7 @@ elastic-apm-node@^4.3.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.5.0"
+    import-in-the-middle "1.7.2"
     json-bigint "^1.0.0"
     lru-cache "^10.0.1"
     measured-reporting "^1.51.1"
@@ -18981,10 +18981,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.5.0.tgz#db939aa2b7220f6149124885160916be715d1cae"
-  integrity sha512-H2hqR0jImhqe9+1k8pYewDKWJHnDeRsWZk5aSztv6MIWD5glmbEOqy1JZrMUC6SJiO1M4A+nVvUUYtWzP5wPYg==
+import-in-the-middle@1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.7.2.tgz#31c44088271b50ecb9cacbdfb1e5732c802e0658"
+  integrity sha512-coz7AjRnPyKW36J6JX5Bjz1mcX7MX1H2XsEGseVcnXMdzsAbbAu0HBZhiAem+3SAmuZdi+p8OwoB2qUpTRgjOQ==
   dependencies:
     acorn "^8.8.2"
     acorn-import-assertions "^1.9.0"
