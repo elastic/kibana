@@ -62,6 +62,7 @@ describe('ScheduleNotificationResponseActions', () => {
   const scheduleNotificationResponseActions = getScheduleNotificationResponseActionsService({
     osqueryCreateActionService: osqueryActionMock,
     endpointAppContextService: endpointActionMock as never,
+    experimentalFeatures: [],
   });
 
   const simpleQuery = 'select * from uptime';

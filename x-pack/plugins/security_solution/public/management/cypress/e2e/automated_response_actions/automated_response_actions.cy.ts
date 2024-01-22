@@ -107,7 +107,7 @@ describe(
 
         cy.contains(/isolate is pending|isolate completed successfully/g);
         cy.contains(/kill-process is pending|kill-process completed successfully/g);
-        cy.contains('The action was called with non-existing field name: entity_id');
+        cy.contains('The action was called with a non-existing field name: entity_id');
       });
     });
   }
