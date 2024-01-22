@@ -138,6 +138,32 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_lower',
+    description: i18n.translate('monaco.esql.definitions.toLowerDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to lower case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_lower(field1)'],
+      },
+    ],
+  },
+  {
+    name: 'to_upper',
+    description: i18n.translate('monaco.esql.definitions.toUpperDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to upper case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_upper(field1)'],
+      },
+    ],
+  },
+  {
     name: 'trim',
     description: i18n.translate('monaco.esql.definitions.trimDoc', {
       defaultMessage: 'Removes leading and trailing whitespaces from strings.',
