@@ -20,7 +20,11 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ALERT_RULE_PARAMETERS, ALERT_TIME_RANGE } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_VALUE,
+  ALERT_RULE_PARAMETERS,
+  ALERT_TIME_RANGE,
+} from '@kbn/rule-data-utils';
 import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { WindowSchema } from '../../../../../../typings';
@@ -69,7 +73,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
   const dataTimeRange = getDataTimeRange(alert.fields[ALERT_TIME_RANGE], actionGroupWindow);
   // @ts-ignore
   const alertTimeRange = getAlertTimeRange(alert.fields[ALERT_TIME_RANGE]);
-  const burnRate = alert.fields['kibana.alert.evaluation.value'];
+  const burnRate = alert.fields[ALERT_EVALUATION_VALUE];
 
   if (isLoading) {
     return <EuiLoadingChart size="m" mono data-test-subj="loading" />;
@@ -148,7 +152,7 @@ export function ErrorRatePanel({ alert, slo, isLoading }: Props) {
                           {i18n.translate(
                             'xpack.observability.slo.burnRateRule.alertDetailsAppSection.burnRate.tresholdSubtitle',
                             {
-                              defaultMessage: 'Alert when >{threshold}x',
+                              defaultMessage: 'Alert when > {threshold}x',
                               values: {
                                 threshold: numeral(actionGroupWindow!.burnRateThreshold).format(
                                   '0.[00]'

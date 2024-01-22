@@ -70,6 +70,9 @@ const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
 // kibana.alert.workflow_tags - user workflow alert tags
 const ALERT_WORKFLOW_TAGS = `${ALERT_NAMESPACE}.workflow_tags` as const;
 
+// kibana.alert.evaluation.value - alert evaluation value
+const ALERT_EVALUATION_VALUE = `${ALERT_NAMESPACE}.evaluation.value` as const;
+
 // kibana.alert.workflow_assignee_ids - user workflow alert assignees
 const ALERT_WORKFLOW_ASSIGNEE_IDS = `${ALERT_NAMESPACE}.workflow_assignee_ids` as const;
 
@@ -123,6 +126,7 @@ const fields = {
   ALERT_INSTANCE_ID,
   ALERT_LAST_DETECTED,
   ALERT_REASON,
+  ALERT_EVALUATION_VALUE,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_EXECUTION_UUID,
