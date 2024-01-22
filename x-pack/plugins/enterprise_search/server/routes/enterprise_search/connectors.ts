@@ -22,9 +22,11 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
+import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
+import { deleteConnector } from '../../lib/connectors/delete_connector';
 import { startSync } from '../../lib/connectors/start_sync';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
@@ -537,6 +539,44 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
           },
         },
       });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        query: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.query;
+
+      let connectorResponse;
+      try {
+        connectorResponse = await deleteConnector(client, connectorId);
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
+
+      return response.ok({ body: connectorResponse });
     })
   );
 }
