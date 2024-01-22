@@ -14,7 +14,6 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { DashboardPluginInternalFunctions } from '../dashboard_container/external_api/dashboard_api';
 import { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
 
@@ -58,12 +57,12 @@ describe('filters notification popover', () => {
     updateQuery = (query) => querySubject.next(query);
 
     api = {
-      uuid: new BehaviorSubject<string>('testId'),
+      uuid: 'testId',
       viewMode: new BehaviorSubject<ViewMode>('edit'),
-      parentApi: new BehaviorSubject<DashboardPluginInternalFunctions>({
+      parentApi: {
         getAllDataViews: jest.fn(),
         getDashboardPanelFromId: jest.fn(),
-      }),
+      },
       localFilters: filtersSubject,
       localQuery: querySubject,
     };
@@ -75,15 +74,13 @@ describe('filters notification popover', () => {
         <FiltersNotificationPopover api={api} />
       </I18nProvider>
     );
-    await userEvent.click(
-      await screen.findByTestId(`embeddablePanelNotification-${api.uuid.value}`)
-    );
+    await userEvent.click(await screen.findByTestId(`embeddablePanelNotification-${api.uuid}`));
     await waitForEuiPopoverOpen();
   };
 
   it('calls get all dataviews from the parent', async () => {
     render(<FiltersNotificationPopover api={api} />);
-    expect(api.parentApi.value?.getAllDataViews).toHaveBeenCalled();
+    expect(api.parentApi?.getAllDataViews).toHaveBeenCalled();
   });
 
   it('renders the filter section when given filters', async () => {
