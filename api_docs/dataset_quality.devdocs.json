@@ -138,7 +138,15 @@
           "DatasetQualityRouteHandlerResources",
           " & { params: { query: { type?: \"metrics\" | \"synthetics\" | \"traces\" | \"logs\" | \"profiling\" | undefined; } & { datasetQuery?: string | undefined; }; }; }) => Promise<{ dataStreamsStats: ({ name: string; } & { size?: string | undefined; sizeBytes?: number | undefined; lastActivity?: number | undefined; integration?: string | undefined; })[]; integrations: ({ name: string; } & { title?: string | undefined; version?: string | undefined; icons?: ({ path: string; src: string; } & { title?: string | undefined; size?: string | undefined; type?: string | undefined; })[] | undefined; datasets?: { [x: string]: string; } | undefined; })[]; }>; } & ",
           "DatasetQualityRouteCreateOptions",
-          "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT | undefined; handler: ({}: any) => Promise<any>; } & ",
+          "; }[TEndpoint] extends { endpoint: any; params?: infer TRouteParamsRT extends ",
+          {
+            "pluginId": "@kbn/server-route-repository",
+            "scope": "common",
+            "docId": "kibKbnServerRouteRepositoryPluginApi",
+            "section": "def-common.RouteParamsRT",
+            "text": "RouteParamsRT"
+          },
+          " | undefined | undefined; handler: ({}: any) => Promise<any>; } & ",
           "ServerRouteCreateOptions",
           " ? TRouteParamsRT extends ",
           {
