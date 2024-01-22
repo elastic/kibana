@@ -28,6 +28,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { useTimelineChartTheme } from '../../../../../utils/use_timeline_chart_theme';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
@@ -53,6 +54,11 @@ interface Props {
 export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible }) => {
   const { sourceId, source } = useSourceContext();
   const { metric, nodeType, accountId, region } = useWaffleOptionsContext();
+
+  if (!ItemTypeRT.is(nodeType)) {
+    throw new Error(`Unexpected nodeType ${nodeType} in Snapshot path`);
+  }
+
   const { currentTime, jumpToTime, stopAutoReload } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
 

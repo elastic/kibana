@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { useSnapshot } from '../hooks/use_snaphot';
@@ -18,6 +19,11 @@ import { Layout } from './layout';
 export const SnapshotContainer = () => {
   const { sourceId } = useSourceContext();
   const { metric, groupBy, nodeType, accountId, region, view } = useWaffleOptionsContext();
+
+  if (!ItemTypeRT.is(nodeType)) {
+    throw new Error(`Unexpected nodeType ${nodeType} in Snapshot path`);
+  }
+
   const { currentTime } = useWaffleTimeContext();
   const { filterQueryAsJson } = useWaffleFiltersContext();
   const {

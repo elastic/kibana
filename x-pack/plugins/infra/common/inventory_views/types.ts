@@ -60,7 +60,7 @@ export const inventoryOptionsStateRT = rt.intersection([
     ),
     groupBy: SnapshotGroupByRT,
     metric: SnapshotMetricInputRT,
-    nodeType: ItemTypeRT,
+    nodeType: rt.union([ItemTypeRT, rt.string]),
     region: rt.string,
     sort: inventorySortOptionRT,
     view: inventoryViewOptionsRT,

@@ -7,7 +7,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { ItemTypeRT, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { WaffleMetricControls } from '../waffle/metric_control';
 import { WaffleGroupByControls } from '../waffle/waffle_group_by_controls';
@@ -31,6 +31,10 @@ export const MetricsAndGroupByToolbarItems = (props: Props) => {
     () => props.groupByFields.map(toGroupByOpt),
     [props.groupByFields]
   );
+
+  if (!ItemTypeRT.is(props.nodeType)) {
+    throw new Error(`Unexpected nodeType ${props.nodeType} in Snapshot path`);
+  }
 
   return (
     <>

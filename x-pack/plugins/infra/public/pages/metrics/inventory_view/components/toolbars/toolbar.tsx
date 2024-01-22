@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useSourceContext } from '../../../../../containers/metrics_source';
@@ -52,5 +51,7 @@ export const ToolbarItems = (props: ToolbarProps) => {
       return <HostToolbarItems {...props} />;
     case 'pod':
       return <PodToolbarItems {...props} />;
+    default:
+      return null;
   }
 };

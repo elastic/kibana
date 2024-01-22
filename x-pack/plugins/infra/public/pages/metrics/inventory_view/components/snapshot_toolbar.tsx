@@ -7,12 +7,12 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { InfraWaffleMapBounds } from '../../../../lib/lib';
 import { DEFAULT_LEGEND, WaffleLegendOptions } from '../hooks/use_waffle_options';
 import { Toolbar } from './toolbars/toolbar';
 import { LegendControls } from './waffle/legend_controls';
 import { ViewSwitcher } from './waffle/view_switcher';
-
 import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { useWaffleTimeContext } from '../hooks/use_waffle_time';
 import { calculateBoundsFromNodes } from '../lib/calculate_bounds_from_nodes';
@@ -51,6 +51,10 @@ export function SnapshotToolbar() {
     },
     [changeBoundsOverride, changeAutoBounds, changeLegend]
   );
+
+  if (!ItemTypeRT.is(nodeType)) {
+    throw new Error(`Unexpected nodeType ${nodeType} in Snapshot path`);
+  }
 
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="m">

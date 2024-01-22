@@ -7,12 +7,17 @@
 
 import { EuiPopover, EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { IntegrationSummary } from '@kbn/observability-plugin/public';
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
+import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 
 const getDisplayNameForType = (type: InventoryItemType) => {
   const inventoryModel = findInventoryModel(type);
@@ -20,6 +25,10 @@ const getDisplayNameForType = (type: InventoryItemType) => {
 };
 
 export const WaffleInventorySwitcher: React.FC = () => {
+  const {
+    services: { http },
+  } = useKibanaContextForPlugin();
+
   const {
     changeNodeType,
     changeGroupBy,
@@ -62,6 +71,28 @@ export const WaffleInventorySwitcher: React.FC = () => {
   const goToAwsS3 = useCallback(() => goToNodeType('awsS3'), [goToNodeType]);
   const goToAwsRDS = useCallback(() => goToNodeType('awsRDS'), [goToNodeType]);
   const goToAwsSQS = useCallback(() => goToNodeType('awsSQS'), [goToNodeType]);
+
+  const goToIntegration = useCallback(
+    (integrationName: string) => {
+      closePopover();
+      changeNodeType(integrationName);
+    },
+    [changeNodeType, closePopover]
+  );
+  const [integrations, setIntegrations] = useState<IntegrationSummary[]>([]);
+  const [integrationsLoading, setIntegrationsLoading] = useState(true);
+  useEffect(() => {
+    async function fetchInstalledIntegrations() {
+      const response = await http.get<{ integrations: IntegrationSummary[] }>(
+        '/api/observability/integrations/installed'
+      );
+      setIntegrations(response.integrations);
+      setIntegrationsLoading(false);
+    }
+
+    fetchInstalledIntegrations();
+  }, [http]);
+
   const panels = useMemo(
     () =>
       [
@@ -88,6 +119,15 @@ export const WaffleInventorySwitcher: React.FC = () => {
               panel: 'awsPanel',
               'data-test-subj': 'goToAWS-open',
             },
+            ...(integrations.length !== 0
+              ? [
+                  {
+                    name: 'Integrations',
+                    panel: 'integrationsPanel',
+                    'data-test-subj': 'goToIntegrations-open',
+                  },
+                ]
+              : []),
           ],
         },
         {
@@ -116,13 +156,47 @@ export const WaffleInventorySwitcher: React.FC = () => {
             },
           ],
         },
+        ...(integrations.length !== 0
+          ? [
+              {
+                id: 'integrationsPanel',
+                title: 'Integrations',
+                items: integrations.map((integration) => ({
+                  name: integration.display_name,
+                  onClick: () => {
+                    goToIntegration(integration.name);
+                  },
+                  'data-test-subj': `goToIntegrations-${integration.name}`,
+                })),
+              },
+            ]
+          : []),
       ] as EuiContextMenuPanelDescriptor[],
-    [goToAwsEC2, goToAwsRDS, goToAwsS3, goToAwsSQS, goToDocker, goToHost, goToK8]
+    [
+      goToAwsEC2,
+      goToAwsRDS,
+      goToAwsS3,
+      goToAwsSQS,
+      goToDocker,
+      goToHost,
+      goToK8,
+      integrations,
+      goToIntegration,
+    ]
   );
 
   const selectedText = useMemo(() => {
-    return getDisplayNameForType(nodeType);
-  }, [nodeType]);
+    if (ItemTypeRT.is(nodeType)) {
+      return getDisplayNameForType(nodeType);
+    }
+
+    const matchedIntegration = integrations.find((integration) => integration.name === nodeType);
+    if (matchedIntegration) {
+      return matchedIntegration.display_name;
+    }
+
+    return 'Loading...';
+  }, [integrations, nodeType]);
 
   const button = (
     <DropdownButton
@@ -131,7 +205,14 @@ export const WaffleInventorySwitcher: React.FC = () => {
       label={i18n.translate('xpack.infra.waffle.showLabel', { defaultMessage: 'Show' })}
       showKubernetesInfo={true}
     >
-      {selectedText}
+      <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexItem>{selectedText}</EuiFlexItem>
+        {integrationsLoading ? (
+          <EuiFlexItem>
+            <EuiLoadingSpinner />
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
     </DropdownButton>
   );
 

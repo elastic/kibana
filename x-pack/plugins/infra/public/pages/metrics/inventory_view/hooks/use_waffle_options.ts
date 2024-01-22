@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import createContainer from 'constate';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType, ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryViewOptions } from '../../../../../common/inventory_views/types';
 import {
   type InventoryLegendOptions,
@@ -72,7 +72,7 @@ export const useWaffleOptions = () => {
   );
 
   const changeNodeType = useCallback(
-    (nodeType: InventoryItemType) => setState((previous) => ({ ...previous, nodeType })),
+    (nodeType: InventoryItemType | string) => setState((previous) => ({ ...previous, nodeType })),
     [setState]
   );
 
@@ -132,9 +132,11 @@ export const useWaffleOptions = () => {
   const { inventoryPrefill } = useAlertPrefillContext();
   useEffect(() => {
     const { setNodeType, setMetric, setCustomMetrics } = inventoryPrefill;
-    setNodeType(state.nodeType);
-    setMetric(state.metric);
-    setCustomMetrics(state.customMetrics);
+    if (ItemTypeRT.is(state.nodeType)) {
+      setNodeType(state.nodeType);
+      setMetric(state.metric);
+      setCustomMetrics(state.customMetrics);
+    }
   }, [state, inventoryPrefill]);
 
   const changeTimelineOpen = useCallback(

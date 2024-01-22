@@ -6,7 +6,7 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -14,6 +14,7 @@ import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { FilterBar } from './components/filter_bar';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -32,16 +33,6 @@ import { TryItButton } from '../../../components/try_it_button';
 import { useWaffleOptionsContext } from './hooks/use_waffle_options';
 
 const HOSTS_LINK_LOCAL_STORAGE_KEY = 'inventoryUI:hostsLinkClicked';
-
-const SNAPSHOT_NODE_TYPES = [
-  'host',
-  'pod',
-  'container',
-  'awsEC2',
-  'awsS3',
-  'awsSQS',
-  'awsRDS',
-] as const;
 
 export const InventoryPage = () => {
   const { nodeType } = useWaffleOptionsContext();
@@ -109,11 +100,7 @@ export const InventoryPage = () => {
                     <WaffleInventorySwitcher />
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    {SNAPSHOT_NODE_TYPES.includes(nodeType) ? (
-                      <SnapshotToolbar />
-                    ) : (
-                      <div>IntegrationsToolbar</div>
-                    )}
+                    {ItemTypeRT.is(nodeType) ? <SnapshotToolbar /> : <div>IntegrationsToolbar</div>}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
@@ -138,11 +125,7 @@ export const InventoryPage = () => {
               )}
 
               <EuiFlexItem>
-                {SNAPSHOT_NODE_TYPES.includes(nodeType) ? (
-                  <SnapshotContainer />
-                ) : (
-                  <div>IntegrationsContainer</div>
-                )}
+                {ItemTypeRT.is(nodeType) ? <SnapshotContainer /> : <div>IntegrationsContainer</div>}
               </EuiFlexItem>
             </EuiFlexGroup>
           </SnapshotModeProvider>

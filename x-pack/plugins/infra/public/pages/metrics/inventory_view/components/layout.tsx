@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryView } from '../../../../../common/inventory_views';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { AutoSizer } from '../../../../components/auto_sizer';
@@ -34,6 +35,11 @@ export const Layout = React.memo(({ currentView, reload, interval, nodes, loadin
   const [showLoading, setShowLoading] = useState(true);
   const { metric, groupBy, sort, nodeType, view, autoBounds, boundsOverride, legend } =
     useWaffleOptionsContext();
+
+  if (!ItemTypeRT.is(nodeType)) {
+    throw new Error(`Unexpected nodeType ${nodeType} in Snapshot path`);
+  }
+
   const { currentTime, jumpToTime, isAutoReloading } = useWaffleTimeContext();
   const { applyFilterQuery } = useWaffleFiltersContext();
   const legendPalette = legend?.palette ?? DEFAULT_LEGEND.palette;
