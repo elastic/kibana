@@ -202,35 +202,6 @@ export const TableActions = ({
       },
       ...panelItems,
     ];
-    // panelItems.push(
-    //   {
-    //     name: filterAddLabel,
-    //     'aria-label': filterAddAriaLabel,
-    //     toolTipContent: filtersPairToolTip,
-    //     icon: 'plusInCircle',
-    //     disabled: filtersPairDisabled,
-    //     'data-test-subj': `addFilterForValueButton-${field}`,
-    //     onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '+')),
-    //   },
-    //   {
-    //     name: filterOutLabel,
-    //     'aria-label': filterOutAriaLabel,
-    //     toolTipContent: filtersPairToolTip,
-    //     icon: 'minusInCircle',
-    //     disabled: filtersPairDisabled,
-    //     'data-test-subj': `addFilterOutValueButton-${field}`,
-    //     onClick: onClickAction(onFilter.bind({}, fieldMapping, flattenedField, '-')),
-    //   },
-    //   {
-    //     name: filterExistsLabel,
-    //     'aria-label': filterExistsAriaLabel,
-    //     toolTipContent: filtersExistsToolTip,
-    //     icon: 'filter',
-    //     disabled: filtersExistsDisabled,
-    //     'data-test-subj': `addExistsFilterButton-${field}`,
-    //     onClick: onClickAction(onFilter.bind({}, '_exists_', field, '+')),
-    //   }
-    // );
   }
 
   const panels = [
