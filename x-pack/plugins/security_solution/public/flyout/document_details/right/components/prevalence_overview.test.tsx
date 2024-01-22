@@ -22,7 +22,7 @@ import {
 } from '../../../shared/components/test_ids';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../mocks/mock_context';
-import { type ExpandableFlyoutApi, useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { type ExpandableFlyoutApi, useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../shared/hooks/use_prevalence');
 
@@ -38,7 +38,7 @@ const flyoutContextValue = {
 } as unknown as ExpandableFlyoutApi;
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -53,7 +53,7 @@ const renderPrevalenceOverview = (contextValue: RightPanelContext = mockContextV
 
 describe('<PrevalenceOverview />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render wrapper component', () => {
