@@ -9,7 +9,7 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { TracksOverlays } from '@kbn/presentation-containers';
-import { ViewMode } from '@kbn/presentation-publishing';
+import { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { core } from '../../kibana_services';
@@ -23,7 +23,7 @@ describe('Customize panel action', () => {
     action = new CustomizePanelAction();
     context = {
       embeddable: {
-        parentApi: new BehaviorSubject<unknown>({}),
+        parentApi: {},
         viewMode: new BehaviorSubject<ViewMode>('edit'),
         dataViews: new BehaviorSubject<DataView[] | undefined>(undefined),
       },
@@ -35,7 +35,7 @@ describe('Customize panel action', () => {
   });
 
   it('is compatible in view mode when API exposes writable unified search', async () => {
-    context.embeddable.viewMode = new BehaviorSubject<ViewMode>('view');
+    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('view');
     context.embeddable.localTimeRange = new BehaviorSubject<TimeRange | undefined>({
       from: 'now-15m',
       to: 'now',
@@ -61,11 +61,11 @@ describe('Customize panel action', () => {
   });
 
   it('opens overlay on parent if parent is an overlay tracker', async () => {
-    context.embeddable.parentApi = new BehaviorSubject<unknown>({
+    context.embeddable.parentApi = {
       openOverlay: jest.fn(),
       clearOverlays: jest.fn(),
-    });
+    };
     await action.execute(context);
-    expect((context.embeddable.parentApi.value as TracksOverlays).openOverlay).toHaveBeenCalled();
+    expect((context.embeddable.parentApi as TracksOverlays).openOverlay).toHaveBeenCalled();
   });
 });

@@ -20,7 +20,8 @@ export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContextValu
 );
 
 /**
- * Retrieve context's properties
+ * Retrieve Flyout's api and state
+ * @deprecated
  */
 export const useExpandableFlyoutContext = (): ExpandableFlyoutApi => {
   const contextValue = useContext(ExpandableFlyoutContext);
@@ -35,4 +36,22 @@ export const useExpandableFlyoutContext = (): ExpandableFlyoutApi => {
   const urlState = useFlyoutUrlState();
 
   return contextValue === 'memory' ? memoryState : urlState;
+};
+
+/**
+ * This hook allows you to interact with the flyout, open panels and previews etc.
+ */
+export const useExpandableFlyoutApi = () => {
+  const { panels, ...api } = useExpandableFlyoutContext();
+
+  return api;
+};
+
+/**
+ * This hook allows you to access the flyout state, read open panels and previews.
+ */
+export const useExpandableFlyoutState = () => {
+  const expandableFlyoutApiAndState = useExpandableFlyoutContext();
+
+  return expandableFlyoutApiAndState.panels;
 };
