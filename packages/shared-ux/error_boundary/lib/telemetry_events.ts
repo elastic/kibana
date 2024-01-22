@@ -24,10 +24,24 @@ export const reactFatalErrorSchema = {
       optional: false as const,
     },
   },
+  component_stack: {
+    type: 'text' as const,
+    _meta: {
+      description: 'Stack trace React component tree',
+      optional: false as const,
+    },
+  },
   error_message: {
     type: 'keyword' as const,
     _meta: {
       description: 'Message from the error',
+      optional: false as const,
+    },
+  },
+  error_stack: {
+    type: 'text' as const,
+    _meta: {
+      description: 'Stack trace from the error object',
       optional: false as const,
     },
   },
