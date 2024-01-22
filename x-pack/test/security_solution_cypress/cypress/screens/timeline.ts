@@ -54,6 +54,8 @@ export const LOCKED_ICON = '[data-test-subj="timeline-date-picker-lock-button"]'
 
 export const UNLOCKED_ICON = '[data-test-subj="timeline-date-picker-unlock-button"]';
 
+export const ROW_ADD_NOTES_BUTTON = '[data-test-subj="timeline-notes-button-small"]';
+
 export const NOTE_CARD_CONTENT = '[data-test-subj="notes"]';
 
 export const NOTE_DESCRIPTION = '[data-test-subj="note-preview-description"]';

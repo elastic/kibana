@@ -8,7 +8,7 @@
 import { HashedCache } from '../../../../common/hashed_cache';
 import { DefaultDataViewsContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultDataViewsContext = {
+export const createDefaultContext = (): DefaultDataViewsContext => ({
   cache: new HashedCache(),
   dataViewsSource: null,
   dataViews: null,
@@ -17,4 +17,4 @@ export const DEFAULT_CONTEXT: DefaultDataViewsContext = {
     name: '',
     sortOrder: 'asc',
   },
-};
+});

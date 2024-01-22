@@ -2822,7 +2822,7 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
+              "Readonly<{ frequency?: Readonly<{} & { summary: boolean; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3587,10 +3587,6 @@
               },
               {
                 "plugin": "uptime",
-                "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/tls_legacy.ts"
-              },
-              {
-                "plugin": "uptime",
                 "path": "x-pack/plugins/uptime/server/legacy_uptime/lib/alerts/duration_anomaly.ts"
               },
               {
@@ -3815,7 +3811,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              ", displayErrors?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
+              ", displayErrors?: boolean, forceRefresh?: boolean) => Promise<void>; fieldArrayToMap: (fields: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4531,7 +4527,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups> ? groups : T extends Readonly<",
+          "<infer groups extends string> ? groups : T extends Readonly<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -4539,7 +4535,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups>> ? groups : never"
+          "<infer groups extends string>> ? groups : never"
         ],
         "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
@@ -4584,7 +4580,7 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { summary: boolean; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
@@ -5088,7 +5084,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {
@@ -9990,7 +9986,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups> ? groups : T extends Readonly<",
+          "<infer groups extends string> ? groups : T extends Readonly<",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -9998,7 +9994,7 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<infer groups>> ? groups : never"
+          "<infer groups extends string>> ? groups : never"
         ],
         "path": "packages/kbn-alerting-types/rule_type.ts",
         "deprecated": false,
