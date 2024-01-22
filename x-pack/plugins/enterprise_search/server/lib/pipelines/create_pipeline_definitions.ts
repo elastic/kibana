@@ -78,6 +78,7 @@ export const createIndexPipelineDefinitions = async (
           set: {
             field: 'body',
             if: 'ctx?._extract_binary_content == true',
+            ignore_empty_value: true,
             on_failure: [
               {
                 append: {

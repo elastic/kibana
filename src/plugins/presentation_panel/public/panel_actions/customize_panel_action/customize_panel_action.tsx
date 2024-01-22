@@ -8,13 +8,14 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  apiCanAccessViewMode,
   apiPublishesDataViews,
   apiPublishesLocalUnifiedSearch,
-  apiPublishesViewMode,
+  CanAccessViewMode,
   EmbeddableApiContext,
+  getInheritedViewMode,
+  HasParentApi,
   PublishesDataViews,
-  PublishesParentApi,
-  PublishesViewMode,
   PublishesWritableLocalUnifiedSearch,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
@@ -24,19 +25,19 @@ import { openCustomizePanelFlyout } from './open_customize_panel';
 
 export const ACTION_CUSTOMIZE_PANEL = 'ACTION_CUSTOMIZE_PANEL';
 
-export type CustomizePanelActionApi = PublishesViewMode &
+export type CustomizePanelActionApi = CanAccessViewMode &
   PublishesDataViews &
   Partial<
     PublishesWritableLocalUnifiedSearch &
       PublishesWritablePanelDescription &
       PublishesWritablePanelTitle &
-      PublishesParentApi
+      HasParentApi
   >;
 
 export const isApiCompatibleWithCustomizePanelAction = (
   api: unknown | null
 ): api is CustomizePanelActionApi =>
-  Boolean(apiPublishesViewMode(api) && apiPublishesDataViews(api));
+  Boolean(apiCanAccessViewMode(api) && apiPublishesDataViews(api));
 
 export class CustomizePanelAction implements Action<EmbeddableApiContext> {
   public type = ACTION_CUSTOMIZE_PANEL;
@@ -59,7 +60,7 @@ export class CustomizePanelAction implements Action<EmbeddableApiContext> {
     if (!isApiCompatibleWithCustomizePanelAction(embeddable)) return false;
     // It should be possible to customize just the time range in View mode
     return (
-      embeddable.viewMode.value === 'edit' ||
+      getInheritedViewMode(embeddable) === 'edit' ||
       (apiPublishesLocalUnifiedSearch(embeddable) &&
         (embeddable.isCompatibleWithLocalUnifiedSearch?.() ?? true))
     );

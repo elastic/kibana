@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { find } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { CellActionsMode } from '@kbn/cell-actions';
 import { getSourcererScopeId } from '../../../../helpers';
 import { SecurityCellActions } from '../../../../common/components/cell_actions';
@@ -33,7 +33,7 @@ function hasData(fieldInfo?: EnrichedFieldInfo): fieldInfo is EnrichedFieldInfoW
  * Document details status displayed in flyout right section header
  */
 export const DocumentStatus: FC = () => {
-  const { closeFlyout } = useExpandableFlyoutContext();
+  const { closeFlyout } = useExpandableFlyoutApi();
   const { eventId, browserFields, dataFormattedForFieldBrowser, scopeId } = useRightPanelContext();
 
   const statusData = useMemo(() => {
