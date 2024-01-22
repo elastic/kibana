@@ -192,6 +192,7 @@ export class JourneyFtrHarness {
     }
 
     if (this.browser) {
+      this.log.info('closing browser');
       await this.browser.close();
     }
   }
