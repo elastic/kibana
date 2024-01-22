@@ -62,7 +62,7 @@ export const getSyntheticsAssetsCheckRoute: SyntheticsRestApiRouteFactory = () =
     }
     if (!hasAllAssets) {
       server.logger.error(
-        `Synthetics assets are missing. Assets check route will try to reinstall assets.`
+        `Synthetics assets are missing. Attempting to reinstall assets.`
       );
 
       // reinstall synthetics integration
