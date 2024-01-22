@@ -487,10 +487,40 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
       };
       this.setState({ urlParamsSelectedMap: newSelectedMap });
     };
-
+    const snapshotLabel = (
+      <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />
+    );
     const radioOptions = [
-      { id: 'savedObject', label: 'Saved object' },
-      { id: 'snapshot', label: 'Snapshot' },
+      {
+        id: 'savedObject',
+        disabled: this.isNotSaved(),
+        label: this.renderWithIconTip(
+          <FormattedMessage id="share.urlPanel.savedObjectLabel" defaultMessage="Saved object" />,
+          <FormattedMessage
+            id="share.urlPanel.savedObjectDescription"
+            defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+            values={{ objectType: this.props.objectType }}
+          />
+        ),
+        ['data-test-subj']: 'exportAsSavedObject',
+      },
+      {
+        id: 'snapshot',
+        label: (
+          <>
+            {this.renderWithIconTip(
+              snapshotLabel,
+              <FormattedMessage
+                id="share.urlPanel.snapshotDescription"
+                defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+          Edits to the saved {objectType} won't be visible via this URL."
+                values={{ objectType: this.props.objectType }}
+              />
+            )}
+          </>
+        ),
+        ['data-test-subj']: 'exportAsSnapshot',
+      },
     ];
 
     const generateLinkAsHelp = this.isNotSaved() ? (
