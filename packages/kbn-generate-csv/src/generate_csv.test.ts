@@ -293,83 +293,208 @@ describe('CsvGenerator', () => {
     expect(content).toMatchSnapshot();
   });
 
-  it('uses the pit ID to page all the data', async () => {
-    mockDataClient.search = jest
-      .fn()
-      .mockImplementationOnce(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            range(0, HITS_TOTAL / 10).map(
-              () =>
-                ({
-                  fields: {
-                    date: ['2020-12-31T00:14:28.000Z'],
-                    ip: ['110.135.176.89'],
-                    message: ['hit from the initial search'],
-                  },
-                } as unknown as estypes.SearchHit)
+  describe('PIT strategy', () => {
+    it('uses the pit ID to page all the data', async () => {
+      mockDataClient.search = jest
+        .fn()
+        .mockImplementationOnce(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from the initial search'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              ),
+              HITS_TOTAL
             ),
-            HITS_TOTAL
-          ),
-        })
-      )
-      .mockImplementation(() =>
-        Rx.of({
-          rawResponse: getMockRawResponse(
-            range(0, HITS_TOTAL / 10).map(
-              () =>
-                ({
-                  fields: {
-                    date: ['2020-12-31T00:14:28.000Z'],
-                    ip: ['110.135.176.89'],
-                    message: ['hit from a subsequent scroll'],
-                  },
-                } as unknown as estypes.SearchHit)
-            )
-          ),
+          })
+        )
+        .mockImplementation(() =>
+          Rx.of({
+            rawResponse: getMockRawResponse(
+              range(0, HITS_TOTAL / 10).map(
+                () =>
+                  ({
+                    fields: {
+                      date: ['2020-12-31T00:14:28.000Z'],
+                      ip: ['110.135.176.89'],
+                      message: ['hit from a subsequent scroll'],
+                    },
+                  } as unknown as estypes.SearchHit)
+              )
+            ),
+          })
+        );
+
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
+      const csvResult = await generateCsv.generateData();
+      expect(csvResult.warnings).toEqual([]);
+      expect(content).toMatchSnapshot();
+
+      expect(mockDataClient.search).toHaveBeenCalledTimes(10);
+      expect(mockDataClient.search).toBeCalledWith(
+        { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
+        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      );
+
+      expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+        {
+          ignore_unavailable: true,
+          index: 'logstash-*',
+          keep_alive: '30s',
+        },
+        { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+      );
+
+      expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
+      expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
+        body: { id: mockPitId },
+      });
+    });
+
+    it('adds a warning if export was unable to close the PIT', async () => {
+      mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
+        new esErrors.ResponseError({
+          statusCode: 419,
+          warnings: [],
+          meta: { context: 'test' } as any,
         })
       );
 
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      mockTaskInstanceFields,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-    const csvResult = await generateCsv.generateData();
-    expect(csvResult.warnings).toEqual([]);
-    expect(content).toMatchSnapshot();
+      const generateCsv = new CsvGenerator(
+        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        mockConfig,
+        mockTaskInstanceFields,
+        {
+          es: mockEsClient,
+          data: mockDataClient,
+          uiSettings: uiSettingsClient,
+        },
+        {
+          searchSourceStart: mockSearchSourceService,
+          fieldFormatsRegistry: mockFieldFormatsRegistry,
+        },
+        new CancellationToken(),
+        mockLogger,
+        stream
+      );
 
-    expect(mockDataClient.search).toHaveBeenCalledTimes(10);
-    expect(mockDataClient.search).toBeCalledWith(
-      { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
-      { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
-    );
+      await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
+        Object {
+          "content_type": "text/csv",
+          "csv_contains_formulas": false,
+          "error_code": undefined,
+          "max_size_reached": false,
+          "metrics": Object {
+            "csv": Object {
+              "rows": 0,
+            },
+          },
+          "warnings": Array [
+            "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
+          ],
+        }
+      `);
+    });
 
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
-      {
-        ignore_unavailable: true,
-        index: 'logstash-*',
-        keep_alive: '30s',
-      },
-      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
-    );
+    describe('debug logging', () => {
+      it('logs the the total hits relation if relation is provided', async () => {
+        mockDataClient.search = jest.fn().mockImplementation(() =>
+          Rx.of({
+            rawResponse: {
+              took: 1,
+              timed_out: false,
+              pit_id: mockPitId,
+              _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+              hits: { hits: [], total: { relation: 'eq', value: 12345 }, max_score: 0 },
+            },
+          })
+        );
 
-    expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
-    expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledWith({
-      body: { id: mockPitId },
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+        const generateCsv = new CsvGenerator(
+          createMockJob({ columns: ['date', 'ip', 'message'] }),
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: eq.');
+      });
+
+      it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
+        mockDataClient.search = jest.fn().mockImplementation(() =>
+          Rx.of({
+            rawResponse: {
+              took: 1,
+              timed_out: false,
+              pit_id: mockPitId,
+              _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
+              hits: { hits: [], total: 12345, max_score: 0 },
+            },
+          })
+        );
+
+        const debugLogSpy = jest.spyOn(mockLogger, 'debug');
+
+        const generateCsv = new CsvGenerator(
+          createMockJob({ columns: ['date', 'ip', 'message'] }),
+          mockConfig,
+          mockTaskInstanceFields,
+          {
+            es: mockEsClient,
+            data: mockDataClient,
+            uiSettings: uiSettingsClient,
+          },
+          {
+            searchSourceStart: mockSearchSourceService,
+            fieldFormatsRegistry: mockFieldFormatsRegistry,
+          },
+          new CancellationToken(),
+          mockLogger,
+          stream
+        );
+
+        await generateCsv.generateData();
+
+        expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
+      });
     });
   });
 
@@ -875,129 +1000,6 @@ describe('CsvGenerator', () => {
       },
       { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
     );
-  });
-
-  it('adds a warning if export was unable to close the PIT', async () => {
-    mockEsClient.asCurrentUser.closePointInTime = jest.fn().mockRejectedValueOnce(
-      new esErrors.ResponseError({
-        statusCode: 419,
-        warnings: [],
-        meta: { context: 'test' } as any,
-      })
-    );
-
-    const generateCsv = new CsvGenerator(
-      createMockJob({ columns: ['date', 'ip', 'message'] }),
-      mockConfig,
-      mockTaskInstanceFields,
-      {
-        es: mockEsClient,
-        data: mockDataClient,
-        uiSettings: uiSettingsClient,
-      },
-      {
-        searchSourceStart: mockSearchSourceService,
-        fieldFormatsRegistry: mockFieldFormatsRegistry,
-      },
-      new CancellationToken(),
-      mockLogger,
-      stream
-    );
-
-    await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-      Object {
-        "content_type": "text/csv",
-        "csv_contains_formulas": false,
-        "error_code": undefined,
-        "max_size_reached": false,
-        "metrics": Object {
-          "csv": Object {
-            "rows": 0,
-          },
-        },
-        "warnings": Array [
-          "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
-        ],
-      }
-    `);
-  });
-
-  describe('debug logging', () => {
-    it('logs the the total hits relation if relation is provided', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
-        Rx.of({
-          rawResponse: {
-            took: 1,
-            timed_out: false,
-            pit_id: mockPitId,
-            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
-            hits: { hits: [], total: { relation: 'eq', value: 12345 }, max_score: 0 },
-          },
-        })
-      );
-
-      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
-
-      const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'] }),
-        mockConfig,
-        mockTaskInstanceFields,
-        {
-          es: mockEsClient,
-          data: mockDataClient,
-          uiSettings: uiSettingsClient,
-        },
-        {
-          searchSourceStart: mockSearchSourceService,
-          fieldFormatsRegistry: mockFieldFormatsRegistry,
-        },
-        new CancellationToken(),
-        mockLogger,
-        stream
-      );
-
-      await generateCsv.generateData();
-
-      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: eq.');
-    });
-
-    it('logs the the total hits relation as "unknown" if relation is not provided', async () => {
-      mockDataClient.search = jest.fn().mockImplementation(() =>
-        Rx.of({
-          rawResponse: {
-            took: 1,
-            timed_out: false,
-            pit_id: mockPitId,
-            _shards: { total: 1, successful: 1, failed: 0, skipped: 0 },
-            hits: { hits: [], total: 12345, max_score: 0 },
-          },
-        })
-      );
-
-      const debugLogSpy = jest.spyOn(mockLogger, 'debug');
-
-      const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'] }),
-        mockConfig,
-        mockTaskInstanceFields,
-        {
-          es: mockEsClient,
-          data: mockDataClient,
-          uiSettings: uiSettingsClient,
-        },
-        {
-          searchSourceStart: mockSearchSourceService,
-          fieldFormatsRegistry: mockFieldFormatsRegistry,
-        },
-        new CancellationToken(),
-        mockLogger,
-        stream
-      );
-
-      await generateCsv.generateData();
-
-      expect(debugLogSpy).toHaveBeenCalledWith('Received total hits: 12345. Accuracy: unknown.');
-    });
   });
 
   it('will return partial data if the scroll or search fails', async () => {
