@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -22,15 +23,19 @@ interface Props {
   onDiscardChanges: () => void;
   onSave: () => void;
   saveLabel: string;
+  appTestSubj: string;
+  areChangesInvalid?: boolean;
 }
 
-export function BottomBarActions({
+export const BottomBarActions = ({
   isLoading,
   onDiscardChanges,
   onSave,
   unsavedChangesCount,
   saveLabel,
-}: Props) {
+  appTestSubj,
+  areChangesInvalid = false,
+}: Props) => {
   return (
     <EuiBottomBar paddingSize="s">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -43,7 +48,7 @@ export function BottomBarActions({
         >
           <EuiHealth color="warning" />
           <EuiText>
-            {i18n.translate('xpack.apm.bottomBarActions.unsavedChanges', {
+            {i18n.translate('xpack.observabilityShared.bottomBarActions.unsavedChanges', {
               defaultMessage:
                 '{unsavedChangesCount, plural, =0{0 unsaved changes} one {1 unsaved change} other {# unsaved changes}} ',
               values: { unsavedChangesCount },
@@ -54,33 +59,40 @@ export function BottomBarActions({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="apmBottomBarActionsDiscardChangesButton"
+                data-test-subj={`${appTestSubj}BottomBarActionsDiscardChangesButton`}
                 color="text"
                 onClick={onDiscardChanges}
               >
-                {i18n.translate(
-                  'xpack.apm.bottomBarActions.discardChangesButton',
-                  {
-                    defaultMessage: 'Discard changes',
-                  }
-                )}
+                {i18n.translate('xpack.observabilityShared.bottomBarActions.discardChangesButton', {
+                  defaultMessage: 'Discard changes',
+                })}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="apmBottomBarActionsButton"
-                onClick={onSave}
-                fill
-                isLoading={isLoading}
-                color="success"
-                iconType="check"
+              <EuiToolTip
+                content={
+                  areChangesInvalid &&
+                  i18n.translate('xpack.observabilityShared.saveButtonTooltipWithInvalidChanges', {
+                    defaultMessage: 'Fix invalid settings before saving.',
+                  })
+                }
               >
-                {saveLabel}
-              </EuiButton>
+                <EuiButton
+                  disabled={areChangesInvalid}
+                  data-test-subj={`${appTestSubj}BottomBarActionsButton`}
+                  onClick={onSave}
+                  fill
+                  isLoading={isLoading}
+                  color="success"
+                  iconType="check"
+                >
+                  {saveLabel}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiBottomBar>
   );
-}
+};
