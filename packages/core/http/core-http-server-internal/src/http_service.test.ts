@@ -450,7 +450,7 @@ test('passes versioned config to router', async () => {
     versioned: {
       versionResolution: 'newest',
       strictClientVersionCheck: false,
-      useVersionResolutionStrategyForInternalPaths: [],
+      useVersionResolutionStrategyForInternalPaths: ['/foo'],
     },
   });
 
@@ -482,6 +482,12 @@ test('passes versioned config to router', async () => {
     '/foo',
     expect.any(Object), // logger
     expect.any(Function), // context enhancer
-    expect.objectContaining({ isDev: true, versionedRouteResolution: 'newest' })
+    expect.objectContaining({
+      isDev: true,
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'newest',
+        useVersionResolutionStrategyForInternalPaths: ['/foo'],
+      },
+    })
   );
 });
