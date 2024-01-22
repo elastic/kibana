@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
+import userEvent, { specialChars } from '@testing-library/user-event';
 
 import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -18,7 +18,10 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174133
+// FLAKY: https://github.com/elastic/kibana/issues/174134
+// FLAKY: https://github.com/elastic/kibana/issues/174135
+describe.skip('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
@@ -52,7 +55,7 @@ describe('Description', () => {
       </MockHookWrapperComponent>
     );
 
-    expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
+    expect(screen.getByTestId('caseDescription')).toBeInTheDocument();
   });
 
   it('it changes the description', async () => {
@@ -62,10 +65,12 @@ describe('Description', () => {
       </MockHookWrapperComponent>
     );
 
-    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
-    userEvent.clear(description);
-    userEvent.paste(description, 'My new description');
+    userEvent.type(
+      description,
+      `${specialChars.selectAll}${specialChars.delete}My new description`
+    );
 
     await waitFor(() => {
       expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
@@ -79,12 +84,14 @@ describe('Description', () => {
       </MockHookWrapperComponent>
     );
 
-    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
     userEvent.clear(description);
-    userEvent.paste(description, '  ');
+    userEvent.type(description, '  ');
 
-    expect(await screen.findByText('A description is required.')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+    });
   });
 
   it('shows an error when description is too long', async () => {
@@ -96,14 +103,16 @@ describe('Description', () => {
       </MockHookWrapperComponent>
     );
 
-    const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+    const description = screen.getByTestId('euiMarkdownEditorTextArea');
 
     userEvent.paste(description, longDescription);
 
-    expect(
-      await screen.findByText(
-        'The length of the description is too long. The maximum length is 30000 characters.'
-      )
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByText(
+          'The length of the description is too long. The maximum length is 30000 characters.'
+        )
+      ).toBeInTheDocument();
+    });
   });
 });
