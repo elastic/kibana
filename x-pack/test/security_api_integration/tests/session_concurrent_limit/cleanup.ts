@@ -240,12 +240,30 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(1);
+      });
+
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
+
       const basicSessionCookieTwo = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
+
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(4);
+      });
+
       const basicSessionCookieThree = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(5);
+      });
+
       const samlSessionCookieThree = await loginWithSAML();
 
       log.debug('Waiting for all sessions to be persisted...');

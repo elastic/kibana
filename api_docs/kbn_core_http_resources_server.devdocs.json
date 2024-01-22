@@ -510,6 +510,14 @@
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaNotModifiedResponseFactory",
+            "text": "KibanaNotModifiedResponseFactory"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-common.KibanaErrorResponseFactory",
             "text": "KibanaErrorResponseFactory"
           },
