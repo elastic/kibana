@@ -10,7 +10,7 @@ import type { FC } from 'react';
 import React, { useMemo, useCallback } from 'react';
 import { isEmpty } from 'lodash';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useRightPanelContext } from '../context';
@@ -36,7 +36,7 @@ export const Description: FC = () => {
   const { isAlert, ruleDescription, ruleName, ruleId } = useBasicDataFromDetailsData(
     dataFormattedForFieldBrowser
   );
-  const { openPreviewPanel } = useExpandableFlyoutContext();
+  const { openPreviewPanel } = useExpandableFlyoutApi();
   const openRulePreview = useCallback(() => {
     const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
