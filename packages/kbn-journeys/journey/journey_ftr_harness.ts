@@ -333,8 +333,11 @@ export class JourneyFtrHarness {
   private telemetryTrackerCount = 0;
 
   private trackTelemetryRequests(page: Page) {
-    const requestSuccess$ = Rx.fromEvent<Request>(page, 'requestfinished');
-    const request$ = Rx.fromEvent<Request>(page, 'request').pipe(
+    const requestSuccess$ = Rx.fromEvent(
+      page,
+      'requestfinished'
+    ) as Rx.Observable<playwright.Request>;
+    const request$ = (Rx.fromEvent(page, 'request') as Rx.Observable<playwright.Request>).pipe(
       Rx.takeUntil(
         this.pageTeardown$.pipe(
           Rx.first((p) => p === page),
