@@ -1048,18 +1048,6 @@
             "path": "x-pack/plugins/aiops/public/embeddable/embeddable_change_point_chart.tsx"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/shared_imports.ts"
           },
@@ -1074,6 +1062,18 @@
           {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/application/app_providers.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "maps",
@@ -1616,6 +1616,10 @@
             "path": "x-pack/plugins/security_solution/public/app/app.tsx"
           },
           {
+            "plugin": "console",
+            "path": "src/plugins/console/public/shared_imports.ts"
+          },
+          {
             "plugin": "snapshotRestore",
             "path": "x-pack/plugins/snapshot_restore/public/shared_imports.ts"
           },
@@ -1734,22 +1738,6 @@
           {
             "plugin": "triggersActionsUi",
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/test_utils.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/shared_imports.ts"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
-          },
-          {
-            "plugin": "console",
-            "path": "src/plugins/console/public/application/index.tsx"
           },
           {
             "plugin": "filesManagement",
@@ -2773,20 +2761,20 @@
             "path": "x-pack/plugins/observability_shared/public/components/header_menu/header_menu_portal.tsx"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
-          },
-          {
             "plugin": "telemetry",
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
           },
           {
             "plugin": "telemetry",
             "path": "src/plugins/telemetry/public/services/telemetry_notifications/render_opt_in_status_notice_banner.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
+          },
+          {
+            "plugin": "advancedSettings",
+            "path": "src/plugins/advanced_settings/public/management_app/components/form/form.tsx"
           },
           {
             "plugin": "maps",
@@ -3123,98 +3111,6 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_management_ui/components/rules_table/bulk_actions/use_bulk_actions.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "uptime",
-            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
-          },
-          {
-            "plugin": "cloudLinks",
-            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
           },
           {
             "plugin": "console",
@@ -3229,6 +3125,98 @@
             "path": "src/plugins/console/public/application/hooks/use_send_current_request/use_send_current_request.ts"
           },
           {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/monitor_list/toast_title.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/browser_test_results.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/monitor_list_table/delete_monitor.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/global_params/delete_param.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_save.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitors_page/management/show_sync_errors.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
+          },
+          {
+            "plugin": "synthetics",
+            "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/test_now_mode/manual_test_run_mode/simple_test_results.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/lib/alert_types/alert_messages.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+          },
+          {
+            "plugin": "uptime",
+            "path": "x-pack/plugins/uptime/public/legacy_uptime/components/monitor/ml/ml_flyout_container.tsx"
+          },
+          {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+          },
+          {
+            "plugin": "cloudLinks",
+            "path": "x-pack/plugins/cloud_integrations/cloud_links/public/maybe_add_cloud_links/theme_darkmode_toggle.tsx"
+          },
+          {
             "plugin": "dataViewManagement",
             "path": "src/plugins/data_view_management/public/components/edit_index_pattern/indexed_fields_table/components/table/table.tsx"
           },
@@ -3259,18 +3247,6 @@
           {
             "plugin": "filesManagement",
             "path": "src/plugins/files_management/public/mount_management_section.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
-          },
-          {
-            "plugin": "embeddable",
-            "path": "src/plugins/embeddable/public/lib/test_samples/actions/send_message_action.tsx"
           },
           {
             "plugin": "embeddable",

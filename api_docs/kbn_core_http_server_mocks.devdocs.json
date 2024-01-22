@@ -933,8 +933,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "ResponseObject",
-                  "> | ",
+                  "Boom",
+                  "<any>> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -943,8 +943,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "Boom",
-                  "<any>> | undefined; readonly preResponses?: ",
+                  "ResponseObject",
+                  "> | undefined; readonly preResponses?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",

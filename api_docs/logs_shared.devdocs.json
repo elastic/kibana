@@ -270,7 +270,15 @@
         "label": "LogAIAssistant",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.LogAIAssistantProps",
+            "text": "LogAIAssistantProps"
+          },
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -280,12 +288,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogAIAssistant.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -302,7 +310,9 @@
         "label": "LogColumnHeader",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: { columnWidth: ",
+          "LogEntryColumnWidth",
+          "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; }) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -312,12 +322,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogColumnHeader.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -334,7 +344,15 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ", { role: React.AriaRole; }, \"role\">) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -344,12 +362,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogColumnHeadersWrapper.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -366,7 +384,15 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ", { role: \"cell\"; } & LogEntryColumnProps, \"role\">) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -376,12 +402,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -398,7 +424,9 @@
         "label": "LogEntryContextMenu",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          "LogEntryContextMenuProps",
+          " & { children?: React.ReactNode; }) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -408,12 +436,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryContextMenu.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -430,7 +458,9 @@
         "label": "LogEntryFieldColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          "LogEntryFieldColumnProps",
+          " & { children?: React.ReactNode; }) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -440,12 +470,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryFieldColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -497,7 +527,9 @@
         "label": "LogEntryMessageColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          "LogEntryMessageColumnProps",
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -507,12 +539,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryMessageColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -529,7 +561,15 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ", { role: \"row\"; } & LogEntryRowWrapperProps, \"role\">) => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -539,12 +579,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryRowWrapper.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -561,7 +601,9 @@
         "label": "LogEntryTimestampColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          "LogEntryTimestampColumnProps",
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -571,12 +613,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryTimestampColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -689,7 +731,15 @@
         "label": "LogStream",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -699,12 +749,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogStream.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -991,7 +1041,9 @@
         "label": "ScrollableLogTextStreamView",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "(props: ",
+          "ScrollableLogTextStreamViewProps",
+          ") => JSX.Element"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1001,12 +1053,12 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.ScrollableLogTextStreamView.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
             ],
             "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
             "deprecated": false,
@@ -3005,7 +3057,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
