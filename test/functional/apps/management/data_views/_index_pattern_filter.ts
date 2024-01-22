@@ -170,6 +170,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await PageObjects.settings.clickIndexPatternLogstash();
 
+      await PageObjects.settings.refreshDataViewFieldList();
+
       await testSubjects.existOrFail('dataViewMappingConflict');
 
       expect(await PageObjects.settings.getFieldTypes()).to.eql([

@@ -21,7 +21,7 @@ import { UptimeServerSetup, UptimeCorePluginsSetup } from './lib/adapters';
 
 import { statusCheckAlertFactory } from './lib/alerts/status_check';
 import { tlsAlertFactory } from './lib/alerts/tls';
-import { tlsLegacyAlertFactory } from './lib/alerts/tls_legacy';
+import { tlsLegacyRuleFactory } from './lib/alerts/tls_legacy';
 import { durationAnomalyAlertFactory } from './lib/alerts/duration_anomaly';
 import { licenseCheck } from './lib/domains';
 
@@ -144,7 +144,7 @@ export const initUptimeServer = (
   } = plugins;
 
   const statusAlert = statusCheckAlertFactory(server, libs, plugins);
-  const tlsLegacyAlert = tlsLegacyAlertFactory(server, libs, plugins);
+  const tlsLegacyRule = tlsLegacyRuleFactory(server, libs, plugins);
   const tlsAlert = tlsAlertFactory(server, libs, plugins);
   const durationAlert = durationAnomalyAlertFactory(server, libs, plugins);
 
@@ -159,5 +159,5 @@ export const initUptimeServer = (
 
   /* TLS Legacy rule supported at least through 8.0.
    * Not registered with RAC */
-  registerType(tlsLegacyAlert);
+  registerType(tlsLegacyRule);
 };
