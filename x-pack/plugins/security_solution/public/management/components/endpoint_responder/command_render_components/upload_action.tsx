@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -27,22 +26,17 @@ export const UploadActionResult = memo<
     ResponseActionUploadParameters
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
   const actionCreator = useSendUploadEndpointRequest();
 
   const actionRequestBody = useMemo<undefined | UploadActionUIRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const { comment, overwrite, file } = command.args.args;
-    const agentType = command.commandDefinition?.meta?.agentType;
 
     if (!endpointId) {
       return;
     }
 
     const reqBody: UploadActionUIRequestBody = {
-      agent_type: isSentinelOneV1Enabled ? agentType : undefined,
       endpoint_ids: [endpointId],
       ...(comment?.[0] ? { comment: comment?.[0] } : {}),
       parameters:
@@ -55,12 +49,7 @@ export const UploadActionResult = memo<
     };
 
     return reqBody;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-    isSentinelOneV1Enabled,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
   const { result, actionDetails } = useConsoleActionSubmitter<
     UploadActionUIRequestBody,

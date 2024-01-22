@@ -6,7 +6,6 @@
  */
 
 import { memo, useMemo } from 'react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
   KillOrSuspendProcessRequestBody,
@@ -19,30 +18,20 @@ import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter
 export const SuspendProcessActionResult = memo<
   ActionRequestComponentProps<{ pid?: string[]; entityId?: string[] }>
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
   const actionCreator = useSendSuspendProcessRequest();
 
   const actionRequestBody = useMemo<undefined | KillOrSuspendProcessRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const parameters = parsedPidOrEntityIdParameter(command.args.args);
-    const agentType = command.commandDefinition?.meta?.agentType;
 
     return endpointId
       ? {
-          agent_type: isSentinelOneV1Enabled ? agentType : undefined,
           endpoint_ids: [endpointId],
           comment: command.args.args?.comment?.[0],
           parameters,
         }
       : undefined;
-  }, [
-    command.args.args,
-    command.commandDefinition?.meta?.agentType,
-    command.commandDefinition?.meta?.endpointId,
-    isSentinelOneV1Enabled,
-  ]);
+  }, [command.args.args, command.commandDefinition?.meta?.endpointId]);
 
   return useConsoleActionSubmitter<
     KillOrSuspendProcessRequestBody,

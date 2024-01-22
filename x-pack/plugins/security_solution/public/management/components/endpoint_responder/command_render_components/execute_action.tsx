@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { ExecuteActionRequestBody } from '../../../../../common/api/endpoint';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
@@ -31,19 +30,14 @@ export const ExecuteActionResult = memo<
     ResponseActionsExecuteParameters
   >
 >(({ command, setStore, store, status, setStatus, ResultComponent }) => {
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
-  );
   const actionCreator = useSendExecuteEndpoint();
   const actionRequestBody = useMemo<undefined | ExecuteActionRequestBody>(() => {
     const endpointId = command.commandDefinition?.meta?.endpointId;
-    const agentType = command.commandDefinition?.meta?.agentType;
 
     if (!endpointId) {
       return;
     }
     return {
-      agentType: isSentinelOneV1Enabled ? agentType : undefined,
       endpoint_ids: [endpointId],
       parameters: {
         command: command.args.args.command[0],
@@ -53,11 +47,9 @@ export const ExecuteActionResult = memo<
     };
   }, [
     command.commandDefinition?.meta?.endpointId,
-    command.commandDefinition?.meta?.agentType,
     command.args.args.command,
     command.args.args.timeout,
     command.args.args?.comment,
-    isSentinelOneV1Enabled,
   ]);
 
   const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<

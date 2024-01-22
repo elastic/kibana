@@ -9,7 +9,6 @@ import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useConsoleActionSubmitter } from '../hooks/use_console_action_submitter';
 import type {
   GetProcessesActionOutputContent,
@@ -46,22 +45,17 @@ const StyledEuiBasicTable = styled(EuiBasicTable)`
 
 export const GetProcessesActionResult = memo<ActionRequestComponentProps>(
   ({ command, setStore, store, status, setStatus, ResultComponent }) => {
-    const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-      'responseActionsSentinelOneV1Enabled'
-    );
     const endpointId = command.commandDefinition?.meta?.endpointId;
     const actionCreator = useSendGetEndpointProcessesRequest();
-    const agentType = command.commandDefinition?.meta?.agentType;
 
     const actionRequestBody = useMemo(() => {
       return endpointId
         ? {
-            agent_type: isSentinelOneV1Enabled ? agentType : undefined,
             endpoint_ids: [endpointId],
             comment: command.args.args?.comment?.[0],
           }
         : undefined;
-    }, [endpointId, isSentinelOneV1Enabled, agentType, command.args.args?.comment]);
+    }, [endpointId, command.args.args?.comment]);
 
     const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
       ProcessesRequestBody,
