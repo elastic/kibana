@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, Fragment } from 'react';
+import React, { FC } from 'react';
 import { Axis, Position } from '@elastic/charts';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import type { LineChartPoint } from './event_rate_chart';
@@ -29,7 +29,7 @@ export const Axes: FC<Props> = ({ chartData }) => {
   const xAxisFormatter = fieldFormats.deserialize({ id: 'date' });
 
   return (
-    <Fragment>
+    <>
       <Axis
         id="bottom"
         position={Position.Bottom}
@@ -40,7 +40,7 @@ export const Axes: FC<Props> = ({ chartData }) => {
         style={useLegacyTimeAxis ? {} : MULTILAYER_TIME_AXIS_STYLE}
       />
       <Axis id="left" position={Position.Left} tickFormat={tickFormatter} domain={yDomain} />
-    </Fragment>
+    </>
   );
 };
 

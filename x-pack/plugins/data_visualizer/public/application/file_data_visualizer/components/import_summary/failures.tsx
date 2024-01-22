@@ -10,7 +10,7 @@ import React, { Component } from 'react';
 
 import { EuiAccordion, EuiPagination } from '@elastic/eui';
 
-const PAGE_SIZE = 50;
+const PAGE_SIZE = 100;
 
 export interface DocFailure {
   item: number;

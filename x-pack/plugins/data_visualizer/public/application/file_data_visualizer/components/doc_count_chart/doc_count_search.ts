@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataPublicPluginStart, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
-import { LineChartPoint } from './event_rate_chart';
-import { TimeBuckets } from '../../../../../common/services/time_buckets';
+import type { DataPublicPluginStart, IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import type { LineChartPoint } from './event_rate_chart';
+import type { TimeBuckets } from '../../../../../common/services/time_buckets';
 
 type EventRateResponse = IKibanaSearchResponse<
   estypes.SearchResponse<
