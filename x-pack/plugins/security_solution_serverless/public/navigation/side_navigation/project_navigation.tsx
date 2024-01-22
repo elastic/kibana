@@ -14,9 +14,9 @@ import { map } from 'rxjs';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 
 import { withServicesProvider, type Services } from '../../common/services';
-import { useFormattedSideNavItems } from '../side_navigation/use_side_nav_items';
+import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { CATEGORIES, FOOTER_CATEGORIES } from '../categories';
-import { formatNavigationTree } from '../navigation_tree/navigation_tree';
+import { formatNavigationTree } from './navigation_tree';
 
 const getPanelContentProvider = (services: Services): React.FC<PanelComponentProps> => {
   const projectNavLinks$ = services.getProjectNavLinks$();
@@ -29,7 +29,7 @@ const getPanelContentProvider = (services: Services): React.FC<PanelComponentPro
     const currentPanelItem = projectNavLinks.find((item) => item.id === linkId);
 
     const { title = '', links = [], categories } = currentPanelItem ?? {};
-    const items = useFormattedSideNavItems(links);
+    const items = usePanelSideNavItems(links);
 
     if (items.length === 0) {
       return null;
