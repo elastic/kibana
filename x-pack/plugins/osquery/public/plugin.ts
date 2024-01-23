@@ -39,6 +39,7 @@ import {
   getExternalReferenceAttachmentRegular,
 } from './shared_components';
 import type { ServicesWrapperProps } from './shared_components/services_wrapper';
+import { getConnectorType } from './osquery_action_type';
 
 export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginStart> {
   private kibanaVersion: string;
@@ -51,6 +52,8 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
   public setup(core: CoreSetup, plugins: SetupPlugins): OsqueryPluginSetup {
     const storage = this.storage;
     const kibanaVersion = this.kibanaVersion;
+
+    plugins.triggersActionsUi.actionTypeRegistry.register(getConnectorType());
 
     // Register an application into the side navigation menu
     core.application.register({

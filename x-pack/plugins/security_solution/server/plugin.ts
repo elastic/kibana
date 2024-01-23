@@ -112,6 +112,8 @@ import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protectio
 import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 
+import { getConnectorType, connectorAdapter } from './endpoint/endpoint_connector';
+
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
 export class Plugin implements ISecuritySolutionPlugin {
@@ -313,6 +315,14 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
     plugins.alerting.registerType(securityRuleTypeWrapper(createThresholdAlertType(ruleOptions)));
     plugins.alerting.registerType(securityRuleTypeWrapper(createNewTermsAlertType(ruleOptions)));
+
+    plugins.actions.registerType(
+      getConnectorType({
+        endpointAppContextService: this.endpointAppContextService,
+      })
+    );
+
+    plugins.alerting.registerConnectorAdapter(connectorAdapter);
 
     // TODO We need to get the endpoint routes inside of initRoutes
     initRoutes(

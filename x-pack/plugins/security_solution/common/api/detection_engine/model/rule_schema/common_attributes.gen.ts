@@ -378,7 +378,7 @@ export const RuleActionParams = z.object({}).catchall(z.unknown());
  * Optionally groups actions by use cases. Use `default` for alert notifications.
  */
 export type RuleActionGroup = z.infer<typeof RuleActionGroup>;
-export const RuleActionGroup = z.string();
+export const RuleActionGroup = z.string().optional();
 
 /**
  * The connector ID.

@@ -12,6 +12,7 @@
     ],
     "requiredPlugins": [
       "actions",
+      "alerting",
       "data",
       "licensing",
       "dataViews",

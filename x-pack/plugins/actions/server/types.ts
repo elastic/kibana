@@ -76,6 +76,7 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  actionsClient: ActionsClient;
 }
 
 export type ActionResult = Connector;

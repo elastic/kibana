@@ -39,6 +39,7 @@ import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
+import type { ActionsClient } from '../actions_client/actions_client';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -53,6 +54,7 @@ export interface ActionExecutorContext {
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
   getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
+  getActionsClientWithRequest: (request: KibanaRequest) => Promise<ActionsClient>;
 }
 
 export interface TaskInfo {
@@ -129,12 +131,14 @@ export class ActionExecutor {
           eventLogger,
           security,
           getActionsAuthorizationWithRequest,
+          getActionsClientWithRequest,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
         const authorization = getActionsAuthorizationWithRequest(request);
+        const actionsClient = await getActionsClientWithRequest(request);
 
         const actionInfo =
           actionInfoFromTaskRunner ||
@@ -259,6 +263,7 @@ export class ActionExecutor {
             configurationUtilities,
             logger,
             source,
+            actionsClient,
           });
         } catch (err) {
           if (

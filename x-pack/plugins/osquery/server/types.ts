@@ -11,7 +11,10 @@ import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
 } from '@kbn/data-plugin/server';
-
+import type {
+  PluginSetupContract as AlertingPluginSetup,
+  PluginStartContract as AlertingPluginStart,
+} from '@kbn/alerting-plugin/server';
 import type { FleetStartContract } from '@kbn/fleet-plugin/server';
 import type { PluginSetupContract } from '@kbn/features-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -34,6 +37,7 @@ export interface OsqueryPluginStart {}
 
 export interface SetupPlugins {
   actions: ActionsPlugin['setup'];
+  alerting: AlertingPluginSetup;
   cases: CasesSetup;
   data: DataPluginSetup;
   features: PluginSetupContract;
@@ -45,6 +49,7 @@ export interface SetupPlugins {
 
 export interface StartPlugins {
   actions: ActionsPlugin['start'];
+  alerting: AlertingPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
   fleet?: FleetStartContract;

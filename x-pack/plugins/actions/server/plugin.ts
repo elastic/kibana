@@ -541,6 +541,7 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
+      getActionsClientWithRequest: secureGetActionsClientWithRequest,
     });
 
     taskRunnerFactory!.initialize({

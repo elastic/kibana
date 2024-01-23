@@ -58,6 +58,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+import { getConnectorType } from './endpoint_action_type';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -224,10 +225,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
-        const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
+        const { alertsTableConfigurationRegistry, actionTypeRegistry } = plugins.triggersActionsUi;
         const { registerAlertsTableConfiguration } =
           await this.lazyRegisterAlertsTableConfiguration();
         registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
+
+        actionTypeRegistry.register(getConnectorType());
 
         const [coreStart, startPlugins] = await core.getStartServices();
         const subPlugins = await this.startSubPlugins(this.storage, coreStart, startPlugins);

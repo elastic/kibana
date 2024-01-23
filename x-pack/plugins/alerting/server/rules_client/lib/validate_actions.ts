@@ -49,8 +49,11 @@ export async function validateActions(
    * or the throttle
    */
   const actionsWithoutSystemActions = actions.filter(
-    (action): action is RuleDefaultAction => action.type !== RuleActionTypes.SYSTEM
+    // (action): action is RuleDefaultAction => action.type !== RuleActionTypes.SYSTEM || action.group
+    (action): action is RuleDefaultAction => action.group
   );
+
+  console.error('actionsWithoutSystemActions', actionsWithoutSystemActions);
 
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
@@ -90,6 +93,11 @@ export async function validateActions(
   const invalidActionGroups = usedAlertActionGroups.filter(
     (group) => !availableAlertTypeActionGroups.has(group)
   );
+
+  console.error('usedAlertActionGroups', usedAlertActionGroups);
+
+  console.log('invalidActionGroups', invalidActionGroups);
+
   if (invalidActionGroups.length) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.invalidGroups', {
