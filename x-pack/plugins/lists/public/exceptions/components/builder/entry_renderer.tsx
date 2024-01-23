@@ -364,12 +364,10 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
   const getWildcardWithIsOperatorWarning = (): React.ReactNode => {
     return (
       <EuiText color="danger" size="xs">
-        <p>
-          <FormattedMessage
-            id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
-            defaultMessage="A wildcard may be in value. Did you mean to use the MATCHES operator?"
-          />
-        </p>
+        <FormattedMessage
+          id="xpack.lists.exceptions.builder.exceptionIsOperator.warningMessage.incorrectWildCardUsage"
+          defaultMessage="A wildcard may be in value. Did you mean to use the MATCHES operator?"
+        />
       </EuiText>
     );
   };
