@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-// TODO: needs to be imported for decorators used by inversify.
-//       needs to be loaded exactly one.
-//       so need to figure out exactly where the best place to load it would be.
-import 'reflect-metadata';
-
-export {
-  pluginOpaqueIdServiceId,
-  pluginNameServiceId,
-  pluginManifestServiceId,
-} from './src/service_identifiers';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/di/core-di-common'],
+};

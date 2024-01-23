@@ -53,6 +53,7 @@ import type {
 } from '@kbn/core-lifecycle-server-internal';
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 
@@ -100,6 +101,7 @@ export class Server {
   private readonly docLinks: DocLinksService;
   private readonly customBranding: CustomBrandingService;
   private readonly userSettingsService: UserSettingsService;
+  private readonly injectionService: CoreInjectionService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -125,6 +127,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
+    this.injectionService = new CoreInjectionService(core);
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -249,6 +252,8 @@ export class Server {
     const executionContextSetup = this.executionContext.setup();
     const docLinksSetup = this.docLinks.setup();
 
+    const injectionSetup = this.injectionService.setup();
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
@@ -344,6 +349,7 @@ export class Server {
       deprecations: deprecationsSetup,
       coreUsageData: coreUsageDataSetup,
       userSettings: userSettingsServiceSetup,
+      injection: injectionSetup,
     };
 
     const pluginsSetup = await this.plugins.setup(coreSetup);

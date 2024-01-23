@@ -25,6 +25,7 @@ import { CoreUsageDataSetup } from '@kbn/core-usage-data-server';
 import { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
 import { UserSettingsServiceSetup } from '@kbn/core-user-settings-server';
 import { PluginsServiceSetup } from '@kbn/core-plugins-contracts-server';
+import { CoreDiServiceSetup } from '@kbn/core-di-server';
 import { CoreStart } from './core_start';
 
 /**
@@ -76,6 +77,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   coreUsageData: CoreUsageDataSetup;
   /** {@link PluginsServiceSetup} */
   plugins: PluginsServiceSetup;
+  /** {@link CoreDiServiceSetup} */
+  injection: CoreDiServiceSetup;
 }
 
 /**

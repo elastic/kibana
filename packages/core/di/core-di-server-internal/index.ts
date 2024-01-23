@@ -6,20 +6,8 @@
  * Side Public License, v 1.
  */
 
+export { CoreInjectionService } from './src/di_service';
 export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-  PluginConfig,
-} from './types';
-
-export { SharedGlobalConfigKeys } from './shared_global_config';
+  InternalCoreDiServiceSetup,
+  InternalCoreDiServiceStart,
+} from './src/internal_contracts';

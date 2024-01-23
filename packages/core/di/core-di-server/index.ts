@@ -7,19 +7,10 @@
  */
 
 export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-  PluginConfig,
-} from './types';
-
-export { SharedGlobalConfigKeys } from './shared_global_config';
+  CoreDiServiceSetup,
+  CoreDiServiceStart,
+  CoreDiSetupModuleHelper,
+  CoreDiSetupModuleCallback,
+  CoreDiSetupModuleCallbackResult,
+} from './src/contracts';
+export type { DIRequestHandlerContext } from './src/request_handler_context';

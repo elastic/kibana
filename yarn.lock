@@ -3667,6 +3667,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-common@link:packages/core/di/core-di-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server-internal@link:packages/core/di/core-di-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server@link:packages/core/di/core-di-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
