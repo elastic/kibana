@@ -19,26 +19,13 @@ import {
 } from '@elastic/eui';
 import React, { ChangeEvent, FunctionComponent } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
-
-import {
-  MOCK_IDP_SECURITY_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
-} from '@kbn/mock-idp-utils/src/constants';
 import { useAuthenticator } from './role_switcher';
 
 export interface LoginPageProps {
-  projectType?: string;
+  roles: string[];
 }
 
-export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) => {
-  const roles =
-    projectType === 'security'
-      ? MOCK_IDP_SECURITY_ROLE_NAMES
-      : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
-
+export const LoginPage: FunctionComponent<LoginPageProps> = ({ roles }) => {
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
@@ -145,7 +132,7 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ projectType }) =>
       </EuiPageTemplate>
     </FormikProvider>
   );
-};
+  }
 
 const sanitizeUsername = (username: string) =>
   username.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();
