@@ -42,10 +42,12 @@ export const createSettingsApplicationServicesMock = (
   ...createFormServicesMock(),
   getAllowlistedSettings: (scope: UiSettingsScope) =>
     scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {},
+  getSections: () => [],
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
+  getToastsService: jest.fn(),
 });
 
 export const TestWrapper = ({
