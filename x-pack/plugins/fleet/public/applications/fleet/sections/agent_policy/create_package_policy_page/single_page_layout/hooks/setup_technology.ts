@@ -18,7 +18,7 @@ export const AGENTLESS_POLICY_ID = 'agentless';
 export const useAgentlessPolicy = () => {
   const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
   const { cloud } = useStartServices();
-  const isServerless = cloud?.isServerlessEnabled ?? false;
+  const isServerless = !!cloud?.isServerlessEnabled;
 
   const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
   const isAgentlessPolicyId = (id: string) => isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
