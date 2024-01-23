@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -89,6 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests,
       setQuery,
       expectedRequests = 2,
+      expectedRefreshRequest = expectedRequests,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -97,6 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
       expectedRequests?: number;
+      expectedRefreshRequest?: number;
     }) => {
       it(`should send ${expectedRequests} search requests (documents + chart) on page load`, async () => {
         await browser.refresh();
@@ -108,7 +110,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchCount).to.be(expectedRequests);
       });
 
-      it(`should send ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
+      it(`should send ${expectedRefreshRequest} requests (documents + chart) when refreshing`, async () => {
         await expectSearches(type, expectedRequests, async () => {
           await queryBar.clickQuerySubmitButton();
         });
@@ -245,6 +247,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearchesRequests: 2,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
         expectedRequests: 1,
+        expectedRefreshRequest: 2,
       });
 
       it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
