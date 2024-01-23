@@ -7,12 +7,14 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
+import { termQuery } from '@kbn/observability-plugin/server';
 import { ESSearchClient } from '../metrics/types';
 import {
   Service,
   ServicesAPIRequest,
   ServicesAPIQueryAggregation,
 } from '../../../common/http_api/host_details';
+import { HOST_NAME_FIELD } from '../../../common/constants'
 
 export const getServices = async (
   client: ESSearchClient,
@@ -23,12 +25,15 @@ export const getServices = async (
   const { filters, size, from, to } = options;
   const filtersList: QueryDslQueryContainer[] = [];
 
+
   if (filters['host.name']) {
+    // also query for host.hostname field along with host.name, as some services may use this field
+    const HOST_HOSTNAME_FIELD = 'host.hostname';
     filtersList.push({
       bool: {
         should: [
-          { term: { 'host.name': filters['host.name'] } },
-          { term: { 'host.hostname': filters['host.name'] } },
+          ...termQuery(HOST_NAME_FIELD, filters[HOST_NAME_FIELD]),  
+          ...termQuery(HOST_HOSTNAME_FIELD, filters[HOST_NAME_FIELD])
         ],
         minimum_should_match: 1,
       },
@@ -73,6 +78,7 @@ export const getServices = async (
       },
     },
   };
+  console.log(JSON.stringify(body, null, 2))
   const result = await client<{}, ServicesAPIQueryAggregation>({
     body,
     index: [transaction, error, metric],
