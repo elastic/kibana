@@ -282,14 +282,14 @@ export function registerAnomalyDetectionAlertType({
         };
 
         if (alertDoc) {
-          const anomalyScore = alertDoc[ALERT_ANOMALY_SCORE];
+          let anomalyScore = alertDoc[ALERT_ANOMALY_SCORE] ?? [];
           if (typeof anomalyScore === 'number') {
             // alert doc has been created before 8.13 with the latest anomaly score only
             anomalyScore = [anomalyScore];
           }
           resultPayload = {
             ...resultPayload,
-            [ALERT_ANOMALY_SCORE]: [...anomalyScore, ...payload.anomaly_score],
+            [ALERT_ANOMALY_SCORE]: [...anomalyScore, ...(payload.anomaly_score ?? [])],
           };
         }
 
