@@ -85,7 +85,6 @@ export abstract class TransformGenerator {
                 },
               };
             },
-            // TODO: figure out groupBy schema
             {
               'slo.instanceId': {
                 terms: { field: 'slo.instanceId' },
