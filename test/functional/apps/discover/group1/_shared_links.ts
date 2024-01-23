@@ -87,6 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               pause: true,
             },
           });
+          await PageObjects.share.closeShareModal();
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {
@@ -96,6 +97,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             const actualUrl = await PageObjects.share.getSharedUrl();
             expect(actualUrl).to.match(re);
           });
+          await PageObjects.share.closeShareModal();
         });
 
         it('should allow for copying the saved object URL', async function () {
@@ -106,6 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.share.exportAsSavedObject();
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.be(expectedUrl);
+          await PageObjects.share.closeShareModal();
         });
 
         it('should load snapshot URL with empty sort param correctly', async function () {

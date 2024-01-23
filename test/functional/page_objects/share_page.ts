@@ -21,7 +21,9 @@ export class SharePageObject extends FtrService {
   }
 
   async closeShareModal() {
-    return this.testSubjects.click('share.doneButton');
+    if (await this.isShareMenuOpen()) {
+      return this.testSubjects.click('share.doneButton');
+    }
   }
 
   async openShareMenuItem(itemTitle: string) {
@@ -52,7 +54,7 @@ export class SharePageObject extends FtrService {
   }
 
   async getSharedUrl() {
-    await this.openPermaLinks();
+    await this.testSubjects.click('Permalinks');
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 
@@ -65,7 +67,7 @@ export class SharePageObject extends FtrService {
   }
 
   async checkShortenUrl() {
-    await this.openPermaLinks();
+    await this.testSubjects.click('Permalinks');
     const shareForm = await this.testSubjects.find('shareUrlForm');
     await this.testSubjects.setCheckbox('useShortUrl', 'check');
     await shareForm.waitForDeletedByCssSelector('.euiLoadingSpinner');
