@@ -6,19 +6,48 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, PropsWithChildren, useCallback, useMemo, useReducer } from 'react';
-import { ActionType } from '../actions';
-import { reducer } from '../reducer';
-import type { ExpandableFlyoutContextValue, FlyoutPanelProps } from '../types';
-import { initialState } from '../reducer';
-import { ExpandableFlyoutContext } from '../context';
+import React, { createContext, FC, useCallback, useMemo } from 'react';
+import {
+  createDispatchHook,
+  createSelectorHook,
+  Provider as ReduxProvider,
+  ReactReduxContextValue,
+} from 'react-redux';
+import { configureStore } from '@reduxjs/toolkit';
 
-/**
- * In-memory state provider for the expandable flyout, for cases when we don't want changes to be persisted
- * in the url.
- */
-export const MemoryStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+import { reducer } from '../reducer';
+import { initialState, State } from '../state';
+import type { ExpandableFlyoutApi, FlyoutPanelProps } from '../types';
+import {
+  closeLeftPanelAction,
+  closePanelsAction,
+  closePreviewPanelAction,
+  closeRightPanelAction,
+  openLeftPanelAction,
+  openPanelsAction,
+  openPreviewPanelAction,
+  openRightPanelAction,
+  previousPreviewPanelAction,
+} from '../actions';
+
+export const store = configureStore({
+  reducer,
+  devTools: process.env.NODE_ENV !== 'production',
+  preloadedState: {},
+  enhancers: [],
+});
+
+export const Context = createContext<ReactReduxContextValue<State>>({
+  store,
+  storeState: initialState,
+});
+
+const useDispatch = createDispatchHook(Context);
+const useSelector = createSelectorHook(Context);
+
+export const useFlyoutMemoryState = (): ExpandableFlyoutApi => {
+  const state = useSelector((s) => s);
+  const dispatch = useDispatch();
 
   const openPanels = useCallback(
     ({
@@ -29,41 +58,41 @@ export const MemoryStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => 
       right?: FlyoutPanelProps;
       left?: FlyoutPanelProps;
       preview?: FlyoutPanelProps;
-    }) => dispatch({ type: ActionType.openFlyout, payload: { left, right, preview } }),
+    }) => dispatch(openPanelsAction({ right, left, preview })),
     [dispatch]
   );
 
   const openRightPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openRightPanel, payload: panel }),
-    []
+    (panel: FlyoutPanelProps) => dispatch(openRightPanelAction(panel)),
+    [dispatch]
   );
 
   const openLeftPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openLeftPanel, payload: panel }),
-    []
+    (panel: FlyoutPanelProps) => dispatch(openLeftPanelAction(panel)),
+    [dispatch]
   );
 
   const openPreviewPanel = useCallback(
-    (panel: FlyoutPanelProps) => dispatch({ type: ActionType.openPreviewPanel, payload: panel }),
-    []
+    (panel: FlyoutPanelProps) => dispatch(openPreviewPanelAction(panel)),
+    [dispatch]
   );
 
-  const closeRightPanel = useCallback(() => dispatch({ type: ActionType.closeRightPanel }), []);
+  const closeRightPanel = useCallback(() => dispatch(closeRightPanelAction()), [dispatch]);
 
-  const closeLeftPanel = useCallback(() => dispatch({ type: ActionType.closeLeftPanel }), []);
+  const closeLeftPanel = useCallback(() => dispatch(closeLeftPanelAction()), [dispatch]);
 
-  const closePreviewPanel = useCallback(() => dispatch({ type: ActionType.closePreviewPanel }), []);
+  const closePreviewPanel = useCallback(() => dispatch(closePreviewPanelAction()), [dispatch]);
 
   const previousPreviewPanel = useCallback(
-    () => dispatch({ type: ActionType.previousPreviewPanel }),
-    []
+    () => dispatch(previousPreviewPanelAction()),
+    [dispatch]
   );
 
   const closePanels = useCallback(() => {
-    dispatch({ type: ActionType.closeFlyout });
-  }, []);
+    dispatch(closePanelsAction());
+  }, [dispatch]);
 
-  const contextValue: ExpandableFlyoutContextValue = useMemo(
+  const api: ExpandableFlyoutApi = useMemo(
     () => ({
       panels: state,
       openFlyout: openPanels,
@@ -90,9 +119,17 @@ export const MemoryStateProvider: FC<PropsWithChildren<{}>> = ({ children }) => 
     ]
   );
 
+  return api;
+};
+
+/**
+ * In-memory state provider for the expandable flyout, for cases when we don't want changes to be persisted
+ * in the url.
+ */
+export const MemoryStateProvider: FC = ({ children }) => {
   return (
-    <ExpandableFlyoutContext.Provider value={contextValue}>
+    <ReduxProvider context={Context} store={store}>
       {children}
-    </ExpandableFlyoutContext.Provider>
+    </ReduxProvider>
   );
 };
