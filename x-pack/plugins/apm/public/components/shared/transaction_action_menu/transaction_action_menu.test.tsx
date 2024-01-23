@@ -76,6 +76,7 @@ function Wrapper({ children }: { children?: React.ReactNode }) {
         .fn()
         .mockImplementation(() => ({ id: 'mockSpaceId' })),
     },
+    settings: { client: { get: () => {} } },
   };
 
   return (
