@@ -124,7 +124,8 @@ export const useESQLFieldStatsData = <T extends Column>({
           error: undefined,
         });
         try {
-          const esqlBaseQuery = searchQuery.esql;
+          // By default, limit the source data to 100,000 rows
+          const esqlBaseQuery = searchQuery.esql + '| LIMIT 100000';
           const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
 
@@ -457,16 +458,16 @@ export const useESQLFieldStatsData = <T extends Column>({
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-        earliest: number | undefined;
-        latest: number | undefined;
-        aggInterval: TimeBucketsInterval;
-        intervalMs: number;
-        searchQuery: AggregateQuery;
-        indexPattern: string | undefined;
-        timeFieldName: string | undefined;
-        lastRefresh: number;
-        filter?: QueryDslQueryContainer;
-      }
+      earliest: number | undefined;
+      latest: number | undefined;
+      aggInterval: TimeBucketsInterval;
+      intervalMs: number;
+      searchQuery: AggregateQuery;
+      indexPattern: string | undefined;
+      timeFieldName: string | undefined;
+      lastRefresh: number;
+      filter?: QueryDslQueryContainer;
+    }
     | undefined
 ) => {
   const {
@@ -506,7 +507,9 @@ export const useESQLOverallStatsData = (
         }
 
         const intervalInMs = intervalMs === 0 ? 60 * 60 * 60 * 10 : intervalMs;
-        const esqlBaseQuery = searchQuery.esql;
+
+        // By default, limit the source data to 100,000 rows
+        const esqlBaseQuery = searchQuery.esql + '| LIMIT 100000';
 
         const columnsResp = await runRequest(
           {
