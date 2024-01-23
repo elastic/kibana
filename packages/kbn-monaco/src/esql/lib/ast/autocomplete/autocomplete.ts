@@ -31,7 +31,6 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
   AstProviderFn,
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandOption,
@@ -64,6 +63,7 @@ import {
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
+  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -180,7 +180,7 @@ export async function suggest(
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = buildQueryForFields(ast, finalText);
+  const queryForFields = buildQueryUntilPreviousCommand(ast, finalText);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -237,11 +237,6 @@ export async function suggest(
     );
   }
   return [];
-}
-
-export function buildQueryForFields(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {

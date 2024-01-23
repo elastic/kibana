@@ -111,4 +111,25 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       },
     };
   },
+
+  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
+    return {
+      async provideCodeActions(
+        model /** ITextModel*/,
+        range /** Range*/,
+        context /** CodeActionContext*/,
+        token /** CancellationToken*/
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        const actions = await astAdapter.codeAction(model, range, context);
+        return {
+          actions,
+          dispose: () => {},
+        };
+      },
+    };
+  },
 };

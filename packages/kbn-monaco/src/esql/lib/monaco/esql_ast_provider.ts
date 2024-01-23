@@ -15,6 +15,7 @@ import { getHoverItem } from '../ast/hover';
 import { getSignatureHelp } from '../ast/signature';
 import type { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
+import { getActions } from '../ast/codeActions';
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
@@ -117,5 +118,15 @@ export class ESQLAstAdapter {
         range: undefined as unknown as monaco.IRange,
       })),
     };
+  }
+
+  async codeAction(
+    model: monaco.editor.ITextModel,
+    range: monaco.Range,
+    context: monaco.languages.CodeActionContext
+  ) {
+    const getAstFn = await this.getAstWorker(model);
+    const codeActions = await getActions(model, range, context, getAstFn, this.callbacks);
+    return codeActions;
   }
 }
