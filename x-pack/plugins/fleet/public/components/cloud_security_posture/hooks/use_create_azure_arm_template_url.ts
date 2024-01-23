@@ -7,9 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AzureArmTemplateProps } from '../components/agent_enrollment_flyout/types';
+import type { AzureArmTemplateProps } from '../../agent_enrollment_flyout/types';
 
-import { useGetSettings } from './use_request';
+import { useGetSettings } from '../../../hooks';
 
 const ARM_TEMPLATE_DEFAULT_ACCOUNT_TYPE = 'single-account';
 
