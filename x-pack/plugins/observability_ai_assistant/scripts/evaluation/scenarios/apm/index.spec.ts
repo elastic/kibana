@@ -15,9 +15,19 @@ import { apm_error_count_AIAssistant } from '../../alert_templates';
 import moment from 'moment';
 import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
 
+import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1'
+
+
 describe('apm', () => {
   let rule_ids: any[] = []
   before(async () => {
+
+    console.log("Creating APM rule")
+    let response_apm_rule = await kibanaClient.callKibana<RuleResponse>("post",
+      { pathname: "/api/alerting/rule" },
+      apm_error_count_AIAssistant.ruleParams,
+    );
+    rule_ids.push(response_apm_rule.data.id);
 
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
@@ -105,12 +115,6 @@ describe('apm', () => {
               aiAssistantService_python.error({ message: "ERROR api_v2 not supported", type: 'My Type' }).timestamp(timestamp)
             )
         ));
-
-    let response_apm_rule = await kibanaClient.callKibana("post",
-      { pathname: "/api/alerting/rule" },
-      apm_error_count_AIAssistant.ruleParams,
-    )
-    rule_ids.push(response_apm_rule.data.id)
 
   });
 

@@ -13,13 +13,38 @@ import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count } from '../../alert_templates';
 import { MessageRole } from '../../../../common';
 
+import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1'
+
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 
 describe('alert function', () => {
   let rule_ids: any[] = []
+
   before(async () => {
+    console.log("Creating APM rule")
+    const responseApmRule = await kibanaClient.callKibana<RuleResponse>("post",
+      { pathname: "/api/alerting/rule" },
+      apm_transaction_rate_AIAssistant.ruleParams,
+    );
+    rule_ids.push(responseApmRule.data.id);
+
+    console.log("Creating dataview")
+    await kibanaClient.callKibana("post",
+      { pathname: "/api/content_management/rpc/create" },
+      custom_threshold_AIAssistant_log_count.dataViewParams,
+    );
+
+    console.log("Creating logs rule")
+    const responseLogsRule = await kibanaClient.callKibana<RuleResponse>("post",
+      { pathname: "/api/alerting/rule" },
+      custom_threshold_AIAssistant_log_count.ruleParams,
+    );
+    rule_ids.push(responseLogsRule.data.id);
+
+    await synthtraceEsClients.apmSynthtraceEsClient.clean();
+
     const myServiceInstance = apm
       .service('my-service', 'production', 'go')
       .instance('my-instance');
@@ -51,27 +76,11 @@ describe('alert function', () => {
             .outcome('success')
         ));
 
-    let responseApmRule = await kibanaClient.callKibana<{ id: string }>("post",
-      { pathname: "/api/alerting/rule" },
-      apm_transaction_rate_AIAssistant.ruleParams,
-    )
-    rule_ids.push(responseApmRule.data.id)
-
-    await kibanaClient.callKibana("post",
-      { pathname: "/api/content_management/rpc/create" },
-      custom_threshold_AIAssistant_log_count.dataViewParams,
-    )
-    let responseLogsRule = await kibanaClient.callKibana<{ id: string }>("post",
-      { pathname: "/api/alerting/rule" },
-      custom_threshold_AIAssistant_log_count.ruleParams,
-    )
-    rule_ids.push(responseLogsRule.data.id)
-
   });
 
   it('summary of active alerts', async () => {
     let conversation = await chatClient.complete(
-      'Do I have any active alerts?'
+      'Are there any active alerts?'
     );
 
     const result = await chatClient.evaluate(conversation, [
@@ -94,7 +103,6 @@ describe('alert function', () => {
         role: MessageRole.User
       })
     );
-
 
     const result = await chatClient.evaluate(conversation, [
       'Uses alerts function to retrieve active alerts for logs_synth, uses "filter": "logs_synth" in the alert function, not service.name or tags',
