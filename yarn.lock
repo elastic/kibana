@@ -6128,6 +6128,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
+  version "0.0.0"
+  uid ""
+
 "@kbn/spaces-plugin@link:x-pack/plugins/spaces":
   version "0.0.0"
   uid ""
