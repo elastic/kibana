@@ -105,8 +105,9 @@ export class ControlGroupContainer extends Container<
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
-  // public hasUnsavedChanges: BehaviorSubject<boolean>;
-  public unsavedChanges: BehaviorSubject<Partial<PersistableControlGroupInput> | undefined>;
+
+  /** This currently reports the **entire** control group input on unsaved changes  */
+  public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 

@@ -16,7 +16,6 @@ import {
   unsavedChangesDiffingFunctions,
 } from './dashboard_diffing_functions';
 import { DashboardContainerInput } from '../../../../common';
-import { pluginServices } from '../../../services/plugin_services';
 import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
@@ -102,10 +101,6 @@ export function startDiffingDashboardState(
                 const hasChanges =
                   Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
                 this.unsavedChanges.next(hasChanges ? unsavedChanges : undefined);
-
-                // if (creationOptions?.useSessionStorageIntegration) {
-                //   backupUnsavedChanges.bind(this)(unsavedChanges);
-                // }
               });
           });
         })
@@ -195,16 +190,4 @@ export function getShouldRefresh(
     }
   }
   return false;
-}
-
-function backupUnsavedChanges(
-  this: DashboardContainer,
-  unsavedChanges: Partial<DashboardContainerInput>
-) {
-  // console.log('BACKIP CHANGES', unsavedChanges);
-  const { dashboardBackup } = pluginServices.getServices();
-  dashboardBackup.setState(
-    this.getDashboardSavedObjectId(),
-    omit(unsavedChanges, keysToOmitFromSessionStorage)
-  );
 }

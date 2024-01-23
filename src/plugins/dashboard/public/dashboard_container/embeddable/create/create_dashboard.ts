@@ -5,14 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, distinctUntilChanged, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
+  PersistableControlGroupInput,
 } from '@kbn/controls-plugin/common';
 import {
   ControlGroupContainerFactory,
@@ -457,28 +459,28 @@ export const initializeDashboard = async ({
         .pipe(
           combineLatestWith(
             dashboard.controlGroup?.unsavedChanges ?? new BehaviorSubject(undefined)
+          ),
+          distinctUntilChanged(
+            ([dashboardChanges1, controlChanges1], [dashboardChanges2, controlChanges2]) =>
+              fastIsEqual(dashboardChanges1, dashboardChanges2) &&
+              fastIsEqual(controlChanges1, controlChanges2)
           )
-          // distinctUntilChanged(
-          //   (
-          //     [dashboardHasChanges1, controlGroupChanges1],
-          //     [dashboardHasChanges2, controlGroupChanges2]
-          //   ) =>
-          //     (dashboardHasChanges1 || Boolean(controlGroupChanges1)) ===
-          //     (dashboardHasChanges2 || Boolean(controlGroupChanges2))
-          // )
         )
         .subscribe(([dashboardChanges, controlGroupChanges]) => {
           dashboard.dispatch.setHasUnsavedChanges(
             Boolean(dashboardChanges) || Boolean(controlGroupChanges)
           );
-          console.log('dashboard chanbges', dashboardChanges);
-          console.log('controlGroupChanges', controlGroupChanges);
 
-          // if (creationOptions?.useSessionStorageIntegration) {
-          //   dashboardBackup.setState(this.getDashboardSavedObjectId(), {
-          //     controlGroupInput: controlGroupChanges,
-          //   });
-          // }
+          if (creationOptions?.useSessionStorageIntegration) {
+            const backup:
+              | Partial<DashboardContainerInput> & {
+                  controlGroupInput?: PersistableControlGroupInput;
+                } = dashboardChanges ?? {};
+            if (controlGroupChanges) {
+              backup.controlGroupInput = controlGroupChanges;
+            }
+            dashboardBackup.setState(dashboard.getDashboardSavedObjectId(), backup);
+          }
         })
     );
   });
