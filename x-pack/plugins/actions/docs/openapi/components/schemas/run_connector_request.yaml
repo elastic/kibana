@@ -31,6 +31,7 @@ properties:
           mapping:
             addEvent: 'run_connector_subaction_addevent.yaml'
             closeAlert: 'run_connector_subaction_closealert.yaml'
+            closeIncident: 'run_connector_subaction_closeincident.yaml'
             createAlert: 'run_connector_subaction_createalert.yaml'
             fieldsByIssueType: 'run_connector_subaction_fieldsbyissuetype.yaml'
             getChoices: 'run_connector_subaction_getchoices.yaml'

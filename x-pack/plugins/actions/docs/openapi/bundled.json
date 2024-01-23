@@ -6040,6 +6040,7 @@
                   "mapping": {
                     "addEvent": "#/components/schemas/run_connector_subaction_addevent",
                     "closeAlert": "#/components/schemas/run_connector_subaction_closealert",
+                    "closeIncident": "#/components/schemas/run_connector_subaction_closeincident",
                     "createAlert": "#/components/schemas/run_connector_subaction_createalert",
                     "fieldsByIssueType": "#/components/schemas/run_connector_subaction_fieldsbyissuetype",
                     "getChoices": "#/components/schemas/run_connector_subaction_getchoices",
