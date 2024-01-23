@@ -3694,13 +3694,15 @@ components:
                   type:
                     - 'null'
                     - string
-                  description: The unique identifier used for the ServiceNow incident.
+                  description: |
+                    An identifier that is assigned to the incident when it is created by the connector. NOTE: If you use the default configuration of `{{ruleID}}:{{alert ID}}` and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.
                   maxLength: 100
                   default: '{{rule.id}}:{{alert.id}}'
                 externalId:
                   type:
                     - 'null'
                     - string
+                  description: The unique identifier (`incidentId`) for the incident in ServiceNow.
     run_connector_subaction_createalert:
       title: The createAlert subaction
       type: object
