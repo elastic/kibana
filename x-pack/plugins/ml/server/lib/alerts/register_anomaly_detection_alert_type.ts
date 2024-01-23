@@ -269,7 +269,7 @@ export function registerAnomalyDetectionAlertType({
           actionGroup: ANOMALY_SCORE_MATCH_GROUP_ID,
         });
 
-        const resultPayload = {
+        let resultPayload = {
           [ALERT_URL]: payload[ALERT_URL],
           [ALERT_REASON]: payload[ALERT_REASON],
           [ALERT_ANOMALY_DETECTION_JOB_ID]: payload.job_id,
@@ -281,18 +281,22 @@ export function registerAnomalyDetectionAlertType({
           [ALERT_ANOMALY_SCORE]: payload.anomaly_score,
         };
 
+        if (alertDoc) {
+          const anomalyScore = alertDoc[ALERT_ANOMALY_SCORE];
+          if (typeof anomalyScore === 'number') {
+            // alert doc has been created before 8.13 with the latest anomaly score only
+            anomalyScore = [anomalyScore];
+          }
+          resultPayload = {
+            ...resultPayload,
+            [ALERT_ANOMALY_SCORE]: [...anomalyScore, ...payload.anomaly_score],
+          };
+        }
+
         alertsClient.setAlertData({
           id: name,
           context,
-          payload: alertDoc
-            ? {
-                ...resultPayload,
-                [ALERT_ANOMALY_SCORE]: [
-                  ...(alertDoc?.[ALERT_ANOMALY_SCORE] ?? []),
-                  ...payload.anomaly_score,
-                ],
-              }
-            : resultPayload,
+          payload: resultPayload,
         });
       }
 
