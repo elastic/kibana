@@ -6,6 +6,7 @@
  */
 
 import type { EuiSelectableOption } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiNotificationBadge,
@@ -103,6 +104,7 @@ export const AgentStatusFilter: React.FC<{
   totalInactiveAgents: number;
   isOpenByDefault?: boolean;
 }> = (props) => {
+  const { euiTheme } = useEuiTheme();
   const {
     selectedStatus,
     onSelectedStatusChange,
@@ -199,6 +201,7 @@ export const AgentStatusFilter: React.FC<{
     >
       <EuiPopover
         ownFocus
+        zIndex={Number(euiTheme.levels.header) - 1}
         button={
           <EuiFilterButton
             iconType="arrowDown"

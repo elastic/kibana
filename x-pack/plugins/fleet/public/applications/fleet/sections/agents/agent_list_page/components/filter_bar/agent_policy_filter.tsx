@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EuiSelectableOption } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { EuiFilterButton, EuiPopover, EuiSelectable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -23,6 +24,7 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
   onSelectedAgentPoliciesChange,
   agentPolicies,
 }: Props) => {
+  const { euiTheme } = useEuiTheme();
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -56,6 +58,7 @@ export const AgentPolicyFilter: React.FunctionComponent<Props> = ({
   return (
     <EuiPopover
       ownFocus
+      zIndex={Number(euiTheme.levels.header) - 1}
       button={
         <EuiFilterButton
           iconType="arrowDown"

@@ -300,7 +300,7 @@ describe('View agents list', () => {
 
       assertTableContainsNAgents(4);
       cy.getBySel(FLEET_AGENT_LIST_PAGE.TAGS_FILTER).click();
-      cy.get('li').contains('Clear all').click();
+      cy.get('button').contains('Clear all').click();
       assertTableContainsNAgents(18);
     });
   });
