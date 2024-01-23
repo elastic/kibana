@@ -27,9 +27,11 @@ import type {
   FileAttachmentAggregationResults,
   FileAttachmentAggsResult,
   AttachmentFrameworkAggsResult,
+  CustomFieldsTelemetry,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
+import { ConfigurationPersistedAttributes } from '../../common/types/configure';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -196,6 +198,28 @@ export const getSolutionValues = ({
       totalWithAtLeastOne:
         caseAggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
+  };
+};
+
+export const getCustomFieldsTelemetry = (
+  customFields: ConfigurationPersistedAttributes['customFields']
+): CustomFieldsTelemetry => {
+  let customFiledTypes: Record<string, number> = {};
+
+  const totalsByType = customFields?.reduce((a, c) => {
+    if (c?.type) {
+      customFiledTypes = { ...customFiledTypes, [c.type]: (customFiledTypes[c.type] ?? 0) + 1 };
+    }
+
+    return { ...customFiledTypes };
+  }, {});
+
+  const allRequiredCustomFields = customFields?.filter((field) => field?.required).length;
+
+  return {
+    totalsByType: totalsByType ?? {},
+    totals: customFields?.length ?? 0,
+    required: allRequiredCustomFields ?? 0,
   };
 };
 
