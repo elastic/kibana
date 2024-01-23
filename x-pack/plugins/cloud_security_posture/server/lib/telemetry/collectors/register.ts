@@ -6,7 +6,7 @@
  */
 
 import { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
@@ -21,6 +21,7 @@ import { getMutedRulesStats } from './muted_rules_stats_collector';
 import { INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE } from '../../../../common/constants';
 
 export function registerCspmUsageCollector(
+  core: CoreSetup,
   logger: Logger,
   coreServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   usageCollection?: UsageCollectionSetup
@@ -55,6 +56,17 @@ export function registerCspmUsageCollector(
 
       const esClient = collectorFetchContext.esClient;
       const soClient = collectorFetchContext.soClient;
+      const internalSoClient = await core.getStartServices().then(async ([coreStart]) => {
+        // note: we include the "cases" and "alert" hidden types here otherwise we would not be able to query them. If at some point cases and alert is not considered a hidden type this can be removed
+        return coreStart.savedObjects.createInternalRepository([
+          'alert',
+        ]) as unknown as SavedObjectsClientContract;
+      });
+
+      const alertRules = await internalSoClient.find({ type: 'alert' });
+
+      console.log(alertRules.saved_objects[0].attributes.params);
+
       const encryptedSoClient = (await coreServices)[0].savedObjects.createInternalRepository([
         INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
       ]);
