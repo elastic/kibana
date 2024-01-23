@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
-import { History } from 'history';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
@@ -22,38 +21,14 @@ import {
   Error,
 } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
-import type { WizardSection } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
 import { MANAGED_BY_FLEET } from '../../constants';
 
 import { MappingsDatastreamRolloverModal } from './mappings_datastreams_rollover_modal';
+import { useStepFromQueryString } from '../use_step_from_query_string';
 
 interface MatchParams {
   name: string;
-}
-
-export function useStepFromQueryString(history: History) {
-  const activeStep = useMemo(() => {
-    const params = new URLSearchParams(history.location.search);
-    if (params.has('step')) {
-      return params.get('step') as WizardSection;
-    }
-  }, [history.location.search]);
-
-  const updateStep = useCallback(
-    (stepId: string) => {
-      const params = new URLSearchParams(history.location.search);
-      if (params.has('step')) {
-        params.set('step', stepId);
-        history.push({
-          search: params.toString(),
-        });
-      }
-    },
-    [history]
-  );
-
-  return { activeStep, updateStep };
 }
 
 export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<MatchParams>> = ({
