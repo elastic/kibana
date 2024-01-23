@@ -583,7 +583,7 @@ describe('setupServerlessVolumes()', () => {
       });
     }).rejects.toThrow(
       'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
-        'Valid resources: operator_users.yml | role_mapping.yml | roles.yml | service_tokens | users | users_roles'
+        'Valid resources: operator_users.yml | role_mapping.yml | service_tokens | users | users_roles | roles.yml'
     );
   });
 });
