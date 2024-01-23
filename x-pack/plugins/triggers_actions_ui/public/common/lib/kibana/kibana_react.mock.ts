@@ -15,6 +15,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { TriggersAndActionsUiServices } from '../../../application/app';
 import {
   RuleTypeRegistryContract,
@@ -78,6 +79,7 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     expressions: expressionsPluginMock.createStartContract(),
     isServerless: false,
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
+    lens: lensPluginMock.createStartContract(),
   } as TriggersAndActionsUiServices;
 };
 

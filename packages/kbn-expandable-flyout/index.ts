@@ -8,7 +8,13 @@
 
 export { ExpandableFlyout } from './src';
 
-export { useExpandableFlyoutContext, type ExpandableFlyoutContext } from './src/context';
+export {
+  type ExpandableFlyoutContext,
+  useExpandableFlyoutState,
+  useExpandableFlyoutApi,
+} from './src/context';
+
+export { type State as ExpandableFlyoutState } from './src/state';
 
 export { ExpandableFlyoutProvider } from './src/provider';
 
