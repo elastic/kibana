@@ -67,6 +67,7 @@ export class SharePageObject extends FtrService {
   }
 
   async checkShortenUrl() {
+    await this.closeShareModal();
     await this.testSubjects.click('Permalinks');
     const shareForm = await this.testSubjects.find('shareUrlForm');
     await this.testSubjects.setCheckbox('useShortUrl', 'check');
