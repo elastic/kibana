@@ -87,7 +87,6 @@ export class LensVisService {
         chartTitle: string | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
-        onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
         onSuggestionContextChange?: (suggestion: CurrentSuggestionContext | undefined) => void;
       }
     | undefined;
@@ -125,7 +124,6 @@ export class LensVisService {
     chartTitle,
     timeInterval,
     breakdownField,
-    onVisContextChanged,
     onSuggestionContextChange,
   }: {
     suggestionContextSelectedPreviously: CurrentSuggestionContext | undefined;
@@ -134,7 +132,6 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-    onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
     onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   }) => {
     const allSuggestions = this.getAllSuggestions({ queryParams });
@@ -152,7 +149,7 @@ export class LensVisService {
 
     console.log('service suggestionState', suggestionState);
 
-    const lensAttributesState = this.getLensAttributesState({
+    const lensAttributesContext = this.getLensAttributesState({
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       externalVisContext,
       queryParams,
@@ -161,7 +158,7 @@ export class LensVisService {
       breakdownField,
     });
 
-    console.log('service lensAttributesState', lensAttributesState);
+    console.log('service lensAttributesContext', lensAttributesContext);
 
     if (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange) {
       console.log(
@@ -170,19 +167,12 @@ export class LensVisService {
       );
       onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
     }
-    if (lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion) {
-      console.log(
-        'forced to update external vis context',
-        lensAttributesState.lensAttributesContext
-      );
-      onVisContextChanged?.(lensAttributesState.lensAttributesContext);
-    }
 
     this.state$.next({
       status: LensVisServiceStatus.completed,
       allSuggestions,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
-      lensAttributesContext: lensAttributesState.lensAttributesContext,
+      lensAttributesContext,
     });
 
     this.prevUpdateContext = {
@@ -190,7 +180,6 @@ export class LensVisService {
       chartTitle,
       timeInterval,
       breakdownField,
-      onVisContextChanged,
       onSuggestionContextChange,
     };
   };
@@ -206,7 +195,7 @@ export class LensVisService {
 
     const { queryParams, chartTitle, timeInterval, breakdownField } = this.prevUpdateContext;
 
-    const lensAttributesState = this.getLensAttributesState({
+    const lensAttributesContext = this.getLensAttributesState({
       currentSuggestionContext: editedSuggestionContext,
       externalVisContext: undefined,
       queryParams,
@@ -215,7 +204,7 @@ export class LensVisService {
       breakdownField,
     });
 
-    return lensAttributesState.lensAttributesContext;
+    return lensAttributesContext;
   };
 
   private getCurrentSuggestionState = ({
@@ -238,8 +227,6 @@ export class LensVisService {
   } => {
     let type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
     let currentSuggestion: Suggestion | undefined = allSuggestions[0];
-
-    console.log('first suggestion', currentSuggestion);
 
     if (suggestionContextSelectedPreviously?.suggestion) {
       currentSuggestion = suggestionContextSelectedPreviously.suggestion;
@@ -272,13 +259,6 @@ export class LensVisService {
       type = UnifiedHistogramSuggestionType.supportedLensSuggestion;
       shouldUpdateSelectedSuggestionDueToDepsChange = true;
     }
-
-    console.log(
-      'next suggestion',
-      currentSuggestion,
-      type,
-      shouldUpdateSelectedSuggestionDueToDepsChange
-    );
 
     if (!currentSuggestion) {
       currentSuggestion = this.getHistogramSuggestionForESQL({ queryParams });
@@ -552,18 +532,12 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-  }): {
-    shouldUpdateVisContextDueToIncompatibleSuggestion: boolean;
-    lensAttributesContext: LensAttributesContext | undefined;
-  } => {
+  }): LensAttributesContext | undefined => {
     const { dataView, query, filters, timeRange } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId) {
-      return {
-        shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-        lensAttributesContext: undefined,
-      };
+      return undefined;
     }
 
     const requestData = {
@@ -582,8 +556,6 @@ export class LensVisService {
           }
         : query;
 
-    let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
-
     if (externalVisContext) {
       if (
         isEqual(externalVisContext.attributes?.state?.query, currentQuery) &&
@@ -592,16 +564,12 @@ export class LensVisService {
         isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
       ) {
         console.log('using the external lens attributes');
-        return {
-          lensAttributesContext: externalVisContext,
-          shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-        };
+        return externalVisContext;
       } else {
         console.log('external vis is not compatible with the current suggestion');
         console.log('query', externalVisContext.attributes?.state?.query, currentQuery);
         console.log('timeInterval', timeInterval, externalVisContext?.requestData?.timeInterval);
         console.log('suggestionType', suggestionType, externalVisContext?.suggestionType);
-        shouldUpdateVisContextDueToIncompatibleSuggestion = true;
       }
     }
 
@@ -650,12 +618,9 @@ export class LensVisService {
     } as TypedLensByValueInput['attributes'];
 
     return {
-      lensAttributesContext: {
-        attributes,
-        requestData,
-        suggestionType,
-      },
-      shouldUpdateVisContextDueToIncompatibleSuggestion,
+      attributes,
+      requestData,
+      suggestionType,
     };
   };
 }

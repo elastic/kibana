@@ -181,12 +181,12 @@ export function Chart({
   const onSuggestionContextEdit = useCallback(
     (editedSuggestionContext: CurrentSuggestionContext | undefined) => {
       console.log('suggestion context was edited', editedSuggestionContext);
-      onSuggestionContextChange?.(editedSuggestionContext);
       onVisContextChanged?.(
         lensVisService.getLensAttributesContextForEditedSuggestion({
           editedSuggestionContext,
         })
       );
+      onSuggestionContextChange?.(editedSuggestionContext);
     },
     [onSuggestionContextChange, onVisContextChanged, lensVisService]
   );
@@ -232,12 +232,18 @@ export function Chart({
       lensVisServiceCurrentSuggestionContext?.type ===
         UnifiedHistogramSuggestionType.supportedLensSuggestion
   );
-  const canSaveVisualization =
-    chartVisible &&
-    hasLensSuggestions &&
+
+  const canCustomizeVisualization =
+    isPlainRecord &&
     currentSuggestion &&
-    services.capabilities.dashboard?.showWriteControls;
-  const canEditVisualizationOnTheFly = hasLensSuggestions && currentSuggestion && chartVisible;
+    [
+      UnifiedHistogramSuggestionType.supportedLensSuggestion,
+      UnifiedHistogramSuggestionType.localHistogramSuggestionForESQL,
+    ].includes(lensVisServiceCurrentSuggestionContext?.type);
+
+  const canEditVisualizationOnTheFly = canCustomizeVisualization && chartVisible;
+  const canSaveVisualization =
+    canEditVisualizationOnTheFly && services.capabilities.dashboard?.showWriteControls;
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
@@ -261,6 +267,7 @@ export function Chart({
       onClick: onEditVisualization,
     });
   }
+
   if (canSaveVisualization) {
     actions.push({
       label: i18n.translate('unifiedHistogram.saveVisualizationButton', {

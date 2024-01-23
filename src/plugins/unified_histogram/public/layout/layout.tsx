@@ -28,6 +28,7 @@ import {
 } from '@kbn/resizable-layout';
 import { Chart, checkChartAvailability } from '../chart';
 import type {
+  CurrentSuggestionContext,
   ExternalVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -37,7 +38,6 @@ import type {
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-  CurrentSuggestionContext,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { LensVisService } from '../services/lens_vis_service';
@@ -246,6 +246,7 @@ export const UnifiedHistogramLayout = ({
   );
 
   useEffect(() => {
+    console.log('before running update', originalSuggestionContext, externalVisContext);
     lensVisService.update({
       suggestionContextSelectedPreviously: originalSuggestionContext,
       externalVisContext,
@@ -260,7 +261,6 @@ export const UnifiedHistogramLayout = ({
       chartTitle: originalChart?.title,
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
-      onVisContextChanged,
       onSuggestionContextChange,
     });
   }, [
@@ -278,8 +278,6 @@ export const UnifiedHistogramLayout = ({
     onVisContextChanged,
     onSuggestionContextChange,
   ]);
-
-  console.log(lensVisServiceCurrentSuggestionContext);
 
   const chart =
     !lensVisServiceCurrentSuggestionContext?.type ||
