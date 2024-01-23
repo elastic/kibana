@@ -12,7 +12,7 @@ export type Alert = ParsedTechnicalFields & {
   _id: string;
   agent?: AlertAgent;
   host?: {
-    name?: string;
+    name: string;
   };
   process?: {
     pid: string;

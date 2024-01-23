@@ -88,7 +88,7 @@ export const getErrorProcessAlerts = (
             endpoint_ids: [agentId],
             hosts: {
               ...currentValue?.hosts,
-              [agentId]: { name: name || hostName, id: agentId },
+              [agentId]: { name: name || hostName || '', id: agentId },
             },
             error: errorField,
           },
