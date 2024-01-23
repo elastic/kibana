@@ -44,7 +44,7 @@ export async function createTests({
   const checks = [typescriptCheck, eslintCheck, jestCheck, fileCasingCheck, i18nCheck];
 
   if (flags['check-dependent-files']) {
-    log.info(`🕵️‍♀️  ${chalk.bold('Collecting dependent files...')} (this can take up to 20 seconds)`);
+    log.info(`🕵️‍♀️  ${chalk.bold('Collecting dependent files...')} (this can take up to 60 seconds)`);
   }
 
   const files = flags['check-dependent-files']

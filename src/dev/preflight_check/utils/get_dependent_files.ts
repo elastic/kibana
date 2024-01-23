@@ -6,97 +6,28 @@
  * Side Public License, v 1.
  */
 
-import oxc from 'oxc-parser';
-import { readdirSync, statSync, readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
+import ts from 'typescript';
+import json5 from 'json5';
+import { readdirSync, statSync, readFileSync, writeFileSync } from 'fs';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { invertBy, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import { DiffedFile } from '../create_tests';
 import { nonNullable } from './non_nullable';
 
-async function findImports({
-  filePath,
-  log,
-}: {
-  filePath: string;
-  log: ToolingLog;
-}): Promise<string[]> {
-  const importsForFile: string[] = [];
-  const fileSource = readFileSync(filePath, 'utf8');
-
-  const { program } = await oxc.parseAsync(fileSource, {
-    sourceFilename: filePath,
-    sourceType: 'module',
-  });
-
-  try {
-    const parsed = JSON.parse(program);
-    parsed.body.forEach((node: any) => {
-      if (node.type === 'ImportDeclaration' && node.source.value.startsWith('.')) {
-        importsForFile.push(resolve(dirname(filePath), `${node.source.value}.ts`));
-      }
-    });
-  } catch (error) {
-    log.error(`Could not parse program: ${error}`);
-  }
-
-  return importsForFile;
-}
-
-async function findImportingFiles({
-  directory,
-  log,
-  map = {},
-  depth = 999,
-}: {
-  directory: string;
-  log: ToolingLog;
-  map?: Record<string, string[]>;
-  depth?: number;
-}): Promise<Record<string, string[]>> {
-  const files = readdirSync(directory);
-  for (const file of files) {
-    if (depth === 0) return map;
-
-    const path = `${directory}/${file}`;
-    const stats = statSync(path);
-
-    if (stats.isFile() && file.endsWith('.ts')) {
-      const imports = await findImports({ filePath: path, log });
-      map[path] = imports;
-    }
-
-    if (
-      stats.isDirectory() &&
-      (path.includes('src') || path.includes('x-pack') || path.includes('packages'))
-    ) {
-      await findImportingFiles({ directory: path, log, depth: depth - 1, map });
-    }
-  }
-
-  return map;
-}
-
-export async function buildImportMap({
-  directory = REPO_ROOT,
-  log,
-}: {
-  directory?: string;
-  log: ToolingLog;
-}) {
-  const importMap = await findImportingFiles({ directory, log });
-
-  // We could write this map to a file and then read it in to make this faster.
-  // writeFileSync('imports.json', JSON.stringify(inverted, null, 2));
-
-  return invertBy(importMap);
-}
-
 export async function getDependentFiles({ files, log }: { files: DiffedFile[]; log: ToolingLog }) {
   // This takes the list of changed files and finds all the modules in the repo that import any of these files.
   // We need to run the checks on these files as well, because they may have been broken by the changes.
-  const repoModuleImportMap = await buildImportMap({ log });
+
+  const TSCONFIG_JSON_CONTENT = readFileSync(`${REPO_ROOT}/tsconfig.base.json`, 'utf-8');
+
+  const tsConfigObject = ts.parseJsonConfigFileContent(
+    json5.parse(TSCONFIG_JSON_CONTENT),
+    ts.sys,
+    REPO_ROOT
+  );
+
+  const repoModuleImportMap = await buildImportMap({ log, tsConfigObject });
 
   const relatedFiles = files
     .flatMap((file) => {
@@ -111,4 +42,99 @@ export async function getDependentFiles({ files, log }: { files: DiffedFile[]; l
     .filter(nonNullable);
 
   return uniqBy(files.concat(relatedFiles), 'path');
+}
+
+async function buildImportMap({
+  log,
+  tsConfigObject,
+}: {
+  tsConfigObject: ts.ParsedCommandLine;
+  log: ToolingLog;
+}) {
+  const importMap = await findImportingFiles({ directory: REPO_ROOT, log, tsConfigObject });
+
+  const filtered = Object.keys(importMap).reduce((acc, curr) => {
+    if (importMap[curr].length) {
+      for (const importThing of importMap[curr]) {
+        const combinedSet = new Set([...(acc[importThing] || []), curr]);
+
+        acc[importThing] = Array.from(combinedSet);
+      }
+    }
+    return acc;
+  }, {} as Record<string, string[]>);
+
+  // We could write this map to a file and then read it in to make this faster.
+  writeFileSync('imports.json', JSON.stringify(filtered, null, 2));
+
+  return filtered;
+}
+
+async function findImports({
+  filePath,
+  tsConfigObject,
+}: {
+  filePath: string;
+  tsConfigObject: ts.ParsedCommandLine;
+}): Promise<string[]> {
+  const importsForFile: string[] = [];
+
+  const fileContent = readFileSync(filePath).toString();
+
+  const fileInfo = ts.preProcessFile(fileContent);
+
+  fileInfo.importedFiles
+    .map((importedModule) => importedModule.fileName)
+    .forEach((rawImport) => {
+      if (rawImport.startsWith('.') || rawImport.startsWith('@kbn/')) {
+        const resolvedImport = ts.resolveModuleName(
+          rawImport,
+          filePath,
+          tsConfigObject.options,
+          ts.sys
+        );
+
+        const importLoc = resolvedImport.resolvedModule?.resolvedFileName;
+
+        if (importLoc) {
+          importsForFile.push(importLoc);
+        }
+      }
+    });
+
+  return importsForFile;
+}
+
+async function findImportingFiles({
+  directory,
+  log,
+  map = {},
+  tsConfigObject,
+}: {
+  directory: string;
+  log: ToolingLog;
+  map?: Record<string, string[]>;
+  depth?: number;
+  tsConfigObject: ts.ParsedCommandLine;
+}): Promise<Record<string, string[]>> {
+  const files = readdirSync(directory);
+
+  for (const file of files) {
+    const path = `${directory}/${file}`;
+    const stats = statSync(path);
+
+    if (stats.isFile() && (file.endsWith('.ts') || file.endsWith('.tsx'))) {
+      const imports = await findImports({ filePath: path, tsConfigObject });
+      map[path] = !map[path] || map[path].length === 0 ? imports : map[path].concat(imports);
+    }
+
+    if (
+      stats.isDirectory() &&
+      (path.includes('src') || path.includes('x-pack') || path.includes('packages'))
+    ) {
+      await findImportingFiles({ directory: path, log, map, tsConfigObject });
+    }
+  }
+
+  return map;
 }

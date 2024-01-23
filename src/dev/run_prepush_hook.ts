@@ -14,6 +14,8 @@ import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { createTests } from './preflight_check/create_tests';
 import { getDiffedFilesForCurrentBranch } from './preflight_check/utils/get_diffed_files_for_current_branch';
 import { checkIfBranchIsClean } from './preflight_check/utils/check_if_branch_is_clean';
+import { renderTestSummary } from './preflight_check/utils/render_test_summary';
+import { checkIfDiffedFilesExceedMaxFiles } from './preflight_check/utils/check_if_diffed_files_exceed_max_files';
 
 run(
   async ({ log, flags }) => {
@@ -48,20 +50,10 @@ run(
       filesChangedSummaryTable.push([path, mode]);
     }
 
-    if (diffedFiles.length <= Number(flags['max-files'])) {
-      log.info(
-        `🔎 ${chalk.bold.blue(
-          `${diffedFiles.length} committed files changed`
-        )} on this branch compared to origin/main.\n`
-      );
-    } else {
+    if (!checkIfDiffedFilesExceedMaxFiles({ flags, files: diffedFiles, log })) {
       reportTime(runStartTime, 'total', {
         success: false,
       });
-
-      log.error(
-        `❌ ${diffedFiles.length} committed files changed on this branch compared to origin/main and max files is set to ${flags['max-files']}.\n`
-      );
 
       throw new Error(
         'Bailing on preflight checks. You can skip preflight checks by running git push --no-verify.'
@@ -79,30 +71,17 @@ run(
     const checkResponses = await Promise.all(tests.map((test) => test.runCheck()));
 
     if (!checkResponses.some((checkResponse) => checkResponse?.errors.length)) {
+      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨`);
+
+      renderTestSummary({
+        startTime,
+        log,
+        tests,
+      });
+
       reportTime(runStartTime, 'total', {
         success: true,
       });
-
-      log.info(`🚀 ${chalk.bold('All preflight checks passed!')} ✨`);
-
-      const endTime = process.hrtime(startTime);
-
-      const elapsedTimeInSeconds = endTime[0] + endTime[1] / 1e9;
-
-      log.info(
-        `Performed ${tests
-          .filter((test) => test.getFiles().length)
-          .map((test, index, arr) => {
-            const count = Number(test.getFiles().length);
-            const prefix = index === arr.length - 1 ? 'and ' : '';
-
-            return `${prefix}${count} ${test.id} ${count === 1 ? 'check' : 'checks'}${
-              prefix ? '' : ','
-            } `;
-          })
-          .join('')
-          .slice(0, -1)} in ${elapsedTimeInSeconds.toFixed(2)} seconds.\n`
-      );
     } else {
       log.info(`${chalk.bold('Results')}`);
 
@@ -120,6 +99,12 @@ run(
       }
 
       log.info(`${resultsSummaryTable.toString()}\n\n`);
+
+      renderTestSummary({
+        startTime,
+        log,
+        tests,
+      });
 
       reportTime(runStartTime, 'total', {
         success: false,
@@ -141,9 +126,9 @@ run(
       },
       help: `
       --check-dependent-files   Also check files that import any of the changed files (dependents). Slower but more thorough.
-      --fix                     Attempt to autofix problems
-      --max-files               Max files number to check against. If exceeded the script will skip the execution
-      --show-file-set           Show which files are being checked
+      --fix                     Attempt to autofix problems.
+      --max-files               Max files number to check against. If exceeded the script will skip the execution.
+      --show-file-set           Show which files are being checked. Useful for debugging this script.
       `,
     },
   }
