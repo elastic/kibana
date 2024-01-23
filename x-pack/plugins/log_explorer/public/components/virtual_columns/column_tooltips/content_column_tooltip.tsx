@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
@@ -14,12 +14,8 @@ import {
   contentHeaderTooltipParagraph2,
   contentLabel,
 } from '../../common/translations';
-import { dynamic } from '../../../utils/dynamic';
 import { HoverPopover } from '../../common/hover_popover';
-
-const ColumnHeaderTruncateContainer = dynamic(
-  () => import('@kbn/unified-data-table/src/components/column_header_truncate_container')
-);
+import { TooltipButtonComponent } from './tooltip_button';
 
 export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const { euiTheme } = useEuiTheme();
@@ -27,13 +23,16 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
     margin-bottom: ${euiTheme.size.s};
   `;
 
-  const contentButtonComponent = (
-    <ColumnHeaderTruncateContainer headerRowHeight={headerRowHeight}>
-      {column.displayAsText} <EuiIcon type="questionInCircle" />
-    </ColumnHeaderTruncateContainer>
-  );
   return (
-    <HoverPopover button={contentButtonComponent} title={contentLabel}>
+    <HoverPopover
+      button={
+        <TooltipButtonComponent
+          displayText={column.displayAsText}
+          headerRowHeight={headerRowHeight}
+        />
+      }
+      title={contentLabel}
+    >
       <div style={{ width: '230px' }}>
         <EuiText size="s" css={spacingCSS}>
           <p>{contentHeaderTooltipParagraph1}</p>
