@@ -21,12 +21,16 @@ import {
   FlyoutDataset,
 } from './types';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
-import { fetchDatasetStatsFailedNotifier } from './notifications';
+import {
+  fetchDatasetDetailsFailedNotifier,
+  fetchDatasetStatsFailedNotifier,
+  fetchDegradedStatsFailedNotifier,
+} from './notifications';
 
 export const createPureDatasetQualityControllerStateMachine = (
   initialContext: DatasetQualityControllerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOgDMcBjACxK0oaTAGJkAQQAqEgPoAZAPITkAUWQBtAAwBdRKAAO1WGRJ19IcogC0ARgDsAFnYBOWwDZbb21p9OATP4ANCAAHoiO-gAc7ACs7lqx9vYAzC7+SVG2AL7ZISJYOATEZFR0jMysHNzo-ILCGKjsRNSoEPUF2OiwXLwCQqIQdGDsggBu1ADWI51FhKQUNPRMLGy9tf0NmM2t7UKz3et1Qgjj1DwYZrTaOjcWRiboVxZWCC7uIeEItrHO7oFRdJRLTuf4BXL5RpdYoLMrLSprGrHLZNFptDpgKAMNqQZDnHpIzaDYajWgTabsA4w0pLCqrap9DqNHbo-aY7EQXH4o6bU5k86XOg3O5IEAPUzmUVfWxRGLvfwpX7AqLuFxaeyxEKvd7sfyOWwpByBexaKIpLIQkBU+Y08orKqjCCsUSUAASEgAcgBxVSyAAKEh9IsMxgltAsXz1cUBoMcKXcvwVWkSWsQsXNuviHmSUX8at8lutJUWdoRHBITrALvd3t9ACVFAB1ADK-tUdf9gdUwbFoaektAkecsRj7jjCciKWTmssiDH7nYCTVtn8Wn8thlBtyeRAtGonPgoqLsNp9rY9z7zylNkVWnYiR+U-1G8cH1nCGs-n+7BSAXsK6nKJHEcIDCyhOZizhOkHUJJlMAvR4r0HG813vWJHy0Z9bFfVMP3sOUPC8KIkjVVUPDAzBoRtEt4XpHk4NRXYGK6Q8Q0QgcwhsDJnAfdNMI3bCEmCd8Yl+Lxk3-TCJ38CjCjwaioLPBkNgYlk9hRFj6KEBCwwjLiQTQjCsNfNdcPeWSqMg08yy0lE1OYnAeh4agAFsDFYdAwB0-tw2vD9V38OJVTHeJQRSRx3jfV483se88y0FwUinBUxxcewLIgk9Szo2D9mZNF1OQdkcQgPEeFY3t2N85D-PTdgsjSjxIlVFV7FwmJ8JSdd7ESjUIsCWIMvkqzspgxk8u2AqMSxEqyoJcaoG8pDOP81D1xAjIXDS+IuqiXCfGcDckqcEDVSBFIhupGjoMRBaCnstkZs5UruWctyPK80VxR8vTVtieqvH-McvxcVrcIyQKNVzDw0vzdJ3EuhTrLoitWCWjivk-WVdXsBJfzcW8U3fYDYtXRwRxlED1WibdsiAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVszoIoFdUAbAS3QE8BhAewDt0AnaoosBgOgDMcBjACxK0oaTAGIIdMO1iZ0UkVhwFiZKnUbNWHbun6DhGVAG0ADAF1EoAA7VYZEnUsgAHogAcAZgBs7AOwAWAIBWNxM3Ly9QgCYAGhByRH8ARhN2NwBOZJMkgICTDw8AX0K4hWw8QlIKGnomFjYuXgEhBXYialQIfTKcWEbdZqhxSXZBADdqAGt5Q3LlKrVazQadPRbDNo6u9cxyvtXBhHHqHgwHWlMzS6cbO3Rzp1cEb392HN8vXw909K8gryivjiCWeSQ87G8UU+6U8biCUSibl8xVKsyUlVUNQ09W0TW6G3anXxu16-TWQzYTA4ViIGE41AYAFt2D0Kipquo6loyYNWoTtgYSeh9nihEdaBNTvc6JdrkgQLd7I55U8Xm9fB8vj8-gCgfFEAjUh4Ah4kgikkl0r4TEEiiUQKz5pjOctcQNiahNkSWmAoAxOpBkCcRe6hMNaFJjtMWWi2QssVyVqLBZ7+d1ff6IIHgzz9OLJWcZeY5dZbEraI9EB54ex8m5-BEkm5LUF-AVgYgvMa-H8QhqkbaGyiHbGnRyljjcztU1t036AxAgzwQ+TRJSGewaXSGczHRjx9juQcPV6BcgMwulyvDscpedZeYbmXpRWVVWa3WG14my22x4OwgravBqvhRGa3y-FabjDnu7KLIeDQkBArCiJQAASACCAByADiACiAD6AAKGH4SWCrPg8b4IBalrsL8GqtukFpRCY6T-vqzymuwQS+L8UQwkkAJBP8QQwaO+7wYmHBISh6HYfhBEAEoAPIAOoAMrEXhSnEaReHkYqL6VjRJi+EEfiBMkoEmFE3g5ABCK+LW-gmJ8nhQtaXhueJQpjlJrqjMhYCoZhuGERpKlKQAKoZlHKqATy0c5bkCQ2vhmma+QARaFm+G4oQmmEyQib5ihxs6E7crJIUqUReFYQRABiAAyACaKkAKqxY+8pGVRiWIOkYRvEJvz-G5fFmgB5lROwTkZc2FqRFEZVzJJCaBTVqEtSpGmEa1HXdXFdwDS4iC0UkPGBEJgT1hk-wAekEL1mEvFpWEHj+NB9qwfGLqTseQhNUQ5DUPg6AKOGkYSlMMx+RtANHsmINgxDCj5ichYXMWvWlqdCXnQg9bgkJQQWjCCKtqBAEZK8vG2gVIT+D8SLFPatDUFm8Dyn9lUIQwT4E6+g0IAAtP4sScWL+W1nkSTJEi9meGt6JwZtgPJgoQvliZXgAf4FmG823xthk+QmCY-iqxVB7SVOKanh6ew68Z1GtjlHhzcxALfNW-xfE2Nv+RryOho7abTnsDuu2dSW2Y5XtpPWOQeFb71-HaqII+rSNJuHfKzlHpI8NQjI0jgYCx4TTzfs9lt0yznnwo5308d4XzeLZ5PJMHiNVfn5KF96wgXlmi7BtXItE62EI2kkIRNkEYTZBxIKG85prMd8rZfZb1u-RJucD26Q8EkXo-zuPV4x318XT-Hc1p+Ti9wivYIAQCV1TWa6TwlEyRAR92PgLB2w8zxj2zMudgpdy6sDkFPPWTY-D5Hyp8ZInwHKcT+KkII-FvIwjbJ8Vah8c7-RPkFVgiDqIWlAn4UC1Y2wKyliCeEzkPh-3+BEesXwfrZ3KiHPOp9Bio3BpDQw1DRYFHmjkNy1YF4RA8AVWm0j-jfACBEZeUIfrFCAA */
   createMachine<
     DatasetQualityControllerContext,
     DatasetQualityControllerEvent,
@@ -119,6 +123,10 @@ export const createPureDatasetQualityControllerStateMachine = (
               target: 'idle',
               actions: ['storeDatasetDetails'],
             },
+            onError: {
+              target: 'idle',
+              actions: ['fetchDatasetDetailsFailedNotifier'],
+            },
           },
         },
       },
@@ -210,7 +218,9 @@ export const createDatasetQualityControllerStateMachine = ({
       notifyFetchDatasetStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
         fetchDatasetStatsFailedNotifier(toasts, event.data),
       notifyFetchDegradedStatsFailed: (_context, event: DoneInvokeEvent<Error>) =>
-        fetchDatasetStatsFailedNotifier(toasts, event.data),
+        fetchDegradedStatsFailedNotifier(toasts, event.data),
+      notifyFetchDatasetDetailsFailed: (_context, event: DoneInvokeEvent<Error>) =>
+        fetchDatasetDetailsFailedNotifier(toasts, event.data),
     },
     services: {
       loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
