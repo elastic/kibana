@@ -60,7 +60,7 @@ export const addDiscoverEsqlQuery = (esqlQuery: string) => {
   selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${esqlQuery}`);
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
-  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).realClick();
+  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 
 export const convertEditorNonBreakingSpaceToSpace = (str: string) => {
