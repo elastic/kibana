@@ -482,16 +482,9 @@ function validateSource(
       })
     );
   } else {
+    // give up on validate if CCS for now
     const hasCCS = hasCCSSource(source.name);
-    if (hasCCS) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'ccsNotSupportedForCommand',
-          values: { value: source.name },
-          locations: source.location,
-        })
-      );
-    } else {
+    if (!hasCCS) {
       const isWildcardAndNotSupported =
         hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
       if (isWildcardAndNotSupported) {

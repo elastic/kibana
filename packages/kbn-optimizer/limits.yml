@@ -107,9 +107,10 @@ pageLoadAssetSize:
   observabilityAIAssistant: 25000
   observabilityLogExplorer: 46650
   observabilityOnboarding: 19573
-  observabilityShared: 52256
+  observabilityShared: 72039
   osquery: 107090
   painlessLab: 179748
+  presentationPanel: 55463
   presentationUtil: 58834
   profiling: 36694
   remoteClusters: 51327

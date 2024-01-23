@@ -13,6 +13,8 @@ interface SloListFilter {
   perPage: number;
   sortBy: string;
   sortDirection: string;
+  filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {
