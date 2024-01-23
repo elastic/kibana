@@ -390,9 +390,9 @@ export class Simulator {
   /**
    * The titles and descriptions (as text) from the node detail panel.
    */
-  public nodeDetailDescriptionListEntries(): Array<[string, string]> {
+  public nodeDetailEntries(): Array<[string, string]> {
     /**
-     * The details of the selected node are shown in a description list. This returns the title elements of the description list.
+     * The details of the selected node are shown in a table. This returns the title elements of the node list.
      */
     const titles = this.domNodes('[data-test-subj="resolver:node-detail:entry-title"]');
     /**
