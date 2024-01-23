@@ -53,7 +53,11 @@ export function DownloadPanelContent({
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiButtonEmpty onClick={onClose}>
-              <FormattedMessage id="xpack.lens.doneButton" defaultMessage="Done" />
+              <FormattedMessage
+                id="xpack.lens.doneButton"
+                data-test-subj="share.doneButton"
+                defaultMessage="Done"
+              />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>

@@ -56,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await PageObjects.lens.isShareActionEnabled('csvDownload'));
       expect(await PageObjects.lens.isShareActionEnabled('permalinks'));
-      await PageObjects.share.closeShareModal();
     });
 
     it('should provide only snapshot url sharing if visualization is not saved yet', async () => {
