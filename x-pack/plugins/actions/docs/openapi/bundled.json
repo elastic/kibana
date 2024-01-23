@@ -5305,7 +5305,7 @@
                       "null",
                       "string"
                     ],
-                    "description": "An identifier that is assigned to the incident when it is created by the connector. NOTE: If you use the default configuration of `{{ruleID}}:{{alert ID}}` and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.\n",
+                    "description": "An identifier that is assigned to the incident when it is created by the connector. NOTE: If you use the default value and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.\n",
                     "maxLength": 100,
                     "default": "{{rule.id}}:{{alert.id}}"
                   },
