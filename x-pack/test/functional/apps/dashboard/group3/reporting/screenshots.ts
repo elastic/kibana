@@ -198,6 +198,7 @@ export default function ({
 
         await PageObjects.reporting.openImageReportingPanel();
         await PageObjects.reporting.forceSharedItemsContainerSize({ width: 1405 });
+        await testSubjects.click('pngReportOption');
         await PageObjects.reporting.clickGenerateReportButton();
         await PageObjects.reporting.removeForceSharedItemsContainerSize();
 
