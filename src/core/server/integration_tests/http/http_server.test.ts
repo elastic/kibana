@@ -56,7 +56,9 @@ describe('Http server', () => {
 
       const router = new Router('', logger, enhanceWithContext, {
         isDev: false,
-        versionedRouteResolution: 'oldest',
+        versionedRouterOptions: {
+          defaultHandlerResolutionStrategy: 'oldest',
+        },
       });
       router.post(
         {
