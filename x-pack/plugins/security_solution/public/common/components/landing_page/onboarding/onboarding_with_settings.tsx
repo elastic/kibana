@@ -9,10 +9,12 @@ import React from 'react';
 import { useAvailableSteps } from './hooks/use_available_steps';
 import { useProductTypes } from './hooks/use_product_types';
 import { Onboarding } from './onboarding';
+import type { StepId } from './types';
 
-export const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean }> = ({
-  indicesExist,
-}) => {
+export const OnboardingWithSettingsComponent: React.FC<{
+  defaultExpandedStep?: StepId;
+  indicesExist?: boolean;
+}> = ({ defaultExpandedStep, indicesExist }) => {
   const productTypes = useProductTypes();
   const onboardingSteps = useAvailableSteps();
 
@@ -22,6 +24,7 @@ export const OnboardingWithSettingsComponent: React.FC<{ indicesExist?: boolean 
 
   return (
     <Onboarding
+      defaultExpandedStep={defaultExpandedStep}
       indicesExist={indicesExist}
       productTypes={productTypes}
       onboardingSteps={onboardingSteps}

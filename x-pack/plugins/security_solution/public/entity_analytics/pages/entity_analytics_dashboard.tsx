@@ -24,6 +24,7 @@ import { useHasSecurityCapability } from '../../helper_hooks';
 import { EntityAnalyticsHeader } from '../components/entity_analytics_header';
 import { EntityAnalyticsAnomalies } from '../components/entity_analytics_anomalies';
 import { EntityAnalyticsRiskScores } from '../components/entity_analytics_risk_score';
+import { AddIntegrationsSteps } from '../../common/components/landing_page/onboarding/types';
 
 const EntityAnalyticsComponent = () => {
   const { data: riskScoreEngineStatus } = useRiskEngineStatus();
@@ -71,7 +72,7 @@ const EntityAnalyticsComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.entityAnalytics} />

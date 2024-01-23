@@ -66,9 +66,11 @@ const syncExpandedCardStepsFromStorageToURL = (
 };
 
 export const useTogglePanel = ({
+  defaultExpandedStep,
   productTypes,
   onboardingSteps,
 }: {
+  defaultExpandedStep?: StepId;
   productTypes?: SecurityProductTypes;
   onboardingSteps: StepId[];
 }) => {
@@ -120,12 +122,12 @@ export const useTogglePanel = ({
   );
 
   const expandedCardsInitialStates: ExpandedCardSteps = useMemo(() => {
-    if (stepIdFromHash) {
-      syncExpandedCardStepsToStorageFromURL(stepIdFromHash);
+    if (defaultExpandedStep || stepIdFromHash) {
+      syncExpandedCardStepsToStorageFromURL(defaultExpandedStep ?? stepIdFromHash);
     }
 
     return getAllExpandedCardStepsFromStorage();
-  }, [getAllExpandedCardStepsFromStorage, stepIdFromHash]);
+  }, [defaultExpandedStep, getAllExpandedCardStepsFromStorage, stepIdFromHash]);
 
   const onStepClicked: OnStepClicked = useCallback(
     ({ stepId, cardId, isExpanded }) => {

@@ -48,6 +48,7 @@ import type {
   ReportDataQualityCheckAllCompletedParams,
   ReportDataQualityIndexCheckedParams,
 } from '../../common/lib/telemetry';
+import { AddIntegrationsSteps } from '../../common/components/landing_page/onboarding/types';
 
 const LOCAL_STORAGE_KEY = 'dataQualityDashboardLastChecked';
 
@@ -296,7 +297,7 @@ const DataQualityComponent: React.FC = () => {
           />
         </SecuritySolutionPageWrapper>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.dataQuality} />

@@ -65,6 +65,7 @@ import { hasMlUserPermissions } from '../../../../../common/machine_learning/has
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
+import { AddIntegrationsSteps } from '../../../../common/components/landing_page/onboarding/types';
 
 const QUERY_ID = 'UsersDetailsQueryId';
 const ES_USER_FIELD = 'user.name';
@@ -264,7 +265,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

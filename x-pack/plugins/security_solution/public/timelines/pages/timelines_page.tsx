@@ -24,6 +24,7 @@ import * as i18n from './translations';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { AddIntegrationsSteps } from '../../common/components/landing_page/onboarding/types';
 
 const TimelinesContainer = styled.div`
   width: 100%;
@@ -93,7 +94,7 @@ export const TimelinesPageComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.timelines} />

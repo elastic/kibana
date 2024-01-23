@@ -57,6 +57,7 @@ import {
   CellActionsMode,
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
+import { AddIntegrationsSteps } from '../../../../common/components/landing_page/onboarding/types';
 
 const NetworkDetailsManage = manageQuery(IpOverview);
 
@@ -260,7 +261,7 @@ const NetworkDetailsComponent: React.FC = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.network} />

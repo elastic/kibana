@@ -8,11 +8,14 @@
 import React, { memo, useMemo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { getOnboardingComponent } from './onboarding';
+import type { StepId } from './onboarding/types';
 
-export const LandingPageComponent = memo(() => {
-  const { indicesExist } = useSourcererDataView();
-  const OnBoarding = useMemo(() => getOnboardingComponent(), []);
-  return <OnBoarding indicesExist={indicesExist} />;
-});
+export const LandingPageComponent = memo(
+  ({ defaultExpandedStep }: { defaultExpandedStep?: StepId }) => {
+    const { indicesExist } = useSourcererDataView();
+    const OnBoarding = useMemo(() => getOnboardingComponent(), []);
+    return <OnBoarding indicesExist={indicesExist} defaultExpandedStep={defaultExpandedStep} />;
+  }
+);
 
 LandingPageComponent.displayName = 'LandingPageComponent';

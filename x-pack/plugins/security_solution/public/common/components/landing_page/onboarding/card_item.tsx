@@ -41,7 +41,7 @@ const CardItemComponent: React.FC<{
   onStepClicked,
   sectionId,
 }) => {
-  const isExpandedCard = expandedCardSteps[cardId].isExpanded;
+  const isExpandedCard = expandedCardSteps[cardId]?.isExpanded ?? false;
 
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
   const expandedSteps = useMemo(

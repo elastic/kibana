@@ -24,12 +24,14 @@ import type { StepId } from './types';
 import { useOnboardingStyles } from './styles/onboarding.styles';
 
 interface OnboardingProps {
+  defaultExpandedStep?: StepId;
   indicesExist?: boolean;
   productTypes: SecurityProductTypes | undefined;
   onboardingSteps: StepId[];
 }
 
 export const OnboardingComponent: React.FC<OnboardingProps> = ({
+  defaultExpandedStep,
   indicesExist,
   productTypes,
   onboardingSteps,
@@ -45,7 +47,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       totalStepsLeft,
       expandedCardSteps,
     },
-  } = useTogglePanel({ productTypes, onboardingSteps });
+  } = useTogglePanel({ productTypes, onboardingSteps, defaultExpandedStep });
   const productTier = productTypes?.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;

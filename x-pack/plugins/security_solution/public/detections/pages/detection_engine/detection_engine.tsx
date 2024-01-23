@@ -88,6 +88,7 @@ import { GroupedAlertsTable } from '../../components/alerts_table/alerts_groupin
 import { AlertsTableComponent } from '../../components/alerts_table';
 import type { AddFilterProps } from '../../components/alerts_kpis/common/types';
 import { DetectionPageFilterSet } from '../../components/detection_page_filters';
+import { AddIntegrationsSteps } from '../../../common/components/landing_page/onboarding/types';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -516,7 +517,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
     </>
   );

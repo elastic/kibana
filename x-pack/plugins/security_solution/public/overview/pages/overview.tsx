@@ -32,6 +32,7 @@ import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti
 import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { LandingPageComponent } from '../../common/components/landing_page';
+import { AddIntegrationsSteps } from '../../common/components/landing_page/onboarding/types';
 
 const OverviewComponent = () => {
   const getGlobalFiltersQuerySelector = useMemo(
@@ -144,7 +145,7 @@ const OverviewComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.overview} />

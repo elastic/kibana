@@ -32,6 +32,7 @@ import { NoPrivileges } from '../../common/components/no_privileges';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { useGlobalFilterQuery } from '../../common/hooks/use_global_filter_query';
 import { useKibana } from '../../common/lib/kibana';
+import { AddIntegrationsSteps } from '../../common/components/landing_page/onboarding/types';
 
 const DetectionResponseComponent = () => {
   const { cases } = useKibana().services;
@@ -119,7 +120,7 @@ const DetectionResponseComponent = () => {
           </SecuritySolutionPageWrapper>
         </>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.detectionAndResponse} />

@@ -8,8 +8,18 @@
 import React from 'react';
 
 import { Onboarding } from './lazy';
+import type { StepId } from './types';
 
-export const getOnboardingComponent = (): React.ComponentType<{ indicesExist?: boolean }> =>
-  function OnBoardingComponent({ indicesExist }: { indicesExist?: boolean }) {
-    return <Onboarding indicesExist={indicesExist} />;
+export const getOnboardingComponent = (): React.ComponentType<{
+  defaultExpandedStep?: StepId;
+  indicesExist?: boolean;
+}> =>
+  function OnBoardingComponent({
+    defaultExpandedStep,
+    indicesExist,
+  }: {
+    defaultExpandedStep?: StepId;
+    indicesExist?: boolean;
+  }) {
+    return <Onboarding indicesExist={indicesExist} defaultExpandedStep={defaultExpandedStep} />;
   };

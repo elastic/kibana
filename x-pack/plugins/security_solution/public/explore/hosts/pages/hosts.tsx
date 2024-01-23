@@ -57,6 +57,7 @@ import { LandingPageComponent } from '../../../common/components/landing_page';
 import { fieldNameExistsFilter } from '../../../common/components/visualization_actions/utils';
 import { useLicense } from '../../../common/hooks/use_license';
 import { useHasSecurityCapability } from '../../../helper_hooks';
+import { AddIntegrationsSteps } from '../../../common/components/landing_page/onboarding/types';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -239,7 +240,7 @@ const HostsComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.hosts} />

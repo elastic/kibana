@@ -53,6 +53,7 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { LandingPageComponent } from '../../../common/components/landing_page';
 import { userNameExistsFilter } from './details/helpers';
 import { useHasSecurityCapability } from '../../../helper_hooks';
+import { AddIntegrationsSteps } from '../../../common/components/landing_page/onboarding/types';
 
 const ID = 'UsersQueryId';
 
@@ -230,7 +231,7 @@ const UsersComponent = () => {
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>
       ) : (
-        <LandingPageComponent />
+        <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
       )}
 
       <SpyRoute pageName={SecurityPageName.users} />

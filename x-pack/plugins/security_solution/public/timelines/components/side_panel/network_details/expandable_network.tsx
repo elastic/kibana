@@ -30,6 +30,7 @@ import { networkModel } from '../../../../explore/network/store';
 import { useAnomaliesTableData } from '../../../../common/components/ml/anomaly/use_anomalies_table_data';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import { LandingPageComponent } from '../../../../common/components/landing_page';
+import { AddIntegrationsSteps } from '../../../../common/components/landing_page/onboarding/types';
 
 interface ExpandableNetworkProps {
   expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
@@ -147,6 +148,6 @@ export const ExpandableNetworkDetails = ({
       jobNameById={jobNameById}
     />
   ) : (
-    <LandingPageComponent />
+    <LandingPageComponent defaultExpandedStep={AddIntegrationsSteps.connectToDataSources} />
   );
 };
