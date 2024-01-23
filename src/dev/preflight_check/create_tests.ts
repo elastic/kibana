@@ -56,7 +56,7 @@ export async function createTests({
 
     const ext = match ? match[2] : undefined;
 
-    if (ext === '.test.ts' || ext === '.test.tsx') {
+    if (ext === '.test.ts' || ext === '.test.tsx' || ext === 'test.js') {
       jestCheck.setFiles([{ path, file: new File(path) }]);
       typescriptCheck.setFiles([{ path, file: new File(path) }]);
       eslintCheck.setFiles([{ path, file: new File(path) }]);

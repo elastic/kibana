@@ -31,7 +31,7 @@ export class JestCheck extends PreflightCheck {
       }
 
       try {
-        await execa('npx', ['jest', path, '-c', jestConfig], {
+        await execa('node_modules/.bin', ['jest', path, '-c', jestConfig], {
           env: { FORCE_COLOR: 'true' },
           stdio: ['ignore'],
         });
