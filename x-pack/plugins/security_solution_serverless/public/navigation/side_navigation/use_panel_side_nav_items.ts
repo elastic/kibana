@@ -9,7 +9,6 @@ import { useCallback, useMemo } from 'react';
 import { type NavigationLink } from '@kbn/security-solution-navigation';
 import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
-import { useNavLinks } from '../../common/hooks/use_nav_links';
 import type { ProjectSideNavItem } from './types';
 import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
 import { isBottomNavItemId } from '../links/util';
@@ -53,19 +52,9 @@ const formatLink = (
 };
 
 /**
- * Returns all the formatted SideNavItems, including external links
+ * Returns all the formatted SideNavItems for the panel, including external links
  */
-export const useSideNavItems = (): ProjectSideNavItem[] => {
-  const navLinks = useNavLinks();
-  return useFormattedSideNavItems(navLinks);
-};
-
-/**
- * Returns all the formatted SideNavItems, including external links
- */
-export const useFormattedSideNavItems = (
-  navLinks: ProjectNavigationLink[]
-): ProjectSideNavItem[] => {
+export const usePanelSideNavItems = (navLinks: ProjectNavigationLink[]): ProjectSideNavItem[] => {
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(
