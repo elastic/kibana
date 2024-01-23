@@ -18,6 +18,7 @@ import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-server';
 import { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
+import { CoreDiServiceStart } from '@kbn/core-di-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -49,4 +50,6 @@ export interface CoreStart {
   coreUsageData: CoreUsageDataStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
 }

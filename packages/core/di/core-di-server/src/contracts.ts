@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { PluginContainer, ContainerModule, CreateModuleFn } from '@kbn/core-di-common';
+import type {
+  PluginContainer,
+  ContainerModule,
+  CreateModuleFn,
+  ReadonlyContainer,
+} from '@kbn/core-di-common';
 
 /**
  * Public setup contract of the DI service.
@@ -22,7 +27,7 @@ export interface CoreDiServiceSetup {
    *
    * @example
    * ```ts
-   * core.di.setupModule((pluginModule, { createModule }) => {
+   * core.di.setupModule((pluginContainer, { createModule }) => {
    *   // register internal modules that will only be visible at the plugin level.
    *   pluginModule.load(myInternalModule());
    *
@@ -66,4 +71,9 @@ export interface CoreDiSetupModuleCallbackResult {
  * Public start contract of the DI service.
  * @public
  */
-export interface CoreDiServiceStart {}
+export interface CoreDiServiceStart {
+  /**
+   * The plugin-scoped container
+   */
+  container: ReadonlyContainer;
+}

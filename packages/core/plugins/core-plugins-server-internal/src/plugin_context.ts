@@ -361,5 +361,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    injection: {
+      container: deps.injection.getPluginContainer(plugin.opaqueId),
+    },
   };
 }

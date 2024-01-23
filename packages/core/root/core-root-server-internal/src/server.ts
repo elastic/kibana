@@ -368,6 +368,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const injectionStart = this.injectionService.start();
     const analyticsStart = this.analytics.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
@@ -420,6 +421,7 @@ export class Server {
       uiSettings: uiSettingsStart,
       coreUsageData: coreUsageDataStart,
       deprecations: deprecationsStart,
+      injection: injectionStart,
     };
 
     await this.plugins.start(this.coreStart);

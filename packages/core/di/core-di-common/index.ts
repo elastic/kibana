@@ -7,10 +7,12 @@
  */
 
 export { inject, injectable } from './src/decorators';
-export {} from './'
 export type {
   ServiceIdentifier,
   PluginContainer,
   ContainerModule,
   CreateModuleFn,
+  CreateModuleCallback,
+  CreateModuleOptions,
+  ReadonlyContainer,
 } from './src/interfaces';
