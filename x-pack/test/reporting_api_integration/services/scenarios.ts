@@ -52,7 +52,7 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const initEcommerce = async (
     performance: LoadActionPerfOptions = {
-      highWaterMark: 300,
+      batchSize: 300,
       concurrency: 1,
     }
   ) => {

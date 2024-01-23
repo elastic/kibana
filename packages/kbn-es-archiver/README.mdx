@@ -23,30 +23,19 @@ We now have a performance parameter for the es-archiver#load(), entry-point
 function.
 This parameter is optional, with defaults:
 
- - HighWaterMark (stream batch size): 5000
+ - Batch size: 5000
  - Concurrency (maximum number of bulk requests that can be active in parallel): 4 
 
 ### Usage in Test Files
 
-To control the batch size
+To control the batch size and concurrency
 
-#### Abstract
-
-```typescript
-await esArchiver.load('SOME-ESARCHIVER-ARCHIVE', {
-  performance: {
-    highWaterMark: SOME-POSITIVE-INTEGER,
-    concurrency: SOME-POSITIVE-INTEGER,
-  },
-});
-```
-
-#### Actual Example 
+#### Example 
 
 ```typescript
 await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare', {
   performance: {
-    highWaterMark: 5000,
+    batchSize: 5000,
     concurrency: 4,
   },
 });

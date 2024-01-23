@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await esArchiver.load(archives.data, {
         performance: {
-          highWaterMark: 300,
+          batchSize: 300,
           concurrency: 5,
         },
       });

@@ -179,7 +179,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await reporting.initLogs();
         await esArchiver.load('x-pack/test/functional/es_archives/reporting/hugedata', {
           performance: {
-            highWaterMark: 5000,
+            batchSize: 5000,
             concurrency: 4,
           },
         });

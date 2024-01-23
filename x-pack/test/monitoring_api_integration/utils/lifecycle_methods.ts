@@ -29,7 +29,7 @@ export const getLifecycleMethods = (getService: FtrProviderContext['getService']
         archivesArray.map((archive) =>
           esArchiver.load(archive, {
             performance: {
-              highWaterMark: 300,
+              batchSize: 300,
               concurrency: 1,
             },
           })

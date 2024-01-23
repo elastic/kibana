@@ -70,7 +70,7 @@ export function createIndexDocRecordsStream(
   }
 
   return new Writable({
-    highWaterMark: performance?.highWaterMark || DEFAULT_PERFORMANCE_OPTIONS.highWaterMark,
+    highWaterMark: performance?.batchSize || DEFAULT_PERFORMANCE_OPTIONS.batchSize,
     objectMode: true,
 
     async write(record, enc, callback) {
@@ -96,11 +96,11 @@ export function createIndexDocRecordsStream(
 }
 
 export interface LoadActionPerfOptions {
-  highWaterMark: number;
+  batchSize: number;
   concurrency: number;
 }
 
 const DEFAULT_PERFORMANCE_OPTIONS: LoadActionPerfOptions = {
-  highWaterMark: 5000,
+  batchSize: 5000,
   concurrency: 4,
 } as const;
