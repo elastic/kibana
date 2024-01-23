@@ -14,6 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
   const { username, password } = getService('config').get('servers.kibana');
+  const log = getService('log');
 
   describe('Audit Log', function () {
     const logFilePath = Path.resolve(__dirname, '../../plugins/audit_log/audit.log');
@@ -41,6 +42,10 @@ export default function ({ getService }: FtrProviderContext) {
       const createEvent = content.find((c) => c.event.action === 'saved_object_create');
       expect(createEvent).to.be.ok();
       expect(createEvent.trace.id).to.be.ok();
+      if (!createEvent.user.name) {
+        log.info(`***** Create event missing user.name: ${JSON.stringify(createEvent)}`);
+        log.info(`***** File content: ${JSON.stringify(content)}`);
+      }
       expect(createEvent.user.name).to.be(username);
       expect(createEvent.kibana.space_id).to.be('default');
 
