@@ -9,7 +9,6 @@ import React from 'react';
 
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Assistant } from '.';
-import { Conversation } from '../assistant_context/types';
 import type { IHttpFetchError } from '@kbn/core/public';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -30,27 +29,28 @@ jest.mock('react-use');
 
 jest.mock('./prompt_editor', () => ({ PromptEditor: jest.fn() }));
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
+jest.mock('./api/conversations/use_fetch_current_user_conversations', () => ({
+  useFetchCurrentUserConversations: jest.fn().mockResolvedValue(() => ({
+    [WELCOME_CONVERSATION_TITLE]: {
+      id: WELCOME_CONVERSATION_TITLE,
+      title: WELCOME_CONVERSATION_TITLE,
+      messages: [],
+      apiConfig: {},
+    },
+    [MOCK_CONVERSATION_TITLE]: {
+      id: MOCK_CONVERSATION_TITLE,
+      title: MOCK_CONVERSATION_TITLE,
+      messages: [],
+      apiConfig: {},
+    },
+  })),
+}));
 
 const MOCK_CONVERSATION_TITLE = 'electric sheep';
 
-const getInitialConversations = (): Record<string, Conversation> => ({
-  [WELCOME_CONVERSATION_TITLE]: {
-    id: WELCOME_CONVERSATION_TITLE,
-    title: WELCOME_CONVERSATION_TITLE,
-    messages: [],
-    apiConfig: {},
-  },
-  [MOCK_CONVERSATION_TITLE]: {
-    id: MOCK_CONVERSATION_TITLE,
-    title: MOCK_CONVERSATION_TITLE,
-    messages: [],
-    apiConfig: {},
-  },
-});
-
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
-    <TestProviders getInitialConversations={getInitialConversations} {...providerProps}>
+    <TestProviders>
       <Assistant {...extraProps} />
     </TestProviders>
   );

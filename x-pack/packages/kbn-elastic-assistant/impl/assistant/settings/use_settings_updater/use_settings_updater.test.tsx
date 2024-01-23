@@ -15,11 +15,16 @@ import {
   mockSuperheroSystemPrompt,
   mockSystemPrompt,
 } from '../../../mock/system_prompt';
+import { HttpSetup } from '@kbn/core/public';
 
 const mockConversations = {
   [alertConvo.id]: alertConvo,
   [welcomeConvo.id]: welcomeConvo,
 };
+
+const mockHttp = {
+  fetch: jest.fn(),
+} as unknown as HttpSetup;
 
 const mockSystemPrompts: Prompt[] = [mockSystemPrompt];
 const mockQuickPrompts: Prompt[] = [defaultSystemPrompt];
@@ -29,14 +34,12 @@ const initialDefaultAllowReplacement = ['replacement1'];
 
 const setAllQuickPromptsMock = jest.fn();
 const setAllSystemPromptsMock = jest.fn();
-const setConversationsMock = jest.fn();
 const setDefaultAllowMock = jest.fn();
 const setDefaultAllowReplacementMock = jest.fn();
 const setKnowledgeBaseMock = jest.fn();
 const reportAssistantSettingToggled = jest.fn();
 const mockValues = {
   assistantTelemetry: { reportAssistantSettingToggled },
-  conversations: mockConversations,
   allSystemPrompts: mockSystemPrompts,
   allQuickPrompts: mockQuickPrompts,
   defaultAllow: initialDefaultAllow,
@@ -46,12 +49,13 @@ const mockValues = {
     isEnabledKnowledgeBase: true,
     latestAlerts: DEFAULT_LATEST_ALERTS,
   },
+  baseConversations: {},
   setAllQuickPrompts: setAllQuickPromptsMock,
-  setConversations: setConversationsMock,
   setAllSystemPrompts: setAllSystemPromptsMock,
   setDefaultAllow: setDefaultAllowMock,
   setDefaultAllowReplacement: setDefaultAllowReplacementMock,
   setKnowledgeBase: setKnowledgeBaseMock,
+  http: mockHttp,
 };
 
 const updatedValues = {
@@ -81,10 +85,11 @@ describe('useSettingsUpdater', () => {
   });
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
       await waitForNextUpdate();
       const {
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
         setUpdatedDefaultAllow,
@@ -93,7 +98,8 @@ describe('useSettingsUpdater', () => {
         resetSettings,
       } = result.current;
 
-      setUpdatedConversationSettings(updatedValues.conversations);
+      setConversationSettings(updatedValues.conversations);
+      setConversationsSettingsBulkActions({});
       setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
       setUpdatedDefaultAllow(updatedValues.defaultAllow);
@@ -109,7 +115,7 @@ describe('useSettingsUpdater', () => {
 
       resetSettings();
 
-      expect(result.current.conversationSettings).toEqual(mockValues.conversations);
+      expect(result.current.conversationSettings).toEqual(mockConversations);
       expect(result.current.quickPromptSettings).toEqual(mockValues.allQuickPrompts);
       expect(result.current.systemPromptSettings).toEqual(mockValues.allSystemPrompts);
       expect(result.current.defaultAllow).toEqual(mockValues.defaultAllow);
@@ -120,10 +126,11 @@ describe('useSettingsUpdater', () => {
 
   it('should update all state variables to their updated values when saveSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
       await waitForNextUpdate();
       const {
-        setUpdatedConversationSettings,
+        setConversationSettings,
+        setConversationsSettingsBulkActions,
         setUpdatedQuickPromptSettings,
         setUpdatedSystemPromptSettings,
         setUpdatedDefaultAllow,
@@ -131,7 +138,8 @@ describe('useSettingsUpdater', () => {
         setUpdatedKnowledgeBaseSettings,
       } = result.current;
 
-      setUpdatedConversationSettings(updatedValues.conversations);
+      setConversationSettings(updatedValues.conversations);
+      setConversationsSettingsBulkActions({ delete: { ids: ['1'] } });
       setUpdatedQuickPromptSettings(updatedValues.allQuickPrompts);
       setUpdatedSystemPromptSettings(updatedValues.allSystemPrompts);
       setUpdatedDefaultAllow(updatedValues.defaultAllow);
@@ -140,9 +148,16 @@ describe('useSettingsUpdater', () => {
 
       result.current.saveSettings();
 
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/api/elastic_assistant/conversations/_bulk_action',
+        {
+          method: 'POST',
+          version: '2023-10-31',
+          body: '{"delete":{"ids":["1"]}}',
+        }
+      );
       expect(setAllQuickPromptsMock).toHaveBeenCalledWith(updatedValues.allQuickPrompts);
       expect(setAllSystemPromptsMock).toHaveBeenCalledWith(updatedValues.allSystemPrompts);
-      expect(setConversationsMock).toHaveBeenCalledWith(updatedValues.conversations);
       expect(setDefaultAllowMock).toHaveBeenCalledWith(updatedValues.defaultAllow);
       expect(setDefaultAllowReplacementMock).toHaveBeenCalledWith(
         updatedValues.defaultAllowReplacement
@@ -152,7 +167,7 @@ describe('useSettingsUpdater', () => {
   });
   it('should track which toggles have been updated when saveSettings is called', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
@@ -167,7 +182,7 @@ describe('useSettingsUpdater', () => {
   });
   it('should track only toggles that updated', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
@@ -183,7 +198,7 @@ describe('useSettingsUpdater', () => {
   });
   it('if no toggles update, do not track anything', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater(mockConversations));
       await waitForNextUpdate();
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 

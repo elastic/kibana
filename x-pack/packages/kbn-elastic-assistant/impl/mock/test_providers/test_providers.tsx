@@ -15,12 +15,11 @@ import { ThemeProvider } from 'styled-components';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AssistantProvider, AssistantProviderProps } from '../../assistant_context';
-import { AssistantAvailability, Conversation } from '../../assistant_context/types';
+import { AssistantAvailability } from '../../assistant_context/types';
 
 interface Props {
   assistantAvailability?: AssistantAvailability;
   children: React.ReactNode;
-  getInitialConversations?: () => Record<string, Conversation>;
   providerContext?: Partial<AssistantProviderProps>;
 }
 

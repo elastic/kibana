@@ -236,7 +236,14 @@ const AssistantComponent: React.FC<Props> = ({
     if (!currentConversation.excludeFromLastConversationStorage) {
       setLastConversationId(currentConversation.id);
     }
-  }, [areConnectorsFetched, connectors?.length, currentConversation, setLastConversationId]);
+  }, [
+    areConnectorsFetched,
+    connectors?.length,
+    conversationsData,
+    currentConversation,
+    isLoading,
+    setLastConversationId,
+  ]);
 
   const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
     conversation: blockBotConversation,

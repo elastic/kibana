@@ -27,7 +27,6 @@ window.scrollTo = jest.fn();
 export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailable = true }) => {
   const http = httpServiceMock.createSetupContract({ basePath: '/test' });
   const actionTypeRegistry = actionTypeRegistryMock.create();
-  const mockGetInitialConversations = jest.fn(() => ({}));
   const mockGetComments = jest.fn(() => []);
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
   const mockTelemetryEvents = {
@@ -71,11 +70,10 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            getInitialConversations={mockGetInitialConversations}
-            setConversations={jest.fn()}
             setDefaultAllow={jest.fn()}
             setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
+            baseConversations={{}}
           >
             <DataQualityProvider
               httpFetch={http.fetch}

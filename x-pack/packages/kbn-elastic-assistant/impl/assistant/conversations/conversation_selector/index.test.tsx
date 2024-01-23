@@ -93,7 +93,7 @@ describe('Conversation selector', () => {
   it('We can add a custom option', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ConversationSelector {...defaultProps} />
+        <ConversationSelector {...defaultProps} conversations={mockConversationsWithCustom} />
       </TestProviders>
     );
     const customOption = 'Custom option';
@@ -181,9 +181,7 @@ describe('Conversation selector', () => {
   it('Right arrow selects last conversation', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ConversationSelector
-          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-        />
+        <ConversationSelector {...defaultProps} conversations={mockConversationsWithCustom} />
       </TestProviders>
     );
 
@@ -199,9 +197,7 @@ describe('Conversation selector', () => {
   it('Right arrow does nothing when ctrlKey is false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ConversationSelector
-          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-        />
+        <ConversationSelector {...defaultProps} conversations={mockConversationsWithCustom} />
       </TestProviders>
     );
 
