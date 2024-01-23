@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { ControlGroupInput, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';

@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { keysOf } from '@elastic/eui';
-import { pick } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
 import { ControlGroupContainer } from '..';
-import { persistableControlGroupInputIsEqual } from '../../../common';
+import { ControlGroupInput } from '../../../common';
+import { isKeyEqual, unsavedChangesDiffingFunctions } from './control_group_diffing_functions';
 import { controlGroupReducers } from './control_group_reducers';
 
 /**
@@ -42,13 +41,13 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
               explicitInput: currentInput,
               componentState: { lastSavedInput },
             } = this.getState();
-
-            if (observer.closed) return;
-            const hasChanges = !persistableControlGroupInputIsEqual(
-              pick(currentInput, keysOf(lastSavedInput)),
-              lastSavedInput
-            );
-            this.hasUnsavedChanges.next(hasChanges);
+            getUnsavedChanges
+              .bind(this)(lastSavedInput, currentInput)
+              .then((unsavedChanges) => {
+                if (observer.closed) return;
+                const hasChanges = Object.keys(unsavedChanges).length > 0;
+                this.unsavedChanges.next(hasChanges ? unsavedChanges : undefined);
+              });
           });
         })
       )
@@ -66,4 +65,43 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
     next(action);
   };
   return diffingMiddleware;
+}
+
+/**
+ * Does a shallow diff between @param lastInput and @param input and
+ * @returns an object out of the keys which are different.
+ */
+export async function getUnsavedChanges(
+  this: ControlGroupContainer,
+  lastInput: ControlGroupInput,
+  input: ControlGroupInput
+): Promise<Partial<ControlGroupInput>> {
+  const allKeys = [...new Set([...Object.keys(lastInput), ...Object.keys(input)])] as Array<
+    keyof ControlGroupInput
+  >;
+
+  const keyComparisons = allKeys.map((key) => {
+    if (input[key] === undefined && lastInput[key] === undefined) {
+      return { key, isEqual: true };
+    }
+    const isEqual = isKeyEqual(
+      key,
+      {
+        currentValue: input[key],
+        currentInput: input,
+        lastValue: lastInput[key],
+        lastInput,
+      },
+      unsavedChangesDiffingFunctions
+    );
+    return { key, isEqual };
+  });
+
+  const inputChanges = keyComparisons.reduce((changes, current) => {
+    const { key, isEqual } = current;
+    if (!isEqual) (changes as { [key: string]: unknown })[key] = input[key];
+    return changes;
+  }, {} as Partial<ControlGroupInput>);
+
+  return inputChanges;
 }

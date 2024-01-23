@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, identity, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, Subject } from 'rxjs';
+import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import { BehaviorSubject, combineLatestWith, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import {
@@ -198,14 +198,22 @@ export const initializeDashboard = async ({
   })();
 
   const overrideInput = getInitialInput?.();
-  const initialInput: DashboardContainerInput = cloneDeep({
-    ...DEFAULT_DASHBOARD_INPUT,
-    ...(loadDashboardReturn?.dashboardInput ?? {}),
-    ...sessionStorageInput,
+  const initialControlGroupInput: ControlGroupInput | {} = {
+    ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+    ...(overrideInput?.controlGroupInput ?? {}),
+  };
+  const initialInput: DashboardContainerInput & { controlGroupInput?: ControlGroupInput } =
+    cloneDeep({
+      ...DEFAULT_DASHBOARD_INPUT,
+      ...omit(loadDashboardReturn?.dashboardInput ?? {}, 'controlGroupInput'),
+      ...sessionStorageInput,
 
-    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
-    ...overrideInput,
-  });
+      ...(initialViewMode ? { viewMode: initialViewMode } : {}),
+      ...omit(overrideInput, 'controlGroupInput'),
+    });
+  if (Object.keys(initialControlGroupInput).length > 0) {
+    initialInput.controlGroupInput = initialControlGroupInput as ControlGroupInput;
+  }
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
@@ -445,13 +453,32 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) => {
     dashboard.integrationSubscriptions.add(
-      dashboard.hasUnsavedChanges
+      dashboard.unsavedChanges
         .pipe(
-          distinctUntilChanged(),
-          combineLatestWith(dashboard.controlGroup?.hasUnsavedChanges ?? new BehaviorSubject(false))
+          combineLatestWith(
+            dashboard.controlGroup?.unsavedChanges ?? new BehaviorSubject(undefined)
+          )
+          // distinctUntilChanged(
+          //   (
+          //     [dashboardHasChanges1, controlGroupChanges1],
+          //     [dashboardHasChanges2, controlGroupChanges2]
+          //   ) =>
+          //     (dashboardHasChanges1 || Boolean(controlGroupChanges1)) ===
+          //     (dashboardHasChanges2 || Boolean(controlGroupChanges2))
+          // )
         )
-        .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
-          dashboard.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
+        .subscribe(([dashboardChanges, controlGroupChanges]) => {
+          dashboard.dispatch.setHasUnsavedChanges(
+            Boolean(dashboardChanges) || Boolean(controlGroupChanges)
+          );
+          console.log('dashboard chanbges', dashboardChanges);
+          console.log('controlGroupChanges', controlGroupChanges);
+
+          // if (creationOptions?.useSessionStorageIntegration) {
+          //   dashboardBackup.setState(this.getDashboardSavedObjectId(), {
+          //     controlGroupInput: controlGroupChanges,
+          //   });
+          // }
         })
     );
   });

@@ -70,7 +70,7 @@ export const persistableControlGroupInputIsEqual = (
   return false;
 };
 
-const getPanelsAreEqual = (
+export const getPanelsAreEqual = (
   originalPanels: PersistableControlGroupInput['panels'],
   newPanels: PersistableControlGroupInput['panels']
 ) => {

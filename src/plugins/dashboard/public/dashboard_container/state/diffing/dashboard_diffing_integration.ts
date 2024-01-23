@@ -36,7 +36,7 @@ export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = 
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
  */
-const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
+export const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'timeslice',
@@ -52,7 +52,6 @@ const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
  */
 export const keysNotConsideredUnsavedChanges: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
-  'controlGroupInput',
   'executionContext',
   'timeslice',
   'viewMode',
@@ -100,15 +99,13 @@ export function startDiffingDashboardState(
               .bind(this)(lastSavedInput, currentInput)
               .then((unsavedChanges) => {
                 if (observer.closed) return;
-                // console.log('UNSAVEDCHANGES dashboard', unsavedChanges);
-                // dispatch has unsaved changes to behaviour subject
                 const hasChanges =
                   Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
-                this.hasUnsavedChanges.next(hasChanges);
+                this.unsavedChanges.next(hasChanges ? unsavedChanges : undefined);
 
-                if (creationOptions?.useSessionStorageIntegration) {
-                  backupUnsavedChanges.bind(this)(unsavedChanges);
-                }
+                // if (creationOptions?.useSessionStorageIntegration) {
+                //   backupUnsavedChanges.bind(this)(unsavedChanges);
+                // }
               });
           });
         })

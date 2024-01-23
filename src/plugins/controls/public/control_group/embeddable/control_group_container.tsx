@@ -19,9 +19,9 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
-  getDefaultControlGroupInput,
   PersistableControlGroupInput,
   persistableControlGroupInputIsEqual,
+  PersistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
@@ -105,7 +105,8 @@ export class ControlGroupContainer extends Container<
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
-  public hasUnsavedChanges: BehaviorSubject<boolean>;
+  // public hasUnsavedChanges: BehaviorSubject<boolean>;
+  public unsavedChanges: BehaviorSubject<Partial<PersistableControlGroupInput> | undefined>;
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
 
@@ -129,7 +130,9 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing dashboard state
-    this.hasUnsavedChanges = new BehaviorSubject(false);
+    this.unsavedChanges = new BehaviorSubject<Partial<PersistableControlGroupInput> | undefined>(
+      undefined
+    );
     const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 
     // build redux embeddable tools
@@ -204,7 +207,7 @@ export class ControlGroupContainer extends Container<
     );
 
     this.subscriptions.add(
-      this.hasUnsavedChanges.pipe(distinctUntilChanged()).subscribe((controlGroupHasChanges) => {
+      this.unsavedChanges.pipe(distinctUntilChanged()).subscribe((controlGroupHasChanges) => {
         console.log('controlGroupHasChanges 1', controlGroupHasChanges);
       })
     );
@@ -221,7 +224,7 @@ export class ControlGroupContainer extends Container<
 
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
     const input = this.getInput();
-    return pick(input, ['id', 'panels', 'chainingSystem', 'controlStyle', 'ignoreParentSettings']);
+    return pick(input, [...PersistableControlGroupInputKeys, 'id']);
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {

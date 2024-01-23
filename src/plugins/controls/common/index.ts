@@ -18,6 +18,7 @@ export {
   type RawControlGroupAttributes,
   type PersistableControlGroupInput,
   type SerializableControlGroupInput,
+  PersistableControlGroupInputKeys,
 } from './control_group/types';
 export {
   controlGroupInputToRawControlGroupAttributes,

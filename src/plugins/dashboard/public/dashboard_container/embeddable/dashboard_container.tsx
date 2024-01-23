@@ -112,7 +112,8 @@ export class DashboardContainer
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
-  public hasUnsavedChanges: BehaviorSubject<boolean>;
+  // public hasUnsavedChanges: BehaviorSubject<boolean>;
+  public unsavedChanges: BehaviorSubject<Partial<DashboardContainerInput> | undefined>;
   private hasUnsavedChangesSubscription: Subscription | undefined;
 
   public searchSessionId?: string;
@@ -175,7 +176,9 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    this.hasUnsavedChanges = new BehaviorSubject(false);
+    this.unsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
+      undefined
+    );
     const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
@@ -210,12 +213,6 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
-
-    this.hasUnsavedChangesSubscription = this.hasUnsavedChanges
-      .pipe(distinctUntilChanged())
-      .subscribe((hasChanges) => {
-        this.dispatch.setHasUnsavedChanges(hasChanges);
-      });
   }
 
   public getAppContext() {

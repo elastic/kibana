@@ -9,7 +9,7 @@
 import { DataViewField } from '@kbn/data-views-plugin/common';
 import { ContainerOutput } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableState } from '@kbn/presentation-util-plugin/public';
-import { ControlGroupInput, PersistableControlGroupInput } from '../../common/control_group/types';
+import { ControlGroupInput } from '../../common/control_group/types';
 import { CommonControlOutput } from '../types';
 
 export type ControlGroupOutput = ContainerOutput &
@@ -41,13 +41,13 @@ export interface ControlGroupSettings {
 }
 
 export type ControlGroupComponentState = ControlGroupSettings & {
-  lastSavedInput: PersistableControlGroupInput;
+  lastSavedInput: ControlGroupInput;
   applyButtonEnabled?: boolean;
 };
 
 export {
-  type ControlsPanels,
+  CONTROL_GROUP_TYPE,
   type ControlGroupInput,
   type ControlPanelState,
-  CONTROL_GROUP_TYPE,
+  type ControlsPanels,
 } from '../../common/control_group/types';
