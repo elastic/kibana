@@ -50,19 +50,18 @@ export const DiscoverHistogramLayout = ({
     [panelsToggle]
   );
 
-  let table: Datatable | undefined = useMemo(() => {
+  const table: Datatable | undefined = useMemo(() => {
     if (
       isPlainRecord &&
       datatable &&
       datatable &&
       ['partial', 'complete'].includes(datatable.fetchStatus)
     ) {
-      table = {
+      return {
         type: 'datatable' as 'datatable',
         rows: datatable.result!.map((r) => r.raw),
         columns: datatable.textBasedQueryColumns || [],
       };
-      return table;
     }
   }, [datatable, isPlainRecord]);
 
