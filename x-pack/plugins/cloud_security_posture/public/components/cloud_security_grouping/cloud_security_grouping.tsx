@@ -9,7 +9,7 @@ import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
 import { Filter } from '@kbn/es-query';
 import React from 'react';
 import { css } from '@emotion/react';
-import { CSP_GROUPING } from '../test_subjects';
+import { CSP_GROUPING, CSP_GROUPING_LOADING } from '../test_subjects';
 
 interface CloudSecurityGroupingProps {
   data: ParsedGroupingAggregation<any>;
@@ -26,6 +26,35 @@ interface CloudSecurityGroupingProps {
   groupSelectorComponent?: JSX.Element;
 }
 
+/**
+ * This component is used to render the loading state of the CloudSecurityGrouping component
+ * It's used to avoid the flickering of the table when the data is loading
+ */
+export const CloudSecurityGroupingLoading = ({
+  grouping,
+  pageSize,
+}: Pick<CloudSecurityGroupingProps, 'grouping' | 'pageSize'>) => {
+  return (
+    <div data-test-subj={CSP_GROUPING_LOADING}>
+      {grouping.getGrouping({
+        activePage: 0,
+        data: {
+          groupsCount: { value: 1 },
+          unitsCount: { value: 1 },
+        },
+        groupingLevel: 0,
+        inspectButton: undefined,
+        isLoading: true,
+        itemsPerPage: pageSize,
+        renderChildComponent: () => <></>,
+        onGroupClose: () => {},
+        selectedGroup: '',
+        takeActionItems: () => [],
+      })}
+    </div>
+  );
+};
+
 export const CloudSecurityGrouping = ({
   data,
   renderChildComponent,
@@ -39,6 +68,10 @@ export const CloudSecurityGrouping = ({
   groupingLevel = 0,
   groupSelectorComponent,
 }: CloudSecurityGroupingProps) => {
+  if (!data || isFetching) {
+    return <CloudSecurityGroupingLoading grouping={grouping} pageSize={pageSize} />;
+  }
+
   return (
     <div
       data-test-subj={CSP_GROUPING}

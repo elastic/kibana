@@ -159,6 +159,7 @@ export const useLatestFindingsGrouping = ({
     onResetFilters,
     error,
     filters,
+    setActivePageIndex,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -167,7 +168,6 @@ export const useLatestFindingsGrouping = ({
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
-    onGroupChange,
     groupingLevel,
   });
 
@@ -247,6 +247,7 @@ export const useLatestFindingsGrouping = ({
     grouping,
     isFetching,
     activePageIndex,
+    setActivePageIndex,
     pageSize,
     selectedGroup,
     onChangeGroupsItemsPerPage,

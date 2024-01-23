@@ -35,7 +35,6 @@ export const useCloudSecurityGrouping = ({
   groupPanelRenderer,
   groupStatsRenderer,
   groupingLevel,
-  onGroupChange,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -45,11 +44,6 @@ export const useCloudSecurityGrouping = ({
   groupPanelRenderer?: GroupPanelRenderer<any>;
   groupStatsRenderer?: GroupStatsRenderer<any>;
   groupingLevel: number;
-  onGroupChange?: (param: {
-    groupByField: string;
-    tableId: string;
-    selectedGroups: string[];
-  }) => void;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -62,14 +56,6 @@ export const useCloudSecurityGrouping = ({
     query: urlQuery.query,
   });
 
-  /**
-   * Reset the active page when the filters or query change
-   * This is needed because the active page is not automatically reset when the filters or query change
-   */
-  useEffect(() => {
-    setActivePageIndex(0);
-  }, [urlQuery.filters, urlQuery.query]);
-
   const grouping = useGrouping({
     componentProps: {
       unit,
@@ -81,14 +67,19 @@ export const useCloudSecurityGrouping = ({
     groupingId: GROUPING_ID,
     maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
-    onGroupChange: (param: { groupByField: string; tableId: string; selectedGroups: string[] }) => {
-      if (!onGroupChange) return;
-      onGroupChange(param);
+    onGroupChange: () => {
       setActivePageIndex(0);
     },
   });
 
   const selectedGroup = grouping.selectedGroups[groupingLevel];
+  /**
+   * Reset the active page when the filters or query change
+   * This is needed because the active page is not automatically reset when the filters or query change
+   */
+  useEffect(() => {
+    setActivePageIndex(0);
+  }, [urlQuery.filters, urlQuery.query]);
 
   // This is recommended by the grouping component to cover an edge case
   // where the selectedGroup has multiple values
@@ -115,6 +106,7 @@ export const useCloudSecurityGrouping = ({
 
   return {
     activePageIndex,
+    setActivePageIndex,
     grouping,
     pageSize,
     query,
