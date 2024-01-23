@@ -24,11 +24,7 @@ export interface UseGetGroupSelectorArgs {
   groupingState: GroupMap;
   maxGroupingLevels?: number;
   onOptionsChange?: (newOptions: GroupOption[]) => void;
-  onGroupChange?: (param: {
-    groupByField: string;
-    tableId: string;
-    selectedGroups: string[];
-  }) => void;
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
   tracker?: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -116,34 +112,24 @@ export const useGetGroupSelector = ({
 
   const onChange = useCallback(
     (groupSelection: string) => {
-      let newSelectedGroups: string[];
-
       // Simulate a toggle behavior when maxGroupingLevels is 1
       if (maxGroupingLevels === 1) {
         setSelectedGroups([groupSelection]);
-        newSelectedGroups = [groupSelection];
       } else {
         if (selectedGroups.find((selected) => selected === groupSelection)) {
           const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
           if (groups.length === 0) {
             setSelectedGroups(['none']);
-            newSelectedGroups = ['none'];
           } else {
             setSelectedGroups(groups);
-            newSelectedGroups = groups;
           }
-
-          // return;
-        } else {
-          newSelectedGroups = isNoneGroup([groupSelection])
-            ? [groupSelection]
-            : [
-                ...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'),
-                groupSelection,
-              ];
-
-          setSelectedGroups(newSelectedGroups);
+          return;
         }
+
+        const newSelectedGroups = isNoneGroup([groupSelection])
+          ? [groupSelection]
+          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];
+        setSelectedGroups(newSelectedGroups);
       }
 
       // built-in telemetry: UI-counter
@@ -152,11 +138,7 @@ export const useGetGroupSelector = ({
         getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
       );
 
-      onGroupChange?.({
-        tableId: groupingId,
-        groupByField: groupSelection,
-        selectedGroups: newSelectedGroups,
-      });
+      onGroupChange?.({ tableId: groupingId, groupByField: groupSelection });
     },
     [groupingId, maxGroupingLevels, onGroupChange, selectedGroups, setSelectedGroups, tracker]
   );
