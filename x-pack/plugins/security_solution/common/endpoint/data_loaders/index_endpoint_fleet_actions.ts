@@ -118,10 +118,10 @@ interface BuildIEndpointAndFleetActionsBulkOperationsResponse
   operations: Required<BulkRequest>['operations'];
 }
 
-const automatedActionsSample: Array<{
+const getAutomatedActionsSample = (): Array<{
   command: ResponseActionsApiCommandNames;
   config?: { overwrite: boolean };
-}> = [
+}> => [
   { command: 'isolate' },
   { command: 'suspend-process', config: { overwrite: true } },
   { command: 'kill-process', config: { overwrite: true } },
@@ -148,13 +148,14 @@ export const buildIEndpointAndFleetActionsBulkOperations = ({
   for (const endpoint of endpoints) {
     const agentId = endpoint.elastic.agent.id;
 
+    const automatedActions = getAutomatedActionsSample();
     for (let i = 0; i < count; i++) {
       // start with endpoint action
       const logsEndpointAction: LogsEndpointAction = endpointActionGenerator.generate({
         EndpointActions: {
           data: {
             comment: 'data generator: this host is bad',
-            ...(alertIds ? automatedActionsSample[i] : {}),
+            ...(alertIds ? automatedActions[i] : {}),
           },
         },
       });
