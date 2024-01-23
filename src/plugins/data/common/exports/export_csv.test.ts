@@ -102,7 +102,7 @@ describe('CSV exporter', () => {
     expect(
       datatableToCSV(datatable, {
         ...getDefaultOptions(),
-        sortedColumns: ['col2', 'col1'],
+        columnsSorting: ['col2', 'col1'],
       })
     ).toMatch('columnTwo,columnOne\r\n"Formatted_5","Formatted_value"\r\n');
   });
