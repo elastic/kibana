@@ -123,8 +123,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+      it(`should send ${expectedRefreshRequest} requests (documents + chart) when changing the time range`, async () => {
+        await expectSearches(type, expectedRefreshRequest, async () => {
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
             'Sep 23, 2015 @ 00:00:00.000'
