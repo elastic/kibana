@@ -21,7 +21,7 @@ interface EsSummaryDocument {
     id: string;
     revision: number;
     instanceId: string;
-    groupings: Record<string, unknown>;
+    groupings: Groupings;
     groupBy: string[];
   };
   sliValue: number;

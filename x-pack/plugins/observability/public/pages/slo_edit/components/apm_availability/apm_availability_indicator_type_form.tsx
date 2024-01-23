@@ -18,6 +18,7 @@ import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
+import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 
 export function ApmAvailabilityIndicatorTypeForm() {
   const { watch, setValue } = useFormContext<CreateSLOForm>();
@@ -171,8 +172,11 @@ export function ApmAvailabilityIndicatorTypeForm() {
           color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
           title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
             defaultMessage:
-              "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
-            values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+              'Selected group by field {groupBy} will generate at least {card} SLO instances based on the last 24h sample data.',
+            values: {
+              card: groupByCardinality.cardinality,
+              groupBy: getGroupKeysProse(groupByField),
+            },
           })}
         />
       )}

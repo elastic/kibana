@@ -30,6 +30,7 @@ import { IndexSelection } from '../custom_common/index_selection';
 import { MetricIndicator } from './metric_indicator';
 import { useKibana } from '../../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../constants';
+import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 
 export { NEW_TIMESLICE_METRIC } from './metric_indicator';
 
@@ -167,8 +168,11 @@ export function TimesliceMetricIndicatorTypeForm() {
             color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
             title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
               defaultMessage:
-                "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
-              values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+                'Selected group by field {groupBy} will generate at least {card} SLO instances based on the last 24h sample data.',
+              values: {
+                card: groupByCardinality.cardinality,
+                groupBy: getGroupKeysProse(groupByField),
+              },
             })}
           />
         )}

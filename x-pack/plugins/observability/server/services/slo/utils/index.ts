@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
+import { Groupings } from '../../../domain/models';
 
 /**
  * Takes a list of groupBy fields and the nested groupings object provided from
@@ -18,12 +19,12 @@ export const getFlattenedGroupings = ({
   groupings,
 }: {
   groupBy: string[] | string;
-  groupings: Record<string, unknown>;
-}): Record<string, unknown> => {
+  groupings: Groupings;
+}): Groupings => {
   const groupByFields = groupBy ? [groupBy].flat() : [];
   const hasGroupings = Object.keys(groupings || []).length;
   const formattedGroupings = hasGroupings
-    ? groupByFields.reduce<Record<string, unknown>>((acc, group) => {
+    ? groupByFields.reduce<Groupings>((acc, group) => {
         acc[group] = get(groupings, group);
         return acc;
       }, {})

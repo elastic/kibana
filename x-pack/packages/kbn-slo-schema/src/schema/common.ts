@@ -49,7 +49,7 @@ const summarySchema = t.type({
   errorBudget: errorBudgetSchema,
 });
 
-const groupingsSchema = t.object;
+const groupingsSchema = t.record(t.string, t.union([t.string, t.number]));
 
 const historicalSummarySchema = t.intersection([
   t.type({
