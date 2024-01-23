@@ -122,7 +122,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
     afterEach(async () => {
-      await PageObjects.share.closeShareModal();
+      if (await PageObjects.share.isShareMenuOpen()) {
+        await PageObjects.share.closeShareModal();
+      }
     });
 
     describe('snapshot share', async () => {
