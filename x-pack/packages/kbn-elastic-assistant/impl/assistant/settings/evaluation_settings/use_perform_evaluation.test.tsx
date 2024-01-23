@@ -67,6 +67,7 @@ describe('usePerformEvaluation', () => {
           outputIndex: undefined,
         },
         signal: undefined,
+        version: '1',
       });
       expect(toasts.addError).not.toHaveBeenCalled();
     });
@@ -106,6 +107,7 @@ describe('usePerformEvaluation', () => {
           outputIndex: 'outputIndex',
         },
         signal: undefined,
+        version: '1',
       });
     });
   });

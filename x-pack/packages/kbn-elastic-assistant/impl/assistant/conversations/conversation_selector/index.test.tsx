@@ -25,17 +25,31 @@ const mockConversation = {
   setConversation,
 };
 
+const mockConversations = {
+  [alertConvo.id]: alertConvo,
+  [welcomeConvo.id]: welcomeConvo,
+};
+
+const mockConversationsWithCustom = {
+  [alertConvo.id]: alertConvo,
+  [welcomeConvo.id]: welcomeConvo,
+  [customConvo.id]: customConvo,
+};
+
 jest.mock('../../use_conversation', () => ({
   useConversation: () => mockConversation,
 }));
 
 const onConversationSelected = jest.fn();
+const onConversationDeleted = jest.fn();
 const defaultProps = {
   isDisabled: false,
   onConversationSelected,
   selectedConversationId: 'Welcome',
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
+  conversations: mockConversations,
+  onConversationDeleted,
 };
 describe('Conversation selector', () => {
   beforeAll(() => {
@@ -46,14 +60,7 @@ describe('Conversation selector', () => {
   });
   it('renders with correct selected conversation', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-          }),
-        }}
-      >
+      <TestProviders>
         <ConversationSelector {...defaultProps} />
       </TestProviders>
     );
@@ -62,31 +69,17 @@ describe('Conversation selector', () => {
   });
   it('On change, selects new item', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-          }),
-        }}
-      >
+      <TestProviders>
         <ConversationSelector {...defaultProps} />
       </TestProviders>
     );
     fireEvent.click(getByTestId('comboBoxSearchInput'));
     fireEvent.click(getByTestId(`convo-option-${alertConvo.id}`));
-    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id);
+    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id, alertConvo.title);
   });
   it('On clear input, clears selected options', () => {
     const { getByPlaceholderText, queryByPlaceholderText, getByTestId, queryByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-          }),
-        }}
-      >
+      <TestProviders>
         <ConversationSelector {...defaultProps} />
       </TestProviders>
     );
@@ -99,14 +92,7 @@ describe('Conversation selector', () => {
 
   it('We can add a custom option', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-          }),
-        }}
-      >
+      <TestProviders>
         <ConversationSelector {...defaultProps} />
       </TestProviders>
     );
@@ -117,31 +103,15 @@ describe('Conversation selector', () => {
       code: 'Enter',
       charCode: 13,
     });
-    expect(setConversation).toHaveBeenCalledWith({
-      conversation: {
-        id: customOption,
-        messages: [],
-        apiConfig: {
-          connectorId: '123',
-          defaultSystemPromptId: undefined,
-          provider: 'OpenAI',
-        },
-      },
-    });
+    expect(onConversationSelected).toHaveBeenCalledWith(customOption, customOption);
   });
 
   it('Only custom options can be deleted', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+        />
       </TestProviders>
     );
 
@@ -156,16 +126,10 @@ describe('Conversation selector', () => {
 
   it('Custom options can be deleted', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+        />
       </TestProviders>
     );
 
@@ -176,21 +140,16 @@ describe('Conversation selector', () => {
     jest.runAllTimers();
     expect(onConversationSelected).not.toHaveBeenCalled();
 
-    expect(deleteConversation).toHaveBeenCalledWith(customConvo.id);
+    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.id);
   });
 
   it('Previous conversation is set to active when selected conversation is deleted', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} selectedConversationId={customConvo.id} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+          selectedConversationId={customConvo.id}
+        />
       </TestProviders>
     );
 
@@ -198,21 +157,15 @@ describe('Conversation selector', () => {
     fireEvent.click(
       within(getByTestId(`convo-option-${customConvo.id}`)).getByTestId('delete-option')
     );
-    expect(onConversationSelected).toHaveBeenCalledWith(welcomeConvo.id);
+    expect(onConversationSelected).toHaveBeenCalledWith(welcomeConvo.id, welcomeConvo.title);
   });
 
   it('Left arrow selects first conversation', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+        />
       </TestProviders>
     );
 
@@ -222,21 +175,15 @@ describe('Conversation selector', () => {
       code: 'ArrowLeft',
       charCode: 27,
     });
-    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id);
+    expect(onConversationSelected).toHaveBeenCalledWith(alertConvo.id, alertConvo.title);
   });
 
   it('Right arrow selects last conversation', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+        />
       </TestProviders>
     );
 
@@ -246,21 +193,15 @@ describe('Conversation selector', () => {
       code: 'ArrowRight',
       charCode: 26,
     });
-    expect(onConversationSelected).toHaveBeenCalledWith(customConvo.id);
+    expect(onConversationSelected).toHaveBeenCalledWith(customConvo.id, customConvo.title);
   });
 
   it('Right arrow does nothing when ctrlKey is false', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
-            [alertConvo.id]: alertConvo,
-            [welcomeConvo.id]: welcomeConvo,
-            [customConvo.id]: customConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+      <TestProviders>
+        <ConversationSelector
+          {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
+        />
       </TestProviders>
     );
 
@@ -275,14 +216,13 @@ describe('Conversation selector', () => {
 
   it('Right arrow does nothing when conversation lenth is 1', () => {
     const { getByTestId } = render(
-      <TestProviders
-        providerContext={{
-          getInitialConversations: () => ({
+      <TestProviders>
+        <ConversationSelector
+          {...defaultProps}
+          conversations={{
             [welcomeConvo.id]: welcomeConvo,
-          }),
-        }}
-      >
-        <ConversationSelector {...defaultProps} />
+          }}
+        />
       </TestProviders>
     );
 

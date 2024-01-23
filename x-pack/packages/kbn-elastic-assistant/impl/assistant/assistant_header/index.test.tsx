@@ -24,8 +24,11 @@ const testProps = {
   onToggleShowAnonymizedValues: jest.fn(),
   selectedConversationId: emptyWelcomeConvo.id,
   setIsSettingsModalVisible: jest.fn(),
-  setSelectedConversationId: jest.fn(),
+  setCurrentConversation: jest.fn(),
+  onConversationDeleted: jest.fn(),
   showAnonymizedValues: false,
+  conversations: {},
+  refetchConversationsState: jest.fn(),
 };
 
 describe('AssistantHeader', () => {
@@ -53,11 +56,7 @@ describe('AssistantHeader', () => {
 
   it('showAnonymizedValues is not checked when currentConversation.replacements has values and showAnonymizedValues is false', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-      />,
+      <AssistantHeader {...testProps} currentConversation={alertConvo} />,
       {
         wrapper: TestProviders,
       }
@@ -67,12 +66,7 @@ describe('AssistantHeader', () => {
 
   it('showAnonymizedValues is checked when currentConversation.replacements has values and showAnonymizedValues is true', () => {
     const { getByTestId } = render(
-      <AssistantHeader
-        {...testProps}
-        currentConversation={alertConvo}
-        selectedConversationId={alertConvo.id}
-        showAnonymizedValues
-      />,
+      <AssistantHeader {...testProps} currentConversation={alertConvo} showAnonymizedValues />,
       {
         wrapper: TestProviders,
       }

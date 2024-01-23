@@ -11,6 +11,7 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import React from 'react';
 import { ConversationRole } from '../../assistant_context/types';
+import { updateConversationApi } from '../api';
 const message = {
   content: 'You are a robot',
   role: 'user' as ConversationRole,
@@ -24,15 +25,9 @@ const anotherMessage = {
 
 const mockConvo = {
   id: 'new-convo',
+  title: 'new-convo',
   messages: [message, anotherMessage],
   apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
-  theme: {
-    title: 'Elastic AI Assistant',
-    titleIcon: 'logoSecurity',
-    assistant: { name: 'Assistant', icon: 'logoSecurity' },
-    system: { icon: 'logoElastic' },
-    user: {},
-  },
 };
 
 describe('useConversation', () => {
@@ -42,27 +37,16 @@ describe('useConversation', () => {
   it('should append a message to an existing conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      const appendResult = result.current.appendMessage({
+      const appendResult = await result.current.appendMessage({
         conversationId: welcomeConvo.id,
         message,
       });
       expect(appendResult).toHaveLength(3);
-      expect(appendResult[2]).toEqual(message);
+      expect(appendResult![2]).toEqual(message);
     });
   });
 
@@ -73,10 +57,6 @@ describe('useConversation', () => {
         wrapper: ({ children }) => (
           <TestProviders
             providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
               assistantTelemetry: {
                 reportAssistantInvoked: () => {},
                 reportAssistantQuickPrompt: () => {},
@@ -90,7 +70,7 @@ describe('useConversation', () => {
         ),
       });
       await waitForNextUpdate();
-      result.current.appendMessage({
+      await result.current.appendMessage({
         conversationId: welcomeConvo.id,
         message,
       });
@@ -106,24 +86,15 @@ describe('useConversation', () => {
   it('should create a new conversation when called with valid conversationId and message', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      const createResult = result.current.createConversation({
-        conversationId: mockConvo.id,
+      const createResult = await result.current.createConversation({
+        id: mockConvo.id,
         messages: mockConvo.messages,
+        apiConfig: { defaultSystemPromptId: 'default-system-prompt' },
+        title: mockConvo.title,
       });
 
       expect(createResult).toEqual(mockConvo);
@@ -133,23 +104,11 @@ describe('useConversation', () => {
   it('should delete an existing conversation when called with valid conversationId', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-                [mockConvo.id]: mockConvo,
-              }),
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      const deleteResult = result.current.deleteConversation('new-convo');
+      const deleteResult = await result.current.deleteConversation('new-convo');
 
       expect(deleteResult).toEqual(mockConvo);
     });
@@ -159,24 +118,14 @@ describe('useConversation', () => {
     await act(async () => {
       const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      result.current.setApiConfig({
+      await result.current.setApiConfig({
         conversationId: welcomeConvo.id,
         apiConfig: mockConvo.apiConfig,
+        title: welcomeConvo.title,
       });
 
       expect(setConversations).toHaveBeenCalledWith({
@@ -185,98 +134,15 @@ describe('useConversation', () => {
     });
   });
 
-  it('overwrites a conversation', async () => {
-    await act(async () => {
-      const setConversations = jest.fn();
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      result.current.setConversation({
-        conversation: {
-          ...mockConvo,
-          id: welcomeConvo.id,
-        },
-      });
-
-      expect(setConversations).toHaveBeenCalledWith({
-        [alertConvo.id]: alertConvo,
-        [welcomeConvo.id]: { ...mockConvo, id: welcomeConvo.id },
-      });
-    });
-  });
-
-  it('clears a conversation', async () => {
-    await act(async () => {
-      const setConversations = jest.fn();
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      result.current.clearConversation(welcomeConvo.id);
-
-      expect(setConversations).toHaveBeenCalledWith({
-        [alertConvo.id]: alertConvo,
-        [welcomeConvo.id]: {
-          ...welcomeConvo,
-          apiConfig: {
-            ...welcomeConvo.apiConfig,
-            defaultSystemPromptId: 'default-system-prompt',
-          },
-          messages: [],
-          replacements: undefined,
-        },
-      });
-    });
-  });
-
   it('appends replacements', async () => {
     await act(async () => {
       const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      result.current.appendReplacements({
+      await result.current.appendReplacements({
         conversationId: welcomeConvo.id,
         replacements: {
           '1.0.0.721': '127.0.0.1',
@@ -285,7 +151,7 @@ describe('useConversation', () => {
         },
       });
 
-      expect(setConversations).toHaveBeenCalledWith({
+      expect(updateConversationApi).toHaveBeenCalledWith({
         [alertConvo.id]: alertConvo,
         [welcomeConvo.id]: {
           ...welcomeConvo,
@@ -303,24 +169,11 @@ describe('useConversation', () => {
     await act(async () => {
       const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-                [mockConvo.id]: mockConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      const removeResult = result.current.removeLastMessage('new-convo');
+      const removeResult = await result.current.removeLastMessage('new-convo');
 
       expect(removeResult).toEqual([message]);
       expect(setConversations).toHaveBeenCalledWith({
@@ -335,24 +188,11 @@ describe('useConversation', () => {
     await act(async () => {
       const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders
-            providerContext={{
-              getInitialConversations: () => ({
-                [alertConvo.id]: alertConvo,
-                [welcomeConvo.id]: welcomeConvo,
-                [mockConvo.id]: mockConvo,
-              }),
-              setConversations,
-            }}
-          >
-            {children}
-          </TestProviders>
-        ),
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
-      result.current.amendMessage({
+      await result.current.amendMessage({
         conversationId: 'new-convo',
         content: 'hello world',
       });

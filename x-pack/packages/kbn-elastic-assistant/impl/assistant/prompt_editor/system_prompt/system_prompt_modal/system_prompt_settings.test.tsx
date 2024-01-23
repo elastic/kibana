@@ -17,7 +17,7 @@ const onSelectedSystemPromptChange = jest.fn();
 const setUpdatedSystemPromptSettings = jest.fn().mockImplementation((fn) => {
   return fn(mockSystemPrompts);
 });
-const setUpdatedConversationSettings = jest.fn().mockImplementation((fn) => {
+const setConversationSettings = jest.fn().mockImplementation((fn) => {
   return fn({
     [welcomeConvo.id]: welcomeConvo,
     [alertConvo.id]: alertConvo,
@@ -31,8 +31,10 @@ const testProps = {
   onSelectedSystemPromptChange,
   selectedSystemPrompt: mockSystemPrompts[0],
   setUpdatedSystemPromptSettings,
-  setUpdatedConversationSettings,
+  setConversationSettings,
   systemPromptSettings: mockSystemPrompts,
+  conversationsSettingsBulkActions: {},
+  setConversationsSettingsBulkActions: jest.fn(),
 };
 
 jest.mock('./system_prompt_selector/system_prompt_selector', () => ({
@@ -126,7 +128,7 @@ describe('SystemPromptSettings', () => {
     );
     fireEvent.click(getByTestId('change-multi'));
 
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       [welcomeConvo.id]: {
         ...welcomeConvo,
         apiConfig: {

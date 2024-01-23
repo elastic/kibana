@@ -6,7 +6,6 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { waitUntilDocumentIndexed } from '../lib/wait_until_document_indexed';
 import { getConversation } from './get_conversation';
 
 export const deleteConversation = async (
@@ -26,19 +25,10 @@ export const deleteConversation = async (
       },
       conflicts: 'proceed',
       index: conversationIndex,
-      refresh: false,
+      refresh: true,
     });
 
-    if (response.deleted) {
-      const checkIfConversationDeleted = async (): Promise<void> => {
-        const deletedConversation = await getConversation(esClient, conversationIndex, id);
-        if (deletedConversation !== null) {
-          throw Error('Conversation has not been re-indexed in time');
-        }
-      };
-
-      await waitUntilDocumentIndexed(checkIfConversationDeleted);
-    } else {
+    if (!response.deleted && response.deleted === 0) {
       throw Error('No conversation has been deleted');
     }
   }

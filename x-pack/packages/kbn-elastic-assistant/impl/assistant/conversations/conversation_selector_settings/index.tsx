@@ -275,6 +275,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
             <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
               <EuiButtonIcon
                 iconType="arrowLeft"
+                data-test-subj="arrowLeft"
                 aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
                 onClick={onLeftArrowClick}
                 disabled={isDisabled || conversationIds.length <= 1}
@@ -285,6 +286,7 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
             <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE} (⌘ + →)`} display="block">
               <EuiButtonIcon
                 iconType="arrowRight"
+                data-test-subj="arrowRight"
                 aria-label={i18n.NEXT_CONVERSATION_TITLE}
                 onClick={onRightArrowClick}
                 disabled={isDisabled || conversationIds.length <= 1}

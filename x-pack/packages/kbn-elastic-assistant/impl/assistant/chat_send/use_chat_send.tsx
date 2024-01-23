@@ -175,8 +175,8 @@ export const useChatSend = ({
     setPromptTextPreview('');
     setUserPrompt('');
     setSelectedPromptContexts({});
-    await clearConversation(currentConversation.id);
     setEditingSystemPromptId(defaultSystemPromptId);
+    await clearConversation(currentConversation.id);
     await refresh();
   }, [
     allSystemPrompts,
