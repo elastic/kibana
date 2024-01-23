@@ -62,7 +62,7 @@ export class CsvGenerator {
     private cancellationToken: CancellationToken,
     private logger: Logger,
     private stream: Writable
-  ) { }
+  ) {}
   /*
    * Load field formats for each field in the list
    */
@@ -232,7 +232,7 @@ export class CsvGenerator {
     if (startedAt) {
       this.logger.debug(
         `Task started at: ${startedAt && moment(startedAt).format()}.` +
-        ` Can run until: ${retryAt && moment(retryAt).format()}`
+          ` Can run until: ${retryAt && moment(retryAt).format()}`
       );
     }
 
@@ -398,7 +398,7 @@ export class CsvGenerator {
     if (!this.maxSizeReached && this.csvRowCount !== totalRecords) {
       logger.warn(
         `ES scroll returned ` +
-        `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
+          `${this.csvRowCount > (totalRecords ?? 0) ? 'more' : 'fewer'} total hits than expected!`
       );
       logger.warn(`Search result total hits: ${totalRecords}. Row count: ${this.csvRowCount}`);
 
