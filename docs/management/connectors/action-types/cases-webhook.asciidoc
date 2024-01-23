@@ -79,7 +79,7 @@ The JSON is validated after the Mustache variables have been placed when REST me
 Manually ensure that the JSON is valid, disregarding the Mustache variables, so the later validation will pass.
 --
 
-Create case response case key::
+Create case response external key::
 The JSON key in the create case response that contains the external case ID.
 
 Create case URL::

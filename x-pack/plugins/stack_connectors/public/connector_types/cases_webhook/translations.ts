@@ -83,7 +83,7 @@ export const GET_INCIDENT_URL_REQUIRED = i18n.translate(
 export const GET_RESPONSE_EXTERNAL_TITLE_KEY_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.error.requiredGetIncidentResponseExternalTitleKeyText',
   {
-    defaultMessage: 'Get case response external case title key is re quired.',
+    defaultMessage: 'Get case response external case title key is required.',
   }
 );
 export const GET_RESPONSE_EXTERNAL_CREATED_KEY_REQUIRED = i18n.translate(
@@ -187,7 +187,7 @@ export const CREATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentJsonHelpText',
   {
     defaultMessage:
-      'JSON object to create case. Use the variable selector to add Cases data to the payload.',
+      'JSON object to create a case. Use the variable selector to add cases data to the payload.',
   }
 );
 
@@ -204,14 +204,14 @@ export const CODE_EDITOR = i18n.translate(
 export const CREATE_INCIDENT_RESPONSE_KEY = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentResponseKeyTextFieldLabel',
   {
-    defaultMessage: 'Create case response case key',
+    defaultMessage: 'Create case response external key',
   }
 );
 
 export const CREATE_INCIDENT_RESPONSE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createIncidentResponseKeyHelpText',
   {
-    defaultMessage: 'JSON key in create case response that contains the external case id',
+    defaultMessage: 'JSON key in the create case response that contains the external case ID',
   }
 );
 
@@ -232,7 +232,7 @@ export const GET_INCIDENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentUrlHelp',
   {
     defaultMessage:
-      'API URL to GET case details JSON from external system. Use the variable selector to add external system id to the url.',
+      'API URL to get case details in JSON format from the external system. Use the variable selector to add the external system ID to the URL.',
   }
 );
 
@@ -245,7 +245,7 @@ export const GET_INCIDENT_TITLE_KEY = i18n.translate(
 export const GET_INCIDENT_TITLE_KEY_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.getIncidentResponseExternalTitleKeyHelp',
   {
-    defaultMessage: 'JSON key in get case response that contains the external case title',
+    defaultMessage: 'JSON key in the get case response that contains the external case title',
   }
 );
 
@@ -259,7 +259,7 @@ export const EXTERNAL_INCIDENT_VIEW_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.viewIncidentUrlHelp',
   {
     defaultMessage:
-      'URL to view case in external system. Use the variable selector to add external system id or external system title to the url.',
+      'URL to view a case in the external system. Use the variable selector to add external system ID or external system title to the URL.',
   }
 );
 
@@ -279,7 +279,7 @@ export const UPDATE_INCIDENT_URL = i18n.translate(
 export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentUrlHelp',
   {
-    defaultMessage: 'API URL to update case.',
+    defaultMessage: 'API URL to update a case.',
   }
 );
 
@@ -293,7 +293,7 @@ export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.updateIncidentJsonHelpl',
   {
     defaultMessage:
-      'JSON object to update case. Use the variable selector to add cases data to the payload.',
+      'JSON object to update a case. Use the variable selector to add cases data to the payload.',
   }
 );
 
@@ -313,7 +313,7 @@ export const CREATE_COMMENT_URL = i18n.translate(
 export const CREATE_COMMENT_URL_HELP = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.createCommentUrlHelp',
   {
-    defaultMessage: 'API URL to add comment to case.',
+    defaultMessage: 'API URL to add a comment to a case.',
   }
 );
 
@@ -385,7 +385,7 @@ export const STEP_2_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step2Description',
   {
     defaultMessage:
-      'Set fields to create the case in the external system. Check your service’s API documentation to understand what fields are required.',
+      'Set fields to create a case in the external system. Check your service’s API documentation to understand what fields are required.',
   }
 );
 
@@ -397,7 +397,7 @@ export const STEP_3_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step3Description',
   {
     defaultMessage:
-      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases. Check your service’s API documentation to understand what fields are required.',
+      'Set fields to add comments to a case in the external system. For some systems, this may be the same method as creating updates in cases. Check your service’s API documentation to understand what fields are required.',
   }
 );
 
@@ -413,7 +413,7 @@ export const STEP_4A_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step4aDescription',
   {
     defaultMessage:
-      'Set fields to create updates to the case in external system. For some systems, this may be the same method as adding comments to cases.',
+      'Set fields to update a case in the external system. For some systems, this may be the same method as adding comments to cases.',
   }
 );
 
@@ -425,7 +425,7 @@ export const STEP_4B_DESCRIPTION = i18n.translate(
   'xpack.stackConnectors.components.casesWebhook.step4bDescription',
   {
     defaultMessage:
-      'Set fields to add comments to the case in external system. For some systems, this may be the same method as creating updates in cases.',
+      'Set fields to add comments to a case in the external system. For some systems, this may be the same method as creating updates in cases.',
   }
 );
 
