@@ -40,6 +40,7 @@ export const PostActionsConnectorExecuteBody = t.type({
   isEnabledKnowledgeBase: t.boolean,
   isEnabledRAGAlerts: t.boolean,
   replacements: t.union([t.record(t.string, t.string), t.undefined]),
+  llmType: t.union([t.literal('bedrock'), t.literal('openai')]),
   size: t.union([t.number, t.undefined]),
 });
 

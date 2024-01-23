@@ -12,8 +12,10 @@ import { get } from 'lodash/fp';
 import { ChatOpenAI } from 'langchain/chat_models/openai';
 import { Stream } from 'openai/streaming';
 import {
+  ChatCompletion,
   ChatCompletionChunk,
   ChatCompletionCreateParamsStreaming,
+  ChatCompletionCreateParamsNonStreaming,
 } from 'openai/resources/chat/completions';
 import { InvokeAIActionParamsSchema, RequestBody } from '../types';
 
@@ -30,7 +32,7 @@ interface ActionsClientChatOpenAIParams {
 }
 
 export class ActionsClientChatOpenAI extends ChatOpenAI {
-  // ChatOpenAI variables
+  // set streaming to true always
   streaming = true;
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
@@ -89,12 +91,22 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   }
 
   async completionWithRetry(
-    completionRequest: ChatCompletionCreateParamsStreaming
-  ): Promise<Stream<ChatCompletionChunk>> {
+    request: ChatCompletionCreateParamsStreaming
+  ): Promise<AsyncIterable<ChatCompletionChunk>>;
+
+  async completionWithRetry(
+    request: ChatCompletionCreateParamsNonStreaming
+  ): Promise<ChatCompletion>;
+
+  async completionWithRetry(
+    completionRequest: ChatCompletionCreateParamsStreaming | ChatCompletionCreateParamsNonStreaming
+  ): Promise<AsyncIterable<ChatCompletionChunk> | ChatCompletion> {
+    if (!completionRequest.stream) {
+      // fallback for typescript, should never be hit
+      return super.completionWithRetry(completionRequest);
+    }
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
-      // stream
-
       // create an actions client from the authenticated request context:
       const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
@@ -151,10 +163,10 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           messages: completionRequest.messages.map((message) => ({
             role: message.role,
             content: message.content ?? '',
-            ...('name' in message ? { name: message.name } : {}),
-            ...('function_call' in message ? { function_call: message.function_call } : {}),
-            ...('tool_calls' in message ? { tool_calls: message.tool_calls } : {}),
-            ...('tool_call_id' in message ? { tool_call_id: message.tool_call_id } : {}),
+            ...('name' in message ? { name: message?.name } : {}),
+            ...('function_call' in message ? { function_call: message?.function_call } : {}),
+            ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
+            ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
           })),
         },
       },

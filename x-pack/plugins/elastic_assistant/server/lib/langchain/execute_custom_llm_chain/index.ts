@@ -49,6 +49,7 @@ export const callAgentExecutor = async ({
   telemetry,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
+  // TODO implement llmClass for bedrock streaming
   const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
 
   const llm = new llmClass({
@@ -104,14 +105,21 @@ export const callAgentExecutor = async ({
 
   logger.debug(`applicable tools: ${JSON.stringify(tools.map((t) => t.name).join(', '), null, 2)}`);
 
-  const executor = await initializeAgentExecutorWithOptions(tools, llm, {
-    agentType: 'openai-functions',
-    memory,
-    verbose: false,
-  });
+  // isStream check is not on agentType alone because typescript doesn't like
+  const executor = isStream
+    ? await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'openai-functions',
+        memory,
+        verbose: false,
+      })
+    : await initializeAgentExecutorWithOptions(tools, llm, {
+        agentType: 'chat-conversational-react-description',
+        memory,
+        verbose: false,
+      });
 
   if (isStream) {
-    const logStream = await executor.streamLog({
+    const logStream = executor.streamLog({
       input: latestMessage[0].content,
       chat_history: [],
     });

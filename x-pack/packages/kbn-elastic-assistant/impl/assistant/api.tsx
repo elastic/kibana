@@ -16,6 +16,7 @@ import {
   getFormattedMessageContent,
   getOptionalRequestParams,
   hasParsableResponse,
+  llmTypeDictionary,
 } from './helpers';
 import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
@@ -79,11 +80,14 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  // TODO: Remove in part 3 of streaming work for security solution
-  // tracked here: https://github.com/elastic/security-team/issues/7363
-  // In part 3 I will make enhancements to langchain to introduce streaming
-  // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled;
+  const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle ?? 'OpenAI'];
+
+  const isStream =
+    assistantStreamingEnabled &&
+    (llmType === 'openai' ||
+      // TODO add streaming support for bedrock with langchain on
+      (llmType === 'bedrock' && !isEnabledRAGAlerts && !isEnabledKnowledgeBase));
+
   const optionalRequestParams = getOptionalRequestParams({
     isEnabledRAGAlerts,
     alertsIndexPattern,
@@ -92,6 +96,11 @@ export const fetchConnectorExecuteAction = async ({
     replacements,
     size,
   });
+  const requiredRequestParams = {
+    isEnabledKnowledgeBase,
+    isEnabledRAGAlerts,
+    llmType,
+  };
 
   const requestBody = isStream
     ? {
@@ -99,8 +108,7 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeStream',
         },
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
+        ...requiredRequestParams,
         ...optionalRequestParams,
       }
     : {
@@ -108,8 +116,7 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeAI',
         },
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
+        ...requiredRequestParams,
         ...optionalRequestParams,
       };
 
@@ -142,9 +149,6 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
-    // TODO: Remove in part 3 of streaming work for security solution
-    // tracked here: https://github.com/elastic/security-team/issues/7363
-    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;

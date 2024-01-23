@@ -84,6 +84,8 @@ export class ActionsClientLlm extends LLM {
       actionId: this.#connectorId,
       params: {
         ...this.#request.body.params, // the original request body params
+        // hard code to non-streaming subaction as this class only supports non-streaming
+        subAction: 'invokeAI',
         subActionParams: {
           ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
           messages: [assistantMessage], // the assistant message

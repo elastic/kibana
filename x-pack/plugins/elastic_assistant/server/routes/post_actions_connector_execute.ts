@@ -107,9 +107,10 @@ export const postActionsConnectorExecuteRoute = (
           esClient,
           kbResource: ESQL_RESOURCE,
           langChainMessages,
-          isStream: request.body.params.subAction !== 'invokeAI',
-          // TODO make dynamic
-          llmType: 'openai',
+          isStream:
+            // TODO implement llmClass for bedrock streaming
+            request.body.params.subAction !== 'invokeAI' && request.body.llmType === 'openai',
+          llmType: request.body.llmType,
           logger,
           onNewReplacements,
           request,

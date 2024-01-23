@@ -138,3 +138,9 @@ export const hasParsableResponse = ({
   isEnabledRAGAlerts: boolean;
   isEnabledKnowledgeBase: boolean;
 }): boolean => isEnabledKnowledgeBase || isEnabledRAGAlerts;
+
+export const llmTypeDictionary: Record<string, string> = {
+  'Amazon Bedrock': 'bedrock',
+  'Azure OpenAI': 'openai',
+  OpenAI: 'openai',
+};
