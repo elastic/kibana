@@ -11,6 +11,7 @@ import { pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { Logger } from '@kbn/core/server';
 import { MAX_ALERTS_PER_CASE } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
@@ -25,6 +26,7 @@ import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachm
 import { CasesConnectorError } from './cases_connector_error';
 
 interface CasesConnectorExecutorParams {
+  logger: Logger;
   casesOracleService: CasesOracleService;
   casesService: CasesService;
   casesClient: CasesClient;
@@ -41,11 +43,18 @@ type GroupedAlertsWithCaseId = GroupedAlertsWithOracleRecords & { caseId: string
 type GroupedAlertsWithCases = GroupedAlertsWithCaseId & { theCase: Case };
 
 export class CasesConnectorExecutor {
+  private readonly logger: Logger;
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
 
-  constructor({ casesOracleService, casesService, casesClient }: CasesConnectorExecutorParams) {
+  constructor({
+    logger,
+    casesOracleService,
+    casesService,
+    casesClient,
+  }: CasesConnectorExecutorParams) {
+    this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
@@ -126,6 +135,11 @@ export class CasesConnectorExecutor {
     alerts,
     groupingBy,
   }: Pick<CasesConnectorRunParams, 'alerts' | 'groupingBy'>): GroupedAlerts[] {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Grouping ${alerts.length} alerts`,
+      { labels: { groupingBy }, tags: ['case-connector:groupAlerts'] }
+    );
+
     const uniqueGroupingByFields = Array.from(new Set<string>(groupingBy));
     const groupingMap = new Map<string, GroupedAlerts>();
 
@@ -138,9 +152,19 @@ export class CasesConnectorExecutor {
       uniqueGroupingByFields.every((groupingByField) => Object.hasOwn(alert, groupingByField))
     );
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][groupAlerts] Total alerts to be grouped: ${filteredAlerts.length} out of ${alerts.length}`,
+      { tags: ['case-connector:groupAlerts'] }
+    );
+
     for (const alert of filteredAlerts) {
       const alertWithOnlyTheGroupingFields = pick(alert, uniqueGroupingByFields);
       const groupingKey = stringify(alertWithOnlyTheGroupingFields);
+
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][groupAlerts] Alert ${alert._id} got grouped into bucket with ID ${groupingKey}`,
+        { tags: ['case-connector:groupAlerts', groupingKey] }
+      );
 
       if (groupingMap.has(groupingKey)) {
         groupingMap.get(groupingKey)?.alerts.push(alert);
@@ -156,6 +180,11 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlerts: GroupedAlerts[]
   ): Map<string, GroupedAlertsWithOracleKey> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Generating ${groupedAlerts.length} oracle keys`,
+      { tags: ['case-connector:generateOracleKeys'] }
+    );
+
     const { rule, owner } = params;
     /**
      * TODO: Take spaceId from the actions framework
@@ -165,15 +194,30 @@ export class CasesConnectorExecutor {
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
     for (const { grouping, alerts } of groupedAlerts) {
-      const oracleKey = this.casesOracleService.getRecordId({
+      const getRecordIdParams = {
         ruleId: rule.id,
         grouping,
         owner,
         spaceId,
-      });
+      };
+
+      const oracleKey = this.casesOracleService.getRecordId(getRecordIdParams);
+
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Oracle key ${oracleKey} generated`,
+        {
+          labels: { params: getRecordIdParams },
+          tags: ['case-connector:generateOracleKeys', oracleKey],
+        }
+      );
 
       oracleMap.set(oracleKey, { oracleKey, grouping, alerts });
     }
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][generateOracleKeys] Total of oracles keys generated ${oracleMap.size}`,
+      { tags: ['case-connector:generateOracleKeys'] }
+    );
 
     return oracleMap;
   }
@@ -181,6 +225,11 @@ export class CasesConnectorExecutor {
   private async upsertOracleRecords(
     groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>
   ): Promise<Map<string, GroupedAlertsWithOracleRecords>> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Upserting ${groupedAlertsWithOracleKey.size} oracle records`,
+      { tags: ['case-connector:upsertOracleRecords'] }
+    );
+
     const bulkCreateReq: BulkCreateOracleRecordRequest = [];
     const oracleRecordMap = new Map<string, GroupedAlertsWithOracleRecords>();
 
@@ -195,8 +244,25 @@ export class CasesConnectorExecutor {
 
     const ids = Array.from(groupedAlertsWithOracleKey.values()).map(({ oracleKey }) => oracleKey);
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Getting oracle records with ids ${ids}`,
+      { tags: ['case-connector:upsertOracleRecords', ...ids] }
+    );
+
     const bulkGetRes = await this.casesOracleService.bulkGetRecords(ids);
     const [bulkGetValidRecords, bulkGetRecordsErrors] = partitionRecordsByError(bulkGetRes);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of valid oracle records is ${bulkGetValidRecords.length} and the total number of errors while getting the records is ${bulkGetRecordsErrors.length}`,
+      {
+        labels: {
+          total: ids.length,
+          success: bulkGetValidRecords.length,
+          errors: bulkGetRecordsErrors.length,
+        },
+        tags: ['case-connector:upsertOracleRecords'],
+      }
+    );
 
     addRecordToMap(bulkGetValidRecords);
 
@@ -205,6 +271,17 @@ export class CasesConnectorExecutor {
     }
 
     const [nonFoundErrors, restOfErrors] = partitionByNonFoundErrors(bulkGetRecordsErrors);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of non found oracle records is ${nonFoundErrors.length} and the total number of the rest of errors while getting the records is ${restOfErrors.length}`,
+      {
+        labels: {
+          nonFoundErrors: nonFoundErrors.length,
+          restOfErrors: restOfErrors.length,
+        },
+        tags: ['case-connector:upsertOracleRecords'],
+      }
+    );
 
     this.handleAndThrowErrors(restOfErrors);
 
@@ -223,8 +300,27 @@ export class CasesConnectorExecutor {
       }
     }
 
+    const idsToCreate = bulkCreateReq.map(({ recordId }) => recordId);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] Creating oracle records with ids ${idsToCreate}`,
+      { tags: ['case-connector:upsertOracleRecords', ...idsToCreate] }
+    );
+
     const bulkCreateRes = await this.casesOracleService.bulkCreateRecord(bulkCreateReq);
     const [bulkCreateValidRecords, bulkCreateErrors] = partitionRecordsByError(bulkCreateRes);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of created oracle records is ${bulkCreateValidRecords.length} and the total number of errors while creating the records is ${bulkCreateErrors.length}`,
+      {
+        labels: {
+          total: idsToCreate.length,
+          success: bulkCreateValidRecords.length,
+          errors: bulkCreateErrors.length,
+        },
+        tags: ['case-connector:upsertOracleRecords'],
+      }
+    );
 
     this.handleAndThrowErrors(bulkCreateErrors);
 
@@ -238,6 +334,12 @@ export class CasesConnectorExecutor {
     oracleRecordMap: Map<string, GroupedAlertsWithOracleRecords>
   ) {
     const { timeWindow } = params;
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleTimeWindow] Handling time window ${timeWindow}`,
+      { tags: ['case-connector:handleTimeWindow'] }
+    );
+
     const oracleRecordMapWithIncreasedCounters = new Map(oracleRecordMap);
 
     const recordsToIncreaseCounter = Array.from(oracleRecordMap.values())
@@ -246,7 +348,22 @@ export class CasesConnectorExecutor {
       )
       .map(({ oracleRecord }) => oracleRecord);
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleTimeWindow] Total oracle records where the time window has passed and their counter will be increased ${recordsToIncreaseCounter.length}`,
+      { tags: ['case-connector:handleTimeWindow', ...recordsToIncreaseCounter.map(({ id }) => id)] }
+    );
+
     const bulkUpdateValidRecords = await this.increaseOracleRecordCounter(recordsToIncreaseCounter);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleTimeWindow] Total oracle records where their counter got increased ${bulkUpdateValidRecords.length}`,
+      {
+        labels: {
+          total: recordsToIncreaseCounter.length,
+        },
+        tags: ['case-connector:handleTimeWindow'],
+      }
+    );
 
     for (const res of bulkUpdateValidRecords) {
       if (oracleRecordMap.has(res.id)) {
@@ -261,6 +378,11 @@ export class CasesConnectorExecutor {
   private async increaseOracleRecordCounter(
     oracleRecords: OracleRecord[]
   ): Promise<OracleRecord[]> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][increaseOracleRecordCounter] Increasing the counters of ${oracleRecords.length} oracle records`,
+      { tags: ['case-connector:increaseOracleRecordCounter'] }
+    );
+
     if (oracleRecords.length === 0) {
       return [];
     }
@@ -274,8 +396,22 @@ export class CasesConnectorExecutor {
       payload: { counter: record.counter + 1 },
     }));
 
+    const idsToUpdate = bulkUpdateReq.map(({ recordId }) => recordId);
+
     const bulkUpdateRes = await this.casesOracleService.bulkUpdateRecord(bulkUpdateReq);
     const [bulkUpdateValidRecords, bulkUpdateErrors] = partitionRecordsByError(bulkUpdateRes);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertOracleRecords] The total number of updated oracle records is ${bulkUpdateValidRecords.length} and the total number of errors while updating is ${bulkUpdateErrors.length}`,
+      {
+        labels: {
+          total: idsToUpdate.length,
+          success: bulkUpdateValidRecords.length,
+          errors: bulkUpdateErrors.length,
+        },
+        tags: ['case-connector:increaseOracleRecordCounter', ...idsToUpdate],
+      }
+    );
 
     this.handleAndThrowErrors(bulkUpdateErrors);
 
@@ -283,23 +419,43 @@ export class CasesConnectorExecutor {
   }
 
   private isTimeWindowPassed(timeWindow: string, counterLastUpdatedAt: string) {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Validating the time window ${timeWindow} against the timestamp of the last update of the oracle record ${counterLastUpdatedAt}`,
+      { tags: ['case-connector:isTimeWindowPassed'] }
+    );
+
     const parsedDate = dateMath.parse(`now-${timeWindow}`);
 
     /**
-     * TODO: Should we throw?
+     * TODO: Should we throw? Should we return true to create a new case?
      */
     if (!parsedDate || !parsedDate.isValid()) {
+      this.logger.warn(
+        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "${timeWindow}"`
+      );
+
       return false;
     }
 
     const counterLastUpdatedAtAsDate = new Date(counterLastUpdatedAt);
 
     /**
-     * TODO: Should we throw?
+     * TODO: Should we throw? Should we return true to create a new case?
      */
     if (isNaN(counterLastUpdatedAtAsDate.getTime())) {
+      this.logger.warn(
+        `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "${counterLastUpdatedAt}" is not a valid date`
+      );
+
       return false;
     }
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Time window has passed ${
+        counterLastUpdatedAtAsDate < parsedDate.toDate()
+      }`,
+      { tags: ['case-connector:isTimeWindowPassed'] }
+    );
 
     return counterLastUpdatedAtAsDate < parsedDate.toDate();
   }
@@ -308,6 +464,11 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlertsWithOracleRecords: Map<string, GroupedAlertsWithOracleRecords>
   ): Map<string, GroupedAlertsWithCaseId> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][generateCaseIds] Generating ${groupedAlertsWithOracleRecords.size} case IDs`,
+      { tags: ['case-connector:generateCaseIds'] }
+    );
+
     const { rule, owner } = params;
 
     /**
@@ -318,13 +479,25 @@ export class CasesConnectorExecutor {
     const casesMap = new Map<string, GroupedAlertsWithCaseId>();
 
     for (const [recordId, entry] of groupedAlertsWithOracleRecords.entries()) {
-      const caseId = this.casesService.getCaseId({
+      const getCaseIdParams = {
         ruleId: rule.id,
         grouping: entry.grouping,
         owner,
         spaceId,
         counter: entry.oracleRecord.counter,
-      });
+      };
+
+      const caseId = this.casesService.getCaseId(getCaseIdParams);
+
+      this.logger.debug(
+        `[CasesConnector][CasesConnectorExecutor][generateCaseIds] Case ID ${caseId} generated with params ${JSON.stringify(
+          getCaseIdParams
+        )}`,
+        {
+          labels: { params: getCaseIdParams },
+          tags: ['case-connector:generateCaseIds', caseId],
+        }
+      );
 
       casesMap.set(caseId, {
         caseId,
@@ -335,6 +508,11 @@ export class CasesConnectorExecutor {
       });
     }
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][generateCaseIds] Total of case IDs generated ${casesMap.size}`,
+      { tags: ['case-connector:generateCaseIds'] }
+    );
+
     return casesMap;
   }
 
@@ -342,11 +520,34 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupedAlertsWithCaseId: Map<string, GroupedAlertsWithCaseId>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
-    const bulkCreateReq: BulkCreateCasesRequest['cases'] = [];
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] Upserting ${groupedAlertsWithCaseId.size} cases`,
+      { tags: ['case-connector:upsertCases'] }
+    );
+
+    const bulkCreateReq = [];
     const casesMap = new Map<string, GroupedAlertsWithCases>();
 
     const ids = Array.from(groupedAlertsWithCaseId.values()).map(({ caseId }) => caseId);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] Getting cases with ids ${ids}`,
+      { tags: ['case-connector:upsertCases', ...ids] }
+    );
+
     const { cases, errors } = await this.casesClient.cases.bulkGet({ ids });
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of cases is ${cases.length} and the total number of errors while getting the cases is ${errors.length}`,
+      {
+        labels: {
+          total: ids.length,
+          success: cases.length,
+          errors: errors.length,
+        },
+        tags: ['case-connector:upsertCases'],
+      }
+    );
 
     for (const theCase of cases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
@@ -367,6 +568,17 @@ export class CasesConnectorExecutor {
       errors.map((error) => ({ ...error, statusCode: error.status ?? 500, id: error.caseId }))
     );
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of non found cases is ${nonFoundErrors.length} and the total number of the rest of errors while getting the cases is ${restOfErrors.length}`,
+      {
+        labels: {
+          nonFoundErrors: nonFoundErrors.length,
+          restOfErrors: restOfErrors.length,
+        },
+        tags: ['case-connector:upsertCases'],
+      }
+    );
+
     this.handleAndThrowErrors(restOfErrors);
 
     if (nonFoundErrors.length === 0) {
@@ -381,12 +593,29 @@ export class CasesConnectorExecutor {
       }
     }
 
+    const idsToCreate = bulkCreateReq.map(({ id }) => id);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] Creating cases with ids ${idsToCreate}`,
+      { tags: ['case-connector:upsertCases', ...idsToCreate] }
+    );
+
     /**
      * cases.bulkCreate throws an error on errors
      */
     const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
       cases: bulkCreateReq,
     });
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][upsertCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
+      {
+        labels: {
+          total: bulkCreateReq.length,
+        },
+        tags: ['case-connector:upsertCases'],
+      }
+    );
 
     for (const theCase of bulkCreateCasesResponse.cases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
@@ -401,7 +630,7 @@ export class CasesConnectorExecutor {
   private getCreateCaseRequest(
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId
-  ): BulkCreateCasesRequest['cases'][number] {
+  ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
     const { grouping, caseId } = groupingData;
 
     const ruleName = params.rule.ruleUrl
@@ -455,8 +684,18 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     casesMap: Map<string, GroupedAlertsWithCases>
   ) {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleClosedCases] Handling closed cases with reopenClosedCases set to ${params.reopenClosedCases}`,
+      { tags: ['case-connector:handleClosedCases'] }
+    );
+
     const entriesWithClosedCases = Array.from(casesMap.values()).filter(
       (theCase) => theCase.theCase.status === CaseStatuses.closed
+    );
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleClosedCases] Closed cases ${entriesWithClosedCases.length}`,
+      { tags: ['case-connector:handleClosedCases'] }
     );
 
     if (entriesWithClosedCases.length === 0) {
@@ -478,6 +717,11 @@ export class CasesConnectorExecutor {
     closedCasesEntries: GroupedAlertsWithCases[],
     casesMap: Map<string, GroupedAlertsWithCases>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][reopenClosedCases] Total closed cases to reopen ${closedCasesEntries.length}`,
+      { tags: ['case-connector:reopenClosedCases'] }
+    );
+
     const casesMapWithClosedCasesOpened = new Map(casesMap);
 
     const bulkUpdateReq = closedCasesEntries.map((entry) => ({
@@ -485,6 +729,13 @@ export class CasesConnectorExecutor {
       version: entry.theCase.version,
       status: CaseStatuses.open,
     }));
+
+    const idsToReopen = bulkUpdateReq.map(({ id }) => id);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][reopenClosedCases] Reopening total ${bulkUpdateReq.length} closed cases with ids ${idsToReopen}`,
+      { tags: ['case-connector:reopenClosedCases', ...idsToReopen] }
+    );
 
     /**
      * cases.bulkUpdate throws an error on errors
@@ -500,6 +751,16 @@ export class CasesConnectorExecutor {
       }
     }
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][reopenClosedCases] The total number of cases that got reopened is ${bulkUpdateCasesResponse.length}`,
+      {
+        labels: {
+          total: bulkUpdateCasesResponse.length,
+        },
+        tags: ['case-connector:reopenClosedCases'],
+      }
+    );
+
     return casesMapWithClosedCasesOpened;
   }
 
@@ -508,6 +769,11 @@ export class CasesConnectorExecutor {
     closedCasesEntries: GroupedAlertsWithCases[],
     casesMap: Map<string, GroupedAlertsWithCases>
   ): Promise<Map<string, GroupedAlertsWithCases>> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] Creating new cases for closed cases ${closedCasesEntries.length}`,
+      { tags: ['case-connector:createNewCasesOutOfClosedCases'] }
+    );
+
     const casesMapWithNewCases = new Map(casesMap);
     const casesMapAsArray = Array.from(casesMap.values());
 
@@ -515,8 +781,23 @@ export class CasesConnectorExecutor {
       return casesMapAsArray.find((record) => record.oracleRecord.id === oracleId);
     };
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] Total oracle records where their corresponding case is closed and their counter will be increased ${closedCasesEntries.length}`,
+      { tags: ['case-connector:createNewCasesOutOfClosedCases'] }
+    );
+
     const bulkUpdateOracleValidRecords = await this.increaseOracleRecordCounter(
       closedCasesEntries.map((entry) => entry.oracleRecord)
+    );
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] Total oracle records where their corresponding case is closed and their counter got increased ${bulkUpdateOracleValidRecords.length}`,
+      {
+        tags: [
+          'case-connector:createNewCasesOutOfClosedCases',
+          ...closedCasesEntries.map(({ oracleKey }) => oracleKey),
+        ],
+      }
     );
 
     const groupedAlertsWithOracleRecords = new Map<string, GroupedAlertsWithOracleRecords>();
@@ -534,9 +815,21 @@ export class CasesConnectorExecutor {
       }
     }
 
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] Generating ${groupedAlertsWithOracleRecords.size} case IDs`,
+      { tags: ['case-connector:createNewCasesOutOfClosedCases'] }
+    );
+
     const groupedAlertsWithCaseId = this.generateCaseIds(params, groupedAlertsWithOracleRecords);
     const bulkCreateReq = Array.from(groupedAlertsWithCaseId.values()).map((record) =>
       this.getCreateCaseRequest(params, record)
+    );
+
+    const idsToCreate = bulkCreateReq.map(({ id }) => id);
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] Creating cases with ids ${idsToCreate}`,
+      { tags: ['case-connector:createNewCasesOutOfClosedCases', ...idsToCreate] }
     );
 
     /**
@@ -545,6 +838,16 @@ export class CasesConnectorExecutor {
     const bulkCreateCasesResponse = await this.casesClient.cases.bulkCreate({
       cases: bulkCreateReq,
     });
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][createNewCasesOutOfClosedCases] The total number of created cases is ${bulkCreateCasesResponse.cases.length}`,
+      {
+        labels: {
+          total: bulkCreateCasesResponse.cases.length,
+        },
+        tags: ['case-connector:createNewCasesOutOfClosedCases'],
+      }
+    );
 
     for (const theCase of bulkCreateCasesResponse.cases) {
       if (groupedAlertsWithCaseId.has(theCase.id)) {
@@ -560,6 +863,11 @@ export class CasesConnectorExecutor {
     groupedAlertsWithCases: Map<string, GroupedAlertsWithCases>,
     params: CasesConnectorRunParams
   ): Promise<void> {
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching alerts to ${groupedAlertsWithCases.size} cases`,
+      { tags: ['case-connector:attachAlertsToCases'] }
+    );
+
     const { rule } = params;
 
     /**
@@ -568,6 +876,16 @@ export class CasesConnectorExecutor {
      */
     const casesUnderAlertLimit = Array.from(groupedAlertsWithCases.values()).filter(
       ({ theCase, alerts }) => theCase.totalAlerts + alerts.length <= MAX_ALERTS_PER_CASE
+    );
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching alerts to ${casesUnderAlertLimit.length} cases that do not have reach the alert limit per case`,
+      {
+        tags: [
+          'case-connector:attachAlertsToCases',
+          ...casesUnderAlertLimit.map(({ caseId }) => caseId),
+        ],
+      }
     );
 
     const bulkCreateAlertsRequest: BulkCreateAlertsReq[] = casesUnderAlertLimit.map(
@@ -588,7 +906,21 @@ export class CasesConnectorExecutor {
       /**
        * attachments.bulkCreate throws an error on errors
        */
-      (req: BulkCreateAlertsReq) => this.casesClient.attachments.bulkCreate(req),
+      async (req: BulkCreateAlertsReq) => {
+        this.logger.debug(
+          `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching ${req.attachments.length} alerts to case with ID ${req.caseId}`,
+          {
+            labels: { caseId: req.caseId },
+            tags: [
+              'case-connector:attachAlertsToCases',
+              req.caseId,
+              ...(req.attachments as Array<{ alertId: string }>).map(({ alertId }) => alertId),
+            ],
+          }
+        );
+
+        await this.casesClient.attachments.bulkCreate(req);
+      },
       {
         concurrency: MAX_CONCURRENT_ES_REQUEST,
       }
@@ -602,6 +934,14 @@ export class CasesConnectorExecutor {
 
     const firstError = errors[0];
     const message = `${firstError.error}: ${firstError.message}`;
+
+    this.logger.debug(
+      `[CasesConnector][CasesConnectorExecutor][handleAndThrowErrors] Error message "${message}"`,
+      {
+        tags: ['case-connector:handleAndThrowErrors'],
+        error: { code: firstError.statusCode.toString() },
+      }
+    );
 
     throw new CasesConnectorError(message, firstError.statusCode);
   }

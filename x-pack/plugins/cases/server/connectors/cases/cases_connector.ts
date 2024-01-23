@@ -43,7 +43,7 @@ export class CasesConnector extends SubActionConnector<
     super(connectorParams);
 
     this.casesOracleService = new CasesOracleService({
-      log: this.logger,
+      logger: this.logger,
       /**
        * TODO: Think about permissions etc.
        * Should we use our own savedObjectsClient as we do
@@ -58,7 +58,7 @@ export class CasesConnector extends SubActionConnector<
      * We should wait at least 5ms before retrying and no more that 2sec
      */
     const backOffFactory = fullJitterBackoffFactory({ baseDelay: 5, maxBackoffTime: 2000 });
-    this.retryService = new CaseConnectorRetryService(backOffFactory);
+    this.retryService = new CaseConnectorRetryService(this.logger, backOffFactory);
 
     /**
      * TODO: Get request from the actions framework.
@@ -101,22 +101,76 @@ export class CasesConnector extends SubActionConnector<
       const casesClient = await this.casesParams.getCasesClient(this.kibanaRequest);
 
       const connectorExecutor = new CasesConnectorExecutor({
+        logger: this.logger,
         casesOracleService: this.casesOracleService,
         casesService: this.casesService,
         casesClient,
       });
 
+      this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
+
       await connectorExecutor.execute(params);
+
+      this.logDebugCurrentState(
+        'success',
+        '[CasesConnector][_run] Execution of case connector succeeded',
+        params
+      );
     } catch (error) {
       if (isCasesConnectorError(error)) {
+        this.logError(error);
         throw error;
       }
 
       if (isCasesClientError(error)) {
-        throw new CasesConnectorError(error.message, error.boomify().output.statusCode);
+        const caseConnectorError = new CasesConnectorError(
+          error.message,
+          error.boomify().output.statusCode
+        );
+
+        this.logError(caseConnectorError);
+        throw caseConnectorError;
       }
 
-      throw new CasesConnectorError(error.message, 500);
+      const caseConnectorError = new CasesConnectorError(error.message, 500);
+      this.logError(caseConnectorError);
+
+      throw caseConnectorError;
+    } finally {
+      this.logDebugCurrentState(
+        'end',
+        '[CasesConnector][_run] Execution of case connector ended',
+        params
+      );
     }
+  }
+
+  private logDebugCurrentState(state: string, message: string, params: CasesConnectorRunParams) {
+    const alertIds = params.alerts.map(({ _id }) => _id);
+
+    this.logger.debug(`[CasesConnector][_run] ${message}`, {
+      labels: {
+        ruleId: params.rule.id,
+        groupingBy: params.groupingBy,
+        totalAlerts: params.alerts.length,
+        timeWindow: params.timeWindow,
+        reopenClosedCases: params.reopenClosedCases,
+        owner: params.owner,
+      },
+      tags: [`cases-connector:${state}`, params.rule.id, ...alertIds],
+    });
+  }
+
+  private logError(error: CasesConnectorError) {
+    this.logger.error(
+      `[CasesConnector][_run] Execution of case connector failed. Message: ${error.message}. Status code: ${error.statusCode}`,
+      {
+        error: {
+          stack_trace: error.stack,
+          code: error.statusCode.toString(),
+          type: 'CasesConnectorError',
+        },
+      }
+    );
   }
 }

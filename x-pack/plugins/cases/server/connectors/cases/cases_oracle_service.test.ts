@@ -8,7 +8,7 @@
 import { createHash } from 'node:crypto';
 import stringify from 'json-stable-stringify';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { loggerMock } from '@kbn/logging-mocks';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 import { CasesOracleService } from './cases_oracle_service';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
@@ -16,13 +16,13 @@ import { isEmpty, set } from 'lodash';
 
 describe('CasesOracleService', () => {
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
-  const mockLogger = loggerMock.create();
+  const logger = loggingSystemMock.createLogger();
 
   let service: CasesOracleService;
 
   beforeEach(() => {
     jest.resetAllMocks();
-    service = new CasesOracleService({ unsecuredSavedObjectsClient, log: mockLogger });
+    service = new CasesOracleService({ unsecuredSavedObjectsClient, logger });
   });
 
   describe('getRecordId', () => {

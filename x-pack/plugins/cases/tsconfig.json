@@ -72,6 +72,7 @@
     "@kbn/content-management-plugin",
     "@kbn/core-logging-server-mocks",
     "@kbn/datemath",
+    "@kbn/core-logging-browser-mocks",
   ],
   "exclude": [
     "target/**/*",
