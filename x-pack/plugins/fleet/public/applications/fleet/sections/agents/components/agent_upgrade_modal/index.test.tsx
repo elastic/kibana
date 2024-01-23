@@ -125,6 +125,22 @@ describe('AgentUpgradeAgentModal', () => {
       });
     });
 
+    it('should make combo invalid on clearing version - bulk action', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        fireEvent.click(utils.getByTestId('comboBoxClearButton'));
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('');
+        expect(utils.getByText('Version is required')).toBeInTheDocument();
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      });
+    });
+
     it('should display the custom version text input if no versions', async () => {
       const { utils } = renderAgentUpgradeAgentModal({
         agents: [
