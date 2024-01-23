@@ -13,13 +13,13 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
   ESQL_SEARCH_STRATEGY,
-  IKibanaSearchRequest,
-  IKibanaSearchResponse,
+  type IKibanaSearchRequest,
+  type IKibanaSearchResponse,
   cellHasFormulas,
   getEsQueryConfig,
 } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
-import { Filter, buildEsQuery } from '@kbn/es-query';
+import { type Filter, buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchReponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import {
@@ -33,7 +33,7 @@ import type { ReportingConfigType } from '@kbn/reporting-server';
 import { zipObject } from 'lodash';
 
 import { CONTENT_TYPE_CSV } from '../constants';
-import { CsvExportSettings, getExportSettings } from './lib/get_export_settings';
+import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
 

@@ -53,3 +53,5 @@ export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';
+
+export type CsvPagingStrategy = 'pit' | 'scroll';

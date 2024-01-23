@@ -29,8 +29,8 @@ import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/ty
 import type { ReportingConfigType } from '@kbn/reporting-server';
 
 import { CONTENT_TYPE_CSV } from '../constants';
-import { JobParamsCSV } from '../types';
-import { CsvExportSettings, getExportSettings } from './lib/get_export_settings';
+import type { JobParamsCSV } from '../types';
+import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
 import { SearchCursor } from './lib/search_cursor';

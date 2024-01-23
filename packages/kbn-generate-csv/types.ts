@@ -7,6 +7,7 @@
  */
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 
 /**
  * Duplicated from @kbn/reporting-export-types-csv-common to reduce dependencies
@@ -17,5 +18,3 @@ export interface JobParamsCSV {
   columns?: string[];
   searchStrategy?: CsvPagingStrategy;
 }
-
-export type CsvPagingStrategy = 'pit' | 'scroll';

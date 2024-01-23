@@ -9,6 +9,7 @@
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
+import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   CSV_BOM_CHARS,
@@ -17,7 +18,6 @@ import {
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from '../../constants';
-import { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;

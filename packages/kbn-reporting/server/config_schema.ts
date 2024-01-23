@@ -7,6 +7,7 @@
  */
 
 import { ByteSizeValue, offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 import moment from 'moment';
@@ -66,15 +67,14 @@ const CsvSchema = schema.object({
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
-    strategy: schema.maybe(
-      schema.string({
-        validate(value) {
-          if (!csvPagingStrategies.includes(value)) {
-            return 'csv paging strategy must equal "pit" or "scroll"';
-          }
-        },
-      })
-    ),
+    strategy: schema.string({
+      defaultValue: 'pit',
+      validate(value) {
+        if (!csvPagingStrategies.includes(value)) {
+          return 'csv paging strategy must equal "pit" or "scroll"';
+        }
+      },
+    }),
     duration: schema.string({
       defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
       validate(value) {

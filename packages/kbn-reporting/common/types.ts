@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
@@ -64,7 +65,7 @@ export interface BaseParams {
   title: string;
   version: string; // to handle any state migrations
   layout?: LayoutParams; // png & pdf only
-  searchStrategy?: 'pit' | 'scroll'; // csv only
+  searchStrategy?: CsvPagingStrategy; // csv only
 }
 
 /**
