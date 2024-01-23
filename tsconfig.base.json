@@ -1534,6 +1534,8 @@
       "@kbn/some-dev-log/*": ["packages/kbn-some-dev-log/*"],
       "@kbn/sort-package-json": ["packages/kbn-sort-package-json"],
       "@kbn/sort-package-json/*": ["packages/kbn-sort-package-json/*"],
+      "@kbn/sort-predicates": ["packages/kbn-sort-predicates"],
+      "@kbn/sort-predicates/*": ["packages/kbn-sort-predicates/*"],
       "@kbn/spaces-plugin": ["x-pack/plugins/spaces"],
       "@kbn/spaces-plugin/*": ["x-pack/plugins/spaces/*"],
       "@kbn/spaces-test-plugin": ["x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin"],
