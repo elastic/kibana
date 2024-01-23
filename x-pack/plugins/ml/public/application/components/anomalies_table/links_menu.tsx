@@ -40,6 +40,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
 import { isDefined } from '@kbn/ml-is-defined';
 import { escapeQuotes } from '@kbn/es-query';
+import { isQuery } from '@kbn/data-plugin/public';
 
 import { PLUGIN_ID } from '../../../../common/constants/app';
 import { findMessageField, getDataViewIdFromName } from '../../util/index_utils';
@@ -316,7 +317,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       let kqlQuery = '';
 
-      if (record.influencers) {
+      if (record.influencers && !withWindowParameters) {
         kqlQuery = record.influencers
           .filter((influencer) => isDefined(influencer))
           .map((influencer) => {
@@ -332,6 +333,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
             }
           })
           .join(' AND ');
+      }
+
+      // For multi-metric jobs, we add the selected partition for links to
+      // Log Rate Analysis, so they can be restore as a search filter.
+      if (withWindowParameters && record.partition_field_name && record.partition_field_value) {
+        if (kqlQuery !== '') {
+          kqlQuery += ' AND ';
+        }
+
+        kqlQuery = `"${escapeQuotes(record.partition_field_name)}":"${escapeQuotes(
+          record.partition_field_value + ''
+        )}"`;
       }
 
       return {
@@ -386,7 +399,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       }
       const pageState = await generateRedirectUrlPageState(true, 'time');
 
-      const { indexPatternId, wp, ...globalState } = pageState;
+      const { indexPatternId, wp, query, ...globalState } = pageState;
 
       const url = await mlLocator.getUrl(
         {
@@ -394,7 +407,17 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           pageState: {
             index: indexPatternId,
             globalState,
-            appState: { logRateAnalysis: { wp } },
+            appState: {
+              logRateAnalysis: {
+                wp,
+                ...(isQuery(query)
+                  ? {
+                      searchString: query.query,
+                      searchQueryLanguage: query.language,
+                    }
+                  : {}),
+              },
+            },
           },
         },
         { absolute: true }

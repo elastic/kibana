@@ -9,9 +9,15 @@ import { useMemo } from 'react';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { isQuery } from '@kbn/data-plugin/public';
 
 import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
-import type { AiOpsIndexBasedAppState } from '../application/url_state/common';
+import {
+  isDefaultSearchQuery,
+  type AiOpsIndexBasedAppState,
+} from '../application/url_state/common';
+import { createMergedEsQuery } from '../application/utils/search_utils';
+
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 export const useSearch = (
@@ -44,8 +50,18 @@ export const useSearch = (
       if (filterManager) filterManager.setFilters(aiopsListState.filters);
       if (globalFilters) filterManager?.addFilters(globalFilters);
     }
+
+    // In cases where the url state contains only a KQL query and not yet
+    // the transformed ES query we regenerate it. This may happen if we restore
+    // url state on page load coming from another page like ML's Single Metric Viewer.
+    let searchQuery = aiopsListState?.searchQuery;
+    const query = { language: 'kuery', query: aiopsListState?.searchString };
+    if ((isDefaultSearchQuery(searchQuery) || searchQuery === undefined) && isQuery(query)) {
+      searchQuery = createMergedEsQuery(query, [], dataView, uiSettings);
+    }
+
     return {
-      searchQuery: aiopsListState?.searchQuery,
+      searchQuery,
       searchString: aiopsListState?.searchString,
       searchQueryLanguage: aiopsListState?.searchQueryLanguage,
     };
