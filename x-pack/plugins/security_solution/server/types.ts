@@ -32,6 +32,7 @@ import type { EndpointInternalFleetServicesInterface } from './endpoint/services
 import type { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import type { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -51,6 +52,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getRiskEngineDataClient: () => RiskEngineDataClient;
   getRiskScoreDataClient: () => RiskScoreDataClient;
   getAssetCriticalityDataClient: () => AssetCriticalityDataClient;
+  getEntityStoreDataClient: () => EntityStoreDataClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

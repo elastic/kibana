@@ -37,6 +37,7 @@ import type { EndpointAuthz } from '../../../../../common/endpoint/types/authz';
 import { riskEngineDataClientMock } from '../../../entity_analytics/risk_engine/risk_engine_data_client.mock';
 import { riskScoreDataClientMock } from '../../../entity_analytics/risk_score/risk_score_data_client.mock';
 import { assetCriticalityDataClientMock } from '../../../entity_analytics/asset_criticality/asset_criticality_data_client.mock';
+import { entityStoreDataClientMock } from '../../../entity_analytics/entity_store/entity_store_data_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -67,6 +68,7 @@ export const createMockClients = () => {
     riskEngineDataClient: riskEngineDataClientMock.create(),
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+    entityStoreyDataClient: entityStoreDataClientMock.create(),
   };
 };
 
@@ -148,6 +150,7 @@ const createSecuritySolutionRequestContextMock = (
     getRiskEngineDataClient: jest.fn(() => clients.riskEngineDataClient),
     getRiskScoreDataClient: jest.fn(() => clients.riskScoreDataClient),
     getAssetCriticalityDataClient: jest.fn(() => clients.assetCriticalityDataClient),
+    getEntityStoreDataClient: jest.fn(() => clients.entityStoreyDataClient),
   };
 };
 

@@ -147,4 +147,7 @@ export const initRoutes = (
   registerEntityAnalyticsRoutes({ router, config, getStartServices, logger });
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
+  if (config.experimentalFeatures.entityStoreEnabled) {
+    entityStoreInitRoute(router);
+  }
 };
