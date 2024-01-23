@@ -75,6 +75,7 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
         showSubmitButton={true}
         showDatePicker={false}
         showQueryInput={true}
+        disableQueryLanguageSwitcher={true}
       />
     </Container>
   );
