@@ -7,7 +7,7 @@
  */
 import './solution_nav.scss';
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import {
   EuiAvatarProps,
@@ -23,10 +23,12 @@ import {
   htmlIdGenerator,
   useIsWithinBreakpoints,
   useIsWithinMinBreakpoint,
+  useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { SolutionNavCollapseButton } from './collapse_button';
 
@@ -173,6 +175,32 @@ export const SolutionNav: FC<SolutionNavProps> = ({
       />
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
+
+  const navWidth = useMemo(() => {
+    if (isLargerBreakpoint) {
+      return isOpenOnDesktop ? `${FLYOUT_SIZE}px` : euiThemeVars.euiSizeXXL;
+    }
+    if (isMediumBreakpoint) {
+      return isSideNavOpenOnMobile || !canBeCollapsed
+        ? `${FLYOUT_SIZE}px`
+        : euiThemeVars.euiSizeXXL;
+    }
+    return '0';
+  }, [
+    isOpenOnDesktop,
+    isSideNavOpenOnMobile,
+    canBeCollapsed,
+    isMediumBreakpoint,
+    isLargerBreakpoint,
+  ]);
+  const { setGlobalCSSVariables } = useEuiThemeCSSVariables();
+  // Setting a global CSS variable with the nav width
+  // so that other pages have it available when needed.
+  useEffect(() => {
+    setGlobalCSSVariables({
+      '--kbnSolutionNavOffset': navWidth,
+    });
+  }, [navWidth, setGlobalCSSVariables]);
 
   return (
     <>
