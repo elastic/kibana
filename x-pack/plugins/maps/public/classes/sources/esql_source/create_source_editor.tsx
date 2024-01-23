@@ -7,11 +7,12 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiSkeletonText } from '@elastic/eui';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
-import { ESQL_GEO_POINT_TYPE } from './esql_utils';
+import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 
 interface Props {
   mostCommonDataViewId?: string;
@@ -39,12 +40,17 @@ export function CreateSourceEditor(props: Props) {
         }
 
         if (dataView) {
-          let geoField: string | undefined;
+          let geoField: DataViewField | undefined;
           const initialDateFields: string[] = [];
           for (let i = 0; i < dataView.fields.length; i++) {
             const field = dataView.fields[i];
-            if (!geoField && ES_GEO_FIELD_TYPE.GEO_POINT === field.type) {
-              geoField = field.name;
+            if (
+              !geoField &&
+              [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(
+                field.type as ES_GEO_FIELD_TYPE
+              )
+            ) {
+              geoField = field;
             } else if ('date' === field.type) {
               initialDateFields.push(field.name);
             }
@@ -57,14 +63,19 @@ export function CreateSourceEditor(props: Props) {
             } else if (initialDateFields.length) {
               initialDateField = initialDateFields[0];
             }
-            const initialEsql = `from ${dataView.getIndexPattern()} | keep ${geoField} | limit 10000`;
+            const initialEsql = `from ${dataView.getIndexPattern()} | keep ${
+              geoField.name
+            } | limit 10000`;
             setDateField(initialDateField);
             setEsql(initialEsql);
             props.onSourceConfigChange({
               columns: [
                 {
-                  name: geoField,
-                  type: ESQL_GEO_POINT_TYPE,
+                  name: geoField.name,
+                  type:
+                    geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+                      ? ESQL_GEO_SHAPE_TYPE
+                      : ESQL_GEO_POINT_TYPE,
                 },
               ],
               dateField: initialDateField,

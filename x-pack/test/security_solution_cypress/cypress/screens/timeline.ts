@@ -29,8 +29,12 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
+export const BOTTOM_BAR_CREATE_NEW_TIMELINE =
+  '[data-test-subj="timeline-bottom-bar-create-new-timeline"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
+export const BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE =
+  '[data-test-subj="timeline-bottom-bar-create-new-timeline-template"]';
 
 export const DATA_PROVIDERS = '.field-value';
 
@@ -181,7 +185,7 @@ export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
-export const TIMELINE_SETTINGS_ICON = '[data-test-subj="timeline-create-open-control"]';
+export const BOTTOM_BAR_TIMELINE_PLUS_ICON = '[data-test-subj="timeline-bottom-bar-open-button"]';
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
 
