@@ -32,11 +32,13 @@ async function downloadCSVs({
   title,
   formatFactory,
   uiSettings,
+  columnsSorting,
 }: {
   title: string;
   activeData: TableInspectorAdapter;
   formatFactory: FormatFactory;
   uiSettings: IUiSettingsClient;
+  columnsSorting?: string[];
 }) {
   if (!activeData) {
     if (window.ELASTIC_LENS_CSV_DOWNLOAD_DEBUG) {
@@ -57,6 +59,7 @@ async function downloadCSVs({
             quoteValues: uiSettings.get('csv:quoteValues', true),
             formatFactory,
             escapeFormulaValues: false,
+            columnsSorting,
           }),
           type: exporters.CSV_MIME_TYPE,
         };
@@ -112,10 +115,11 @@ export const downloadCsvShareProvider = ({
       return [];
     }
 
-    const { title, activeData, csvEnabled } = sharingData as {
+    const { title, activeData, csvEnabled, columnsSorting } = sharingData as {
       title: string;
       activeData: TableInspectorAdapter;
       csvEnabled: boolean;
+      columnsSorting?: string[];
     };
 
     const panelTitle = i18n.translate(
@@ -141,6 +145,7 @@ export const downloadCsvShareProvider = ({
                 formatFactory: formatFactoryFn(),
                 activeData,
                 uiSettings,
+                columnsSorting,
               });
             }}
           />,
