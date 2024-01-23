@@ -15,7 +15,7 @@ export const validateCustomFieldTypesInRequest = ({
   requestCustomFields,
   originalCustomFields,
 }: {
-  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes }>;
+  requestCustomFields?: Array<{ key: string; type: CustomFieldTypes; label: string }>;
   originalCustomFields: Array<{ key: string; type: CustomFieldTypes }>;
 }) => {
   if (!Array.isArray(requestCustomFields) || !originalCustomFields.length) {
@@ -28,13 +28,13 @@ export const validateCustomFieldTypesInRequest = ({
     const originalField = originalCustomFields.find((item) => item.key === requestField.key);
 
     if (originalField && originalField.type !== requestField.type) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`"${requestField.label}"`);
     }
   });
 
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
-      `Invalid custom field types in request for the following keys: ${invalidFields}`
+      `Invalid custom field types in request for the following keys: ${invalidFields.join(', ')}`
     );
   }
 };
@@ -49,6 +49,7 @@ export const validateRequiredCustomFieldsInRequest = ({
     key: string;
     required: boolean;
     defaultValue?: string | boolean | null;
+    label: string;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -62,13 +63,15 @@ export const validateRequiredCustomFieldsInRequest = ({
       requestField.required &&
       (requestField.defaultValue === undefined || requestField.defaultValue === null)
     ) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`"${requestField.label}"`);
     }
   });
 
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
-      `The following required custom fields are missing the default value: ${invalidFields}`
+      `The following required custom fields are missing the default value: ${invalidFields.join(
+        ', '
+      )}`
     );
   }
 };
@@ -83,6 +86,7 @@ export const validateOptionalCustomFieldsInRequest = ({
     key: string;
     required: boolean;
     defaultValue?: unknown;
+    label: string;
   }>;
 }) => {
   if (!Array.isArray(requestCustomFields)) {
@@ -93,13 +97,15 @@ export const validateOptionalCustomFieldsInRequest = ({
 
   requestCustomFields.forEach((requestField) => {
     if (!requestField.required && requestField.defaultValue !== undefined) {
-      invalidFields.push(requestField.key);
+      invalidFields.push(`"${requestField.label}"`);
     }
   });
 
   if (invalidFields.length > 0) {
     throw Boom.badRequest(
-      `The following optional custom fields try to define a default value: ${invalidFields}`
+      `The following optional custom fields try to define a default value: ${invalidFields.join(
+        ', '
+      )}`
     );
   }
 };

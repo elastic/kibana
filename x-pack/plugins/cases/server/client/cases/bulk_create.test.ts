@@ -1019,7 +1019,7 @@ describe('bulkCreate', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: first_key,second_key"`
+        `"Failed to bulk create cases: Error: The following custom fields have the wrong type in the request: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
