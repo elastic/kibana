@@ -21,6 +21,7 @@ export type ConnectorViewItem = Connector & { docsCount?: number };
 export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
+  closeDeleteModal(): void;
   fetchConnectors({
     fetchCrawlersOnly,
     from,
@@ -39,11 +40,23 @@ export interface ConnectorsActions {
   };
   makeRequest: FetchConnectorsApiLogicActions['makeRequest'];
   onPaginate(newPageIndex: number): { newPageIndex: number };
+  openDeleteModal(
+    connectorName: string,
+    connectorId: string,
+    indexName: string | null
+  ): {
+    connectorId: string;
+    connectorName: string;
+    indexName: string | null;
+  };
   setIsFirstRequest(): void;
 }
 export interface ConnectorsValues {
   connectors: ConnectorViewItem[];
   data: typeof FetchConnectorsApiLogic.values.data;
+  deleteModalConnectorName: string;
+  deleteModalIndexName: string | null;
+  isDeleteModalVisible: boolean;
   isEmpty: boolean;
   isFetchConnectorsDetailsLoading: boolean;
   isFirstRequest: boolean;
@@ -60,6 +73,7 @@ export interface ConnectorsValues {
 
 export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsActions>>({
   actions: {
+    closeDeleteModal: true,
     fetchConnectors: ({ fetchCrawlersOnly, from, size, searchQuery }) => ({
       fetchCrawlersOnly,
       from,
@@ -67,6 +81,11 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       size,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
+    openDeleteModal: (connectorName, connectorId, indexName) => ({
+      connectorId,
+      connectorName,
+      indexName,
+    }),
     setIsFirstRequest: true,
   },
   connect: {
@@ -81,6 +100,27 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
   }),
   path: ['enterprise_search', 'content', 'connectors_logic'],
   reducers: () => ({
+    deleteModalConnectorName: [
+      '',
+      {
+        closeDeleteModal: () => '',
+        openDeleteModal: (_, { connectorName }) => connectorName,
+      },
+    ],
+    deleteModalIndexName: [
+      null,
+      {
+        closeDeleteModal: () => null,
+        openDeleteModal: (_, { indexName }) => indexName,
+      },
+    ],
+    isDeleteModalVisible: [
+      false,
+      {
+        closeDeleteModal: () => false,
+        openDeleteModal: () => true,
+      },
+    ],
     isFirstRequest: [
       true,
       {

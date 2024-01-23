@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
+  deleteConnectorById,
   fetchConnectors,
   fetchSyncJobsByConnectorId,
   putUpdateNative,
@@ -26,7 +27,6 @@ import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identi
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
-import { deleteConnector } from '../../lib/connectors/delete_connector';
 import { startSync } from '../../lib/connectors/start_sync';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
@@ -548,16 +548,18 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         query: schema.object({
           connectorId: schema.string(),
+          indexToDelete: schema.maybe(schema.string()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connectorId } = request.query;
+      const { connectorId, indexToDelete } = request.query;
 
       let connectorResponse;
       try {
-        connectorResponse = await deleteConnector(client, connectorId);
+        connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
+        // TODO if indexToDelete is available delete index too.
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           return createError({
