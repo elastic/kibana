@@ -15,6 +15,7 @@ export interface JobParamsCSV {
   browserTimezone?: string;
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
+  searchStrategy?: CsvPagingStrategy;
 }
 
-export type CsvPagingStrategy = 'pit' | 'scroll' | undefined;
+export type CsvPagingStrategy = 'pit' | 'scroll';

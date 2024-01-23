@@ -64,7 +64,7 @@ export interface BaseParams {
   title: string;
   version: string; // to handle any state migrations
   layout?: LayoutParams; // png & pdf only
-  searchStrategy?: string; // csv only
+  searchStrategy?: 'pit' | 'scroll'; // csv only
 }
 
 /**

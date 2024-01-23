@@ -33,9 +33,10 @@ import {
 } from '../constants';
 import { CsvGenerator } from './generate_csv';
 
-const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
-  ...baseObj,
-});
+const createMockJob = (baseObj: Partial<JobParamsCSV> = {}): JobParamsCSV =>
+  ({
+    ...baseObj,
+  } as JobParamsCSV);
 const mockTaskInstanceFields = { startedAt: null, retryAt: null };
 
 describe('CsvGenerator', () => {
@@ -293,10 +294,6 @@ describe('CsvGenerator', () => {
   });
 
   describe('PIT strategy', () => {
-    beforeEach(() => {
-      mockConfig = { ...mockConfig, scroll: { ...mockConfig.scroll, strategy: 'pit' } };
-    });
-
     it('uses the pit ID to page all the data', async () => {
       mockDataClient.search = jest
         .fn()
@@ -335,7 +332,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'pit' }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -387,7 +384,7 @@ describe('CsvGenerator', () => {
       );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'pit' }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -502,10 +499,6 @@ describe('CsvGenerator', () => {
   });
 
   describe('Scroll strategy', () => {
-    beforeEach(() => {
-      mockConfig = { ...mockConfig, scroll: { ...mockConfig.scroll, strategy: 'scroll' } };
-    });
-
     it('uses the scroll context to page all the data', async () => {
       mockDataClient.search = jest
         .fn()
@@ -544,7 +537,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'] }),
+        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'scroll' }),
         mockConfig,
         mockTaskInstanceFields,
         {

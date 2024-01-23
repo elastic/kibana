@@ -9,6 +9,7 @@
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ISearchClient } from '@kbn/data-plugin/common';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
 import { SearchCursor, SearchCursorSettings } from './search_cursor';
 
@@ -35,15 +36,26 @@ describe('CSV Export Search Cursor', () => {
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursor('test-index-pattern-string', settings, { data, es }, logger);
+    cursor = new SearchCursor(
+      'test-index-pattern-string',
+      undefined,
+      settings,
+      { data, es },
+      logger
+    );
     await cursor.initialize();
   });
 
-  it('selects the point-in-time strategy by default', () => {
-    expect(cursor.getPagingFieldsForSearchSource()).toMatchObject([
-      'pit',
-      { id: 'what-a-pit-id', keep_alive: '10m' },
-    ]);
+  it('selects the point-in-time strategy by default', async () => {
+    const searchWithPitSpy = jest
+      // @ts-expect-error create spy on private method
+      .spyOn(cursor, 'searchWithPit')
+      // @ts-expect-error mock resolved value for spy on private method
+      .mockResolvedValueOnce({ rawResponse: { hits: [] } });
+
+    const searchSource = createSearchSourceMock();
+    await cursor.getPage(searchSource);
+    expect(searchWithPitSpy).toBeCalledTimes(1);
   });
 
   it('can update internal cursor ID', () => {
@@ -63,5 +75,30 @@ describe('CSV Export Search Cursor', () => {
       },
     ]);
     expect(cursor.getSearchAfter()).toEqual(['Wed Jan 17 15:35:47 MST 2024', 42]);
+  });
+
+  describe('scroll strategy', () => {
+    beforeEach(async () => {
+      cursor = new SearchCursor(
+        'test-index-pattern-string',
+        'scroll',
+        settings,
+        { data, es },
+        logger
+      );
+      await cursor.initialize();
+    });
+
+    it('supports scroll', async () => {
+      const scanSpy = jest
+        // @ts-expect-error create spy on private method
+        .spyOn(cursor, 'scan')
+        // @ts-expect-error mock resolved value for spy on private method
+        .mockResolvedValueOnce({ rawResponse: { hits: [] } });
+
+      const searchSource = createSearchSourceMock();
+      await cursor.getPage(searchSource);
+      expect(scanSpy).toBeCalledTimes(1);
+    });
   });
 });

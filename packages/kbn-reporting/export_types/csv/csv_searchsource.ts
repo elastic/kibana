@@ -67,7 +67,7 @@ export class CsvSearchSourceExportType extends ExportType<
   }
 
   public createJob = async (jobParams: JobParamsCSV) => {
-    const searchStrategy = this.config.csv.scroll.strategy;
+    const searchStrategy = this.config.csv.scroll.strategy as 'pit' | 'scroll' | undefined;
     return { searchStrategy, ...jobParams };
   };
 

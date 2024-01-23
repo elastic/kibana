@@ -251,7 +251,13 @@ export class CsvGenerator {
     let reportingError: undefined | ReportingError;
 
     // use a class to internalize the paging strategy
-    const cursor = new SearchCursor(indexPatternTitle, settings, this.clients, this.logger);
+    const cursor = new SearchCursor(
+      indexPatternTitle,
+      this.job.searchStrategy,
+      settings,
+      this.clients,
+      this.logger
+    );
     await cursor.initialize();
 
     // apply timezone from the job to all date field formatters

@@ -33,17 +33,17 @@ export type SearchCursorSettings = Pick<
 >;
 
 export class SearchCursor {
-  private strategy: Exclude<CsvPagingStrategy, undefined>;
   private cursorId: string | undefined;
   private searchAfter: estypes.SortResults | undefined;
 
   constructor(
     private indexPatternTitle: string,
+    private strategy: CsvPagingStrategy | undefined,
     private settings: SearchCursorSettings,
     private clients: Clients,
     private logger: Logger
   ) {
-    this.strategy = settings.scroll.strategy ?? 'pit';
+    this.strategy = strategy ?? 'pit';
     logger.debug('Using search strategy: ' + this.strategy);
   }
 
