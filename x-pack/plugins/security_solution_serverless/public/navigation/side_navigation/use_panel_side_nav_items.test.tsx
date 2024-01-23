@@ -6,13 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useSideNavItems } from './use_side_nav_items';
+import { usePanelSideNavItems } from './use_panel_side_nav_items';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { mockServices, mockProjectNavLinks } from '../../common/services/__mocks__/services.mock';
 import { ExternalPageName } from '../links/constants';
 
 jest.mock('@kbn/security-solution-navigation/src/navigation');
-jest.mock('../../common/services');
 
 const mockUseLocation = jest.fn(() => ({ pathname: '/' }));
 jest.mock('react-router-dom', () => ({
@@ -20,25 +18,24 @@ jest.mock('react-router-dom', () => ({
   useLocation: () => mockUseLocation(),
 }));
 
-describe('useSideNavItems', () => {
+describe('usePanelSideNavItems', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should return empty items', async () => {
-    const { result } = renderHook(useSideNavItems);
+    const { result } = renderHook(usePanelSideNavItems, { initialProps: [] });
     const items = result.current;
-
     expect(items).toEqual([]);
-    expect(mockServices.getProjectNavLinks$).toHaveBeenCalledTimes(1);
   });
 
   it('should return main items', async () => {
-    mockProjectNavLinks.mockReturnValueOnce([
-      { id: SecurityPageName.alerts, title: 'Alerts' },
-      { id: SecurityPageName.case, title: 'Cases' },
-    ]);
-    const { result } = renderHook(useSideNavItems);
+    const { result } = renderHook(usePanelSideNavItems, {
+      initialProps: [
+        { id: SecurityPageName.alerts, title: 'Alerts' },
+        { id: SecurityPageName.case, title: 'Cases' },
+      ],
+    });
 
     const items = result.current;
     expect(items).toEqual([
@@ -58,14 +55,15 @@ describe('useSideNavItems', () => {
   });
 
   it('should return secondary items', async () => {
-    mockProjectNavLinks.mockReturnValueOnce([
-      {
-        id: SecurityPageName.dashboards,
-        title: 'Dashboards',
-        links: [{ id: SecurityPageName.detectionAndResponse, title: 'Detection & Response' }],
-      },
-    ]);
-    const { result } = renderHook(useSideNavItems);
+    const { result } = renderHook(usePanelSideNavItems, {
+      initialProps: [
+        {
+          id: SecurityPageName.dashboards,
+          title: 'Dashboards',
+          links: [{ id: SecurityPageName.detectionAndResponse, title: 'Detection & Response' }],
+        },
+      ],
+    });
 
     const items = result.current;
     expect(items).toEqual([
@@ -86,14 +84,15 @@ describe('useSideNavItems', () => {
   });
 
   it('should return get started link', async () => {
-    mockProjectNavLinks.mockReturnValueOnce([
-      {
-        id: SecurityPageName.landing,
-        title: 'Get Started',
-        sideNavIcon: 'launch',
-      },
-    ]);
-    const { result } = renderHook(useSideNavItems);
+    const { result } = renderHook(usePanelSideNavItems, {
+      initialProps: [
+        {
+          id: SecurityPageName.landing,
+          title: 'Get Started',
+          sideNavIcon: 'launch',
+        },
+      ],
+    });
 
     const items = result.current;
 
@@ -109,15 +108,16 @@ describe('useSideNavItems', () => {
   });
 
   it('should openInNewTab for external (cloud) links', async () => {
-    mockProjectNavLinks.mockReturnValueOnce([
-      {
-        id: ExternalPageName.cloudUsersAndRoles,
-        externalUrl: 'https://cloud.elastic.co/users_roles',
-        title: 'Users & Roles',
-        sideNavIcon: 'someicon',
-      },
-    ]);
-    const { result } = renderHook(useSideNavItems);
+    const { result } = renderHook(usePanelSideNavItems, {
+      initialProps: [
+        {
+          id: ExternalPageName.cloudUsersAndRoles,
+          externalUrl: 'https://cloud.elastic.co/users_roles',
+          title: 'Users & Roles',
+          sideNavIcon: 'someicon',
+        },
+      ],
+    });
 
     const items = result.current;
 
