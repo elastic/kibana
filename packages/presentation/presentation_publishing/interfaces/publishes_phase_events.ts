@@ -20,10 +20,12 @@ export interface PhaseEvent {
   timeToEvent: number;
 }
 
-export interface FiresPhaseEvents {
-  onPhaseChange: PublishingSubject<PhaseEvent>;
+export interface PublishesPhaseEvents {
+  onPhaseChange: PublishingSubject<PhaseEvent | undefined>;
 }
 
-export const apiFiresPhaseEvents = (unknownApi: null | unknown): unknownApi is FiresPhaseEvents => {
-  return Boolean(unknownApi && (unknownApi as FiresPhaseEvents)?.onPhaseChange !== undefined);
+export const apiPublishesPhaseEvents = (
+  unknownApi: null | unknown
+): unknownApi is PublishesPhaseEvents => {
+  return Boolean(unknownApi && (unknownApi as PublishesPhaseEvents)?.onPhaseChange !== undefined);
 };
