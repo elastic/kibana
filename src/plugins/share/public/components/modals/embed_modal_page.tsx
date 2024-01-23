@@ -10,7 +10,6 @@ import {
   EuiForm,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCheckboxGroup,
   EuiButtonEmpty,
   EuiButton,
   EuiFormRow,
@@ -29,7 +28,7 @@ import {
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
-import React, { Component } from 'react';
+import React, { Component, ReactElement } from 'react';
 import { format as formatUrl, parse as parseUrl } from 'url';
 import {
   LocatorPublic,
@@ -426,67 +425,37 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
     );
   };
 
-  public render() {
-    const dashboardUrlParams = {
-      showTopMenu: 'show-top-menu',
-      showQueryInput: 'show-query-input',
-      showTimeFilter: 'show-time-filter',
-      hideFilterBar: 'hide-filter-bar',
-    };
-    const showFilterBarId = 'showFilterBar';
-    const shareModalStrings = {
-      getTopMenuCheckbox: () =>
-        i18n.translate('share.embedUrlParamExtension.topMenu', {
-          defaultMessage: 'Top menu',
-        }),
-      getQueryCheckbox: () =>
-        i18n.translate('share.embedUrlParamExtension.query', {
-          defaultMessage: 'Query',
-        }),
-      getTimeFilterCheckbox: () =>
-        i18n.translate('share.embedUrlParamExtension.timeFilter', {
-          defaultMessage: 'Time filter',
-        }),
-      getFilterBarCheckbox: () =>
-        i18n.translate('share.embedUrlParamExtension.filterBar', {
-          defaultMessage: 'Filter bar',
-        }),
-      getCheckboxLegend: () =>
-        i18n.translate('share.embedUrlParamExtension.include', {
-          defaultMessage: 'Include',
-        }),
-      getSnapshotShareWarning: () =>
-        i18n.translate('share.snapshotShare.longUrlWarning', {
-          defaultMessage:
-            'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.',
-        }),
-    };
-    const checkboxes = [
-      {
-        id: dashboardUrlParams.showTopMenu,
-        label: shareModalStrings.getTopMenuCheckbox(),
-      },
-      {
-        id: dashboardUrlParams.showQueryInput,
-        label: shareModalStrings.getQueryCheckbox(),
-      },
-      {
-        id: dashboardUrlParams.showTimeFilter,
-        label: shareModalStrings.getTimeFilterCheckbox(),
-      },
-      {
-        id: showFilterBarId,
-        label: shareModalStrings.getFilterBarCheckbox(),
-      },
-    ];
+  private renderUrlParamExtensions = (): ReactElement => {
+    if (!this.props.urlParamExtensions) {
+      return <></>;
+    }
 
-    const handleChange = (param: string): void => {
-      const newSelectedMap = {
-        ...this.state.urlParamsSelectedMap,
-        [param]: !this.state.urlParamsSelectedMap[param],
+    const setParamValue =
+      (paramName: string) =>
+      (values: { [queryParam: string]: boolean } = {}): void => {
+        const stateUpdate = {
+          urlParams: {
+            ...this.state.urlParams,
+            [paramName]: {
+              ...values,
+            },
+          },
+        };
+        this.setState(stateUpdate, this.state.useShortUrl ? this.createShortUrl : this.setUrl);
       };
-      this.setState({ urlParamsSelectedMap: newSelectedMap });
-    };
+
+    return (
+      <React.Fragment>
+        {this.props.urlParamExtensions.map(({ paramName, component: UrlParamComponent }) => (
+          <EuiFormRow key={paramName}>
+            <UrlParamComponent setParamValue={setParamValue(paramName)} />
+          </EuiFormRow>
+        ))}
+      </React.Fragment>
+    );
+  };
+
+  public render() {
     const snapshotLabel = (
       <FormattedMessage id="share.urlPanel.snapshotLabel" defaultMessage="Snapshot" />
     );
@@ -540,17 +509,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
           <EuiModalBody>
             <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
               <EuiFlexGroup direction="column">
-                <EuiFlexItem grow={1}>
-                  <EuiCheckboxGroup
-                    options={checkboxes}
-                    idToSelectedMap={this.state.urlParamsSelectedMap}
-                    onChange={handleChange}
-                    legend={{
-                      children: shareModalStrings.getCheckboxLegend(),
-                    }}
-                    data-test-subj="embedUrlParamExtension"
-                  />
-                </EuiFlexItem>
+                <EuiFlexItem grow={1}>{this.renderUrlParamExtensions()}</EuiFlexItem>
                 <EuiFormRow helpText={generateLinkAsHelp}>
                   <EuiRadioGroup
                     options={radioOptions}
