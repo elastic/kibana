@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getSortingCriteria } from './sorting';
@@ -40,8 +41,8 @@ function testSorting({
       sorted.push(firstEl);
     }
   }
-  const criteria = getSortingCriteria(type, 'a', getMockFormatter(), direction);
-  expect(datatable.sort(criteria).map((row) => row.a)).toEqual(sorted);
+  const criteria = getSortingCriteria(type, 'a', getMockFormatter());
+  expect(datatable.sort((a, b) => criteria(a, b, direction)).map((row) => row.a)).toEqual(sorted);
 }
 
 describe('Data sorting criteria', () => {
