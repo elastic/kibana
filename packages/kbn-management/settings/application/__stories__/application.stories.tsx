@@ -43,6 +43,9 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
     getAllowlistedSettings={(scope: UiSettingsScope) =>
       scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {}
     }
+    getSections={() => []}
+    // @ts-ignore
+    getToastsService={() => null}
     isCustomSetting={() => false}
     isOverriddenSetting={() => false}
     saveChanges={action('saveChanges')}

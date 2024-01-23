@@ -107,7 +107,7 @@ export const addIndexToDefault = (index: string) => {
         }
       });
 
-      cy.get('button[data-test-subj="advancedSetting-saveButton"]').click();
+      cy.get('button[data-test-subj="settings-save-button"]').click();
       cy.get('button[data-test-subj="windowReloadButton"]').click();
       visitWithTimeRange(hostsUrl('allHosts'));
     });
