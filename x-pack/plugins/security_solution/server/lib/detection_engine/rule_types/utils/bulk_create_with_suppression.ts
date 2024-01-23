@@ -27,6 +27,7 @@ export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   bulkCreateDuration: string;
   enrichmentDuration: string;
   createdItemsCount: number;
+  suppressedItemsCount: number;
   createdItems: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
   errors: string[];
 }
@@ -55,6 +56,7 @@ export const bulkCreateWithSuppression = async <
       enrichmentDuration: '0',
       bulkCreateDuration: '0',
       createdItemsCount: 0,
+      suppressedItemsCount: 0,
       createdItems: [],
     };
   }
@@ -81,7 +83,7 @@ export const bulkCreateWithSuppression = async <
     }
   };
 
-  const { createdAlerts, errors } = await alertWithSuppression(
+  const { createdAlerts, errors, suppressedAlerts } = await alertWithSuppression(
     wrappedDocs.map((doc) => ({
       _id: doc._id,
       // `fields` should have already been merged into `doc._source`
@@ -105,6 +107,7 @@ export const bulkCreateWithSuppression = async <
       bulkCreateDuration: makeFloatString(end - start),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
+      suppressedItemsCount: suppressedAlerts.length,
     };
   } else {
     return {
@@ -114,6 +117,7 @@ export const bulkCreateWithSuppression = async <
       enrichmentDuration: makeFloatString(enrichmentsTimeFinish - enrichmentsTimeStart),
       createdItemsCount: createdAlerts.length,
       createdItems: createdAlerts,
+      suppressedItemsCount: suppressedAlerts.length,
     };
   }
 };

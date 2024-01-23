@@ -117,24 +117,26 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
  * suppress alerts by ALERT_INSTANCE_ID in memory
  */
 const suppressAlertsInMemory = <
-  T extends { [ALERT_SUPPRESSION_DOCS_COUNT]: number; [ALERT_INSTANCE_ID]: string }
->(
-  alerts: Array<{
+  T extends { [ALERT_SUPPRESSION_DOCS_COUNT]: number; [ALERT_INSTANCE_ID]: string },
+  A extends {
     _id: string;
     _source: T;
-  }>
-): Array<{
-  _id: string;
-  _source: T;
-}> => {
+  }
+>(
+  alerts: A[]
+): {
+  alertCandidates: A[];
+  suppressedAlerts: A[];
+} => {
   const idsMap: Record<string, number> = {};
-
+  const suppressedAlerts: A[] = [];
   const filteredAlerts = alerts.filter((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
     const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
 
     if (instanceId && idsMap[instanceId] != null) {
       idsMap[instanceId] += suppressionDocsCount + 1;
+      suppressedAlerts.push(alert);
       return false;
     } else {
       idsMap[instanceId] = suppressionDocsCount;
@@ -142,13 +144,18 @@ const suppressAlertsInMemory = <
     }
   }, []);
 
-  return filteredAlerts.map((alert) => {
+  const alertCandidates = filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
     if (instanceId) {
       alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId];
     }
     return alert;
   });
+
+  return {
+    alertCandidates,
+    suppressedAlerts,
+  };
 };
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
@@ -304,10 +311,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   spaceId: options.spaceId,
                 });
 
-                const filteredAlerts = suppressAlertsInMemory(filteredDuplicates);
+                const {
+                  alertCandidates: filteredAlerts,
+                  suppressedAlerts: suppressedInMemoryAlerts,
+                } = suppressAlertsInMemory(filteredDuplicates);
 
                 if (filteredAlerts.length === 0) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
                 }
 
                 const suppressionAlertSearchRequest = {
@@ -425,7 +435,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 });
 
                 if (bulkResponse == null) {
-                  return { createdAlerts: [], errors: {} };
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
                 }
 
                 const createdAlerts = augmentedAlerts
@@ -469,11 +479,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
 
                 return {
                   createdAlerts,
+                  suppressedAlerts: [...duplicateAlerts, ...suppressedInMemoryAlerts],
                   errors: errorAggregator(bulkResponse.body, [409]),
                 };
               } else {
                 logger.debug('Writing is disabled.');
-                return { createdAlerts: [], errors: {} };
+                return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
               }
             },
           },

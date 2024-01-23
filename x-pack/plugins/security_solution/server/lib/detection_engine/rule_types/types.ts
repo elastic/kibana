@@ -390,6 +390,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   createdSignals: unknown[];
   errors: string[];
   warningMessages: string[];
+  suppressedAlertsCount?: number;
 }
 
 // the new fields can be added later if needed

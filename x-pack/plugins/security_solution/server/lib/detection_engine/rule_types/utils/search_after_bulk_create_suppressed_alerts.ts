@@ -23,6 +23,7 @@ import {
   mergeSearchResults,
   getSafeSortIds,
   addToSearchAfterReturn,
+  getMaxSignalsWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -218,11 +219,13 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
             alertTimestampOverride,
           });
 
-          // TODO: work on it
-          // if (bulkCreateResult.alertsWereTruncated) {
-          //   toReturn.warningMessages.push(getMaxSignalsWarning());
-          //   break;
-          // }
+          if (
+            bulkCreateResult.suppressedItemsCount + bulkCreateResult.createdItemsCount >=
+            tuple.maxSignals
+          ) {
+            toReturn.warningMessages.push(getMaxSignalsWarning());
+            break;
+          }
 
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 

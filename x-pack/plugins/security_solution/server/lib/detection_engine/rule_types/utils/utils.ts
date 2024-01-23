@@ -668,6 +668,7 @@ export const createSearchAfterReturnType = ({
   createdSignals,
   errors,
   warningMessages,
+  suppressedAlertsCount,
 }: {
   success?: boolean | undefined;
   warning?: boolean;
@@ -679,6 +680,7 @@ export const createSearchAfterReturnType = ({
   createdSignals?: unknown[] | undefined;
   errors?: string[] | undefined;
   warningMessages?: string[] | undefined;
+  suppressedAlertsCount?: number | undefined;
 } = {}): SearchAfterAndBulkCreateReturnType => {
   return {
     success: success ?? true,
@@ -691,6 +693,7 @@ export const createSearchAfterReturnType = ({
     createdSignals: createdSignals ?? [],
     errors: errors ?? [],
     warningMessages: warningMessages ?? [],
+    suppressedAlertsCount: suppressedAlertsCount ?? 0,
   };
 };
 
@@ -732,6 +735,9 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
+  if (current.suppressedAlertsCount != null) {
+    current.suppressedAlertsCount += next.suppressedAlertsCount ?? 0;
+  }
 };
 
 export const mergeReturns = (
@@ -749,6 +755,7 @@ export const mergeReturns = (
       createdSignals: existingCreatedSignals,
       errors: existingErrors,
       warningMessages: existingWarningMessages,
+      suppressedAlertsCount: existingSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = prev;
 
     const {
@@ -762,6 +769,7 @@ export const mergeReturns = (
       createdSignals: newCreatedSignals,
       errors: newErrors,
       warningMessages: newWarningMessages,
+      suppressedAlertsCount: newSuppressedAlertsCount,
     }: SearchAfterAndBulkCreateReturnType = next;
 
     return {
@@ -775,6 +783,7 @@ export const mergeReturns = (
       createdSignals: [...existingCreatedSignals, ...newCreatedSignals],
       errors: [...new Set([...existingErrors, ...newErrors])],
       warningMessages: [...existingWarningMessages, ...newWarningMessages],
+      suppressedAlertsCount: (existingSuppressedAlertsCount ?? 0) + (newSuppressedAlertsCount ?? 0),
     };
   });
 };

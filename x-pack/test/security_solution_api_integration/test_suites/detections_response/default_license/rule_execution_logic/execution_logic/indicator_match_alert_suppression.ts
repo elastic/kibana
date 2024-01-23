@@ -16,6 +16,7 @@ import {
   ALERT_LAST_DETECTED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -152,7 +153,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe.only('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -1740,8 +1741,7 @@ export default ({ getService }: FtrProviderContext) => {
           // and most of them suppressed
           // when number of suppressed alerts could many thousands, search could
           // iterate through them search exhaustion
-          // TODO: fix test
-          it.skip('should not suppress more than max_signals alerts', async () => {
+          it('should not suppress more than max_signals alerts', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
             const doc1 = {
@@ -1789,18 +1789,21 @@ export default ({ getService }: FtrProviderContext) => {
               interval: '30m',
             };
 
-            const { previewId } = await previewRule({
+            const { previewId, logs } = await previewRule({
               supertest,
               rule,
               timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
               invocationCount: 1,
             });
+
+            expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
+
             const previewAlerts = await getPreviewAlerts({
               es,
               previewId,
               sort: ['agent.name', ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).toEqual(2);
+            expect(previewAlerts.length).toEqual(1);
             expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
@@ -1809,17 +1812,7 @@ export default ({ getService }: FtrProviderContext) => {
                   value: 'agent-a',
                 },
               ],
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 96,
-            });
-            expect(previewAlerts[1]._source).toEqual({
-              ...previewAlerts[1]._source,
-              [ALERT_SUPPRESSION_TERMS]: [
-                {
-                  field: 'agent.name',
-                  value: 'agent-b',
-                },
-              ],
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 99,
             });
           });
         });
