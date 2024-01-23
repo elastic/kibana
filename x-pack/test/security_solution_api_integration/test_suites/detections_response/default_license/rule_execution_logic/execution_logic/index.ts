@@ -14,7 +14,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./machine_learning'));
     loadTestFile(require.resolve('./new_terms'));
     loadTestFile(require.resolve('./saved_query'));
-    loadTestFile(require.resolve('./threat_match'));
+    loadTestFile(require.resolve('./indicator_match'));
+    loadTestFile(require.resolve('./indicator_match_alert_suppression'));
     loadTestFile(require.resolve('./threshold'));
     loadTestFile(require.resolve('./threshold_alert_suppression'));
     loadTestFile(require.resolve('./non_ecs_fields'));
