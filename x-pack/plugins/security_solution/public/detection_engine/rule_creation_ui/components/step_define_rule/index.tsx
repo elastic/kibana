@@ -88,7 +88,7 @@ import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common
 import { DurationInput } from '../duration_input';
 import { MINIMUM_LICENSE_FOR_SUPPRESSION } from '../../../../../common/detection_engine/constants';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useAlertSuppression } from '../../../rule_management/hooks/use_alert_suppression';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -178,6 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
+  const { isSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -185,10 +186,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const license = useLicense();
 
   const esqlQueryRef = useRef<DefineStepRule['queryBar'] | undefined>(undefined);
-
-  const isAlertSuppressionForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
-    'alertSuppressionForIndicatorMatchRuleEnabled'
-  );
 
   const isAlertSuppressionLicenseValid = license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION);
 
@@ -813,11 +810,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [isUpdateView, mlCapabilities]
   );
 
-  const isAlertSuppressionEnabled =
-    isQueryRule(ruleType) ||
-    isThresholdRule ||
-    (isAlertSuppressionForIndicatorMatchRuleEnabled && isThreatMatchRule(ruleType));
-
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -989,7 +981,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <EuiSpacer size="m" />
-          <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isSuppressionEnabled && isThresholdRule} fullWidth>
             <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
               <CommonUseField
                 path="enableThresholdSuppression"
@@ -1006,7 +998,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+            $isVisible={isSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -1021,7 +1013,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            $isVisible={isAlertSuppressionEnabled}
+            $isVisible={isSuppressionEnabled}
             data-test-subj="alertSuppressionDuration"
           >
             <UseMultiFields
@@ -1043,7 +1035,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <IntendedRuleTypeEuiFormRow
             // threshold rule does not have this suppression configuration
-            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
+            $isVisible={isSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>

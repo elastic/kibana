@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { renderHook } from '@testing-library/react-hooks';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { SuppressibleAlertRules } from '../../../../common/detection_engine/constants';
+import * as useIsExperimentalFeatureEnabledMock from '@kbn/security-solution-plugin/public/common/hooks/use_experimental_features';
+import { useAlertSuppression } from './use_alert_suppression';
+
+describe('useAlertSuppression', () => {
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules and Feature Flag is enabled', () => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockImplementation((featureFlagName: string) => {
+        return featureFlagName === 'alertSuppressionForIndicatorMatchRuleEnabled';
+      });
+    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.THREAT_MATCH));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
+  });
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules and Feature Flag is disabled', () => {
+    jest
+      .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
+      .mockImplementation((featureFlagName: string) => {
+        return featureFlagName !== 'alertSuppressionForIndicatorMatchRuleEnabled';
+      });
+    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.THREAT_MATCH));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return the correct isSuppressionEnabled value if rule Type exists in SuppressibleAlertRules', () => {
+    const { result } = renderHook(() => useAlertSuppression(SuppressibleAlertRules.QUERY));
+
+    expect(result.current.isSuppressionEnabled).toBe(true);
+  });
+
+  it('should return false if rule type is not set', () => {
+    const { result } = renderHook(() => useAlertSuppression());
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+
+  it('should return false if rule type is not THREAT_MATCH', () => {
+    const { result } = renderHook(() => useAlertSuppression('OTHER_RULE_TYPE' as Type));
+
+    expect(result.current.isSuppressionEnabled).toBe(false);
+  });
+});

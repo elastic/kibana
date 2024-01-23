@@ -54,7 +54,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import { useAlertSuppression } from './use_alert_suppression';
+import { useAlertSuppression } from '../../hooks/use_alert_suppression';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -738,7 +738,7 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
-  const { isSuppressionEnabled } = useAlertSuppression(rule);
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
 
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
