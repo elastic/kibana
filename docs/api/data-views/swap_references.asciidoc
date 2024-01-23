@@ -6,6 +6,8 @@
 
 Swap saved object references
 
+CAUTION! MISUSE CAN BREAK LARGE NUMBERS OF SAVED OBJECTS! PRACTICE WITH A BACKUP!
+
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
@@ -51,7 +53,8 @@ Preview swapping references to data view id "abcd-efg" with "xyz-123":
 $ curl -X api/data_views/swap_references
 {
      "fromId" : "abcd-efg",
-     "toId" : "xyz-123"
+     "toId" : "xyz-123",
+     "delete" : true // optional, removes data view which is no longer referenced
 }
 
 --------------------------------------------------
@@ -63,6 +66,10 @@ The API returns a list of affected saved objects:
 --------------------------------------------------
 {
   result: [{ id: "123", type: "visualization" }],
+  deleteStatus: {
+    remainingRefs: 0,
+    deletePerformed: true
+  }
 }
 --------------------------------------------------
 
