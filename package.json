@@ -766,6 +766,7 @@
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
     "@kbn/slo-schema": "link:x-pack/packages/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/plugins/snapshot_restore",
+    "@kbn/sort-predicates": "link:packages/kbn-sort-predicates",
     "@kbn/spaces-plugin": "link:x-pack/plugins/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
     "@kbn/stack-alerts-plugin": "link:x-pack/plugins/stack_alerts",

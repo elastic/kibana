@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
@@ -22,6 +22,7 @@ import type {
   RuleStateAttributes,
 } from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
+import { RulesCounters } from './rules_counters';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
@@ -173,47 +174,47 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder={false} hasShadow={false}>
-        <RulesTableHeader
-          onSectionChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
-          }
-          onRuleNumberChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
-          }
-          sectionSelectOptions={cleanedSectionList}
-          ruleNumberSelectOptions={cleanedRuleNumberList}
-          search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search || ''}
-          totalRulesCount={rulesPageData.all_rules.length}
-          pageSize={rulesPageData.rules_page.length}
-          isSearching={status === 'loading'}
-          selectedRules={selectedRules}
-          refetchRulesStates={rulesStates.refetch}
-          setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
-          currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
-          setSelectAllRules={setSelectAllRules}
-          setSelectedRules={setSelectedRules}
-        />
-        <EuiSpacer />
-        <RulesTable
-          rules_page={rulesPageData.rules_page}
-          total={rulesPageData.total}
-          error={rulesPageData.error}
-          loading={rulesPageData.loading}
-          perPage={pageSize || rulesQuery.perPage}
-          page={rulesQuery.page}
-          setPagination={(paginationQuery) => {
-            setPageSize(paginationQuery.perPage);
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
-          }}
-          setSelectedRuleId={setSelectedRuleId}
-          selectedRuleId={selectedRuleId}
-          refetchRulesStates={rulesStates.refetch}
-          selectedRules={selectedRules}
-          setSelectedRules={setSelectedRules}
-        />
-      </EuiPanel>
+      <RulesCounters />
+      <EuiSpacer />
+      <RulesTableHeader
+        onSectionChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
+        }
+        onRuleNumberChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
+        }
+        sectionSelectOptions={cleanedSectionList}
+        ruleNumberSelectOptions={cleanedRuleNumberList}
+        search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
+        searchValue={rulesQuery.search || ''}
+        totalRulesCount={rulesPageData.all_rules.length}
+        pageSize={rulesPageData.rules_page.length}
+        isSearching={status === 'loading'}
+        selectedRules={selectedRules}
+        refetchRulesStates={rulesStates.refetch}
+        setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+        currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
+        setSelectAllRules={setSelectAllRules}
+        setSelectedRules={setSelectedRules}
+      />
+      <EuiSpacer />
+      <RulesTable
+        rules_page={rulesPageData.rules_page}
+        total={rulesPageData.total}
+        error={rulesPageData.error}
+        loading={rulesPageData.loading}
+        perPage={pageSize || rulesQuery.perPage}
+        page={rulesQuery.page}
+        setPagination={(paginationQuery) => {
+          setPageSize(paginationQuery.perPage);
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
+        }}
+        setSelectedRuleId={setSelectedRuleId}
+        selectedRuleId={selectedRuleId}
+        refetchRulesStates={rulesStates.refetch}
+        selectedRules={selectedRules}
+        setSelectedRules={setSelectedRules}
+      />
       {selectedRuleId && (
         <RuleFlyout
           rule={rulesFlyoutData}
