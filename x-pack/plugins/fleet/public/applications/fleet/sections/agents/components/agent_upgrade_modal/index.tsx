@@ -346,6 +346,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       confirmButtonDisabled={
         isSubmitting ||
         (isUpdating && updatingAgents === 0) ||
+        !selectedVersion[0].value ||
         (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value))
       }
       confirmButtonText={
