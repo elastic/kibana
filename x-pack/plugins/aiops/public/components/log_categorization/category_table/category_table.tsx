@@ -167,17 +167,17 @@ export const CategoryTable: FC<Props> = ({
           onClick={() => toggleDetails(item)}
           aria-label={
             itemIdToExpandedRowMap[item.key]
-              ? i18n.translate('xpack.ml.trainedModels.nodesList.collapseRow', {
+              ? i18n.translate('xpack.aiops.logCategorization.column.collapseRow', {
                   defaultMessage: 'Collapse',
                 })
-              : i18n.translate('xpack.ml.trainedModels.nodesList.expandRow', {
+              : i18n.translate('xpack.aiops.logCategorization.column.expandRow', {
                   defaultMessage: 'Expand',
                 })
           }
           iconType={itemIdToExpandedRowMap[item.key] ? 'arrowDown' : 'arrowRight'}
         />
       ),
-      'data-test-subj': 'mlNodesTableRowDetailsToggle',
+      'data-test-subj': 'aiopsLogPatternsExpandRowToggle',
     },
     {
       field: 'count',
