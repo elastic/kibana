@@ -28,17 +28,23 @@ For the most up-to-date API details, refer to the
 [[data-views-api-swap-references-request-body]]
 ==== Request body
 
-fromId - Saved object reference to change
+`formId`::
+(Required, string) Saved object reference to change.
 
-toId - New saved object reference value to replace the old
+`toId`::
+(Required, string) New saved object reference value to replace the old.
 
-delete - Deletes referenced saved object if all references are removed
+`delete`::
+ (Optional, boolean) Deletes referenced saved object if all references are removed.
 
-fromType - Specify the type of the saved object reference to alter. Default is `index-pattern` for data view
+`fromType`::
+ (Required, object) Specify the type of the saved object reference to alter. Default is `index-pattern` for data view.
 
-forId - Limit the affected saved objects to one or more by id
+`forId`::
+(Optional, string) Limit the affected saved objects to one or more by IDs.
 
-forType - Limit the affected saved objects by type
+`forType`::
+ (Optional, string) Limit the affected saved objects by type.
 
 [[data-views-api-swap-references-errors-codes]]
 ==== Response code
