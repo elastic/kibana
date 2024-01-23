@@ -1048,9 +1048,9 @@ x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
 x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
-/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/obs-ux-logs-team
 
 # Fleet
