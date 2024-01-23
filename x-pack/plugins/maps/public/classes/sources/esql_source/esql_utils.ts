@@ -12,6 +12,7 @@ import type { ESQLColumn } from '@kbn/es-types';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
 export const ESQL_GEO_POINT_TYPE = 'geo_point';
+export const ESQL_GEO_SHAPE_TYPE = 'geo_shape';
 
 const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
   'xpack.maps.source.esql.noGeometryColumnErrorMsg',
@@ -20,8 +21,8 @@ const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
   }
 );
 
-function isGeometryColumn(column: ESQLColumn) {
-  return column.type === ESQL_GEO_POINT_TYPE;
+export function isGeometryColumn(column: ESQLColumn) {
+  return [ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE].includes(column.type);
 }
 
 export function verifyGeometryColumn(columns: ESQLColumn[]) {

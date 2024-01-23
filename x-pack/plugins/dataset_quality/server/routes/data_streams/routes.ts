@@ -7,12 +7,19 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { typeRt, rangeRt } from '../../types/default_api_types';
+import Boom from '@hapi/boom';
+import {
+  DataStreamDetails,
+  DataStreamStat,
+  DegradedDocs,
+  Integration,
+} from '../../../common/api_types';
+import { rangeRt, typeRt } from '../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
+import { getDataStreamDetails } from './get_data_stream_details';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 import { getDegradedDocsPaginated } from './get_degraded_docs';
-import { DegradedDocs, DataStreamStat, Integration } from '../../../common/api_types';
 import { getIntegrations } from './get_integrations';
 
 const statsRoute = createDatasetQualityServerRoute({
@@ -92,7 +99,40 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   },
 });
 
+const dataStreamDetailsRoute = createDatasetQualityServerRoute({
+  endpoint: 'GET /internal/dataset_quality/data_streams/{dataStream}/details',
+  params: t.type({
+    path: t.type({
+      dataStream: t.string,
+    }),
+  }),
+  options: {
+    tags: [],
+  },
+  async handler(resources): Promise<DataStreamDetails> {
+    const { context, params } = resources;
+    const { dataStream } = params.path;
+    const coreContext = await context.core;
+
+    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
+    const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    try {
+      return await getDataStreamDetails({ esClient, dataStream });
+    } catch (e) {
+      if (e) {
+        if (e?.message?.indexOf('index_not_found_exception') > -1) {
+          throw Boom.notFound(`Data stream "${dataStream}" not found.`);
+        }
+      }
+
+      throw e;
+    }
+  },
+});
+
 export const dataStreamsRouteRepository = {
   ...statsRoute,
   ...degradedDocsRoute,
+  ...dataStreamDetailsRoute,
 };
