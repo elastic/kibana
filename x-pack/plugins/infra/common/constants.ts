@@ -24,7 +24,6 @@ export const POD_FIELD = 'kubernetes.pod.uid';
 export const CMDLINE_FIELD = 'system.process.cmdline';
 export const HOST_NAME_FIELD = 'host.name';
 
-
 export const O11Y_AAD_FIELDS = [
   'cloud.*',
   'host.*',
