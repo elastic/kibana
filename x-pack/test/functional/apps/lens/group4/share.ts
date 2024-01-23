@@ -120,7 +120,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const csv = await PageObjects.lens.getCSVContent();
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);
-      await PageObjects.share.closeShareModal();
+      if (await PageObjects.share.isShareMenuOpen()) {
+        PageObjects.share.closeShareModal();
+      }
     });
 
     it('should be able to download CSV of multi layer visualization', async () => {

@@ -52,12 +52,8 @@ export function DownloadPanelContent({
       <EuiModalFooter>
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
-            <EuiButtonEmpty onClick={onClose}>
-              <FormattedMessage
-                id="xpack.lens.doneButton"
-                data-test-subj="share.doneButton"
-                defaultMessage="Done"
-              />
+            <EuiButtonEmpty onClick={onClose} data-test-subj="share.doneButton">
+              <FormattedMessage id="xpack.lens.doneButton" defaultMessage="Done" />
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem>
