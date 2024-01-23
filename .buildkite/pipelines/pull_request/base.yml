@@ -19,6 +19,18 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/checks.sh
+    label: 'Checks'
+    agents:
+      queue: n2-2-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
+  - wait
+
   - command: .buildkite/scripts/steps/build_api_docs.sh
     label: 'Check Types and Build API Docs'
     agents:
@@ -74,16 +86,6 @@ steps:
       queue: n2-16-spot
     key: linting_with_types
     timeout_in_minutes: 90
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 3
-
-  - command: .buildkite/scripts/steps/checks.sh
-    label: 'Checks'
-    agents:
-      queue: n2-2-spot
-    timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
