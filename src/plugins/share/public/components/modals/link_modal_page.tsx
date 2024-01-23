@@ -419,54 +419,66 @@ export class LinkModal extends Component<LinkModalProps, State> {
         </EuiModalHeader>
         <EuiModalBody>
           <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">
-            <EuiRadioGroup
-              options={[
-                {
-                  id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
-                  label: (
-                    <>
-                      {this.renderWithIconTip(
-                        this.snapshotLabel,
-                        <FormattedMessage
-                          id="share.urlModal.snapshotDescription"
-                          defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
+            <EuiFormRow
+              helpText={
+                this.isNotSaved() ? (
+                  <FormattedMessage
+                    id="share.urlPanel.canNotShareAsSavedObjectHelpText"
+                    defaultMessage="To share as a saved object, save the {objectType}."
+                    values={{ objectType: this.props.objectType }}
+                  />
+                ) : undefined
+              }
+            >
+              <EuiRadioGroup
+                options={[
+                  {
+                    id: ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT,
+                    label: (
+                      <>
+                        {this.renderWithIconTip(
+                          this.snapshotLabel,
+                          <FormattedMessage
+                            id="share.urlModal.snapshotDescription"
+                            defaultMessage="Snapshot URLs encode the current state of the {objectType} in the URL itself.
                       Edits to the saved {objectType} won't be visible via this URL."
-                          values={{ objectType: this.props.objectType }}
-                        />
-                      )}
-                    </>
-                  ),
-                  ['data-test-subj']: 'exportAsSnapshot',
-                },
-                {
-                  id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
-                  disabled: this.isNotSaved(),
-                  label: this.renderWithIconTip(
+                            values={{ objectType: this.props.objectType }}
+                          />
+                        )}
+                      </>
+                    ),
+                    ['data-test-subj']: 'exportAsSnapshot',
+                  },
+                  {
+                    id: ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT,
+                    disabled: this.isNotSaved(),
+                    label: this.renderWithIconTip(
+                      <FormattedMessage
+                        id="share.urlModal.savedObjectLabel"
+                        defaultMessage="Saved object"
+                      />,
+                      <FormattedMessage
+                        id="share.urlModal.savedObjectDescription"
+                        defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
+                        values={{ objectType: this.props.objectType }}
+                      />
+                    ),
+                    ['data-test-subj']: 'exportAsSavedObject',
+                  },
+                ]}
+                onChange={this.handleExportUrlAs}
+                name="embed radio group"
+                idSelected={this.state.exportUrlAs}
+                legend={{
+                  children: (
                     <FormattedMessage
-                      id="share.urlModal.savedObjectLabel"
-                      defaultMessage="Saved object"
-                    />,
-                    <FormattedMessage
-                      id="share.urlModal.savedObjectDescription"
-                      defaultMessage="You can share this URL with people to let them load the most recent saved version of this {objectType}."
-                      values={{ objectType: this.props.objectType }}
+                      id="share.urlModal.generateLinkAsLabel"
+                      defaultMessage="Generate as"
                     />
                   ),
-                  ['data-test-subj']: 'exportAsSavedObject',
-                },
-              ]}
-              onChange={this.handleExportUrlAs}
-              name="embed radio group"
-              idSelected={this.state.exportUrlAs}
-              legend={{
-                children: (
-                  <FormattedMessage
-                    id="share.urlModal.generateLinkAsLabel"
-                    defaultMessage="Generate as"
-                  />
-                ),
-              }}
-            />
+                }}
+              />
+            </EuiFormRow>
             <EuiSpacer size="m" />
           </EuiForm>
         </EuiModalBody>
