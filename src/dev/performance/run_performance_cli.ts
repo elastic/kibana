@@ -66,9 +66,9 @@ run(
         // create folder to store ES/Kibana server logs
         const logsDir = path.resolve(REPO_ROOT, `.ftr/journey_server_logs/${journey.name}`);
         fs.mkdirSync(logsDir, { recursive: true });
+        process.stdout.write(`--- Running journey: ${journey.name} [start ES, warmup run]\n`);
         await startEs(logsDir);
         if (!skipWarmup) {
-          process.stdout.write(`--- Running warmup: ${journey.name}\n`);
           // Set the phase to WARMUP, this will prevent the FTR from starting Kibana with opt-in telemetry and save logs to file
           await runFunctionalTest({
             journey,
@@ -77,7 +77,7 @@ run(
             logsDir,
           });
         }
-        process.stdout.write(`--- Running actual test: ${journey.name}\n`);
+        process.stdout.write(`--- Running journey: ${journey.name} [collect metrics]\n`);
         await runFunctionalTest({ journey, phase: 'TEST', kibanaInstallDir });
       } catch (e) {
         log.error(e);
@@ -117,7 +117,6 @@ run(
     }
 
     async function startEs(logsDir: string) {
-      process.stdout.write(`Starting ES\n`);
       await procRunner.run('es', {
         cmd: 'node',
         args: [
