@@ -8,6 +8,6 @@ import { useObservable } from 'react-use';
 import { useKibana } from '../../../../lib/kibana';
 
 export const useAvailableSteps = () => {
-  const availableSteps$ = useKibana().services.onboarding.getAvailableStepsObservable();
+  const { availableSteps$ } = useKibana().services.onboarding;
   return useObservable(availableSteps$);
 };

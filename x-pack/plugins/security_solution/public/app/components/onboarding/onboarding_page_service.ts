@@ -33,22 +33,6 @@ export class OnboardingPageService {
     this.availableSteps$ = this.availableStepsSubject$.asObservable();
   }
 
-  getProductTypesObservable() {
-    return this.productTypes$;
-  }
-
-  getProjectsUrlObservable() {
-    return this.projectsUrl$;
-  }
-
-  getProjectFeaturesUrlObservable() {
-    return this.projectFeaturesUrl$;
-  }
-
-  getAvailableStepsObservable() {
-    return this.availableSteps$;
-  }
-
   setProductTypes(productTypes: SecurityProductTypes) {
     this.productTypesSubject$.next(productTypes);
   }
