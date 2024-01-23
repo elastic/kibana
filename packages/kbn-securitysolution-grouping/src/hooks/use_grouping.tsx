@@ -65,11 +65,7 @@ interface GroupingArgs<T> {
   /** for tracking
    * @param param { groupByField: string; tableId: string } selected group and table id
    */
-  onGroupChange?: (param: {
-    groupByField: string;
-    tableId: string;
-    selectedGroups: string[];
-  }) => void;
+  onGroupChange?: (param: { groupByField: string; tableId: string }) => void;
   onOptionsChange?: (options: GroupOption[]) => void;
   tracker?: (
     type: UiCounterMetricType,
