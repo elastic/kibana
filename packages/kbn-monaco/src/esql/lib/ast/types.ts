@@ -17,7 +17,8 @@ export type ESQLSingleAstItem =
   | ESQLColumn
   | ESQLTimeInterval
   | ESQLList
-  | ESQLLiteral;
+  | ESQLLiteral
+  | ESQLCommandMode;
 
 export type ESQLAstItem = ESQLSingleAstItem | ESQLAstItem[];
 
@@ -40,6 +41,11 @@ export interface ESQLCommand extends ESQLAstBaseItem {
 
 export interface ESQLCommandOption extends ESQLAstBaseItem {
   type: 'option';
+  args: ESQLAstItem[];
+}
+
+export interface ESQLCommandMode extends ESQLAstBaseItem {
+  type: 'mode';
   args: ESQLAstItem[];
 }
 
