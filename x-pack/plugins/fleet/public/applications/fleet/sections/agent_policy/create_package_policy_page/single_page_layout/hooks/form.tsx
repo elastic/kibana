@@ -9,8 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
-import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
-
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -27,7 +25,7 @@ import {
   sendGetPackagePolicies,
 } from '../../../../../hooks';
 import {
-  getCloudShellUrlFromPackagePolicy,
+  ExperimentalFeaturesService,
   isVerificationError,
   packageToPackagePolicy,
 } from '../../../../../services';
@@ -45,7 +43,11 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
-import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+import {
+  getAzureArmPropsFromPackagePolicy,
+  getCloudFormationPropsFromPackagePolicy,
+  getCloudShellUrlFromPackagePolicy,
+} from '../../../../../../../components/cloud_security_posture/services';
 
 import { useAgentlessPolicy } from './setup_technology';
 
@@ -85,7 +87,7 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
 const DEFAULT_PACKAGE_POLICY = {
   name: '',
   description: '',
-  namespace: 'default',
+  namespace: '',
   policy_id: '',
   enabled: true,
   inputs: [],
@@ -219,7 +221,7 @@ export function useOnSubmit({
         packageToPackagePolicy(
           packageInfo,
           agentPolicy?.id || '',
-          agentPolicy?.namespace || DEFAULT_PACKAGE_POLICY.namespace,
+          '',
           DEFAULT_PACKAGE_POLICY.name || incrementedName,
           DEFAULT_PACKAGE_POLICY.description,
           integrationToEnable
@@ -234,7 +236,6 @@ export function useOnSubmit({
     if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
       updatePackagePolicy({
         policy_id: agentPolicy.id,
-        namespace: agentPolicy.namespace,
       });
     }
   }, [packagePolicy, agentPolicy, updatePackagePolicy]);

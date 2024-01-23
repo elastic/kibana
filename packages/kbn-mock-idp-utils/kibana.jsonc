@@ -1,0 +1,6 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/mock-idp-utils",
+  "owner": "@elastic/kibana-security",
+  "devOnly": true,
+}

@@ -27,24 +27,36 @@ expressions - require quoting if the identifier contains characters other than
 letters, numbers and `_` and doesn’t start with a letter, `_` or `@`.
 For instance:
 // Retain just one field
+```esql
 FROM index
 | KEEP 1.field
+```
+
 is legal. However, if same field is to be used with an EVAL,
 it’d have to be quoted:
 // Copy one field
+```esql
 FROM index
 | EVAL my_field = `1.field`
+```
+
 Literalsedit
 ES|QL currently supports numeric and string literals.
 String literalsedit
 A string literal is a sequence of unicode characters delimited by double
 quotes (`"`).
 // Filter by a string value
+```esql
 FROM index
 | WHERE first_name == "Georgi"
+```
+
 If the literal string itself contains quotes, these need to be escaped (`\\"`).
 ES|QL also supports the triple-quotes (`"""`) delimiter, for convenience:
+```esql
 ROW name = """Indiana "Indy" Jones"""
+```
+
 The special characters CR, LF and TAB can be provided with the usual escaping:
 `\r`, `\n`, `\t`, respectively.
 Numerical literalsedit
@@ -67,11 +79,20 @@ ES|QL uses C++ style comments:
 double slash `//` for single line comments
 `/*` and `*/` for block comments
 // Query the employees index
+```esql
 FROM employees
 | WHERE height > 2
+```
+
+```esql
 FROM /* Query the employees index */ employees
 | WHERE height > 2
+```
+
+```esql
 FROM employees
+```
+
 /* Query the
  * employees
  * index */
