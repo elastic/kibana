@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback } from 'react';
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { isSuppressibleAlertRule } from '../../../../common/detection_engine/utils';
 import { SuppressibleAlertRules } from '../../../../common/detection_engine/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
