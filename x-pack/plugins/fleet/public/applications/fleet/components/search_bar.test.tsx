@@ -160,7 +160,7 @@ describe('SearchBar', () => {
     });
     const textArea = result.queryByTestId('queryInput');
     expect(textArea).not.toBeNull();
-    expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data using KQL syntax');
+    expect(textArea?.getAttribute('placeholder')).toEqual('Filter your data');
     expect(textArea?.getAttribute('aria-label')).toEqual(
       'Start typing to search and filter the Fleet page'
     );

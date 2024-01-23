@@ -75,6 +75,7 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
   const { euiTheme } = useEuiTheme();
+  const initialWidth = 540; // Give enough room to search bar to not wrap
   const minWidth = euiTheme.base * 24;
   const maxWidth = euiTheme.breakpoint.xl;
 
@@ -205,7 +206,7 @@ export function DiscoverGridFlyout({
         defaultMessage: 'Document',
       });
   const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
-  const flyoutSize = flyoutCustomization?.size ?? 'm';
+  const flyoutSize = flyoutCustomization?.size ?? initialWidth;
 
   return (
     <EuiPortal>
