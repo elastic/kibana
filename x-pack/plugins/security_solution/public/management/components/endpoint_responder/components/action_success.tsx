@@ -11,7 +11,7 @@ import type { ActionDetails, MaybeImmutable } from '../../../../../common/endpoi
 import type { CommandExecutionResultComponent, CommandExecutionResultProps } from '../../console';
 
 export interface ActionSuccessProps extends CommandExecutionResultProps {
-  action: MaybeImmutable<ActionDetails<{ code?: string }>>;
+  action: MaybeImmutable<ActionDetails>;
   ResultComponent: CommandExecutionResultComponent;
 }
 

@@ -119,6 +119,10 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.esCapabilities = esCapabilities;
   }
 
+  public getDocumentMigrator() {
+    return this.documentMigrator;
+  }
+
   public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI

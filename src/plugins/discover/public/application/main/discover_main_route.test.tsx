@@ -137,6 +137,7 @@ function getServicesMock(hasESData = true, hasUserDataView = true) {
     hasUserDataView: jest.fn(() => Promise.resolve(hasUserDataView)),
     hasDataView: jest.fn(() => Promise.resolve(true)),
   };
+  discoverServiceMock.core.http.get = jest.fn().mockResolvedValue({});
   return discoverServiceMock;
 }
 

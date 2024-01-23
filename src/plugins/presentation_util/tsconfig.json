@@ -32,7 +32,8 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-plugin",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/calculate-width-from-char-count"
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
   ],
   "exclude": ["target/**/*"]
 }

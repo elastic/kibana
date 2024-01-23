@@ -28,13 +28,13 @@ import { SerializableRecord } from '@kbn/utility-types';
 import { EmptyDashboards } from './empty_dashboards';
 import { GotoDashboard, LinkDashboard } from './actions';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { SavedApmCustomDashboard } from '../../../../common/custom_dashboards';
 import { ContextMenu } from './context_menu';
 import { UnlinkDashboard } from './actions/unlink_dashboard';
 import { EditDashboard } from './actions/edit_dashboard';
 import { DashboardSelector } from './dashboard_selector';
-import { useApmDataView } from '../../../hooks/use_apm_data_view';
+import { useAdHocApmDataView } from '../../../hooks/use_adhoc_apm_data_view';
 import { getFilters } from '../metrics/static_dashboard';
 import { useDashboardFetcher } from '../../../hooks/use_dashboards_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -49,7 +49,10 @@ export function ServiceDashboards() {
   const {
     path: { serviceName },
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
-  } = useApmParams('/services/{serviceName}/dashboards');
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/dashboards',
+    '/mobile-services/{serviceName}/dashboards'
+  );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<
     MergedServiceDashboard[]
@@ -58,7 +61,7 @@ export function ServiceDashboards() {
     useState<MergedServiceDashboard>();
   const { data: allAvailableDashboards } = useDashboardFetcher();
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { dataView } = useApmDataView();
+  const { dataView } = useAdHocApmDataView();
   const { share } = useApmPluginContext();
 
   const { data, status, refetch } = useFetcher(
@@ -209,11 +212,13 @@ export function ServiceDashboards() {
                       emptyButton={true}
                       onRefresh={refetch}
                       serviceDashboards={serviceDashboards}
+                      serviceName={serviceName}
                     />,
                     <GotoDashboard currentDashboard={currentDashboard} />,
                     <EditDashboard
                       currentDashboard={currentDashboard}
                       onRefresh={refetch}
+                      serviceName={serviceName}
                     />,
                     <UnlinkDashboard
                       currentDashboard={currentDashboard}
@@ -238,7 +243,11 @@ export function ServiceDashboards() {
           </EuiFlexItem>
         </>
       ) : (
-        <EmptyDashboards actions={<LinkDashboard onRefresh={refetch} />} />
+        <EmptyDashboards
+          actions={
+            <LinkDashboard onRefresh={refetch} serviceName={serviceName} />
+          }
+        />
       )}
     </EuiPanel>
   );

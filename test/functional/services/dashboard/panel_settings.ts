@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CommonlyUsed } from '../../page_objects/time_picker';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export function DashboardCustomizePanelProvider({ getService, getPageObject }: FtrProviderContext) {
   const log = getService('log');

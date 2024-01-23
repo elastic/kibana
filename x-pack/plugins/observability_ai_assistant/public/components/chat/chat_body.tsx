@@ -20,6 +20,7 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { findLastIndex } from 'lodash';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useLicense } from '../../hooks/use_license';
@@ -28,7 +29,7 @@ import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors'
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
-import { ChatPromptEditor } from './chat_prompt_editor';
+import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
@@ -214,7 +215,7 @@ export function ChatBody({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor
+            <PromptEditor
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               disabled
@@ -257,13 +258,13 @@ export function ChatBody({
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
                   onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
                     const indexOf = messages.indexOf(editedMessage);
                     next(messages.slice(0, indexOf).concat(newMessage));
                   }}
                   onFeedback={handleFeedback}
                   onRegenerate={(message) => {
-                    const indexOf = messages.indexOf(message);
-                    next(messages.slice(0, indexOf));
+                    next(reverseToLastUserMessage(messages, message));
                   }}
                   onSendTelemetry={(eventWithPayload) =>
                     sendEvent(chatService.analytics, eventWithPayload)
@@ -313,14 +314,14 @@ export function ChatBody({
             color="subdued"
             className={promptEditorContainerClassName}
           >
-            <ChatPromptEditor
+            <PromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
+              onChangeHeight={handleChangeHeight}
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
-              onChangeHeight={handleChangeHeight}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
@@ -408,4 +409,20 @@ export function ChatBody({
       {footer}
     </EuiFlexGroup>
   );
+}
+
+// Exported for testing only
+export function reverseToLastUserMessage(messages: Message[], message: Message) {
+  // Drop messages after and including the one marked for regeneration
+  const indexOf = messages.indexOf(message);
+  const previousMessages = messages.slice(0, indexOf);
+
+  // Go back to the last written user message to fully regenerate function calls
+  const lastUserMessageIndex = findLastIndex(
+    previousMessages,
+    (aMessage: Message) => aMessage.message.role === 'user' && !aMessage.message.name
+  );
+  const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
+
+  return nextMessages;
 }

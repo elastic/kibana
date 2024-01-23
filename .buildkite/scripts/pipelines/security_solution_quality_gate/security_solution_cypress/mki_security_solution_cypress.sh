@@ -17,11 +17,12 @@ export JOB=kibana-security-solution-chrome
 buildkite-agent meta-data set "${BUILDKITE_JOB_ID}_is_test_execution_step" "true"
 
 mkdir .ftr
-retry 5 5 vault kv get -format=json -field=data secret/kibana-issues/dev/security-quality-gate/role-users > .ftr/role_users.json
+vault_get security-quality-gate/role-users data -format=json > .ftr/role_users.json
 
 cd x-pack/test/security_solution_cypress
 set +e
 
-QA_API_KEY=$(vault_get security-solution-qg-enc-key qa_api_key)
+QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
+BK_ANALYTICS_API_KEY=$(vault_get security-solution-quality-gate serverless-sec-sol-cypress-bk-api-key)
 
-CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status
+BK_ANALYTICS_API_KEY=$BK_ANALYTICS_API_KEY CLOUD_QA_API_KEY=$QA_API_KEY yarn $1; status=$?; yarn junit:merge || :; exit $status

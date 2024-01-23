@@ -53,13 +53,13 @@ describe('<AnalyzerPreview />', () => {
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       isActiveTimeline: false,
-      documentId: 'ancestors-id',
+      documentId: 'eventId',
       indices: ['rule-indices'],
     });
     expect(wrapper.getByTestId(ANALYZER_PREVIEW_TEST_ID)).toBeInTheDocument();
   });
 
-  it('shows error message when documentid and index are not present', () => {
+  it('shows error message when index is not present', () => {
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
       error: false,
@@ -82,7 +82,7 @@ describe('<AnalyzerPreview />', () => {
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({
       isActiveTimeline: false,
-      documentId: '',
+      documentId: 'eventId',
       indices: [],
     });
 

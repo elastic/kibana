@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -26,7 +26,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
-import { Chart } from '../chart';
+import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
   UnifiedHistogramServices,
@@ -38,6 +38,10 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+
+const ChartMemoized = React.memo(Chart);
+
+const chartSpacer = <EuiSpacer size="s" />;
 
 export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> {
   /**
@@ -107,9 +111,9 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   topPanelHeight?: number;
   /**
-   * Append a custom element to the right of the hits count
+   * This element would replace the default chart toggle buttons
    */
-  appendHitsCounter?: ReactElement;
+  renderCustomChartToggleActions?: () => ReactElement | undefined;
   /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
@@ -197,7 +201,7 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   container,
   topPanelHeight,
-  appendHitsCounter,
+  renderCustomChartToggleActions,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
@@ -234,6 +238,8 @@ export const UnifiedHistogramLayout = ({
   });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
+  const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
+
   const [topPanelNode] = useState(() =>
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
@@ -263,17 +269,11 @@ export const UnifiedHistogramLayout = ({
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
 
-  const onResetChartHeight = useMemo(() => {
-    return currentTopPanelHeight !== defaultTopPanelHeight &&
-      panelsMode === ResizableLayoutMode.Resizable
-      ? () => onTopPanelHeightChange?.(undefined)
-      : undefined;
-  }, [currentTopPanelHeight, defaultTopPanelHeight, onTopPanelHeightChange, panelsMode]);
-
   return (
     <>
       <InPortal node={topPanelNode}>
-        <Chart
+        <ChartMemoized
+          isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}
           dataView={dataView}
@@ -289,13 +289,12 @@ export const UnifiedHistogramLayout = ({
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          appendHitsCounter={appendHitsCounter}
-          appendHistogram={<EuiSpacer size="s" />}
+          renderCustomChartToggleActions={renderCustomChartToggleActions}
+          appendHistogram={chartSpacer}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           input$={input$}
-          onResetChartHeight={onResetChartHeight}
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
@@ -311,7 +310,11 @@ export const UnifiedHistogramLayout = ({
           withDefaultActions={withDefaultActions}
         />
       </InPortal>
-      <InPortal node={mainPanelNode}>{children}</InPortal>
+      <InPortal node={mainPanelNode}>
+        {React.isValidElement(children)
+          ? React.cloneElement(children, { isChartAvailable })
+          : children}
+      </InPortal>
       <ResizableLayout
         className={className}
         mode={panelsMode}

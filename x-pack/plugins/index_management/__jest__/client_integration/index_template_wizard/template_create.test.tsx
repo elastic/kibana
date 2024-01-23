@@ -20,8 +20,8 @@ import {
 import { setup } from './template_create.helpers';
 import { TemplateFormTestBed } from './template_form.helpers';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -528,7 +528,6 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         allowAutoCreate: true,
       });
       // Component templates
@@ -618,7 +617,6 @@ describe('<TemplateCreate />', () => {
       await testBed.actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
-        dataStream: {},
         lifecycle: {
           enabled: true,
           value: 1,

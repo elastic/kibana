@@ -138,6 +138,32 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    name: 'to_lower',
+    description: i18n.translate('monaco.esql.definitions.toLowerDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to lower case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_lower(field1)'],
+      },
+    ],
+  },
+  {
+    name: 'to_upper',
+    description: i18n.translate('monaco.esql.definitions.toUpperDoc', {
+      defaultMessage: 'Returns a new string representing the input string converted to upper case.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'string' }],
+        returnType: 'string',
+        examples: ['from index | eval to_upper(field1)'],
+      },
+    ],
+  },
+  {
     name: 'trim',
     description: i18n.translate('monaco.esql.definitions.trimDoc', {
       defaultMessage: 'Removes leading and trailing whitespaces from strings.',
@@ -479,45 +505,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         ],
         returnType: 'number',
         examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],
-      },
-    ],
-  },
-  {
-    name: 'is_finite',
-    description: i18n.translate('monaco.esql.definitions.isFiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is a finite number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_finite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_infinite',
-    description: i18n.translate('monaco.esql.definitions.isInfiniteDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is infinite.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['from index | eval s = is_infinite(field/0)'],
-      },
-    ],
-  },
-  {
-    name: 'is_nan',
-    description: i18n.translate('monaco.esql.definitions.isNanDoc', {
-      defaultMessage: 'Returns a boolean that indicates whether its input is not a number.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'boolean',
-        examples: ['row a = 1 | eval is_nan(a)'],
       },
     ],
   },

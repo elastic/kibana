@@ -9,6 +9,7 @@
 import type { ComponentType } from 'react';
 import type { Location } from 'history';
 import type { EuiThemeSizes, IconType } from '@elastic/eui';
+import type { Observable } from 'rxjs';
 import type { AppId as DevToolsApp, DeepLinkId as DevToolsLink } from '@kbn/deeplinks-devtools';
 import type {
   AppId as AnalyticsApp,
@@ -27,6 +28,7 @@ import type {
 
 import type { ChromeBreadcrumb } from './breadcrumb';
 import type { ChromeNavLink } from './nav_links';
+import type { ChromeRecentlyAccessedHistoryItem } from './recently_accessed';
 
 /** @public */
 export type AppId =
@@ -48,6 +50,22 @@ export type AppDeepLinkId =
 
 /** @public */
 export type CloudLinkId = 'userAndRoles' | 'performance' | 'billingAndSub' | 'deployment';
+
+export interface CloudURLs {
+  billingUrl?: string;
+  deploymentUrl?: string;
+  performanceUrl?: string;
+  usersAndRolesUrl?: string;
+}
+
+export interface CloudLink {
+  title: string;
+  href: string;
+}
+
+export type CloudLinks = {
+  [id in CloudLinkId]?: CloudLink;
+};
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
@@ -189,14 +207,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
 }
 
 /** @public */
-export interface ChromeProjectNavigation {
-  /**
-   * The navigation tree representation of the side bar navigation.
-   */
-  navigationTree: ChromeProjectNavigationNode[];
-}
-
-/** @public */
 export interface SideNavCompProps {
   activeNodes: ChromeProjectNavigationNode[][];
 }
@@ -211,9 +221,6 @@ export type ChromeProjectBreadcrumb = ChromeBreadcrumb;
 export interface ChromeSetProjectBreadcrumbsParams {
   absolute: boolean;
 }
-
-// --- NOTE: The following types are the ones that the consumer uses to configure their navigation.
-// ---       They are converted to the ChromeProjectNavigationNode type above.
 
 /**
  * @public
@@ -253,3 +260,116 @@ export type NodeDefinitionWithChildren<
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
+
+/** The preset that can be pass to the NavigationBucket component */
+export type NavigationGroupPreset = 'analytics' | 'devtools' | 'ml' | 'management';
+
+/**
+ * @public
+ *
+ *  Definition for the "Recently accessed" section of the side navigation.
+ */
+export interface RecentlyAccessedDefinition {
+  type: 'recentlyAccessed';
+  /**
+   * Optional observable for recently accessed items. If not provided, the
+   * recently items from the Chrome service will be used.
+   */
+  recentlyAccessed$?: Observable<ChromeRecentlyAccessedHistoryItem[]>;
+  /**
+   * If true, the recently accessed list will be collapsed by default.
+   * @default false
+   */
+  defaultIsCollapsed?: boolean;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition.
+ */
+export interface GroupDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navGroup';
+  children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * A group root item definition built from a specific preset.
+ */
+export interface PresetDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
+  type: 'preset';
+  preset: NavigationGroupPreset;
+}
+
+/**
+ * @public
+ *
+ * An navigation item at root level.
+ */
+export interface ItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
+  type: 'navItem';
+}
+
+/**
+ * @public
+ *
+ * The navigation definition for a root item in the side navigation.
+ */
+export type RootNavigationItemDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> =
+  | RecentlyAccessedDefinition
+  | GroupDefinition<LinkId, Id, ChildrenId>
+  | PresetDefinition<LinkId, Id, ChildrenId>
+  | ItemDefinition<LinkId, Id, ChildrenId>;
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ */
+export interface NavigationTreeDefinition<
+  LinkId extends AppDeepLinkId = AppDeepLinkId,
+  Id extends string = string,
+  ChildrenId extends string = Id
+> {
+  /**
+   * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  body: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+  /**
+   * Footer content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"
+   * or "group" items.
+   * */
+  footer?: Array<RootNavigationItemDefinition<LinkId, Id, ChildrenId>>;
+}
+
+/**
+ * @public
+ *
+ * Definition for the complete navigation tree, including body and footer
+ * that is used by the UI to render the navigation.
+ * This interface is the result of parsing the definition above (validating, replacing "link" props
+ * with their corresponding "deepLink"...)
+ */
+export interface NavigationTreeDefinitionUI {
+  body: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+  footer?: Array<ChromeProjectNavigationNode | RecentlyAccessedDefinition>;
+}

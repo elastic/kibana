@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
   EuiButtonEmpty,
