@@ -86,7 +86,7 @@ const InitializingContent = React.memo(() => (
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
       title={
         <FormattedMessage
-          id="xpack.observabilityLogExplorer.InitializingTitle"
+          id="xpack.observabilityLogExplorer.datasetQuality.InitializingTitle"
           defaultMessage="Initializing the Dataset Quality"
         />
       }
