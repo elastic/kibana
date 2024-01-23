@@ -59,6 +59,7 @@ describe('API tests', () => {
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -79,6 +80,7 @@ describe('API tests', () => {
           asResponse: true,
           rawResponse: true,
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -105,6 +107,7 @@ describe('API tests', () => {
           },
           method: 'POST',
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -127,6 +130,7 @@ describe('API tests', () => {
             'Content-Type': 'application/json',
           },
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -149,6 +153,7 @@ describe('API tests', () => {
             'Content-Type': 'application/json',
           },
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -282,6 +287,7 @@ describe('API tests', () => {
         {
           method: 'GET',
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -306,6 +312,7 @@ describe('API tests', () => {
         {
           method: 'POST',
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -328,6 +335,7 @@ describe('API tests', () => {
         {
           method: 'DELETE',
           signal: undefined,
+          version: '1',
         }
       );
     });
@@ -377,6 +385,7 @@ describe('API tests', () => {
           runName: 'Test Run Name',
         },
         signal: undefined,
+        version: '1',
       });
     });
     it('returns error when error is an error', async () => {

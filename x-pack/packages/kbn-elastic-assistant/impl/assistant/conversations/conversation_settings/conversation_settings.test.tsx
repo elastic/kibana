@@ -21,7 +21,7 @@ const mockConvos = {
 };
 const onSelectedConversationChange = jest.fn();
 
-const setUpdatedConversationSettings = jest.fn().mockImplementation((fn) => {
+const setConversationSettings = jest.fn().mockImplementation((fn) => {
   return fn(mockConvos);
 });
 
@@ -33,7 +33,9 @@ const testProps = {
   http: { basePath: { get: jest.fn() } },
   onSelectedConversationChange,
   selectedConversation: welcomeConvo,
-  setUpdatedConversationSettings,
+  setConversationSettings,
+  conversationsSettingsBulkActions: {},
+  setConversationsSettingsBulkActions: jest.fn(),
 } as unknown as ConversationSettingsProps;
 
 jest.mock('../../../connectorland/use_load_connectors', () => ({
@@ -115,7 +117,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-sp'));
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,
@@ -135,7 +137,7 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-convo'));
 
-    expect(setUpdatedConversationSettings).toHaveReturnedWith(mockConvos);
+    expect(setConversationSettings).toHaveReturnedWith(mockConvos);
     expect(onSelectedConversationChange).toHaveBeenCalledWith(alertConvo);
   });
   it('Selecting an existing conversation updates the selected convo and is added to the convo settings', () => {
@@ -154,7 +156,7 @@ describe('ConversationSettings', () => {
       id: 'Cool new conversation',
       messages: [],
     };
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       ...mockConvos,
       [newConvo.id]: newConvo,
     });
@@ -168,7 +170,7 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('delete-convo'));
     const { [customConvo.id]: _, ...rest } = mockConvos;
-    expect(setUpdatedConversationSettings).toHaveReturnedWith(rest);
+    expect(setConversationSettings).toHaveReturnedWith(rest);
   });
   it('Selecting a new connector updates the conversation', () => {
     const { getByTestId } = render(
@@ -177,7 +179,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-connector'));
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,
@@ -194,7 +196,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-model'));
-    expect(setUpdatedConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveReturnedWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,

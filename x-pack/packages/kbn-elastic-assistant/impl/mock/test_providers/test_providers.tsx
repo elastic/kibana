@@ -27,8 +27,6 @@ interface Props {
 window.scrollTo = jest.fn();
 window.HTMLElement.prototype.scrollIntoView = jest.fn();
 
-const mockGetInitialConversations = () => ({});
-
 export const mockAssistantAvailability: AssistantAvailability = {
   hasAssistantPrivilege: false,
   hasConnectorsAllPrivilege: true,
@@ -40,7 +38,6 @@ export const mockAssistantAvailability: AssistantAvailability = {
 export const TestProvidersComponent: React.FC<Props> = ({
   assistantAvailability = mockAssistantAvailability,
   children,
-  getInitialConversations = mockGetInitialConversations,
   providerContext,
 }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -83,11 +80,10 @@ export const TestProvidersComponent: React.FC<Props> = ({
               DOC_LINK_VERSION: 'current',
             }}
             getComments={mockGetComments}
-            getInitialConversations={getInitialConversations}
-            setConversations={jest.fn()}
             setDefaultAllow={jest.fn()}
             setDefaultAllowReplacement={jest.fn()}
             http={mockHttp}
+            baseConversations={{}}
             {...providerContext}
           >
             {children}
