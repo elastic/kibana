@@ -41,7 +41,6 @@ import {
   TIMELINE_FILTER_OPERATOR,
   TIMELINE_FILTER_VALUE,
   TIMELINE_INSPECT_BUTTON,
-  TIMELINE_SETTINGS_ICON,
   TIMELINE_TITLE_INPUT,
   TIMELINE_TITLE_BY_ID,
   TIMESTAMP_TOGGLE_FIELD,
@@ -85,6 +84,9 @@ import {
   TIMELINE_DATA_PROVIDERS_CONTAINER,
   ROW_ADD_NOTES_BUTTON,
   TIMELINE_PANEL,
+  BOTTOM_BAR_TIMELINE_PLUS_ICON,
+  BOTTOM_BAR_CREATE_NEW_TIMELINE,
+  BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE,
 } from '../screens/timeline';
 
 import { REFRESH_BUTTON, TIMELINE, TIMELINES_TAB_TEMPLATE } from '../screens/timelines';
@@ -322,28 +324,28 @@ export const openCreateTimelineOptionsPopover = () => {
   cy.get(NEW_TIMELINE_ACTION).filter(':visible').click();
 };
 
-export const createTimelineOptionsPopoverBottomBar = () => {
+export const createTimelineFromBottomBar = () => {
   recurse(
     () => {
-      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE).eq(0);
+      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE);
     },
     (sub) => sub.is(':visible')
   );
 
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE).click();
 };
 
-export const createTimelineTemplateOptionsPopoverBottomBar = () => {
+export const createTimelineTemplateFromBottomBar = () => {
   recurse(
     () => {
-      cy.get(TIMELINE_SETTINGS_ICON).filter(':visible').click();
-      return cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
+      cy.get(BOTTOM_BAR_TIMELINE_PLUS_ICON).filter(':visible').click();
+      return cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0);
     },
     (sub) => sub.is(':visible')
   );
 
-  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
+  cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
 };
 
 export const createNewTimelineTemplate = () => {
