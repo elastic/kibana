@@ -9,6 +9,7 @@
 export type {
   PrebootPlugin,
   Plugin,
+  PluginConfig,
   AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
@@ -22,3 +23,4 @@ export type {
 } from './src';
 
 export { SharedGlobalConfigKeys } from './src';
+export { loggerServiceId, configServiceId } from './src/service_identifiers';

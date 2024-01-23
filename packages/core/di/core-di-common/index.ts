@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
+export { inject, injectable } from './src/decorators';
+export {} from './'
 export type {
-  PrebootPlugin,
-  Plugin,
-  AsyncPlugin,
-  PluginConfigDescriptor,
-  PluginConfigSchema,
-  PluginInitializer,
-  PluginInitializerContext,
-  PluginManifest,
-  SharedGlobalConfig,
-  MakeUsageFromSchema,
-  ExposedToBrowserDescriptor,
-  DynamicConfigDescriptor,
-  PluginConfig,
-} from './types';
-
-export { SharedGlobalConfigKeys } from './shared_global_config';
+  ServiceIdentifier,
+  PluginContainer,
+  ContainerModule,
+  CreateModuleFn,
+} from './src/interfaces';

@@ -291,6 +291,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
+    injection: {
+      setupModule: (callback) => deps.injection.configurePluginModule(plugin.opaqueId, callback),
+    },
   };
 }
 
