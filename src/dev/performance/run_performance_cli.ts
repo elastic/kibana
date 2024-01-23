@@ -23,7 +23,7 @@ interface TestRunProps {
   phase: 'TEST' | 'WARMUP';
   journey: Journey;
   kibanaInstallDir: string | undefined;
-  logsDir: string;
+  logsDir?: string;
 }
 
 run(
@@ -78,7 +78,7 @@ run(
           });
         }
         process.stdout.write(`--- Running actual test: ${journey.name}\n`);
-        await runFunctionalTest({ journey, phase: 'TEST', kibanaInstallDir, logsDir });
+        await runFunctionalTest({ journey, phase: 'TEST', kibanaInstallDir });
       } catch (e) {
         log.error(e);
         failedJourneys.push(journey.name);
@@ -95,8 +95,8 @@ run(
           'scripts/functional_tests',
           ['--config', journey.path],
           kibanaInstallDir ? ['--kibana-install-dir', kibanaInstallDir] : [],
-          // save Kibana logs for WARMUP phase in file
-          phase === 'WARMUP' ? ['--writeLogsToPath', logsDir] : [],
+          // save Kibana logs in file instead of console output; only for "warmup" phase
+          logsDir ? ['--writeLogsToPath', logsDir] : [],
           '--debug',
           '--bail',
         ].flat(),
