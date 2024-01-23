@@ -335,15 +335,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           .join(' AND ');
       }
 
-      // For multi-metric jobs, we add the selected partition for links to
-      // Log Rate Analysis, so they can be restore as a search filter.
-      if (withWindowParameters && record.partition_field_name && record.partition_field_value) {
+      // For multi-metric or population jobs, we add the selected entity for links to
+      // Log Rate Analysis, so they can be restored as part of the search filter.
+      if (withWindowParameters && props.anomaly.entityName && props.anomaly.entityValue) {
         if (kqlQuery !== '') {
           kqlQuery += ' AND ';
         }
 
-        kqlQuery = `"${escapeQuotes(record.partition_field_name)}":"${escapeQuotes(
-          record.partition_field_value + ''
+        kqlQuery = `"${escapeQuotes(props.anomaly.entityName)}":"${escapeQuotes(
+          props.anomaly.entityValue + ''
         )}"`;
       }
 
