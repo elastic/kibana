@@ -553,6 +553,9 @@ async function getExpressionSuggestionsByType(
             variables: nodeArg ? undefined : anyVariables,
           }))
         );
+        if (command.name === 'show') {
+          suggestions.push(...getBuiltinCompatibleFunctionDefinition(command.name, 'any'));
+        }
       }
     }
 
