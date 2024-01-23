@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { pick } from 'lodash/fp';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -20,14 +19,15 @@ import {
 } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import usePrevious from 'react-use/lib/usePrevious';
 
+import type { State } from '../../../../common/store';
+import { selectTimelineById } from '../../../store/selectors';
 import { getUseField, Field, Form, useForm } from '../../../../shared_imports';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../store';
+import { timelineActions } from '../../../store';
 import * as commonI18n from '../../timeline/properties/translations';
 import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
@@ -37,9 +37,21 @@ import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
 import { formSchema } from './schema';
 
 const CommonUseField = getUseField({ component: Field });
+
+const descriptionLabel = `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`;
+
 interface SaveTimelineModalProps {
+  /**
+   * Callback called when the modal closes
+   */
   closeSaveTimeline: () => void;
+  /**
+   * Sets the initial focus to either the title of the modal or the save button
+   */
   initialFocusOn?: 'title' | 'save';
+  /**
+   * Id of the timeline to be displayed in the bottom bar and within the modal
+   */
   timelineId: string;
   /**
    * When showWarning is true, the modal is used as a reminder
@@ -48,36 +60,32 @@ interface SaveTimelineModalProps {
   showWarning?: boolean;
 }
 
+/**
+ * This component renders the modal to save a timeline with title, description, save as new timeline switch and save / cancel buttons
+ */
 export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
   ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
-    const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-    const {
-      isSaving,
-      description = '',
-      status,
-      title = '',
-      timelineType,
-    } = useDeepEqualSelector((state) =>
-      pick(
-        ['isSaving', 'description', 'status', 'title', 'timelineType'],
-        getTimeline(state, timelineId)
-      )
+
+    const dispatch = useDispatch();
+    const { isSaving, description, status, title, timelineType } = useSelector((state: State) =>
+      selectTimelineById(state, timelineId)
     );
+
+    const [saveAsNewTimeline, setSaveAsNewTimeline] = useState(false);
+    const onSaveAsNewChanged = useCallback(
+      (e: EuiSwitchEvent) => setSaveAsNewTimeline(e.target.checked),
+      []
+    );
+
     const isUnsaved = status === TimelineStatus.draft;
     const prevIsSaving = usePrevious(isSaving);
-    const dispatch = useDispatch();
+
     // Resetting the timeline by replacing the active one with a new empty one
     const resetTimeline = useCreateTimeline({
       timelineId: TimelineId.active,
       timelineType: TimelineType.default,
     });
-    const [saveAsNewTimeline, setSaveAsNewTimeline] = useState(false);
-
-    const onSaveAsNewChanged = useCallback(
-      (e: EuiSwitchEvent) => setSaveAsNewTimeline(e.target.checked),
-      []
-    );
 
     const handleSubmit = useCallback(
       (titleAndDescription, isValid) => {
@@ -166,13 +174,11 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
       [timelineType]
     );
 
-    const descriptionLabel = useMemo(() => `${i18n.TIMELINE_DESCRIPTION} (${i18n.OPTIONAL})`, []);
-
     const titleFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_TITLE,
         autoFocus: initialFocusOn === 'title',
-        'data-test-subj': 'save-timeline-title',
+        'data-test-subj': 'save-timeline-modal-title-input',
         disabled: isSaving,
         spellCheck: true,
         placeholder:
@@ -186,7 +192,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
     const descriptionFieldProps = useMemo(
       () => ({
         'aria-label': i18n.TIMELINE_DESCRIPTION,
-        'data-test-subj': 'save-timeline-description',
+        'data-test-subj': 'save-timeline-modal-description-input',
         disabled: isSaving,
         placeholder: commonI18n.DESCRIPTION,
       }),
@@ -208,7 +214,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
         {isSaving && (
           <EuiProgress size="s" color="primary" position="absolute" data-test-subj="progress-bar" />
         )}
-        <EuiModalHeader data-test-subj="modal-header">{modalHeader}</EuiModalHeader>
+        <EuiModalHeader data-test-subj="save-timeline-modal-header">{modalHeader}</EuiModalHeader>
 
         <EuiModalBody>
           {showWarning && (
@@ -217,7 +223,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                 title={calloutMessage}
                 color="danger"
                 iconType="warning"
-                data-test-subj="edit-timeline-callout"
+                data-test-subj="save-timeline-modal-callout"
               />
               <EuiSpacer size="m" />
             </EuiFlexItem>
@@ -248,7 +254,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                     label={i18n.SAVE_AS_NEW}
                     checked={saveAsNewTimeline}
                     onChange={onSaveAsNewChanged}
-                    data-test-subj="save-as-new-switch"
+                    data-test-subj="save-timeline-modal-save-as-new-switch"
                   />
                 ) : null}
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
@@ -258,7 +264,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                       fill={false}
                       onClick={handleCancel}
                       isDisabled={isSaving}
-                      data-test-subj="close-button"
+                      data-test-subj="save-timeline-modal-close-button"
                     >
                       {closeModalText}
                     </EuiButton>
@@ -270,7 +276,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                       isDisabled={isSaving || isSubmitting}
                       fill={true}
                       onClick={onSubmit}
-                      data-test-subj="save-button"
+                      data-test-subj="save-timeline-modal-save-button"
                     >
                       {saveButtonTitle}
                     </EuiButton>

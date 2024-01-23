@@ -15,7 +15,7 @@ import type { TimelineTabs } from '../../../../../common/types';
 import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { NewTimelineAction } from './new_timeline';
-import { SaveTimelineButton } from './save_timeline_button';
+import { SaveTimelineButton } from '../../modal/actions/save_timeline_button';
 import { OpenTimelineButton } from '../../modal/actions/open_timeline_button';
 import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
