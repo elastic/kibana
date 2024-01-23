@@ -212,6 +212,33 @@ export default function ({ getService }: FtrProviderContext) {
       const basicSessionCookieThree = await loginWithBasic(testUser);
       const samlSessionCookieThree = await loginWithSAML();
 
+      // const basicSessionCookieOne = await loginWithBasic(testUser);
+      // await retry.tryForTime(20000, async () => {
+      //   expect(await getNumberOfSessionDocuments()).to.be(1);
+      // });
+
+      // const samlSessionCookieOne = await loginWithSAML();
+      // await retry.tryForTime(20000, async () => {
+      //   expect(await getNumberOfSessionDocuments()).to.be(2);
+      // });
+
+      // const basicSessionCookieTwo = await loginWithBasic(testUser);
+      // await retry.tryForTime(20000, async () => {
+      //   expect(await getNumberOfSessionDocuments()).to.be(3);
+      // });
+
+      // const samlSessionCookieTwo = await loginWithSAML();
+      // await retry.tryForTime(20000, async () => {
+      //   expect(await getNumberOfSessionDocuments()).to.be(4);
+      // });
+
+      // const basicSessionCookieThree = await loginWithBasic(testUser);
+      // await retry.tryForTime(20000, async () => {
+      //   expect(await getNumberOfSessionDocuments()).to.be(5);
+      // });
+
+      // const samlSessionCookieThree = await loginWithSAML();
+
       log.debug('Waiting for all sessions to be persisted...');
       await retry.tryForTime(20000, async () => {
         expect(await getNumberOfSessionDocuments()).to.be(6);
@@ -221,7 +248,7 @@ export default function ({ getService }: FtrProviderContext) {
       await runCleanupTaskSoon();
       log.debug('Waiting for cleanup job to run...');
       await retry.tryForTime(30000, async () => {
-        // The oldest session should have been removed, but the rest should still be valid.
+        // The oldest sessions should have been removed, but the rest should still be valid.
         expect(await getNumberOfSessionDocuments()).to.be(4);
       });
 
