@@ -21,7 +21,6 @@
       "observability",
       "observabilityShared",
       "management",
-      "cloud"
     ],
     "optionalPlugins": [],
     "requiredBundles": []

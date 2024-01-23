@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 import { OBSERVABILITY_OWNER } from '../../../../common/constants';
 import { alertCommentWithIndices, basicCase } from '../../../containers/mock';
 import type { AppMockRenderer } from '../../../common/mock';
@@ -23,8 +23,7 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/174819
-describe.skip('CaseUI View Page activity tab', () => {
+describe('CaseUI View Page activity tab', () => {
   const getAlertsStateTableMock = jest.fn();
   let appMockRender: AppMockRenderer;
 
@@ -38,15 +37,15 @@ describe.skip('CaseUI View Page activity tab', () => {
       ruleTypeIds: ['log-threshold'],
     });
   });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
   it('should render the alerts table', async () => {
-    const result = appMockRender.render(<CaseViewAlerts caseData={caseData} />);
-    await waitFor(async () => {
-      expect(result.getByTestId('alerts-table')).toBeTruthy();
-    });
+    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+
+    expect(await screen.findByTestId('alerts-table')).toBeInTheDocument();
   });
 
   it('should call the alerts table with correct props for security solution', async () => {
@@ -124,7 +123,7 @@ describe.skip('CaseUI View Page activity tab', () => {
   });
 
   it('should show an empty prompt when the cases has no alerts', async () => {
-    const result = appMockRender.render(
+    appMockRender.render(
       <CaseViewAlerts
         caseData={{
           ...caseData,
@@ -132,8 +131,7 @@ describe.skip('CaseUI View Page activity tab', () => {
         }}
       />
     );
-    await waitFor(async () => {
-      expect(result.getByTestId('caseViewAlertsEmpty')).toBeTruthy();
-    });
+
+    expect(await screen.findByTestId('caseViewAlertsEmpty')).toBeInTheDocument();
   });
 });

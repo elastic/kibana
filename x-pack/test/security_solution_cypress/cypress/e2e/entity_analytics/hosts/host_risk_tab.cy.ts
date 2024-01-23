@@ -23,7 +23,8 @@ import { kqlSearch } from '../../../tasks/security_header';
 import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
-  describe('with legacy risk score', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/174859
+  describe.skip('with legacy risk score', () => {
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });

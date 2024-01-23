@@ -12252,10 +12252,10 @@
               ", responseToolkit: ",
               "ResponseToolkit",
               ") => Promise<",
-              "ResponseObject",
-              " | ",
               "Boom",
-              "<any>>"
+              "<any> | ",
+              "ResponseObject",
+              ">"
             ],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
@@ -14813,6 +14813,10 @@
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
               {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
@@ -16115,7 +16119,7 @@
             "section": "def-common.HandlerFunction",
             "text": "HandlerFunction"
           },
-          "<infer U> ? U : never"
+          "<infer U extends object> ? U : never"
         ],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
         "deprecated": false,
