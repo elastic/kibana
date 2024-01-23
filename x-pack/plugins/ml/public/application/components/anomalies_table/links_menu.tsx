@@ -280,8 +280,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         ? moment(record.timestamp)
         : moment(record.timestamp).startOf(interval);
 
-      // For Log Rate Analysis, look back 6x the bucket span
-      // to provide enough room for the baseline time range.
+      // For Log Rate Analysis, look back further to
+      // provide enough room for the baseline time range.
       // In all other cases look back 1 hour.
       if (withWindowParameters) {
         earliestMoment.subtract(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
@@ -292,7 +292,6 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       const latestMoment = moment(record.timestamp).add(record.bucket_span, 's');
 
-      // For Log Rate Analysis, add 2x the bucket span
       if (withWindowParameters) {
         latestMoment.add(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
       } else if (props.isAggregatedData === true) {
@@ -307,9 +306,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       const to = timeFormatter(latestMoment.unix() * 1000); // e.g. 2016-02-08T18:59:59.000Z
 
       // The window parameters for Log Rate Analysis.
-      // The deviation time range will span the anomaly's bucket.
-      // The baseline time range looks back 5x buckets including
-      // a gap between baseline and deviation of 1/10 of the bucket size.
+      // The deviation time range will span the current anomaly's bucket.
       const dMin = record.timestamp;
       const dMax = record.timestamp + record.bucket_span * 1000;
       const bMax = dMin - record.bucket_span * 1000;
