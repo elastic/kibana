@@ -59,11 +59,12 @@ export interface ReportOutput extends TaskRunResult {
  * @deprecated
  */
 export interface BaseParams {
-  layout?: LayoutParams;
+  browserTimezone: string; // to format dates in the user's time zone
   objectType: string;
   title: string;
-  browserTimezone: string; // to format dates in the user's time zone
   version: string; // to handle any state migrations
+  layout?: LayoutParams; // png & pdf only
+  searchStrategy?: string; // csv only
 }
 
 /**

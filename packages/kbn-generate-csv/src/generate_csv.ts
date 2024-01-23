@@ -280,7 +280,7 @@ export class CsvGenerator {
         }
         const pagingFieldsForSearchSource = cursor.getPagingFieldsForSearchSource();
         if (pagingFieldsForSearchSource) {
-          searchSource.setField(...pagingFieldsForSearchSource);
+          searchSource.setField(...pagingFieldsForSearchSource); // for pit only
         }
 
         searchSource.setField('size', settings.scroll.size);

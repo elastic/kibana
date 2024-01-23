@@ -68,7 +68,6 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
       ...jobParams,
       locatorParams: [locatorParams],
       isDeprecated: false,
-      browserTimezone: jobParams.browserTimezone,
       forceNow: new Date().toISOString(),
     };
   };
