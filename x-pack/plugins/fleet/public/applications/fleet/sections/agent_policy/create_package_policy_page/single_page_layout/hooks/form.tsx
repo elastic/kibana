@@ -9,8 +9,6 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { safeLoad } from 'js-yaml';
 
-import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
-
 import type {
   AgentPolicy,
   NewPackagePolicy,
@@ -28,7 +26,6 @@ import {
 } from '../../../../../hooks';
 import {
   ExperimentalFeaturesService,
-  getCloudShellUrlFromPackagePolicy,
   isVerificationError,
   packageToPackagePolicy,
 } from '../../../../../services';
@@ -46,7 +43,11 @@ import type { PackagePolicyFormState } from '../../types';
 import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
-import { getCloudFormationPropsFromPackagePolicy } from '../../../../../services';
+import {
+  getAzureArmPropsFromPackagePolicy,
+  getCloudFormationPropsFromPackagePolicy,
+  getCloudShellUrlFromPackagePolicy,
+} from '../../../../../../../components/cloud_security_posture/services';
 
 import { AGENTLESS_POLICY_ID } from './setup_technology';
 

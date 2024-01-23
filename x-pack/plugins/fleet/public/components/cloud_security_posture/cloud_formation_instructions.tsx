@@ -10,10 +10,10 @@ import { EuiButton, EuiSpacer, EuiCallOut, EuiSkeletonText } from '@elastic/eui'
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { useCreateCloudFormationUrl } from '../../hooks';
-import { CloudFormationGuide } from '../cloud_formation_guide';
+import type { CloudSecurityIntegration } from '../agent_enrollment_flyout/types';
 
-import type { CloudSecurityIntegration } from './types';
+import { useCreateCloudFormationUrl } from './hooks';
+import { CloudFormationGuide } from './cloud_formation_guide';
 
 interface Props {
   enrollmentAPIKey?: string;

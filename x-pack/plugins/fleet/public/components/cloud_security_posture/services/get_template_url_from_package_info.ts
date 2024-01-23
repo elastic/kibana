@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackageInfo } from '../types';
+import type { PackageInfo } from '../../../types';
 
 export const SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS = {
   CLOUD_FORMATION: 'cloud_formation_template',
