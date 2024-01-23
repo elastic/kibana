@@ -110,9 +110,6 @@
 #  type: rolling-file
 #  fileName: /var/logs/kibana.log
 #  policy:
-#    type: time-interval
-#    interval: 24h
-#  policy:
 #    type: size-limit
 #    size: 256mb
 #  strategy:
