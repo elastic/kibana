@@ -304,6 +304,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerUserProfileDelegate: (delegate) =>
         deps.userProfile.registerUserProfileDelegate(delegate),
     },
+    injection: {
+      setupModule: (callback) => deps.injection.configurePluginModule(plugin.opaqueId, callback),
+    },
   };
 }
 
@@ -397,5 +400,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       audit: deps.security.audit,
     },
     userProfile: deps.userProfile,
+    injection: {
+      container: deps.injection.getPluginContainer(plugin.opaqueId),
+    },
   };
 }
