@@ -27,6 +27,8 @@ export const ServerLogParamsFields: React.FunctionComponent<
   const [[isUsingDefault, defaultMessageUsed], setDefaultMessageUsage] = useState<
     [boolean, string | undefined]
   >([false, defaultMessage]);
+  // This params component is derived primarily from server_log_params.tsx, see that file and its
+  // corresponding unit tests for details on functionality
   useEffect(() => {
     if (
       useDefaultMessage ||

@@ -249,77 +249,43 @@ export const ActionForm = ({
     let actionTypeConnectors = connectors.filter(
       (field) => field.actionTypeId === actionTypeModel.id
     );
-    if (actionTypeConnectors.length > 0) {
-      actions.push(
-        isSystemAction
-          ? {
-              id: '',
-              actionTypeId: actionTypeModel.id,
-              params: {},
-              uuid: uuidv4(),
-              type: RuleActionTypes.SYSTEM,
-            }
-          : {
-              id: '',
-              actionTypeId: actionTypeModel.id,
-              group: defaultActionGroupId,
-              params: {},
-              frequency: defaultRuleFrequency,
-              uuid: uuidv4(),
-              type: RuleActionTypes.DEFAULT,
-            }
-      );
-      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
-    } else {
+
+    const actionToPush = isSystemAction
+      ? {
+          id: '',
+          actionTypeId: actionTypeModel.id,
+          params: {},
+          uuid: uuidv4(),
+          type: RuleActionTypes.SYSTEM,
+        }
+      : {
+          id: '',
+          actionTypeId: actionTypeModel.id,
+          group: defaultActionGroupId,
+          params: {},
+          frequency: defaultRuleFrequency,
+          uuid: uuidv4(),
+          type: RuleActionTypes.DEFAULT,
+        };
+
+    if (actionTypeConnectors.length === 0) {
       actionTypeConnectors = connectors.filter((field) =>
         allowGroupConnector.includes(field.actionTypeId)
       );
       if (actionTypeConnectors.length > 0) {
-        actions.push(
-          isSystemAction
-            ? {
-                id: '',
-                actionTypeId: actionTypeModel.id,
-                params: {},
-                uuid: uuidv4(),
-                type: RuleActionTypes.SYSTEM,
-              }
-            : {
-                id: '',
-                actionTypeId: actionTypeConnectors[0].actionTypeId,
-                group: defaultActionGroupId,
-                params: {},
-                frequency: DEFAULT_FREQUENCY,
-                uuid: uuidv4(),
-                type: RuleActionTypes.DEFAULT,
-              }
-        );
+        // If a connector was successfully found, update the actionTypeId
+        actions.push({ ...actionToPush, actionTypeId: actionTypeConnectors[0].actionTypeId });
         setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      } else {
+        // if no connectors exists or all connectors is already assigned an action under current alert
+        // set actionType as id to be able to create new connector within the alert form
+        actions.push(actionToPush);
+        setActionIdByIndex(actions.length.toString(), actions.length - 1);
+        setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
       }
-    }
-
-    if (actionTypeConnectors.length === 0) {
-      // if no connectors exists or all connectors is already assigned an action under current alert
-      // set actionType as id to be able to create new connector within the alert form
-      actions.push(
-        isSystemAction
-          ? {
-              id: '',
-              actionTypeId: actionTypeModel.id,
-              params: {},
-              type: RuleActionTypes.SYSTEM,
-            }
-          : {
-              id: '',
-              actionTypeId: actionTypeModel.id,
-              group: defaultActionGroupId,
-              params: {},
-              frequency: defaultRuleFrequency,
-              type: RuleActionTypes.DEFAULT,
-            }
-      );
-      setActionIdByIndex(actions.length.toString(), actions.length - 1);
-      setEmptyActionsIds([...emptyActionsIds, actions.length.toString()]);
+    } else {
+      actions.push(actionToPush);
+      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
     }
   }
 
