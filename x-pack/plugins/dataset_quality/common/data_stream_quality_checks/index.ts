@@ -8,4 +8,5 @@
 export * from './check';
 export * from './common';
 export * from './plan';
+export * from './problem';
 export * from './result';

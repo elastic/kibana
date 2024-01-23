@@ -17,10 +17,10 @@ export {
   checkSkippedResultRT,
   dataStreamQualityCheckArgumentsRT,
   dataStreamQualityCheckExecutionRT,
-  failReasonRT,
   ignoredFieldCauseRT,
-  ignoredFieldFailReasonRT,
-  ingestPipelineErrorFailReasonRT,
+  ignoredFieldProblemRT,
+  ingestPipelineErrorProblemRT,
+  qualityProblemRT,
 } from './data_stream_quality_checks';
 export type {
   CheckPlan,
@@ -29,14 +29,15 @@ export type {
   CheckTimeRange,
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
-  FailReason,
   IgnoredFieldCause,
+  QualityProblem,
 } from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
 export type { DatasetQualityConfig } from './plugin_config';
 export {
   DATA_STREAM_CHECKS_PATH,
   DATA_STREAM_CHECK_PATH,
+  DATA_STREAM_MITIGATIONS_PATH,
   getDataStreamCheckPath,
   getDatastreamCheckRequestParamsRT,
   getDatastreamCheckRequestPayloadRT,
@@ -45,6 +46,10 @@ export {
   getDatastreamChecksRequestParamsRT,
   getDatastreamChecksRequestPayloadRT,
   getDatastreamChecksResponsePayloadRT,
+  getDataStreamMitigationsPath,
+  getDatastreamMitigationsRequestParamsRT,
+  getDatastreamMitigationsRequestPayloadRT,
+  getDatastreamMitigationsResponsePayloadRT,
 } from './rest';
 export type {
   APIClientRequestParamsOf,
