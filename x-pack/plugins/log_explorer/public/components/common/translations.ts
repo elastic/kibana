@@ -11,6 +11,10 @@ export const flyoutContentLabel = i18n.translate('xpack.logExplorer.flyoutDetail
   defaultMessage: 'Content breakdown',
 });
 
+export const contentLabel = i18n.translate('xpack.logExplorer.dataTable.header.popover.content', {
+  defaultMessage: 'Content',
+});
+
 export const flyoutServiceLabel = i18n.translate('xpack.logExplorer.flyoutDetail.label.service', {
   defaultMessage: 'Service',
 });
@@ -23,17 +27,10 @@ export const flyoutHostNameLabel = i18n.translate('xpack.logExplorer.flyoutDetai
   defaultMessage: 'Host name',
 });
 
-export const serviceAccordionTitle = i18n.translate(
-  'xpack.logExplorer.flyoutDetail.accordion.title.service',
+export const serviceInfraAccordionTitle = i18n.translate(
+  'xpack.logExplorer.flyoutDetail.accordion.title.serviceInfra',
   {
-    defaultMessage: 'Service',
-  }
-);
-
-export const infraAccordionTitle = i18n.translate(
-  'xpack.logExplorer.flyoutDetail.accordion.title.infrastructure',
-  {
-    defaultMessage: 'Infrastructure',
+    defaultMessage: 'Service & Infrastructure',
   }
 );
 
@@ -198,5 +195,19 @@ export const closeCellActionPopoverText = i18n.translate(
   'xpack.logExplorer.popoverAction.closePopover',
   {
     defaultMessage: 'Close popover',
+  }
+);
+
+export const contentHeaderTooltipParagraph1 = i18n.translate(
+  'xpack.logExplorer.dataTable.header.content.tooltip.paragraph1',
+  {
+    defaultMessage: "Fields that provide information on the document's source, such as:",
+  }
+);
+
+export const contentHeaderTooltipParagraph2 = i18n.translate(
+  'xpack.logExplorer.dataTable.header.content.tooltip.paragraph2',
+  {
+    defaultMessage: 'When the message field is empty, one of the following is displayed',
   }
 );

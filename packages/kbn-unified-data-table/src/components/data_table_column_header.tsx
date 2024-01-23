@@ -8,13 +8,14 @@
 
 import React, { useMemo } from 'react';
 import { css, CSSObject } from '@emotion/react';
-import { EuiIcon, EuiTextBlockTruncate, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnTypes } from '../types';
+import ColumnHeaderTruncateContainer from './column_header_truncate_container';
 
 interface DataTableColumnHeaderProps {
   dataView: DataView;
@@ -99,33 +100,6 @@ function getRenderedToken({
 
   return null;
 }
-
-const ColumnHeaderTruncateContainer = ({
-  headerRowHeight = 1,
-  children,
-}: {
-  headerRowHeight: number;
-  children: React.ReactNode;
-}) => {
-  return (
-    <EuiTextBlockTruncate
-      lines={headerRowHeight}
-      css={css`
-        overflow-wrap: anywhere;
-        overflow: auto;
-        white-space: normal;
-        word-break: break-all;
-        line-height: ${euiThemeVars.euiSize};
-        text-align: left;
-        .euiDataGridHeaderCell--numeric & {
-          float: right;
-        }
-      `}
-    >
-      {children}
-    </EuiTextBlockTruncate>
-  );
-};
 
 export const DataTableTimeColumnHeader = ({
   dataView,

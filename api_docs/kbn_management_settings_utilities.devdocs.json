@@ -92,6 +92,83 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-utilities",
+        "id": "def-common.getCategoryCounts",
+        "type": "Function",
+        "tags": [],
+        "label": "getCategoryCounts",
+        "description": [
+          "\nUtility function to extract the number of fields in each settings category."
+        ],
+        "signature": [
+          "(fields: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ", string | number | boolean | (string | number)[] | null | undefined>[]) => ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.CategoryCounts",
+            "text": "CategoryCounts"
+          }
+        ],
+        "path": "packages/kbn-management/settings/utilities/category/get_category_counts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/management-settings-utilities",
+            "id": "def-common.getCategoryCounts.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [
+              "A list of {@link FieldDefinition } objects."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.FieldDefinition",
+                "text": "FieldDefinition"
+              },
+              "<",
+              {
+                "pluginId": "@kbn/core-ui-settings-common",
+                "scope": "common",
+                "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+                "section": "def-common.UiSettingsType",
+                "text": "UiSettingsType"
+              },
+              ", string | number | boolean | (string | number)[] | null | undefined>[]"
+            ],
+            "path": "packages/kbn-management/settings/utilities/category/get_category_counts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A {@link CategoryCounts } object."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-utilities",
         "id": "def-common.getCategoryName",
         "type": "Function",
         "tags": [],
