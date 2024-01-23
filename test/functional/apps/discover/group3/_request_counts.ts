@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send ${expectedRefreshRequest} requests (documents + chart) when refreshing`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+        await expectSearches(type, expectedRefreshRequest, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
