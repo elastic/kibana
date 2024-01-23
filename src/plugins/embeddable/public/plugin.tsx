@@ -8,7 +8,6 @@
 
 import { Subscription } from 'rxjs';
 import { identity } from 'lodash';
-import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
@@ -40,7 +39,6 @@ import {
   defaultEmbeddableFactoryProvider,
   IEmbeddable,
   SavedObjectEmbeddableInput,
-  PANEL_BADGE_TRIGGER,
 } from './lib';
 import { EmbeddableFactoryDefinition } from './lib/embeddables/embeddable_factory_definition';
 import { EmbeddableStateTransfer } from './lib/state_transfer';
@@ -55,7 +53,6 @@ import {
 } from '../common/lib';
 import { getAllMigrations } from '../common/lib/get_all_migrations';
 import { setKibanaServices } from './kibana_services';
-import { CustomTimeRangeBadge, EditPanelAction } from './embeddable_panel/panel_actions';
 
 export interface EmbeddableSetupDependencies {
   uiActions: UiActionsSetup;
@@ -95,7 +92,9 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   getStateTransfer: (storage?: Storage) => EmbeddableStateTransfer;
   getAttributeService: <
     A extends { title: string },
-    V extends EmbeddableInput & { [ATTRIBUTE_SERVICE_KEY]: A } = EmbeddableInput & {
+    V extends EmbeddableInput & {
+      [ATTRIBUTE_SERVICE_KEY]: A;
+    } = EmbeddableInput & {
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
@@ -145,12 +144,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       );
     });
 
-    const { uiActions } = deps;
-    const { overlays, theme, uiSettings } = core;
-
-    const dateFormat = uiSettings.get(UI_SETTINGS.DATE_FORMAT);
-    const commonlyUsedRanges = uiSettings.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES);
-
     this.appListSubscription = core.application.applications$.subscribe((appList) => {
       this.appList = appList;
     });
@@ -161,22 +154,6 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
       this.appList
     );
     this.isRegistryReady = true;
-
-    const editPanel = new EditPanelAction(
-      this.getEmbeddableFactory,
-      core.application,
-      this.stateTransferService
-    );
-
-    const timeRangeBadge = new CustomTimeRangeBadge(
-      overlays,
-      theme,
-      editPanel,
-      commonlyUsedRanges,
-      dateFormat
-    );
-
-    uiActions.addTriggerAction(PANEL_BADGE_TRIGGER, timeRangeBadge);
 
     const commonContract: CommonEmbeddableStartContract = {
       getEmbeddableFactory: this

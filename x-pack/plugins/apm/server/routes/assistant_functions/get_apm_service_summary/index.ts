@@ -18,8 +18,8 @@ import {
 import * as t from 'io-ts';
 import { compact, keyBy } from 'lodash';
 import {
-  ApmMlDetectorType,
-  getApmMlDetectorType,
+  AnomalyDetectorType,
+  getAnomalyDetectorType,
 } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { Environment } from '../../../../common/environment_rt';
@@ -184,10 +184,10 @@ async function getAnomalies({
         return undefined;
       }
 
-      const type = getApmMlDetectorType(Number(bucket.key.detectorIndex));
+      const type = getAnomalyDetectorType(Number(bucket.key.detectorIndex));
 
       // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
-      const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
+      const divider = type === AnomalyDetectorType.txFailureRate ? 100 : 1;
 
       const metrics = bucket.record_scores.top_anomaly.top[0]?.metrics;
 

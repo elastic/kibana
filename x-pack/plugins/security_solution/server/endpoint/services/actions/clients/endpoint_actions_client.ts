@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { dump } from '../../../utils/dump';
+import { stringify } from '../../../utils/stringify';
 import type { HapiReadableStream } from '../../../../types';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { updateCases } from '../create/update_cases';
 import type { CreateActionPayload } from '../create/types';
 import type {
@@ -36,6 +39,8 @@ import type {
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];
@@ -83,7 +88,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       });
     } catch (err) {
       // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${dump(err)}`);
+      this.log.warn(`failed to update cases: ${err.message}\n${stringify(err)}`);
     }
 
     return response as TResponse;

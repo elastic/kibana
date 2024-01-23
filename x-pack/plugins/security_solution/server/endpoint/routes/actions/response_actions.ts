@@ -7,7 +7,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import { dump } from '../../utils/dump';
+import { stringify } from '../../utils/stringify';
 import { getResponseActionsClient } from '../../services';
 import type { ResponseActionsClient } from '../../services/actions/clients/lib/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
@@ -292,7 +292,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   const logger = endpointContext.logFactory.get('responseActionsHandler');
 
   return async (context, req, res) => {
-    logger.debug(`response action [${command}]:\n${dump(req.body)}`);
+    logger.debug(`response action [${command}]:\n${stringify(req.body)}`);
 
     // Note:  because our API schemas are defined as module static variables (as opposed to a
     //        `getter` function), we need to include this additional validation here, since

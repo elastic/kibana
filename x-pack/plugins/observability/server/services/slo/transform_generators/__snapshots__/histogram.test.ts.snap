@@ -26,7 +26,7 @@ exports[`Histogram Transform Generator aggregates using the numerator equation 1
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "value": "_good>total['0.0-100.0']>_count",
+      "value": "_good>total['target']>_count",
     },
     "script": "params.value",
   },
@@ -37,7 +37,7 @@ exports[`Histogram Transform Generator aggregates using the numerator equation w
 Object {
   "bucket_script": Object {
     "buckets_path": Object {
-      "value": "_good>total['0.0-100.0']>_count",
+      "value": "_good>total['target']>_count",
     },
     "script": "params.value",
   },
@@ -79,6 +79,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
+  "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",
@@ -96,6 +97,7 @@ Object {
               "ranges": Array [
                 Object {
                   "from": 0,
+                  "key": "target",
                   "to": 100,
                 },
               ],
@@ -138,7 +140,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "value": "_good>total['0.0-100.0']>_count",
+            "value": "_good>total['target']>_count",
           },
           "script": "params.value",
         },
@@ -240,6 +242,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
+  "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",
@@ -257,6 +260,7 @@ Object {
               "ranges": Array [
                 Object {
                   "from": 0,
+                  "key": "target",
                   "to": 100,
                 },
               ],
@@ -290,7 +294,7 @@ Object {
       "slo.numerator": Object {
         "bucket_script": Object {
           "buckets_path": Object {
-            "value": "_good>total['0.0-100.0']>_count",
+            "value": "_good>total['target']>_count",
           },
           "script": "params.value",
         },

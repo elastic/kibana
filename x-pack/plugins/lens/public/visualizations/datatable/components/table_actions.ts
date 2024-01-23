@@ -5,12 +5,28 @@
  * 2.0.
  */
 
-import type { EuiDataGridSorting } from '@elastic/eui';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import type {
+  EuiDataGridColumn,
+  EuiDataGridSchemaDetector,
+  EuiDataGridSorting,
+} from '@elastic/eui';
+import type {
+  Datatable,
+  DatatableColumn,
+  DatatableColumnMeta,
+} from '@kbn/expressions-plugin/common';
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import { getSortingCriteria } from '@kbn/sort-predicates';
+import { i18n } from '@kbn/i18n';
 import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
-import type { ColumnConfig, LensGridDirection } from '../../../../common/expressions';
+import type {
+  ColumnConfig,
+  ColumnConfigArg,
+  LensGridDirection,
+} from '../../../../common/expressions';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
+import type { FormatFactory } from '../../../../common/types';
+import { buildColumnsMetaLookup } from './helpers';
 
 export const createGridResizeHandler =
   (
@@ -73,7 +89,7 @@ export const createGridFilterHandler =
     tableRef: React.MutableRefObject<Datatable>,
     onClickValue: (data: ClickTriggerEvent['data']) => void
   ) =>
-  (field: string, value: unknown, colIndex: number, rowIndex: number, negate: boolean = false) => {
+  (_field: string, value: unknown, colIndex: number, rowIndex: number, negate: boolean = false) => {
     const data: ClickTriggerEvent['data'] = {
       negate,
       data: [
@@ -151,3 +167,68 @@ export const createGridSortingConfig = (
     });
   },
 });
+
+function isRange(meta: { params?: { id?: string } } | undefined) {
+  return meta?.params?.id === 'range';
+}
+
+function getColumnType({
+  columnConfig,
+  columnId,
+  lookup,
+}: {
+  columnConfig: ColumnConfig;
+  columnId: string;
+  lookup: Record<
+    string,
+    {
+      name: string;
+      index: number;
+      meta?: DatatableColumnMeta | undefined;
+    }
+  >;
+}) {
+  const sortingHint = columnConfig.columns.find((col) => col.columnId === columnId)?.sortingHint;
+  return sortingHint ?? (isRange(lookup[columnId]?.meta) ? 'range' : lookup[columnId]?.meta?.type);
+}
+
+export const buildSchemaDetectors = (
+  columns: EuiDataGridColumn[],
+  columnConfig: {
+    columns: ColumnConfigArg[];
+    sortingColumnId: string | undefined;
+    sortingDirection: 'none' | 'asc' | 'desc';
+  },
+  table: Datatable,
+  formatters: Record<string, ReturnType<FormatFactory>>
+): EuiDataGridSchemaDetector[] => {
+  const columnsReverseLookup = buildColumnsMetaLookup(table);
+
+  return columns.map((column) => {
+    const schemaType = getColumnType({
+      columnConfig,
+      columnId: column.id,
+      lookup: columnsReverseLookup,
+    });
+    const sortingCriteria = getSortingCriteria(schemaType, column.id, formatters?.[column.id]);
+    return {
+      sortTextAsc: i18n.translate('xpack.lens.datatable.sortTextAsc', {
+        defaultMessage: 'Sort Ascending',
+      }),
+      sortTextDesc: i18n.translate('xpack.lens.datatable.sortTextDesc', {
+        defaultMessage: 'Sort Descending',
+      }),
+      icon: '',
+      type: column.id,
+      detector: () => 1,
+      // This is the actual logic that is used to sort the table
+      comparator: (_a, _b, direction, { aIndex, bIndex }) =>
+        sortingCriteria(table.rows[aIndex], table.rows[bIndex], direction) as 0 | 1 | -1,
+      // When the SO is updated, then this property will trigger a re-sort of the table
+      defaultSortDirection:
+        columnConfig.sortingColumnId === column.id && columnConfig.sortingDirection !== 'none'
+          ? columnConfig.sortingDirection
+          : undefined,
+    };
+  });
+};

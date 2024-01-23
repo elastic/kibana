@@ -18,6 +18,8 @@ import type { LogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
+import { createCustomCellRenderer } from './custom_cell_renderer';
+import { createCustomGridColumnsConfiguration } from './custom_column';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -79,6 +81,12 @@ export const createLogExplorerProfileCustomizations =
         navigation,
         unifiedSearch,
       }),
+    });
+
+    customizations.set({
+      id: 'data_table',
+      customCellRenderer: createCustomCellRenderer({ data }),
+      customGridColumnsConfiguration: createCustomGridColumnsConfiguration(),
     });
 
     /**

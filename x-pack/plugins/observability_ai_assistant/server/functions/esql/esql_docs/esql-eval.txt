@@ -1,0 +1,28 @@
+EVAL
+
+Syntax
+EVAL column1 = value1[, ..., columnN = valueN]
+Parameters
+columnX
+The column name.
+valueX
+The value for the column. Can be a literal, an expression, or a
+function.
+DescriptionThe EVAL processing command enables you to append new columns with calculated
+values. EVAL supports various functions for calculating values. Refer to
+Functions for more information.Examples
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height_feet = height * 3.281, height_cm = height * 100
+```
+
+If the specified column already exists, the existing column will be dropped, and
+the new column will be appended to the table:
+```esql
+FROM employees
+| SORT emp_no
+| KEEP first_name, last_name, height
+| EVAL height = height * 3.281
+```

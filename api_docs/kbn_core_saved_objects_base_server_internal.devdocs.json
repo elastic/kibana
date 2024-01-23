@@ -1689,6 +1689,325 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.DocumentMigrateOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "DocumentMigrateOptions",
+        "description": [
+          "\nOptions for {@link IDocumentMigrator.migrate}"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DocumentMigrateOptions.allowDowngrade",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowDowngrade",
+            "description": [
+              "\nDefines whether it is allowed to convert documents from an higher version or not.\n- If `true`, documents from higher versions will go though the downgrade pipeline.\n- If `false`, an error will be thrown when trying to process a document with an higher type version.\nDefaults to `false`."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.DocumentMigrateOptions.targetTypeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "targetTypeVersion",
+            "description": [
+              "\nIf specified, will migrate to the given version instead of the latest known version."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.IDocumentMigrator",
+        "type": "Interface",
+        "tags": [],
+        "label": "IDocumentMigrator",
+        "description": [
+          "\nManages transformations of individual documents."
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.IDocumentMigrator.migrate",
+            "type": "Function",
+            "tags": [],
+            "label": "migrate",
+            "description": [
+              "\nMigrates a document to its latest version."
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>, options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                "section": "def-common.DocumentMigrateOptions",
+                "text": "DocumentMigrateOptions"
+              },
+              " | undefined) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.IDocumentMigrator.migrate.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.IDocumentMigrator.migrate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                    "section": "def-common.DocumentMigrateOptions",
+                    "text": "DocumentMigrateOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.IDocumentMigrator.migrateAndConvert",
+            "type": "Function",
+            "tags": [],
+            "label": "migrateAndConvert",
+            "description": [
+              "\nMigrates a document to the latest version and applies type conversions if applicable.\nAlso returns any additional document(s) that may have been created during the transformation process.\n"
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>) => ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.IDocumentMigrator.migrateAndConvert.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.IDocumentMigrator.isDowngradeRequired",
+            "type": "Function",
+            "tags": [],
+            "label": "isDowngradeRequired",
+            "description": [
+              "\nReturns true if the provided document has a higher version that the `targetTypeVersion`\n(defaulting to the last known version), false otherwise."
+            ],
+            "signature": [
+              "(doc: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectUnsanitizedDoc",
+                "text": "SavedObjectUnsanitizedDoc"
+              },
+              "<unknown>, options?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                "section": "def-common.IsDowngradeRequiredOptions",
+                "text": "IsDowngradeRequiredOptions"
+              },
+              " | undefined) => boolean"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.IDocumentMigrator.isDowngradeRequired.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "doc",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                    "section": "def-common.SavedObjectUnsanitizedDoc",
+                    "text": "SavedObjectUnsanitizedDoc"
+                  },
+                  "<unknown>"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+                "id": "def-common.IDocumentMigrator.isDowngradeRequired.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-base-server-internal",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
+                    "section": "def-common.IsDowngradeRequiredOptions",
+                    "text": "IsDowngradeRequiredOptions"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+        "id": "def-common.IsDowngradeRequiredOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "IsDowngradeRequiredOptions",
+        "description": [
+          "\nOptions for {@link IDocumentMigrator.isDowngradeRequired}"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-base-server-internal",
+            "id": "def-common.IsDowngradeRequiredOptions.targetTypeVersion",
+            "type": "string",
+            "tags": [],
+            "label": "targetTypeVersion",
+            "description": [
+              "\nIf specified, will migrate to the given version instead of the latest known version."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-base-server-internal/src/migration/document_migrator.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
