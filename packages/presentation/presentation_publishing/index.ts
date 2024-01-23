@@ -18,11 +18,11 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
-  apiFiresPhaseEvents,
-  type FiresPhaseEvents,
+  apiPublishesPhaseEvents,
+  type PublishesPhaseEvents,
   type PhaseEvent,
   type PhaseEventType,
-} from './interfaces/fires_phase_events';
+} from './interfaces/publishes_phase_events';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
