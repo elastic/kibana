@@ -13,8 +13,8 @@ import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/a
 
 export interface CreateEsSearchIterableOptions<TDocument = unknown> {
   esClient: ElasticsearchClient;
-  searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort'> &
-    Pick<Required<SearchRequest>, 'sort'>;
+  searchRequest: Omit<SearchRequest, 'search_after' | 'from' | 'sort' | 'pit' | 'index'> &
+    Pick<Required<SearchRequest>, 'sort' | 'index'>;
   /**
    * An optional callback for mapping the results retrieved from ES. If defined, the iterator
    * `value` will be set to the data returned by this mapping function.
@@ -22,6 +22,8 @@ export interface CreateEsSearchIterableOptions<TDocument = unknown> {
    * @param data
    */
   resultsMapper?: (data: SearchResponse<TDocument>) => any;
+  /** If a Point in Time should be used while executing the search. Defaults to `true` */
+  usePointInTime?: boolean;
 }
 
 export type InferEsSearchIteratorResultValue<TDocument = unknown> =
@@ -58,23 +60,59 @@ export type InferEsSearchIteratorResultValue<TDocument = unknown> =
  */
 export const createEsSearchIterable = <TDocument = unknown>({
   esClient,
-  searchRequest: { size = 1000, ...searchOptions },
+  searchRequest: { size = 1000, index, ...searchOptions },
   resultsMapper,
+  usePointInTime = true,
 }: CreateEsSearchIterableOptions<TDocument>): AsyncIterable<
   InferEsSearchIteratorResultValue<TDocument>
 > => {
+  const keepAliveValue = '5m';
   let done = false;
   let value: SearchResponse<TDocument>;
-
   let searchAfterValue: estypes.SearchHit['sort'] | undefined;
+  let pointInTime: Promise<{ id: string }> = usePointInTime
+    ? esClient.openPointInTime({
+        index,
+        ignore_unavailable: true,
+        keep_alive: keepAliveValue,
+      })
+    : Promise.resolve({ id: '' });
 
-  // FIXME:PT should use PIT for the query. Look into adding it.
+  const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
+    return { done, value };
+  };
+
+  const setValue = (searchResponse: SearchResponse<TDocument>): void => {
+    value = resultsMapper ? resultsMapper(searchResponse) : searchResponse;
+  };
+
+  const setDone = async (): Promise<void> => {
+    done = true;
+
+    if (usePointInTime) {
+      const pitId = (await pointInTime).id;
+
+      if (pitId) {
+        await esClient.closePointInTime({ id: pitId });
+      }
+    }
+  };
 
   const fetchData = async () => {
+    const pitId = (await pointInTime).id;
+
     const searchResult = await esClient
       .search<TDocument>({
         ...searchOptions,
         size,
+        ...(usePointInTime
+          ? {
+              pit: {
+                id: pitId,
+                keep_alive: keepAliveValue,
+              },
+            }
+          : { index }),
         search_after: searchAfterValue,
       })
       .catch((e) => {
@@ -82,32 +120,28 @@ export const createEsSearchIterable = <TDocument = unknown>({
         throw e;
       });
 
-    value = resultsMapper ? resultsMapper(searchResult) : searchResult;
-
     const searchHits = searchResult.hits.hits;
+    const lastSearchHit = searchHits[searchHits.length - 1];
 
     if (searchHits.length === 0) {
-      done = true;
+      await setDone();
       return;
     }
 
-    const lastSearchHit = searchHits[searchHits.length - 1];
     searchAfterValue = lastSearchHit.sort;
+    pointInTime = Promise.resolve({ id: searchResult.pit_id ?? '' });
+    setValue(searchResult);
 
     // If (for some reason) we don't have a `searchAfterValue`,
     // then throw an error, or else we'll keep looping forever
     if (!searchAfterValue) {
-      done = true;
+      await setDone();
       throw new Error(
         `Unable to store 'search_after' value. Last 'SearchHit' did not include a 'sort' property \n(did you forget to set the 'sort' attribute on your SearchRequest?)':\n${JSON.stringify(
           lastSearchHit
         )}`
       );
     }
-  };
-
-  const createIteratorResult = (): IteratorResult<SearchResponse<TDocument>> => {
-    return { done, value };
   };
 
   return {
