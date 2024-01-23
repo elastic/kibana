@@ -940,10 +940,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     if (openInLogRateAnalysisUrl) {
       items.push(
         <EuiContextMenuItem
-          key={`log_rate_analysis`}
+          key="log_rate_analysis"
           icon="machineLearningApp"
           href={openInLogRateAnalysisUrl}
-          data-test-subj={`mlAnomaliesListRowAction_viewInLogRateAnalysisButton`}
+          data-test-subj="mlAnomaliesListRowAction_runLogRateAnalysisButton"
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
