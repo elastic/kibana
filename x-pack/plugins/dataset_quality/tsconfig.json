@@ -28,7 +28,6 @@
     "@kbn/deeplinks-observability",
     "@kbn/router-utils",
     "@kbn/xstate-utils",
-    "@kbn/observability-shared-plugin",
   ],
   "exclude": [
     "target/**/*",
