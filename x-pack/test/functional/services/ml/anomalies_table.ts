@@ -131,7 +131,7 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
-    async assertAnomalyActionLogRateAnalaysisButtonExists(rowIndex: number) {
+    async assertAnomalyActionLogRateAnalysisButtonExists(rowIndex: number) {
       await this.ensureAnomalyActionsMenuOpen(rowIndex);
       await testSubjects.existOrFail('mlAnomaliesListRowAction_runLogRateAnalysisButton');
     },

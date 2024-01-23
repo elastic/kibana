@@ -6,17 +6,25 @@
  */
 
 import expect from '@kbn/expect';
-import { asyncForEach } from '@kbn/std';
 
 import type { LogRateAnalysisType } from '@kbn/aiops-utils';
+
+import type { Datafeed, Job } from '@kbn/ml-plugin/server/shared';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
-function getJobWithDataFeed(detectorFunction: string, detectorField?: string) {
-  const postFix = `${detectorFunction}${detectorField ? `_${detectorField}` : ''}`;
+function getJobWithDataFeed(
+  detectorFunction: string,
+  detectorField?: string,
+  partitionFieldName?: string
+) {
+  const postFix = `${detectorFunction}${detectorField ? `_${detectorField}` : ''}${
+    partitionFieldName ? `_${partitionFieldName}` : ''
+  }`;
   const jobId = `fq_single_1_smv_lra_${postFix}`;
+
   // @ts-expect-error not full interface
   const jobConfig: Job = {
     job_id: jobId,
@@ -31,6 +39,7 @@ function getJobWithDataFeed(detectorFunction: string, detectorField?: string) {
         {
           function: detectorFunction,
           ...(detectorField ? { field_name: detectorField } : {}),
+          ...(partitionFieldName ? { partition_field_name: partitionFieldName } : {}),
         },
       ],
     },
@@ -50,7 +59,26 @@ function getJobWithDataFeed(detectorFunction: string, detectorField?: string) {
   return { jobConfig, datafeedConfig };
 }
 
-const testData = [
+interface TestData {
+  jobConfig: Job;
+  datafeedConfig: Datafeed;
+  analysisType: LogRateAnalysisType;
+  dataGenerator: LogRateAnalysisDataGenerator;
+  entitySelectionField?: string;
+  entitySelectionValue?: string;
+  expected: {
+    anomalyTableLogRateAnalysisButtonAvailable: boolean;
+    analysisResults?: Array<{
+      fieldName: string;
+      fieldValue: string;
+      impact: string;
+      logRate: string;
+      pValue: string;
+    }>;
+  };
+}
+
+const testData: TestData[] = [
   {
     ...getJobWithDataFeed('count'),
     analysisType: 'spike',
@@ -69,6 +97,16 @@ const testData = [
     },
   },
   {
+    ...getJobWithDataFeed('high_count', undefined, 'airline'),
+    analysisType: 'spike',
+    dataGenerator: 'farequote_with_spike',
+    entitySelectionField: 'airline',
+    entitySelectionValue: 'AAL',
+    expected: {
+      anomalyTableLogRateAnalysisButtonAvailable: true,
+    },
+  },
+  {
     ...getJobWithDataFeed('mean', 'responsetime'),
     analysisType: 'spike',
     dataGenerator: 'farequote_with_spike',
@@ -80,31 +118,40 @@ const testData = [
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
+  const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
   const aiops = getService('aiops');
   const ml = getService('ml');
 
   describe('anomaly table with link to log rate analysis', async function () {
     this.tags(['ml']);
 
-    describe('with single metric job', async function () {
-      before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-        await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
-        await ml.testResources.setKibanaTimeZoneToUTC();
+    for (const td of testData) {
+      const {
+        jobConfig,
+        datafeedConfig,
+        analysisType,
+        dataGenerator,
+        entitySelectionField,
+        entitySelectionValue,
+        expected,
+      } = td;
+      describe(`with single metric viewer job ${jobConfig.job_id}`, async function () {
+        before(async () => {
+          await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+          await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
+          await ml.testResources.setKibanaTimeZoneToUTC();
 
-        await asyncForEach(testData, async ({ jobConfig, datafeedConfig, expected }) => {
           await ml.api.createAndRunAnomalyDetectionLookbackJob(jobConfig, datafeedConfig);
+
+          await ml.securityUI.loginAsMlPowerUser();
         });
 
-        await ml.securityUI.loginAsMlPowerUser();
-      });
+        after(async () => {
+          await ml.api.cleanMlIndices();
+          await ml.testResources.deleteDataViewByTitle('ft_farequote');
+        });
 
-      after(async () => {
-        await ml.api.cleanMlIndices();
-        await ml.testResources.deleteDataViewByTitle('ft_farequote');
-      });
-
-      await asyncForEach(testData, async ({ jobConfig, analysisType, dataGenerator, expected }) => {
         it(`should load the single metric viewer for job '${jobConfig.job_id}`, async () => {
           await ml.testExecution.logTestStep('navigate to job list');
           await ml.navigation.navigateToMl();
@@ -115,6 +162,16 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.jobTable.clickOpenJobInSingleMetricViewerButton(jobConfig.job_id);
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+          if (entitySelectionField && entitySelectionValue) {
+            await testSubjects.existOrFail(
+              `mlSingleMetricViewerEntitySelection ${entitySelectionField}`
+            );
+            await comboBox.set(
+              `mlSingleMetricViewerEntitySelection ${entitySelectionField} > comboBoxInput`,
+              entitySelectionValue
+            );
+          }
 
           await ml.testExecution.logTestStep('displays the anomalies table');
           await ml.anomaliesTable.assertTableExists();
@@ -132,34 +189,39 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.anomaliesTable.ensureAnomalyActionLogRateAnalysisButtonClicked(0);
           });
 
+          const shouldHaveResults = expected.analysisResults !== undefined;
+
           it('should complete the analysis', async () => {
             await aiops.logRateAnalysisPage.assertAnalysisComplete(
-              analysisType as LogRateAnalysisType,
-              dataGenerator as LogRateAnalysisDataGenerator
+              analysisType,
+              dataGenerator,
+              !shouldHaveResults
             );
           });
 
-          it('should show analysis results', async () => {
-            await aiops.logRateAnalysisResultsTable.assertLogRateAnalysisResultsTableExists();
-            const actualAnalysisTable =
-              await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
+          if (shouldHaveResults) {
+            it('should show analysis results', async () => {
+              await aiops.logRateAnalysisResultsTable.assertLogRateAnalysisResultsTableExists();
+              const actualAnalysisTable =
+                await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
-            expect(actualAnalysisTable).to.be.eql(
-              expected.analysisResults,
-              `Expected analysis table to be ${JSON.stringify(
-                expected.analysisResults
-              )}, got ${JSON.stringify(actualAnalysisTable)}`
-            );
-          });
+              expect(actualAnalysisTable).to.be.eql(
+                expected.analysisResults,
+                `Expected analysis table to be ${JSON.stringify(
+                  expected.analysisResults
+                )}, got ${JSON.stringify(actualAnalysisTable)}`
+              );
+            });
+          }
         } else {
           it('should not show the log rate analysis action', async () => {
             await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
             await ml.anomaliesTable.scrollRowIntoView(0);
             await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
-            await ml.anomaliesTable.assertAnomalyActionLogRateAalysisButtonNotExists(0);
+            await ml.anomaliesTable.assertAnomalyActionLogRateAnalysisButtonNotExists(0);
           });
         }
       });
-    });
+    }
   });
 }
