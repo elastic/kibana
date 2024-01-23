@@ -10,6 +10,7 @@ import {
   rangeQuery,
 } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { ApmPluginRequestHandlerContext } from '../typings';
 import {
   IndexLifecyclePhaseSelectOption,
@@ -26,7 +27,6 @@ import {
   INDEX,
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import {
   getTotalIndicesStats,
   getEstimatedSizeForDocumentsInIndex,

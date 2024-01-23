@@ -13,6 +13,7 @@ import {
   termsQuery,
 } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   AGENT_NAME,
   EVENT_OUTCOME,
@@ -31,7 +32,6 @@ import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { maybe } from '../../../common/utils/maybe';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 const MAX_NUM_SPANS = 1000;

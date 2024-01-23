@@ -111,6 +111,9 @@
     "@kbn/shared-svg",
     "@kbn/shared-ux-utility",
     "@kbn/management-settings-components-field-row",
+    "@kbn/apm-es-schemas",
+    "@kbn/key-value-metadata-table",
+    "@kbn/event-stacktrace",
   ],
   "exclude": ["target/**/*"]
 }

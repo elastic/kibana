@@ -8,11 +8,11 @@ import datemath from '@elastic/datemath';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import type { APMError } from '@kbn/apm-es-schemas';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { termQuery } from '../../../../common/utils/term_query';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import type { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 export const errorRouteRt = t.intersection([
   t.type({

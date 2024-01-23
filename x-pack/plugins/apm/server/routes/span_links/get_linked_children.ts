@@ -7,6 +7,8 @@
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
+import type { SpanRaw } from '@kbn/apm-es-schemas';
+import type { TransactionRaw } from '@kbn/apm-es-schemas';
 import {
   PROCESSOR_EVENT,
   SPAN_ID,
@@ -16,8 +18,6 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '../../../common/es_fields/apm';
-import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

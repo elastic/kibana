@@ -19,11 +19,11 @@ import React, { ComponentType } from 'react';
 import styled from 'styled-components';
 import { Markdown, useKibana } from '@kbn/kibana-react-plugin/public';
 import { AgentIcon } from '@kbn/custom-icons';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   AgentRuntimeAttachmentProps,
   CreateAgentInstructions,
 } from './agent_instructions_mappings';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import type {
   NewPackagePolicy,
   PackagePolicy,

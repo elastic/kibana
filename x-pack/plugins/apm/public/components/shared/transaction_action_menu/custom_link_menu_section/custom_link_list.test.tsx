@@ -8,7 +8,7 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import {
   expectTextsInDocument,
   expectTextsNotInDocument,

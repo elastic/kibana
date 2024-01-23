@@ -7,7 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,

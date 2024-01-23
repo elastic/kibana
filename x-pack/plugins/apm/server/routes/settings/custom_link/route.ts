@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
 import { pick } from 'lodash';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { isActiveGoldLicense } from '../../../../common/license_check';
 import { INVALID_LICENSE } from '../../../../common/custom_link';
 import { FILTER_OPTIONS } from '../../../../common/custom_link/custom_link_filter_options';
@@ -20,7 +21,6 @@ import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
 import { createInternalESClientWithResources } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { CustomLink } from '../../../../common/custom_link/custom_link_types';
 
 const customLinkTransactionRoute = createApmServerRoute({

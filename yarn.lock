@@ -3212,6 +3212,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-stacktrace@link:packages/kbn-event-stacktrace":
+  version "0.0.0"
+  uid ""
+
+"@kbn/apm-es-schemas@link:packages/kbn-apm-es-schemas":
+  version "0.0.0"
+  uid ""
+
 "@kbn/apm-plugin@link:x-pack/plugins/apm":
   version "0.0.0"
   uid ""
@@ -4949,6 +4957,10 @@
   uid ""
 
 "@kbn/kbn-tp-run-pipeline-plugin@link:test/interpreter_functional/plugins/kbn_tp_run_pipeline":
+  version "0.0.0"
+  uid ""
+
+"@kbn/key-value-metadata-table@link:packages/kbn-key-value-metadata-table":
   version "0.0.0"
   uid ""
 

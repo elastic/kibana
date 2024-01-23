@@ -8,9 +8,9 @@
 import { EuiIcon, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { isOpenTelemetryAgentName } from '../../../../../../common/agent_name';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
-import { AgentName } from '../../../../../../typings/es_schemas/ui/fields/agent';
 
 interface AgentExplorerDocsLinkProps {
   agentName: AgentName;

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import { APMError } from '@kbn/apm-es-schemas';
 
 export enum ErrorTabKey {
   LogStackTrace = 'log_stacktrace',

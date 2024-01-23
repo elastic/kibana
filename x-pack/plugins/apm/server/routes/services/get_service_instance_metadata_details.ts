@@ -7,23 +7,23 @@
 import { merge } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { Agent } from '@kbn/apm-es-schemas';
+import { Service } from '@kbn/apm-es-schemas';
+import { Container } from '@kbn/apm-es-schemas';
+import { Kubernetes } from '@kbn/apm-es-schemas';
+import { Host } from '@kbn/apm-es-schemas';
+import { Cloud } from '@kbn/apm-es-schemas';
+import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import {
+  getBackwardCompatibleDocumentTypeFilter,
+  getProcessorEventForTransactions,
+} from '../../lib/helpers/transactions';
+import { maybe } from '../../../common/utils/maybe';
 import {
   METRICSET_NAME,
   SERVICE_NAME,
   SERVICE_NODE_NAME,
 } from '../../../common/es_fields/apm';
-import { maybe } from '../../../common/utils/maybe';
-import {
-  getBackwardCompatibleDocumentTypeFilter,
-  getProcessorEventForTransactions,
-} from '../../lib/helpers/transactions';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { Agent } from '../../../typings/es_schemas/ui/fields/agent';
-import { Service } from '../../../typings/es_schemas/raw/fields/service';
-import { Container } from '../../../typings/es_schemas/raw/fields/container';
-import { Kubernetes } from '../../../typings/es_schemas/raw/fields/kubernetes';
-import { Host } from '../../../typings/es_schemas/raw/fields/host';
-import { Cloud } from '../../../typings/es_schemas/raw/fields/cloud';
 
 export interface ServiceInstanceMetadataDetailsResponse {
   '@timestamp': string;

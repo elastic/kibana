@@ -7,6 +7,7 @@
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { TransactionRaw } from '@kbn/apm-es-schemas';
 import {
   AGENT_NAME,
   CLOUD_PROVIDER,
@@ -21,7 +22,6 @@ import {
   SERVICE_FRAMEWORK_NAME,
 } from '../../../common/es_fields/apm';
 import { ContainerType } from '../../../common/service_metadata';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getProcessorEventForTransactions } from '../../lib/helpers/transactions';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import {

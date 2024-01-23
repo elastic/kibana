@@ -7,7 +7,7 @@
 
 import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { getSections } from './sections';
 import {
   apmRouter as apmRouterBase,

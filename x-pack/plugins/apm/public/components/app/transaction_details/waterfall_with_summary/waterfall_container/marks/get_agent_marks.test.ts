@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Transaction } from '../../../../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { getAgentMarks } from './get_agent_marks';
 
 describe('getAgentMarks', () => {

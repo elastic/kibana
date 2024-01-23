@@ -6,11 +6,11 @@
  */
 
 import React, { ReactNode } from 'react';
+import { APMError } from '@kbn/apm-es-schemas';
 import {
   ERROR_GROUP_ID,
   SERVICE_NAME,
 } from '../../../../../common/es_fields/apm';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { DiscoverLink } from './discover_link';
 
 function getDiscoverQuery(error: APMError, kuery?: string) {

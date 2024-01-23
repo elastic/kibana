@@ -6,6 +6,8 @@
  */
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { SpanRaw } from '@kbn/apm-es-schemas';
+import { TransactionRaw } from '@kbn/apm-es-schemas';
 import {
   SPAN_ID,
   SPAN_LINKS,
@@ -13,8 +15,6 @@ import {
   TRANSACTION_ID,
   PROCESSOR_EVENT,
 } from '../../../common/es_fields/apm';
-import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getLinkedParentsOfSpan({

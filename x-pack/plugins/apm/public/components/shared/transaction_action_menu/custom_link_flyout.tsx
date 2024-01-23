@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import React from 'react';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { Filter } from '../../../../common/custom_link/custom_link_types';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { convertFiltersToQuery } from '../../app/settings/custom_link/create_edit_custom_link_flyout/helper';

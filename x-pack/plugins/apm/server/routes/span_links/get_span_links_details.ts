@@ -7,6 +7,9 @@
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { chunk, compact, isEmpty, keyBy } from 'lodash';
+import { SpanLink } from '@kbn/apm-es-schemas';
+import { SpanRaw } from '@kbn/apm-es-schemas';
+import { TransactionRaw } from '@kbn/apm-es-schemas';
 import {
   SERVICE_NAME,
   SPAN_ID,
@@ -24,9 +27,6 @@ import {
 } from '../../../common/es_fields/apm';
 import { Environment } from '../../../common/environment_rt';
 import { SpanLinkDetails } from '../../../common/span_links';
-import { SpanLink } from '../../../typings/es_schemas/raw/fields/span_links';
-import { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
-import { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
 import { getBufferedTimerange } from './utils';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 

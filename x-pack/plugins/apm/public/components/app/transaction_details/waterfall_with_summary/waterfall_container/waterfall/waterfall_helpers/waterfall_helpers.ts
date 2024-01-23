@@ -8,8 +8,8 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { first, flatten, groupBy, isEmpty, sortBy, uniq } from 'lodash';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import type { Transaction } from '@kbn/apm-es-schemas';
 import type { APIReturnType } from '../../../../../../../services/rest/create_call_apm_api';
-import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import {
   WaterfallError,
   WaterfallSpan,

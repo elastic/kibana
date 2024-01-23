@@ -11,6 +11,10 @@ import { createHash } from 'crypto';
 import { flatten, merge, pickBy, sortBy, sum, uniq } from 'lodash';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { APMError } from '@kbn/apm-es-schemas';
+import { AgentName } from '@kbn/apm-es-schemas';
+import { Span } from '@kbn/apm-es-schemas';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { AGENT_NAMES, RUM_AGENT_NAMES } from '../../../../common/agent_name';
 import {
   AGENT_ACTIVATION_METHOD,
@@ -55,10 +59,6 @@ import {
 } from '../../../../common/service_groups';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { getKueryFields } from '../../../../common/utils/get_kuery_fields';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import { Span } from '../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import {
   APMDataTelemetry,
   APMPerService,

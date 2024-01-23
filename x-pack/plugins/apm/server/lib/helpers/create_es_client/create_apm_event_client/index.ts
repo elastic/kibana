@@ -21,12 +21,12 @@ import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 import { compact, omit } from 'lodash';
 import { ValuesType } from 'utility-types';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { APMError } from '@kbn/apm-es-schemas';
+import { Metric } from '@kbn/apm-es-schemas';
+import { Span } from '@kbn/apm-es-schemas';
+import { Transaction } from '@kbn/apm-es-schemas';
+import { Event } from '@kbn/apm-es-schemas';
 import { ApmDataSource } from '../../../../../common/data_source';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Metric } from '../../../../../typings/es_schemas/ui/metric';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { Event } from '../../../../../typings/es_schemas/ui/event';
 import { withApmSpan } from '../../../../utils/with_apm_span';
 import {
   callAsyncWithDebug,

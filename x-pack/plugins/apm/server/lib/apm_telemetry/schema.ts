@@ -6,13 +6,13 @@
  */
 
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import { ElasticAgentName } from '@kbn/apm-es-schemas';
 import {
   AggregatedTransactionsCounts,
   APMUsage,
   APMPerService,
   DataStreamCombined,
 } from './types';
-import { ElasticAgentName } from '../../../typings/es_schemas/ui/fields/agent';
 
 const aggregatedTransactionCountSchema: MakeSchemaFrom<
   AggregatedTransactionsCounts,

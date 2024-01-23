@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { useDefaultTimeRange } from '../../../../../../hooks/use_default_time_range';
 import { ApmRoutes } from '../../../../../routing/apm_route_config';

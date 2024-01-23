@@ -15,7 +15,7 @@ import {
   NODE_LOGS_LOCATOR_ID,
   TRACE_LOGS_LOCATOR_ID,
 } from '@kbn/logs-shared-plugin/common';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,

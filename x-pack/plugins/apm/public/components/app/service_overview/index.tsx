@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import { AgentName } from '@kbn/apm-es-schemas';
 import {
   isOpenTelemetryAgentName,
   isRumAgentName,

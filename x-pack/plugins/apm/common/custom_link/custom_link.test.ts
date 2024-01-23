@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { extractTemplateVariableNames, getEncodedCustomLinkUrl } from '.';
-import { Transaction } from '../../typings/es_schemas/ui/transaction';
+import { Transaction } from '@kbn/apm-es-schemas';
 
 describe('Custom link', () => {
   describe('extractTemplateVariableNames', () => {
