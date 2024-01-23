@@ -114,7 +114,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
             slo.id,
-            slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
           )
         );
         navigateToUrl(sloDetailsUrl);
@@ -241,9 +241,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         const sloDetailsUrl = basePath.prepend(
           paths.observability.sloDetails(
             slo.id,
-            ![slo.groupBy].flat().includes(ALL_VALUE) && Object.keys(slo.groupings || {}).length
-              ? slo.groupings
-              : undefined
+            ![slo.groupBy].flat().includes(ALL_VALUE) && slo.instanceId ? slo.instanceId : undefined
           )
         );
         return (
