@@ -9,6 +9,4 @@ import type { HasDisableTriggers, HasParentApi, HasType } from '@kbn/presentatio
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
 export type FilterByMapExtentActionApi = HasType &
-  Partial<HasDisableTriggers> &
-  Partial<HasParentApi<HasType>> &
-  Partial<HasVisualizeConfig>;
+  Partial<HasDisableTriggers & HasParentApi<HasType> & HasVisualizeConfig>;
