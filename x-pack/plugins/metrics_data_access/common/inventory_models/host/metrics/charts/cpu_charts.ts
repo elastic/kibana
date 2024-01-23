@@ -56,37 +56,3 @@ export const cpuUsageBreakdown = {
       : {}),
   }),
 };
-
-export const loadBreakdown = {
-  get: ({ dataViewId }: ChartArgs): LensConfigWithId => ({
-    id: 'loadBreakdown',
-    chartType: 'xy',
-    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
-      defaultMessage: 'Load',
-    }),
-    layers: [
-      {
-        seriesType: 'area',
-        type: 'series',
-        xAxis: '@timestamp',
-        yAxis: [formulas.load1m, formulas.load5m, formulas.load15m],
-      },
-    ],
-    fittingFunction: 'Linear',
-    legend: {
-      position: 'bottom',
-      show: true,
-    },
-    axisTitleVisibility: {
-      showXAxisTitle: false,
-      showYAxisTitle: false,
-    },
-    ...(dataViewId
-      ? {
-          dataset: {
-            index: dataViewId,
-          },
-        }
-      : {}),
-  }),
-};
