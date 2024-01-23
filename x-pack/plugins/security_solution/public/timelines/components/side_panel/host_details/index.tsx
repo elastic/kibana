@@ -111,6 +111,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <ExpandableHostDetailsPageLink hostName={hostName} />
         </StyledEuiFlexButtonWrapper>
         <EuiSpacer size="m" />
+        <AssetCriticalitySelector entity={{ type: 'host', name: hostName }} />
         <StyledPanelContent>
           <ExpandableHostDetails
             contextID={contextID}
