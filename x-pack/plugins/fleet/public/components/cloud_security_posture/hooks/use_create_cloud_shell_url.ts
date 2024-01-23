@@ -7,10 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { PackagePolicy } from '../../common';
-import { getCloudShellUrlFromPackagePolicy } from '../services';
+import type { PackagePolicy } from '../../../../common';
 
-import { useGetSettings } from './use_request';
+import { useGetSettings } from '../../../hooks';
+
+import { getCloudShellUrlFromPackagePolicy } from '../services';
 
 export const useCreateCloudShellUrl = ({
   enrollmentAPIKey,

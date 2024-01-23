@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '../types';
+import type { PackagePolicy } from '../../../types';
 
 /**
  * Get the project id, organization id and account type of gcp integration from a package policy

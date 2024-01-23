@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PackagePolicy } from '../types';
+import type { PackagePolicy } from '../../../types';
 
 /**
  * Get the cloud shell url from a package policy

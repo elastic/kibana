@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AgentPolicy } from '../types';
+import type { AgentPolicy } from '../../../types';
 
 /**
  * Get the cloud shell url from a agent policy
