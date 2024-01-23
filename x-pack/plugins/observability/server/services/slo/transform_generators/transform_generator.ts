@@ -17,8 +17,8 @@ export abstract class TransformGenerator {
   public abstract getTransformParams(slo: SLO): TransformPutTransformRequest;
 
   public buildCommonRuntimeMappings(slo: SLO): MappingRuntimeFields {
-    const mustIncludeAllInstanceId = slo.groupBy === ALL_VALUE || slo.groupBy === '';
-
+    const groupings = [slo.groupBy].flat().filter((value) => !!value);
+    const hasGroupings = !groupings.includes(ALL_VALUE) && groupings.length;
     return {
       'slo.id': {
         type: 'keyword',
@@ -32,15 +32,30 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      ...(mustIncludeAllInstanceId && {
-        'slo.instanceId': {
-          type: 'keyword',
-          script: {
-            source: `emit('${ALL_VALUE}')`,
-          },
-        },
-      }),
+      ...(hasGroupings
+        ? {
+            'slo.instanceId': {
+              type: 'keyword',
+              script: {
+                source: this.buildInstanceId(slo),
+              },
+            },
+          }
+        : {
+            'slo.instanceId': {
+              type: 'keyword',
+              script: {
+                source: `emit('${ALL_VALUE}')`,
+              },
+            },
+          }),
     };
+  }
+
+  public buildInstanceId(slo: SLO): string {
+    const groups = [slo.groupBy].flat().filter((value) => !!value);
+    const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
+    return `emit(${groupings})`;
   }
 
   public buildDescription(slo: SLO): string {
@@ -73,7 +88,7 @@ export abstract class TransformGenerator {
             // TODO: figure out groupBy schema
             {
               'slo.instanceId': {
-                terms: { field: Array.isArray(slo.groupBy) ? slo.groupBy[0] : slo.groupBy },
+                terms: { field: 'slo.instanceId' },
               },
             }
           )

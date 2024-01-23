@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyStringOrArray, dateType, summarySchema, groupingSchema } from './common';
+import { allOrAnyStringOrArray, dateType, summarySchema, groupingsSchema } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
@@ -55,7 +55,7 @@ const sloSchema = t.type({
 
 const sloWithSummarySchema = t.intersection([
   sloSchema,
-  t.type({ summary: summarySchema, groupings: groupingSchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema }),
 ]);
 
 export {

@@ -49,7 +49,7 @@ const summarySchema = t.type({
   errorBudget: errorBudgetSchema,
 });
 
-const groupingSchema = t.type(t.object);
+const groupingsSchema = t.object;
 
 const historicalSummarySchema = t.intersection([
   t.type({
@@ -81,7 +81,7 @@ export {
   dateRangeSchema,
   dateType,
   errorBudgetSchema,
-  groupingSchema,
+  groupingsSchema,
   historicalSummarySchema,
   previewDataSchema,
   statusSchema,

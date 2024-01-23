@@ -14,6 +14,7 @@ import {
   budgetingMethodSchema,
   dateType,
   durationType,
+  groupingsSchema,
   histogramIndicatorSchema,
   historicalSummarySchema,
   indicatorSchema,
@@ -121,7 +122,7 @@ const sloResponseSchema = t.intersection([
 
 const sloWithSummaryResponseSchema = t.intersection([
   sloResponseSchema,
-  t.type({ summary: summarySchema }),
+  t.type({ summary: summarySchema, groupings: groupingsSchema }),
 ]);
 
 const getSLOQuerySchema = t.partial({
@@ -181,7 +182,9 @@ const deleteSLOInstancesParamsSchema = t.type({
 });
 
 const fetchHistoricalSummaryParamsSchema = t.type({
-  body: t.type({ list: t.array(t.type({ sloId: sloIdSchema, instanceId: allOrAnyString })) }),
+  body: t.type({
+    list: t.array(t.type({ sloId: sloIdSchema, instanceId: t.string })),
+  }),
 });
 
 const fetchHistoricalSummaryResponseSchema = t.array(

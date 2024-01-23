@@ -20,10 +20,11 @@ export function SloGroupByBadge({ slo, color }: Props) {
   if (!slo.groupBy || slo.groupBy === ALL_VALUE) {
     return null;
   }
+
   const groupings = [slo.groupBy].flat();
 
   return groupings.map((group) => (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} key={group}>
       <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
         <EuiToolTip
           position="top"

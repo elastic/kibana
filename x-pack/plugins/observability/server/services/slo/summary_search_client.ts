@@ -8,12 +8,13 @@
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
-import _ from 'lodash';
+import { partition } from 'lodash';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
+import { getFlattenedGroupings } from './utils';
 
 interface EsSummaryDocument {
   slo: {
@@ -86,7 +87,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
       }
 
-      const [tempSummaryDocuments, summaryDocuments] = _.partition(
+      const [tempSummaryDocuments, summaryDocuments] = partition(
         summarySearch.hits.hits,
         (doc) => !!doc._source?.isTempDoc
       );
@@ -130,7 +131,10 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
             sliValue: toHighPrecision(doc._source!.sliValue),
             status: doc._source!.status,
           },
-          groupings: doc._source!.slo.groupings,
+          groupings: getFlattenedGroupings({
+            groupings: doc._source!.slo.groupings,
+            groupBy: doc._source!.slo.groupBy,
+          }),
         })),
       };
     } catch (err) {
