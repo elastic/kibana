@@ -57,45 +57,46 @@ const FieldNameFieldComponent = ({
       return (
         <FormattedMessage
           id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
-          defaultMessage="Entity_id is an endpoint specific field, if the alert does not come from endpoint we will not be able to send the action."
+          defaultMessage="Entity_id is an Elastic Security agent specific field, if the alert does not come from Elastic Security agent we will not be able to send the action."
         />
       );
     }
     return null;
   }, [fieldValue]);
 
-  const CONFIG = {
-    label: i18n.translate('xpack.securitySolution.responseActions.endpoint.fieldLabel', {
-      defaultMessage: '{field}',
-      values: { field: FIELD_LABEL },
-    }),
-    helpText: renderEntityIdNote,
-    validations: [
-      {
-        validator: ({ value }: { value: string }) => {
-          if (isRequired && value === '') {
-            return {
-              code: 'ERR_FIELD_MISSING',
-              path,
-              message: i18n.translate(
-                'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
-                {
-                  defaultMessage:
-                    '{field} is a required field when process.pid toggle is turned off',
-                  values: { field: FIELD_LABEL },
-                }
-              ),
-            };
-          }
+  const CONFIG = useMemo(() => {
+    return {
+      label: FIELD_LABEL,
+      helpText: renderEntityIdNote,
+      validations: [
+        {
+          validator: ({ value }: { value: string }) => {
+            if (isRequired && value === '') {
+              return {
+                code: 'ERR_FIELD_MISSING',
+                path,
+                message: i18n.translate(
+                  'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
+                  {
+                    defaultMessage:
+                      '{field} is a required field when process.pid toggle is turned off',
+                    values: { field: FIELD_LABEL },
+                  }
+                ),
+              };
+            }
+          },
         },
-      },
-    ],
-  };
+      ],
+    };
+  }, [isRequired, path, renderEntityIdNote]);
 
-  const optionsAsComboBoxOptions = ECSSchemaOptions.map(({ label }) => ({
-    label,
-    value: label,
-  }));
+  const optionsAsComboBoxOptions = useMemo(() => {
+    return ECSSchemaOptions.map(({ label }) => ({
+      label,
+      value: label,
+    }));
+  }, []);
 
   return (
     <>

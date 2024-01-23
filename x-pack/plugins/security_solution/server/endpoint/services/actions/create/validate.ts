@@ -9,7 +9,10 @@ import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import type { LicenseService } from '../../../../../common/license';
 
-export const validateEndpointLicense = (license: LicenseService, licenseType: LicenseType) => {
+export const validateEndpointLicense = (
+  license: LicenseService,
+  licenseType: LicenseType
+): string | undefined => {
   const hasEnterpriseLicense = license.isAtLeast(licenseType);
 
   if (!hasEnterpriseLicense) {
@@ -17,13 +20,13 @@ export const validateEndpointLicense = (license: LicenseService, licenseType: Li
   }
 };
 
-export const validateAgents = (agents: string[]) => {
+export const validateAgents = (agents: string[]): string | undefined => {
   if (!agents.length) {
     return HOST_NOT_ENROLLED;
   }
 };
 
-export const validateAlertError = (field?: string) => {
+export const validateAlertError = (field?: string): string | undefined => {
   if (field) {
     return FIELD_NOT_EXIST(field);
   }
@@ -43,7 +46,7 @@ export const HOST_NOT_ENROLLED = i18n.translate(
   }
 );
 
-export const FIELD_NOT_EXIST = (field: string) =>
+export const FIELD_NOT_EXIST = (field: string): string =>
   i18n.translate('xpack.securitySolution.responseActionsList.error.nonExistingFieldName', {
     defaultMessage: 'The action was called with a non-existing event field name: {field}',
     values: { field },

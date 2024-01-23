@@ -58,8 +58,11 @@ export const ResponseActionsForm = ({
 
             if (name.includes(paramsPath)) {
               if (fields[name]?.errors?.length) {
+                const responseActionType = upperFirst(
+                  (fields[`${path}.actionTypeId`].value as string).substring(1)
+                );
                 acc.push({
-                  type: upperFirst((fields[`${path}.actionTypeId`].value as string).substring(1)),
+                  type: responseActionType,
                   errors: map(fields[name].errors, 'message'),
                 });
               }
