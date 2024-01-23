@@ -31,30 +31,6 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      it(`successfully decrypts 'fleet-message-signing-keys' objects`, async () => {
-        const decryptResponse = await supertest
-          .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/fleet-message-signing-keys/15d50edc-e8aa-4856-a5a3-df0188c4f550`
-          )
-          .expect(200);
-
-        const decryptedObject = JSON.parse(decryptResponse.text);
-        expect(decryptedObject.attributes.passphrase).to.eql('This is the passphrase');
-      });
-
-      it(`successfully decrypts 'alert' objects`, async () => {
-        const decryptResponse = await supertest
-          .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/ef277b05-595b-41b9-9674-d199753c40ca`
-          )
-          .expect(200);
-
-        const decryptedObject = JSON.parse(decryptResponse.text);
-        expect(decryptedObject.attributes.apiKey).to.eql(
-          'This api key was encrypted prior to the AAD include list change.'
-        );
-      });
-
       it(`successfully decrypts 'action' objects`, async () => {
         const decryptResponse = await supertest
           .get(
@@ -66,36 +42,17 @@ export default function ({ getService }: FtrProviderContext) {
         expect(decryptedObject.attributes.secrets).to.eql({ token: 'some-random-token-value' });
       });
 
-      it(`successfully decrypts 'synthetics-param' objects`, async () => {
+      it(`successfully decrypts 'action_task_params' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-param/a304e397-723a-495c-a934-126504d53d10`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action_task_params/de958a84-0c3f-4745-9cc2-8bfedbad9de9`
           )
           .expect(200);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
-        expect(decryptedObject.attributes.value).to.eql(
-          'This value was encrypted prior to the AAD include list change.'
+        expect(decryptedObject.attributes.apiKey).to.eql(
+          'This api key was encrypted prior to the AAD include list change.'
         );
-      });
-
-      it(`successfully decrypts 'synthetics-monitor' objects`, async () => {
-        const decryptResponse = await supertest
-          .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-monitor/305ea066-0f33-47f2-8d15-2bf82c5ea430`
-          )
-          .expect(200);
-
-        const decryptedObject = JSON.parse(decryptResponse.text);
-        const secrets = JSON.parse(decryptedObject.attributes.secrets);
-        expect(secrets).to.eql({
-          params: 'some-params',
-          'source.inline.script': `step('Go to localhost', async () => {\n  await page.goto('localhost');\n});`,
-          'source.project.content': '',
-          synthetics_args: ['param1', 'param2', 'param3'],
-          'ssl.key': 'some-ssl-key',
-          'ssl.key_passphrase': 'some-passphrase',
-        });
       });
 
       it(`successfully decrypts 'connector_token' objects`, async () => {
@@ -111,20 +68,62 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
+      it(`successfully decrypts 'alert' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/alert/ef277b05-595b-41b9-9674-d199753c40ca`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.apiKey).to.eql(
+          'This api key was encrypted prior to the AAD include list change.'
+        );
+      });
+
+      // Still working on this one, not passing...
+      // it.only(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
+      //   const decryptResponse = await supertest
+      //     .get(
+      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/bfda0e42-23d7-468c-8ed4-bf3c3de82cf3`
+      //     )
+      //     .expect(200);
+
+      //   const decryptedObject = JSON.parse(decryptResponse.text);
+      //   expect(decryptedObject.attributes.apiKeyId).to.eql(
+      //     'This api key id was encrypted prior to the AAD include list change.'
+      //   );
+      // });
+
       it(`successfully decrypts 'ingest-outputs' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/ingest-outputs/8118481a-b91a-40e6-83f7-f9e1c08bb3ae`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/ingest-outputs/e7e5ea1b-8342-45f3-8051-1bc1448fd923`
           )
           .expect(200);
 
         const decryptedObject = JSON.parse(decryptResponse.text);
         const ssl = JSON.parse(decryptedObject.attributes.ssl);
         expect(ssl).to.eql({
-          certificate_authorities: ['some SSL CA'],
+          certificate_authorities: [
+            'This SSL CA was encrypted prior to the AAD include list change.',
+          ],
           verification_mode: 'full',
         });
-        expect(decryptedObject.attributes.password).to.eql('some-password');
+        expect(decryptedObject.attributes.password).to.eql(
+          'This password was encrypted prior to the AAD include list change.'
+        );
+      });
+
+      it(`successfully decrypts 'fleet-message-signing-keys' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/fleet-message-signing-keys/15d50edc-e8aa-4856-a5a3-df0188c4f550`
+          )
+          .expect(200);
+
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.passphrase).to.eql('This is the passphrase');
       });
 
       it(`successfully decrypts 'fleet-uninstall-tokens' objects`, async () => {
@@ -153,32 +152,37 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      // Still working on these two, not passing...
-      // it(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
-      //   const decryptResponse = await supertest
-      //     .get(
-      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/a6b5125f-7e8b-491e-b389-14276d631d76`
-      //     )
-      //     .expect(200);
+      it(`successfully decrypts 'synthetics-monitor' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-monitor/305ea066-0f33-47f2-8d15-2bf82c5ea430`
+          )
+          .expect(200);
 
-      //   const decryptedObject = JSON.parse(decryptResponse.text);
-      //   expect(decryptedObject.attributes.apiKeyId).to.eql(
-      //     'This api key id was encrypted prior to the AAD include list change.'
-      //   );
-      // });
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        const secrets = JSON.parse(decryptedObject.attributes.secrets);
+        expect(secrets).to.eql({
+          params: 'some-params',
+          'source.inline.script': `step('Go to localhost', async () => {\n  await page.goto('localhost');\n});`,
+          'source.project.content': '',
+          synthetics_args: ['param1', 'param2', 'param3'],
+          'ssl.key': 'some-ssl-key',
+          'ssl.key_passphrase': 'some-passphrase',
+        });
+      });
 
-      // it(`successfully decrypts 'action_task_params' objects`, async () => {
-      //   const decryptResponse = await supertest
-      //     .get(
-      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/action_task_params/de958a84-0c3f-4745-9cc2-8bfedbad9de9`
-      //     )
-      //     .expect(200);
+      it(`successfully decrypts 'synthetics-param' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/synthetics-param/a304e397-723a-495c-a934-126504d53d10`
+          )
+          .expect(200);
 
-      //   const decryptedObject = JSON.parse(decryptResponse.text);
-      //   expect(decryptedObject.attributes.apiKey).to.eql(
-      //     'This api key was encrypted prior to the AAD include list change.'
-      //   );
-      // });
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.value).to.eql(
+          'This value was encrypted prior to the AAD include list change.'
+        );
+      });
     });
   });
 }

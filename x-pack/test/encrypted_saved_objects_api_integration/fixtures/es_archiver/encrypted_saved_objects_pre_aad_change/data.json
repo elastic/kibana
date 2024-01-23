@@ -345,9 +345,18 @@
   "type": "doc",
   "value": {
     "index": ".kibana_ingest",
-    "id": "ingest-outputs:8118481a-b91a-40e6-83f7-f9e1c08bb3ae",
+    "id": "ingest-outputs:e7e5ea1b-8342-45f3-8051-1bc1448fd923",
     "source": {
       "ingest-outputs": {
+        "service_token": "some-service-token",
+        "shipper": {
+          "prop1": "a",
+          "prop2": "b"
+        },
+        "allow_edit": false,
+        "broker_ack_reliability": "some-value",
+        "broker_buffer_size": 100,
+        "channel_buffer_size": 100,
         "name": "test_kafka_output",
         "type": "kafka",
         "hosts": [
@@ -384,16 +393,16 @@
         "timeout": 30,
         "broker_timeout": 30,
         "required_acks": 1,
-        "ssl": "PFLHz9pywSov/p+PZUAPfioMJDQFNpQt0VrRNbPUIKrbj2Q1MiwWIQR8nlpVzocOJp7tjXVItnUzsbJZu30osfvtsbzixT8zp8QRPHFZC3sjDA9alchulj6eoj+mueyAQNKktL56Dwp16CNg/huLea//Xyp3nJ4AYVRCpGV5+avQtI1K+FiLpo17+W8dj7Y+VXpJqcL9nuTdi6KdiwCoTWzXeqmkk9YdY3ffbQ==",
-        "password": "vEd4zRVTh03N2lCOx5Y7BbURX1A8C6Di4l/X+YfTBW0EGEwFkLMa779oCVH9V2atbUGbubqGD6IVYIwylCO3sMhGFU8qBVHju0fNTvCddd9AFXj2DLC3opxfR95Xaa05Lnen6O3yrUPn9sE="
+        "ssl": "QxjwNqSXWYqkJmZkgn9o4jBvzu6JIvqatP2F+CH3zPSF9fLSLBp7Q6PRWjztmuKv0Uq6Q+BrZRM4rE7OTt2wQoYrhtRETzQsxWWXXDD9B2Ph7ivUqlRiZmXLSERNYDPYlWspRDlv8e5gcncV8WUyinJAnRucNZuFQBvH1H+L7CkwpuVOG8avoiaJ00ZEn93AruSMxvPdTDfd+YIOjrcrE/ReU4fxith794adlLDDubN5vblbvBM0O4fsGjAoYxjNpWdOm9GvoxTDDw9v1QM9FLwV2i1FAYSVXLc69OWnd5s=",
+        "password": "xtsCxu6mdPQxLusMO6pkfM3yriLyt+8/9pn3BHcc5qce4wYjrdWhRsyyMcMSR/DUwfZzmWXDNT3uYUxeegbMzDwypqCcgYyGl85jB6ekUOJeGkokfW0vl130Xk7TccY6wjlyzMVC61PWavNLfaaEOEdGktKcx+6Tn+syxAc734puI0wMGxgyenMX+lkXqXEW4TYZ27hOthWwKSW35V/m"
       },
       "type": "ingest-outputs",
       "references": [],
       "managed": false,
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "10.4.0",
-      "updated_at": "2024-01-17T17:21:06.427Z",
-      "created_at": "2024-01-17T17:18:40.441Z"
+      "updated_at": "2024-01-23T03:10:45.098Z",
+      "created_at": "2024-01-23T03:10:45.098Z"
     }
   }
 }
@@ -444,18 +453,18 @@
   "type": "doc",
   "value": {
     "index": ".kibana_alerting_cases",
-    "id": "api_key_pending_invalidation:a6b5125f-7e8b-491e-b389-14276d631d76",
+    "id": "api_key_pending_invalidation:bfda0e42-23d7-468c-8ed4-bf3c3de82cf3",
     "source": {
       "api_key_pending_invalidation": {
-        "createdAt": "2024-01-17T22:46:44.927Z",
-        "apiKeyId": "cAnKjDD2SGfhkDTqr90lPzX1QaVCDt77DgiqaFKELR/++kD/GDnVMM2at4E7K7UVcX3GdIfJt+MvqkF0RVEEd9Zgt6IUBDYdSudgB79l5z26w9zWcrO6qVDMB1sRI1+ztYjKz8eLOtT2VQ4FXQG27CA+oBMXICwcSPueRTRGjkNoFMGS7C2iLxvuArZ/VMW0UALDI7D4PvvANjfKNjmbxGk="
+        "createdAt": "2024-01-23T03:25:33.002Z",
+        "apiKeyId": "bhBpeJkCPf8xPNKpQMgIitKX9dFj+VDPiO8y/L0qv4M1w9f6InFW7PGa3aU84VhGGFWx/VSVvhlCg/GaH5BYH0YV3xMOjLImv2rus+strbJECjOWWgCqBAnthCx1bpEc8mvl7lLAZ2zJuhRPUatHEw6Sqmr6V/+V6nn7PhoVS7ceVdEzlAw2PwcT2Tt7poePob0fXeVu5ml3pU+RdvFtVQI="
       },
       "type": "api_key_pending_invalidation",
       "references": [],
       "managed": false,
       "coreMigrationVersion": "8.8.0",
-      "updated_at": "2024-01-17T22:46:44.927Z",
-      "created_at": "2024-01-17T22:46:44.927Z"
+      "updated_at": "2024-01-23T03:25:33.002Z",
+      "created_at": "2024-01-23T03:25:33.002Z"
     }
   }
 }

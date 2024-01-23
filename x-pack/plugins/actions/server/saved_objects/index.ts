@@ -100,11 +100,15 @@ export function setupSavedObjects(
     attributesToEncrypt: new Set(['apiKey']),
     attributesToIncludeInAAD: new Set([
       'actionId',
+      'actionExecutionId',
+      'isEphemeral',
       'consumer',
       'params',
       'executionId',
       'relatedSavedObjects',
-      // 'source',
+      'source',
+      'taskInfo',
+      'actionInfo',
     ]),
   });
 
