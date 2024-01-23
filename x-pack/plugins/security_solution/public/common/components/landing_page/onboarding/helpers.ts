@@ -41,16 +41,20 @@ export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone:
 export const getCardStepsLeft = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   Math.max((activeSteps?.length ?? 0) - (stepsDone.size ?? 0), 0);
 
-export const isStepActive = (step: Step, activeProducts: Set<ProductLine>) =>
-  !step.productLineRequired ||
-  step.productLineRequired?.some((condition) => activeProducts.has(condition));
+export const isStepActive = (
+  step: Step,
+  activeProducts: Set<ProductLine>,
+  onboardingSteps: StepId[]
+) =>
+  onboardingSteps.includes(step.id) &&
+  (!step.productLineRequired ||
+    step.productLineRequired?.some((condition) => activeProducts.has(condition)));
 
 export const getActiveSteps = (
   steps: Step[] | undefined,
   activeProducts: Set<ProductLine>,
   onboardingSteps: StepId[]
-) =>
-  steps?.filter((step) => onboardingSteps.includes(step.id) && isStepActive(step, activeProducts));
+) => steps?.filter((step) => isStepActive(step, activeProducts, onboardingSteps));
 
 const getfinishedActiveSteps = (
   finishedStepIds: StepId[] | undefined,

@@ -10,7 +10,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { TogglePanel } from './toggle_panel';
 
-import { useTogglePanel } from './hooks/use_toggle_panel';
+import { useSetupPanel } from './hooks/use_setup_panel';
 import { Progress } from './progress_bar';
 import { StepContextProvider } from './context/step_context';
 import { CONTENT_WIDTH } from './helpers';
@@ -47,7 +47,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       totalStepsLeft,
       expandedCardSteps,
     },
-  } = useTogglePanel({ productTypes, onboardingSteps, defaultExpandedStep });
+  } = useSetupPanel({ productTypes, onboardingSteps, defaultExpandedStep });
   const productTier = productTypes?.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;

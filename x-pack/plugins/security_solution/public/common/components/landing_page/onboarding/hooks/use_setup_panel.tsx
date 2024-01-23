@@ -65,7 +65,7 @@ const syncExpandedCardStepsFromStorageToURL = (
   }
 };
 
-export const useTogglePanel = ({
+export const useSetupPanel = ({
   defaultExpandedStep,
   productTypes,
   onboardingSteps,

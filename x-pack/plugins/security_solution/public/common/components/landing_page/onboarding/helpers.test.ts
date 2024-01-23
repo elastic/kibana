@@ -11,6 +11,7 @@ import {
   setupActiveSections,
   updateActiveSections,
   isStepActive,
+  isDefaultFinishedCardStep,
 } from './helpers';
 import type { ActiveSections, Card, CardId, Section, Step, StepId } from './types';
 
@@ -44,14 +45,19 @@ describe('getCardTimeInMinutes', () => {
   it('should calculate the total time in minutes for a card correctly', () => {
     const card = {
       steps: [
-        { id: 'step1', timeInMinutes: 30 },
-        { id: 'step2', timeInMinutes: 45 },
-        { id: 'step3', timeInMinutes: 15 },
+        { id: CreateProjectSteps.createFirstProject, timeInMinutes: 30 },
+        { id: OverviewSteps.getToKnowElasticSecurity, timeInMinutes: 45 },
+        { id: AddIntegrationsSteps.connectToDataSources, timeInMinutes: 15 },
       ],
     } as unknown as Card;
     const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
-    const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
+    const activeSteps = card.steps?.filter((step) =>
+      isStepActive(step, activeProducts, onboardingSteps)
+    );
+    const stepsDone = new Set([
+      CreateProjectSteps.createFirstProject,
+      AddIntegrationsSteps.connectToDataSources,
+    ]) as unknown as Set<StepId>;
 
     const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
 
@@ -62,7 +68,9 @@ describe('getCardTimeInMinutes', () => {
     const card = {} as Card;
 
     const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
+    const activeSteps = card.steps?.filter((step) =>
+      isStepActive(step, activeProducts, onboardingSteps)
+    );
     const stepsDone = new Set(['step1']) as unknown as Set<StepId>;
 
     const timeInMinutes = getCardTimeInMinutes(activeSteps, stepsDone);
@@ -73,10 +81,21 @@ describe('getCardTimeInMinutes', () => {
 
 describe('getCardStepsLeft', () => {
   it('should calculate the number of steps left for a card correctly', () => {
-    const card = { steps: ['step1', 'step2', 'step3'] } as unknown as Card;
+    const card = {
+      steps: [
+        { id: CreateProjectSteps.createFirstProject },
+        { id: OverviewSteps.getToKnowElasticSecurity },
+        { id: AddIntegrationsSteps.connectToDataSources },
+      ],
+    } as unknown as Card;
     const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
-    const stepsDone = new Set(['step1', 'step3']) as unknown as Set<StepId>;
+    const activeSteps = card.steps?.filter((step) =>
+      isStepActive(step, activeProducts, onboardingSteps)
+    );
+    const stepsDone = new Set([
+      CreateProjectSteps.createFirstProject,
+      AddIntegrationsSteps.connectToDataSources,
+    ]) as unknown as Set<StepId>;
 
     const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
 
@@ -86,7 +105,9 @@ describe('getCardStepsLeft', () => {
   it('should return the total number of steps if the card is null or has no steps', () => {
     const card = {} as Card;
     const activeProducts = new Set([ProductLine.security, ProductLine.cloud]);
-    const activeSteps = card.steps?.filter((step) => isStepActive(step, activeProducts));
+    const activeSteps = card.steps?.filter((step) =>
+      isStepActive(step, activeProducts, onboardingSteps)
+    );
     const stepsDone = new Set() as unknown as Set<StepId>;
 
     const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
@@ -103,7 +124,7 @@ describe('isStepActive', () => {
     } as Step;
     const activeProducts = new Set([ProductLine.cloud]);
 
-    const isActive = isStepActive(step, activeProducts);
+    const isActive = isStepActive(step, activeProducts, onboardingSteps);
 
     expect(isActive).toBe(true);
   });
@@ -114,7 +135,7 @@ describe('isStepActive', () => {
     } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isStepActive(step, activeProducts);
+    const isActive = isStepActive(step, activeProducts, onboardingSteps);
 
     expect(isActive).toBe(true);
   });
@@ -126,7 +147,24 @@ describe('isStepActive', () => {
     } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
-    const isActive = isStepActive(step, activeProducts);
+    const isActive = isStepActive(step, activeProducts, onboardingSteps);
+
+    expect(isActive).toBe(false);
+  });
+
+  it('should return false if it is not included in the onboardingSteps', () => {
+    const step = {
+      id: CreateProjectSteps.createFirstProject,
+    };
+    const activeProducts = new Set([ProductLine.cloud]);
+
+    const isActive = isStepActive(step, activeProducts, [
+      OverviewSteps.getToKnowElasticSecurity,
+      AddIntegrationsSteps.connectToDataSources,
+      ViewDashboardSteps.analyzeData,
+      EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      ViewAlertsSteps.viewAlerts,
+    ]);
 
     expect(isActive).toBe(false);
   });
@@ -345,5 +383,40 @@ describe('updateActiveSections', () => {
       totalStepsLeft: null,
       totalActiveSteps: null,
     });
+  });
+});
+
+describe('isDefaultFinishedCardStep', () => {
+  it('should return true if the card is a default finished card', () => {
+    const cardId = QuickStartSectionCardsId.createFirstProject;
+    const stepId = CreateProjectSteps.createFirstProject;
+
+    const isDefaultFinished = isDefaultFinishedCardStep(cardId, stepId, onboardingSteps);
+
+    expect(isDefaultFinished).toBe(true);
+  });
+
+  it('should return false if the card is not included in default finished steps', () => {
+    const cardId = QuickStartSectionCardsId.createFirstProject;
+    const stepId = OverviewSteps.getToKnowElasticSecurity;
+
+    const isDefaultFinished = isDefaultFinishedCardStep(cardId, stepId, onboardingSteps);
+
+    expect(isDefaultFinished).toBe(false);
+  });
+
+  it('should return false if the step is not included in the onboarding steps', () => {
+    const cardId = QuickStartSectionCardsId.createFirstProject;
+    const stepId = CreateProjectSteps.createFirstProject;
+
+    const isDefaultFinished = isDefaultFinishedCardStep(cardId, stepId, [
+      OverviewSteps.getToKnowElasticSecurity,
+      AddIntegrationsSteps.connectToDataSources,
+      ViewDashboardSteps.analyzeData,
+      EnablePrebuiltRulesSteps.enablePrebuiltRules,
+      ViewAlertsSteps.viewAlerts,
+    ]);
+
+    expect(isDefaultFinished).toBe(false);
   });
 });
