@@ -2875,6 +2875,276 @@
       },
       {
         "parentPluginId": "lens",
+        "id": "def-public.InlineEditLensEmbeddableContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "InlineEditLensEmbeddableContext",
+        "description": [],
+        "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.attributes",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "attributes",
+            "description": [],
+            "signature": [
+              "LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.lensEvent",
+            "type": "Object",
+            "tags": [],
+            "label": "lensEvent",
+            "description": [],
+            "signature": [
+              "LensChartLoadEvent"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.onUpdate",
+            "type": "Function",
+            "tags": [],
+            "label": "onUpdate",
+            "description": [],
+            "signature": [
+              "(newAttributes: LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>) => void"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.InlineEditLensEmbeddableContext.onUpdate.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newAttributes",
+                "description": [],
+                "signature": [
+                  "LensAttributes<\"lnsXY\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.XYState",
+                    "text": "XYState"
+                  },
+                  "> | LensAttributes<\"lnsPie\", ",
+                  "PieVisualizationState",
+                  "> | LensAttributes<\"lnsHeatmap\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.HeatmapVisualizationState",
+                    "text": "HeatmapVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsGauge\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.GaugeVisualizationState",
+                    "text": "GaugeVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsDatatable\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatatableVisualizationState",
+                    "text": "DatatableVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsLegacyMetric\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.LegacyMetricState",
+                    "text": "LegacyMetricState"
+                  },
+                  "> | LensAttributes<\"lnsMetric\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.MetricVisualizationState",
+                    "text": "MetricVisualizationState"
+                  },
+                  "> | LensAttributes<string, unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.onApply",
+            "type": "Function",
+            "tags": [],
+            "label": "onApply",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.onCancel",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancel",
+            "description": [],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.InlineEditLensEmbeddableContext.container",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "container",
+            "description": [],
+            "signature": [
+              "HTMLElement | null | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
         "id": "def-public.LastValueIndexPatternColumn",
         "type": "Interface",
         "tags": [],

@@ -1,7 +1,0 @@
-ASIN
-
-
-Inverse sine trigonometric function.
-ROW a=.9
-| EVAL asin=ASIN(a)
-Supported types:

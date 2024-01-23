@@ -33,7 +33,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
 import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { CreateApiKeyFlyout } from '../api_key/create_api_key_flyout';
@@ -43,7 +42,7 @@ import { EndpointIcon } from './endpoint_icon';
 
 export const EndpointsHeaderAction: React.FC = ({ children }) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const { cloud, navigateToUrl } = useValues(KibanaLogic);
+  const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
@@ -57,7 +56,7 @@ export const EndpointsHeaderAction: React.FC = ({ children }) => {
 
   const apiKeys = data?.api_keys || [];
   const cloudId = cloud?.cloudId;
-  const elasticsearchEndpoint = cloud?.elasticsearchUrl || ELASTICSEARCH_URL_PLACEHOLDER;
+  const elasticsearchEndpoint = esConfig.elasticsearch_host;
 
   const button = (
     <EuiButtonEmpty iconType={EndpointIcon} size="s" onClick={() => setPopoverOpen(!isPopoverOpen)}>

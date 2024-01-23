@@ -8,8 +8,10 @@
 
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
+import { EuiHorizontalRule } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { DataView } from '@kbn/data-plugin/common';
 import { dataViewMock, esHitsMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   AvailableFields$,
@@ -19,7 +21,7 @@ import {
   RecordRawType,
 } from '../../services/discover_data_state_container';
 import { createDiscoverServicesMock } from '../../../../__mocks__/services';
-import { FetchStatus } from '../../../types';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -31,16 +33,19 @@ import { DiscoverDocuments } from './discover_documents';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
+import { PanelsToggle } from '../../../../components/panels_toggle';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 const mountComponent = async ({
   hideChart = false,
   isPlainRecord = false,
+  isChartAvailable,
   viewMode = VIEW_MODE.DOCUMENT_LEVEL,
   storage,
 }: {
   hideChart?: boolean;
   isPlainRecord?: boolean;
+  isChartAvailable?: boolean;
   viewMode?: VIEW_MODE;
   storage?: Storage;
   savedSearch?: SavedSearch;
@@ -80,15 +85,19 @@ const mountComponent = async ({
     result: Number(esHitsMock.length),
   }) as DataTotalHits$;
 
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   const savedSearchData$ = {
     main$,
     documents$,
     totalHits$,
     availableFields$,
   };
-  const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.dataState.data$ = savedSearchData$;
+  const dataView = stateContainer.savedSearchState
+    .getState()
+    .searchSource.getField('index') as DataView;
   stateContainer.appState.update({
+    index: dataView?.id!,
     interval: 'auto',
     hideChart,
     columns: [],
@@ -96,12 +105,26 @@ const mountComponent = async ({
 
   const props: DiscoverMainContentProps = {
     isPlainRecord,
-    dataView: dataViewMock,
+    dataView,
     stateContainer,
     onFieldEdited: jest.fn(),
     columns: [],
     viewMode,
     onAddFilter: jest.fn(),
+    isChartAvailable,
+    panelsToggle: (
+      <PanelsToggle
+        stateContainer={stateContainer}
+        sidebarToggleState$={
+          new BehaviorSubject<SidebarToggleState>({
+            isCollapsed: true,
+            toggle: () => {},
+          })
+        }
+        isChartAvailable={undefined}
+        renderedFor="root"
+      />
+    ),
   };
 
   const component = mountWithIntl(
@@ -128,14 +151,35 @@ describe('Discover main content component', () => {
       expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
-    it('should not show DocumentViewModeToggle when isPlainRecord is true', async () => {
+    it('should include DocumentViewModeToggle when isPlainRecord is true', async () => {
       const component = await mountComponent({ isPlainRecord: true });
-      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeUndefined();
+      expect(component.find(DiscoverDocuments).prop('viewModeToggle')).toBeDefined();
     });
 
     it('should show DocumentViewModeToggle for Field Statistics', async () => {
       const component = await mountComponent({ viewMode: VIEW_MODE.AGGREGATED_LEVEL });
       expect(component.find(DocumentViewModeToggle).exists()).toBe(true);
+    });
+
+    it('should include PanelsToggle when chart is available', async () => {
+      const component = await mountComponent({ isChartAvailable: true });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(true);
+    });
+
+    it('should include PanelsToggle when chart is available and hidden', async () => {
+      const component = await mountComponent({ isChartAvailable: true, hideChart: true });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(true);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
+    });
+
+    it('should include PanelsToggle when chart is not available', async () => {
+      const component = await mountComponent({ isChartAvailable: false });
+      expect(component.find(PanelsToggle).prop('isChartAvailable')).toBe(false);
+      expect(component.find(PanelsToggle).prop('renderedFor')).toBe('tabs');
+      expect(component.find(EuiHorizontalRule).exists()).toBe(false);
     });
   });
 

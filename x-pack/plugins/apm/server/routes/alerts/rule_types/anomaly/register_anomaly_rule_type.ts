@@ -15,7 +15,7 @@ import {
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -28,10 +28,6 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
-import {
-  ApmMlDetectorType,
-  getApmMlDetectorIndex,
-} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -58,6 +54,10 @@ import {
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
+import {
+  getAnomalyDetectorIndex,
+  getAnomalyDetectorType,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -188,9 +188,11 @@ export function registerAnomalyRuleType({
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
-                  ...termQuery(
+                  ...termsQuery(
                     'detector_index',
-                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                    ...(ruleParams.anomalyDetectorTypes?.map((type) =>
+                      getAnomalyDetectorIndex(type)
+                    ) ?? [])
                   ),
                 ] as QueryDslQueryContainer[],
               },
@@ -202,6 +204,7 @@ export function registerAnomalyRuleType({
                     { field: 'partition_field_value' },
                     { field: 'by_field_value' },
                     { field: 'job_id' },
+                    { field: 'detector_index' },
                   ],
                   size: 1000,
                   order: { 'latest_score.record_score': 'desc' as const },
@@ -216,6 +219,7 @@ export function registerAnomalyRuleType({
                         { field: 'job_id' },
                         { field: 'timestamp' },
                         { field: 'bucket_span' },
+                        { field: 'detector_index' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -250,8 +254,12 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                detectorType: getAnomalyDetectorType(
+                  latest.detector_index as number
+                ),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
+                bucketKey: bucket.key,
               };
             })
             .filter((anomaly) =>
@@ -264,8 +272,10 @@ export function registerAnomalyRuleType({
             environment,
             transactionType,
             score,
+            detectorType,
             timestamp,
             bucketSpan,
+            bucketKey,
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
@@ -281,21 +291,15 @@ export function registerAnomalyRuleType({
 
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
-            measured: score,
+            anomalyScore: score,
             serviceName,
             severityLevel,
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
+            detectorType,
           });
 
-          const alertId = [
-            ApmRuleType.Anomaly,
-            serviceName,
-            environment,
-            transactionType,
-          ]
-            .filter((name) => name)
-            .join('_');
+          const alertId = bucketKey.join('_');
 
           const alert = services.alertWithLifecycle({
             id: alertId,

@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import type { EuiInMemoryTableProps } from '@elastic/eui';
 import { EuiInMemoryTable } from '@elastic/eui';
 
-type BasicTableType<T> = React.ComponentType<EuiInMemoryTableProps<T>>;
+type BasicTableType<T extends object> = React.ComponentType<EuiInMemoryTableProps<T>>;
 export const BasicTable: typeof EuiInMemoryTable & { displayName: string } = styled(
   EuiInMemoryTable as BasicTableType<any> // eslint-disable-line @typescript-eslint/no-explicit-any
 )`

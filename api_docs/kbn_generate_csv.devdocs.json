@@ -80,6 +80,21 @@
                 "id": "def-server.CsvGenerator.Unnamed.$3",
                 "type": "Object",
                 "tags": [],
+                "label": "taskInstanceFields",
+                "description": [],
+                "signature": [
+                  "TaskInstanceFields"
+                ],
+                "path": "packages/kbn-generate-csv/src/generate_csv.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/generate-csv",
+                "id": "def-server.CsvGenerator.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
                 "label": "clients",
                 "description": [],
                 "signature": [
@@ -92,7 +107,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-server.CsvGenerator.Unnamed.$4",
+                "id": "def-server.CsvGenerator.Unnamed.$5",
                 "type": "Object",
                 "tags": [],
                 "label": "dependencies",
@@ -107,7 +122,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-server.CsvGenerator.Unnamed.$5",
+                "id": "def-server.CsvGenerator.Unnamed.$6",
                 "type": "Object",
                 "tags": [],
                 "label": "cancellationToken",
@@ -128,7 +143,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-server.CsvGenerator.Unnamed.$6",
+                "id": "def-server.CsvGenerator.Unnamed.$7",
                 "type": "Object",
                 "tags": [],
                 "label": "logger",
@@ -149,7 +164,7 @@
               },
               {
                 "parentPluginId": "@kbn/generate-csv",
-                "id": "def-server.CsvGenerator.Unnamed.$7",
+                "id": "def-server.CsvGenerator.Unnamed.$8",
                 "type": "Object",
                 "tags": [],
                 "label": "stream",

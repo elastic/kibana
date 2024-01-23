@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule } from '@elastic/eui';
-
 import React from 'react';
+import { EuiHorizontalRule } from '@elastic/eui';
+import { AssetCriticalitySelector } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { RiskSummary } from '../../../entity_analytics/components/risk_summary_flyout/risk_summary';
 import type { RiskScoreState } from '../../../entity_analytics/api/hooks/use_risk_score';
 import type { RiskScoreEntity, HostItem } from '../../../../common/search_strategy';
@@ -25,9 +25,11 @@ interface HostPanelContentProps {
   scopeId: string;
   isDraggable: boolean;
   openDetailsPanel: (tab: EntityDetailsLeftPanelTab) => void;
+  hostName: string;
 }
 
 export const HostPanelContent = ({
+  hostName,
   observedHost,
   riskScoreState,
   contextID,
@@ -41,16 +43,15 @@ export const HostPanelContent = ({
     <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
-          {
-            <RiskSummary
-              riskScoreData={riskScoreState}
-              queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
-              openDetailsPanel={openDetailsPanel}
-            />
-          }
-          <EuiHorizontalRule margin="m" />
+          <RiskSummary
+            riskScoreData={riskScoreState}
+            queryId={HOST_PANEL_RISK_SCORE_QUERY_ID}
+            openDetailsPanel={openDetailsPanel}
+          />
+          <EuiHorizontalRule />
         </>
       )}
+      <AssetCriticalitySelector entity={{ name: hostName, type: 'host' }} />
       <ObservedEntity
         observedData={observedHost}
         contextID={contextID}

@@ -12,7 +12,6 @@ export * from './crud';
 export * from './update';
 export * from './actions';
 export * from './reassign';
-export * from './setup';
 export * from './update_agent_tags';
 export * from './action_status';
 export * from './request_diagnostics';

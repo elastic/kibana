@@ -32,7 +32,7 @@ import {
 import { IntegrationsPopover } from '../../../../detections/components/rules/related_integrations/integrations_popover';
 import { RuleStatusBadge } from '../../../../detections/components/rules/rule_execution_status';
 import { RuleSwitch } from '../../../../detections/components/rules/rule_switch';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
 import type { Rule } from '../../../rule_management/logic';

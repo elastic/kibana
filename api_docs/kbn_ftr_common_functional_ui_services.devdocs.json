@@ -20,6 +20,1903 @@
     "classes": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.TestSubjects",
+        "type": "Class",
+        "tags": [],
+        "label": "TestSubjects",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.TestSubjects",
+            "text": "TestSubjects"
+          },
+          " extends ",
+          "FtrService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.retry",
+            "type": "Object",
+            "tags": [],
+            "label": "retry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ftr-common-functional-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                "section": "def-common.RetryService",
+                "text": "RetryService"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.findService",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "findService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.AsyncInstance",
+                "text": "AsyncInstance"
+              },
+              "<",
+              "FindService",
+              "> & ",
+              "FindService"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.Config",
+                "text": "Config"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.FIND_TIME",
+            "type": "Any",
+            "tags": [],
+            "label": "FIND_TIME",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.TRY_TIME",
+            "type": "Any",
+            "tags": [],
+            "label": "TRY_TIME",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.WAIT_FOR_EXISTS_TIME",
+            "type": "Any",
+            "tags": [],
+            "label": "WAIT_FOR_EXISTS_TIME",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.exists",
+            "type": "Function",
+            "tags": [],
+            "label": "exists",
+            "description": [
+              "\nGet a promise that resolves with `true` when an element exists, if the element doesn't exist\nyet it will wait until the element does exist. If we wait until the timeout and the element\nstill doesn't exist the promise will resolve with `false`.\n\nThis method is intended to quickly answer the question \"does this testSubject exist\". Its\n2.5 second timeout responds quickly, making it a good candidate for putting inside\n`retry.waitFor()` loops.\n\nWhen `options.timeout` is not passed the `timeouts.waitForExists` config is used as\nthe timeout. The default value for that config is currently 2.5 seconds (in ms).\n\nIf the element is hidden it is not treated as \"existing\", unless `options.allowHidden`\nis set to `true`."
+            ],
+            "signature": [
+              "(selector: string, options?: ExistsOptions) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.exists.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.exists.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ExistsOptions"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.existOrFail",
+            "type": "Function",
+            "tags": [],
+            "label": "existOrFail",
+            "description": [
+              "\nGet a promise that resolves when an element exists, if the element doesn't exist\nbefore the timeout is reached the promise will reject with an error.\n\nThis method is intended to be used as success critieria when something is expected\nto exist. The default 2 minute timeout is not appropriate for all conditions, but\nhard-coding timeouts all over tests is also bad, so please use your best judgement.\n\nThe options are equal to the options accepted by the {@link #exists} method except\nthat `options.timeout` defaults to the `timeouts.try` config, or 2 minutes."
+            ],
+            "signature": [
+              "(selector: string, existsOptions?: ExistsOptions | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.existOrFail.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.existOrFail.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "existsOptions",
+                "description": [],
+                "signature": [
+                  "ExistsOptions | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.missingOrFail",
+            "type": "Function",
+            "tags": [],
+            "label": "missingOrFail",
+            "description": [
+              "\nGet a promise that resolves when an element no longer exists, if the element does exist\nit will wait until the element does not exist. If we wait until the timeout and the element\nstill exists the promise will reject.\n\nThis method is intended to quickly assert that an element does not exist. Its\n2.5 second timeout responds quickly.\n\nWhen `options.timeout` is not passed the `timeouts.waitForExists` config is used as\nthe timeout. The default value for that config is currently 2.5 seconds.\n\nIf the element is hidden but still in the DOM it is treated as \"existing\", unless `options.allowHidden`\nis set to `true`."
+            ],
+            "signature": [
+              "(selector: string, options?: ExistsOptions) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.missingOrFail.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.missingOrFail.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "ExistsOptions"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.stringExistsInCodeBlockOrFail",
+            "type": "Function",
+            "tags": [],
+            "label": "stringExistsInCodeBlockOrFail",
+            "description": [],
+            "signature": [
+              "(codeBlockSelector: string, stringToFind: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.stringExistsInCodeBlockOrFail.$1",
+                "type": "string",
+                "tags": [],
+                "label": "codeBlockSelector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.stringExistsInCodeBlockOrFail.$2",
+                "type": "string",
+                "tags": [],
+                "label": "stringToFind",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.append",
+            "type": "Function",
+            "tags": [],
+            "label": "append",
+            "description": [],
+            "signature": [
+              "(selector: string, text: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.append.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.append.$2",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.clickWhenNotDisabled",
+            "type": "Function",
+            "tags": [],
+            "label": "clickWhenNotDisabled",
+            "description": [
+              "\nClicks on the element identified by the testSubject selector. If the retries\nautomatically on \"stale element\" errors unlike clickWhenNotDisabledWithoutRetry.\n`opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds"
+            ],
+            "signature": [
+              "(selector: string, opts?: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.TimeoutOpt",
+                "text": "TimeoutOpt"
+              },
+              " | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.clickWhenNotDisabled.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.clickWhenNotDisabled.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TimeoutOpt",
+                    "text": "TimeoutOpt"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.clickWhenNotDisabledWithoutRetry",
+            "type": "Function",
+            "tags": [],
+            "label": "clickWhenNotDisabledWithoutRetry",
+            "description": [
+              "\nClicks on the element identified by the testSubject selector. Somewhat surprisingly,\nthis method allows `stale element` errors to propogate, which is why it was renamed\nfrom `clickWhenNotDisabled()` and that method was re-implemented to be more consistent\nwith the rest of the functions in this service.\n\n`opts.timeout` defaults to the 'timeouts.find' config, which defaults to 10 seconds"
+            ],
+            "signature": [
+              "(selector: string, opts?: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.TimeoutOpt",
+                "text": "TimeoutOpt"
+              },
+              " | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.clickWhenNotDisabledWithoutRetry.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.clickWhenNotDisabledWithoutRetry.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "opts",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TimeoutOpt",
+                    "text": "TimeoutOpt"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.click",
+            "type": "Function",
+            "tags": [],
+            "label": "click",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number, topOffset?: number | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.click.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.click.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.click.$3",
+                "type": "number",
+                "tags": [],
+                "label": "topOffset",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.pressEnter",
+            "type": "Function",
+            "tags": [],
+            "label": "pressEnter",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.pressEnter.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.pressEnter.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.doubleClick",
+            "type": "Function",
+            "tags": [],
+            "label": "doubleClick",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.doubleClick.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.doubleClick.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.descendantExists",
+            "type": "Function",
+            "tags": [],
+            "label": "descendantExists",
+            "description": [],
+            "signature": [
+              "(selector: string, parentElement: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ") => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.descendantExists.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.descendantExists.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parentElement",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.WebElementWrapper",
+                    "text": "WebElementWrapper"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.findDescendant",
+            "type": "Function",
+            "tags": [],
+            "label": "findDescendant",
+            "description": [],
+            "signature": [
+              "(selector: string, parentElement: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findDescendant.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findDescendant.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parentElement",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.WebElementWrapper",
+                    "text": "WebElementWrapper"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.findAllDescendant",
+            "type": "Function",
+            "tags": [],
+            "label": "findAllDescendant",
+            "description": [],
+            "signature": [
+              "(selector: string, parentElement: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              "[]>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findAllDescendant.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findAllDescendant.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "parentElement",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.WebElementWrapper",
+                    "text": "WebElementWrapper"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ">"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.find.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.find.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.findAll",
+            "type": "Function",
+            "tags": [],
+            "label": "findAll",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              "[]>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.findAll.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getAttributeAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAttributeAll",
+            "description": [],
+            "signature": [
+              "(selector: string, attribute: string) => Promise<string[]>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAttributeAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAttributeAll.$2",
+                "type": "string",
+                "tags": [],
+                "label": "attribute",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getAttribute",
+            "type": "Function",
+            "tags": [],
+            "label": "getAttribute",
+            "description": [],
+            "signature": [
+              "(selector: string, attribute: string, options?: number | { findTimeout?: number | undefined; tryTimeout?: number | undefined; } | undefined) => Promise<string>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAttribute.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAttribute.$2",
+                "type": "string",
+                "tags": [],
+                "label": "attribute",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getAttribute.$3",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "number | { findTimeout?: number | undefined; tryTimeout?: number | undefined; } | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.setValue",
+            "type": "Function",
+            "tags": [],
+            "label": "setValue",
+            "description": [],
+            "signature": [
+              "(selector: string, text: string, options?: SetValueOptions, topOffset?: number | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setValue.$2",
+                "type": "string",
+                "tags": [],
+                "label": "text",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setValue.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "SetValueOptions"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setValue.$4",
+                "type": "number",
+                "tags": [],
+                "label": "topOffset",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.selectValue",
+            "type": "Function",
+            "tags": [],
+            "label": "selectValue",
+            "description": [],
+            "signature": [
+              "(selector: string, value: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.selectValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.selectValue.$2",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "isEnabled",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isEnabled.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isDisplayed",
+            "type": "Function",
+            "tags": [],
+            "label": "isDisplayed",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number | undefined) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isDisplayed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isDisplayed.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isSelected",
+            "type": "Function",
+            "tags": [],
+            "label": "isSelected",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isSelected.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isSelectedAll",
+            "type": "Function",
+            "tags": [],
+            "label": "isSelectedAll",
+            "description": [],
+            "signature": [
+              "(selectorAll: string) => Promise<boolean[]>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isSelectedAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selectorAll",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getVisibleText",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleText",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<string>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getVisibleText.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getVisibleTextAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getVisibleTextAll",
+            "description": [],
+            "signature": [
+              "(selectorAll: string) => Promise<string[]>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getVisibleTextAll.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selectorAll",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.moveMouseTo",
+            "type": "Function",
+            "tags": [],
+            "label": "moveMouseTo",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.moveMouseTo.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.waitForDeleted",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForDeleted",
+            "description": [],
+            "signature": [
+              "(selectorOrElement: string | ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.WebElementWrapper",
+                "text": "WebElementWrapper"
+              },
+              ") => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForDeleted.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "selectorOrElement",
+                "description": [],
+                "signature": [
+                  "string | ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.WebElementWrapper",
+                    "text": "WebElementWrapper"
+                  }
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.waitForAttributeToChange",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForAttributeToChange",
+            "description": [],
+            "signature": [
+              "(selector: string, attribute: string, value: string) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAttributeToChange.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAttributeToChange.$2",
+                "type": "string",
+                "tags": [],
+                "label": "attribute",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForAttributeToChange.$3",
+                "type": "string",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.waitForHidden",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForHidden",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForHidden.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForHidden.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.waitForEnabled",
+            "type": "Function",
+            "tags": [],
+            "label": "waitForEnabled",
+            "description": [],
+            "signature": [
+              "(selector: string, timeout?: number) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForEnabled.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.waitForEnabled.$2",
+                "type": "number",
+                "tags": [],
+                "label": "timeout",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.getCssSelector",
+            "type": "Function",
+            "tags": [],
+            "label": "getCssSelector",
+            "description": [],
+            "signature": [
+              "(selector: string) => string"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.getCssSelector.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.scrollIntoView",
+            "type": "Function",
+            "tags": [],
+            "label": "scrollIntoView",
+            "description": [],
+            "signature": [
+              "(selector: string, offset?: number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined) => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.scrollIntoView.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.scrollIntoView.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "offset",
+                "description": [],
+                "signature": [
+                  "number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isChecked",
+            "type": "Function",
+            "tags": [],
+            "label": "isChecked",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isChecked.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.setCheckbox",
+            "type": "Function",
+            "tags": [],
+            "label": "setCheckbox",
+            "description": [],
+            "signature": [
+              "(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setCheckbox.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setCheckbox.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "\"check\" | \"uncheck\""
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.isEuiSwitchChecked",
+            "type": "Function",
+            "tags": [],
+            "label": "isEuiSwitchChecked",
+            "description": [],
+            "signature": [
+              "(selector: string) => Promise<boolean>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.isEuiSwitchChecked.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.TestSubjects.setEuiSwitch",
+            "type": "Function",
+            "tags": [],
+            "label": "setEuiSwitch",
+            "description": [],
+            "signature": [
+              "(selector: string, state: \"check\" | \"uncheck\") => Promise<void>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setEuiSwitch.$1",
+                "type": "string",
+                "tags": [],
+                "label": "selector",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.setEuiSwitch.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  "\"check\" | \"uncheck\""
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
         "id": "def-common.WebElementWrapper",
         "type": "Class",
         "tags": [],
@@ -9995,6 +11892,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+        "id": "def-common.Browser",
+        "type": "Type",
+        "tags": [],
+        "label": "Browser",
+        "description": [],
+        "signature": [
+          "BrowserService"
+        ],
+        "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ftr-common-functional-ui-services",
         "id": "def-common.FtrProviderContext",
         "type": "Type",
         "tags": [],
@@ -10054,7 +11966,23 @@
           },
           ") => Promise<",
           "FindService",
-          ">; }, {}, ProvidedTypeMap<{ retry: typeof ",
+          ">; testSubjects: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.TestSubjects",
+            "text": "TestSubjects"
+          },
+          "; browser: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -10100,7 +12028,23 @@
           },
           ") => Promise<",
           "FindService",
-          ">; }>, ProvidedTypeMap<{}>>"
+          ">; testSubjects: typeof ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.TestSubjects",
+            "text": "TestSubjects"
+          },
+          "; browser: (ctx: ",
+          {
+            "pluginId": "@kbn/ftr-common-functional-ui-services",
+            "scope": "common",
+            "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+            "section": "def-common.FtrProviderContext",
+            "text": "FtrProviderContext"
+          },
+          ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
         ],
         "path": "packages/kbn-ftr-common-functional-ui-services/services/ftr_provider_context.ts",
         "deprecated": false,
@@ -10533,7 +12477,23 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -10579,7 +12539,23 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }>, ProvidedTypeMap<{}>>"
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/retry_on_stale.ts",
                 "deprecated": false,
@@ -10683,7 +12659,23 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -10729,7 +12721,23 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }>, ProvidedTypeMap<{}>>"
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/remote/remote.ts",
                 "deprecated": false,
@@ -10823,7 +12831,23 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -10869,9 +12893,216 @@
                   },
                   ") => Promise<",
                   "FindService",
-                  ">; }>, ProvidedTypeMap<{}>>"
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
                 ],
                 "path": "packages/kbn-ftr-common-functional-ui-services/services/find.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.services.testSubjects",
+            "type": "Object",
+            "tags": [],
+            "label": "testSubjects",
+            "description": [],
+            "signature": [
+              "typeof ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.TestSubjects",
+                "text": "TestSubjects"
+              }
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+            "id": "def-common.services.browser",
+            "type": "Function",
+            "tags": [],
+            "label": "browser",
+            "description": [],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "@kbn/ftr-common-functional-ui-services",
+                "scope": "common",
+                "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                "section": "def-common.FtrProviderContext",
+                "text": "FtrProviderContext"
+              },
+              ") => Promise<BrowserService>"
+            ],
+            "path": "packages/kbn-ftr-common-functional-ui-services/services/all.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.services.browser.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/test",
+                    "scope": "common",
+                    "docId": "kibKbnTestPluginApi",
+                    "section": "def-common.GenericFtrProviderContext",
+                    "text": "GenericFtrProviderContext"
+                  },
+                  "<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }, {}, ProvidedTypeMap<{ retry: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalServicesPluginApi",
+                    "section": "def-common.RetryService",
+                    "text": "RetryService"
+                  },
+                  "; retryOnStale: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => { <T>(fn: () => Promise<T>): Promise<T>; wrap<Args extends any[], Result>(fn: (...args: Args) => Promise<Result>): (...args: Args) => Promise<Result>; }; __webdriver__: ({ getService }: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<{ driver: ",
+                  "WebDriver",
+                  "; browserType: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.Browsers",
+                    "text": "Browsers"
+                  },
+                  "; consoleLog$: ",
+                  "Observable",
+                  "<{ message: string; level: string; }>; }>; find: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<",
+                  "FindService",
+                  ">; testSubjects: typeof ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.TestSubjects",
+                    "text": "TestSubjects"
+                  },
+                  "; browser: (ctx: ",
+                  {
+                    "pluginId": "@kbn/ftr-common-functional-ui-services",
+                    "scope": "common",
+                    "docId": "kibKbnFtrCommonFunctionalUiServicesPluginApi",
+                    "section": "def-common.FtrProviderContext",
+                    "text": "FtrProviderContext"
+                  },
+                  ") => Promise<BrowserService>; }>, ProvidedTypeMap<{}>>"
+                ],
+                "path": "packages/kbn-ftr-common-functional-ui-services/services/browser.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

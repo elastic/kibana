@@ -22,6 +22,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./patch_rules_bulk'));
     loadTestFile(require.resolve('./patch_rules'));
     loadTestFile(require.resolve('./import_timelines'));
-    loadTestFile(require.resolve('./coverage_overview'));
   });
 };

@@ -7,9 +7,13 @@
  */
 
 import { createContext, useContext } from 'react';
-import { type ExpandableFlyoutContextValue } from './types';
+import { useFlyoutMemoryState } from './context/memory_state_provider';
+import { useFlyoutUrlState } from './context/url_state_provider';
+import { type ExpandableFlyoutApi } from './types';
 
-export type { ExpandableFlyoutContextValue };
+export type { ExpandableFlyoutApi as ExpandableFlyoutContextValue };
+
+type ExpandableFlyoutContextValue = 'memory' | 'url';
 
 export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContextValue | undefined>(
   undefined
@@ -18,7 +22,7 @@ export const ExpandableFlyoutContext = createContext<ExpandableFlyoutContextValu
 /**
  * Retrieve context's properties
  */
-export const useExpandableFlyoutContext = (): ExpandableFlyoutContextValue => {
+export const useExpandableFlyoutContext = (): ExpandableFlyoutApi => {
   const contextValue = useContext(ExpandableFlyoutContext);
 
   if (!contextValue) {
@@ -27,5 +31,8 @@ export const useExpandableFlyoutContext = (): ExpandableFlyoutContextValue => {
     );
   }
 
-  return contextValue;
+  const memoryState = useFlyoutMemoryState();
+  const urlState = useFlyoutUrlState();
+
+  return contextValue === 'memory' ? memoryState : urlState;
 };

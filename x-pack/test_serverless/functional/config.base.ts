@@ -107,6 +107,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           pathname: '/app/dev_tools',
           hash: '/searchprofiler',
         },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

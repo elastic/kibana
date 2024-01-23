@@ -102,6 +102,8 @@ describe('GaugeComponent', function () {
       paletteService: await paletteThemeService.getPalettes(),
       uiState,
       renderComplete: jest.fn(),
+      setChartSize: jest.fn(),
+      shouldUseVeil: false,
     };
   });
 

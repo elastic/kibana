@@ -11688,6 +11688,23 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggIpPrefix",
+        "type": "Function",
+        "tags": [],
+        "label": "aggIpPrefix",
+        "description": [],
+        "signature": [
+          "() => FunctionDefinition"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggIpRange",
         "type": "Function",
         "tags": [],
@@ -14066,6 +14083,39 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.getIpPrefixBucketAgg",
+        "type": "Function",
+        "tags": [],
+        "label": "getIpPrefixBucketAgg",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BucketAggType",
+            "text": "BucketAggType"
+          },
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IBucketAggConfig",
+            "text": "IBucketAggConfig"
+          },
+          ">"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.getIpRangeBucketAgg",
         "type": "Function",
         "tags": [],
@@ -15491,6 +15541,60 @@
               "[]"
             ],
             "path": "src/plugins/data/common/search/search_source/inject_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.ipPrefixToAst",
+        "type": "Function",
+        "tags": [],
+        "label": "ipPrefixToAst",
+        "description": [],
+        "signature": [
+          "(ipPrefix: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IpPrefix",
+            "text": "IpPrefix"
+          },
+          ") => ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionAstExpression",
+            "text": "ExpressionAstExpression"
+          }
+        ],
+        "path": "src/plugins/data/common/search/expressions/ip_prefix_to_ast.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixToAst.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "ipPrefix",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IpPrefix",
+                "text": "IpPrefix"
+              }
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix_to_ast.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -17333,6 +17437,51 @@
                 "text": "ExpressionFunctionDefinition"
               },
               "<\"aggSignificantTerms\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggFunctionsMapping.aggIpPrefix",
+            "type": "Object",
+            "tags": [],
+            "label": "aggIpPrefix",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggIpPrefix\", any, Arguments, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -21053,6 +21202,69 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.AggParamsIpPrefix",
+        "type": "Interface",
+        "tags": [],
+        "label": "AggParamsIpPrefix",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.AggParamsIpPrefix",
+            "text": "AggParamsIpPrefix"
+          },
+          " extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.BaseAggParams",
+            "text": "BaseAggParams"
+          }
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsIpPrefix.field",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsIpPrefix.ipPrefix",
+            "type": "Object",
+            "tags": [],
+            "label": "ipPrefix",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IpPrefix",
+                "text": "IpPrefix"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.AggParamsIpRange",
         "type": "Interface",
         "tags": [],
@@ -21169,6 +21381,26 @@
                 "docId": "kibDataSearchPluginApi",
                 "section": "def-common.AggParamsRange",
                 "text": "AggParamsRange"
+              }
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.AggParamsMapping.BUCKET_TYPES.IP_PREFIX",
+            "type": "Object",
+            "tags": [],
+            "label": "[BUCKET_TYPES.IP_PREFIX]",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggParamsIpPrefix",
+                "text": "AggParamsIpPrefix"
               }
             ],
             "path": "src/plugins/data/common/search/aggs/types.ts",
@@ -27549,6 +27781,48 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.IpPrefix",
+        "type": "Interface",
+        "tags": [],
+        "label": "IpPrefix",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IpPrefix.prefixLength",
+            "type": "number",
+            "tags": [],
+            "label": "prefixLength",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.IpPrefix.isIpv6",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isIpv6",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.IpRange",
         "type": "Interface",
         "tags": [],
@@ -30691,6 +30965,21 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.aggIpPrefixFnName",
+        "type": "string",
+        "tags": [],
+        "label": "aggIpPrefixFnName",
+        "description": [],
+        "signature": [
+          "\"aggIpPrefix\""
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/ip_prefix_fn.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.aggIpRangeFnName",
         "type": "string",
         "tags": [],
@@ -32101,6 +32390,60 @@
       },
       {
         "parentPluginId": "data",
+        "id": "def-common.ExpressionFunctionIpPrefix",
+        "type": "Type",
+        "tags": [],
+        "label": "ExpressionFunctionIpPrefix",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExpressionFunctionDefinition",
+            "text": "ExpressionFunctionDefinition"
+          },
+          "<\"ipPrefix\", null, ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IpPrefix",
+            "text": "IpPrefix"
+          },
+          ", ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IpPrefixOutput",
+            "text": "IpPrefixOutput"
+          },
+          ", ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.ExecutionContext",
+            "text": "ExecutionContext"
+          },
+          "<",
+          {
+            "pluginId": "inspector",
+            "scope": "common",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-common.Adapters",
+            "text": "Adapters"
+          },
+          ">>"
+        ],
+        "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
         "id": "def-common.ExpressionFunctionIpRange",
         "type": "Type",
         "tags": [],
@@ -33211,6 +33554,43 @@
           "IResponseAggConfig"
         ],
         "path": "src/plugins/data/common/search/aggs/metrics/percentile_ranks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.IpPrefixKey",
+        "type": "Type",
+        "tags": [],
+        "label": "IpPrefixKey",
+        "description": [],
+        "signature": [
+          "IpPrefixAggKey"
+        ],
+        "path": "src/plugins/data/common/search/aggs/buckets/lib/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.IpPrefixOutput",
+        "type": "Type",
+        "tags": [],
+        "label": "IpPrefixOutput",
+        "description": [],
+        "signature": [
+          "{ type: \"ip_prefix\"; } & ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IpPrefix",
+            "text": "IpPrefix"
+          }
+        ],
+        "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -36499,6 +36879,223 @@
                   "GeoPointArguments"
                 ],
                 "path": "src/plugins/data/common/search/expressions/geo_point.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "data",
+        "id": "def-common.ipPrefixFunction",
+        "type": "Object",
+        "tags": [],
+        "label": "ipPrefixFunction",
+        "description": [],
+        "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "\"ipPrefix\""
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"ip_prefix\""
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.inputTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "inputTypes",
+            "description": [],
+            "signature": [
+              "\"null\"[]"
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.help",
+            "type": "string",
+            "tags": [],
+            "label": "help",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.args",
+            "type": "Object",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.ipPrefixFunction.args.prefixLength",
+                "type": "Object",
+                "tags": [],
+                "label": "prefixLength",
+                "description": [],
+                "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.ipPrefixFunction.args.prefixLength.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"number\"[]"
+                    ],
+                    "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.ipPrefixFunction.args.prefixLength.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.ipPrefixFunction.args.isIpv6",
+                "type": "Object",
+                "tags": [],
+                "label": "isIpv6",
+                "description": [],
+                "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.ipPrefixFunction.args.isIpv6.types",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "types",
+                    "description": [],
+                    "signature": [
+                      "\"boolean\"[]"
+                    ],
+                    "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.ipPrefixFunction.args.isIpv6.help",
+                    "type": "string",
+                    "tags": [],
+                    "label": "help",
+                    "description": [],
+                    "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.ipPrefixFunction.fn",
+            "type": "Function",
+            "tags": [],
+            "label": "fn",
+            "description": [],
+            "signature": [
+              "(input: null, { prefixLength, isIpv6 }: ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IpPrefix",
+                "text": "IpPrefix"
+              },
+              ") => { type: \"ip_prefix\"; prefixLength: number | undefined; isIpv6: boolean | undefined; }"
+            ],
+            "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.ipPrefixFunction.fn.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "null"
+                ],
+                "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "data",
+                "id": "def-common.ipPrefixFunction.fn.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "{ prefixLength, isIpv6 }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "data",
+                    "scope": "common",
+                    "docId": "kibDataSearchPluginApi",
+                    "section": "def-common.IpPrefix",
+                    "text": "IpPrefix"
+                  }
+                ],
+                "path": "src/plugins/data/common/search/expressions/ip_prefix.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true

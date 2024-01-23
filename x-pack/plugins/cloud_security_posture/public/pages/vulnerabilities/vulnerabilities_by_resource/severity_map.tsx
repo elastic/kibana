@@ -88,6 +88,7 @@ export const SeverityMap = ({ severityMap, total }: Props) => {
       `}
       anchorClassName={css`
         height: ${euiTheme.size.xl};
+        flex-grow: 1;
         display: flex;
         align-items: center;
       `}
