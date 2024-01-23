@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
@@ -50,19 +50,26 @@ export const DiscoverHistogramLayout = ({
     [panelsToggle]
   );
 
+  let table: Datatable | undefined = useMemo(() => {
+    if (
+      isPlainRecord &&
+      datatable &&
+      datatable &&
+      ['partial', 'complete'].includes(datatable.fetchStatus)
+    ) {
+      table = {
+        type: 'datatable' as 'datatable',
+        rows: datatable.result!.map((r) => r.raw),
+        columns: datatable.textBasedQueryColumns || [],
+      };
+      return table;
+    }
+  }, [datatable, isPlainRecord]);
+
   // Initialized when the first search has been requested or
   // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
     return null;
-  }
-
-  let table: Datatable | undefined;
-  if (datatable && ['partial', 'complete'].includes(datatable.fetchStatus)) {
-    table = {
-      type: 'datatable' as 'datatable',
-      rows: datatable.result!.map((r) => r.raw),
-      columns: datatable.textBasedQueryColumns || [],
-    };
   }
 
   return (

@@ -288,7 +288,6 @@ export function Chart({
 
     if (layers) {
       for (const key of Object.keys(layers)) {
-        // Modify the value as needed, e.g., appending ' modified' to each value
         const newLayer = { ...layers[key] };
         delete newLayer.table;
         newState.state.datasourceStates.textBased!.layers[key] = newLayer;
