@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 
-if [ "$KIBANA_LATEST" = "1" ]; then
+if [ "$KIBANA_CURRENT" = "1" ]; then
     docker pull docker.elastic.co/kibana-ci/kibana-serverless:git-${BUILDKITE_COMMIT:0:12}
     build_date=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:git-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.build-date"')
     vcs_ref=$(docker inspect docker.elastic.co/kibana-ci/kibana-serverless:git-${BUILDKITE_COMMIT:0:12} | jq -r '.[0].Config.Labels."org.label-schema.vcs-ref"')

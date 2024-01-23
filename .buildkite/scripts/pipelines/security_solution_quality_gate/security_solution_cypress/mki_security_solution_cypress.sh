@@ -30,7 +30,7 @@ fi
 cd x-pack/test/security_solution_cypress
 set +e
 
-if [ -z "${KIBANA_LATEST+x}" ] || [ "$KIBANA_LATEST" = "0" ]; then
+if [ -z "${KIBANA_CURRENT+x}" ] || [ "$KIBANA_CURRENT" = "0" ]; then
     KIBANA_OVERRIDE_FLAG=0
 else
     KIBANA_OVERRIDE_FLAG=1

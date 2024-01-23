@@ -18,7 +18,7 @@ QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
-if [ -z "${KIBANA_LATEST+x}" ] || [ "$KIBANA_LATEST" = "0" ]; then
+if [ -z "${KIBANA_CURRENT+x}" ] || [ "$KIBANA_CURRENT" = "0" ]; then
   ENVIRONMENT_DETAILS=$(curl -v --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
     --header "Authorization: ApiKey $QA_API_KEY" \
     --header 'Content-Type: application/json' \
