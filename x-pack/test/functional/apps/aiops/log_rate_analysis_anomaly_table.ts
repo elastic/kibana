@@ -14,18 +14,23 @@ import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { LogRateAnalysisDataGenerator } from '../../services/aiops/log_rate_analysis_data_generator';
 
-function getJobWithDataFeed() {
+function getJobWithDataFeed(detectorFunction: string, detectorField?: string) {
+  const postFix = `${detectorFunction}${detectorField ? `_${detectorField}` : ''}`;
+  const jobId = `fq_single_1_smv_lra_${postFix}`;
   // @ts-expect-error not full interface
   const jobConfig: Job = {
-    job_id: `fq_single_1_smv_lra`,
-    description: 'count() on farequote dataset with 15m bucket span',
+    job_id: jobId,
+    description: `${detectorFunction}(${
+      detectorField ? detectorField : ''
+    }) on farequote dataset with 15m bucket span`,
     groups: ['farequote', 'automated', 'single-metric'],
     analysis_config: {
       bucket_span: '15m',
       influencers: [],
       detectors: [
         {
-          function: 'count',
+          function: detectorFunction,
+          ...(detectorField ? { field_name: detectorField } : {}),
         },
       ],
     },
@@ -36,9 +41,9 @@ function getJobWithDataFeed() {
 
   // @ts-expect-error not full interface
   const datafeedConfig: Datafeed = {
-    datafeed_id: 'datafeed-fq_single_1_smv_lra',
+    datafeed_id: `datafeed-fq_single_1_smv_lra_${postFix}`,
     indices: ['ft_farequote'],
-    job_id: 'fq_single_1_smv_lra',
+    job_id: jobId,
     query: { bool: { must: [{ match_all: {} }] } },
   };
 
@@ -47,10 +52,11 @@ function getJobWithDataFeed() {
 
 const testData = [
   {
-    ...getJobWithDataFeed(),
+    ...getJobWithDataFeed('count'),
     analysisType: 'spike',
     dataGenerator: 'farequote_with_spike',
     expected: {
+      anomalyTableLogRateAnalysisButtonAvailable: true,
       analysisResults: [
         {
           fieldName: 'airline',
@@ -60,6 +66,14 @@ const testData = [
           pValue: '8.96e-49',
         },
       ],
+    },
+  },
+  {
+    ...getJobWithDataFeed('mean', 'responsetime'),
+    analysisType: 'spike',
+    dataGenerator: 'farequote_with_spike',
+    expected: {
+      anomalyTableLogRateAnalysisButtonAvailable: false,
     },
   },
 ];
@@ -109,32 +123,42 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.anomaliesTable.assertTableNotEmpty();
         });
 
-        it('should click the log rate analysis action', async () => {
-          await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
-          await ml.anomaliesTable.scrollRowIntoView(0);
-          await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
-          await ml.anomaliesTable.assertAnomalyActionLogRateAnalaysisButtonExists(0);
-          await ml.anomaliesTable.ensureAnomalyActionLogRateAnalysisButtonClicked(0);
-        });
+        if (expected.anomalyTableLogRateAnalysisButtonAvailable) {
+          it('should click the log rate analysis action', async () => {
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+            await ml.anomaliesTable.scrollRowIntoView(0);
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+            await ml.anomaliesTable.assertAnomalyActionLogRateAnalysisButtonExists(0);
+            await ml.anomaliesTable.ensureAnomalyActionLogRateAnalysisButtonClicked(0);
+          });
 
-        it('should complete the analysis', async () => {
-          await aiops.logRateAnalysisPage.assertAnalysisComplete(
-            analysisType as LogRateAnalysisType,
-            dataGenerator as LogRateAnalysisDataGenerator
-          );
-        });
+          it('should complete the analysis', async () => {
+            await aiops.logRateAnalysisPage.assertAnalysisComplete(
+              analysisType as LogRateAnalysisType,
+              dataGenerator as LogRateAnalysisDataGenerator
+            );
+          });
 
-        it('should show analysis results', async () => {
-          await aiops.logRateAnalysisResultsTable.assertLogRateAnalysisResultsTableExists();
-          const actualAnalysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
+          it('should show analysis results', async () => {
+            await aiops.logRateAnalysisResultsTable.assertLogRateAnalysisResultsTableExists();
+            const actualAnalysisTable =
+              await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
-          expect(actualAnalysisTable).to.be.eql(
-            expected.analysisResults,
-            `Expected analysis table to be ${JSON.stringify(
-              expected.analysisResults
-            )}, got ${JSON.stringify(actualAnalysisTable)}`
-          );
-        });
+            expect(actualAnalysisTable).to.be.eql(
+              expected.analysisResults,
+              `Expected analysis table to be ${JSON.stringify(
+                expected.analysisResults
+              )}, got ${JSON.stringify(actualAnalysisTable)}`
+            );
+          });
+        } else {
+          it('should not show the log rate analysis action', async () => {
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+            await ml.anomaliesTable.scrollRowIntoView(0);
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+            await ml.anomaliesTable.assertAnomalyActionLogRateAalysisButtonNotExists(0);
+          });
+        }
       });
     });
   });
