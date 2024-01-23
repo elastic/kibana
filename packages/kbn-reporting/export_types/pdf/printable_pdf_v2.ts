@@ -63,6 +63,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       ...jobParams,
       locatorParams,
       isDeprecated: false,
+      browserTimezone: jobParams.browserTimezone,
       forceNow: new Date().toISOString(),
     };
   };

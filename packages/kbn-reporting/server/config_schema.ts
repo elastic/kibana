@@ -7,7 +7,6 @@
  */
 
 import { ByteSizeValue, offeringBasedSchema, schema } from '@kbn/config-schema';
-import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 import moment from 'moment';
