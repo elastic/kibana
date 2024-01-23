@@ -17,7 +17,11 @@ export function plugin(initializerContext: PluginInitializerContext) {
 
 /** @public static code */
 export { TypesService } from './vis_types/types_service';
-export { apiHasVisualizeConfig, VISUALIZE_EMBEDDABLE_TYPE, VIS_EVENT_TO_TRIGGER } from './embeddable';
+export {
+  apiHasVisualizeConfig,
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VIS_EVENT_TO_TRIGGER,
+} from './embeddable';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 

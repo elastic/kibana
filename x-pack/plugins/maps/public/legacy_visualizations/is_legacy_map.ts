@@ -18,8 +18,7 @@ export function isLegacyMap(embeddable: Embeddable) {
   );
 }
 
-type LegacyMapApi = HasType &
-  Partial<HasVisualizeConfig>;
+type LegacyMapApi = HasType & Partial<HasVisualizeConfig>;
 
 export function isLegacyMapApi(api: LegacyMapApi) {
   if (api.type !== 'visualization' || !apiHasVisualizeConfig(api)) {
