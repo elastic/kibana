@@ -9,7 +9,7 @@ import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
 import { Filter } from '@kbn/es-query';
 import React from 'react';
 import { css } from '@emotion/react';
-import { CSP_GROUPING, CSP_GROUPING_LOADING } from '../test_subjects';
+import { CSP_GROUPING } from '../test_subjects';
 
 interface CloudSecurityGroupingProps {
   data: ParsedGroupingAggregation<any>;
@@ -22,36 +22,8 @@ interface CloudSecurityGroupingProps {
   onChangeGroupsPage: (index: number) => void;
   selectedGroup: string;
   isGroupLoading?: boolean;
+  groupingLevel?: number;
 }
-
-/**
- * This component is used to render the loading state of the CloudSecurityGrouping component
- * It's used to avoid the flickering of the table when the data is loading
- */
-const CloudSecurityGroupingLoading = ({
-  grouping,
-  pageSize,
-}: Pick<CloudSecurityGroupingProps, 'grouping' | 'pageSize'>) => {
-  return (
-    <div data-test-subj={CSP_GROUPING_LOADING}>
-      {grouping.getGrouping({
-        activePage: 0,
-        data: {
-          groupsCount: { value: 1 },
-          unitsCount: { value: 1 },
-        },
-        groupingLevel: 0,
-        inspectButton: undefined,
-        isLoading: true,
-        itemsPerPage: pageSize,
-        renderChildComponent: () => <></>,
-        onGroupClose: () => {},
-        selectedGroup: '',
-        takeActionItems: () => [],
-      })}
-    </div>
-  );
-};
 
 export const CloudSecurityGrouping = ({
   data,
@@ -63,11 +35,8 @@ export const CloudSecurityGrouping = ({
   onChangeGroupsItemsPerPage,
   onChangeGroupsPage,
   selectedGroup,
-  isGroupLoading,
+  groupingLevel = 0,
 }: CloudSecurityGroupingProps) => {
-  if (isGroupLoading) {
-    return <CloudSecurityGroupingLoading grouping={grouping} pageSize={pageSize} />;
-  }
   return (
     <div
       data-test-subj={CSP_GROUPING}
@@ -84,7 +53,8 @@ export const CloudSecurityGrouping = ({
       {grouping.getGrouping({
         activePage: activePageIndex,
         data,
-        groupingLevel: 0,
+        groupingLevel,
+        selectedGroup,
         inspectButton: undefined,
         isLoading: isFetching,
         itemsPerPage: pageSize,
@@ -92,7 +62,6 @@ export const CloudSecurityGrouping = ({
         onChangeGroupsPage,
         renderChildComponent,
         onGroupClose: () => {},
-        selectedGroup,
         takeActionItems: () => [],
       })}
     </div>

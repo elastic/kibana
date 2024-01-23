@@ -9,8 +9,9 @@ import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import React from 'react';
-import { FindingsBaseProps } from '../../../common/types';
+import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
+
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -21,9 +22,11 @@ import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
+import { UseGrouping } from "@kbn/securitysolution-grouping/src";
 
-type LatestFindingsTableProps = FindingsBaseProps & {
+interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
+  grouping?: UseGrouping<any>;
   height?: number;
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
@@ -84,14 +87,16 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 });
 
 export const LatestFindingsTable = ({
-  dataView,
   groupSelectorComponent,
+  grouping,
   height,
   showDistributionBar = true,
   nonPersistedFilters,
-  dataViewRefetch,
-  dataViewIsRefetching,
 }: LatestFindingsTableProps) => {
+  const dataViewQuery = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
+  const dataView = dataViewQuery.data!;
+  const dataViewRefetch = dataViewQuery.refetch;
+  const dataViewIsRefetching = dataViewQuery.isRefetching;
   const {
     cloudPostureDataTable,
     rows,
