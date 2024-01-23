@@ -162,7 +162,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables SentinelOne manual host manipulation actions
    */
-  sentinelOneManualHostActionsEnabled: false,
+  sentinelOneManualHostActionsEnabled: true,
 
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
