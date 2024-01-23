@@ -46,6 +46,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
 
   const tableProps: EuiInMemoryTableProps<ComponentTemplateListItem> = {
+    tableLayout: 'auto',
     itemId: 'name',
     isSelectable: true,
     'data-test-subj': 'componentTemplatesTable',
@@ -154,7 +155,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
           defaultMessage: 'Name',
         }),
         sortable: true,
-        width: '20%',
+        width: '45%',
         render: (name: string, item: ComponentTemplateListItem) => (
           <>
             <EuiLink
