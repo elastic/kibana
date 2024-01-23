@@ -694,7 +694,9 @@ export class ManifestManager {
     await policyUpdateBatchProcessor.complete();
 
     this.logger.info(
-      `Policies updated: [${updatedPolicies.length}]. Policies un-changed: [${unChangedPolicies.length}]`
+      `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies (updated: [${
+        updatedPolicies.length
+      }], un-changed: [${unChangedPolicies.length}]`
     );
 
     if (updatedPolicies.length) {

@@ -182,7 +182,7 @@ export class ManifestTask {
       const diff = newManifest.diff(oldManifest);
 
       this.logger.debug(
-        `New -vs- old manifest diff counts:\n${Object.entries(diff).map(
+        `New -vs- old manifest diff counts: ${Object.entries(diff).map(
           ([diffType, diffItems]) => `${diffType}: ${diffItems.length}`
         )}`
       );
