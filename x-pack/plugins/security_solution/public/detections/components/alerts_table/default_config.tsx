@@ -192,7 +192,7 @@ export const getAlertsDefaultModel = (license?: LicenseService): SubsetDataTable
 
 export const getAlertsPreviewDefaultModel = (license?: LicenseService): SubsetDataTableModel => ({
   ...getAlertsDefaultModel(license),
-  columns: getColumns(license),
+  columns: getRulePreviewColumns(license),
   defaultColumns: getRulePreviewColumns(license),
   sort: [
     {

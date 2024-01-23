@@ -20,7 +20,6 @@ import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_me
 import { LensEmbeddable } from './lens_embeddable';
 import { useKibana } from '../../lib/kibana';
 import { useActions } from './use_actions';
-import { ACTION_CUSTOMIZE_PANEL } from '@kbn/embeddable-plugin/public';
 
 const mockActions = [
   { id: 'inspect' },
@@ -132,7 +131,7 @@ describe('LensEmbeddable', () => {
 
   it('should not render Panel settings action', () => {
     expect(
-      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes(ACTION_CUSTOMIZE_PANEL)
+      mockEmbeddableComponent.mock.calls[0][0].disabledActions.includes('ACTION_CUSTOMIZE_PANEL')
     ).toBeTruthy();
   });
 });
