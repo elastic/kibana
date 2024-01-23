@@ -9,7 +9,7 @@
     },
     "schedule": 10,
     "locations": [
-      "localhost"
+      "dev"
     ],
     "params": {},
     "playwrightOptions": {

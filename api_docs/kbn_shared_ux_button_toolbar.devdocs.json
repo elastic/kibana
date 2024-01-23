@@ -469,7 +469,7 @@
               "Button size"
             ],
             "signature": [
-              "\"m\" | \"compressed\" | \"s\" | undefined"
+              "\"m\" | \"s\" | \"compressed\" | undefined"
             ],
             "path": "packages/shared-ux/button_toolbar/src/buttons/icon_button_group/icon_button_group.tsx",
             "deprecated": false,

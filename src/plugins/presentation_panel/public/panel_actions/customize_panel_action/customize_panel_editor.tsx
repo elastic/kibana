@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { apiPublishesLocalUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiPublishesLocalUnifiedSearch, getInheritedViewMode } from '@kbn/presentation-publishing';
 
 import { core } from '../../kibana_services';
 import { CustomizePanelActionApi } from './customize_panel_action';
@@ -54,7 +54,7 @@ export const CustomizePanelEditor = ({
    * eventually the panel editor could be made to use state from the API instead (which will allow us to use a push flyout)
    * For now, we copy the state here with `useState` initializing it to the latest value.
    */
-  const editMode = api.viewMode.value === 'edit';
+  const editMode = getInheritedViewMode(api) === 'edit';
   const [hideTitle, setHideTitle] = useState(api.hidePanelTitle?.value);
   const [panelDescription, setPanelDescription] = useState(
     api.panelDescription?.value ?? api.defaultPanelDescription?.value
