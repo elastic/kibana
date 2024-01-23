@@ -20,7 +20,7 @@ export type PluginContainer = Omit<interfaces.Container, 'parent'>;
 
 export type ContainerModule = interfaces.ContainerModule;
 
-export type CreateModuleFn = (options: {
+export interface CreateModuleOptions {
   bind: interfaces.Bind;
   unbind: interfaces.Unbind;
   isBound: interfaces.IsBound;
@@ -28,4 +28,15 @@ export type CreateModuleFn = (options: {
   unbindAsync: interfaces.UnbindAsync;
   onActivation: interfaces.Container['onActivation'];
   onDeactivation: interfaces.Container['onDeactivation'];
-}) => ContainerModule;
+}
+
+export type CreateModuleFn = (callback: CreateModuleCallback) => ContainerModule;
+
+export type CreateModuleCallback = (options: CreateModuleOptions) => void;
+
+/**
+ * A readonly container, as exposed to plugin though the start contract of Core's injection service
+ */
+export interface ReadonlyContainer {
+  get<T>(serviceIdentifier: ServiceIdentifier<T>): T;
+}

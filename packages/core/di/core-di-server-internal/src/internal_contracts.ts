@@ -7,15 +7,11 @@
  */
 
 import type { PluginOpaqueId, PluginManifest } from '@kbn/core-base-common';
-import type { ContainerModule, PluginContainer,  } from '@kbn/core-di-common';
-import type {
-  CoreDiServiceSetup,
-  CoreDiServiceStart,
-  CoreDiSetupModuleCallback,
-} from '@kbn/core-di-server';
+import type { ContainerModule, PluginContainer, ReadonlyContainer } from '@kbn/core-di-common';
+import type { CoreDiSetupModuleCallback } from '@kbn/core-di-server';
 
 /** @internal */
-export type InternalCoreDiServiceSetup = Omit<CoreDiServiceSetup, 'setupModule'> & {
+export type InternalCoreDiServiceSetup = {
   // public interfaces to be bridged to the public contract
 
   configurePluginModule(pluginId: PluginOpaqueId, callback: CoreDiSetupModuleCallback): void;
@@ -36,4 +32,6 @@ export type InternalCoreDiServiceSetup = Omit<CoreDiServiceSetup, 'setupModule'>
 };
 
 /** @internal */
-export type InternalCoreDiServiceStart = CoreDiServiceStart;
+export interface InternalCoreDiServiceStart {
+  getPluginContainer(pluginId: PluginOpaqueId): ReadonlyContainer;
+}

@@ -374,5 +374,8 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       authc: deps.security.authc,
     },
     userProfile: deps.userProfile,
+    injection: {
+      container: deps.injection.getPluginContainer(plugin.opaqueId),
+    },
   };
 }

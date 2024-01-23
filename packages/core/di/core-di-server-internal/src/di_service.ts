@@ -8,7 +8,7 @@
 
 import { Container } from 'inversify';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
-import type { ContainerModule } from '@kbn/core-di-common';
+import type { ContainerModule, ReadonlyContainer } from '@kbn/core-di-common';
 import {
   pluginOpaqueIdServiceId,
   pluginNameServiceId,
@@ -16,22 +16,30 @@ import {
 } from '@kbn/core-di-common-internal';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './internal_contracts';
+import { createModule } from './utils';
 
 /** @internal */
 export class CoreInjectionService {
   private rootContainer: Container;
   private pluginContainers: Map<PluginOpaqueId, Container> = new Map();
   private internalPluginModules: ContainerModule[] = [];
-  private blockInternalRegistration: false; // TODO: use
+  // private blockInternalRegistration: false; // TODO: use
 
-  constructor(private readonly coreContext: CoreContext) {
+  constructor(coreContext: CoreContext) {
     this.rootContainer = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
   }
 
   public setup(): InternalCoreDiServiceSetup {
     return {
       configurePluginModule: (pluginId, callback) => {
-        // TODO
+        const pluginContainer = this.pluginContainers.get(pluginId)!;
+        const modules = callback(pluginContainer, { createModule });
+        if (modules.global) {
+          // TODO
+        }
+        if (modules.request) {
+          // TODO
+        }
       },
 
       createPluginContainer: (pluginId, pluginManifest) => {
@@ -60,6 +68,17 @@ export class CoreInjectionService {
   }
 
   public start(): InternalCoreDiServiceStart {
-    return {};
+    return {
+      getPluginContainer: (pluginId: PluginOpaqueId) => {
+        const pluginContainer = this.pluginContainers.get(pluginId)!;
+        return toReadonly(pluginContainer);
+      },
+    };
   }
 }
+
+const toReadonly = (container: Container): ReadonlyContainer => {
+  return {
+    get: (id) => container.get(id),
+  };
+};
