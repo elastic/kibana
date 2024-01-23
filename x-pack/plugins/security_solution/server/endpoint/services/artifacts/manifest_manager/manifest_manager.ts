@@ -693,13 +693,13 @@ export class ManifestManager {
 
     await policyUpdateBatchProcessor.complete();
 
-    this.logger.info(`Policies updated: [${updatedPolicies.length}]`);
+    this.logger.info(
+      `Policies updated: [${updatedPolicies.length}]. Policies un-changed: [${unChangedPolicies.length}]`
+    );
 
     if (updatedPolicies.length) {
       this.logger.debug(`Updated Policies:\n  ${updatedPolicies.join('\n  ')}`);
     }
-
-    this.logger.info(`Policies un-changed: [${unChangedPolicies.length}]`);
 
     if (unChangedPolicies.length) {
       this.logger.debug(`Un-changed Policies:\n  ${unChangedPolicies.join('\n  ')}`);
