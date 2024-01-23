@@ -94,11 +94,12 @@ export const getServices = async (
     _source: false,
     query: {
       bool: {
-        filter: [...commonFiltersList],
+        filter: commonFiltersList,
       },
     },
     aggs,
   };
+
   const resultMetrics = await client<{}, ServicesAPIQueryAggregation>({
     body: metricsQuery,
     index: [metric],
