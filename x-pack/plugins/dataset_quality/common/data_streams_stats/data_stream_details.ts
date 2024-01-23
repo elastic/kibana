@@ -7,4 +7,5 @@
 
 export interface DataStreamDetails {
   createdOn?: number;
+  lastActivity?: number;
 }

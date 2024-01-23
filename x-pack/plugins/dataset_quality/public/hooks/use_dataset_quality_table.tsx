@@ -7,12 +7,13 @@
 
 import { useSelector } from '@xstate/react';
 import { find, orderBy } from 'lodash';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../common/constants';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 
 export type DIRECTION = 'asc' | 'desc';
@@ -27,11 +28,12 @@ export const useDatasetQualityTable = () => {
   const {
     services: { fieldFormats },
   } = useKibanaContextForPlugin();
-  const [selectedDataset, setSelectedDataset] = useState<DataStreamStat>();
 
   const { service } = useDatasetQualityContext();
 
   const { page, rowsPerPage, sort } = useSelector(service, (state) => state.context.table);
+
+  const flyout = useSelector(service, (state) => state.context?.flyout);
 
   const dataStreamStats = useSelector(service, (state) => state.context.dataStreamStats);
   const loading = useSelector(service, (state) => state.matches('fetchingData.loadingDatasets'));
@@ -41,15 +43,26 @@ export const useDatasetQualityTable = () => {
     state.matches('fetchingData.loadingDegradedDocs')
   );
 
+  const closeFlyout = useCallback(() => service.send({ type: 'CLOSE_FLYOUT' }), [service]);
+  const openFlyout = useCallback(
+    (selectedDataset: DataStreamStat) => {
+      service.send({
+        type: 'OPEN_FLYOUT',
+        dataset: selectedDataset as FlyoutDataset,
+      });
+    },
+    [service]
+  );
+
   const columns = useMemo(
     () =>
       getDatasetQualityTableColumns({
         fieldFormats,
-        selectedDataset,
-        setSelectedDataset,
+        selectedDataset: flyout?.dataset,
+        openFlyout,
         loadingDegradedStats,
       }),
-    [fieldFormats, loadingDegradedStats, selectedDataset, setSelectedDataset]
+    [flyout?.dataset, fieldFormats, loadingDegradedStats, openFlyout]
   );
 
   const pagination = {
@@ -115,8 +128,6 @@ export const useDatasetQualityTable = () => {
     );
   }, [dataStreamStats.length, renderedItems.length, page, rowsPerPage]);
 
-  const closeFlyout = useCallback(() => setSelectedDataset(undefined), []);
-
   return {
     sort: { sort },
     onTableChange,
@@ -126,6 +137,6 @@ export const useDatasetQualityTable = () => {
     loading,
     resultsCount,
     closeFlyout,
-    selectedDataset,
+    selectedDataset: flyout?.dataset,
   };
 };

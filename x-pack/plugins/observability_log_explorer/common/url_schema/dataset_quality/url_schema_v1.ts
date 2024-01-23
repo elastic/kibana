@@ -18,10 +18,38 @@ export const tableRT = rt.strict({
   sort: sortRT,
 });
 
+const integrationRT = rt.strict({
+  name: rt.string,
+  title: rt.string,
+  version: rt.string,
+});
+
+const datasetRT = rt.intersection([
+  rt.strict({
+    rawName: rt.string,
+    type: rt.string,
+    name: rt.string,
+    namespace: rt.string,
+    title: rt.string,
+  }),
+  rt.exact(
+    rt.partial({
+      integration: integrationRT,
+    })
+  ),
+]);
+
+export const flyoutRT = rt.exact(
+  rt.partial({
+    dataset: datasetRT,
+  })
+);
+
 export const urlSchemaRT = rt.exact(
   rt.partial({
     v: rt.literal(1),
     table: tableRT,
+    flyout: flyoutRT,
   })
 );
 

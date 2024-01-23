@@ -17,6 +17,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       direction: DEFAULT_SORT_DIRECTION,
     },
   },
+  flyout: {},
   dataStreamStats: [],
   degradedDocStats: [],
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DIRECTION, SORT_FIELD } from '../hooks';
 import {
   DatasetQualityControllerContext,
   DEFAULT_CONTEXT,
@@ -16,6 +17,7 @@ export const getPublicStateFromContext = (
 ): DatasetQualityPublicState => {
   return {
     table: context.table,
+    flyout: context.flyout,
   };
 };
 
@@ -26,5 +28,14 @@ export const getContextFromPublicState = (
   table: {
     ...DEFAULT_CONTEXT.table,
     ...publicState.table,
+    sort: {
+      ...publicState.table?.sort,
+      field: publicState.table?.sort.field as SORT_FIELD,
+      direction: publicState.table?.sort.direction as DIRECTION,
+    },
+  },
+  flyout: {
+    ...DEFAULT_CONTEXT.flyout,
+    ...publicState.flyout,
   },
 });

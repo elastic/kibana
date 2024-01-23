@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { DataStreamDetails } from '../../../../common/data_streams_stats/data_stream_details';
 import { DIRECTION, SORT_FIELD } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
@@ -25,6 +26,26 @@ interface WithTableOptions {
   };
 }
 
+export interface FlyoutDataset {
+  rawName: string;
+  type: string;
+  name: string;
+  namespace: string;
+  title: string;
+  integration?: {
+    name: string;
+    title: string;
+    version: string;
+  };
+}
+
+interface WithFlyoutOptions {
+  flyout: {
+    dataset?: FlyoutDataset;
+    datasetDetails?: DataStreamDetails;
+  };
+}
+
 interface WithDataStreamStats {
   dataStreamStats: DataStreamStat[];
 }
@@ -34,9 +55,11 @@ interface WithDegradedDocs {
 
 export type DefaultDatasetQualityControllerState = WithTableOptions &
   WithDataStreamStats &
-  WithDegradedDocs;
+  WithDegradedDocs &
+  WithFlyoutOptions;
 
-type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState;
+type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
+  Partial<WithFlyoutOptions>;
 
 export type DatasetQualityControllerTypeState =
   | {
@@ -45,6 +68,10 @@ export type DatasetQualityControllerTypeState =
     }
   | {
       value: 'idle';
+      context: DefaultDatasetQualityStateContext;
+    }
+  | {
+      value: 'fetchingFlyoutData';
       context: DefaultDatasetQualityStateContext;
     }
   | {
@@ -73,6 +100,13 @@ export type DatasetQualityControllerEvent =
         field: SORT_FIELD;
         direction: DIRECTION;
       };
+    }
+  | {
+      type: 'OPEN_FLYOUT';
+      dataset: FlyoutDataset;
+    }
+  | {
+      type: 'CLOSE_FLYOUT';
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

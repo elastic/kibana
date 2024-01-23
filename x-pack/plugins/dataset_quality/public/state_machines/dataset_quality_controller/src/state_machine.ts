@@ -7,6 +7,9 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { DataStreamType } from '../../../../common/types';
+import { DataStreamDetails } from '../../../../common/data_streams_stats/data_stream_details';
+import { dataStreamPartsToIndexName } from '../../../../common/utils';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { getDefaultTimeRange } from '../../../utils';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
@@ -15,6 +18,7 @@ import {
   DatasetQualityControllerContext,
   DatasetQualityControllerEvent,
   DatasetQualityControllerTypeState,
+  FlyoutDataset,
 } from './types';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import { fetchDatasetStatsFailedNotifier } from './notifications';
@@ -98,6 +102,23 @@ export const createPureDatasetQualityControllerStateMachine = (
               target: 'idle',
               actions: ['storeSortOptions'],
             },
+            OPEN_FLYOUT: {
+              target: 'fetchingFlyoutData',
+              actions: ['storeFlyoutOptions'],
+            },
+            CLOSE_FLYOUT: {
+              target: 'idle',
+              actions: ['resetFlyoutOptions'],
+            },
+          },
+        },
+        fetchingFlyoutData: {
+          invoke: {
+            src: 'loadDataStreamDetails',
+            onDone: {
+              target: 'idle',
+              actions: ['storeDatasetDetails'],
+            },
           },
         },
       },
@@ -134,6 +155,17 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeFlyoutOptions: assign((context, event) => {
+          return 'dataset' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  dataset: event.dataset as FlyoutDataset,
+                },
+              }
+            : {};
+        }),
+        resetFlyoutOptions: assign((_context, _event) => ({ flyout: undefined })),
         storeDataStreamStats: assign((_context, event) => {
           return 'data' in event
             ? {
@@ -145,6 +177,16 @@ export const createPureDatasetQualityControllerStateMachine = (
           return 'data' in event
             ? {
                 degradedDocStats: event.data as DegradedDocsStat[],
+              }
+            : {};
+        }),
+        storeDatasetDetails: assign((context, event) => {
+          return 'data' in event
+            ? {
+                flyout: {
+                  ...context.flyout,
+                  datasetDetails: event.data as DataStreamDetails,
+                },
               }
             : {};
         }),
@@ -178,6 +220,17 @@ export const createDatasetQualityControllerStateMachine = ({
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           start: defaultTimeRange.from,
           end: defaultTimeRange.to,
+        });
+      },
+      loadDataStreamDetails: (context) => {
+        const { type, name: dataset, namespace } = context.flyout.dataset as FlyoutDataset;
+
+        return dataStreamStatsClient.getDataStreamDetails({
+          dataStream: dataStreamPartsToIndexName({
+            type: type as DataStreamType,
+            dataset,
+            namespace,
+          }),
         });
       },
     },
