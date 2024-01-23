@@ -62,7 +62,10 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     http,
   });
   const { data: evalData } = useEvaluationData({ http });
-  const defaultAgents = (evalData as GetEvaluateResponse)?.agentExecutors ?? [];
+  const defaultAgents = useMemo(
+    () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
+    [evalData]
+  );
 
   // Run Details
   // Project Name
