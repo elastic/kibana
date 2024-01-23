@@ -242,10 +242,7 @@ export class AlertsClient<
       this.reportedAlerts[alert.id] = alert.payload;
     }
 
-    const alertDoc: AlertData | undefined =
-      !alert.payload && !!this.fetchedAlerts.data[alert.id]
-        ? (this.fetchedAlerts.data[alert.id] as AlertData)
-        : undefined;
+    const alertDoc: AlertData | undefined = this.fetchedAlerts.data[alert.id];
 
     return {
       uuid: legacyAlert.getUuid(),
