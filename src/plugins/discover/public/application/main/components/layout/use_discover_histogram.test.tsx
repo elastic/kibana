@@ -171,7 +171,6 @@ describe('useDiscoverHistogram', () => {
         'breakdownField',
         'totalHitsStatus',
         'totalHitsResult',
-        'externalVisContext',
       ]);
     });
 

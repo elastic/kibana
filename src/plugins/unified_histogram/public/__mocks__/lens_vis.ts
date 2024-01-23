@@ -33,7 +33,7 @@ export const getLensVisMock = async ({
   isPlainRecord: boolean;
   timeInterval: string;
   breakdownField: DataViewField | undefined;
-  suggestionContext: CurrentSuggestionContext;
+  suggestionContext: CurrentSuggestionContext | undefined;
   allSuggestions?: Suggestion[];
 }): Promise<{
   lensService: LensVisService;

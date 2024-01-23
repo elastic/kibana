@@ -13,7 +13,6 @@ import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
-import { currentSuggestionMock } from '../../__mocks__/suggestions';
 import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
@@ -34,7 +33,6 @@ describe('useStateProps', () => {
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
     currentSuggestionContext: undefined,
-    externalVisContext: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -225,7 +223,7 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestionContext: currentSuggestionMock,
+        currentSuggestionContext: undefined,
       },
     });
     const { result } = renderHook(() =>
