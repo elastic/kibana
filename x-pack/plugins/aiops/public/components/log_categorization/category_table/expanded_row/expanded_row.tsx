@@ -9,7 +9,7 @@ import React, { FC } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 
 import type { Category } from '../../../../../common/api/log_categorization/types';
-import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../../formatted_text';
+import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../../format_category';
 
 interface ExpandedRowProps {
   category: Category;

@@ -43,7 +43,7 @@ import type { EventRate } from '../use_categorize_request';
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
 import { ExpandedRow } from './expanded_row/expanded_row';
-import { FormattedPatternExamples } from '../formatted_text';
+import { FormattedPatternExamples } from '../format_category';
 
 interface Props {
   categories: Category[];
