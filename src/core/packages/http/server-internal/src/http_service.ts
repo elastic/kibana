@@ -31,6 +31,7 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
+import type { InternalCoreDiServiceStart } from '@kbn/core-di-server-internal';
 import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
@@ -55,6 +56,10 @@ export interface SetupDeps {
   executionContext: InternalExecutionContextSetup;
 }
 
+export interface StartDeps {
+  injection: InternalCoreDiServiceStart;
+}
+
 /** @internal */
 export class HttpService
   implements CoreService<InternalHttpServiceSetup, InternalHttpServiceStart>
@@ -72,6 +77,7 @@ export class HttpService
   private internalPreboot?: InternalHttpServicePreboot;
   private internalSetup?: InternalHttpServiceSetup;
   private requestHandlerContext?: IContextContainer;
+  private afterRequestHandledCallback?: InternalCoreDiServiceStart['disposeRequestContainer'];
 
   constructor(private readonly coreContext: CoreContext) {
     const { logger, configService, env } = coreContext;
@@ -201,6 +207,11 @@ export class HttpService
           env: this.env,
           versionedRouterOptions: getVersionedRouterOptions(config),
           pluginId,
+          afterRequestHandled: (request) => {
+            if (this.afterRequestHandledCallback) {
+              this.afterRequestHandledCallback(request);
+            }
+          },
         });
         registerRouter(router);
         return router;
@@ -228,7 +239,9 @@ export class HttpService
     };
   }
 
-  public async start() {
+  public async start(deps: StartDeps) {
+    this.afterRequestHandledCallback = deps.injection.disposeRequestContainer.bind(deps.injection);
+
     const config = await firstValueFrom(this.config$);
     if (this.shouldListen(config)) {
       this.log.debug('stopping preboot server');
