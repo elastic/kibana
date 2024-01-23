@@ -32,7 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('does allow user with reporting_user role', async () => {
-        await reportingFunctional.loginDataAnalyst();
+        await reportingFunctional.loginReportingUser();
         await reportingFunctional.openSavedDashboard(DASHBOARD_TITLE);
         await reportingFunctional.tryDashboardDownloadCsvSuccess('Ecommerce Data');
       });

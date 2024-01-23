@@ -78,10 +78,7 @@ export class DashboardPanelActionsService extends FtrService {
   async clickContextMenuMoreItem() {
     this.log.debug('clickContextMenuMoreItem');
     await this.expectContextMenuToBeOpen();
-    const hasMoreSubPanel = await this.hasContextMenuMoreItem();
-    if (hasMoreSubPanel) {
-      await this.testSubjects.click('embeddablePanelMore-mainMenu');
-    }
+    await this.testSubjects.click('embeddablePanelMore-mainMenu');
   }
 
   async openContextMenuMorePanel(parent?: WebElementWrapper) {
