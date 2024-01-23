@@ -45,17 +45,12 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
+    await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
       id: existingSavedObjectId,
       overwrite: true,
     });
 
-    const result = this.toSLO(savedSLO.attributes);
-    if (result === undefined) {
-      throw new Error('Invalid stored SLO');
-    }
-
-    return result;
+    return slo;
   }
 
   async findById(id: string): Promise<SLO> {
