@@ -402,7 +402,6 @@ export class ManifestManager {
     newManifest: Manifest
   ): Promise<Error[]> {
     const errors: Error[] = [];
-
     const artifactsToCreate: InternalArtifactCompleteSchema[] = [];
 
     for (const artifact of artifacts) {
@@ -417,28 +416,50 @@ export class ManifestManager {
       return errors;
     }
 
+    this.logger.debug(`Creating [${artifactsToCreate.length}] artifacts`);
+
     const { artifacts: fleetArtifacts, errors: createErrors } =
       await this.artifactClient.bulkCreateArtifacts(artifactsToCreate);
+
+    this.logger.info(`Count of artifacts created: ${fleetArtifacts?.length ?? 0}`);
 
     if (createErrors) {
       errors.push(...createErrors);
     }
 
     const newArtifactsAddedToManifest: string[] = [];
+    const artifactsNotCreated: string[] = [];
 
     if (fleetArtifacts) {
-      const fleetArtfactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+      const fleetArtifactsByIdentifier: { [key: string]: InternalArtifactCompleteSchema } = {};
+
       fleetArtifacts.forEach((fleetArtifact) => {
-        fleetArtfactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
+        fleetArtifactsByIdentifier[getArtifactId(fleetArtifact)] = fleetArtifact;
       });
+
       artifactsToCreate.forEach((artifact) => {
         const artifactId = getArtifactId(artifact);
-        const fleetArtifact = fleetArtfactsByIdentifier[artifactId];
+        const fleetArtifact = fleetArtifactsByIdentifier[artifactId];
 
-        if (!fleetArtifact) return;
+        if (!fleetArtifact) {
+          artifactsNotCreated.push(artifactId);
+
+          return;
+        }
+
         newManifest.replaceArtifact(fleetArtifact);
         newArtifactsAddedToManifest.push(artifactId);
       });
+    }
+
+    if (artifactsNotCreated.length) {
+      this.logger.debug(
+        `A total of [${
+          artifactsNotCreated.length
+        }] artifacts were not created. Prior version of the artifact will remain in manifest.\n${artifactsNotCreated.join(
+          '\n'
+        )}`
+      );
     }
 
     if (newArtifactsAddedToManifest.length !== 0) {
@@ -520,13 +541,17 @@ export class ManifestManager {
       }
 
       if (invalidArtifactIds.length) {
-        manifest.needsUpdate = true;
-
         this.logger.warn(
-          `Missing artifacts detected! Internal artifact manifest (SavedObject version [${manifestSo.version}]) references [${invalidArtifactIds.length}] artifact IDs that don't exist`
+          `Missing artifacts detected! Internal artifact manifest (SavedObject version [${
+            manifestSo.version
+          }]) references [${
+            invalidArtifactIds.length
+          }] artifact IDs that don't exist.\nFirst 10 below (run with logging set to 'debug' to see all):\n${invalidArtifactIds
+            .slice(0, 10)
+            .join('\n')}`
         );
         this.logger.debug(
-          `Artifact references that are missing:\n${stringify(invalidArtifactIds)}`
+          `Artifact ID references that are missing:\n${stringify(invalidArtifactIds)}`
         );
       }
 
@@ -704,8 +729,6 @@ export class ManifestManager {
       });
     }
 
-    // eslint-disable-next-line require-atomic-updates
-    manifest.needsUpdate = false;
     this.logger.info(`Committed manifest ${manifest.getSemanticVersion()}`);
   }
 

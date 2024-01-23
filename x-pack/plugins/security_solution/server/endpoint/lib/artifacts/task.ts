@@ -65,6 +65,8 @@ export class ManifestTask {
               const taskInterval = packagerTaskInterval;
               const startTime = new Date();
 
+              this.logger.info(`Started. Checking for changes to endpoint artifacts`);
+
               await this.runTask(taskInstance.id);
 
               const endTime = new Date().getTime();
@@ -154,20 +156,23 @@ export class ManifestTask {
         // Last manifest we computed, which was saved to ES
         oldManifest = await manifestManager.getLastComputedManifest();
       } catch (e) {
+        this.logger.error(e);
+
         // Lets recover from a failure in getting the internal manifest map by creating an empty default manifest
         if (e instanceof InvalidInternalManifestError) {
-          this.logger.error(e);
           this.logger.warn('recovering from invalid internal manifest');
           oldManifest = ManifestManager.createDefaultManifest();
-        }
+        } else {
+          this.logger.error(
+            `unable to recover from error while attempting to retrieve last computed manifest`
+          );
 
-        this.logger.debug(
-          `Encountered an error while attempting to retrieve last computed manifest (this might be ok if no endpoint policies exist yet):\n${e.stack}`
-        );
+          return;
+        }
       }
 
       if (!oldManifest) {
-        this.logger.debug('Last computed manifest not available yet');
+        this.logger.info('Last computed manifest not available yet');
         return;
       }
 
@@ -195,9 +200,6 @@ export class ManifestTask {
       if (!isEmptyManifestDiff(diff)) {
         // Commit latest manifest state
         newManifest.bumpSemanticVersion();
-        await manifestManager.commit(newManifest);
-      } else if (newManifest.needsUpdate || oldManifest.needsUpdate) {
-        // Looks like an update to the manifest is still needed. In this case, we don't bump the version - only save it
         await manifestManager.commit(newManifest);
       }
 
