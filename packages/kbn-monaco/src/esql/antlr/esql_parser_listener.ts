@@ -81,6 +81,7 @@ import { SubqueryExpressionContext } from "./esql_parser";
 import { ShowCommandContext } from "./esql_parser";
 import { EnrichCommandContext } from "./esql_parser";
 import { EnrichWithClauseContext } from "./esql_parser";
+import { SettingContext } from "./esql_parser";
 
 
 /**
@@ -992,5 +993,16 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitEnrichWithClause?: (ctx: EnrichWithClauseContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.setting`.
+	 * @param ctx the parse tree
+	 */
+	enterSetting?: (ctx: SettingContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.setting`.
+	 * @param ctx the parse tree
+	 */
+	exitSetting?: (ctx: SettingContext) => void;
 }
 
