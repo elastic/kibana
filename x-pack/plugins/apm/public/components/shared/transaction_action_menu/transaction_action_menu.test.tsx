@@ -32,6 +32,7 @@ import { TransactionActionMenu } from './transaction_action_menu';
 import * as Transactions from './__fixtures__/mock_data';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import * as useAdHocApmDataView from '../../../hooks/use_adhoc_apm_data_view';
+import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 
 const apmContextMock = {
   ...mockApmPluginContextValue,
@@ -60,6 +61,10 @@ const apmContextMock = {
   },
 } as unknown as ApmPluginContextValue;
 
+jest.mock('../../../hooks/use_profiling_integration_setting', () => ({
+  useProfilingIntegrationSetting: jest.fn().mockReturnValue(false),
+}));
+
 const history = createMemoryHistory();
 history.replace(
   '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi'
@@ -76,7 +81,6 @@ function Wrapper({ children }: { children?: React.ReactNode }) {
         .fn()
         .mockImplementation(() => ({ id: 'mockSpaceId' })),
     },
-    settings: { client: { get: () => {} } },
   };
 
   return (
@@ -116,6 +120,10 @@ const expectLogsLocatorsToBeCalled = () => {
 let useAdHocApmDataViewSpy: jest.SpyInstance;
 
 describe('TransactionActionMenu ', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   jest.spyOn(hooks, 'useFetcher').mockReturnValue({
     // return as Profiling had been initialized
     data: {
@@ -309,6 +317,10 @@ describe('TransactionActionMenu ', () => {
   });
 
   describe('Profiling items', () => {
+    beforeEach(() => {
+      useProfilingIntegrationSetting.mockReturnValue(true);
+    });
+
     it('renders flamegraph item', async () => {
       const component = await renderTransaction(
         Transactions.transactionWithHostData
