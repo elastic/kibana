@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import versionCompare from 'compare-versions';
@@ -130,9 +131,15 @@ const rangeComparison: CompareFn<Omit<Range, 'type'>> = (v1, v2) => {
   return fromComparison || toComparison || 0;
 };
 
-function createArrayValuesHandler(sortBy: string, directionFactor: number, formatter: FieldFormat) {
+function createArrayValuesHandler(sortBy: string, formatter: FieldFormat) {
   return function <T>(criteriaFn: CompareFn<T>) {
-    return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
+    return (
+      rowA: Record<string, unknown>,
+      rowB: Record<string, unknown>,
+      direction: 'asc' | 'desc'
+    ) => {
+      // handle the direction with a multiply factor.
+      const directionFactor = direction === 'asc' ? 1 : -1;
       // if either side of the comparison is an array, make it also the other one become one
       // then perform an array comparison
       if (Array.isArray(rowA[sortBy]) || Array.isArray(rowB[sortBy])) {
@@ -157,13 +164,21 @@ function createArrayValuesHandler(sortBy: string, directionFactor: number, forma
 
 function getUndefinedHandler(
   sortBy: string,
-  sortingCriteria: (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => number
+  sortingCriteria: (
+    rowA: Record<string, unknown>,
+    rowB: Record<string, unknown>,
+    directionFactor: 'asc' | 'desc'
+  ) => number
 ) {
-  return (rowA: Record<string, unknown>, rowB: Record<string, unknown>) => {
+  return (
+    rowA: Record<string, unknown>,
+    rowB: Record<string, unknown>,
+    direction: 'asc' | 'desc'
+  ) => {
     const valueA = rowA[sortBy];
     const valueB = rowB[sortBy];
     if (valueA != null && valueB != null && !Number.isNaN(valueA) && !Number.isNaN(valueB)) {
-      return sortingCriteria(rowA, rowB);
+      return sortingCriteria(rowA, rowB, direction);
     }
     if (valueA == null || Number.isNaN(valueA)) {
       return 1;
@@ -179,13 +194,9 @@ function getUndefinedHandler(
 export function getSortingCriteria(
   type: string | undefined,
   sortBy: string,
-  formatter: FieldFormat,
-  direction: string
+  formatter: FieldFormat
 ) {
-  // handle the direction with a multiply factor.
-  const directionFactor = direction === 'asc' ? 1 : -1;
-
-  const arrayValueHandler = createArrayValuesHandler(sortBy, directionFactor, formatter);
+  const arrayValueHandler = createArrayValuesHandler(sortBy, formatter);
 
   if (['number', 'date'].includes(type || '')) {
     return getUndefinedHandler(sortBy, arrayValueHandler(numberCompare));
