@@ -72,4 +72,5 @@ export const CasesConnectorRunParamsSchema = schema.object({
     },
   }),
   reopenClosedCases: schema.boolean({ defaultValue: false }),
+  maxOpenCases: schema.number({ defaultValue: 5, min: 1, max: 10 }),
 });

@@ -28,6 +28,7 @@ describe('CasesConnectorRunParamsSchema', () => {
         "groupingBy": Array [
           "host.name",
         ],
+        "maxOpenCases": 5,
         "owner": "cases",
         "reopenClosedCases": false,
         "rule": Object {
@@ -177,6 +178,24 @@ describe('CasesConnectorRunParamsSchema', () => {
   describe('reopenClosedCases', () => {
     it('defaults the reopenClosedCases to false', () => {
       expect(CasesConnectorRunParamsSchema.validate(getParams()).reopenClosedCases).toBe(false);
+    });
+  });
+
+  describe('maxOpenCases', () => {
+    it('defaults the maxOpenCases to 5', () => {
+      expect(CasesConnectorRunParamsSchema.validate(getParams()).maxOpenCases).toBe(5);
+    });
+
+    it('throws if the maxOpenCases > 10', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ maxOpenCases: 11 }))
+      ).toThrow();
+    });
+
+    it('throws if the maxOpenCases < 1', () => {
+      expect(() =>
+        CasesConnectorRunParamsSchema.validate(getParams({ maxOpenCases: 0 }))
+      ).toThrow();
     });
   });
 });
