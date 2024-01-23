@@ -20,14 +20,12 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useQuery } from '@tanstack/react-query';
 
-import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../services/get_azure_arm_props_from_package_policy';
+import { AzureArmTemplateGuide } from '../../../../../../../../components/cloud_security_posture';
+import { getAzureArmPropsFromPackagePolicy } from '../../../../../../../../components/cloud_security_posture/services';
+import { useCreateAzureArmTemplateUrl } from '../../../../../../../../components/cloud_security_posture/hooks';
 
-import { useCreateAzureArmTemplateUrl } from '../../../../../../../hooks/use_create_azure_arm_template_url';
-
-import { AzureArmTemplateGuide } from '../../../../../../../components/azure_arm_template_guide';
-
-import type { AgentPolicy, PackagePolicy } from '../../../../../types';
-import { sendGetEnrollmentAPIKeys } from '../../../../../hooks';
+import type { AgentPolicy, PackagePolicy } from '../../../../../../types';
+import { sendGetEnrollmentAPIKeys } from '../../../../../../hooks';
 
 export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   onConfirm: () => void;
