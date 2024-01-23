@@ -142,9 +142,9 @@ describe('apm', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Uses get_apm_service_summary to obtain the status of the ai-assistant-service service',
-      'Executes get_apm_timeseries to obtain the throughput of the services ai-assistant-service-front for the last 4 hours',
+      'Executes get_apm_timeseries to obtain the throughput of the services ai-assistant-service for the last 4 hours',
       'Gives a summary of the throughput stats for ai-assistant-service',
-      'Provides the downstream dependencies of ai-assistant-service',
+      'Provides the downstream dependencies of ai-assistant-service-front',
     ]);
 
     expect(result.passed).to.be(true);

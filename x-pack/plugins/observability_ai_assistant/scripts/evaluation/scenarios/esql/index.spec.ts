@@ -290,7 +290,7 @@ describe('ES|QL query generation', () => {
 
     it('error logs rate', async () => {
       await evaluateEsqlQuery({
-        question: `i have logs in logs-apm*. Show me the error rate as a percetage of the error logs vs the total logs per day for the last 7 days. Errors are the logs identified as processor.event containing the value error. `,
+        question: `i have logs in logs-apm*. Using ESQL, show me the error rate as a percetage of the error logs vs the total logs per day for the last 7 days. Errors are the logs identified as processor.event containing the value error. `,
         expected: `FROM logs-apm*
         | WHERE @timestamp >= NOW() - 7 days
         | EVAL day = DATE_TRUNC(1 day, @timestamp)
@@ -325,7 +325,7 @@ describe('ES|QL query generation', () => {
   describe('SPL queries', () => {
     it('network_firewall count by', async () => {
       await evaluateEsqlQuery({
-        question: `can you convert this SPL query onto ESQL index=network_firewall "SYN Timeout" | stats count by dest`,
+        question: `can you convert this SPL query to ESQL? index=network_firewall "SYN Timeout" | stats count by dest`,
         expected: `FROM network_firewall
         | WHERE message == "SYN Timeout"
         | STATS count = count(*) by dest`,
@@ -335,7 +335,7 @@ describe('ES|QL query generation', () => {
     });
     it('prod_web length', async () => {
       await evaluateEsqlQuery({
-        question: `can you convert this SPL query onto ESQL index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
+        question: `can you convert this SPL query to ESQL? index=prod_web | eval length=len(message) | eval k255=if((length>255),1,0) | eval k2=if((length>2048),1,0) | eval k4=if((length>4096),1,0) |eval k16=if((length>16384),1,0) | stats count, sum(k255), sum(k2),sum(k4),sum(k16), sum(length)`,
         expected: `from prod_web
         | EVAL length = length(message), k255 = CASE(length > 255, 1, 0), k2 = CASE(length > 2048, 1, 0), k4 = CASE(length > 4096, 1, 0), k16 = CASE(length > 16384, 1, 0)
         | STATS COUNT(*), SUM(k255), SUM(k2), SUM(k4), SUM(k16), SUM(length)`,
@@ -347,7 +347,7 @@ describe('ES|QL query generation', () => {
     })
     it('prod_web filter message and host', async () => {
       await evaluateEsqlQuery({
-        question: `can you convert this SPL query onto ESQL index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
+        question: `can you convert this SPL query to ESQL? index=prod_web NOT "Connection reset" NOT "[acm-app] created a ThreadLocal" sourcetype!=prod_urlf_east_logs sourcetype!=prod_urlf_west_logs host!="dbs-tools-*" NOT "Public] in context with path [/global] " host!="*dev*" host!="*qa*" host!="*uat*"`,
         expected: `FROM prod_web
       | WHERE message NOT LIKE "Connection reset"
         AND message NOT LIKE "[acm-app] created a ThreadLocal"
