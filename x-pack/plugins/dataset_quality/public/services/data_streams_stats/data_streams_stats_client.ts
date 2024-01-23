@@ -11,7 +11,9 @@ import { find, merge } from 'lodash';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
+  getDataStreamsDetailsResponseRt,
 } from '../../../common/api_types';
+import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
 import {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
@@ -19,7 +21,10 @@ import {
   GetDataStreamsStatsError,
   GetDataStreamsStatsQuery,
   GetDataStreamsStatsResponse,
+  GetDataStreamDetailsParams,
+  GetDataStreamDetailsResponse,
 } from '../../../common/data_streams_stats';
+import { DataStreamDetails } from '../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from './types';
 
@@ -27,7 +32,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getDataStreamsStats(
-    params: GetDataStreamsStatsQuery = { type: 'logs' }
+    params: GetDataStreamsStatsQuery = { type: DEFAULT_DATASET_TYPE }
   ): Promise<DataStreamStatServiceResponse> {
     const response = await this.http
       .get<GetDataStreamsStatsResponse>('/internal/dataset_quality/data_streams/stats', {
@@ -59,7 +64,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         {
           query: {
             ...params,
-            type: 'logs',
+            type: DEFAULT_DATASET_TYPE,
           },
         }
       )
@@ -78,5 +83,23 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     )(response);
 
     return degradedDocs;
+  }
+
+  public async getDataStreamDetails({ dataStream }: GetDataStreamDetailsParams) {
+    const response = await this.http
+      .get<GetDataStreamDetailsResponse>(
+        `/internal/dataset_quality/data_streams/${dataStream}/details`
+      )
+      .catch((error) => {
+        throw new GetDataStreamsStatsError(`Failed to fetch data stream details": ${error}`);
+      });
+
+    const dataStreamDetails = decodeOrThrow(
+      getDataStreamsDetailsResponseRt,
+      (message: string) =>
+        new GetDataStreamsStatsError(`Failed to decode data stream details response: ${message}"`)
+    )(response);
+
+    return dataStreamDetails as DataStreamDetails;
   }
 }

@@ -102,7 +102,7 @@ export class SecurityUsageReportingTask {
         params: { version: this.version },
       });
     } catch (e) {
-      this.logger.debug(`Error scheduling task, received ${e.message}`);
+      this.logger.error(`Error scheduling task ${this.taskType}, received ${e.message}`);
     }
   };
 
