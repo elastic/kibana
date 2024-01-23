@@ -18,14 +18,11 @@ import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
@@ -40,6 +37,7 @@ import {
 
 export interface PageTitleProps {
   alert: TopAlert | null;
+  alertStatus?: AlertStatus;
   dataTestSubj: string;
 }
 
@@ -53,7 +51,7 @@ export function pageTitleContent(ruleCategory: string) {
   });
 }
 
-export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
+export function PageTitle({ alert, alertStatus, dataTestSubj }: PageTitleProps) {
   const { euiTheme } = useEuiTheme();
 
   if (!alert) return <EuiLoadingSpinner />;
@@ -71,16 +69,12 @@ export function PageTitle({ alert, dataTestSubj }: PageTitleProps) {
       <EuiSpacer size="l" />
       <EuiFlexGroup direction="row" alignItems="center" gutterSize="xl">
         <EuiFlexItem grow={false}>
-          <AlertLifecycleStatusBadge
-            alertStatus={
-              alert.fields[ALERT_STATUS] === 'active'
-                ? ALERT_STATUS_ACTIVE
-                : alert.fields[ALERT_STATUS] === 'recovered'
-                ? ALERT_STATUS_RECOVERED
-                : ALERT_STATUS_UNTRACKED
-            }
-            flapping={alert.fields[ALERT_FLAPPING]}
-          />
+          {alertStatus && (
+            <AlertLifecycleStatusBadge
+              alertStatus={alertStatus}
+              flapping={alert.fields[ALERT_FLAPPING]}
+            />
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="none">

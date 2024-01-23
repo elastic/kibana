@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates metric chart config', async () => {
+test('generates region map chart config', async () => {
   const result = await buildRegionMap(
     {
       chartType: 'regionmap',

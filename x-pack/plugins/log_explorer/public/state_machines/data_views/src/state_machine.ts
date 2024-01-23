@@ -11,7 +11,7 @@ import { assign, createMachine } from 'xstate';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { parseDataViewListItem } from '../../../utils/parse_data_view_list_item';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
-import { DEFAULT_CONTEXT } from './defaults';
+import { createDefaultContext } from './defaults';
 import type {
   DataViewsContext,
   DataViewsEvent,
@@ -21,7 +21,7 @@ import type {
 } from './types';
 
 export const createPureDataViewsStateMachine = (
-  initialContext: DefaultDataViewsContext = DEFAULT_CONTEXT
+  initialContext: DefaultDataViewsContext = createDefaultContext()
 ) =>
   createMachine<DataViewsContext, DataViewsEvent, DataViewsTypestate>(
     {

@@ -41,7 +41,7 @@ import {
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
 import * as waitForSecurityIndexUtil from './wait_for_security_index';
-import * as mockIdpPluginUtil from '@kbn/mock-idp-plugin/common';
+import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -59,7 +59,7 @@ jest.mock('./wait_for_security_index', () => ({
   waitForSecurityIndex: jest.fn(),
 }));
 
-jest.mock('@kbn/mock-idp-plugin/common');
+jest.mock('@kbn/mock-idp-utils');
 
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
@@ -583,7 +583,7 @@ describe('setupServerlessVolumes()', () => {
       });
     }).rejects.toThrow(
       'Unsupported ES serverless --resources value(s):\n  /absolute/path/invalid\n\n' +
-        'Valid resources: operator_users.yml | role_mapping.yml | roles.yml | service_tokens | users | users_roles'
+        'Valid resources: operator_users.yml | role_mapping.yml | service_tokens | users | users_roles | roles.yml'
     );
   });
 });

@@ -546,33 +546,89 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cluster_health 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cluster_health 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cpu_usage 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_cpu_usage 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_disk_usage 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_disk_usage 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_elasticsearch_version_mismatch 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_elasticsearch_version_mismatch 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_jvm_memory_usage 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_jvm_memory_usage 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_kibana_version_mismatch 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_kibana_version_mismatch 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_license_expiration 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_license_expiration 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_logstash_version_mismatch 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_logstash_version_mismatch 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_missing_monitoring_data 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_missing_monitoring_data 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_nodes_changed 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_nodes_changed 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_search_rejections 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_search_rejections 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_write_rejections 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_alert_thread_pool_write_rejections 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_ccr_read_exceptions 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_ccr_read_exceptions 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
-exports[`Alert as data fields checks detect AAD fields changes for: monitoring_shard_size 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: monitoring_shard_size 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: observability.rules.custom_threshold 1`] = `
 Object {
@@ -5802,7 +5858,11 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: siem.notifications 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: siem.notifications 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: siem.queryRule 1`] = `
 Object {
@@ -9493,7 +9553,11 @@ Object {
 }
 `;
 
-exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tls 1`] = `undefined`;
+exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tls 1`] = `
+Object {
+  "fieldMap": Object {},
+}
+`;
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tlsCertificate 1`] = `
 Object {
