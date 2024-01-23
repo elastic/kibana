@@ -56,11 +56,7 @@ export const CorrelationsOverview: React.FC = () => {
     });
   }, [eventId, openLeftPanel, indexName, scopeId]);
 
-  const {
-    show: showAlertsByAncestry,
-    documentId,
-    indices,
-  } = useShowRelatedAlertsByAncestry({
+  const { show: showAlertsByAncestry, indices } = useShowRelatedAlertsByAncestry({
     getFieldsData,
     dataAsNestedObject,
     dataFormattedForFieldBrowser,
@@ -115,8 +111,8 @@ export const CorrelationsOverview: React.FC = () => {
           {showAlertsBySession && entityId && (
             <RelatedAlertsBySession entityId={entityId} scopeId={scopeId} />
           )}
-          {showAlertsByAncestry && documentId && indices && (
-            <RelatedAlertsByAncestry documentId={documentId} indices={indices} scopeId={scopeId} />
+          {showAlertsByAncestry && indices && (
+            <RelatedAlertsByAncestry documentId={eventId} indices={indices} scopeId={scopeId} />
           )}
         </EuiFlexGroup>
       ) : (

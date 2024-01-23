@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
@@ -42,6 +43,13 @@ export interface TaskRunResult {
   error_code?: string;
 }
 
+export interface ExecutionError {
+  name: string;
+  message: string;
+  stack: string;
+  cause: string;
+}
+
 export interface ReportOutput extends TaskRunResult {
   content: string | null;
   size: number;
@@ -74,6 +82,11 @@ export interface BasePayload extends BaseParams {
   spaceId?: string;
   isDeprecated?: boolean;
 }
+
+/**
+ * Timestamp metrics about the task lifecycle
+ */
+export type TaskInstanceFields = Pick<ConcreteTaskInstance, 'startedAt' | 'retryAt'>;
 
 export type JobId = string;
 
@@ -136,6 +149,10 @@ export interface ReportSource {
    * `output` is only populated if the report job is completed or failed.
    */
   output: ReportOutput | null;
+  /**
+   * Execution error during one of the execute task runs.
+   */
+  error?: ExecutionError | unknown;
 
   /*
    * Optional fields: populated when the job is claimed to execute, and after

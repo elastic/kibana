@@ -251,10 +251,5 @@ function createContextValueBasedOperation<ColumnType extends ConstantsIndexPatte
         },
       };
     },
-    documentation: {
-      section: 'constants',
-      signature: '',
-      description,
-    },
   };
 }

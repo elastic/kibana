@@ -3370,6 +3370,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.getInspectorRequestIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getInspectorRequestIds",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3989,7 +4005,7 @@
             "section": "def-common.LayerDescriptor",
             "text": "LayerDescriptor"
           },
-          "[]) => void; mapColors: string[]; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
+          "[]) => void; mapColors: string[]; mostCommonDataViewId?: string | undefined; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,

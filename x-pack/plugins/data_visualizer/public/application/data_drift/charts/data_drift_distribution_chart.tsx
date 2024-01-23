@@ -13,11 +13,11 @@ import {
   Position,
   ScaleType,
   Settings,
-  LEGACY_LIGHT_THEME,
   AreaSeries,
   CurveType,
+  PartialTheme,
 } from '@elastic/charts';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useStorage } from '@kbn/ml-local-storage';
@@ -33,9 +33,9 @@ import {
   DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE,
 } from '../../index_data_visualizer/types/storage';
 import { DATA_DRIFT_COMPARISON_CHART_TYPE } from '../../index_data_visualizer/types/data_drift';
-import { useCurrentEuiTheme } from '../../common/hooks/use_current_eui_theme';
+import { useDataVisualizerKibana } from '../../kibana_context';
 
-const CHART_HEIGHT = 200;
+const CHART_HEIGHT = 150;
 
 const showAsAreaChartOption = i18n.translate(
   'xpack.dataVisualizer.dataDrift.showAsAreaChartOptionLabel',
@@ -75,7 +75,9 @@ export const DataDriftDistributionChart = ({
   secondaryType: string;
   domain?: Feature['domain'];
 }) => {
-  const euiTheme = useCurrentEuiTheme();
+  const {
+    services: { charts },
+  } = useDataVisualizerKibana();
 
   const xAxisFormatter = useFieldFormatter(getFieldFormatType(secondaryType));
   const yAxisFormatter = useFieldFormatter(FIELD_FORMAT_IDS.NUMBER);
@@ -88,13 +90,23 @@ export const DataDriftDistributionChart = ({
     DATA_DRIFT_COMPARISON_CHART_TYPE.AREA
   );
 
+  const chartBaseTheme = charts.theme.useChartsBaseTheme();
+  const chartThemeOverrides = useMemo<PartialTheme>(() => {
+    return {
+      background: {
+        color: 'transparent',
+      },
+    };
+  }, []);
+
   if (!item || item.comparisonDistribution.length === 0) return <NoChartsData />;
   const { featureName, fieldType, comparisonDistribution: data } = item;
 
   return (
-    <div css={{ width: '100%', height: `calc(${CHART_HEIGHT}px + ${euiTheme.euiSize});` }}>
+    <div css={{ width: '100%' }}>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
+          buttonSize="s"
           legend={visualizeComparisonChartType}
           options={visualizeComparisonChartIcons}
           idSelected={comparisonChartType}
@@ -107,70 +119,75 @@ export const DataDriftDistributionChart = ({
         />
       </EuiFlexItem>
       <EuiSpacer size="s" />
-      <Chart>
-        <Tooltip body={DataComparisonChartTooltipBody} />
-        <Settings
-          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
-          baseTheme={LEGACY_LIGHT_THEME}
-          locale={i18n.getLocale()}
-        />
-        <Axis
-          id="bottom"
-          position={Position.Bottom}
-          tickFormat={xAxisFormatter}
-          labelFormat={xAxisFormatter}
-        />
-        <Axis
-          id="vertical"
-          position={Position.Left}
-          tickFormat={yAxisFormatter}
-          domain={{ min: 0, max: 1 }}
-        />
-        {comparisonChartType === DATA_DRIFT_COMPARISON_CHART_TYPE.BAR ? (
-          <BarSeries
-            id="dataVisualizer.barDistributionComparisonChart"
-            name={featureName}
-            xScaleType={
-              fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
-            }
-            yScaleType={ScaleType.Linear}
-            xAccessor="key"
-            yAccessors={['percentage']}
-            splitSeriesAccessors={['g']}
-            data={data}
-            color={(identifier) => {
-              const key = identifier.seriesKeys[0];
-              return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
-            }}
+      <div css={{ width: '100%', height: CHART_HEIGHT }}>
+        <Chart size={{ height: CHART_HEIGHT }}>
+          <Tooltip body={DataComparisonChartTooltipBody} />
+          <Settings
+            theme={[chartThemeOverrides]}
+            baseTheme={chartBaseTheme}
+            locale={i18n.getLocale()}
           />
-        ) : (
-          <AreaSeries
-            id="dataVisualizer.overlapDistributionComparisonChart"
-            name={i18n.translate('xpack.dataVisualizer.dataDrift.distributionComparisonChartName', {
-              defaultMessage:
-                'Distribution comparison of {referenceLabel} and {comparisonLabel} data for {fieldName}',
-              values: {
-                referenceLabel: REFERENCE_LABEL.toLowerCase(),
-                comparisonLabel: COMPARISON_LABEL.toLowerCase(),
-                fieldName: featureName,
-              },
-            })}
-            xScaleType={
-              fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
-            }
-            yScaleType={ScaleType.Linear}
-            xAccessor="key"
-            yAccessors={['percentage']}
-            splitSeriesAccessors={['g']}
-            data={data}
-            curve={CurveType.CURVE_STEP}
-            color={(identifier) => {
-              const key = identifier.seriesKeys[0];
-              return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
-            }}
+          <Axis
+            id="bottom"
+            position={Position.Bottom}
+            tickFormat={xAxisFormatter}
+            labelFormat={xAxisFormatter}
           />
-        )}
-      </Chart>
+          <Axis
+            id="vertical"
+            position={Position.Left}
+            tickFormat={yAxisFormatter}
+            domain={{ min: 0, max: 1 }}
+          />
+          {comparisonChartType === DATA_DRIFT_COMPARISON_CHART_TYPE.BAR ? (
+            <BarSeries
+              id="dataVisualizer.barDistributionComparisonChart"
+              name={featureName}
+              xScaleType={
+                fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+              }
+              yScaleType={ScaleType.Linear}
+              xAccessor="key"
+              yAccessors={['percentage']}
+              splitSeriesAccessors={['g']}
+              data={data}
+              color={(identifier) => {
+                const key = identifier.seriesKeys[0];
+                return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
+              }}
+            />
+          ) : (
+            <AreaSeries
+              id="dataVisualizer.overlapDistributionComparisonChart"
+              name={i18n.translate(
+                'xpack.dataVisualizer.dataDrift.distributionComparisonChartName',
+                {
+                  defaultMessage:
+                    'Distribution comparison of {referenceLabel} and {comparisonLabel} data for {fieldName}',
+                  values: {
+                    referenceLabel: REFERENCE_LABEL.toLowerCase(),
+                    comparisonLabel: COMPARISON_LABEL.toLowerCase(),
+                    fieldName: featureName,
+                  },
+                }
+              )}
+              xScaleType={
+                fieldType === DATA_COMPARISON_TYPE.NUMERIC ? ScaleType.Linear : ScaleType.Ordinal
+              }
+              yScaleType={ScaleType.Linear}
+              xAccessor="key"
+              yAccessors={['percentage']}
+              splitSeriesAccessors={['g']}
+              data={data}
+              curve={CurveType.CURVE_STEP}
+              color={(identifier) => {
+                const key = identifier.seriesKeys[0];
+                return key === COMPARISON_LABEL ? colors.comparisonColor : colors.referenceColor;
+              }}
+            />
+          )}
+        </Chart>
+      </div>
     </div>
   );
 };

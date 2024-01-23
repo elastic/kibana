@@ -6,6 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import {
+  AVG_ID,
+  MAX_ID,
+  MIN_ID,
+  OVERALL_AVERAGE_ID,
+  OVERALL_AVERAGE_NAME,
+  OVERALL_MAX_ID,
+  OVERALL_MAX_NAME,
+  OVERALL_MIN_ID,
+  OVERALL_MIN_NAME,
+  OVERALL_SUM_ID,
+  OVERALL_SUM_NAME,
+  SUM_ID,
+} from '@kbn/lens-formula-docs';
 import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
@@ -19,22 +33,22 @@ type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternCo
     operationType: T;
   };
 
-export type OverallSumIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_sum'>;
-export type OverallMinIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_min'>;
-export type OverallMaxIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_max'>;
-export type OverallAverageIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_average'>;
+export type OverallSumIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_SUM_ID>;
+export type OverallMinIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_MIN_ID>;
+export type OverallMaxIndexPatternColumn = OverallMetricIndexPatternColumn<typeof OVERALL_MAX_ID>;
+export type OverallAverageIndexPatternColumn = OverallMetricIndexPatternColumn<
+  typeof OVERALL_AVERAGE_ID
+>;
 
 function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<string>>({
   type,
   displayName,
   ofName,
-  description,
   metric,
 }: {
   type: T['operationType'];
   displayName: string;
   ofName: (name?: string) => string;
-  description: string;
   metric: string;
 }): OperationDefinition<T, 'fullReference'> {
   return {
@@ -90,21 +104,12 @@ function buildOverallMetricOperation<T extends OverallMetricIndexPatternColumn<s
     },
     filterable: false,
     shiftable: false,
-    documentation: {
-      section: 'calculation',
-      signature: i18n.translate('xpack.lens.indexPattern.overall_metric', {
-        defaultMessage: 'metric: number',
-      }),
-      description,
-    },
   };
 }
 
 export const overallSumOperation = buildOverallMetricOperation<OverallSumIndexPatternColumn>({
-  type: 'overall_sum',
-  displayName: i18n.translate('xpack.lens.indexPattern.overallSum', {
-    defaultMessage: 'Overall sum',
-  }),
+  type: OVERALL_SUM_ID,
+  displayName: OVERALL_SUM_NAME,
   ofName: (name?: string) => {
     return i18n.translate('xpack.lens.indexPattern.overallSumOf', {
       defaultMessage: 'Overall sum of {name}',
@@ -117,25 +122,12 @@ export const overallSumOperation = buildOverallMetricOperation<OverallSumIndexPa
       },
     });
   },
-  metric: 'sum',
-  description: i18n.translate('xpack.lens.indexPattern.overall_sum.documentation.markdown', {
-    defaultMessage: `
-Calculates the sum of a metric of all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
-Other dimensions breaking down the data like top values or filter are treated as separate series.
-
-If no date histograms or interval functions are used in the current chart, \`overall_sum\` is calculating the sum over all dimensions no matter the used function.
-
-Example: Percentage of total
-\`sum(bytes) / overall_sum(sum(bytes))\`
-      `,
-  }),
+  metric: SUM_ID,
 });
 
 export const overallMinOperation = buildOverallMetricOperation<OverallMinIndexPatternColumn>({
-  type: 'overall_min',
-  displayName: i18n.translate('xpack.lens.indexPattern.overallMin', {
-    defaultMessage: 'Overall min',
-  }),
+  type: OVERALL_MIN_ID,
+  displayName: OVERALL_MIN_NAME,
   ofName: (name?: string) => {
     return i18n.translate('xpack.lens.indexPattern.overallMinOf', {
       defaultMessage: 'Overall min of {name}',
@@ -148,25 +140,12 @@ export const overallMinOperation = buildOverallMetricOperation<OverallMinIndexPa
       },
     });
   },
-  metric: 'min',
-  description: i18n.translate('xpack.lens.indexPattern.overall_min.documentation.markdown', {
-    defaultMessage: `
-Calculates the minimum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
-Other dimensions breaking down the data like top values or filter are treated as separate series.
-
-If no date histograms or interval functions are used in the current chart, \`overall_min\` is calculating the minimum over all dimensions no matter the used function
-
-Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes)) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
-      `,
-  }),
+  metric: MIN_ID,
 });
 
 export const overallMaxOperation = buildOverallMetricOperation<OverallMaxIndexPatternColumn>({
-  type: 'overall_max',
-  displayName: i18n.translate('xpack.lens.indexPattern.overallMax', {
-    defaultMessage: 'Overall max',
-  }),
+  type: OVERALL_MAX_ID,
+  displayName: OVERALL_MAX_NAME,
   ofName: (name?: string) => {
     return i18n.translate('xpack.lens.indexPattern.overallMaxOf', {
       defaultMessage: 'Overall max of {name}',
@@ -179,26 +158,13 @@ export const overallMaxOperation = buildOverallMetricOperation<OverallMaxIndexPa
       },
     });
   },
-  metric: 'max',
-  description: i18n.translate('xpack.lens.indexPattern.overall_max.documentation.markdown', {
-    defaultMessage: `
-Calculates the maximum of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
-Other dimensions breaking down the data like top values or filter are treated as separate series.
-
-If no date histograms or interval functions are used in the current chart, \`overall_max\` is calculating the maximum over all dimensions no matter the used function
-
-Example: Percentage of range
-\`(sum(bytes) - overall_min(sum(bytes))) / (overall_max(sum(bytes)) - overall_min(sum(bytes)))\`
-      `,
-  }),
+  metric: MAX_ID,
 });
 
 export const overallAverageOperation =
   buildOverallMetricOperation<OverallAverageIndexPatternColumn>({
-    type: 'overall_average',
-    displayName: i18n.translate('xpack.lens.indexPattern.overallMax', {
-      defaultMessage: 'Overall max',
-    }),
+    type: OVERALL_AVERAGE_ID,
+    displayName: OVERALL_AVERAGE_NAME,
     ofName: (name?: string) => {
       return i18n.translate('xpack.lens.indexPattern.overallAverageOf', {
         defaultMessage: 'Overall average of {name}',
@@ -211,16 +177,5 @@ export const overallAverageOperation =
         },
       });
     },
-    metric: 'average',
-    description: i18n.translate('xpack.lens.indexPattern.overall_average.documentation.markdown', {
-      defaultMessage: `
-Calculates the average of a metric for all data points of a series in the current chart. A series is defined by a dimension using a date histogram or interval function.
-Other dimensions breaking down the data like top values or filter are treated as separate series.
-
-If no date histograms or interval functions are used in the current chart, \`overall_average\` is calculating the average over all dimensions no matter the used function
-
-Example: Divergence from the mean:
-\`sum(bytes) - overall_average(sum(bytes))\`
-      `,
-    }),
+    metric: AVG_ID,
   });

@@ -45,6 +45,7 @@ describe('convertHighlightedFieldsToTableRow', () => {
         field: 'host.name-override',
         description: {
           field: 'host.name-override',
+          originalField: 'host.name',
           values: ['host-1'],
           scopeId: 'scopeId',
           isPreview,

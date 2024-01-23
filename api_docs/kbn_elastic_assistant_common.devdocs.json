@@ -453,7 +453,43 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
-    "objects": []
+    "misc": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.AssistantFeatures",
+        "type": "Type",
+        "tags": [],
+        "label": "AssistantFeatures",
+        "description": [
+          "\nInterface for features available to the elastic assistant"
+        ],
+        "signature": [
+          "{ readonly assistantModelEvaluation: boolean; readonly assistantStreamingEnabled: boolean; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.defaultAssistantFeatures",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultAssistantFeatures",
+        "description": [
+          "\nDefault features available to the elastic assistant"
+        ],
+        "signature": [
+          "{ readonly assistantModelEvaluation: boolean; readonly assistantStreamingEnabled: boolean; }"
+        ],
+        "path": "x-pack/packages/kbn-elastic-assistant-common/impl/capabilities/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

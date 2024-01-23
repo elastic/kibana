@@ -29,7 +29,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 describe(
   'Host details flyout',
   {
-    tags: ['@ess', '@serverless'],
+    tags: ['@ess'],
     env: {
       ftrConfig: {
         kbnServerArgs: [
@@ -52,7 +52,8 @@ describe(
       expandFirstAlertHostFlyout();
     });
 
-    describe('Host flyout', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/173991
+    describe.skip('Host flyout', () => {
       it('should display header section', () => {
         cy.log('header and content');
 

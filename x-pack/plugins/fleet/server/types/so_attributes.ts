@@ -228,6 +228,7 @@ export interface SettingsSOAttributes {
   has_seen_add_data_notice?: boolean;
   fleet_server_hosts?: string[];
   secret_storage_requirements_met?: boolean;
+  output_secret_storage_requirements_met?: boolean;
 }
 
 export interface DownloadSourceSOAttributes {

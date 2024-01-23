@@ -6,21 +6,8 @@
  */
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import React from 'react';
 import TorqParamsFields from './torq_params';
-
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('TorqParamsFields renders', () => {
   test('all params fields is rendered', () => {

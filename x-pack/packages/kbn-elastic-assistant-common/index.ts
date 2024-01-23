@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+export { defaultAssistantFeatures } from './impl/capabilities';
+export type { AssistantFeatures } from './impl/capabilities';
+
 export { getAnonymizedValue } from './impl/data_anonymization/get_anonymized_value';
 
 export {

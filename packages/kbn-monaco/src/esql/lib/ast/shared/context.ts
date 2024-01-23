@@ -20,6 +20,7 @@ import {
   isColumnItem,
   getLastCharFromTrimmed,
   getFunctionDefinition,
+  isSourceItem,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -69,7 +70,9 @@ function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | u
 }
 
 function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
-  return Boolean(node && isColumnItem(node) && node.name === EDITOR_MARKER);
+  return Boolean(
+    node && (isColumnItem(node) || isSourceItem(node)) && node.name.endsWith(EDITOR_MARKER)
+  );
 }
 
 function cleanMarkerNode(node: ESQLSingleAstItem | undefined): ESQLSingleAstItem | undefined {

@@ -1746,48 +1746,6 @@
                 "id": "def-public.CustomizePanelAction.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "overlays",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-common.OverlayStart",
-                    "text": "OverlayStart"
-                  }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "theme",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-theme-browser",
-                    "scope": "common",
-                    "docId": "kibKbnCoreThemeBrowserPluginApi",
-                    "section": "def-common.ThemeServiceSetup",
-                    "text": "ThemeServiceSetup"
-                  }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$3",
-                "type": "Object",
-                "tags": [],
                 "label": "editPanel",
                 "description": [],
                 "signature": [
@@ -1798,71 +1756,6 @@
                     "section": "def-public.EditPanelAction",
                     "text": "EditPanelAction"
                   }
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$4",
-                "type": "Array",
-                "tags": [],
-                "label": "commonlyUsedRanges",
-                "description": [],
-                "signature": [
-                  "CommonlyUsedRange",
-                  "[] | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.Unnamed.$5",
-                "type": "string",
-                "tags": [],
-                "label": "dateFormat",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.CustomizePanelAction.isTimeRangeCompatible",
-            "type": "Function",
-            "tags": [],
-            "label": "isTimeRangeCompatible",
-            "description": [],
-            "signature": [
-              "({ embeddable }: ",
-              "CustomizePanelActionContext",
-              ") => boolean"
-            ],
-            "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.CustomizePanelAction.isTimeRangeCompatible.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "{ embeddable }",
-                "description": [],
-                "signature": [
-                  "CustomizePanelActionContext"
                 ],
                 "path": "src/plugins/embeddable/public/embeddable_panel/panel_actions/customize_panel_action/customize_panel_action.tsx",
                 "deprecated": false,

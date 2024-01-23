@@ -17,6 +17,23 @@ import { StatefulEventContext } from '../../../../../common/components/events_vi
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 
 const mockedTelemetry = createTelemetryServiceMock();
+const mockUseIsExperimentalFeatureEnabled = jest.fn();
+const mockOpenRightPanel = jest.fn();
+
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
+  useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled,
+}));
+
+jest.mock('@kbn/expandable-flyout/src/context', () => {
+  const original = jest.requireActual('@kbn/expandable-flyout/src/context');
+
+  return {
+    ...original,
+    useExpandableFlyoutContext: () => ({
+      openRightPanel: mockOpenRightPanel,
+    }),
+  };
+});
 
 jest.mock('react-redux', () => {
   const origin = jest.requireActual('react-redux');
@@ -194,6 +211,29 @@ describe('HostName', () => {
         },
         tabType: context.tabType,
       });
+      expect(toggleExpandedDetail).not.toHaveBeenCalled();
+    });
+  });
+
+  test('it should open expandable flyout if timeline is not in context and experimental flag is enabled', async () => {
+    mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+    const context = {
+      enableHostDetailsFlyout: true,
+      enableIpDetailsFlyout: true,
+      timelineID: 'fake-timeline',
+      tabType: TimelineTabs.query,
+    };
+    const wrapper = mount(
+      <TestProviders>
+        <StatefulEventContext.Provider value={context}>
+          <HostName {...props} />
+        </StatefulEventContext.Provider>
+      </TestProviders>
+    );
+
+    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
+    await waitFor(() => {
+      expect(mockOpenRightPanel).toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });

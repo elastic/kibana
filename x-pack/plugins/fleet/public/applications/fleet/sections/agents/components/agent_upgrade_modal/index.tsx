@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiCallOut,
   EuiDatePicker,
+  EuiFieldText,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -49,8 +50,8 @@ import {
 
 import { sendGetAgentsAvailableVersions } from '../../../../hooks';
 import {
-  isAgentUpgradeable,
   getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
 } from '../../../../../../../common/services/is_agent_upgradeable';
 
 import {
@@ -206,6 +207,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   ];
   const [selectedVersion, setSelectedVersion] = useState(preselected);
 
+  const [selectedVersionStr, setSelectedVersionStr] = useState('');
+
   // latest agent version might be earlier than kibana version
   const latestAgentVersion = useAgentVersion();
   useEffect(() => {
@@ -243,7 +246,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       const { error } =
         isSingleAgent &&
         !isScheduled &&
-        isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value)
+        isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value)
           ? await sendPostAgentUpgrade((agents[0] as Agent).id, {
               version,
               force: isUpdating,
@@ -339,10 +342,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
       }
       confirmButtonDisabled={
         isSubmitting ||
-        noVersions ||
         (isUpdating && updatingAgents === 0) ||
-        (isSingleAgent &&
-          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value))
+        (isSingleAgent && !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value))
       }
       confirmButtonText={
         isSingleAgent ? (
@@ -374,10 +375,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         {noVersions ? (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.noVersionsText"
-            defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
+            defaultMessage="No newer versions found to upgrade to. You may type in a custom version."
           />
         ) : isSingleAgent ? (
-          !isAgentUpgradeable(agents[0], latestAgentVersion || '', selectedVersion[0].value) ? (
+          !isAgentUpgradeableToVersion(agents[0], selectedVersion[0].value) ? (
             <EuiCallOut
               data-test-subj="agentUpgradeModal.notUpgradeableCallout"
               color="warning"
@@ -443,25 +444,38 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
         })}
         fullWidth
       >
-        <EuiComboBox
-          data-test-subj="agentUpgradeModal.VersionCombobox"
-          fullWidth
-          singleSelection={{ asPlainText: true }}
-          options={versionOptions}
-          isDisabled={noVersions}
-          isClearable={false}
-          selectedOptions={selectedVersion}
-          onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
-            if (!selected.length) {
-              return;
+        {noVersions ? (
+          <EuiFieldText
+            fullWidth
+            placeholder="Enter version"
+            value={selectedVersionStr}
+            data-test-subj="agentUpgradeModal.VersionInput"
+            onChange={(e) => {
+              const newValue = e.target.value;
+              setSelectedVersionStr(newValue);
+              setSelectedVersion([{ label: newValue, value: newValue }]);
+            }}
+          />
+        ) : (
+          <EuiComboBox
+            data-test-subj="agentUpgradeModal.VersionCombobox"
+            fullWidth
+            singleSelection={{ asPlainText: true }}
+            options={versionOptions}
+            isClearable={false}
+            selectedOptions={selectedVersion}
+            onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+              if (!selected.length) {
+                return;
+              }
+              setSelectedVersion(selected);
+            }}
+            onCreateOption={
+              config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
             }
-            setSelectedVersion(selected);
-          }}
-          onCreateOption={
-            config?.internal?.onlyAllowAgentUpgradeToKnownVersions ? undefined : onCreateOption
-          }
-          customOptionText="Use custom agent version {searchValue} (not recommended)"
-        />
+            customOptionText="Use custom agent version {searchValue} (not recommended)"
+          />
+        )}
       </EuiFormRow>
       {!isSingleAgent &&
       Array.isArray(agents) &&

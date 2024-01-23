@@ -59,6 +59,11 @@ deploy() {
       -XPOST -d "$PROJECT_CREATE_CONFIGURATION" &>> $DEPLOY_LOGS
 
     PROJECT_ID=$(jq -r --slurp '.[1].id' $DEPLOY_LOGS)
+    if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
+      echo "Failed to create project. Deploy logs:"
+      cat $DEPLOY_LOGS
+      exit 1
+    fi
 
     echo "Get credentials..."
     curl -s -XPOST -H "Authorization: ApiKey $PROJECT_API_KEY" \

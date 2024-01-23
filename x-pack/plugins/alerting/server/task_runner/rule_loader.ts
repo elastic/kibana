@@ -6,12 +6,13 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, FakeRawRequest, Headers } from '@kbn/core/server';
+import { CoreKibanaRequest, FakeRawRequest, Headers, SavedObject } from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   LoadedIndirectParams,
   LoadIndirectParamsResult,
 } from '@kbn/task-manager-plugin/server/task';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
 import {
@@ -70,23 +71,33 @@ export function validateRule<Params extends RuleTypeParams>(
   const { enabled, apiKey } = indirectParams;
 
   if (!enabled) {
-    throw new ErrorWithReason(
-      RuleExecutionStatusErrorReasons.Disabled,
-      new Error(`Rule failed to execute because rule ran after it was disabled.`)
+    throw createTaskRunError(
+      new ErrorWithReason(
+        RuleExecutionStatusErrorReasons.Disabled,
+        new Error(`Rule failed to execute because rule ran after it was disabled.`)
+      ),
+      TaskErrorSource.FRAMEWORK
     );
   }
+
   alertingEventLogger.setRuleName(rule.name);
   try {
     ruleTypeRegistry.ensureRuleTypeEnabled(rule.alertTypeId);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err);
+    throw createTaskRunError(
+      new ErrorWithReason(RuleExecutionStatusErrorReasons.License, err),
+      TaskErrorSource.USER
+    );
   }
 
   let validatedParams: Params;
   try {
     validatedParams = validateRuleTypeParams<Params>(rule.params, paramValidator);
   } catch (err) {
-    throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err);
+    throw createTaskRunError(
+      new ErrorWithReason(RuleExecutionStatusErrorReasons.Validate, err),
+      TaskErrorSource.USER
+    );
   }
 
   if (rule.monitoring) {
@@ -114,11 +125,17 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
 ): Promise<RuleData<Params>> {
   const namespace = context.spaceIdToNamespace(spaceId);
 
-  const rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
-    RULE_SAVED_OBJECT_TYPE,
-    ruleId,
-    { namespace }
-  );
+  let rawRule: SavedObject<RawRule>;
+
+  try {
+    rawRule = await context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawRule>(
+      RULE_SAVED_OBJECT_TYPE,
+      ruleId,
+      { namespace }
+    );
+  } catch (e) {
+    throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+  }
 
   const fakeRequest = getFakeKibanaRequest(context, spaceId, rawRule.attributes.apiKey);
   const rulesClient = context.getRulesClientWithRequest(fakeRequest);

@@ -125,30 +125,17 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
 
   cy.request({
     log: false,
-    method: 'GET',
+    method: 'DELETE',
     url: `${kibanaUrl}/api/fleet/epm/packages/${integrationName}`,
+    body: {
+      force: false,
+    },
     headers: {
       'kbn-xsrf': 'e2e_test',
+      'Elastic-Api-Version': '1',
     },
     auth: { user: 'editor', pass: 'changeme' },
     failOnStatusCode: false,
-  }).then((response) => {
-    const status = response.body.item?.status;
-    if (status === 'installed') {
-      cy.request({
-        log: false,
-        method: 'DELETE',
-        url: `${kibanaUrl}/api/fleet/epm/packages/${integrationName}`,
-        body: {
-          force: false,
-        },
-        headers: {
-          'kbn-xsrf': 'e2e_test',
-          'Elastic-Api-Version': '1',
-        },
-        auth: { user: 'editor', pass: 'changeme' },
-      });
-    }
   });
 });
 

@@ -29,7 +29,7 @@ import { timelineSelectors } from '../../../store';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { timelineDefaults } from '../../../store/defaults';
 import { savedSearchComparator } from './utils';
-import { setIsDiscoverSavedSearchLoaded } from '../../../store/actions';
+import { setIsDiscoverSavedSearchLoaded, endTimelineSaving } from '../../../store/actions';
 import { GET_TIMELINE_DISCOVER_SAVED_SEARCH_TITLE } from './translations';
 
 const HideSearchSessionIndicatorBreadcrumbIcon = createGlobalStyle`
@@ -131,6 +131,13 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
         resetDiscoverAppState().then(() => {
           setSavedSearchLoaded(true);
         });
+      } else {
+        dispatch(
+          endTimelineSaving({
+            id: timelineId,
+          })
+        );
+        setSavedSearchLoaded(true);
       }
       return;
     }
@@ -148,6 +155,8 @@ export const DiscoverTabContent: FC<DiscoverTabContentProps> = ({ timelineId }) 
     restoreDiscoverAppStateFromSavedSearch,
     isFetching,
     setSavedSearchLoaded,
+    dispatch,
+    timelineId,
   ]);
 
   const getCombinedDiscoverSavedSearchState: () => SavedSearch | undefined = useCallback(() => {

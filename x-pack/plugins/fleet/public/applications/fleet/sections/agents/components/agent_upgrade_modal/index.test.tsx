@@ -90,8 +90,8 @@ describe('AgentUpgradeAgentModal', () => {
         agentCount: 30,
       });
 
-      const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
       await waitFor(() => {
+        const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
         expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
       });
     });
@@ -102,11 +102,27 @@ describe('AgentUpgradeAgentModal', () => {
         agentCount: 1,
       });
 
-      const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
-      const input = within(container).getByRole<HTMLInputElement>('combobox');
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+      });
+    });
+
+    it('should display the custom version text input if no versions', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
 
       await waitFor(() => {
-        expect(input?.value).toEqual('8.10.2');
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        expect(input?.textContent).toEqual('');
       });
     });
 

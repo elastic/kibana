@@ -16,8 +16,8 @@ import type { NavigationID as DevNavId } from '@kbn/default-nav-devtools';
 // use this for nicer type suggestions, but allow any string anyway
 type NavigationId = MlNavId | AlNavId | MgmtNavId | DevNavId | string;
 
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import type { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
 const getSectionIdTestSubj = (sectionId: NavigationId) => `~nav-item-${sectionId}`;
 

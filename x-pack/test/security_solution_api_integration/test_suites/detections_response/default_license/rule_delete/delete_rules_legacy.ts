@@ -27,7 +27,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('@ess delete_rules_legacy', () => {
+  describe('@ess Legacy route for deleting rules', () => {
     describe('deleting rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);

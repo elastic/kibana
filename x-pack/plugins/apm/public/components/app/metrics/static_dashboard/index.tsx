@@ -19,21 +19,18 @@ import { i18n } from '@kbn/i18n';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { NotificationsStart } from '@kbn/core/public';
-import { useDataViewId } from '../../../../hooks/use_data_view_id';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
 } from '../../../../../common/environment_filter_values';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-import { getDashboardPanelMap, MetricsDashboardProps } from './helper';
+import { convertSavedDashboardToPanels, MetricsDashboardProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
-  const dataViewId = useDataViewId();
-
+  const { dataView } = dashboardProps;
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useApmParams('/services/{serviceName}/metrics');
@@ -41,8 +38,6 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const {
     core: { notifications },
   } = useApmPluginContext();
-
-  const { dataView } = useApmDataView();
 
   const { serviceName } = useApmServiceContext();
 
@@ -55,21 +50,17 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   }, [kuery, dashboard, rangeFrom, rangeTo]);
 
   useEffect(() => {
-    if (!dashboard || !dataView) return;
+    if (!dashboard) return;
 
     dashboard.updateInput({
       filters: dataView ? getFilters(serviceName, environment, dataView) : [],
     });
   }, [dataView, serviceName, environment, dashboard]);
 
-  if (!dataViewId) {
-    return null;
-  }
-
   return (
     <DashboardRenderer
       getCreationOptions={() =>
-        getCreationOptions(dashboardProps, notifications, dataViewId)
+        getCreationOptions(dashboardProps, notifications, dataView)
       }
       ref={setDashboard}
     />
@@ -79,20 +70,23 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
   notifications: NotificationsStart,
-  dataViewId: string
+  dataView: DataView
 ): Promise<DashboardCreationOptions> {
   try {
     const builder = controlGroupInputBuilder;
     const controlGroupInput = getDefaultControlGroupInput();
 
     await builder.addDataControlFromField(controlGroupInput, {
-      dataViewId,
+      dataViewId: dataView.id ?? '',
       title: 'Node name',
       fieldName: 'service.node.name',
       width: 'medium',
       grow: true,
     });
-    const panels = await getDashboardPanelMap(dashboardProps, dataViewId);
+    const panels = await convertSavedDashboardToPanels(
+      dashboardProps,
+      dataView
+    );
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');

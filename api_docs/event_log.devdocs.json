@@ -807,6 +807,21 @@
         "children": [
           {
             "parentPluginId": "eventLog",
+            "id": "def-server.AggregateEventsBySavedObjectResult.hits",
+            "type": "Object",
+            "tags": [],
+            "label": "hits",
+            "description": [],
+            "signature": [
+              "SearchHitsMetadata",
+              "<unknown> | undefined"
+            ],
+            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "eventLog",
             "id": "def-server.AggregateEventsBySavedObjectResult.aggregations",
             "type": "Object",
             "tags": [],

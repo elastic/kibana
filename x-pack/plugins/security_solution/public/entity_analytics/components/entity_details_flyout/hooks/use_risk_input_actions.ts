@@ -30,7 +30,7 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
     tableId: TableId.riskInputs,
   });
 
-  const { cases: casesService } = useKibana().services;
+  const { cases: casesService, telemetry } = useKibana().services;
   const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess: noop });
   const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal();
 
@@ -58,7 +58,12 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
         closePopover();
         createCaseFlyout.open({ attachments: caseAttachments });
       },
+
       addToNewTimeline: () => {
+        telemetry.reportAddRiskInputToTimelineClicked({
+          quantity: alerts.length,
+        });
+
         closePopover();
         timelineAction.onClick(
           alerts.map((alert: AlertRawData) => {
@@ -79,6 +84,14 @@ export const useRiskInputActions = (alerts: AlertRawData[], closePopover: () => 
         );
       },
     }),
-    [alerts, caseAttachments, closePopover, createCaseFlyout, selectCaseModal, timelineAction]
+    [
+      alerts,
+      caseAttachments,
+      closePopover,
+      createCaseFlyout,
+      selectCaseModal,
+      telemetry,
+      timelineAction,
+    ]
   );
 };

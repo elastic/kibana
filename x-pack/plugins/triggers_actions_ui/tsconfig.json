@@ -58,7 +58,9 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/serverless",
     "@kbn/field-formats-plugin",
-    "@kbn/triggers-actions-ui-types"
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/code-editor",
+    "@kbn/code-editor-mock",
   ],
   "exclude": ["target/**/*"]
 }

@@ -14,6 +14,7 @@ import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { AppMountParameters, ScopedHistory } from '@kbn/core/public';
 import { LogsSharedClientStartExports } from '@kbn/logs-shared-plugin/public';
 import { DatasetQualityPluginStart } from '@kbn/dataset-quality-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ObservabilityLogExplorerLocators,
   ObservabilityLogExplorerLocationState,
@@ -37,6 +38,7 @@ export interface ObservabilityLogExplorerStartDeps {
   discover: DiscoverStart;
   logExplorer: LogExplorerPluginStart;
   logsShared: LogsSharedClientStartExports;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
   serverless?: ServerlessPluginStart;
   share: SharePluginStart;

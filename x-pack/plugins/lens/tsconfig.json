@@ -96,9 +96,15 @@
     "@kbn/panel-loader",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
+    "@kbn/discover-utils",
+    "@kbn/code-editor",
     "@kbn/calculate-width-from-char-count",
     "@kbn/discover-utils",
-    "@kbn/visualization-utils"
+    "@kbn/lens-formula-docs",
+    "@kbn/visualization-utils",
+    "@kbn/test-eui-helpers",
+    "@kbn/shared-ux-utility",
+    "@kbn/text-based-editor"
   ],
   "exclude": [
     "target/**/*"

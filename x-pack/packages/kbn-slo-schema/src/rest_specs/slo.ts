@@ -50,6 +50,7 @@ const createSLOParamsSchema = t.type({
       settings: optionalSettingsSchema,
       tags: tagsSchema,
       groupBy: allOrAnyString,
+      revision: t.number,
     }),
   ]),
 });

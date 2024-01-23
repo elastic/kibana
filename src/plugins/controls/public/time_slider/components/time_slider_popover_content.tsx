@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { Ref } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiRangeTick, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { getIsAnchored } from '../time_slider_selectors';
 import { TimeSliderStrings } from './time_slider_strings';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { TimeSliderAnchoredRange } from './time_slider_anchored_range';
-import { EuiDualRangeRef, TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
+import { TimeSliderSlidingWindowRange } from './time_slider_sliding_window_range';
 
 interface Props {
   value: [number, number];
@@ -22,7 +22,6 @@ interface Props {
   ticks: EuiRangeTick[];
   timeRangeMin: number;
   timeRangeMax: number;
-  rangeRef?: Ref<EuiDualRangeRef>;
 }
 
 export function TimeSliderPopoverContent(props: Props) {
@@ -55,7 +54,6 @@ export function TimeSliderPopoverContent(props: Props) {
       value={props.value}
       onChange={props.onChange}
       stepSize={props.stepSize}
-      rangeRef={props.rangeRef}
       ticks={ticks}
       timeRangeMin={props.timeRangeMin}
       timeRangeMax={props.timeRangeMax}

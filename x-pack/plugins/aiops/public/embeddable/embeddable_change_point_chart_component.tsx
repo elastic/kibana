@@ -15,12 +15,16 @@ import {
   useEmbeddableFactory,
 } from '@kbn/embeddable-plugin/public';
 import { EuiLoadingChart } from '@elastic/eui';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
+import {
+  type ChangePointDetectionViewType,
+  type EmbeddableChangePointType,
+} from '../../common/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
 
 export interface EmbeddableChangePointChartProps {
+  viewType?: ChangePointDetectionViewType;
   dataViewId: string;
   timeRange: TimeRange;
   fn: 'avg' | 'sum' | 'min' | 'max' | string;
@@ -40,12 +44,16 @@ export interface EmbeddableChangePointChartProps {
    * Last reload request time, can be used for manual reload
    */
   lastReloadRequestTime?: number;
+  /** Origin of the embeddable instance */
+  embeddingOrigin?: string;
 }
-export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
+export function getEmbeddableChangePointChart(
+  visType: EmbeddableChangePointType,
+  core: CoreStart,
+  plugins: AiopsPluginStartDeps
+) {
   const { embeddable: embeddableStart } = plugins;
-  const factory = embeddableStart.getEmbeddableFactory<EmbeddableChangePointChartInput>(
-    EMBEDDABLE_CHANGE_POINT_CHART_TYPE
-  )!;
+  const factory = embeddableStart.getEmbeddableFactory<EmbeddableChangePointChartInput>(visType)!;
 
   return (props: EmbeddableChangePointChartProps) => {
     const input = { ...props };

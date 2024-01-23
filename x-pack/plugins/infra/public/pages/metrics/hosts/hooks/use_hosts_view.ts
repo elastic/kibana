@@ -41,7 +41,7 @@ const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const {
-    services: { http, data },
+    services: { http, data, telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const abortCtrlRef = useRef(new AbortController());
@@ -59,14 +59,26 @@ export const useHostsView = () => {
   );
 
   const [state, refetch] = useAsyncFn(
-    () => {
+    async () => {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
 
-      return http.post<GetInfraMetricsResponsePayload>(`${BASE_INFRA_METRICS_PATH}`, {
-        signal: abortCtrlRef.current.signal,
-        body: JSON.stringify(baseRequest),
-      });
+      const start = performance.now();
+      const metricsResponse = await http.post<GetInfraMetricsResponsePayload>(
+        `${BASE_INFRA_METRICS_PATH}`,
+        {
+          signal: abortCtrlRef.current.signal,
+          body: JSON.stringify(baseRequest),
+        }
+      );
+      const duration = performance.now() - start;
+      telemetry.reportPerformanceMetricEvent(
+        'infra_hosts_table_load',
+        duration,
+        { key1: 'data_load', value1: duration },
+        { limit: searchCriteria.limit }
+      );
+      return metricsResponse;
     },
     [baseRequest, http],
     { loading: true }

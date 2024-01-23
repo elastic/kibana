@@ -37,7 +37,7 @@ export interface StackedBarChartProps {
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
   charts: TopNSubchart[];
   showFrames: boolean;
-  onClick?: (category: string) => void;
+  onClick?: (selectedChart: TopNSubchart) => void;
 }
 
 export function StackedBarChart({
@@ -79,12 +79,11 @@ export function StackedBarChart({
             percentage={highlightedSubchart.Percentage}
             sample={highlightedSample}
             showFrames={showFrames}
-            /* we don't show metadata in tooltips */
-            metadata={[]}
             height={128}
             width={MAX_TOOLTIP_WIDTH}
             showAxes={false}
             padTitle={false}
+            onClick={onClick ? () => onClick(highlightedSubchart) : undefined}
           />
         </EuiPanel>
       </TooltipContainer>
@@ -113,7 +112,7 @@ export function StackedBarChart({
             ? (elements) => {
                 const [value] = elements[0] as XYChartElementEvent;
                 const sample = value.datum as TopNSample;
-                onClick(sample.Category);
+                onClick(chartsbyCategoryMap[sample.Category]);
               }
             : undefined
         }

@@ -6,18 +6,22 @@
  */
 
 import type { EuiBasicTableColumn, Pagination } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import { useAlertsByIds } from '../../../../common/containers/alerts/use_alerts_by_ids';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { ActionColumn } from '../components/action_column';
 import { RiskInputsUtilityBar } from '../components/utility_bar';
+import { useRiskContributingAlerts } from '../../../hooks/use_risk_contributing_alerts';
+import { useRiskScore } from '../../../api/hooks/use_risk_score';
+import { buildHostNamesFilter, buildUserNamesFilter } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/entity_analytics/risk_engine';
 
 export interface RiskInputsTabProps extends Record<string, unknown> {
-  alertIds: string[];
+  entityType: RiskScoreEntity;
+  entityName: string;
 }
 
 export interface AlertRawData {
@@ -26,9 +30,36 @@ export interface AlertRawData {
   _id: string;
 }
 
-export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
+const FIRST_RECORD_PAGINATION = {
+  cursorStart: 0,
+  querySize: 1,
+};
+
+export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
-  const { loading, data: alertsData } = useAlertsByIds({ alertIds });
+
+  const nameFilterQuery = useMemo(() => {
+    if (entityType === RiskScoreEntity.host) {
+      return buildHostNamesFilter([entityName]);
+    } else if (entityType === RiskScoreEntity.user) {
+      return buildUserNamesFilter([entityName]);
+    }
+  }, [entityName, entityType]);
+
+  const { data: riskScoreData, error: riskScoreError } = useRiskScore({
+    riskEntity: entityType,
+    filterQuery: nameFilterQuery,
+    onlyLatest: false,
+    pagination: FIRST_RECORD_PAGINATION,
+    skip: nameFilterQuery === undefined,
+  });
+
+  const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
+  const {
+    loading,
+    data: alertsData,
+    error: riskAlertsError,
+  } = useRiskContributingAlerts({ riskScore });
 
   const euiTableSelectionProps = useMemo(
     () => ({
@@ -98,12 +129,34 @@ export const RiskInputsTab = ({ alertIds }: RiskInputsTabProps) => {
 
   const pagination: Pagination = useMemo(
     () => ({
-      totalItemCount: alertIds.length,
+      totalItemCount: alertsData?.length ?? 0,
       pageIndex: currentPage.index,
       pageSize: currentPage.size,
     }),
-    [currentPage.index, currentPage.size, alertIds.length]
+    [currentPage.index, currentPage.size, alertsData?.length]
   );
+
+  if (riskScoreError || riskAlertsError) {
+    return (
+      <EuiCallOut
+        title={
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorTitle"
+            defaultMessage="Something went wrong"
+          />
+        }
+        color="danger"
+        iconType="error"
+      >
+        <p>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.errorBody"
+            defaultMessage="Error while fetching risk inputs. Please try again later."
+          />
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <>

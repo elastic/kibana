@@ -101,13 +101,15 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/monaco",
-    "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
     "@kbn/custom-icons",
     "@kbn/elastic-agent-utils",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/observability-get-padded-alert-time-range-util",
-    "@kbn/core-lifecycle-server"
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
+    "@kbn/shared-svg",
   ],
   "exclude": ["target/**/*"]
 }

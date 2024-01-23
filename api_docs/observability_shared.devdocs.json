@@ -385,7 +385,7 @@
           {
             "parentPluginId": "observabilityShared",
             "id": "def-public.EmbeddableFunctions.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
@@ -440,6 +440,72 @@
               }
             ],
             "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_profiling_search_bar.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.EmbeddableStackTraces",
+        "type": "Function",
+        "tags": [],
+        "label": "EmbeddableStackTraces",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_stack_traces.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.EmbeddableStackTraces.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/embeddable_stack_traces.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FeatureFeedbackButton",
+        "type": "Function",
+        "tags": [],
+        "label": "FeatureFeedbackButton",
+        "description": [],
+        "signature": [
+          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, surveyButtonText, }: FeatureFeedbackButtonProps) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FeatureFeedbackButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  surveyButtonText = (\n    <FormattedMessage\n      id=\"xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink\"\n      defaultMessage=\"Tell us what you think!\"\n    />\n  ),\n}",
+            "description": [],
+            "signature": [
+              "FeatureFeedbackButtonProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -877,7 +943,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",
@@ -916,7 +982,7 @@
               "DisambiguateSet",
               "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
               "DisambiguateSet",
-              "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+              "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
               "IconType",
               " | undefined; iconProps?: Omit<",
               "EuiIconProps",
@@ -2820,6 +2886,23 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.EMBEDDABLE_STACK_TRACES",
+        "type": "string",
+        "tags": [],
+        "label": "EMBEDDABLE_STACK_TRACES",
+        "description": [
+          "Profiling threads embeddable key"
+        ],
+        "signature": [
+          "\"EMBEDDABLE_STACK_TRACES\""
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/profiling/embeddables/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.LazyObservabilityPageTemplateProps",
         "type": "Type",
         "tags": [],
@@ -3039,7 +3122,7 @@
           "DisambiguateSet",
           "<React.ButtonHTMLAttributes<HTMLButtonElement>, Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">> & Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">) | (",
           "DisambiguateSet",
-          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; target?: string | undefined; rel?: string | undefined; iconType?: ",
+          "<Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, \"href\">, React.ButtonHTMLAttributes<HTMLButtonElement>> & React.ButtonHTMLAttributes<HTMLButtonElement>))), \"color\" | \"onClick\" | \"rel\" | \"target\"> & { size?: \"m\" | \"s\" | \"l\" | \"xs\" | undefined; color?: \"text\" | \"subdued\" | \"primary\" | undefined; label: React.ReactNode; isActive?: boolean | undefined; isDisabled?: boolean | undefined; href?: string | undefined; rel?: string | undefined; target?: string | undefined; external?: boolean | undefined; iconType?: ",
           "IconType",
           " | undefined; iconProps?: Omit<",
           "EuiIconProps",

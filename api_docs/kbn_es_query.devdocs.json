@@ -2817,6 +2817,39 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.getLimitFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getLimitFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string) => number"
+        ],
+        "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.getLimitFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/es_query/es_aggregate_query.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.isCombinedFilter",
         "type": "Function",
         "tags": [],

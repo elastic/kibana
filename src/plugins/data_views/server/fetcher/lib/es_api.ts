@@ -83,7 +83,7 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         ignore_unavailable: true,
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
-        include_fields_with_no_value: includeFieldsWithNoValue ?? true ,
+        include_fields_with_no_value: includeFieldsWithNoValue ?? true,
         ...fieldCapsOptions,
       },
       { meta: true }

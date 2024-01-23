@@ -128,6 +128,7 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
         current
       ) => {
         if (current.enabled) {
+          const inputStatusFormatter = inputStatusMap.get(current.type);
           return [
             ...acc,
             {
@@ -156,18 +157,20 @@ export const AgentDetailsIntegrationInputs: React.FunctionComponent<{
               ),
               id: current.type,
               icon: getInputStatusIcon(current.type),
-              children: [
-                {
-                  label: (
-                    <AgentDetailsIntegrationInputStatus
-                      inputStatusFormatter={inputStatusMap.get(current.type)!}
-                    />
-                  ),
-                  id: `input-status-${current.type}`,
-                  isExpanded: true,
-                  className: 'input-action-item-expanded',
-                },
-              ],
+              children: !!inputStatusFormatter
+                ? [
+                    {
+                      label: (
+                        <AgentDetailsIntegrationInputStatus
+                          inputStatusFormatter={inputStatusFormatter}
+                        />
+                      ),
+                      id: `input-status-${current.type}`,
+                      isExpanded: true,
+                      className: 'input-action-item-expanded',
+                    },
+                  ]
+                : [],
             },
           ];
         }

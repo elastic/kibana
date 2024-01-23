@@ -10,6 +10,7 @@ import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { IndexPrivilegeForm } from './index_privilege_form';
 import { IndexPrivileges } from './index_privileges';

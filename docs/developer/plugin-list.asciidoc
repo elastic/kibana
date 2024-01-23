@@ -502,10 +502,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
-|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
 |Adds all the links to the Elastic Cloud console.
 
@@ -783,7 +779,7 @@ It leverages universal configuration and other APIs in the serverless plugin to 
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
-|This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+|This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]

@@ -9,7 +9,11 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger } from '@kbn/core/server';
 import { ALERT_UUID, getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
 import { asSavedObjectExecutionSource } from '@kbn/actions-plugin/server';
-import { isEphemeralTaskRejectedDueToCapacityError } from '@kbn/task-manager-plugin/server';
+import {
+  createTaskRunError,
+  isEphemeralTaskRejectedDueToCapacityError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import {
   ExecuteOptions as EnqueueExecutionOptions,
   ExecutionResponseItem,
@@ -360,10 +364,15 @@ export class ExecutionHandler<
 
       if (!!bulkActions.length) {
         for (const c of chunk(bulkActions, CHUNK_SIZE)) {
-          const response = await this.actionsClient!.bulkEnqueueExecution(c);
-          if (response.errors) {
+          let enqueueResponse;
+          try {
+            enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
+          } catch (e) {
+            throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+          }
+          if (enqueueResponse.errors) {
             bulkActionsResponse = bulkActionsResponse.concat(
-              response.items.filter(
+              enqueueResponse.items.filter(
                 (i) => i.response === ExecutionResponseType.QUEUED_ACTIONS_LIMIT_ERROR
               )
             );
@@ -730,7 +739,13 @@ export class ExecutionHandler<
         executionUuid: this.executionId,
       };
     }
-    const alerts = await this.alertsClient.getSummarizedAlerts!(options);
+
+    let alerts;
+    try {
+      alerts = await this.alertsClient.getSummarizedAlerts!(options);
+    } catch (e) {
+      throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
+    }
 
     /**
      * We need to remove all new alerts with maintenance windows retrieved from

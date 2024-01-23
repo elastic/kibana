@@ -23,7 +23,8 @@ const caseData: CaseUI = {
   comments: [...basicCase.comments, alertCommentWithIndices],
 };
 
-describe('CaseUI View Page activity tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174819
+describe.skip('CaseUI View Page activity tab', () => {
   const getAlertsStateTableMock = jest.fn();
   let appMockRender: AppMockRenderer;
 
