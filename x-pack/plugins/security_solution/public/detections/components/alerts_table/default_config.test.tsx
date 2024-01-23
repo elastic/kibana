@@ -70,8 +70,6 @@ const platinumBaseColumns = [
   { columnHeaderType: 'not-filtered', id: 'host.risk.calculated_level' },
   { columnHeaderType: 'not-filtered', id: 'user.name' },
   { columnHeaderType: 'not-filtered', id: 'user.risk.calculated_level' },
-  { columnHeaderType: 'not-filtered', id: 'kibana.alert.host.criticality_level' },
-  { columnHeaderType: 'not-filtered', id: 'kibana.alert.user.criticality_level' },
   { columnHeaderType: 'not-filtered', id: 'process.name' },
   { columnHeaderType: 'not-filtered', id: 'file.name' },
   { columnHeaderType: 'not-filtered', id: 'source.ip' },
