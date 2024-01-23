@@ -587,10 +587,15 @@ packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
+packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+packages/presentation/presentation_containers @elastic/kibana-presentation
+packages/presentation/presentation_library @elastic/kibana-presentation
+src/plugins/presentation_panel @elastic/kibana-presentation
+packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/profiling @elastic/obs-ux-infra_services-team

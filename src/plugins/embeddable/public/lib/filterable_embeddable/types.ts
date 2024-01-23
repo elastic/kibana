@@ -7,6 +7,7 @@
  */
 
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { PublishesWritableLocalUnifiedSearch } from '@kbn/presentation-publishing';
 import { EmbeddableInput } from '../embeddables';
 
 export type FilterableEmbeddableInput = EmbeddableInput & {
@@ -17,20 +18,27 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
   timeslice?: [number, number];
 };
 
+export type EmbeddableHasTimeRange = Pick<
+  PublishesWritableLocalUnifiedSearch,
+  | 'localTimeRange'
+  | 'setLocalTimeRange'
+  | 'getFallbackTimeRange'
+  | 'isCompatibleWithLocalUnifiedSearch'
+>;
+
 /**
  * All embeddables that implement this interface should support being filtered
- * and/or queried via the top navigation bar
- * @public
+ * and/or queried via the top navigation bar.
  */
 export interface FilterableEmbeddable {
   /**
    * Gets the embeddable's local filters
    **/
-  getFilters: () => Promise<Filter[]>;
+  getFilters: () => Filter[];
   /**
    * Gets the embeddable's local query
    **/
-  getQuery: () => Promise<Query | AggregateQuery | undefined>;
+  getQuery: () => Query | AggregateQuery | undefined;
 }
 
 /**
