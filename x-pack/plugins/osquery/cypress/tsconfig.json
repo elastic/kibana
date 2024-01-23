@@ -15,7 +15,6 @@
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
     ],
     "resolveJsonModule": true,
   },

@@ -59,3 +59,7 @@ export const TIMELINES_OVERVIEW_ONLY_FAVORITES = `${TIMELINES_OVERVIEW} [data-te
 export const TIMELINES_OVERVIEW_SEARCH = `${TIMELINES_OVERVIEW} [data-test-subj="search-bar"]`;
 
 export const TIMELINES_OVERVIEW_TABLE = `${TIMELINES_OVERVIEW} [data-test-subj="timelines-table"]`;
+
+export const ROWS = '.euiTableRow';
+
+export const TIMELINES_TAB_TEMPLATE = '[data-test-subj="timeline-tab-template"]';

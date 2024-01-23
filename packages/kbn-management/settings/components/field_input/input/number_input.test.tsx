@@ -65,14 +65,17 @@ describe('NumberInput', () => {
     expect(input).toHaveValue(4321);
   });
 
-  it('calls the onInputChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', async () => {
     const { getByTestId } = render(wrap(<NumberInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '54321' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'number',
-      unsavedValue: 54321,
-    });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'number',
+        unsavedValue: 54321,
+      })
+    );
   });
 
   it('disables the input when isDisabled prop is true', () => {

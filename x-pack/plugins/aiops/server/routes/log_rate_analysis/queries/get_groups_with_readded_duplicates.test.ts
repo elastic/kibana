@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { significantTermGroups } from '../../../../common/__mocks__/artificial_logs/significant_term_groups';
+import { significantItemGroups } from '../../../../common/__mocks__/artificial_logs/significant_item_groups';
 import { significantTerms } from '../../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
@@ -16,15 +16,15 @@ import { getMarkedDuplicates } from './get_marked_duplicates';
 
 describe('getGroupsWithReaddedDuplicates', () => {
   it('gets groups with readded duplicates', () => {
-    const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
+    const groupedSignificantItems = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
-    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
+    const fieldValuePairCounts = getFieldValuePairCounts(significantItemGroups);
+    const markedDuplicates = getMarkedDuplicates(significantItemGroups, fieldValuePairCounts);
     const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
       markedDuplicates,
-      groupedSignificantTerms
+      groupedSignificantItems
     );
 
     expect(groupsWithReaddedDuplicates).toEqual([

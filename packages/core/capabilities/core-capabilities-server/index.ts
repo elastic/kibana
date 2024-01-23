@@ -11,4 +11,5 @@ export type {
   CapabilitiesSetup,
   CapabilitiesStart,
   ResolveCapabilitiesOptions,
+  CapabilitiesSwitcherOptions,
 } from './src/contracts';

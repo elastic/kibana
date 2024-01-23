@@ -7,28 +7,24 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import { DocumentStatus } from './status';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProviders } from '../../../../common/mock';
 import { useAlertsActions } from '../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions';
 import { STATUS_BUTTON_TEST_ID } from './test_ids';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 jest.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
-
-const flyoutContextValue = {
-  closeFlyout: jest.fn(),
-} as unknown as ExpandableFlyoutContext;
 
 const renderStatus = (contextValue: RightPanelContext) =>
   render(
     <TestProviders>
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <TestProvider>
         <RightPanelContext.Provider value={contextValue}>
           <DocumentStatus />
         </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     </TestProviders>
   );
 
@@ -60,7 +56,7 @@ describe('<DocumentStatus />', () => {
     expect(getByTestId('data-test-subj')).toBeInTheDocument();
   });
 
-  it('should render empty component', () => {
+  it('should render empty tag when status is not available', () => {
     const contextValue = {
       eventId: 'eventId',
       browserFields: {},
@@ -70,6 +66,20 @@ describe('<DocumentStatus />', () => {
 
     const { container } = renderStatus(contextValue);
 
-    expect(container).toBeEmptyDOMElement();
+    expect(container).toHaveTextContent('Status—');
+  });
+
+  it('should render empty tag in preview mode', () => {
+    const contextValue = {
+      eventId: 'eventId',
+      browserFields: {},
+      dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser,
+      scopeId: 'scopeId',
+      isPreview: true,
+    } as unknown as RightPanelContext;
+
+    const { container } = renderStatus(contextValue);
+
+    expect(container).toHaveTextContent('Status—');
   });
 });

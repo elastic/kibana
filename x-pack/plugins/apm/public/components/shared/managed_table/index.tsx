@@ -14,7 +14,7 @@ import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_
 import { fromQuery, toQuery } from '../links/url_helpers';
 
 // TODO: this should really be imported from EUI
-export interface ITableColumn<T> {
+export interface ITableColumn<T extends object> {
   name: ReactNode;
   actions?: Array<Record<string, unknown>>;
   field?: string;
@@ -26,7 +26,7 @@ export interface ITableColumn<T> {
   render?: (value: any, item: T) => unknown;
 }
 
-interface Props<T> {
+interface Props<T extends object> {
   items: T[];
   columns: Array<ITableColumn<T>>;
   initialPageSize: number;
@@ -59,7 +59,7 @@ export type SortFunction<T> = (
   sortDirection: 'asc' | 'desc'
 ) => T[];
 
-function UnoptimizedManagedTable<T>(props: Props<T>) {
+function UnoptimizedManagedTable<T extends object>(props: Props<T>) {
   const history = useHistory();
   const {
     items,

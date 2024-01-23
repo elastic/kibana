@@ -91,7 +91,12 @@ export async function fetchSearchSourceQuery({
     link,
     numMatches: Number(searchResult.hits.total),
     searchResult,
-    parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
+    parsedResults: parseAggregationResults({
+      isCountAgg,
+      isGroupAgg,
+      esResult: searchResult,
+      sourceFieldsParams: params.sourceFields,
+    }),
     index: [index.name],
   };
 }
@@ -153,6 +158,7 @@ export function updateSearchSource(
       aggField: params.aggField,
       termField: params.termField,
       termSize: params.termSize,
+      sourceFieldsParams: params.sourceFields,
       condition: {
         resultLimit: alertLimit,
         conditionScript: getComparatorScript(

@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { LeftPanelTabsType } from './tabs';
@@ -16,7 +16,7 @@ import { tabs } from './tabs';
 import { useLeftPanelContext } from './context';
 
 export type LeftPanelPaths = 'visualize' | 'insights' | 'investigation' | 'response';
-export const LeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
+export const DocumentDetailsLeftPanelKey: LeftPanelProps['key'] = 'document-details-left';
 export const LeftPanelVisualizeTab: LeftPanelPaths = 'visualize';
 export const LeftPanelInsightsTab: LeftPanelPaths = 'insights';
 export const LeftPanelInvestigationTab: LeftPanelPaths = 'investigation';
@@ -33,7 +33,7 @@ export interface LeftPanelProps extends FlyoutPanelProps {
 }
 
 export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const { eventId, indexName, scopeId } = useLeftPanelContext();
 
   const selectedTabId = useMemo(() => {
@@ -45,7 +45,7 @@ export const LeftPanel: FC<Partial<LeftPanelProps>> = memo(({ path }) => {
 
   const setSelectedTabId = (tabId: LeftPanelTabsType[number]['id']) => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: tabId,
       },

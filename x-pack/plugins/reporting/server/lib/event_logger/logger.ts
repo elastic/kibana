@@ -7,8 +7,8 @@
 
 import deepMerge from 'deepmerge';
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { TaskRunMetrics } from '@kbn/reporting-common';
-import { PLUGIN_ID } from '../../../common/constants';
+import type { TaskRunMetrics } from '@kbn/reporting-common/types';
+import { PLUGIN_ID } from '@kbn/reporting-common';
 import { IReport } from '../store';
 import { ActionType } from '.';
 import { EcsLogAdapter } from './adapter';
@@ -62,9 +62,9 @@ export function reportingEventLoggerFactory(logger: Logger) {
       this.report = report;
       this.task = task;
       this.eventObj = {
-        event: { timezone: report.payload.browserTimezone },
+        event: { timezone: report.payload?.browserTimezone ?? 'UTC' },
         kibana: {
-          reporting: { id: report._id, jobType: report.jobtype },
+          reporting: { id: report._id, jobType: report.jobtype ?? 'NULL' },
           ...(task?.id ? { task: { id: task.id } } : undefined),
         },
         user: report.created_by ? { name: report.created_by } : undefined,

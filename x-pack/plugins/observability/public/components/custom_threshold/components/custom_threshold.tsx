@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/custom_threshold_rule/types';
 
 export interface ChartProps {
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 
@@ -21,7 +21,7 @@ export interface Props {
   chartProps: ChartProps;
   comparator: Comparator | string;
   id: string;
-  threshold: number;
+  threshold: number[];
   title: string;
   value: number;
   valueFormatter: (d: number) => string;
@@ -48,7 +48,7 @@ export function Threshold({
         minWidth: '100%',
       }}
       hasShadow={false}
-      data-test-subj={`thresholdRule-${threshold}-${value}`}
+      data-test-subj={`thresholdRule-${threshold.join('-')}-${value}`}
     >
       <Chart>
         <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
@@ -63,7 +63,10 @@ export function Threshold({
                     {i18n.translate(
                       'xpack.observability.customThreshold.rule.thresholdExtraTitle',
                       {
-                        values: { comparator, threshold: valueFormatter(threshold) },
+                        values: {
+                          comparator,
+                          threshold: threshold.map((t) => valueFormatter(t)).join(' - '),
+                        },
                         defaultMessage: `Alert when {comparator} {threshold}`,
                       }
                     )}

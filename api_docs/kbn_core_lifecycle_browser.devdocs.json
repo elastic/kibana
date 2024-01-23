@@ -616,6 +616,14 @@
                 "path": "x-pack/plugins/transform/public/app/mount_management_section.ts"
               },
               {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/plugins/dashboard/public/dashboard_container/embeddable/api/duplicate_dashboard_panel.test.ts"
+              },
+              {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/services/discover_state.test.ts"
               },
@@ -807,8 +815,8 @@
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-common.ThemeServiceStart",
-                "text": "ThemeServiceStart"
+                "section": "def-common.ThemeServiceSetup",
+                "text": "ThemeServiceSetup"
               }
             ],
             "path": "packages/core/lifecycle/core-lifecycle-browser/src/core_start.ts",

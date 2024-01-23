@@ -53,8 +53,12 @@ describe('agent configuration queries', () => {
 
   describe('listConfigurations', () => {
     it('fetches configurations', async () => {
-      mock = await inspectSearchParams(({ mockInternalESClient }) =>
-        listConfigurations(mockInternalESClient)
+      mock = await inspectSearchParams(
+        ({ mockInternalESClient, mockIndices }) =>
+          listConfigurations({
+            internalESClient: mockInternalESClient,
+            apmIndices: mockIndices,
+          })
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -92,33 +96,39 @@ describe('agent configuration queries', () => {
 
   describe('findExactConfiguration', () => {
     it('find configuration by service.name', async () => {
-      mock = await inspectSearchParams(({ mockInternalESClient }) =>
-        findExactConfiguration({
-          service: { name: 'foo' },
-          internalESClient: mockInternalESClient,
-        })
+      mock = await inspectSearchParams(
+        ({ mockInternalESClient, mockApmEventClient }) =>
+          findExactConfiguration({
+            service: { name: 'foo' },
+            internalESClient: mockInternalESClient,
+            apmEventClient: mockApmEventClient,
+          })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('find configuration by service.environment', async () => {
-      mock = await inspectSearchParams(({ mockInternalESClient }) =>
-        findExactConfiguration({
-          service: { environment: 'bar' },
-          internalESClient: mockInternalESClient,
-        })
+      mock = await inspectSearchParams(
+        ({ mockInternalESClient, mockApmEventClient }) =>
+          findExactConfiguration({
+            service: { environment: 'bar' },
+            internalESClient: mockInternalESClient,
+            apmEventClient: mockApmEventClient,
+          })
       );
 
       expect(mock.params).toMatchSnapshot();
     });
 
     it('find configuration by service.name and service.environment', async () => {
-      mock = await inspectSearchParams(({ mockInternalESClient }) =>
-        findExactConfiguration({
-          service: { name: 'foo', environment: 'bar' },
-          internalESClient: mockInternalESClient,
-        })
+      mock = await inspectSearchParams(
+        ({ mockInternalESClient, mockApmEventClient }) =>
+          findExactConfiguration({
+            service: { name: 'foo', environment: 'bar' },
+            internalESClient: mockInternalESClient,
+            apmEventClient: mockApmEventClient,
+          })
       );
 
       expect(mock.params).toMatchSnapshot();

@@ -16,6 +16,10 @@ export interface IndexManagementPluginSetup {
   extensionsService: ExtensionsSetup;
 }
 
+export interface IndexManagementPluginStart {
+  extensionsService: ExtensionsSetup;
+}
+
 export interface SetupDependencies {
   fleet?: unknown;
   usageCollection: UsageCollectionSetup;

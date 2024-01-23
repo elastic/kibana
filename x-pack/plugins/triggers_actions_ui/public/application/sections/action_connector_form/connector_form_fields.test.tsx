@@ -10,7 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFields } from './connector_form_fields';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
 
 describe('ConnectorFormFields', () => {

@@ -28,6 +28,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+}));
+
 const ecsRowData: Ecs = {
   _id: '1',
   agent: { type: ['blah'] },
@@ -74,16 +78,21 @@ jest.mock('../../../../common/lib/kibana', () => {
         application: {
           capabilities: { siem: { crud_alerts: true, read_alerts: true } },
         },
-        cases: mockCasesContract(),
+        cases: {
+          ...mockCasesContract(),
+          helpers: {
+            canUseCases: jest.fn().mockReturnValue({
+              all: true,
+              create: true,
+              read: true,
+              update: true,
+              delete: true,
+              push: true,
+            }),
+            getRuleIdFromEvent: jest.fn(),
+          },
+        },
       },
-    }),
-    useGetUserCasesPermissions: jest.fn().mockReturnValue({
-      all: true,
-      create: true,
-      read: true,
-      update: true,
-      delete: true,
-      push: true,
     }),
   };
 });
@@ -100,6 +109,7 @@ const markAsAcknowledgedButton = '[data-test-subj="acknowledged-alert-status"]';
 const markAsClosedButton = '[data-test-subj="close-alert-status"]';
 const addEndpointEventFilterButton = '[data-test-subj="add-event-filter-menu-item"]';
 const applyAlertTagsButton = '[data-test-subj="alert-tags-context-menu-item"]';
+const applyAlertAssigneesButton = '[data-test-subj="alert-assignees-context-menu-item"]';
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -297,6 +307,18 @@ describe('Alert table context menu', () => {
       wrapper.find(actionMenuButton).simulate('click');
 
       expect(wrapper.find(applyAlertTagsButton).first().exists()).toEqual(true);
+    });
+  });
+
+  describe('Assign alert action', () => {
+    test('it renders the assign alert action button', () => {
+      const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
+        wrappingComponent: TestProviders,
+      });
+
+      wrapper.find(actionMenuButton).simulate('click');
+
+      expect(wrapper.find(applyAlertAssigneesButton).first().exists()).toEqual(true);
     });
   });
 });

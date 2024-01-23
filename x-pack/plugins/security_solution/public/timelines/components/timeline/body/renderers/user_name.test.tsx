@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
-import { timelineActions } from '../../../../store/timeline';
+import { timelineActions } from '../../../../store';
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { UserName } from './user_name';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -44,8 +44,8 @@ jest.mock('../../../../../common/components/draggables', () => ({
   DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
 }));
 
-jest.mock('../../../../store/timeline', () => {
-  const original = jest.requireActual('../../../../store/timeline');
+jest.mock('../../../../store', () => {
+  const original = jest.requireActual('../../../../store');
   return {
     ...original,
     timelineActions: {

@@ -17,6 +17,8 @@ export function getHealthColor(status: RuleExecutionStatuses) {
       return 'primary';
     case 'pending':
       return 'accent';
+    case 'warning':
+      return 'warning';
     default:
       return 'subdued';
   }

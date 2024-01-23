@@ -4,14 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { ElasticsearchClient } from '@kbn/core/server';
+import {
+  profilingAWSCostDiscountRate,
+  profilingCo2PerKWH,
+  profilingCostPervCPUPerHour,
+  profilingDatacenterPUE,
+  profilingPervCPUWattArm64,
+  profilingPervCPUWattX86,
+} from '@kbn/observability-plugin/common';
+import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
+import { percentToFactor } from '../../utils/percent_to_factor';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
 import { searchStackTraces } from '../search_stack_traces';
 
 export interface FetchFunctionsParams {
+  core: CoreRequestHandlerContext;
   esClient: ElasticsearchClient;
   rangeFromMs: number;
   rangeToMs: number;
@@ -24,6 +33,7 @@ const targetSampleSize = 20000; // minimum number of samples to get statisticall
 
 export function createFetchFunctions({ createProfilingEsClient }: RegisterServicesParams) {
   return async ({
+    core,
     esClient,
     rangeFromMs,
     rangeToMs,
@@ -33,6 +43,23 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
   }: FetchFunctionsParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
+    const totalSeconds = rangeToSecs - rangeFromSecs;
+
+    const [
+      co2PerKWH,
+      datacenterPUE,
+      pervCPUWattX86,
+      pervCPUWattArm64,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+    ] = await Promise.all([
+      core.uiSettings.client.get<number>(profilingCo2PerKWH),
+      core.uiSettings.client.get<number>(profilingDatacenterPUE),
+      core.uiSettings.client.get<number>(profilingPervCPUWattX86),
+      core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
+      core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
+      core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+    ]);
 
     const profilingEsClient = createProfilingEsClient({ esClient });
 
@@ -43,6 +70,13 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         rangeTo: rangeToSecs,
         kuery,
         sampleSize: targetSampleSize,
+        durationSeconds: totalSeconds,
+        co2PerKWH,
+        datacenterPUE,
+        pervCPUWattX86,
+        pervCPUWattArm64,
+        awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
+        costPervCPUPerHour,
       }
     );
 

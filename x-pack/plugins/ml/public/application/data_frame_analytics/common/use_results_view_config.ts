@@ -37,12 +37,10 @@ export const useResultsViewConfig = (jobId: string) => {
   } = useMlKibana();
   const trainedModelsApiService = useTrainedModelsApiService();
 
-  const [indexPattern, setIndexPattern] = useState<DataView | undefined>(undefined);
-  const [indexPatternErrorMessage, setIndexPatternErrorMessage] = useState<undefined | string>(
-    undefined
-  );
+  const [dataView, setDataView] = useState<DataView | undefined>(undefined);
+  const [dataViewErrorMessage, setDataViewErrorMessage] = useState<undefined | string>(undefined);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [needsDestIndexPattern, setNeedsDestIndexPattern] = useState<boolean>(false);
+  const [needsDestDataView, setNeedsDestDataView] = useState<boolean>(false);
   const [isLoadingJobConfig, setIsLoadingJobConfig] = useState<boolean>(false);
   const [jobConfig, setJobConfig] = useState<DataFrameAnalyticsConfig | undefined>(undefined);
   const [jobCapsServiceErrorMessage, setJobCapsServiceErrorMessage] = useState<undefined | string>(
@@ -100,39 +98,39 @@ export const useResultsViewConfig = (jobId: string) => {
           try {
             const destIndex = getDestinationIndex(jobConfigUpdate);
             const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
-            let dataView: DataView | undefined;
+            let fetchedDataView: DataView | undefined;
 
             try {
-              dataView = await dataViews.get(destDataViewId);
+              fetchedDataView = await dataViews.get(destDataViewId);
 
               // Force refreshing the fields list here because a user directly coming
               // from the job creation wizard might land on the page without the
               // data view being fully initialized because it was created
               // before the analytics job populated the destination index.
-              await dataViews.refreshFields(dataView);
+              await dataViews.refreshFields(fetchedDataView);
             } catch (e) {
-              dataView = undefined;
+              fetchedDataView = undefined;
             }
 
-            if (dataView === undefined) {
-              setNeedsDestIndexPattern(true);
+            if (fetchedDataView === undefined) {
+              setNeedsDestDataView(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
               const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
               try {
-                dataView = await dataViews.get(sourceDataViewId);
+                fetchedDataView = await dataViews.get(sourceDataViewId);
               } catch (e) {
-                dataView = undefined;
+                fetchedDataView = undefined;
               }
             }
 
-            if (dataView !== undefined) {
-              await newJobCapsServiceAnalytics.initializeFromDataVIew(dataView);
+            if (fetchedDataView !== undefined) {
+              await newJobCapsServiceAnalytics.initializeFromDataVIew(fetchedDataView);
               setJobConfig(analyticsConfigs.data_frame_analytics[0]);
-              setIndexPattern(dataView);
+              setDataView(fetchedDataView);
               setIsInitialized(true);
               setIsLoadingJobConfig(false);
             } else {
-              setIndexPatternErrorMessage(
+              setDataViewErrorMessage(
                 i18n.translate('xpack.ml.dataframe.analytics.results.dataViewMissingErrorMessage', {
                   defaultMessage:
                     'To view this page, a Kibana data view is necessary for either the destination or source index of this analytics job.',
@@ -153,15 +151,15 @@ export const useResultsViewConfig = (jobId: string) => {
   }, []);
 
   return {
-    indexPattern,
-    indexPatternErrorMessage,
+    dataView,
+    dataViewErrorMessage,
     isInitialized,
     isLoadingJobConfig,
     jobCapsServiceErrorMessage,
     jobConfig,
     jobConfigErrorMessage,
     jobStatus,
-    needsDestIndexPattern,
+    needsDestDataView,
     totalFeatureImportance,
   };
 };

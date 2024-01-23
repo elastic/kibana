@@ -21,11 +21,12 @@ export const waitForAlertsToBePresent = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   numberOfAlerts = 1,
-  alertIds: string[]
+  alertIds: string[],
+  namespace?: string
 ): Promise<void> => {
   await waitFor(
     async () => {
-      const alertsOpen = await getAlertsByIds(supertest, log, alertIds, numberOfAlerts);
+      const alertsOpen = await getAlertsByIds(supertest, log, alertIds, numberOfAlerts, namespace);
       return alertsOpen.hits.hits.length >= numberOfAlerts;
     },
     'waitForAlertsToBePresent',

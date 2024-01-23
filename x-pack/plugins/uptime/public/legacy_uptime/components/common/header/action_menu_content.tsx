@@ -13,7 +13,7 @@ import { useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
+
 import { stringifyUrlParams } from '../../../lib/helper/url_params/stringify_url_params';
 import { useUptimeSettingsContext } from '../../../contexts/uptime_settings_context';
 import { useGetUrlParams } from '../../../hooks';
@@ -22,6 +22,7 @@ import { MONITOR_ROUTE, SETTINGS_ROUTE } from '../../../../../common/constants';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { monitorStatusSelector } from '../../../state/selectors';
 import { ManageMonitorsBtn } from './manage_monitors_btn';
+import { useUptimeStartPlugins } from '../../../contexts/uptime_startup_plugins_context';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.uptime.addDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -38,7 +39,10 @@ const ANALYZE_MESSAGE = i18n.translate('xpack.uptime.analyzeDataButtonLabel.mess
 
 export function ActionMenuContent(): React.ReactElement {
   const kibana = useKibana();
+
   const { basePath } = useUptimeSettingsContext();
+  const { observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem } = {} } =
+    useUptimeStartPlugins();
   const params = useGetUrlParams();
   const { dateRangeStart, dateRangeEnd } = params;
   const history = useHistory();
@@ -117,7 +121,7 @@ export function ActionMenuContent(): React.ReactElement {
         {ADD_DATA_LABEL}
       </EuiHeaderLink>
       <InspectorHeaderLink />
-      <ObservabilityAIAssistantActionMenuItem />
+      {ObservabilityAIAssistantActionMenuItem ? <ObservabilityAIAssistantActionMenuItem /> : null}
     </EuiHeaderLinks>
   );
 }

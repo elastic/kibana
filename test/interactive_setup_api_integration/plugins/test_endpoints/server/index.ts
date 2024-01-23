@@ -11,7 +11,9 @@ import path from 'path';
 
 import type { PluginInitializer, PrebootPlugin } from '@kbn/core/server';
 
-export const plugin: PluginInitializer<void, never> = (initializerContext): PrebootPlugin => ({
+export const plugin: PluginInitializer<void, never> = async (
+  initializerContext
+): Promise<PrebootPlugin> => ({
   setup: (core) => {
     core.http.registerRoutes('', (router) => {
       router.get(

@@ -10,6 +10,8 @@ import {
   DEVICE_MODEL_IDENTIFIER,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
+  ERROR_TYPE,
+  ERROR_GROUP_ID,
 } from '../es_fields/apm';
 import { fieldValuePairToKql } from './field_value_pair_to_kql';
 
@@ -36,5 +38,39 @@ export function getKueryWithMobileFilters({
     .filter(Boolean)
     .join(' and ');
 
+  return kueryWithFilters;
+}
+
+export function getKueryWithMobileCrashFilter({
+  groupId,
+  kuery,
+}: {
+  groupId: string | undefined;
+  kuery: string;
+}) {
+  const kueryWithFilters = [
+    kuery,
+    ...fieldValuePairToKql(ERROR_TYPE, 'crash'),
+    ...fieldValuePairToKql(ERROR_GROUP_ID, groupId),
+  ]
+    .filter(Boolean)
+    .join(' and ');
+  return kueryWithFilters;
+}
+
+export function getKueryWithMobileErrorFilter({
+  groupId,
+  kuery,
+}: {
+  groupId: string | undefined;
+  kuery: string;
+}) {
+  const kueryWithFilters = [
+    kuery,
+    `NOT ${ERROR_TYPE}: crash`,
+    ...fieldValuePairToKql(ERROR_GROUP_ID, groupId),
+  ]
+    .filter(Boolean)
+    .join(' and ');
   return kueryWithFilters;
 }

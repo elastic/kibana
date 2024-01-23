@@ -28,16 +28,13 @@ import {
 import { login } from '../../../../tasks/login';
 
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
 import { getNewRule } from '../../../../objects/rule';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 
 describe('Rules table: auto-refresh', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
-
     setRulesTableAutoRefreshIntervalSetting({
       enabled: true,
       refreshInterval: RULES_TABLE_REFRESH_INTERVAL_MS,

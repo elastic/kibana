@@ -11,11 +11,13 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DiscoverMainRoute } from '../../application/main';
 import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
+import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -28,6 +30,7 @@ export interface DiscoverContainerInternalProps {
   getDiscoverServices: () => Promise<DiscoverServices>;
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
+  stateStorageContainer?: IKbnUrlStateStorage;
   isDev: boolean;
   isLoading?: boolean;
 }
@@ -43,12 +46,18 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'embedded',
+  showLogExplorerTabs: false,
+};
+
 export const DiscoverContainerInternal = ({
   overrideServices,
   scopedHistory,
   customizationCallbacks,
   isDev,
   getDiscoverServices,
+  stateStorageContainer,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
   const [discoverServices, setDiscoverServices] = useState<DiscoverServices | undefined>();
@@ -90,7 +99,8 @@ export const DiscoverContainerInternal = ({
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
-            mode="embedded"
+            customizationContext={customizationContext}
+            stateStorageContainer={stateStorageContainer}
             isDev={isDev}
           />
         </KibanaContextProvider>

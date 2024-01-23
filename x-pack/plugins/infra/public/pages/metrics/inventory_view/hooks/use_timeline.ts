@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import { fold } from 'fp-ts/lib/Either';
-import { identity } from 'fp-ts/lib/function';
-import { pipe } from 'fp-ts/lib/pipeable';
 import { first } from 'lodash';
-import { useEffect, useMemo, useCallback } from 'react';
+import { useEffect, useMemo } from 'react';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
-import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
-import { useHTTPRequest } from '../../../../hooks/use_http_request';
-import {
-  SnapshotNodeResponseRT,
-  SnapshotNodeResponse,
-  SnapshotRequest,
-  InfraTimerangeInput,
-} from '../../../../../common/http_api/snapshot_api';
+import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
+import { useSnapshot } from './use_snaphot';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -64,13 +55,6 @@ export function useTimeline(
   interval: string | undefined,
   shouldReload: boolean
 ) {
-  const decodeResponse = (response: any) => {
-    return pipe(
-      SnapshotNodeResponseRT.decode(response),
-      fold(throwErrors(createPlainError), identity)
-    );
-  };
-
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
 
   const timeLengthResult = useMemo(
@@ -88,12 +72,11 @@ export function useTimeline(
     forceInterval: true,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
-    '/api/metrics/snapshot',
-    'POST',
-    JSON.stringify({
+  const { nodes, error, loading, reload } = useSnapshot(
+    {
       metrics,
       groupBy: null,
+      currentTime,
       nodeType,
       timerange,
       filterQuery,
@@ -101,33 +84,27 @@ export function useTimeline(
       accountId,
       region,
       includeTimeseries: true,
-    } as SnapshotRequest),
-    decodeResponse
+      sendRequestImmediately: false,
+    },
+    {
+      abortable: true,
+    }
   );
-
-  const loadData = useCallback(() => {
-    if (shouldReload) return makeRequest();
-    return Promise.resolve();
-  }, [makeRequest, shouldReload]);
 
   useEffect(() => {
     (async () => {
-      if (timeLength) {
-        await loadData();
-      }
+      if (shouldReload) return reload();
     })();
-  }, [loadData, timeLength]);
+  }, [reload, shouldReload]);
 
-  const timeseries = response
-    ? first(response.nodes.map((node) => first(node.metrics)?.timeseries))
-    : null;
+  const timeseries = nodes ? first(nodes.map((node) => first(node.metrics)?.timeseries)) : null;
 
   return {
-    error: (error && error.message) || null,
+    error: error || null,
     loading: !interval ? true : loading,
     timeseries,
     startTime,
     endTime,
-    reload: makeRequest,
+    reload,
   };
 }

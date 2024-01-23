@@ -8,4 +8,4 @@
 
 import { CoreDynamicResolvingBPlugin } from './plugin';
 
-export const plugin = () => new CoreDynamicResolvingBPlugin();
+export const plugin = async () => new CoreDynamicResolvingBPlugin();

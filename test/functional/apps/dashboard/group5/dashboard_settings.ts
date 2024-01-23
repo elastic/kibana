@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
+  const browser = getService('browser');
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
   const dashboardSettings = getService('dashboardSettings');
@@ -19,6 +20,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('dashboard settings', () => {
     let originalTitles: string[] = [];
+
+    const checkDashboardTitle = async (expectedTitle: string) => {
+      expect(await browser.getTitle()).to.equal(`${expectedTitle} - Elastic`);
+      await retry.try(async () => {
+        const breadcrumb = await globalNav.getLastBreadcrumb();
+        expect(breadcrumb).to.equal(`Editing ${expectedTitle}`);
+      });
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -60,13 +69,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should update the title of the dashboard', async () => {
+      await checkDashboardTitle('few panels');
+
       const newTitle = 'My awesome dashboard!!1';
       await PageObjects.dashboard.openSettingsFlyout();
       await dashboardSettings.setCustomPanelTitle(newTitle);
       await dashboardSettings.clickApplyButton();
-      await retry.try(async () => {
-        expect((await globalNav.getLastBreadcrumb()) === newTitle);
-      });
+
+      await checkDashboardTitle(newTitle);
     });
 
     it('should disable quick save when the settings are open', async () => {
@@ -106,9 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardSettings.expectDuplicateTitleWarningDisplayed();
       });
       await dashboardSettings.clickApplyButton();
-      await retry.try(async () => {
-        expect((await globalNav.getLastBreadcrumb()) === newTitle);
-      });
+
+      await checkDashboardTitle(newTitle);
     });
   });
 }

@@ -33,6 +33,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 /**
  * AIOps App Dependencies to be provided via React context.
@@ -97,6 +98,10 @@ export interface AiopsAppDependencies {
    * Used to create lens embeddables.
    */
   lens: LensPublicStart;
+  /**
+   * UI actions.
+   */
+  uiActions?: UiActionsStart;
   /**
    * Internationalisation service
    */

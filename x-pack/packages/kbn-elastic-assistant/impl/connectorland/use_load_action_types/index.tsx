@@ -15,7 +15,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { IToasts } from '@kbn/core-notifications-browser';
-import { GenerativeAIConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { GenerativeAIForSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import * as i18n from '../translations';
 
 /**
@@ -39,7 +39,7 @@ export const useLoadActionTypes = ({
     async () => {
       const queryResult = await loadActionTypes({
         http,
-        featureId: GenerativeAIConnectorFeatureId,
+        featureId: GenerativeAIForSecurityConnectorFeatureId,
       });
       const sortedData = queryResult.sort((a, b) => a.name.localeCompare(b.name));
 

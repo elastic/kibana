@@ -62,7 +62,11 @@ export type UnresolvedDatasetSelectionPayload = rt.TypeOf<
 >;
 export type DatasetSelectionPlain = rt.TypeOf<typeof datasetSelectionPlainRT>;
 
+export type DataViewSpecWithId = DataViewSpec & {
+  id: string;
+};
+
 export interface DatasetSelectionStrategy {
-  toDataviewSpec(): DataViewSpec;
-  toURLSelectionId(): string;
+  toDataviewSpec(): DataViewSpecWithId;
+  toPlainSelection(): DatasetSelectionPlain;
 }

@@ -29,6 +29,7 @@ export enum ROLES {
   reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
+  no_risk_engine_privileges = 'no_risk_engine_privileges',
 }
 
 /**

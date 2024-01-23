@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const TIMELINE_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.timeline.properties.timelineDescription',
-  {
-    defaultMessage: 'Timeline Description',
-  }
-);
-
-export const ADD_TO_FAVORITES = i18n.translate(
-  'xpack.securitySolution.timeline.properties.addToFavoriteButtonLabel',
-  {
-    defaultMessage: 'Add to favorites',
-  }
-);
-
-export const REMOVE_FROM_FAVORITES = i18n.translate(
-  'xpack.securitySolution.timeline.properties.removeFromFavoritesButtonLabel',
-  {
-    defaultMessage: 'Remove from favorites',
-  }
-);
-
 export const UNTITLED_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.untitledTimelinePlaceholder',
   {
@@ -56,14 +35,14 @@ export const NOTES = i18n.translate('xpack.securitySolution.timeline.properties.
 export const NEW_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTimelineButtonLabel',
   {
-    defaultMessage: 'Create new timeline',
+    defaultMessage: 'Create new Timeline',
   }
 );
 
 export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.properties.newTemplateTimelineButtonLabel',
   {
-    defaultMessage: 'Create new timeline template',
+    defaultMessage: 'Create new Timeline template',
   }
 );
 

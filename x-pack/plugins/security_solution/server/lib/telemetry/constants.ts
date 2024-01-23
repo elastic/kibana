@@ -9,6 +9,8 @@ export const TELEMETRY_CHANNEL_LISTS = 'security-lists-v2';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
 
+export const TELEMETRY_CHANNEL_ENDPOINT_ALERTS = 'alerts-endpoint';
+
 export const TELEMETRY_CHANNEL_DETECTION_ALERTS = 'alerts-detections';
 
 export const TELEMETRY_CHANNEL_TIMELINE = 'alerts-timeline';
@@ -24,6 +26,8 @@ export const LIST_TRUSTED_APPLICATION = 'trusted_application';
 export const INSIGHTS_CHANNEL = 'security-insights-v1';
 
 export const TASK_METRICS_CHANNEL = 'task-metrics';
+
+export const DEFAULT_DIAGNOSTIC_INDEX = '.logs-endpoint.diagnostic.collection-*' as const;
 
 export const DEFAULT_ADVANCED_POLICY_CONFIG_SETTINGS = {
   linux: {

@@ -15,7 +15,7 @@ import {
 import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import type { SecurityAppStore } from '../../../common/store';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import { fieldHasCellActions } from '../../utils';
 import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';

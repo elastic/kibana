@@ -5,6 +5,8 @@
  * 2.0.
  */
 import { act, renderHook } from '@testing-library/react-hooks';
+
+import { DEFAULT_LATEST_ALERTS } from '../../../assistant_context/constants';
 import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversation';
 import { useSettingsUpdater } from './use_settings_updater';
 import { Prompt } from '../../../..';
@@ -31,15 +33,18 @@ const setConversationsMock = jest.fn();
 const setDefaultAllowMock = jest.fn();
 const setDefaultAllowReplacementMock = jest.fn();
 const setKnowledgeBaseMock = jest.fn();
-
+const reportAssistantSettingToggled = jest.fn();
 const mockValues = {
+  assistantTelemetry: { reportAssistantSettingToggled },
   conversations: mockConversations,
   allSystemPrompts: mockSystemPrompts,
   allQuickPrompts: mockQuickPrompts,
   defaultAllow: initialDefaultAllow,
   defaultAllowReplacement: initialDefaultAllowReplacement,
   knowledgeBase: {
-    assistantLangChain: true,
+    isEnabledRAGAlerts: true,
+    isEnabledKnowledgeBase: true,
+    latestAlerts: DEFAULT_LATEST_ALERTS,
   },
   setAllQuickPrompts: setAllQuickPromptsMock,
   setConversations: setConversationsMock,
@@ -56,7 +61,9 @@ const updatedValues = {
   defaultAllow: ['allow2'],
   defaultAllowReplacement: ['replacement2'],
   knowledgeBase: {
-    assistantLangChain: false,
+    isEnabledRAGAlerts: false,
+    isEnabledKnowledgeBase: false,
+    latestAlerts: DEFAULT_LATEST_ALERTS,
   },
 };
 
@@ -69,6 +76,9 @@ jest.mock('../../../assistant_context', () => {
 });
 
 describe('useSettingsUpdater', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
   it('should set all state variables to their initial values when resetSettings is called', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
@@ -138,6 +148,48 @@ describe('useSettingsUpdater', () => {
         updatedValues.defaultAllowReplacement
       );
       expect(setKnowledgeBaseMock).toHaveBeenCalledWith(updatedValues.knowledgeBase);
+    });
+  });
+  it('should track which toggles have been updated when saveSettings is called', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      await waitForNextUpdate();
+      const { setUpdatedKnowledgeBaseSettings } = result.current;
+
+      setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
+
+      result.current.saveSettings();
+      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: false,
+      });
+    });
+  });
+  it('should track only toggles that updated', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      await waitForNextUpdate();
+      const { setUpdatedKnowledgeBaseSettings } = result.current;
+
+      setUpdatedKnowledgeBaseSettings({
+        ...updatedValues.knowledgeBase,
+        isEnabledKnowledgeBase: true,
+      });
+      result.current.saveSettings();
+      expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
+        isEnabledRAGAlerts: false,
+      });
+    });
+  });
+  it('if no toggles update, do not track anything', async () => {
+    await act(async () => {
+      const { result, waitForNextUpdate } = renderHook(() => useSettingsUpdater());
+      await waitForNextUpdate();
+      const { setUpdatedKnowledgeBaseSettings } = result.current;
+
+      setUpdatedKnowledgeBaseSettings(mockValues.knowledgeBase);
+      result.current.saveSettings();
+      expect(reportAssistantSettingToggled).not.toHaveBeenCalledWith();
     });
   });
 });

@@ -30,8 +30,8 @@ import {
   testIndexStats,
 } from './mocks';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood
@@ -395,6 +395,29 @@ describe('<IndexDetailsPage />', () => {
       expect(testBed.actions.overview.addDocCodeBlockExists()).toBe(true);
     });
 
+    it('renders index name badges from the extensions service', async () => {
+      const testBadges = ['testBadge1', 'testBadge2'];
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _badges: testBadges.map((badge) => ({
+                  matchIndex: () => true,
+                  label: badge,
+                  color: 'primary',
+                })),
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      const header = testBed.actions.getHeader();
+      expect(header).toEqual(`${testIndexName} ${testBadges.join(' ')}`);
+    });
+
     describe('extension service overview content', () => {
       it('renders the content instead of the default code block', async () => {
         const extensionsServiceOverview = 'Test content via extensions service';
@@ -477,6 +500,28 @@ describe('<IndexDetailsPage />', () => {
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
       });
+    });
+
+    it('renders the content set via the extensions service', async () => {
+      const mappingsContent = 'test mappings extension';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          dependencies: {
+            services: {
+              extensionsService: {
+                _indexMappingsContent: {
+                  renderContent: () => mappingsContent,
+                },
+              },
+            },
+          },
+        });
+      });
+      testBed.component.update();
+      await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+      const content = testBed.actions.getActiveTabContent();
+      expect(content).toContain(mappingsContent);
     });
   });
 
@@ -605,11 +650,31 @@ describe('<IndexDetailsPage />', () => {
     });
   });
 
-  it('navigates back to indices', async () => {
-    jest.spyOn(testBed.routerMock.history, 'push');
-    await testBed.actions.clickBackToIndicesButton();
-    expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
-    expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+  describe('navigates back to the indices list', () => {
+    it('without indices list params', async () => {
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith('/indices');
+    });
+    it('with indices list params', async () => {
+      const filter = 'isFollower:true';
+      await act(async () => {
+        testBed = await setup({
+          httpSetup,
+          initialEntry: `/indices/index_details?indexName=${testIndexName}&filter=${encodeURIComponent(
+            filter
+          )}&includeHiddenIndices=true`,
+        });
+      });
+      testBed.component.update();
+      jest.spyOn(testBed.routerMock.history, 'push');
+      await testBed.actions.clickBackToIndicesButton();
+      expect(testBed.routerMock.history.push).toHaveBeenCalledTimes(1);
+      expect(testBed.routerMock.history.push).toHaveBeenCalledWith(
+        `/indices?filter=${encodeURIComponent(filter)}&includeHiddenIndices=true`
+      );
+    });
   });
 
   it('renders a link to discover', () => {

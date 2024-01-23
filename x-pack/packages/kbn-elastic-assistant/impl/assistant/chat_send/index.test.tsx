@@ -9,50 +9,28 @@ import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { ChatSend, Props } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { useChatSend } from './use_chat_send';
-import { defaultSystemPrompt, mockSystemPrompt } from '../../mock/system_prompt';
-import { emptyWelcomeConvo } from '../../mock/conversation';
-import { HttpSetup } from '@kbn/core-http-browser';
 
 jest.mock('./use_chat_send');
 
-const testProps: Props = {
-  selectedPromptContexts: {},
-  allSystemPrompts: [defaultSystemPrompt, mockSystemPrompt],
-  currentConversation: emptyWelcomeConvo,
-  http: {
-    basePath: {
-      basePath: '/mfg',
-      serverBasePath: '/mfg',
-    },
-    anonymousPaths: {},
-    externalUrl: {},
-  } as unknown as HttpSetup,
-  editingSystemPromptId: defaultSystemPrompt.id,
-  setEditingSystemPromptId: () => {},
-  setPromptTextPreview: () => {},
-  setSelectedPromptContexts: () => {},
-  setUserPrompt: () => {},
-  isDisabled: false,
-  shouldRefocusPrompt: false,
-  userPrompt: '',
-};
 const handleButtonSendMessage = jest.fn();
 const handleOnChatCleared = jest.fn();
 const handlePromptChange = jest.fn();
 const handleSendMessage = jest.fn();
-const chatSend = {
+const handleRegenerateResponse = jest.fn();
+const testProps: Props = {
   handleButtonSendMessage,
   handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
+  handleRegenerateResponse,
   isLoading: false,
+  isDisabled: false,
+  shouldRefocusPrompt: false,
+  userPrompt: '',
 };
-
 describe('ChatSend', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useChatSend as jest.Mock).mockReturnValue(chatSend);
   });
   it('the prompt updates when the text area changes', async () => {
     const { getByTestId } = render(<ChatSend {...testProps} />, {

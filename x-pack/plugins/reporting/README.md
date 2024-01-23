@@ -10,7 +10,7 @@ This should be deprecated. It is historically a customer driven endpoint.  This 
 This new endpoint is designed to have a more automation-friendly signature. It will replace csv_searchsource in the UI at some point, when there is more capacity in reporting. It will need a little more work to have parity: it needs to be able to export "unsaved" searches.
 
 ## Generate CSV
-Although historically related to reporting, the CsvGenerator class has now be moved into its own package `@kbn/generate-csv` and `@kbn/generate-csv-types`. 
+Although historically related to reporting, the CsvGenerator class has now be moved into its own package `@kbn/generate-csv`. 
 
 ## Serverless configuration
 There are several improvements made for reporting in serverless environments. Most changes are reflected in `reporting/server/config/schema.ts` for reference. 

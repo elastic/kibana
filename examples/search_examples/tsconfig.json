@@ -33,5 +33,6 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/search-response-warnings",
+    "@kbn/shared-ux-link-redirect-app",
   ]
 }

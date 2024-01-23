@@ -11,5 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./add_actions'));
     loadTestFile(require.resolve('./update_actions'));
     loadTestFile(require.resolve('./migrations'));
+    loadTestFile(require.resolve('./throttle'));
+    loadTestFile(require.resolve('./check_privileges'));
   });
 }

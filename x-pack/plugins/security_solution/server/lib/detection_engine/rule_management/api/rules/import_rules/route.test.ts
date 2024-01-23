@@ -167,7 +167,7 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Unexpected token h in JSON at position 1',
+              message: `Unexpected token 'h', "this is not"... is not valid JSON`,
               status_code: 400,
             },
             rule_id: '(unknown id)',
@@ -311,14 +311,14 @@ describe('Import rules route', () => {
         errors: [
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',
           },
           {
             error: {
-              message: 'Invalid value "undefined" supplied to "rule_id"',
+              message: 'rule_id: Required',
               status_code: 400,
             },
             rule_id: '(unknown id)',

@@ -155,6 +155,8 @@
     "@kbn/core-test-helpers-model-versions",
     "@kbn/core-plugins-contracts-browser",
     "@kbn/core-plugins-contracts-server",
+    "@kbn/dev-utils",
+    "@kbn/server-http-tools",
   ],
   "exclude": [
     "target/**/*",

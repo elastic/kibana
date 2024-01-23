@@ -15,6 +15,7 @@ import { getMockSearchConfig } from '../../../../config.mock';
 
 const getMockEqlResponse = () => ({
   body: {
+    id: 'my-search-id',
     is_partial: false,
     is_running: false,
     took: 162,
@@ -54,6 +55,7 @@ describe('EQL search strategy', () => {
   describe('search()', () => {
     let mockEqlSearch: jest.Mock;
     let mockEqlGet: jest.Mock;
+    let mockEqlDelete: jest.Mock;
     let mockDeps: SearchStrategyDependencies;
     let params: Required<EqlSearchStrategyRequest>['params'];
     let options: Required<EqlSearchStrategyRequest>['options'];
@@ -61,6 +63,8 @@ describe('EQL search strategy', () => {
     beforeEach(() => {
       mockEqlSearch = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
       mockEqlGet = jest.fn().mockResolvedValueOnce(getMockEqlResponse());
+      mockEqlDelete = jest.fn();
+
       mockDeps = {
         uiSettingsClient: {
           get: jest.fn(),
@@ -70,6 +74,7 @@ describe('EQL search strategy', () => {
             eql: {
               get: mockEqlGet,
               search: mockEqlSearch,
+              delete: mockEqlDelete,
             },
           },
         },
@@ -122,6 +127,34 @@ describe('EQL search strategy', () => {
           }
         );
       });
+    });
+
+    it('should delete when aborted', async () => {
+      const response = getMockEqlResponse();
+      mockEqlSearch.mockReset().mockResolvedValueOnce({
+        ...response,
+        body: {
+          ...response.body,
+          is_running: true,
+        },
+      });
+      const eqlSearch = await eqlSearchStrategyProvider(mockSearchConfig, mockLogger);
+      const abortController = new AbortController();
+      const abortSignal = abortController.signal;
+
+      // Abort after an incomplete first response is returned
+      setTimeout(() => abortController.abort(), 100);
+
+      let err: any;
+      try {
+        await eqlSearch.search({ options, params }, { abortSignal }, mockDeps).toPromise();
+      } catch (e) {
+        err = e;
+      }
+
+      expect(mockEqlSearch).toBeCalled();
+      expect(err).not.toBeUndefined();
+      expect(mockEqlDelete).toBeCalled();
     });
 
     describe('arguments', () => {

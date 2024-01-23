@@ -20,7 +20,7 @@ export const source: Command = {
     return dedent`
       Options:
 
-        --license         Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
+        --license         Run with a 'basic' or 'trial' license [default: ${license}]
         --source-path     Path to ES source [default: ${defaults['source-path']}]
         --base-path       Path containing cache/installations [default: ${basePath}]
         --install-path    Installation path, defaults to 'source' within base-path

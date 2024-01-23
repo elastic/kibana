@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import type { FindRulesRequestQuery } from './find_rules_route';
+import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
 
 /**
  * Additional validation that is implemented outside of the schema itself.
  */
-export const validateFindRulesRequestQuery = (query: FindRulesRequestQuery): string[] => {
-  return [...validateSortOrder(query)];
-};
-
-const validateSortOrder = (query: FindRulesRequestQuery): string[] => {
+export const validateFindRulesRequestQuery = (query: FindRulesRequestQueryInput): string[] => {
   if (query.sort_order != null || query.sort_field != null) {
     if (query.sort_order == null || query.sort_field == null) {
       return ['when "sort_order" and "sort_field" must exist together or not at all'];
-    } else {
-      return [];
     }
-  } else {
-    return [];
   }
+  return [];
 };

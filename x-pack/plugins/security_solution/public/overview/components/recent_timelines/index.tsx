@@ -16,7 +16,7 @@ import {
   dispatchUpdateTimeline,
 } from '../../../timelines/components/open_timeline/helpers';
 import type { OnOpenTimeline } from '../../../timelines/components/open_timeline/types';
-import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/timeline/actions';
+import { updateIsLoading as dispatchUpdateIsLoading } from '../../../timelines/store/actions';
 
 import { RecentTimelines } from './recent_timelines';
 import * as i18n from './translations';

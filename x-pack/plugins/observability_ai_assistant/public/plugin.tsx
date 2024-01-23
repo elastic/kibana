@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { ComponentType, lazy, Ref } from 'react';
+import ReactDOM from 'react-dom';
 import {
   AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
@@ -15,9 +17,10 @@ import {
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import React from 'react';
-import ReactDOM from 'react-dom';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { createService } from './service/create_service';
+import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetup,
@@ -26,6 +29,8 @@ import type {
   ObservabilityAIAssistantPluginStartDependencies,
   ObservabilityAIAssistantService,
 } from './types';
+import { registerTelemetryEventTypes } from './analytics';
+import { ObservabilityAIAssistantProvider } from './context/observability_ai_assistant_provider';
 
 export class ObservabilityAIAssistantPlugin
   implements
@@ -64,7 +69,6 @@ export class ObservabilityAIAssistantPlugin
           path: '/conversations/new',
         },
       ],
-
       mount: async (appMountParameters: AppMountParameters<unknown>) => {
         // Load application bundle and Get start services
         const [{ Application }, [coreStart, pluginsStart]] = await Promise.all([
@@ -87,6 +91,9 @@ export class ObservabilityAIAssistantPlugin
         };
       },
     });
+
+    registerTelemetryEventTypes(coreSetup.analytics);
+
     return {};
   }
 
@@ -95,26 +102,72 @@ export class ObservabilityAIAssistantPlugin
     pluginsStart: ObservabilityAIAssistantPluginStartDependencies
   ): ObservabilityAIAssistantPluginStart {
     const service = (this.service = createService({
+      analytics: coreStart.analytics,
       coreStart,
-      securityStart: pluginsStart.security,
-      licenseStart: pluginsStart.licensing,
-      shareStart: pluginsStart.share,
       enabled: coreStart.application.capabilities.observabilityAIAssistant.show === true,
+      licenseStart: pluginsStart.licensing,
+      securityStart: pluginsStart.security,
+      shareStart: pluginsStart.share,
     }));
 
-    service.register(async ({ signal, registerContext, registerFunction }) => {
+    service.register(async ({ registerRenderFunction }) => {
       const mod = await import('./functions');
 
       return mod.registerFunctions({
         service,
-        signal,
         pluginsStart,
-        coreStart,
-        registerContext,
-        registerFunction,
+        registerRenderFunction,
       });
     });
 
-    return service;
+    const withProviders = <P extends {}, R = {}>(
+      Component: ComponentType<P>,
+      services: Omit<CoreStart, 'plugins'> & {
+        plugins: { start: ObservabilityAIAssistantPluginStartDependencies };
+      }
+    ) =>
+      React.forwardRef((props: P, ref: Ref<R>) => (
+        <KibanaContextProvider services={services}>
+          <ObservabilityAIAssistantProvider value={service}>
+            <Component {...props} ref={ref} />
+          </ObservabilityAIAssistantProvider>
+        </KibanaContextProvider>
+      ));
+
+    const services = {
+      ...coreStart,
+      plugins: {
+        start: pluginsStart,
+      },
+    };
+
+    const isEnabled = service.isEnabled();
+
+    return {
+      service,
+      useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
+      ObservabilityAIAssistantContextualInsight: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/insight/insight').then((m) => ({ default: m.Insight }))
+              ),
+              services
+            )
+          )
+        : null,
+      ObservabilityAIAssistantActionMenuItem: isEnabled
+        ? withSuspense(
+            withProviders(
+              lazy(() =>
+                import('./components/action_menu_item/action_menu_item').then((m) => ({
+                  default: m.ObservabilityAIAssistantActionMenuItem,
+                }))
+              ),
+              services
+            )
+          )
+        : null,
+    };
   }
 }

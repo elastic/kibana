@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { SettingType } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { debounce } from 'lodash';
+import { useServices } from '../services';
 import { CodeEditor, CodeEditorProps } from '../code_editor';
 import type { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -45,39 +45,48 @@ export const CodeEditorInput = ({
   defaultValue,
   onInputChange,
 }: CodeEditorInputProps) => {
+  // @ts-expect-error
+  const [inputValue] = getFieldInputValue(field, unsavedChange);
+  const [value, setValue] = useState(inputValue);
+  const { validateChange } = useServices();
   const onUpdate = useUpdate({ onInputChange, field });
 
-  const onChange: CodeEditorProps['onChange'] = (inputValue) => {
-    let newUnsavedValue;
-    let errorParams = {};
+  const updateValue = useCallback(
+    async (newValue: string, onUpdateFn) => {
+      const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
+      const parsedValue = newValue || (isJsonArray ? '[]' : '{}');
+      const validationResponse = await validateChange(field.id, parsedValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: newValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: newValue });
+      }
+    },
+    [validateChange, field.id, field.type, defaultValue]
+  );
 
-    switch (type) {
-      case 'json':
-        const isJsonArray = Array.isArray(JSON.parse(defaultValue || '{}'));
-        newUnsavedValue = inputValue || (isJsonArray ? '[]' : '{}');
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 1000 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 1000);
+  }, [updateValue]);
 
-        try {
-          JSON.parse(newUnsavedValue);
-        } catch (e) {
-          errorParams = {
-            error: i18n.translate('management.settings.field.codeEditorSyntaxErrorMessage', {
-              defaultMessage: 'Invalid JSON syntax',
-            }),
-            isInvalid: true,
-          };
-        }
-        break;
-      default:
-        newUnsavedValue = inputValue;
-    }
-
-    onUpdate({ type: field.type, unsavedValue: inputValue, ...errorParams });
+  const onChange: CodeEditorProps['onChange'] = async (newValue) => {
+    // @ts-expect-error
+    setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
   };
+
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
 
   const { id, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
-  // @ts-expect-error
-  const [value] = getFieldInputValue(field, unsavedChange);
 
   return (
     <div>

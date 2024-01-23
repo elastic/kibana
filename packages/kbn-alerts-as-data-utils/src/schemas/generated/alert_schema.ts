@@ -80,6 +80,7 @@ const AlertRequired = rt.type({
   'kibana.alert.uuid': schemaString,
   'kibana.space_ids': schemaStringArray,
 });
+// prettier-ignore
 const AlertOptional = rt.partial({
   'event.action': schemaString,
   'event.kind': schemaString,
@@ -98,6 +99,7 @@ const AlertOptional = rt.partial({
   'kibana.alert.start': schemaDate,
   'kibana.alert.time_range': schemaDateRange,
   'kibana.alert.url': schemaString,
+  'kibana.alert.workflow_assignee_ids': schemaStringArray,
   'kibana.alert.workflow_status': schemaString,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.version': schemaString,

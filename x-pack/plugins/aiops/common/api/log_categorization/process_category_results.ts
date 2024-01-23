@@ -11,14 +11,13 @@ import { estypes } from '@elastic/elasticsearch';
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
-import type { Category, CategoriesAgg, CatResponse, SparkLinesPerCategory } from './types';
+import type { Category, CategoriesAgg, CatResponse } from './types';
 
 export function processCategoryResults(
   result: CatResponse,
   field: string,
   unwrap: ReturnType<typeof createRandomSamplerWrapper>['unwrap']
 ) {
-  const sparkLinesPerCategory: SparkLinesPerCategory = {};
   const { aggregations } = result.rawResponse;
   if (aggregations === undefined) {
     throw new Error('processCategoryResults failed, did not return aggregations.');
@@ -30,7 +29,7 @@ export function processCategoryResults(
   ) as CategoriesAgg;
 
   const categories: Category[] = buckets.map((b) => {
-    sparkLinesPerCategory[b.key] =
+    const sparkline =
       b.sparkline === undefined
         ? {}
         : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
@@ -41,11 +40,16 @@ export function processCategoryResults(
     return {
       key: b.key,
       count: b.doc_count,
-      examples: b.hit.hits.hits.map((h) => get(h._source, field)),
+      examples: b.examples.hits.hits.map((h) => get(h._source, field)),
+      sparkline,
+      subTimeRangeCount: b.sub_time_range?.buckets[0].doc_count ?? undefined,
+      subFieldCount: b.sub_time_range?.buckets[0].sub_field?.doc_count ?? undefined,
+      subFieldExamples:
+        b.sub_time_range?.buckets[0].examples.hits.hits.map((h) => get(h._source, field)) ??
+        undefined,
     };
   });
   return {
     categories,
-    sparkLinesPerCategory,
   };
 }

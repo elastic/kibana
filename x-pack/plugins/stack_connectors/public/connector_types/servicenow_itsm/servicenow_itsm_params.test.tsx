@@ -14,6 +14,7 @@ import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';
 import { Choice } from '../lib/servicenow/types';
 import { merge } from 'lodash';
+import { ACTION_GROUP_RECOVERED } from '../lib/servicenow/helpers';
 
 jest.mock('../lib/servicenow/use_get_choices');
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
@@ -151,33 +152,6 @@ describe('ServiceNowITSMParamsFields renders', () => {
     expect(title.prop('isInvalid')).toBeTruthy();
   });
 
-  test('When subActionParams is undefined, set to default', () => {
-    const { subActionParams, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-    mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual({
-      incident: {
-        correlation_id: '{{rule.id}}:{{alert.id}}',
-      },
-      comments: [],
-    });
-  });
-
-  test('When subAction is undefined, set to default', () => {
-    const { subAction, ...newParams } = actionParams;
-
-    const newProps = {
-      ...defaultProps,
-      actionParams: newParams,
-    };
-    mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
-    expect(editAction.mock.calls[0][1]).toEqual('pushToService');
-  });
-
   test('Resets fields when connector changes', () => {
     const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...defaultProps} />);
     expect(editAction.mock.calls.length).toEqual(0);
@@ -188,6 +162,20 @@ describe('ServiceNowITSMParamsFields renders', () => {
         correlation_id: '{{rule.id}}:{{alert.id}}',
       },
       comments: [],
+    });
+  });
+
+  test('Resets fields when connector changes and action group is recovered', () => {
+    const newProps = {
+      ...defaultProps,
+      selectedActionGroupId: ACTION_GROUP_RECOVERED,
+    };
+    const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+    expect(editAction.mock.calls.length).toEqual(0);
+    wrapper.setProps({ actionConnector: { ...connector, id: '1234' } });
+    expect(editAction.mock.calls.length).toEqual(1);
+    expect(editAction.mock.calls[0][1]).toEqual({
+      incident: { correlation_id: '{{rule.id}}:{{alert.id}}' },
     });
   });
 
@@ -298,6 +286,58 @@ describe('ServiceNowITSMParamsFields renders', () => {
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
+    });
+
+    test('shows only correlation_id field when actionGroup is recovered', () => {
+      const newProps = {
+        ...defaultProps,
+        selectedActionGroupId: 'recovered',
+      };
+      const wrapper = mountWithIntl(<ServiceNowITSMParamsFields {...newProps} />);
+      expect(wrapper.find('input[data-test-subj="correlation_idInput"]').exists()).toBeTruthy();
+      expect(wrapper.find('input[data-test-subj="short_descriptionInput"]').exists()).toBeFalsy();
+    });
+
+    test('A short description change triggers editAction', () => {
+      const wrapper = mountWithIntl(
+        <ServiceNowITSMParamsFields
+          actionParams={{}}
+          errors={{ ['subActionParams.incident.short_description']: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      );
+
+      const shortDescriptionField = wrapper.find('input[data-test-subj="short_descriptionInput"]');
+      shortDescriptionField.simulate('change', {
+        target: { value: 'new updated short description' },
+      });
+
+      expect(editAction.mock.calls[0][1]).toEqual({
+        incident: { short_description: 'new updated short description' },
+        comments: [],
+      });
+    });
+
+    test('A correlation_id field change triggers edit action correctly when actionGroup is recovered', () => {
+      const wrapper = mountWithIntl(
+        <ServiceNowITSMParamsFields
+          selectedActionGroupId={'recovered'}
+          actionParams={{}}
+          errors={{ ['subActionParams.incident.short_description']: [] }}
+          editAction={editAction}
+          index={0}
+        />
+      );
+      const correlationIdField = wrapper.find('input[data-test-subj="correlation_idInput"]');
+
+      correlationIdField.simulate('change', {
+        target: { value: 'updated correlation id' },
+      });
+
+      expect(editAction.mock.calls[0][1]).toEqual({
+        incident: { correlation_id: 'updated correlation id' },
+      });
     });
   });
 });

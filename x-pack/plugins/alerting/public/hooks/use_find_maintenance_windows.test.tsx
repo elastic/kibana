@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { renderHook } from '@testing-library/react-hooks/dom';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 
 import { AppMockRenderer, createAppMockRenderer } from '../lib/test_utils';
 import { useFindMaintenanceWindows } from './use_find_maintenance_windows';

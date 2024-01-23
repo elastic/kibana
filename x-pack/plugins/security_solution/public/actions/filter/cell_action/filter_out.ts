@@ -17,7 +17,7 @@ import type { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
-import { timelineSelectors } from '../../../timelines/store/timeline';
+import { timelineSelectors } from '../../../timelines/store';
 import { TimelineId } from '../../../../common/types';
 import { isTimelineScope } from '../../../helpers';
 import type { SecurityCellAction } from '../../types';

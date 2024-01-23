@@ -27,6 +27,8 @@ import { useRefreshTransformList } from './use_refresh_transform_list';
 interface CreateTransformArgs {
   transformId: TransformId;
   transformConfig: PutTransformsRequestSchema;
+  createDataView: boolean;
+  timeFieldName?: string;
 }
 
 export const useCreateTransform = () => {
@@ -48,10 +50,16 @@ export const useCreateTransform = () => {
   }
 
   const mutation = useMutation({
-    mutationFn: ({ transformId, transformConfig }: CreateTransformArgs) => {
+    mutationFn: ({
+      transformId,
+      transformConfig,
+      createDataView = false,
+      timeFieldName,
+    }: CreateTransformArgs) => {
       return http.put<PutTransformsResponseSchema>(
         addInternalBasePath(`transforms/${transformId}`),
         {
+          query: { createDataView, timeFieldName },
           body: JSON.stringify(transformConfig),
           version: '1',
         }

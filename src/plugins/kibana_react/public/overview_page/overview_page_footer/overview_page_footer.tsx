@@ -11,7 +11,7 @@ import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@ela
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '../../app_links';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useKibana } from '../../context';
 import { useUiSetting$ } from '../../ui_settings';
 
@@ -43,7 +43,11 @@ export const OverviewPageFooter: FC<Props> = ({
   if (!show && !save) return <></>;
 
   const defaultRouteButton = defaultRoute.includes(path) ? (
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <EuiButtonEmpty
         className="kbnOverviewPageFooter__button"
         flush="both"

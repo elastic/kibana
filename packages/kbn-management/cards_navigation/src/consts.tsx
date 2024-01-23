@@ -93,7 +93,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.SAVED_OBJECTS]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.objectsDescription', {
-      defaultMessage: 'Manage your saved dashboards, maps, data views, and Canvas workpads.',
+      defaultMessage: 'Manage your saved dashboards, visualizations, maps, and data views.',
     }),
     icon: 'save',
   },
@@ -107,7 +107,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
+      defaultMessage: 'Manage generated CSV reports.',
     }),
     icon: 'visPie',
   },

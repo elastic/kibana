@@ -17,13 +17,13 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
   INDEX_OPEN,
   IndexDetailsSection,
   IndexDetailsTab,
   IndexDetailsTabId,
-  Section,
 } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
@@ -49,7 +49,7 @@ const defaultTabs: IndexDetailsTab[] = [
     name: (
       <FormattedMessage id="xpack.idxMgmt.indexDetails.mappingsTitle" defaultMessage="Mappings" />
     ),
-    renderTabContent: ({ index }) => <DetailsPageMappings indexName={index.name} />,
+    renderTabContent: ({ index }) => <DetailsPageMappings index={index} />,
     order: 20,
   },
   {
@@ -77,13 +77,17 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
+  navigateToIndicesList: () => void;
 }
 export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
+  navigateToIndicesList,
 }) => {
   const {
     config: { enableIndexStats },
@@ -109,14 +113,10 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(getIndexDetailsLink(index.name, search, newSection));
     },
-    [history, index]
+    [history, index.name, search]
   );
-
-  const navigateToAllIndices = useCallback(() => {
-    history.push(`/${Section.Indices}`);
-  }, [history]);
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {
     return tabs.map((tabConfig) => ({
@@ -128,6 +128,13 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
     }));
   }, [tabs, tab, onSectionChange]);
 
+  const pageTitle = (
+    <>
+      {index.name}
+      {renderBadges(index, extensionsService)}
+    </>
+  );
+
   return (
     <>
       <EuiPageSection paddingSize="none">
@@ -135,25 +142,25 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
           data-test-subj="indexDetailsBackToIndicesButton"
           color="text"
           iconType="arrowLeft"
-          onClick={navigateToAllIndices}
+          onClick={navigateToIndicesList}
         >
           <FormattedMessage
             id="xpack.idxMgmt.indexDetails.backToIndicesButtonLabel"
-            defaultMessage="Back to all indices"
+            defaultMessage="Back to indices"
           />
         </EuiButton>
       </EuiPageSection>
       <EuiSpacer size="l" />
       <EuiPageHeader
         data-test-subj="indexDetailsHeader"
-        pageTitle={index.name}
+        pageTitle={pageTitle}
         bottomBorder
         rightSideItems={[
           <DiscoverLink indexName={index.name} asButton={true} />,
           <ManageIndexButton
             index={index}
             reloadIndexDetails={fetchIndexDetails}
-            navigateToAllIndices={navigateToAllIndices}
+            navigateToIndicesList={navigateToIndicesList}
           />,
         ]}
         rightSideGroupProps={{

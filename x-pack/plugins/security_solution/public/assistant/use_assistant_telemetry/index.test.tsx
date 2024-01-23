@@ -27,6 +27,7 @@ const mockedTelemetry = {
   reportAssistantInvoked,
   reportAssistantMessageSent,
   reportAssistantQuickPrompt,
+  reportAssistantSettingToggled: () => {},
 };
 
 jest.mock('../use_conversation_store', () => {

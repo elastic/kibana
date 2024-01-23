@@ -25,6 +25,16 @@ export const ALERT_SUPPRESSION_FIELDS =
 export const ALERT_SUPPRESSION_DURATION_OPTIONS =
   '[data-test-subj="alertSuppressionDuration"] [data-test-subj="groupByDurationOptions"]';
 
+export const ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-time-period`;
+
+export const ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION = `${ALERT_SUPPRESSION_DURATION_OPTIONS} #per-rule-execution`;
+
+export const ALERT_SUPPRESSION_DURATION_INPUT =
+  '[data-test-subj="alertSuppressionDuration"] [data-test-subj="alertSuppressionDurationInput"]';
+
+export const THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX =
+  '[data-test-subj="detectionEngineStepDefineRuleThresholdEnableSuppression"] input';
+
 export const ANOMALY_THRESHOLD_INPUT = '[data-test-subj="anomalyThresholdSlider"] .euiFieldNumber';
 
 export const ADVANCED_SETTINGS_BTN = '[data-test-subj="advancedSettings"] .euiAccordion__button';

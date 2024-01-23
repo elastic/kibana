@@ -19,7 +19,7 @@ import { validateIndexPatterns } from '../utils';
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThresholdRuleParams, ThresholdAlertState, {}, 'default'> => {
-  const { version } = createOptions;
+  const { version, licensing } = createOptions;
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
@@ -62,7 +62,7 @@ export const createThresholdAlertType = (
           completeRule,
           tuple,
           wrapHits,
-          ruleDataReader,
+          ruleDataClient,
           inputIndex,
           runtimeMappings,
           primaryTimestamp,
@@ -76,6 +76,7 @@ export const createThresholdAlertType = (
         services,
         startedAt,
         state,
+        spaceId,
       } = execOptions;
       const result = await thresholdExecutor({
         completeRule,
@@ -87,7 +88,7 @@ export const createThresholdAlertType = (
         state,
         bulkCreate,
         wrapHits,
-        ruleDataReader,
+        ruleDataClient,
         inputIndex,
         runtimeMappings,
         primaryTimestamp,
@@ -96,6 +97,9 @@ export const createThresholdAlertType = (
         exceptionFilter,
         unprocessedExceptions,
         inputIndexFields,
+        spaceId,
+        runOpts: execOptions.runOpts,
+        licensing,
       });
       return result;
     },

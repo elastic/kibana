@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { maintenanceWindowStatus, maintenanceWindowCategoryIdTypes } from '../constants';
 import { rRuleSchema } from '../../r_rule/schemas';
+import { alertsFilterQuerySchema } from '../../alerts_filter_query/schemas';
 
 export const maintenanceWindowEventSchema = schema.object({
   gte: schema.string(),
@@ -47,4 +48,5 @@ export const maintenanceWindowSchema = schema.object({
     schema.literal(maintenanceWindowStatus.ARCHIVED),
   ]),
   categoryIds: maintenanceWindowCategoryIdsSchema,
+  scopedQuery: schema.maybe(schema.nullable(alertsFilterQuerySchema)),
 });

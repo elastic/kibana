@@ -312,9 +312,13 @@ export interface BulkCreateAttachmentUserAction
   attachments: Array<{ id: string; owner: string; attachment: AttachmentRequest }>;
 }
 
-export type CreateUserActionClient<T extends keyof BuilderParameters> = CreateUserAction<T> &
-  CommonUserActionArgs &
-  IndexRefresh;
+export type CreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userAction: CreateUserAction<T> & CommonUserActionArgs;
+} & IndexRefresh;
+
+export type BulkCreateUserActionArgs<T extends keyof BuilderParameters> = {
+  userActions: Array<CreateUserAction<T> & CommonUserActionArgs>;
+} & IndexRefresh;
 
 export interface CreateUserActionES<T> extends IndexRefresh {
   attributes: T;

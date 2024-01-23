@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LogExplorerLocatorDefinition, LogExplorerLocators } from '../common/locators';
 import { createLogExplorer } from './components/log_explorer';
-import {
+import { createLogExplorerControllerLazyFactory } from './controller/lazy_create_controller';
+import type {
   LogExplorerPluginSetup,
   LogExplorerPluginStart,
   LogExplorerSetupDeps,
@@ -21,12 +23,14 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: LogExplorerSetupDeps) {
-    const { share, discover } = plugins;
+    const { share } = plugins;
+    const discoverAppLocator =
+      share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
 
     // Register Locators
     const logExplorerLocator = share.url.locators.create(
       new LogExplorerLocatorDefinition({
-        discover,
+        discoverAppLocator,
       })
     );
 
@@ -45,8 +49,14 @@ export class LogExplorerPlugin implements Plugin<LogExplorerPluginSetup, LogExpl
       plugins,
     });
 
+    const createLogExplorerController = createLogExplorerControllerLazyFactory({
+      core,
+      plugins,
+    });
+
     return {
       LogExplorer,
+      createLogExplorerController,
     };
   }
 }

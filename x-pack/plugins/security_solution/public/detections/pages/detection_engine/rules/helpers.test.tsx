@@ -125,6 +125,7 @@ describe('rule helpers', () => {
         newTermsFields: ['host.name'],
         historyWindowSize: '7d',
         suppressionMissingFields: expect.any(String),
+        enableThresholdSuppression: false,
       };
 
       const aboutRuleStepData: AboutStepRule = {

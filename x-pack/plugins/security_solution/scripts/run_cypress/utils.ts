@@ -11,7 +11,35 @@ import * as parser from '@babel/parser';
 import generate from '@babel/generator';
 import type { ExpressionStatement, ObjectExpression, ObjectProperty } from '@babel/types';
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { getExperimentalAllowedValues } from '../../common/experimental_features';
+
+/**
+ * Retrieve test files using a glob pattern.
+ * If process.env.RUN_ALL_TESTS is true, returns all matching files, otherwise, return files that should be run by this job based on process.env.BUILDKITE_PARALLEL_JOB_COUNT and process.env.BUILDKITE_PARALLEL_JOB
+ */
+export const retrieveIntegrations = (integrationsPaths: string[]) => {
+  const nonSkippedSpecs = integrationsPaths.filter((filePath) => !isSkipped(filePath));
+
+  if (process.env.RUN_ALL_TESTS === 'true') {
+    return nonSkippedSpecs;
+  } else {
+    // The number of instances of this job were created
+    const chunksTotal: number = process.env.BUILDKITE_PARALLEL_JOB_COUNT
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB_COUNT, 10)
+      : 1;
+    // An index which uniquely identifies this instance of the job
+    const chunkIndex: number = process.env.BUILDKITE_PARALLEL_JOB
+      ? parseInt(process.env.BUILDKITE_PARALLEL_JOB, 10)
+      : 0;
+
+    const nonSkippedSpecsForChunk: string[] = [];
+
+    for (let i = chunkIndex; i < nonSkippedSpecs.length; i += chunksTotal) {
+      nonSkippedSpecsForChunk.push(nonSkippedSpecs[i]);
+    }
+
+    return nonSkippedSpecsForChunk;
+  }
+};
 
 export const isSkipped = (filePath: string): boolean => {
   const testFile = fs.readFileSync(filePath, { encoding: 'utf8' });
@@ -39,9 +67,10 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
     plugins: ['typescript'],
   });
 
-  const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-    | ExpressionStatement
-    | undefined;
+  const expressionStatement = _.find(ast.program.body, {
+    type: 'ExpressionStatement',
+    expression: { callee: { name: 'describe' } },
+  }) as ExpressionStatement | undefined;
 
   const callExpression = expressionStatement?.expression;
   // @ts-expect-error
@@ -85,21 +114,7 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
 const TestFileFtrConfigSchema = schema.object(
   {
     license: schema.maybe(schema.string()),
-    enableExperimental: schema.maybe(
-      schema.arrayOf(
-        schema.string({
-          validate: (value) => {
-            const allowedValues = getExperimentalAllowedValues();
-
-            if (!allowedValues.includes(value)) {
-              return `Invalid [enableExperimental] value {${value}.\nValid values are: [${allowedValues.join(
-                ', '
-              )}]`;
-            }
-          },
-        })
-      )
-    ),
+    kbnServerArgs: schema.maybe(schema.arrayOf(schema.string())),
     productTypes: schema.maybe(
       // TODO:PT write validate function to ensure that only the correct combinations are used
       schema.arrayOf(

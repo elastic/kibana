@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IStaticAssets } from '@kbn/core/server';
 import type { SampleDatasetSchema } from './sample_dataset_schema';
 export type { SampleDatasetSchema, DataIndexSchema } from './sample_dataset_schema';
 
@@ -27,7 +28,11 @@ export enum EmbeddableTypes {
   SEARCH_EMBEDDABLE_TYPE = 'search',
   VISUALIZE_EMBEDDABLE_TYPE = 'visualization',
 }
-export type SampleDatasetProvider = () => SampleDatasetSchema;
+
+export interface SampleDatasetProviderContext {
+  staticAssets: IStaticAssets;
+}
+export type SampleDatasetProvider = (context: SampleDatasetProviderContext) => SampleDatasetSchema;
 
 /** This type is used to identify an object in a sample dataset. */
 export interface SampleObject {

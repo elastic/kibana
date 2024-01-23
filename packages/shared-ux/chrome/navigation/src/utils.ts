@@ -6,47 +6,21 @@
  * Side Public License, v 1.
  */
 
-import type { ChromeProjectNavigationNode, NodeDefinition } from '@kbn/core-chrome-browser';
-
-let uniqueId = 0;
-
-function generateUniqueNodeId() {
-  const id = `node${uniqueId++}`;
-  return id;
-}
+import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 
 export function isAbsoluteLink(link: string) {
   return link.startsWith('http://') || link.startsWith('https://');
 }
 
-export function nodePathToString<T extends { path?: string[]; id: string } | null>(
-  node?: T
-): T extends { path?: string[]; id: string } ? string : undefined {
-  if (!node) return undefined as T extends { path?: string[]; id: string } ? string : undefined;
-  return (node.path ? node.path.join('.') : node.id) as T extends { path?: string[]; id: string }
-    ? string
-    : undefined;
+function isSamePath(pathA: string | null, pathB: string | null) {
+  if (pathA === null || pathB === null) {
+    return false;
+  }
+  return pathA === pathB;
 }
 
-export function isGroupNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
-  return children !== undefined;
-}
-
-export function isItemNode({ children }: Pick<ChromeProjectNavigationNode, 'children'>) {
-  return children === undefined;
-}
-
-export function getNavigationNodeId(
-  { id: _id, link }: Pick<NodeDefinition, 'id' | 'link'>,
-  idGenerator = generateUniqueNodeId
-): string {
-  const id = _id ?? link;
-  return id ?? idGenerator();
-}
-
-export function getNavigationNodeHref({
-  href,
-  deepLink,
-}: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
-  return deepLink?.url ?? href;
+export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
+  return activeNodes.reduce((acc, nodesBranch) => {
+    return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
+  }, false);
 }

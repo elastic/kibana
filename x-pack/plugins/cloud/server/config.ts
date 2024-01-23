@@ -35,8 +35,9 @@ const configSchema = schema.object({
   serverless: schema.maybe(
     schema.object(
       {
-        project_id: schema.string(),
+        project_id: schema.maybe(schema.string()),
         project_name: schema.maybe(schema.string()),
+        project_type: schema.maybe(schema.string()),
       },
       // avoid future chicken-and-egg situation with the component populating the config
       { unknowns: 'ignore' }
@@ -63,6 +64,7 @@ export const config: PluginConfigDescriptor<CloudConfigType> = {
     serverless: {
       project_id: true,
       project_name: true,
+      project_type: true,
     },
   },
   schema: configSchema,

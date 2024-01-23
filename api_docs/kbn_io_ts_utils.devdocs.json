@@ -773,6 +773,41 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.UniqueTimeKey",
+        "type": "Interface",
+        "tags": [],
+        "label": "UniqueTimeKey",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.UniqueTimeKey",
+            "text": "UniqueTimeKey"
+          },
+          " extends { time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/io-ts-utils",
+            "id": "def-common.UniqueTimeKey.gid",
+            "type": "string",
+            "tags": [],
+            "label": "gid",
+            "description": [],
+            "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -848,6 +883,21 @@
       },
       {
         "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.MinimalTimeKey",
+        "type": "Type",
+        "tags": [],
+        "label": "MinimalTimeKey",
+        "description": [],
+        "signature": [
+          "{ time: string; tiebreaker: number; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.NonEmptyString",
         "type": "Type",
         "tags": [],
@@ -870,9 +920,40 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.TimeKey",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeKey",
+        "description": [],
+        "signature": [
+          "{ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.DateFromStringOrNumber",
+        "type": "Object",
+        "tags": [],
+        "label": "DateFromStringOrNumber",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string | number, unknown>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/io-ts-utils",
         "id": "def-common.datemathStringRt",
@@ -957,6 +1038,26 @@
           "<any, string, unknown>"
         ],
         "path": "packages/kbn-io-ts-utils/src/json_rt/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/io-ts-utils",
+        "id": "def-common.minimalTimeKeyRT",
+        "type": "Object",
+        "tags": [],
+        "label": "minimalTimeKeyRT",
+        "description": [],
+        "signature": [
+          "TypeC",
+          "<{ time: ",
+          "Type",
+          "<string, string | number, unknown>; tiebreaker: ",
+          "NumberC",
+          "; }>"
+        ],
+        "path": "packages/kbn-io-ts-utils/src/time_key_rt/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

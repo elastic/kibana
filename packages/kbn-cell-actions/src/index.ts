@@ -20,7 +20,7 @@ export type {
 export type { UseDataGridColumnsCellActions, UseDataGridColumnsCellActionsProps } from './hooks';
 
 // Constants
-export { CellActionsMode, FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from './constants';
+export { CellActionsMode } from './constants';
 
 // Components and hooks
 export { CellActionsProvider } from './context';

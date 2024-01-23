@@ -83,6 +83,37 @@ export const numericDraggedField = {
   },
 };
 
+export const fieldListNonNumericOnly = [
+  {
+    columnId: 'category',
+    fieldName: 'category',
+    meta: {
+      type: 'string',
+    },
+  },
+  {
+    columnId: 'currency',
+    fieldName: 'currency',
+    meta: {
+      type: 'string',
+    },
+  },
+  {
+    columnId: 'products.sold_date',
+    fieldName: 'products.sold_date',
+    meta: {
+      type: 'date',
+    },
+  },
+  {
+    columnId: 'products.buyer',
+    fieldName: 'products.buyer',
+    meta: {
+      type: 'string',
+    },
+  },
+];
+
 export const fieldList = [
   {
     columnId: 'category',
@@ -121,14 +152,12 @@ export const defaultProps = {
       first: {
         index: 'indexId',
         query: {
-          sql: 'SELECT * FROM "kibana_sample_data_ecommerce"',
+          esql: 'FROM "kibana_sample_data_ecommerce"',
         },
         columns: [column1, column2, column3],
-        allColumns: [...fieldList, column1, column2, column3],
         errors: [],
       },
     },
-    fieldList,
     indexPatternRefs: [],
   },
   source: numericDraggedColumn,

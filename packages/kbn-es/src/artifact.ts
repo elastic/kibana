@@ -27,7 +27,7 @@ const PERMANENT_SNAPSHOTS_BASE_URL =
   'https://storage.googleapis.com/kibana-ci-es-snapshots-permanent';
 
 type ChecksumType = 'sha512';
-export type ArtifactLicense = 'oss' | 'basic' | 'trial';
+export type ArtifactLicense = 'basic' | 'trial';
 
 interface ArtifactManifest {
   id: string;
@@ -122,7 +122,7 @@ async function getArtifactSpecForSnapshot(
   log: ToolingLog
 ): Promise<ArtifactSpec> {
   const desiredVersion = urlVersion.replace('-SNAPSHOT', '');
-  const desiredLicense = license === 'oss' ? 'oss' : 'default';
+  const desiredLicense = 'default';
 
   const customManifestUrl = process.env.ES_SNAPSHOT_MANIFEST;
   const primaryManifestUrl = `${DAILY_SNAPSHOTS_BASE_URL}/${desiredVersion}/manifest-latest${

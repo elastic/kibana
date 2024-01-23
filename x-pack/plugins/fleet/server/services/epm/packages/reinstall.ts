@@ -11,6 +11,10 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import type { Installation } from '../../../types';
 import { pkgToPkgKey } from '../registry';
 
+import { PackageNotFoundError, PackageAlreadyInstalledError } from '../../../errors';
+
+import { getBundledPackageForInstallation } from './bundled_packages';
+
 import { installPackage } from './install';
 
 export async function reinstallPackageForInstallation({
@@ -22,9 +26,20 @@ export async function reinstallPackageForInstallation({
   esClient: ElasticsearchClient;
   installation: Installation;
 }) {
-  if (installation.install_source === 'upload') {
-    throw new Error('Cannot reinstall an uploaded package');
+  if (installation.install_source === 'upload' || installation.install_source === 'bundled') {
+    // If there is a matching bundled package
+    const matchingBundledPackage = await getBundledPackageForInstallation(installation);
+    if (!matchingBundledPackage) {
+      if (installation.install_source === 'bundled') {
+        throw new PackageNotFoundError(
+          `Cannot reinstall: ${installation.name}, bundled package not found`
+        );
+      } else {
+        throw new PackageAlreadyInstalledError('Cannot reinstall an uploaded package');
+      }
+    }
   }
+
   return installPackage({
     // If the package is bundled reinstall from the registry will still use the bundled package.
     installSource: 'registry',

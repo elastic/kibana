@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
-import { cleanKibana, resetRulesTableState } from '../../../../tasks/common';
+import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
@@ -97,7 +97,6 @@ function expectDefaultRulesTableState(): void {
 
 describe('Rules table: persistent state', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createTestRules();
   });
 

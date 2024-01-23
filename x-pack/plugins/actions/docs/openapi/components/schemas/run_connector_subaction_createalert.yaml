@@ -30,7 +30,8 @@ properties:
         type: object
         description: The custom properties of the alert.
         additionalProperties: true
-        example: {"key1":"value1","key2":"value2"}
+        examples:
+          - {"key1":"value1","key2":"value2"}
       entity:
         type: string
         description: The domain of the alert. For example, the application or server name.

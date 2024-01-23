@@ -129,7 +129,7 @@ export class Home extends Component<HomeProps, State> {
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled } = this.props;
     const { application, trackUiMetric } = getServices();
-    const isDarkMode = getServices().uiSettings?.get('theme:darkMode') || false;
+    const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
 

@@ -6,11 +6,13 @@
  */
 
 import { SavedObjectsClient } from '@kbn/core/server';
+import type {
+  AuditServiceSetup,
+  AuthorizationServiceSetup,
+} from '@kbn/security-plugin-types-server';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
 import { SecureSpacesClientWrapper } from './secure_spaces_client_wrapper';
-import type { AuditServiceSetup } from '../audit';
-import type { AuthorizationServiceSetup } from '../authorization';
 import { SavedObjectsSecurityExtension } from '../saved_objects';
 
 interface Deps {

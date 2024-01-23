@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -17,25 +16,19 @@ import {
 /**
  * Helper to cut down on the noise in some of the tests. This checks for
  * an expected 200 still and does not do any retries.
+ *
  * @param supertest The supertest deps
  * @param rule The rule to create
  */
 export const updateRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog,
   updatedRule: RuleUpdateProps
-): Promise<RuleResponse> => {
-  const response = await supertest
-    .put(DETECTION_ENGINE_RULES_URL)
-    .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31')
-    .send(updatedRule);
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when updating a rule (updateRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
-  }
-  return response.body;
-};
+): Promise<RuleResponse> =>
+  (
+    await supertest
+      .put(DETECTION_ENGINE_RULES_URL)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send(updatedRule)
+      .expect(200)
+  ).body;

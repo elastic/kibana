@@ -12,7 +12,7 @@ import { distinctUntilChanged, filter, map, shareReplay, tap } from 'rxjs/operat
 import type { Logger, StatusServiceSetup } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
-import type { SecurityLicense } from '../../common/licensing';
+import type { SecurityLicense } from '../../common';
 
 export interface ElasticsearchServiceSetupParams {
   readonly status: StatusServiceSetup;

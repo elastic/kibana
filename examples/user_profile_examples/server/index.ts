@@ -5,6 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { UserProfilesPlugin } from './plugin';
 
-export const plugin = () => new UserProfilesPlugin();
+export const plugin = async () => {
+  const { UserProfilesPlugin } = await import('./plugin');
+  return new UserProfilesPlugin();
+};

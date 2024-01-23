@@ -11,7 +11,10 @@ import {
   PROCESSOR_EVENT,
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
-import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import {
+  TRANSACTION_PAGE_EXIT,
+  TRANSACTION_PAGE_LOAD,
+} from '../../../common/transaction_types';
 import { SetupUX } from '../../../typings/ui_filters';
 import { getEsFilter } from './get_es_filter';
 import { rangeQuery } from './range_query';
@@ -47,6 +50,47 @@ export function getRumPageLoadTransactionsProjection({
             },
           ]
         : []),
+      ...(urlQuery
+        ? [
+            {
+              wildcard: {
+                'url.full': `*${urlQuery}*`,
+              },
+            },
+          ]
+        : []),
+      ...getEsFilter(uiFilters),
+    ],
+    must_not: [...getEsFilter(uiFilters, true)],
+  };
+
+  return {
+    body: {
+      query: {
+        bool,
+      },
+    },
+  };
+}
+
+export function getRumPageExitTransactionsProjection({
+  setup,
+  urlQuery,
+  start,
+  end,
+}: {
+  setup: SetupUX;
+  urlQuery?: string;
+  start: number;
+  end: number;
+}) {
+  const { uiFilters } = setup;
+
+  const bool = {
+    filter: [
+      ...rangeQuery(start, end),
+      { term: { [TRANSACTION_TYPE]: TRANSACTION_PAGE_EXIT } },
+      { terms: { [PROCESSOR_EVENT]: [ProcessorEvent.transaction] } },
       ...(urlQuery
         ? [
             {

@@ -8,12 +8,10 @@
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { registerHelpers } from './cluster_nodes.helpers';
+import { clusterNodesApi } from './lib/cluster_nodes.api';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  const { getNodesPlugins } = registerHelpers({ supertest });
+  const { getNodesPlugins } = clusterNodesApi(getService);
 
   describe('nodes', () => {
     it('should fetch the nodes plugins', async () => {

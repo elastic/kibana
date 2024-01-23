@@ -6,6 +6,10 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
+import {
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+} from '../../../../common/field_maps/field_names';
 import type { LicenseService } from '../../../../common/license';
 import type { ColumnHeaderOptions } from '../../../../common/types';
 
@@ -20,6 +24,13 @@ import {
   DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
 } from './translations';
+
+export const assigneesColumn: ColumnHeaderOptions = {
+  columnHeaderType: defaultColumnHeaderType,
+  displayAsText: i18n.ALERTS_HEADERS_ASSIGNEES,
+  id: 'kibana.alert.workflow_assignee_ids',
+  initialWidth: DEFAULT_DATE_COLUMN_MIN_WIDTH,
+};
 
 const getBaseColumns = (
   license?: LicenseService
@@ -66,6 +77,18 @@ const getBaseColumns = (
           id: 'user.risk.calculated_level',
         }
       : null,
+    isPlatinumPlus
+      ? {
+          columnHeaderType: defaultColumnHeaderType,
+          id: ALERT_HOST_CRITICALITY,
+        }
+      : null,
+    isPlatinumPlus
+      ? {
+          columnHeaderType: defaultColumnHeaderType,
+          id: ALERT_USER_CRITICALITY,
+        }
+      : null,
     {
       columnHeaderType: defaultColumnHeaderType,
       id: 'process.name',
@@ -109,6 +132,7 @@ export const getColumns = (
     initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
     linkField: 'kibana.alert.rule.uuid',
   },
+  assigneesColumn,
   ...getBaseColumns(license),
 ];
 

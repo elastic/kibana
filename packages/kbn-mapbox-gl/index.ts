@@ -7,6 +7,7 @@
  */
 
 import type {
+  AJAXError,
   Map,
   LayerSpecification,
   Source,
@@ -44,6 +45,7 @@ maplibregl.setRTLTextPlugin(mbRtlPlugin);
 export { maplibregl };
 
 export type {
+  AJAXError,
   Map,
   LayerSpecification,
   SourceSpecification,

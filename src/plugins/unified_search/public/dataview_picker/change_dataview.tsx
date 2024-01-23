@@ -96,7 +96,9 @@ export function ChangeDataView({
   const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, dataViewsList });
+
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );
@@ -215,7 +217,7 @@ export function ChangeDataView({
             })}
           </EuiContextMenuItem>
         ) : (
-          <React.Fragment />
+          <React.Fragment key="empty" />
         ),
         <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
@@ -305,12 +307,6 @@ export function ChangeDataView({
           isTextBasedLangSelected={isTextBasedLangSelected}
           setPopoverIsOpen={setPopoverIsOpen}
           onChangeDataView={async (newId) => {
-            try {
-              // refreshing the field list
-              await dataViews.get(newId, false, true);
-            } catch (e) {
-              //
-            }
             setSelectedDataViewId(newId);
             setPopoverIsOpen(false);
             if (isTextBasedLangSelected && !isTextLangTransitionModalDismissed) {
@@ -336,13 +332,23 @@ export function ChangeDataView({
     if (textBasedLanguages?.length) {
       panelItems.push(
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
-        <EuiPanel color="transparent" paddingSize="none">
+        <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
+            css={css`
+              border-top-right-radius: unset;
+              border-top-left-radius: unset;
+            `}
             color="success"
             size="s"
             fullWidth
             onClick={() => onTextBasedSubmit({ esql: `from ${trigger.title} | limit 10` })}
             data-test-subj="select-text-based-language-panel"
+            contentProps={{
+              css: {
+                justifyContent: 'flex-start',
+                paddingLeft: '26px',
+              },
+            }}
           >
             {i18n.translate('unifiedSearch.query.queryBar.textBasedLanguagesTryLabel', {
               defaultMessage: 'Try ES|QL',

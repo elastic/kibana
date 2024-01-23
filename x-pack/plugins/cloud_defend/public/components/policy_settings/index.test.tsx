@@ -7,6 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import '@kbn/code-editor-mock/jest_helper';
 import { TestProvider } from '../../test/test_provider';
 import { getCloudDefendNewPolicyMock } from '../../test/mocks';
 import { PolicySettings } from '.';

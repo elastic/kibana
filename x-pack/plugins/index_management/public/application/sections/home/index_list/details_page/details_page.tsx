@@ -6,12 +6,17 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, FunctionComponent } from 'react';
+import qs from 'query-string';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
-import { IndexDetailsSection, IndexDetailsTabId } from '../../../../../../common/constants';
+import {
+  IndexDetailsSection,
+  IndexDetailsTabId,
+  Section,
+} from '../../../../../../common/constants';
 import { Index } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';
@@ -28,6 +33,14 @@ export const DetailsPage: FunctionComponent<
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const [index, setIndex] = useState<Index | null>();
+
+  const navigateToIndicesList = useCallback(() => {
+    const indicesListParams = qs.parse(search);
+    delete indicesListParams.indexName;
+    delete indicesListParams.tab;
+    const paramsString = qs.stringify(indicesListParams);
+    history.push(`/${Section.Indices}${paramsString ? '?' : ''}${paramsString}`);
+  }, [history, search]);
 
   const fetchIndexDetails = useCallback(async () => {
     if (indexName) {
@@ -87,7 +100,13 @@ export const DetailsPage: FunctionComponent<
     );
   }
   if (error || !index) {
-    return <DetailsPageError indexName={indexName} resendRequest={fetchIndexDetails} />;
+    return (
+      <DetailsPageError
+        indexName={indexName}
+        resendRequest={fetchIndexDetails}
+        navigateToIndicesList={navigateToIndicesList}
+      />
+    );
   }
   return (
     <DetailsPageContent
@@ -95,6 +114,8 @@ export const DetailsPage: FunctionComponent<
       tab={tab}
       fetchIndexDetails={fetchIndexDetails}
       history={history}
+      search={search}
+      navigateToIndicesList={navigateToIndicesList}
     />
   );
 };

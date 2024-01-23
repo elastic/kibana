@@ -43,3 +43,9 @@ export type GetOutputsResponse = ListResult<Output>;
 export interface PostLogstashApiKeyResponse {
   api_key: string;
 }
+
+export interface GetOutputHealthResponse {
+  state: string;
+  message: string;
+  timestamp: string;
+}

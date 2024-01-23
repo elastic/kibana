@@ -12,10 +12,10 @@ import { get } from 'lodash/fp';
 
 import { dataTableActions } from '@kbn/securitysolution-data-table';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
-import { updateTotalCount } from '../../../timelines/store/timeline/actions';
+import { updateTotalCount } from '../../../timelines/store/actions';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
-import type { TimelineEpicDependencies } from '../../../timelines/store/timeline/types';
+import type { TimelineEpicDependencies } from '../../../timelines/store/types';
 
 const {
   applyDeltaToColumnWidth,
@@ -34,7 +34,7 @@ const {
 
 export const isNotNull = <T>(value: T | null): value is T => value !== null;
 
-const tableActionTypes = [
+const tableActionTypes = new Set([
   removeColumn.type,
   upsertColumn.type,
   applyDeltaToColumnWidth.type,
@@ -48,7 +48,7 @@ const tableActionTypes = [
   updateTotalCount.type,
   updateIsLoading.type,
   toggleDetailPanel.type,
-];
+]);
 
 export const createDataTableLocalStorageEpic =
   <State>(): Epic<Action, Action, State, TimelineEpicDependencies<State>> =>
@@ -58,7 +58,7 @@ export const createDataTableLocalStorageEpic =
       delay(500),
       withLatestFrom(table$),
       tap(([action, tableById]) => {
-        if (tableActionTypes.includes(action.type)) {
+        if (tableActionTypes.has(action.type)) {
           if (storage) {
             const tableId: TableIdLiteral = get('payload.id', action);
             addTableInStorage(storage, tableId, tableById[tableId]);

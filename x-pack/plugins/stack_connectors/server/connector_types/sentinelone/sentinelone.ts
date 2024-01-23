@@ -17,7 +17,7 @@ import type {
   SentinelOneBaseApiResponse,
   SentinelOneGetRemoteScriptsParams,
   SentinelOneGetRemoteScriptsResponse,
-  SentinelOneIsolateAgentParams,
+  SentinelOneIsolateHostParams,
   SentinelOneKillProcessParams,
   SentinelOneExecuteScriptParams,
 } from '../../../common/sentinelone/types';
@@ -27,12 +27,13 @@ import {
   SentinelOneGetRemoteScriptsParamsSchema,
   SentinelOneGetRemoteScriptsResponseSchema,
   SentinelOneGetAgentsResponseSchema,
-  SentinelOneIsolateAgentResponseSchema,
-  SentinelOneIsolateAgentParamsSchema,
+  SentinelOneIsolateHostResponseSchema,
+  SentinelOneIsolateHostParamsSchema,
   SentinelOneGetRemoteScriptStatusParamsSchema,
   SentinelOneGetRemoteScriptStatusResponseSchema,
   SentinelOneGetAgentsParamsSchema,
   SentinelOneExecuteScriptResponseSchema,
+  SentinelOneKillProcessParamsSchema,
 } from '../../../common/sentinelone/schema';
 import { SUB_ACTION } from '../../../common/sentinelone/constants';
 
@@ -45,8 +46,8 @@ export class SentinelOneConnector extends SubActionConnector<
 > {
   private urls: {
     agents: string;
-    isolateAgent: string;
-    releaseAgent: string;
+    isolateHost: string;
+    releaseHost: string;
     remoteScripts: string;
     remoteScriptStatus: string;
     remoteScriptsExecute: string;
@@ -56,8 +57,8 @@ export class SentinelOneConnector extends SubActionConnector<
     super(params);
 
     this.urls = {
-      isolateAgent: `${this.config.url}${API_PATH}/agents/actions/disconnect`,
-      releaseAgent: `${this.config.url}${API_PATH}/agents/actions/connect`,
+      isolateHost: `${this.config.url}${API_PATH}/agents/actions/disconnect`,
+      releaseHost: `${this.config.url}${API_PATH}/agents/actions/connect`,
       remoteScripts: `${this.config.url}${API_PATH}/remote-scripts`,
       remoteScriptStatus: `${this.config.url}${API_PATH}/remote-scripts/status`,
       remoteScriptsExecute: `${this.config.url}${API_PATH}/remote-scripts/execute`,
@@ -87,21 +88,21 @@ export class SentinelOneConnector extends SubActionConnector<
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.ISOLATE_AGENT,
-      method: 'isolateAgent',
-      schema: SentinelOneIsolateAgentParamsSchema,
+      name: SUB_ACTION.ISOLATE_HOST,
+      method: 'isolateHost',
+      schema: SentinelOneIsolateHostParamsSchema,
     });
 
     this.registerSubAction({
-      name: SUB_ACTION.RELEASE_AGENT,
-      method: 'releaseAgent',
-      schema: SentinelOneIsolateAgentParamsSchema,
+      name: SUB_ACTION.RELEASE_HOST,
+      method: 'releaseHost',
+      schema: SentinelOneIsolateHostParamsSchema,
     });
 
     this.registerSubAction({
       name: SUB_ACTION.KILL_PROCESS,
       method: 'killProcess',
-      schema: SentinelOneKillProcessResponseSchema,
+      schema: SentinelOneKillProcessParamsSchema,
     });
 
     this.registerSubAction({
@@ -112,7 +113,7 @@ export class SentinelOneConnector extends SubActionConnector<
   }
 
   public async executeScript(payload: SentinelOneExecuteScriptParams) {
-    return this.sentinelOneApiRequest({
+    await this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
       data: {
@@ -128,7 +129,7 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async killProcess({ processName, ...payload }: SentinelOneKillProcessParams) {
+  public async killProcess({ alertIds, processName, ...payload }: SentinelOneKillProcessParams) {
     const agentData = await this.getAgents(payload);
 
     const agentId = agentData.data[0]?.id;
@@ -139,14 +140,14 @@ export class SentinelOneConnector extends SubActionConnector<
 
     const terminateScriptResponse = await this.getRemoteScripts({
       query: 'terminate',
-      osTypes: [agentData?.data[0]?.osType],
+      osTypes: agentData?.data[0]?.osType,
     });
 
     if (!processName) {
       throw new Error('No process name provided');
     }
 
-    return this.sentinelOneApiRequest({
+    await this.sentinelOneApiRequest({
       url: this.urls.remoteScriptsExecute,
       method: 'post',
       data: {
@@ -165,32 +166,36 @@ export class SentinelOneConnector extends SubActionConnector<
     });
   }
 
-  public async isolateAgent(payload: SentinelOneIsolateAgentParams) {
+  public async isolateHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {
-      throw new Error('No agents found');
+      const errorMessage = 'No agents found';
+
+      throw new Error(errorMessage);
     }
 
     if (response.data[0].networkStatus === 'disconnected') {
-      throw new Error('Agent already isolated');
+      const errorMessage = 'Agent already isolated';
+
+      throw new Error(errorMessage);
     }
 
     const agentId = response.data[0].id;
 
     return this.sentinelOneApiRequest({
-      url: this.urls.isolateAgent,
+      url: this.urls.isolateHost,
       method: 'post',
       data: {
         filter: {
           ids: agentId,
         },
       },
-      responseSchema: SentinelOneIsolateAgentResponseSchema,
+      responseSchema: SentinelOneIsolateHostResponseSchema,
     });
   }
 
-  public async releaseAgent(payload: SentinelOneIsolateAgentParams) {
+  public async releaseHost({ alertIds, ...payload }: SentinelOneIsolateHostParams) {
     const response = await this.getAgents(payload);
 
     if (response.data.length === 0) {
@@ -204,14 +209,14 @@ export class SentinelOneConnector extends SubActionConnector<
     const agentId = response.data[0].id;
 
     return this.sentinelOneApiRequest({
-      url: this.urls.releaseAgent,
+      url: this.urls.releaseHost,
       method: 'post',
       data: {
         filter: {
           ids: agentId,
         },
       },
-      responseSchema: SentinelOneIsolateAgentResponseSchema,
+      responseSchema: SentinelOneIsolateHostResponseSchema,
     });
   }
 

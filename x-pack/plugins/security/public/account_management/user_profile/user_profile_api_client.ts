@@ -10,60 +10,17 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 
 import type { HttpStart } from '@kbn/core/public';
+import type {
+  UserProfileAPIClient as UserProfileAPIClientType,
+  UserProfileBulkGetParams,
+  UserProfileGetCurrentParams,
+  UserProfileSuggestParams,
+} from '@kbn/security-plugin-types-public';
 import type { UserProfileData } from '@kbn/user-profile-components';
 
 import type { GetUserProfileResponse, UserProfile } from '../../../common';
 
-/**
- * Parameters for the get user profile for the current user API.
- */
-export interface UserProfileGetCurrentParams {
-  /**
-   * By default, get API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath: string;
-}
-
-/**
- * Parameters for the bulk get API.
- */
-export interface UserProfileBulkGetParams {
-  /**
-   * List of user profile identifiers.
-   */
-  uids: Set<string>;
-
-  /**
-   * By default, suggest API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath?: string;
-}
-
-/**
- * Parameters for the suggest API.
- */
-export interface UserProfileSuggestParams {
-  /**
-   * Query string used to match name-related fields in user profiles. The following fields are treated as
-   * name-related: username, full_name and email.
-   */
-  name: string;
-
-  /**
-   * Desired number of suggestions to return. The default value is 10.
-   */
-  size?: number;
-
-  /**
-   * By default, suggest API returns user information, but does not return any user data. The optional "dataPath"
-   * parameter can be used to return personal data for this user (within `kibana` namespace only).
-   */
-  dataPath?: string;
-}
-
-export class UserProfileAPIClient {
+export class UserProfileAPIClient implements UserProfileAPIClientType {
   private readonly internalDataUpdates$: Subject<UserProfileData> = new Subject();
 
   /**

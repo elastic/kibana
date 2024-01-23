@@ -7,8 +7,8 @@
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { Query } from '@elastic/eui';
-
-import type { State, UserContentCommonSchema } from './table_list_view_table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { State } from './table_list_view_table';
 
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {

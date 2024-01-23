@@ -94,7 +94,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
       const totalHitsParams = {
         ...searchParams,
-        selectedSignificantTerm: undefined,
+        selectedSignificantItem: undefined,
         trackTotalHits: true,
       };
 

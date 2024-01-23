@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, config } from './plugin';
+import { config } from './plugin';
 
-export function plugin() {
+export async function plugin() {
+  const { Plugin } = await import('./plugin');
   return new Plugin();
 }
 

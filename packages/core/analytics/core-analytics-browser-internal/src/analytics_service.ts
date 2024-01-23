@@ -184,6 +184,10 @@ export class AnalyticsService {
           type: 'keyword',
           _meta: { description: 'The Cluster version', optional: true },
         },
+        cluster_build_flavor: {
+          type: 'keyword',
+          _meta: { description: 'The Cluster build flavor', optional: true },
+        },
       },
     });
   }

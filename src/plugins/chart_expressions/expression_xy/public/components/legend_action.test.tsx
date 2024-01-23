@@ -203,8 +203,7 @@ describe('getLegendAction', function () {
         formattedColumns: {},
       },
     },
-    {},
-    () => true
+    {}
   );
   let wrapper: ReactWrapper<LegendActionProps>;
 

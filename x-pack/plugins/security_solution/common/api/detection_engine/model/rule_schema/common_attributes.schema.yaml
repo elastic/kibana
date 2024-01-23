@@ -95,7 +95,6 @@ components:
           - field
           - operator
           - value
-        x-modify: requiredOptional
       description: Overrides generated alerts' risk_score with a value from the source event
 
     Severity:
@@ -397,6 +396,23 @@ components:
         - notifyWhen
         - throttle
 
+    RuleActionAlertsFilter:
+      type: object
+      additionalProperties: true
+
+    RuleActionParams:
+      type: object
+      description: Object containing the allowed connector fields, which varies according to the connector type.
+      additionalProperties: true
+
+    RuleActionGroup:
+      type: string
+      description: Optionally groups actions by use cases. Use `default` for alert notifications.
+
+    RuleActionId:
+      type: string
+      description: The connector ID.
+
     RuleAction:
       type: object
       properties:
@@ -404,20 +420,15 @@ components:
           type: string
           description: The action type used for sending notifications.
         group:
-          type: string
-          description: Optionally groups actions by use cases. Use `default` for alert notifications.
+          $ref: '#/components/schemas/RuleActionGroup'
         id:
-          type: string
-          description: The connector ID.
+          $ref: '#/components/schemas/RuleActionId'
         params:
-          type: object
-          description: Object containing the allowed connector fields, which varies according to the connector type.
-          additionalProperties: true
+          $ref: '#/components/schemas/RuleActionParams'
         uuid:
           $ref: '#/components/schemas/NonEmptyString'
         alerts_filter:
-          type: object
-          additionalProperties: true
+          $ref: '#/components/schemas/RuleActionAlertsFilter'
         frequency:
           $ref: '#/components/schemas/RuleActionFrequency'
       required:
@@ -460,3 +471,19 @@ components:
         - list_id
         - type
         - namespace_type
+
+    AlertSuppressionDuration:
+      type: object
+      properties:
+        value:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+          enum:
+            - s
+            - m
+            - h
+      required:
+        - value
+        - unit

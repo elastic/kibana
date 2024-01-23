@@ -52,7 +52,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   });
 
   registry.when('Agent explorer', { config: 'basic', archives: [] }, () => {
-    describe('when data is loaded', () => {
+    // FAILING VERSION BUMP: https://github.com/elastic/kibana/issues/172753
+    describe.skip('when data is loaded', () => {
       before(async () => {
         const serviceOtelJava = apm
           .service({

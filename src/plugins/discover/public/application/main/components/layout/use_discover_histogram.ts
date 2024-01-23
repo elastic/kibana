@@ -30,7 +30,6 @@ import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
 import { FetchStatus } from '../../../types';
-import { useDataState } from '../../hooks/use_data_state';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../services/discover_state';
@@ -68,9 +67,6 @@ export const useDiscoverHistogram = ({
       breakdownField,
     } = stateContainer.appState.getState();
 
-    const { fetchStatus: totalHitsStatus, result: totalHitsResult } =
-      savedSearchData$.totalHits$.getValue();
-
     return {
       localStorageKeyPrefix: 'discover',
       disableAutoFetching: true,
@@ -78,11 +74,11 @@ export const useDiscoverHistogram = ({
         chartHidden,
         timeInterval,
         breakdownField,
-        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
-        totalHitsResult,
+        totalHitsStatus: UnifiedHistogramFetchStatus.loading,
+        totalHitsResult: undefined,
       },
     };
-  }, [savedSearchData$.totalHits$, stateContainer.appState]);
+  }, [stateContainer.appState]);
 
   /**
    * Sync Unified Histogram state with Discover state
@@ -114,28 +110,6 @@ export const useDiscoverHistogram = ({
       subscription?.unsubscribe();
     };
   }, [inspectorAdapters, stateContainer.appState, unifiedHistogram?.state$]);
-
-  /**
-   * Override Unified Histgoram total hits with Discover partial results
-   */
-
-  const firstLoadComplete = useRef(false);
-
-  const { fetchStatus: totalHitsStatus, result: totalHitsResult } = useDataState(
-    savedSearchData$.totalHits$
-  );
-
-  useEffect(() => {
-    // We only want to show the partial results on the first load,
-    // or there will be a flickering effect as the loading spinner
-    // is quickly shown and hidden again on fetches
-    if (!firstLoadComplete.current) {
-      unifiedHistogram?.setTotalHits({
-        totalHitsStatus: totalHitsStatus.toString() as UnifiedHistogramFetchStatus,
-        totalHitsResult,
-      });
-    }
-  }, [totalHitsResult, totalHitsStatus, unifiedHistogram]);
 
   /**
    * Sync URL query params with Unified Histogram
@@ -181,7 +155,17 @@ export const useDiscoverHistogram = ({
           return;
         }
 
-        const { recordRawType } = savedSearchData$.totalHits$.getValue();
+        const { recordRawType, result: totalHitsResult } = savedSearchData$.totalHits$.getValue();
+
+        if (
+          (status === UnifiedHistogramFetchStatus.loading ||
+            status === UnifiedHistogramFetchStatus.uninitialized) &&
+          totalHitsResult &&
+          typeof result !== 'number'
+        ) {
+          // ignore the histogram initial loading state if discover state already has a total hits value
+          return;
+        }
 
         // Sync the totalHits$ observable with the unified histogram state
         savedSearchData$.totalHits$.next({
@@ -196,10 +180,6 @@ export const useDiscoverHistogram = ({
 
         // Check the hits count to set a partial or no results state
         checkHitCount(savedSearchData$.main$, result);
-
-        // Indicate the first load has completed so we don't show
-        // partial results on subsequent fetches
-        firstLoadComplete.current = true;
       }
     );
 
@@ -317,6 +297,11 @@ export const useDiscoverHistogram = ({
       skipRefetch.current = false;
     });
 
+    // triggering the initial request for total hits hook
+    if (!isPlainRecord && !skipRefetch.current) {
+      unifiedHistogram.refetch();
+    }
+
     return () => {
       subscription.unsubscribe();
     };
@@ -326,14 +311,24 @@ export const useDiscoverHistogram = ({
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
+  const servicesMemoized = useMemo(() => ({ ...services, uiActions: getUiActions() }), [services]);
+
+  const filtersMemoized = useMemo(
+    () => [...(filters ?? []), ...customFilters],
+    [filters, customFilters]
+  );
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+
   return {
     ref,
     getCreationOptions,
-    services: { ...services, uiActions: getUiActions() },
+    services: servicesMemoized,
     dataView: isPlainRecord ? textBasedDataView : dataView,
     query: isPlainRecord ? textBasedQuery : query,
-    filters: [...(filters ?? []), ...customFilters],
-    timeRange,
+    filters: filtersMemoized,
+    timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns,
     onFilter: histogramCustomization?.onFilter,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-import { LogExplorerServerPlugin } from './plugin';
-
-export const plugin = () => new LogExplorerServerPlugin();
+export const plugin = async () => {
+  const { LogExplorerServerPlugin } = await import('./plugin');
+  return new LogExplorerServerPlugin();
+};
