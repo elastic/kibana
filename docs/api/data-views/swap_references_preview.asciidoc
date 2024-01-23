@@ -33,7 +33,7 @@ For the most up-to-date API details, refer to the
  (Optional, boolean) Deletes referenced saved object if all references are removed.
 
 `fromType`::
- (Required, object) Specify the type of the saved object reference to alter. Default is `index-pattern` for data view.
+ (Optional, string) Specify the type of the saved object reference to alter. Default is `index-pattern` for data view.
 
 `forId`::
 (Optional, string) Limit the affected saved objects to one or more by IDs.
