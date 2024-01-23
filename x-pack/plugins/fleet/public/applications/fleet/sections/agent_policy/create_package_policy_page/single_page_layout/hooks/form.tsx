@@ -261,7 +261,11 @@ export function useOnSubmit({
         setFormState('INVALID');
         return;
       }
-      if (agentCount !== 0 && formState !== 'CONFIRM') {
+      if (
+        agentCount !== 0 &&
+        packagePolicy?.policy_id !== AGENTLESS_POLICY_ID &&
+        formState !== 'CONFIRM'
+      ) {
         setFormState('CONFIRM');
         return;
       }
