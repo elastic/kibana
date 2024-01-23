@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APIClientRequestParamsOf, APIReturnType } from '../rest/create_call_dataset_quality_api';
+import { APIClientRequestParamsOf, APIReturnType } from '../rest';
 import { DataStreamStat } from './data_stream_stat';
 
 export type GetDataStreamsStatsParams =
@@ -26,3 +26,11 @@ export type GetDataStreamsDegradedDocsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
 export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
 export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];
+
+export type GetDataStreamDetailsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>['params']['path'];
+export type GetDataStreamDetailsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>;
+
+export type { DataStreamStat } from './data_stream_stat';
+export type { DataStreamDetails } from './data_stream_details';
