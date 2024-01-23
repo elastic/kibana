@@ -54,7 +54,7 @@ export class SharePageObject extends FtrService {
   }
 
   async getSharedUrl() {
-    await this.testSubjects.click('Permalinks');
+    await this.testSubjects.click('sharePanel-Permalinks');
     return await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 
