@@ -33,14 +33,20 @@ export const createDataStreamQualityChecker = ({
   dataStreamQualityClient: IDataStreamQualityClient;
 }) =>
   React.memo(({ dataStream, timeRange }: DataStreamQualityCheckerProps) => {
-    const [initialParameters] = useState(() => ({
-      dataStream,
-      timeRange,
-    }));
+    const initialParameters = useMemo(
+      () => ({
+        dataStream,
+        timeRange,
+      }),
+      [dataStream, timeRange]
+    );
 
-    const [dependencies] = useState(() => ({
-      dataStreamQualityClient,
-    }));
+    const dependencies = useMemo(
+      () => ({
+        dataStreamQualityClient,
+      }),
+      []
+    );
 
     const [key, regenerateKey] = useRandomId(
       `${initialParameters.dataStream}-${initialParameters.timeRange.start}-${initialParameters.timeRange.end}`
@@ -106,7 +112,7 @@ const ConnectedPlannedChecksList = () => {
 };
 
 const ConnectedCheckProgressList = () => {
-  const [state, send] = useActor(useDataStreamQualityChecksStateContext());
+  const [state] = useActor(useDataStreamQualityChecksStateContext());
 
   const checkProgress = state.context.checkProgress;
 
