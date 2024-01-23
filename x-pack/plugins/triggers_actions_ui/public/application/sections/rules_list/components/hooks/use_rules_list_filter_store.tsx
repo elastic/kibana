@@ -145,23 +145,16 @@ export const useRulesListFilterStore = ({
   const resetFiltersStore = useCallback(() => {
     setFilters({
       actionTypes: [],
-      ruleExecutionStatuses: lastResponseFilter ?? [],
-      ruleLastRunOutcomes: lastRunOutcomeFilter ?? [],
-      ruleParams: ruleParamFilter ?? {},
-      ruleStatuses: statusFilter ?? [],
-      searchText: searchFilter ?? '',
+      ruleExecutionStatuses: [],
+      ruleLastRunOutcomes: [],
+      ruleParams: {},
+      ruleStatuses: [],
+      searchText: '',
       tags: [],
-      types: typeFilter ?? [],
+      types: [],
       kueryNode: undefined,
     });
-  }, [
-    lastResponseFilter,
-    lastRunOutcomeFilter,
-    ruleParamFilter,
-    searchFilter,
-    statusFilter,
-    typeFilter,
-  ]);
+  }, []);
 
   useEffect(() => {
     if (hasFilterFromUrl || hasFilterFromLocalStorage) {
