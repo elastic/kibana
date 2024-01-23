@@ -9,11 +9,9 @@ import { APP_PATH } from '@kbn/security-solution-plugin/common';
 import type { CoreSetup } from '@kbn/core/public';
 import type { SecuritySolutionServerlessPluginSetupDeps } from '../types';
 import type { Services } from '../common/services';
-import { withServicesProvider } from '../common/services';
 import { subscribeBreadcrumbs } from './breadcrumbs';
-import { ProjectNavigationTree } from './navigation_tree';
 import { getSecuritySideNavComponent } from './side_navigation';
-import { SecuritySideNavComponent } from './project_navigation';
+import { initProjectNavigation } from './project_navigation';
 import { projectAppLinksSwitcher } from './links/app_links';
 import { formatProjectDeepLinks } from './links/deep_links';
 import { enableManagementCardsLanding } from './management_cards';
@@ -32,16 +30,17 @@ export const startNavigation = (services: Services) => {
 
   enableManagementCardsLanding(services);
 
-  const projectNavigationTree = new ProjectNavigationTree(services);
-
   if (services.experimentalFeatures.platformNavEnabled) {
-    const SideNavComponentWithServices = withServicesProvider(SecuritySideNavComponent, services);
-    serverless.setSideNavComponent(SideNavComponentWithServices);
+    initProjectNavigation(services);
   } else {
-    projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
-      serverless.setNavigation({ navigationTree: chromeNavigationTree });
-    });
-    serverless.setSideNavComponent(getSecuritySideNavComponent(services));
+    // TODO: Remove this else block as platform is enabled by default
+    // Issue: https://github.com/elastic/kibana/issues/174944
+
+    // const projectNavigationTree = new ProjectNavigationTree(services);
+    // projectNavigationTree.getChromeNavigationTree$().subscribe((chromeNavigationTree) => {
+    //   serverless.setNavigation({ navigationTree: chromeNavigationTree });
+    // });
+    serverless.setSideNavComponentDeprecated(getSecuritySideNavComponent(services));
   }
   management.setIsSidebarEnabled(false);
 
