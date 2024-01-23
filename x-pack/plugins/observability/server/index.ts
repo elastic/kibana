@@ -44,9 +44,6 @@ const configSchema = schema.object({
       observability: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
       }),
-      slo: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
     }),
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({

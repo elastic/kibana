@@ -18,7 +18,7 @@ const ALLOWED_RULE_TYPES = [
 const isUnsafeAlertDetailsFlag = (
   subject: string
 ): subject is keyof Omit<ConfigSchema['unsafe']['alertDetails'], 'logs'> =>
-  ['uptime', 'metrics', 'observability', 'slo'].includes(subject);
+  ['uptime', 'metrics', 'observability'].includes(subject);
 
 // We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
 // to know whether the feature flag is enabled or not.
