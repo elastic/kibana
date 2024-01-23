@@ -32,6 +32,7 @@ import {
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
   MLCATEGORY,
+  ML_JOB_AGGREGATION,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
@@ -62,6 +63,17 @@ import { useMlKibana } from '../../contexts/kibana';
 import { getFieldTypeFromMapping } from '../../services/mapping_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
+
+const LOG_RATE_ANALYSIS_ML_FUNCTIONS = [
+  ML_JOB_AGGREGATION.COUNT,
+  ML_JOB_AGGREGATION.LOW_COUNT,
+  ML_JOB_AGGREGATION.HIGH_COUNT,
+  ML_JOB_AGGREGATION.NON_ZERO_COUNT,
+  ML_JOB_AGGREGATION.LOW_NON_ZERO_COUNT,
+  ML_JOB_AGGREGATION.HIGH_NON_ZERO_COUNT,
+];
+const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
+const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
 
 interface LinksMenuProps {
   anomaly: MlAnomaliesTableRecord;
@@ -269,7 +281,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       // to provide enough room for the baseline time range.
       // In all other cases look back 1 hour.
       if (withWindowParameters) {
-        earliestMoment.subtract(record.bucket_span * 6, 's');
+        earliestMoment.subtract(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
       } else if (interval === 'hour') {
         // Start from the previous hour.
         earliestMoment.subtract(1, 'h');
@@ -279,7 +291,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
       // For Log Rate Analysis, add 2x the bucket span
       if (withWindowParameters) {
-        latestMoment.add(record.bucket_span * 2, 's');
+        latestMoment.add(record.bucket_span * LOG_RATE_ANALYSIS_MARGIN_FACTOR, 's');
       } else if (props.isAggregatedData === true) {
         if (interval === 'hour') {
           // Show to the end of the next hour.
@@ -297,8 +309,8 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       // a gap between baseline and deviation of 1/10 of the bucket size.
       const dMin = record.timestamp;
       const dMax = record.timestamp + record.bucket_span * 1000;
-      const bMax = dMin - record.bucket_span * 100;
-      const bMin = bMax - record.bucket_span * 4900;
+      const bMax = dMin - record.bucket_span * 1000;
+      const bMin = bMax - record.bucket_span * 1000 * LOG_RATE_ANALYSIS_BASELINE_FACTOR;
 
       let kqlQuery = '';
 
@@ -353,7 +365,15 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
     };
 
     const generateLogRateAnalysisUrl = async () => {
-      const pageState = await generateRedirectUrlPageState(true, 'time');
+      if (
+        !LOG_RATE_ANALYSIS_ML_FUNCTIONS.includes(
+          props.anomaly.source.function as ML_JOB_AGGREGATION
+        ) &&
+        !unmounted
+      ) {
+        setOpenInLogRateAnalysisUrl(undefined);
+        return;
+      }
 
       const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
 
@@ -362,6 +382,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         console.error('Unable to detect locator for ML or bounds');
         return;
       }
+      const pageState = await generateRedirectUrlPageState(true, 'time');
 
       const { indexPatternId, wp, ...globalState } = pageState;
 
@@ -891,32 +912,18 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (!isCategorizationAnomalyRecord) {
-      // Add item from the start, but disable it during the URL generation.
-      const isLoading = discoverUrlError === undefined && openInDiscoverUrl === undefined;
-
+    if (openInLogRateAnalysisUrl) {
       items.push(
         <EuiContextMenuItem
           key={`log_rate_analysis`}
           icon="machineLearningApp"
-          disabled={discoverUrlError !== undefined || isLoading}
           href={openInLogRateAnalysisUrl}
           data-test-subj={`mlAnomaliesListRowAction_viewInLogRateAnalysisButton`}
         >
-          {discoverUrlError ? (
-            <EuiToolTip content={discoverUrlError}>
-              <FormattedMessage
-                id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
-                defaultMessage="Run log rate analysis"
-              />
-            </EuiToolTip>
-          ) : (
-            <FormattedMessage
-              id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
-              defaultMessage="Run log rate analysis"
-            />
-          )}
-          {isLoading ? <EuiProgress size={'xs'} color={'accent'} /> : null}
+          <FormattedMessage
+            id="xpack.ml.anomaliesTable.linksMenu.runLogRateAnalysis"
+            defaultMessage="Run log rate analysis"
+          />
         </EuiContextMenuItem>
       );
     }
