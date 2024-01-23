@@ -14813,6 +14813,10 @@
                 "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
               {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
+              },
+              {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
