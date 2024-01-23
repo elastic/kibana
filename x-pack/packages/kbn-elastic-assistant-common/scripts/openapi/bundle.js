@@ -7,12 +7,13 @@
 
 require('../../../../../src/setup_node_env');
 const { bundle } = require('@kbn/openapi-bundler');
+// eslint-disable-next-line import/no-nodejs-modules
 const { resolve } = require('path');
 
 const ELASTIC_ASSISTANT_ROOT = resolve(__dirname, '../..');
 
 bundle({
   rootDir: ELASTIC_ASSISTANT_ROOT,
-  sourceGlob: './server/schemas/**/*.schema.yaml',
+  sourceGlob: './impl/schemas/**/*.schema.yaml',
   outputFilePath: './target/openapi/elastic_assistant.bundled.schema.yaml',
 });

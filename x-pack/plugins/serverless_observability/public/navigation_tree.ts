@@ -178,6 +178,27 @@ export const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
+        {
+          id: 'synthetics',
+          title: i18n.translate('xpack.serverlessObservability.nav.synthetics', {
+            defaultMessage: 'Synthetics',
+          }),
+          renderAs: 'accordion',
+          children: [
+            {
+              link: 'synthetics:overview',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/synthetics'));
+              },
+            },
+            {
+              link: 'synthetics:management',
+              getIsActive: ({ pathNameSerialized, prepend }) => {
+                return pathNameSerialized.startsWith(prepend('/app/synthetics/monitors'));
+              },
+            },
+          ],
+        },
       ],
     },
   ],
