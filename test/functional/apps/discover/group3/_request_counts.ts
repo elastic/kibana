@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -116,8 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it(`should send ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
-        await expectSearches(type, expectedRequests, async () => {
+      it(`should send ${expectedRefreshRequest} requests (documents + chart) when changing the query`, async () => {
+        await expectSearches(type, expectedRefreshRequest, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
