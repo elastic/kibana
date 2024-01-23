@@ -22,7 +22,11 @@ import { toDateRange } from '../../domain/services/date_range';
 import { getFlattenedGroupings } from './utils';
 
 export interface SummaryClient {
-  computeSummary(slo: SLO, groupings?: string, instanceId?: string): Promise<Summary>;
+  computeSummary(
+    slo: SLO,
+    groupings?: string,
+    instanceId?: string
+  ): Promise<{ summary: Summary; groupings: Groupings }>;
 }
 
 export class DefaultSummaryClient implements SummaryClient {

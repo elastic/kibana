@@ -41,7 +41,7 @@ export function IndexFieldSelector({
 
   const getSelectedItems = (value: string | string[], fields: FieldSpec[]) => {
     const values = [value].flat();
-    const selectedItems = [];
+    const selectedItems: Array<EuiComboBoxOptionOption<string>> = [];
     fields.forEach((field) => {
       if (values.includes(field.name)) {
         selectedItems.push({ value: field.name, label: field.name });

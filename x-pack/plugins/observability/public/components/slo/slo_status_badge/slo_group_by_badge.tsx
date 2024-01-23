@@ -23,24 +23,28 @@ export function SloGroupByBadge({ slo, color }: Props) {
 
   const groupings = [slo.groupBy].flat();
 
-  return groupings.map((group) => (
-    <EuiFlexItem grow={false} key={group}>
-      <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.observability.slo.groupByBadge', {
-            defaultMessage: 'Group by {groupKey}',
-            values: {
-              groupKey: group,
-            },
-          })}
-          display="block"
-        >
-          <span>
-            {group}: {get(slo.groupings, group)}
-          </span>
-        </EuiToolTip>
-      </EuiBadge>
-    </EuiFlexItem>
-  ));
+  return groupings.length ? (
+    <>
+      {groupings.map((group) => (
+        <EuiFlexItem grow={false} key={group}>
+          <EuiBadge color={color ?? euiLightVars.euiColorDisabled}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.observability.slo.groupByBadge', {
+                defaultMessage: 'Group by {groupKey}',
+                values: {
+                  groupKey: group,
+                },
+              })}
+              display="block"
+            >
+              <span>
+                {group}: {get(slo.groupings, group)}
+              </span>
+            </EuiToolTip>
+          </EuiBadge>
+        </EuiFlexItem>
+      ))}
+    </>
+  ) : null;
 }

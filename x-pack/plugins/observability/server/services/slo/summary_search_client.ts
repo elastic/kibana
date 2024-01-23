@@ -11,7 +11,7 @@ import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
-import { SLOId, Status, Summary } from '../../domain/models';
+import { SLOId, Status, Summary, Groupings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
 import { getFlattenedGroupings } from './utils';
@@ -21,6 +21,8 @@ interface EsSummaryDocument {
     id: string;
     revision: number;
     instanceId: string;
+    groupings: Record<string, unknown>;
+    groupBy: string[];
   };
   sliValue: number;
   errorBudgetConsumed: number;
@@ -36,6 +38,7 @@ export interface SLOSummary {
   id: SLOId;
   instanceId: string;
   summary: Summary;
+  groupings: Groupings;
 }
 
 export type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sli_value' | 'status';

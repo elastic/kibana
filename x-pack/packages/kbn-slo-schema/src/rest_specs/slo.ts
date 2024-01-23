@@ -239,7 +239,7 @@ const getSLOInstancesParamsSchema = t.type({
 });
 
 const getSLOInstancesResponseSchema = t.type({
-  groupBy: t.string,
+  groupBy: t.union([t.string, t.array(t.string)]),
   instances: t.array(t.string),
 });
 

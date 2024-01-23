@@ -62,11 +62,11 @@ const getSubTitle = (slo: SLOWithSummaryResponse) => {
 };
 
 const getGroupings = (slo: SLOWithSummaryResponse) => {
-  const groupByFields = Object.keys(slo.groupings || {})
-    .map<string>((key) => `${key}: ${slo.groupings[key]}`)
+  const groupByFields = Object.entries(slo.groupings)
+    .map(([key, value]) => `${key}: ${value}`)
     .join('\n');
 
-  return slo.groupBy && slo.groupBy !== ALL_VALUE ? groupByFields : '';
+  return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? groupByFields : '';
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {

@@ -58,8 +58,6 @@ import {
 import type { ObservabilityRequestHandlerContext } from '../../types';
 import { createObservabilityServerRoute } from '../create_observability_server_route';
 
-const decodeFromBase64 = (str: string) => Buffer.from(str, 'base64').toString('utf8');
-
 const transformGenerators: Record<IndicatorTypes, TransformGenerator> = {
   'sli.apm.transactionDuration': new ApmTransactionDurationTransformGenerator(),
   'sli.apm.transactionErrorRate': new ApmTransactionErrorRateTransformGenerator(),
