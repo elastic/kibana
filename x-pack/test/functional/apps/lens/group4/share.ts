@@ -121,7 +121,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);
       if (await PageObjects.share.isShareMenuOpen()) {
-        PageObjects.share.closeShareModal();
+        await PageObjects.share.closeShareModal();
       }
     });
 
