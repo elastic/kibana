@@ -5,9 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import useAsync from 'react-use/lib/useAsync';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../../hooks/use_data_view';
 import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -21,12 +20,10 @@ export type ChartProps = LensConfig & {
 };
 
 export const Chart = ({ id, ...chartProps }: ChartProps) => {
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
   const { searchCriteria } = useUnifiedSearchContext();
   const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
@@ -38,15 +35,6 @@ export const Chart = ({ id, ...chartProps }: ChartProps) => {
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     searchSessionId,
   });
-
-  const { value: dataView } = useAsync(async () => {
-    if (!chartProps.dataset) {
-      return undefined;
-    }
-    if ('index' in chartProps.dataset) {
-      return dataViews.get(chartProps.dataset.index, false);
-    }
-  }, [chartProps.dataset]);
 
   const filters = useMemo(() => {
     return shouldUseSearchCriteria

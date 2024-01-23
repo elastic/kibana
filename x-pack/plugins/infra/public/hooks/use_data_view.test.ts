@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import { type KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { InfraClientStartDeps } from '../../../../types';
+import type { InfraClientStartDeps } from '../types';
 import { CoreStart } from '@kbn/core/public';
 
 jest.mock('@kbn/kibana-react-plugin/public');
@@ -46,7 +46,7 @@ describe('useDataView hook', () => {
   });
 
   it('should create a new ad-hoc data view', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'test' }));
+    const { result, waitForNextUpdate } = renderHook(() => useDataView({ index: 'test' }));
 
     await waitForNextUpdate();
     expect(result.current.loading).toEqual(false);
@@ -55,7 +55,7 @@ describe('useDataView hook', () => {
   });
 
   it('should create a dataview with unique id for metricAlias metrics', async () => {
-    const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'metrics' }));
+    const { waitForNextUpdate } = renderHook(() => useDataView({ index: 'metrics' }));
 
     await waitForNextUpdate();
     expect(dataViewMock.create).toHaveBeenCalledWith({
@@ -66,7 +66,7 @@ describe('useDataView hook', () => {
   });
 
   it('should create a dataview with unique id for metricAlias remote-metrics', async () => {
-    const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'remote-metrics' }));
+    const { waitForNextUpdate } = renderHook(() => useDataView({ index: 'remote-metrics' }));
 
     await waitForNextUpdate();
     expect(dataViewMock.create).toHaveBeenCalledWith({

@@ -16,7 +16,7 @@ import { HostMetricsDocsLink } from '../../../../../components/lens';
 import { Kpi } from './kpi';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { HostCountKpi } from './host_count_kpi';
-import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 
 export const KPIGrid = () => {

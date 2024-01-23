@@ -5,15 +5,13 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
-import useAsync from 'react-use/lib/useAsync';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../hooks/use_data_view';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export const Kpi = ({
@@ -29,19 +27,8 @@ export const Kpi = ({
   assetName: string;
   dateRange: TimeRange;
 }) => {
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
   const { searchSessionId } = useLoadingStateContext();
-
-  const { value: dataView } = useAsync(async () => {
-    if (!chartProps.dataset) {
-      return undefined;
-    }
-    if ('index' in chartProps.dataset) {
-      return dataViews.get(chartProps.dataset.index, false);
-    }
-  }, [chartProps.dataset]);
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
   const filters = useMemo(() => {
     return [

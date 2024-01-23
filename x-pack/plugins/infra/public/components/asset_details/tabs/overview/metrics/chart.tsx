@@ -6,10 +6,9 @@
  */
 import React, { useCallback, useMemo } from 'react';
 
-import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import type { TimeRange } from '@kbn/es-query';
-import useAsync from 'react-use/lib/useAsync';
-import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
+import { useDataView } from '../../../../../hooks/use_data_view';
 import { METRIC_CHART_HEIGHT } from '../../../../../common/visualizations/constants';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../../../lens';
@@ -34,21 +33,10 @@ export const Chart = ({
   assetName,
   ...props
 }: ChartProps) => {
-  const {
-    services: { dataViews },
-  } = useKibanaContextForPlugin();
   const { setDateRange } = useDatePickerContext();
   const { searchSessionId } = useLoadingStateContext();
   const { ['data-test-subj']: dataTestSubj, ...chartProps } = { ...props };
-
-  const { value: dataView } = useAsync(async () => {
-    if (!chartProps.dataset) {
-      return undefined;
-    }
-    if ('index' in chartProps.dataset) {
-      return dataViews.get(chartProps.dataset.index, false);
-    }
-  }, [chartProps.dataset]);
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
   const filters = useMemo(() => {
     return [

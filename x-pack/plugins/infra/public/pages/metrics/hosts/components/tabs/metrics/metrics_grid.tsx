@@ -12,7 +12,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { HostMetricsExplanationContent } from '../../../../../../components/lens';
 import { Chart } from './chart';
 import { Popover } from '../../table/popover';
-import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../../../hooks/use_metrics_data_view';
 
 export const MetricsGrid = () => {
   const model = findInventoryModel('host');
