@@ -26,6 +26,7 @@ import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 import { IndexSelection } from '../custom_common/index_selection';
+import { getGroupKeysProse } from '../../../../utils/slo/groupings';
 import { MetricIndicator } from './metric_indicator';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
@@ -190,8 +191,11 @@ export function CustomMetricIndicatorTypeForm() {
             color={groupByCardinality.isHighCardinality ? 'warning' : 'primary'}
             title={i18n.translate('xpack.observability.slo.sloEdit.groupBy.cardinalityInfo', {
               defaultMessage:
-                "Selected group by field '{groupBy}' will generate at least {card} SLO instances based on the last 24h sample data.",
-              values: { card: groupByCardinality.cardinality, groupBy: groupByField },
+                'Selected group by field {groupBy} will generate at least {card} SLO instances based on the last 24h sample data.',
+              values: {
+                card: groupByCardinality.cardinality,
+                groupBy: getGroupKeysProse(groupByField),
+              },
             })}
           />
         )}
