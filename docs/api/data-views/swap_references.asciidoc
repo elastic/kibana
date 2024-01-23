@@ -6,7 +6,10 @@
 
 Swap saved object references
 
-CAUTION! MISUSE CAN BREAK LARGE NUMBERS OF SAVED OBJECTS! PRACTICE WITH A BACKUP!
+[WARNING]
+====
+Misuse can break large numbers of saved objects! Practicing with a backup is recommended. 
+====
 
 [NOTE]
 ====
