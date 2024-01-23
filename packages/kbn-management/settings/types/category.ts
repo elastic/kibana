@@ -14,3 +14,7 @@ export interface CategorizedFields {
     fields: FieldDefinition[];
   };
 }
+
+export interface CategoryCounts {
+  [category: string]: number;
+}

@@ -479,6 +479,26 @@ describe('agent policy', () => {
           },
         ],
       } as any);
+      soClient.get.mockImplementation((type, id, options): any => {
+        if (id === 'test1') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-123',
+              monitoring_output_id: 'output-id-another-output',
+            },
+          });
+        }
+        if (id === 'test2') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-another-output',
+              monitoring_output_id: 'output-id-123',
+            },
+          });
+        }
+      });
 
       await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
 
@@ -487,13 +507,15 @@ describe('agent policy', () => {
         expect.anything(),
         expect.anything(),
         'test1',
-        { data_output_id: null, monitoring_output_id: 'output-id-another-output' }
+        { data_output_id: null, monitoring_output_id: 'output-id-another-output' },
+        { skipValidation: true }
       );
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test2',
-        { data_output_id: 'output-id-another-output', monitoring_output_id: null }
+        { data_output_id: 'output-id-another-output', monitoring_output_id: null },
+        { skipValidation: true }
       );
     });
   });

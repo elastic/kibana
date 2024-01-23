@@ -10,7 +10,8 @@ import React, { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { EuiLoadingChart } from '@elastic/eui';
 import classNames from 'classnames';
 
-import { EmbeddablePhaseEvent, EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
+import { PhaseEvent } from '@kbn/presentation-publishing';
+import { EmbeddablePanel, ViewMode } from '@kbn/embeddable-plugin/public';
 
 import { css } from '@emotion/react';
 import { DashboardPanelState } from '../../../../common';
@@ -27,7 +28,7 @@ export interface Props extends DivProps {
   focusedPanelId?: string;
   key: string;
   isRenderable?: boolean;
-  onPanelStatusChange?: (info: EmbeddablePhaseEvent) => void;
+  onPanelStatusChange?: (info: PhaseEvent) => void;
 }
 
 export const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -116,7 +117,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
             {children}
           </>
         ) : (
-          <div className="embPanel embPanel-isLoading">
+          <div>
             <EuiLoadingChart size="l" mono />
           </div>
         )}

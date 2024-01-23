@@ -33,7 +33,6 @@ export class UiActionExamplesPlugin
       openModal: (await core.getStartServices())[0].overlays.openModal,
     }));
 
-    uiActions.registerAction(helloWorldAction);
     uiActions.addTriggerAction(helloWorldTrigger.id, helloWorldAction);
   }
 

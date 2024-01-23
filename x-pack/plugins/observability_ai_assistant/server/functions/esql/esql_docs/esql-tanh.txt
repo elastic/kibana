@@ -2,6 +2,9 @@ TANH
 
 
 Tangent hyperbolic function.
+```esql
 ROW a=1.8
 | EVAL tanh=TANH(a)
+```
+
 Supported types:

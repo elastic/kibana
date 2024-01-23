@@ -60,6 +60,7 @@ const getRuleMock = (id = chance.guid()): CspBenchmarkRule =>
         name: chance.word(),
         version: chance.sentence(),
         id: chance.word(),
+        rule_number: chance.word(),
       },
       default_value: chance.sentence(),
       description: chance.sentence(),
