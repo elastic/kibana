@@ -58,6 +58,9 @@ xpack.fleet.internal.registry.excludePackages: [
 
     # ML integrations
     'dga',
+
+    # Profiling integrations
+    'profiler_agent',
   ]
 
 ## Required for force installation of APM Package
