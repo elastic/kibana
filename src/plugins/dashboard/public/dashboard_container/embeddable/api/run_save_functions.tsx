@@ -10,12 +10,15 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import React from 'react';
 import { batch } from 'react-redux';
 
-import { ControlGroupInput, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 import { DashboardContainerInput } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
-import { SaveDashboardReturn } from '../../../services/dashboard_content_management/types';
+import {
+  SaveDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
@@ -79,7 +82,9 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      let stateToSave: DashboardContainerInput & { controlGroupInput?: ControlGroupInput } = {
+      let stateToSave: DashboardContainerInput & {
+        controlGroupInput?: PersistableControlGroupInput;
+      } = {
         ...currentState,
         ...stateFromSaveModal,
       };
@@ -146,8 +151,7 @@ export async function runQuickSave(this: DashboardContainer) {
 
   if (managed) return;
 
-  let stateToSave: DashboardContainerInput & { controlGroupInput?: PersistableControlGroupInput } =
-    currentState;
+  let stateToSave: SavedDashboardInput = currentState;
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
   if (this.controlGroup) {
     persistableControlGroupInput = this.controlGroup.getPersistableInput();

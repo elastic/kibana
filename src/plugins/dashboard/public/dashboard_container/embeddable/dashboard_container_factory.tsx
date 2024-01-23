@@ -26,7 +26,10 @@ import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
 import { createExtract, createInject, DashboardContainerInput } from '../../../common';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import {
+  LoadDashboardReturn,
+  SavedDashboardInput,
+} from '../../services/dashboard_content_management/types';
 import type { DashboardContainer } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
@@ -36,9 +39,7 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardContainerInput> & {
-    controlGroupInput?: Partial<ControlGroupInput>;
-  };
+  getInitialInput?: () => Partial<SavedDashboardInput>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 

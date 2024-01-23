@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupInput, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 
 import { DashboardContainerInput } from '../../../common';
@@ -62,13 +62,17 @@ export interface LoadDashboardFromSavedObjectProps {
 
 type DashboardResolveMeta = DashboardCrudTypes['GetOut']['meta'];
 
+export type SavedDashboardInput = DashboardContainerInput & {
+  controlGroupInput?: PersistableControlGroupInput;
+};
+
 export interface LoadDashboardReturn {
   dashboardFound: boolean;
   newDashboardCreated?: boolean;
   dashboardId?: string;
   managed?: boolean;
   resolveMeta?: DashboardResolveMeta;
-  dashboardInput: DashboardContainerInput & { controlGroupInput?: ControlGroupInput };
+  dashboardInput: SavedDashboardInput;
   anyMigrationRun?: boolean;
 }
 
@@ -78,7 +82,7 @@ export interface LoadDashboardReturn {
 export type SavedDashboardSaveOpts = SavedObjectSaveOpts & { saveAsCopy?: boolean };
 
 export interface SaveDashboardProps {
-  currentState: DashboardContainerInput & { controlGroupInput?: PersistableControlGroupInput };
+  currentState: SavedDashboardInput;
   saveOptions: SavedDashboardSaveOpts;
   lastSavedId?: string;
 }

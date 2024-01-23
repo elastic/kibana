@@ -33,7 +33,10 @@ import {
   DEFAULT_PANEL_WIDTH,
   GLOBAL_STATE_STORAGE_KEY,
 } from '../../../dashboard_constants';
-import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
+import {
+  LoadDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
 import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
 import { DashboardPublicState } from '../../types';
@@ -43,6 +46,10 @@ import { startSyncingDashboardControlGroup } from './controls/dashboard_control_
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
+import {
+  keysNotConsideredUnsavedChanges,
+  keysToOmitFromSessionStorage,
+} from '../../state/diffing/dashboard_diffing_integration';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -179,7 +186,7 @@ export const initializeDashboard = async ({
   // --------------------------------------------------------------------------------------
   // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
-  const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
+  const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
     return dashboardBackup.getState(loadDashboardReturn.dashboardId);
   })();
@@ -200,31 +207,28 @@ export const initializeDashboard = async ({
   })();
 
   const overrideInput = getInitialInput?.();
-  const initialControlGroupInput: ControlGroupInput | {} = {
+  const initialDashboardInput: DashboardContainerInput = cloneDeep({
+    ...DEFAULT_DASHBOARD_INPUT,
+    ...omit(loadDashboardReturn?.dashboardInput ?? {}, 'controlGroupInput'),
+    ...sessionStorageInput,
+
+    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
+    ...omit(overrideInput, 'controlGroupInput'),
+  });
+  const initialControlGroupInput: PersistableControlGroupInput | {} = {
     ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+    ...(sessionStorageInput?.controlGroupInput ?? {}),
     ...(overrideInput?.controlGroupInput ?? {}),
   };
-  const initialInput: DashboardContainerInput & { controlGroupInput?: ControlGroupInput } =
-    cloneDeep({
-      ...DEFAULT_DASHBOARD_INPUT,
-      ...omit(loadDashboardReturn?.dashboardInput ?? {}, 'controlGroupInput'),
-      ...sessionStorageInput,
-
-      ...(initialViewMode ? { viewMode: initialViewMode } : {}),
-      ...omit(overrideInput, 'controlGroupInput'),
-    });
-  if (Object.keys(initialControlGroupInput).length > 0) {
-    initialInput.controlGroupInput = initialControlGroupInput as ControlGroupInput;
-  }
 
   // Back up any view mode passed in explicitly.
   if (overrideInput?.viewMode) {
     dashboardBackup.storeViewMode(overrideInput?.viewMode);
   }
 
-  initialInput.executionContext = {
+  initialDashboardInput.executionContext = {
     type: 'dashboard',
-    description: initialInput.title,
+    description: initialDashboardInput.title,
   };
 
   // --------------------------------------------------------------------------------------
@@ -237,7 +241,7 @@ export const initializeDashboard = async ({
       timeRestore,
       timeRange: savedTimeRange,
       refreshInterval: savedRefreshInterval,
-    } = initialInput;
+    } = initialDashboardInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
     // apply filters and query to the query service
@@ -259,7 +263,7 @@ export const initializeDashboard = async ({
       // otherwise fall back to the time range from the timefilterService.
       return timefilterService.getTime();
     })();
-    initialInput.timeRange = initialTimeRange;
+    initialDashboardInput.timeRange = initialTimeRange;
     if (timeRestore) {
       if (savedTimeRange) timefilterService.setTime(savedTimeRange);
       if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
@@ -291,13 +295,13 @@ export const initializeDashboard = async ({
       container.setHighlightPanelId(id);
     };
 
-    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    initialDashboardInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
     if (
       incomingEmbeddable.embeddableId &&
-      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+      Boolean(initialDashboardInput.panels[incomingEmbeddable.embeddableId])
     ) {
       // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+      const panelToUpdate = initialDashboardInput.panels[incomingEmbeddable.embeddableId];
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
@@ -401,11 +405,11 @@ export const initializeDashboard = async ({
     > & {
       create: ControlGroupContainerFactory['create'];
     };
-    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
+    const { filters, query, timeRange, viewMode, id } = initialDashboardInput;
     const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
-      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
+      ...pickBy(initialControlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
       timeRange,
       viewMode,
       filters,
@@ -467,15 +471,17 @@ export const initializeDashboard = async ({
           )
         )
         .subscribe(([dashboardChanges, controlGroupChanges]) => {
+          const dashboardHasUnsavedChanges =
+            omit(Object.keys(dashboardChanges ?? {}), keysNotConsideredUnsavedChanges).length > 0;
           dashboard.dispatch.setHasUnsavedChanges(
-            Boolean(dashboardChanges) || Boolean(controlGroupChanges)
+            dashboardHasUnsavedChanges || Boolean(controlGroupChanges)
           );
 
           if (creationOptions?.useSessionStorageIntegration) {
-            const backup:
-              | Partial<DashboardContainerInput> & {
-                  controlGroupInput?: PersistableControlGroupInput;
-                } = dashboardChanges ?? {};
+            const backup: Partial<SavedDashboardInput> = omit(
+              dashboardChanges ?? {},
+              keysToOmitFromSessionStorage
+            );
             if (controlGroupChanges) {
               backup.controlGroupInput = controlGroupChanges;
             }
@@ -485,5 +491,5 @@ export const initializeDashboard = async ({
     );
   });
 
-  return { input: initialInput, searchSessionId: initialSearchSessionId };
+  return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

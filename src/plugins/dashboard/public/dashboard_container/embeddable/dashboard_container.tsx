@@ -9,7 +9,7 @@
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { BehaviorSubject, distinctUntilChanged, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, Subject, Subscription } from 'rxjs';
 
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
@@ -179,7 +179,7 @@ export class DashboardContainer
     this.unsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
       undefined
     );
-    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
+    const diffingMiddleware = startDiffingDashboardState.bind(this)();
 
     // build redux embeddable tools
     const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<

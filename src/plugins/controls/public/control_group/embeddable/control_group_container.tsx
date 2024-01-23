@@ -131,9 +131,7 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing dashboard state
-    this.unsavedChanges = new BehaviorSubject<Partial<PersistableControlGroupInput> | undefined>(
-      undefined
-    );
+    this.unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
     const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 
     // build redux embeddable tools
@@ -205,12 +203,6 @@ export class ControlGroupContainer extends Container<
      */
     this.subscriptions.add(
       this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
-    );
-
-    this.subscriptions.add(
-      this.unsavedChanges.pipe(distinctUntilChanged()).subscribe((controlGroupHasChanges) => {
-        console.log('controlGroupHasChanges 1', controlGroupHasChanges);
-      })
     );
   };
 
