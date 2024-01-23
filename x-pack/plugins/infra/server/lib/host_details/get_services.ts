@@ -10,7 +10,6 @@ import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ESSearchClient } from '../metrics/types';
 import {
-  Service,
   ServicesAPIRequest,
   ServicesAPIQueryAggregation,
 } from '../../../common/http_api/host_details';
@@ -21,14 +20,28 @@ export const getServices = async (
   apmIndices: APMDataAccessConfig['indices'],
   options: ServicesAPIRequest
 ) => {
-  const { transaction, error, metric } = apmIndices;
+  const { error, metric } = apmIndices;
   const { filters, size, from, to } = options;
-  const filtersList: QueryDslQueryContainer[] = [];
+  const commonFiltersList: QueryDslQueryContainer[] = [
+    {
+      range: {
+        '@timestamp': {
+          gte: from,
+          lte: to,
+        },
+      },
+    },
+    {
+      exists: {
+        field: 'service.name',
+      },
+    },
+  ];
 
   if (filters['host.name']) {
     // also query for host.hostname field along with host.name, as some services may use this field
     const HOST_HOSTNAME_FIELD = 'host.hostname';
-    filtersList.push({
+    commonFiltersList.push({
       bool: {
         should: [
           ...termQuery(HOST_NAME_FIELD, filters[HOST_NAME_FIELD]),
@@ -38,68 +51,87 @@ export const getServices = async (
       },
     });
   }
-
-  const body = {
+  const aggs = {
+    services: {
+      terms: {
+        field: 'service.name',
+        size,
+      },
+      aggs: {
+        latestAgent: {
+          top_metrics: {
+            metrics: [{ field: 'agent.name' }],
+            sort: {
+              '@timestamp': 'desc',
+            },
+            size: 1,
+          },
+        },
+      },
+    },
+  };
+  // get services from transaction metrics
+  const metricsQuery = {
     size: 0,
     _source: false,
     query: {
       bool: {
         filter: [
           {
-            range: {
-              '@timestamp': {
-                gte: from,
-                lte: to,
-              },
+            term: {
+              'metricset.name': 'transaction',
             },
           },
-          ...filtersList,
+          ...commonFiltersList,
         ],
       },
     },
-    aggs: {
-      services: {
-        terms: {
-          field: 'service.name',
-          size,
-        },
-        aggs: {
-          latestAgent: {
-            top_metrics: {
-              metrics: [{ field: 'agent.name' }],
-              sort: {
-                '@timestamp': 'desc',
-              },
-              size: 1,
-            },
-          },
-        },
+    aggs,
+  };
+  // get services from logs
+  const logsQuery = {
+    size: 0,
+    _source: false,
+    query: {
+      bool: {
+        filter: [...commonFiltersList],
       },
     },
+    aggs,
   };
-  const result = await client<{}, ServicesAPIQueryAggregation>({
-    body,
-    index: [transaction, error, metric],
+  const resultMetrics = await client<{}, ServicesAPIQueryAggregation>({
+    body: metricsQuery,
+    index: [metric],
+  });
+  const resultLogs = await client<{}, ServicesAPIQueryAggregation>({
+    body: logsQuery,
+    index: [error],
   });
 
-  const servicesListBuckets = result.aggregations?.services?.buckets || [];
+  const servicesListBucketsFromMetrics = resultMetrics.aggregations?.services?.buckets || [];
+  const servicesListBucketsFromLogs = resultLogs.aggregations?.services?.buckets || [];
+  const serviceMap = [...servicesListBucketsFromMetrics, ...servicesListBucketsFromLogs].reduce(
+    (acc, bucket) => {
+      const serviceName = bucket.key;
+      const latestAgentEntry = bucket.latestAgent.top[0];
+      const latestTimestamp = latestAgentEntry.sort[0];
+      const agentName = latestAgentEntry.metrics['agent.name'];
+      // dedup and get the latest timestamp
+      const existingService = acc.get(serviceName);
+      if (!existingService || existingService.latestTimestamp < latestTimestamp) {
+        acc.set(serviceName, { latestTimestamp, agentName });
+      }
 
-  const services = servicesListBuckets.reduce((acc: Service[], bucket) => {
-    const serviceName = bucket.key;
-    const agentName = bucket.latestAgent.top[0].metrics['agent.name'];
-
-    if (!serviceName) {
       return acc;
-    }
+    },
+    new Map<string, { latestTimestamp: string; agentName: string | null }>()
+  );
 
-    const service: Service = {
+  const services = Array.from(serviceMap)
+    .slice(0, size)
+    .map(([serviceName, { agentName }]) => ({
       'service.name': serviceName,
       'agent.name': agentName,
-    };
-
-    acc.push(service);
-
-    return acc;
-  }, []);
+    }));
   return { services };
 };
