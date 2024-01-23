@@ -31,7 +31,7 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'threat_indicator_path',
   'timestamp_override',
   'tags',
-  // Rule Description fields
+  // Rule Definition fields
   'data_source',
   'type',
   'kql_query',
@@ -65,3 +65,56 @@ export const UPGRADE_FIELD_ORDER: string[] = [
   'throttle',
   'max_signals',
 ];
+
+export const ABOUT_UPGRADE_FIELD_ORDER = [
+  'name',
+  'description',
+  'author',
+  'building_block',
+  'severity',
+  'severity_mapping',
+  'risk_score',
+  'risk_score_mapping',
+  'references',
+  'false_positives',
+  'investigation_fields',
+  'license',
+  'rule_name_override',
+  'threat',
+  'threat_indicator_path',
+  'timestamp_override',
+  'tags',
+];
+
+export const DEFINITION_UPGRADE_FIELD_ORDER = [
+  'data_source',
+  'type',
+  'kql_query',
+  'eql_query',
+  'event_category_override',
+  'timestamp_field',
+  'tiebreaker_field',
+  'esql_query',
+  'anomaly_threshold',
+  'machine_learning_job_id',
+  'related_integrations',
+  'required_fields',
+  'timeline_template',
+  'threshold',
+  'threat_index',
+  'threat_mapping',
+  'threat_filters',
+  'threat_query',
+  'threat_indicator_path',
+  'concurrent_searches',
+  'items_per_search',
+  'alert_suppression',
+  'new_terms_fields',
+  'history_window_start',
+];
+
+export const SCHEDULE_UPGRADE_FIELD_ORDER = ['rule_schedule'];
+
+export const SETUP_UPGRADE_FIELD_ORDER = ['setup', 'note'];
+
+export const OTHER_UPGRADE_FIELD_ORDER = ['throttle', 'max_signals'];

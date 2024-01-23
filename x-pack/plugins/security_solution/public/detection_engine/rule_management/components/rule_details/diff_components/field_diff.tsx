@@ -14,7 +14,7 @@ import { DiffMethod } from '../json_diff/mark_edits';
 import { RuleDiffPanelWrapper } from './panel_wrapper';
 
 export interface FieldDiffComponentProps {
-  ruleDiffs: Array<{ currentVersion: string; targetVersion: string; fieldName: string }>;
+  ruleDiffs: Array<{ currentVersion: unknown; targetVersion: unknown; fieldName: string }>;
   fieldName: string;
 }
 

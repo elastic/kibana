@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiFlexGroup,
-  EuiHorizontalRule,
-  EuiIconTip,
-  EuiSplitPanel,
-  EuiTitle,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAccordion, EuiSplitPanel, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { camelCase, startCase } from 'lodash';
 import { css } from '@emotion/css';
 import React from 'react';
-import * as i18n from '../json_diff/translations';
 
 interface RuleDiffPanelWrapperProps {
   fieldName: string;
@@ -45,35 +36,7 @@ export const RuleDiffPanelWrapper = ({ fieldName, children }: RuleDiffPanelWrapp
           </EuiTitle>
         }
       >
-        <EuiSplitPanel.Inner color="transparent">
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-              <EuiIconTip
-                color="subdued"
-                content={i18n.BASE_VERSION_DESCRIPTION}
-                type="iInCircle"
-                size="m"
-                display="block"
-              />
-              <EuiTitle size="xxs">
-                <h6>{i18n.BASE_VERSION}</h6>
-              </EuiTitle>
-            </EuiFlexGroup>
-            <EuiFlexGroup alignItems="baseline" gutterSize="xs">
-              <EuiIconTip
-                color="subdued"
-                content={i18n.UPDATED_VERSION_DESCRIPTION}
-                type="iInCircle"
-                size="m"
-              />
-              <EuiTitle size="xxs">
-                <h6>{i18n.UPDATED_VERSION}</h6>
-              </EuiTitle>
-            </EuiFlexGroup>
-          </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" size="full" />
-          {children}
-        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner color="transparent">{children}</EuiSplitPanel.Inner>
       </EuiAccordion>
     </EuiSplitPanel.Outer>
   );
