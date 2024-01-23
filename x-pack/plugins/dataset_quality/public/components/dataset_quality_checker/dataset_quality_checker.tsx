@@ -163,6 +163,7 @@ const CheckListFinishedItem = ({
       <EuiPanel color="danger">
         <PreJson value={check} />
         <PreJson value={execution} />
+        <EuiButton color="danger">Fix this problem</EuiButton>
       </EuiPanel>
     );
   }

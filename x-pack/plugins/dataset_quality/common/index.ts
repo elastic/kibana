@@ -18,6 +18,7 @@ export {
   dataStreamQualityCheckArgumentsRT,
   dataStreamQualityCheckExecutionRT,
   failReasonRT,
+  ignoredFieldCauseRT,
   ignoredFieldFailReasonRT,
   ingestPipelineErrorFailReasonRT,
 } from './data_stream_quality_checks';
@@ -29,6 +30,7 @@ export type {
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
   FailReason,
+  IgnoredFieldCause,
 } from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
 export type { DatasetQualityConfig } from './plugin_config';
