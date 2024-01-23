@@ -432,8 +432,9 @@ export class GetPreviewData {
       // they've breached the threshold.
       const bucketSize =
         params.indicator.type === 'sli.metric.timeslice' &&
-        params.range.end - params.range.start <= 86_400_000
-          ? 1
+        params.range.end - params.range.start <= 86_400_000 &&
+        params.objective?.timesliceWindow
+          ? params.objective.timesliceWindow.asMinutes()
           : Math.max(
               calculateAuto
                 .near(100, moment.duration(params.range.end - params.range.start, 'ms'))

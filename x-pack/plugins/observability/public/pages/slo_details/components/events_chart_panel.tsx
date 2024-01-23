@@ -52,7 +52,7 @@ export function EventsChartPanel({ slo, range }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const filter = slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : '';
-  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range, filter);
+  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range, slo.objective, filter);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
