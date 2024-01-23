@@ -34,18 +34,18 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
+            "section": "def-common.HasUniqueId",
+            "text": "HasUniqueId"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
           },
-          "<unknown> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -58,24 +58,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesBlockingError",
             "text": "PublishesBlockingError"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
           },
           " & ",
           {
@@ -93,23 +77,55 @@
             "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
-          "> = Partial<",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          " & Partial<Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ", \"hidePanelTitle\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">>> = Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasUniqueId",
+            "text": "HasUniqueId"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
           },
-          "<unknown> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -122,24 +138,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesBlockingError",
             "text": "PublishesBlockingError"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
           },
           " & ",
           {
@@ -157,7 +157,39 @@
             "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
-          ">, PropsType extends {} = {}>(props: ",
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          " & Partial<Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ", \"hidePanelTitle\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">>>, PropsType extends {} = {}>(props: ",
           {
             "pluginId": "presentationPanel",
             "scope": "public",
@@ -218,18 +250,18 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesUniqueId",
-            "text": "PublishesUniqueId"
+            "section": "def-common.HasUniqueId",
+            "text": "HasUniqueId"
           },
           " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesParentApi",
-            "text": "PublishesParentApi"
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
           },
-          "<unknown> & ",
+          " & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -242,24 +274,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-common.PublishesBlockingError",
             "text": "PublishesBlockingError"
-          },
-          " & ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
           },
           " & ",
           {
@@ -277,7 +293,39 @@
             "section": "def-common.PublishesDisabledActionIds",
             "text": "PublishesDisabledActionIds"
           },
-          "> | undefined; }) => JSX.Element"
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PresentationContainer",
+            "text": "PresentationContainer"
+          },
+          " & Partial<Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ", \"hidePanelTitle\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">>> | undefined; }) => JSX.Element"
         ],
         "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
         "deprecated": false,
@@ -336,18 +384,18 @@
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.PublishesUniqueId",
-                    "text": "PublishesUniqueId"
+                    "section": "def-common.HasUniqueId",
+                    "text": "HasUniqueId"
                   },
                   " & ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.PublishesParentApi",
-                    "text": "PublishesParentApi"
+                    "section": "def-common.PublishesPanelTitle",
+                    "text": "PublishesPanelTitle"
                   },
-                  "<unknown> & ",
+                  " & ",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
@@ -360,24 +408,8 @@
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",
                     "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.PublishesViewMode",
-                    "text": "PublishesViewMode"
-                  },
-                  " & ",
-                  {
-                    "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
                     "section": "def-common.PublishesBlockingError",
                     "text": "PublishesBlockingError"
-                  },
-                  " & ",
-                  {
-                    "pluginId": "@kbn/presentation-publishing",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationPublishingPluginApi",
-                    "section": "def-common.PublishesPanelTitle",
-                    "text": "PublishesPanelTitle"
                   },
                   " & ",
                   {
@@ -395,7 +427,39 @@
                     "section": "def-common.PublishesDisabledActionIds",
                     "text": "PublishesDisabledActionIds"
                   },
-                  "> | undefined"
+                  " & ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.HasParentApi",
+                    "text": "HasParentApi"
+                  },
+                  "<",
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PresentationContainer",
+                    "text": "PresentationContainer"
+                  },
+                  " & Partial<Pick<",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PublishesPanelTitle",
+                    "text": "PublishesPanelTitle"
+                  },
+                  ", \"hidePanelTitle\"> & ",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PublishesViewMode",
+                    "text": "PublishesViewMode"
+                  },
+                  ">>> | undefined"
                 ],
                 "path": "src/plugins/presentation_panel/public/panel_component/presentation_panel_error.tsx",
                 "deprecated": false,
