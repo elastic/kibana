@@ -28,6 +28,7 @@ import type { EndpointAppContextService } from './endpoint/endpoint_app_context_
 import { RiskEngineDataClient } from './lib/entity_analytics/risk_engine/risk_engine_data_client';
 import { RiskScoreDataClient } from './lib/entity_analytics/risk_score/risk_score_data_client';
 import { AssetCriticalityDataClient } from './lib/entity_analytics/asset_criticality';
+import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -156,6 +157,14 @@ export class RequestContextFactory implements IRequestContextFactory {
       getAssetCriticalityDataClient: memoize(
         () =>
           new AssetCriticalityDataClient({
+            logger: options.logger,
+            esClient: coreContext.elasticsearch.client.asCurrentUser,
+            namespace: getSpaceId(),
+          })
+      ),
+      getEntityStoreDataClient: memoize(
+        () =>
+          new EntityStoreDataClient({
             logger: options.logger,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
             namespace: getSpaceId(),

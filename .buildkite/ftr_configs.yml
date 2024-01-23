@@ -481,6 +481,8 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/entity_store/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/entity_store/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/serverless.config.ts
