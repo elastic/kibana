@@ -189,6 +189,6 @@ export async function getServiceTransactionStats({
         };
       }) ?? [],
     serviceOverflowCount:
-      response.aggregations?.sample?.overflowCount.value || 0,
+      response.aggregations?.sample?.overflowCount?.value || 0,
   };
 }

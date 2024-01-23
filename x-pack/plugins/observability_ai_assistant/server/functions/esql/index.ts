@@ -72,7 +72,7 @@ export function registerEsqlFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.User,
-      description: 'Execute an ES|QL query',
+      description: 'Execute an ES|QL query.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -129,14 +129,36 @@ export function registerEsqlFunction({
       const source$ = streamIntoObservable(
         await client.chat({
           connectorId,
-          messages: withEsqlSystemMessage(),
+          messages: withEsqlSystemMessage(
+            `Use the classify_esql function to classify the user's request
+            and get more information about specific functions and commands
+            you think are candidates for answering the question.
+            
+              
+            Examples for functions and commands:
+            Do you need to group data? Request \`STATS\`.
+            Extract data? Request \`DISSECT\` AND \`GROK\`.
+            Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
+
+            Examples for determining whether the user wants to execute a query:
+            - "Show me the avg of x"
+            - "Give me the results of y"
+            - "Display the sum of z"
+
+            Examples for determining whether the user does not want to execute a query:
+            - "I want a query that ..."
+            - "... Just show me the query"
+            - "Create a query that ..."`
+          ),
           signal,
           stream: true,
           functions: [
             {
-              name: 'get_esql_info',
-              description:
-                'Use this function to get more information about syntax, commands and examples. Take a deep breath and reason about what commands and functions you expect to use. Do you need to group data? Request `STATS`. Extract data? Request `DISSECT` AND `GROK`. Convert a column based on a set of conditionals? Request `EVAL` and `CASE`.',
+              name: 'classify_esql',
+              description: `Use this function to determine:
+              - what ES|QL functions and commands are candidates for answering the user's question
+              - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
+              `,
               parameters: {
                 type: 'object',
                 properties: {
@@ -154,12 +176,17 @@ export function registerEsqlFunction({
                     },
                     description: 'A list of functions.',
                   },
+                  execute: {
+                    type: 'boolean',
+                    description:
+                      'Whether the user wants to execute a query (true) or just wants the query to be displayed (false)',
+                  },
                 },
-                required: ['commands', 'functions'],
+                required: ['commands', 'functions', 'execute'],
               },
             },
           ],
-          functionCall: 'get_esql_info',
+          functionCall: 'classify_esql',
         })
       ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
 
@@ -168,6 +195,7 @@ export function registerEsqlFunction({
       const args = JSON.parse(response.message.function_call.arguments) as {
         commands: string[];
         functions: string[];
+        execute: boolean;
       };
 
       const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
@@ -254,7 +282,6 @@ export function registerEsqlFunction({
             },
           ],
           connectorId,
-          functions: [],
           signal,
           stream: true,
         })
@@ -294,6 +321,30 @@ export function registerEsqlFunction({
                   ],
                 });
               }
+
+              const esqlQuery = cachedContent.match(/```esql([\s\S]*?)```/)?.[1];
+
+              if (esqlQuery && args.execute) {
+                subscriber.next({
+                  created: 0,
+                  id: '',
+                  model: '',
+                  object: 'chat.completion.chunk',
+                  choices: [
+                    {
+                      delta: {
+                        function_call: {
+                          name: 'execute_query',
+                          arguments: JSON.stringify({ query: esqlQuery }),
+                        },
+                      },
+                      index: 0,
+                      finish_reason: null,
+                    },
+                  ],
+                });
+              }
+
               subscriber.complete();
             },
             error: (error) => {
