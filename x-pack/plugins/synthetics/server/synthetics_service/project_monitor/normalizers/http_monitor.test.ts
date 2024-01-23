@@ -43,7 +43,7 @@ describe('http normalizers', () => {
     const monitors = [
       {
         privateLocations: ['Germany'],
-        locations: ['dev'],
+        locations: ['us_central'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-2',
@@ -82,7 +82,7 @@ describe('http normalizers', () => {
       },
       {
         privateLocations: ['Germany'],
-        locations: ['dev'],
+        locations: ['us_central'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-3',
@@ -145,6 +145,15 @@ describe('http normalizers', () => {
               is_tls_enabled: true,
             },
             locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
               {
                 id: 'germany',
                 isServiceManaged: false,
@@ -209,6 +218,15 @@ describe('http normalizers', () => {
               is_tls_enabled: true,
             },
             locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
               {
                 id: 'germany',
                 isServiceManaged: false,
@@ -317,6 +335,15 @@ describe('http normalizers', () => {
             journey_id: 'my-monitor-2',
             locations: [
               {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
+              {
                 id: 'germany',
                 isServiceManaged: false,
                 label: 'Germany',
@@ -380,6 +407,15 @@ describe('http normalizers', () => {
             form_monitor_type: 'http',
             journey_id: 'my-monitor-3',
             locations: [
+              {
+                geo: {
+                  lat: 33.333,
+                  lon: 73.333,
+                },
+                id: 'us_central',
+                isServiceManaged: true,
+                label: 'Test Location',
+              },
               {
                 id: 'germany',
                 isServiceManaged: false,
