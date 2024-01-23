@@ -70,7 +70,8 @@
     "@kbn/ml-chi2test",
     "@kbn/field-utils",
     "@kbn/visualization-utils",
-    "@kbn/code-editor"
+    "@kbn/code-editor",
+    "@kbn/ui-theme"
   ],
   "exclude": [
     "target/**/*",
