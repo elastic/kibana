@@ -105,8 +105,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openCsvReportingPanel();
-        const advOpt = await find.byXPath(`//button[descendant::*[text()='Advanced options']]`);
-        await advOpt.click();
         const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
         await postUrl.click();
 
