@@ -1661,7 +1661,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
-          namespace: newPolicy.namespace ?? 'default',
+          namespace: newPolicy?.namespace ?? '',
           description: newPolicy.description ?? '',
           enabled: newPolicy.enabled ?? true,
           package: {
