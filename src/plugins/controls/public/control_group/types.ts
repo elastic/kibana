@@ -42,7 +42,6 @@ export interface ControlGroupSettings {
 
 export type ControlGroupComponentState = ControlGroupSettings & {
   lastSavedInput: ControlGroupInput;
-  applyButtonEnabled?: boolean;
 };
 
 export {
