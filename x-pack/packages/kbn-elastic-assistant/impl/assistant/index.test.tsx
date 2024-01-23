@@ -22,6 +22,8 @@ import { useLocalStorage } from 'react-use';
 import { PromptEditor } from './prompt_editor';
 import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { mockAssistantAvailability, TestProviders } from '../mock/test_providers/test_providers';
+import { useFetchCurrentUserConversations } from './api';
+import { Conversation } from '../assistant_context/types';
 
 jest.mock('../connectorland/use_load_connectors');
 jest.mock('../connectorland/connector_setup');
@@ -29,24 +31,7 @@ jest.mock('react-use');
 
 jest.mock('./prompt_editor', () => ({ PromptEditor: jest.fn() }));
 jest.mock('./quick_prompts/quick_prompts', () => ({ QuickPrompts: jest.fn() }));
-jest.mock('./api/conversations/use_fetch_current_user_conversations', () => ({
-  useFetchCurrentUserConversations: jest.fn().mockResolvedValue(() => ({
-    [WELCOME_CONVERSATION_TITLE]: {
-      id: WELCOME_CONVERSATION_TITLE,
-      title: WELCOME_CONVERSATION_TITLE,
-      messages: [],
-      apiConfig: {},
-    },
-    [MOCK_CONVERSATION_TITLE]: {
-      id: MOCK_CONVERSATION_TITLE,
-      title: MOCK_CONVERSATION_TITLE,
-      messages: [],
-      apiConfig: {},
-    },
-  })),
-}));
-
-const MOCK_CONVERSATION_TITLE = 'electric sheep';
+jest.mock('./api/conversations/use_fetch_current_user_conversations');
 
 const renderAssistant = (extraProps = {}, providerProps = {}) =>
   render(
@@ -88,6 +73,25 @@ describe('Assistant', () => {
         data: connectors,
       } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          Welcome: {
+            id: 'Welcome',
+            title: 'Welcome',
+            messages: [],
+            apiConfig: {},
+          },
+          'electric sheep': {
+            id: 'electric sheep',
+            title: 'electric sheep',
+            messages: [],
+            apiConfig: {},
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn(),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -112,24 +116,27 @@ describe('Assistant', () => {
         data: connectors,
       } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
-      const { getByLabelText } = renderAssistant(
-        {},
-        {
-          getInitialConversations: () => ({
-            [WELCOME_CONVERSATION_TITLE]: {
-              id: WELCOME_CONVERSATION_TITLE,
-              messages: [],
-              apiConfig: {},
-            },
-            [MOCK_CONVERSATION_TITLE]: {
-              id: MOCK_CONVERSATION_TITLE,
-              messages: [],
-              apiConfig: {},
-              excludeFromLastConversationStorage: true,
-            },
-          }),
-        }
-      );
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          Welcome: {
+            id: 'Welcome',
+            title: 'Welcome',
+            messages: [],
+            apiConfig: {},
+          },
+          'electric sheep': {
+            id: 'electric sheep',
+            title: 'electric sheep',
+            messages: [],
+            apiConfig: {},
+            excludeFromLastConversationStorage: true,
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn(),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+
+      const { getByLabelText } = renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
 
@@ -152,6 +159,25 @@ describe('Assistant', () => {
         data: connectors,
       } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          Welcome: {
+            id: 'Welcome',
+            title: 'Welcome',
+            messages: [],
+            apiConfig: {},
+          },
+          'electric sheep': {
+            id: 'electric sheep',
+            title: 'electric sheep',
+            messages: [],
+            apiConfig: {},
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn(),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+
       renderAssistant({ setConversationId });
 
       await act(async () => {
@@ -171,6 +197,25 @@ describe('Assistant', () => {
         data: emptyConnectors,
       } as unknown as UseQueryResult<ActionConnector[], IHttpFetchError>);
 
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          Welcome: {
+            id: 'Welcome',
+            title: 'Welcome',
+            messages: [],
+            apiConfig: {},
+          },
+          'electric sheep': {
+            id: 'electric sheep',
+            title: 'electric sheep',
+            messages: [],
+            apiConfig: {},
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn(),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+
       renderAssistant();
 
       expect(persistToLocalStorage).toHaveBeenCalled();
@@ -180,6 +225,25 @@ describe('Assistant', () => {
 
   describe('when not authorized', () => {
     it('should be disabled', async () => {
+      jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
+        data: {
+          Welcome: {
+            id: 'Welcome',
+            title: 'Welcome',
+            messages: [],
+            apiConfig: {},
+          },
+          'electric sheep': {
+            id: 'electric sheep',
+            title: 'electric sheep',
+            messages: [],
+            apiConfig: {},
+          },
+        },
+        isLoading: false,
+        refetch: jest.fn(),
+      } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
+
       const { queryByTestId } = renderAssistant(
         {},
         {

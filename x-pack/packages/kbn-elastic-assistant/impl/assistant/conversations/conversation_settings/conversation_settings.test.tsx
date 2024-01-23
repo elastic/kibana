@@ -21,9 +21,7 @@ const mockConvos = {
 };
 const onSelectedConversationChange = jest.fn();
 
-const setConversationSettings = jest.fn().mockImplementation((fn) => {
-  return fn(mockConvos);
-});
+const setConversationSettings = jest.fn();
 
 const testProps = {
   allSystemPrompts: mockSystemPrompts,
@@ -117,7 +115,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-sp'));
-    expect(setConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,
@@ -137,7 +135,7 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('change-convo'));
 
-    expect(setConversationSettings).toHaveReturnedWith(mockConvos);
+    expect(setConversationSettings).toHaveBeenLastCalledWith(mockConvos);
     expect(onSelectedConversationChange).toHaveBeenCalledWith(alertConvo);
   });
   it('Selecting an existing conversation updates the selected convo and is added to the convo settings', () => {
@@ -154,9 +152,10 @@ describe('ConversationSettings', () => {
         provider: 'OpenAI',
       },
       id: 'Cool new conversation',
+      title: 'Cool new conversation',
       messages: [],
     };
-    expect(setConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [newConvo.id]: newConvo,
     });
@@ -170,7 +169,7 @@ describe('ConversationSettings', () => {
     );
     fireEvent.click(getByTestId('delete-convo'));
     const { [customConvo.id]: _, ...rest } = mockConvos;
-    expect(setConversationSettings).toHaveReturnedWith(rest);
+    expect(setConversationSettings).toHaveBeenLastCalledWith(rest);
   });
   it('Selecting a new connector updates the conversation', () => {
     const { getByTestId } = render(
@@ -179,7 +178,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-connector'));
-    expect(setConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,
@@ -196,7 +195,7 @@ describe('ConversationSettings', () => {
       </TestProviders>
     );
     fireEvent.click(getByTestId('change-model'));
-    expect(setConversationSettings).toHaveReturnedWith({
+    expect(setConversationSettings).toHaveBeenLastCalledWith({
       ...mockConvos,
       [welcomeConvo.id]: {
         ...welcomeConvo,

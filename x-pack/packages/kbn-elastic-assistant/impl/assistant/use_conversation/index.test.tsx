@@ -11,7 +11,33 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import React from 'react';
 import { ConversationRole } from '../../assistant_context/types';
-import { updateConversationApi } from '../api';
+
+/* import {
+  updateConversationApi as _updateConversationApi,
+  getConversationById as _getConversationById,
+  appendConversationMessagesApi as _appendConversationMessagesApi,
+} from '../api/conversations';
+import { useMutation as _useMutation } from '@tanstack/react-query';
+
+
+const updateConversationApiMock = _updateConversationApi as jest.Mock;
+const getConversationByIdMock = _getConversationById as jest.Mock;
+const useMutationMock = _useMutation as jest.Mock;
+*/
+jest.mock('../api/conversations', () => {
+  const actual = jest.requireActual('../api/conversations');
+  return {
+    ...actual,
+    updateConversationApi: jest.fn((...args) => actual.updateConversationApi(...args)),
+    appendConversationMessagesApi: jest.fn((...args) =>
+      actual.appendConversationMessagesApi(...args)
+    ),
+    createConversationApi: jest.fn((...args) => actual.createConversationApi(...args)),
+    deleteConversationApi: jest.fn((...args) => actual.deleteConversationApi(...args)),
+    getConversationById: jest.fn((...args) => actual.getConversationById(...args)),
+  };
+});
+
 const message = {
   content: 'You are a robot',
   role: 'user' as ConversationRole,
@@ -136,7 +162,6 @@ describe('useConversation', () => {
 
   it('appends replacements', async () => {
     await act(async () => {
-      const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
@@ -151,7 +176,7 @@ describe('useConversation', () => {
         },
       });
 
-      expect(updateConversationApi).toHaveBeenCalledWith({
+      expect(updateConversationApiMock).toHaveBeenCalledWith({
         [alertConvo.id]: alertConvo,
         [welcomeConvo.id]: {
           ...welcomeConvo,

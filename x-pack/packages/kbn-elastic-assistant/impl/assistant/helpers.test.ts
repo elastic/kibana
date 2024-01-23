@@ -24,6 +24,7 @@ describe('getBlockBotConversation', () => {
         theme: {},
         messages: [],
         apiConfig: {},
+        title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages).toEqual(enterpriseMessaging);
@@ -33,7 +34,6 @@ describe('getBlockBotConversation', () => {
     it('When conversation history and the last message is not enterprise messaging, appends enterprise messaging to conversation', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
         messages: [
           {
             role: 'user' as const,
@@ -46,6 +46,7 @@ describe('getBlockBotConversation', () => {
           },
         ],
         apiConfig: {},
+        title: 'conversation_id',
       };
       const result = getBlockBotConversation(conversation, isAssistantEnabled);
       expect(result.messages.length).toEqual(2);
@@ -54,7 +55,7 @@ describe('getBlockBotConversation', () => {
     it('returns the conversation without changes when the last message is enterprise messaging', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
         messages: enterpriseMessaging,
         apiConfig: {},
       };
@@ -66,7 +67,7 @@ describe('getBlockBotConversation', () => {
     it('returns the conversation with new enterprise message when conversation has enterprise messaging, but not as the last message', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
         messages: [
           ...enterpriseMessaging,
           {
@@ -91,7 +92,7 @@ describe('getBlockBotConversation', () => {
     it('when no conversation history, returns the welcome conversation', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
         messages: [],
         apiConfig: {},
       };
@@ -101,7 +102,7 @@ describe('getBlockBotConversation', () => {
     it('returns a conversation history with the welcome conversation appended', () => {
       const conversation = {
         id: 'conversation_id',
-        theme: {},
+        title: 'conversation_id',
         messages: [
           {
             role: 'user' as const,

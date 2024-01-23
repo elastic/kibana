@@ -65,6 +65,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={undefined}
           selectedConversation={undefined}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -76,6 +77,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       messages: [],
       apiConfig: {},
+      title: 'conversation_id',
     };
     const { getByText } = render(
       <TestProviders>
@@ -83,6 +85,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -93,6 +96,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       messages: [],
       apiConfig: {},
+      title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -100,6 +104,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -113,6 +118,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       messages: [],
       apiConfig: {},
+      title: 'conversation_id',
     };
     const { getByTestId, queryByTestId } = render(
       <TestProviders>
@@ -120,6 +126,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );
@@ -135,6 +142,7 @@ describe('ConnectorSelectorInline', () => {
         provider: 'OpenAI',
       },
       conversationId: 'conversation_id',
+      title: 'conversation_id',
     });
   });
   it('On connector change to add new connector, onchange event does nothing', () => {
@@ -142,6 +150,7 @@ describe('ConnectorSelectorInline', () => {
       id: 'conversation_id',
       messages: [],
       apiConfig: {},
+      title: 'conversation_id',
     };
     const { getByTestId } = render(
       <TestProviders>
@@ -149,6 +158,7 @@ describe('ConnectorSelectorInline', () => {
           isDisabled={false}
           selectedConnectorId={'missing-connector-id'}
           selectedConversation={conversation}
+          onConnectorSelected={jest.fn()}
         />
       </TestProviders>
     );

@@ -18,12 +18,10 @@ import {
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 
-import useEvent from 'react-use/lib/useEvent';
 import { Conversation } from '../../../..';
 import * as i18n from '../conversation_selector/translations';
 import { SystemPromptSelectorOption } from '../../prompt_editor/system_prompt/system_prompt_modal/system_prompt_selector/system_prompt_selector';
 
-const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 interface Props {
   conversations: Record<string, Conversation>;
   onConversationDeleted: (conversationId: string) => void;
@@ -160,40 +158,6 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
       handleSelectionChange(nextOption);
     }, [conversationIds, conversationOptions, handleSelectionChange, selectedConversationId]);
 
-    // Register keyboard listener for quick conversation switching
-    const onKeyDown = useCallback(
-      (event: KeyboardEvent) => {
-        if (isDisabled || conversationIds.length <= 1) {
-          return;
-        }
-
-        if (
-          event.key === 'ArrowLeft' &&
-          (isMac ? event.metaKey : event.ctrlKey) &&
-          !shouldDisableKeyboardShortcut()
-        ) {
-          event.preventDefault();
-          onLeftArrowClick();
-        }
-        if (
-          event.key === 'ArrowRight' &&
-          (isMac ? event.metaKey : event.ctrlKey) &&
-          !shouldDisableKeyboardShortcut()
-        ) {
-          event.preventDefault();
-          onRightArrowClick();
-        }
-      },
-      [
-        conversationIds.length,
-        isDisabled,
-        onLeftArrowClick,
-        onRightArrowClick,
-        shouldDisableKeyboardShortcut,
-      ]
-    );
-    useEvent('keydown', onKeyDown);
-
     const renderOption: (
       option: ConversationSelectorSettingsOption,
       searchValue: string,
@@ -272,26 +236,22 @@ export const ConversationSelectorSettings: React.FC<Props> = React.memo(
           compressed={true}
           isDisabled={isDisabled}
           prepend={
-            <EuiToolTip content={`${i18n.PREVIOUS_CONVERSATION_TITLE} (⌘ + ←)`} display="block">
-              <EuiButtonIcon
-                iconType="arrowLeft"
-                data-test-subj="arrowLeft"
-                aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
-                onClick={onLeftArrowClick}
-                disabled={isDisabled || conversationIds.length <= 1}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              iconType="arrowLeft"
+              data-test-subj="arrowLeft"
+              aria-label={i18n.PREVIOUS_CONVERSATION_TITLE}
+              onClick={onLeftArrowClick}
+              disabled={isDisabled || conversationIds.length <= 1}
+            />
           }
           append={
-            <EuiToolTip content={`${i18n.NEXT_CONVERSATION_TITLE} (⌘ + →)`} display="block">
-              <EuiButtonIcon
-                iconType="arrowRight"
-                data-test-subj="arrowRight"
-                aria-label={i18n.NEXT_CONVERSATION_TITLE}
-                onClick={onRightArrowClick}
-                disabled={isDisabled || conversationIds.length <= 1}
-              />
-            </EuiToolTip>
+            <EuiButtonIcon
+              iconType="arrowRight"
+              data-test-subj="arrowRight"
+              aria-label={i18n.NEXT_CONVERSATION_TITLE}
+              onClick={onRightArrowClick}
+              disabled={isDisabled || conversationIds.length <= 1}
+            />
           }
         />
       </EuiFormRow>

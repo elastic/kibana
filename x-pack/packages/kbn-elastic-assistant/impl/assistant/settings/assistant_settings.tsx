@@ -153,7 +153,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         onConversationSelected(newSelectedConversationId);
       }
       await saveSettings();
-      onSave();
+      await onSave();
     }, [
       conversationSettings,
       defaultSelectedConversation.id,

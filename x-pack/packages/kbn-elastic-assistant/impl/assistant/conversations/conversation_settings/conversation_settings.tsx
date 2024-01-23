@@ -224,10 +224,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
               model: config?.defaultModel,
             },
           };
-          setConversationSettings((prev) => ({
-            ...prev,
+          setConversationSettings({
+            ...conversationSettings,
             [selectedConversation.id]: updatedConversation,
-          }));
+          });
           if (selectedConversation.id !== selectedConversation.title) {
             setConversationsSettingsBulkActions({
               ...conversationsSettingsBulkActions,
@@ -261,6 +261,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         }
       },
       [
+        conversationSettings,
         conversationsSettingsBulkActions,
         selectedConversation,
         setConversationSettings,
