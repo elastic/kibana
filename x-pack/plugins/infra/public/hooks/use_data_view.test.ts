@@ -40,6 +40,7 @@ describe('useDataView hook', () => {
   beforeEach(() => {
     dataViewMock = {
       create: jest.fn().mockImplementation(() => Promise.resolve(mockDataView)),
+      get: jest.fn().mockImplementation(() => Promise.reject(new Error('Data view not found'))),
     } as Partial<DataViewsServicePublic> as jest.Mocked<DataViewsServicePublic>;
 
     mockUseKibana();
