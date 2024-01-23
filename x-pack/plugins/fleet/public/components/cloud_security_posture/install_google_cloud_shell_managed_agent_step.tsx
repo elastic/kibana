@@ -11,41 +11,39 @@ import { i18n } from '@kbn/i18n';
 
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
-import type { GetOneEnrollmentAPIKeyResponse } from '../../../../common/types/rest_spec/enrollment_api_key';
+import type { GetOneEnrollmentAPIKeyResponse } from '../../../common/types';
 
-import { CloudFormationInstructions } from '../cloud_formation_instructions';
+import { GoogleCloudShellInstructions } from './google_cloud_shell_instructions';
 
-import type { CloudSecurityIntegration } from '../types';
-
-export const InstallCloudFormationManagedAgentStep = ({
+export const InstallGoogleCloudShellManagedAgentStep = ({
   selectedApiKeyId,
   apiKeyData,
-  enrollToken,
   isComplete,
-  cloudSecurityIntegration,
-  fleetServerHost,
+  cloudShellUrl,
+  cloudShellCommand,
+  projectId,
 }: {
   selectedApiKeyId?: string;
   apiKeyData?: GetOneEnrollmentAPIKeyResponse | null;
-  enrollToken?: string;
   isComplete?: boolean;
-  cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
-  fleetServerHost: string;
+  cloudShellUrl?: string | undefined;
+  cloudShellCommand?: string;
+  projectId?: string;
 }): EuiContainedStepProps => {
   const nonCompleteStatus = selectedApiKeyId ? undefined : 'disabled';
   const status = isComplete ? 'complete' : nonCompleteStatus;
 
   return {
     status,
-    title: i18n.translate('xpack.fleet.agentEnrollment.cloudFormation.stepEnrollAndRunAgentTitle', {
+    title: i18n.translate('xpack.fleet.agentEnrollment.cloudShell.stepEnrollAndRunAgentTitle', {
       defaultMessage: 'Install Elastic Agent on your cloud',
     }),
     children:
-      selectedApiKeyId && apiKeyData && cloudSecurityIntegration ? (
-        <CloudFormationInstructions
-          cloudSecurityIntegration={cloudSecurityIntegration}
-          enrollmentAPIKey={enrollToken}
-          fleetServerHost={fleetServerHost}
+      selectedApiKeyId && apiKeyData && cloudShellUrl ? (
+        <GoogleCloudShellInstructions
+          cloudShellUrl={cloudShellUrl || ''}
+          cloudShellCommand={cloudShellCommand || ''}
+          projectId={projectId || ''}
         />
       ) : (
         <React.Fragment />
