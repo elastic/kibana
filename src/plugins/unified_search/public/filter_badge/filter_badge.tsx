@@ -7,10 +7,11 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiTextColor, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiTextBlockTruncate, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { isCombinedFilter } from '@kbn/es-query';
+import { css } from '@emotion/react';
 import { FilterBadgeGroup } from './filter_badge_group';
 import type { FilterLabelStatus } from '../filter_bar/filter_item/filter_item';
 import { badgePaddingCss, marginLeftLabelCss } from './filter_badge.styles';
@@ -59,24 +60,33 @@ function FilterBadge({
       iconSide="right"
       {...rest}
     >
-      {!hideAlias && filter.meta.alias !== null ? (
-        <>
-          <span className={marginLeftLabelCss(euiTheme)}>
-            {prefix}
-            {filter.meta.alias}
-            {filterLabelStatus && <>: {filterLabelValue}</>}
-          </span>
-        </>
-      ) : (
-        <div>
-          {isCombinedFilter(filter) && prefix}
-          <FilterBadgeGroup
-            filters={[filter]}
-            dataViews={dataViews}
-            filterLabelStatus={valueLabel}
-          />
-        </div>
-      )}
+      <span
+        css={css`
+          white-space: normal;
+          overflow-wrap: break-word;
+        `}
+      >
+        <EuiTextBlockTruncate lines={10}>
+          {!hideAlias && filter.meta.alias !== null ? (
+            <>
+              <span className={marginLeftLabelCss(euiTheme)}>
+                {prefix}
+                {filter.meta.alias}
+                {filterLabelStatus && <>: {filterLabelValue}</>}
+              </span>
+            </>
+          ) : (
+            <div>
+              {isCombinedFilter(filter) && prefix}
+              <FilterBadgeGroup
+                filters={[filter]}
+                dataViews={dataViews}
+                filterLabelStatus={valueLabel}
+              />
+            </div>
+          )}
+        </EuiTextBlockTruncate>
+      </span>
     </EuiBadge>
   );
 }

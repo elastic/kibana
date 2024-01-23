@@ -28,9 +28,9 @@ import {
   validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
   validateAxes,
+  validateMinBarHeight,
 } from './validate';
 import { logDatatable } from '../utils';
-import { shouldShowLegendActionDefault } from '../helpers/visualization';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
   const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
@@ -112,6 +112,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
+  validateMinBarHeight(args.minBarHeight);
 
   validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
@@ -128,6 +129,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
+        minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio:
           dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
@@ -140,7 +142,6 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
       overrides: handlers.variables?.overrides as XYRender['value']['overrides'],
-      shouldShowLegendAction: handlers?.shouldShowLegendAction ?? shouldShowLegendActionDefault,
     },
   };
 };

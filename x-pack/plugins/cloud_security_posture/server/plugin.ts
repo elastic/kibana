@@ -35,7 +35,7 @@ import type {
   CspServerPluginStartServices,
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
-import { setupSavedObjects } from './saved_objects';
+import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
@@ -50,6 +50,7 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
+import { CspBenchmarkRule, CspSettings } from '../common/types/latest';
 
 export class CspPlugin
   implements
@@ -80,7 +81,8 @@ export class CspPlugin
     core: CoreSetup<CspServerPluginStartDeps, CspServerPluginStart>,
     plugins: CspServerPluginSetupDeps
   ): CspServerPluginSetup {
-    setupSavedObjects(core.savedObjects);
+    core.savedObjects.registerType<CspBenchmarkRule>(cspBenchmarkRule);
+    core.savedObjects.registerType<CspSettings>(cspSettings);
 
     setupRoutes({
       core,

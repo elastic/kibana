@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { getJobId } from '../../../common/log_analysis';
+import { getJobId } from '../../../common/infra_ml';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useTrackedPromise } from '../../utils/use_tracked_promise';
 import { JobSummary } from './api/ml_get_jobs_summary_api';

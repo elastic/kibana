@@ -71,11 +71,22 @@ export class IndexPatternsFetcher {
     rollupIndex?: string;
     indexFilter?: QueryDslQueryContainer;
     fields?: string[];
+    allowHidden?: boolean;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
-    const { pattern, metaFields = [], fieldCapsOptions, type, rollupIndex, indexFilter } = options;
+    const {
+      pattern,
+      metaFields = [],
+      fieldCapsOptions,
+      type,
+      rollupIndex,
+      indexFilter,
+      allowHidden,
+    } = options;
     const allowNoIndices = fieldCapsOptions
       ? fieldCapsOptions.allow_no_indices
       : this.allowNoIndices;
+
+    const expandWildcards = allowHidden ? 'all' : 'open';
 
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
@@ -87,6 +98,7 @@ export class IndexPatternsFetcher {
       },
       indexFilter,
       fields: options.fields || ['*'],
+      expandWildcards,
     });
 
     if (this.rollupsEnabled && type === 'rollup' && rollupIndex) {

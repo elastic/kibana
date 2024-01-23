@@ -39,7 +39,7 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-cisco.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/cisco.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/cisco.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function ciscoLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/cisco_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/cisco_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

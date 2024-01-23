@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import * as Rx from 'rxjs';
+import { firstValueFrom, Observable } from 'rxjs';
+
 import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { CSV_REPORTING_ACTION } from '@kbn/reporting-common';
+
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import type { ReportingPublicPluginStartDendencies } from '../plugin';
+import type { ReportingPublicPluginStartDependencies } from '../plugin';
+
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {
@@ -33,7 +36,7 @@ export interface ActionContext {
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Rx.Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
+  startServices$: Observable<[CoreStart, ReportingPublicPluginStartDependencies, unknown]>;
   usesUiCapabilities: boolean;
 }
 
@@ -41,12 +44,10 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   private isDownloading: boolean;
   public readonly type = '';
   public readonly id = CSV_REPORTING_ACTION;
-  private licenseHasDownloadCsv: boolean = false;
-  private capabilityHasDownloadCsv: boolean = false;
-  private notifications: NotificationsSetup;
-  private apiClient: ReportingAPIClient;
-  private startServices$: Params['startServices$'];
-  private usesUiCapabilities: any;
+  private readonly notifications: NotificationsSetup;
+  private readonly apiClient: ReportingAPIClient;
+  private readonly startServices$: Params['startServices$'];
+  private readonly usesUiCapabilities: boolean;
 
   constructor({ core, apiClient, startServices$, usesUiCapabilities }: Params) {
     this.isDownloading = false;
@@ -69,37 +70,26 @@ export class ReportingCsvPanelAction implements ActionDefinition<ActionContext> 
   }
 
   public async getSharingData(savedSearch: SavedSearch) {
-    const [{ uiSettings }, { data }] = await Rx.firstValueFrom(this.startServices$);
+    const [{ uiSettings }, { data }] = await firstValueFrom(this.startServices$);
     const { getSharingData } = await loadSharingDataHelpers();
     return await getSharingData(savedSearch.searchSource, savedSearch, { uiSettings, data });
   }
 
   public isCompatible = async (context: ActionContext) => {
-    await new Promise<void>((resolve) => {
-      this.startServices$.subscribe(([{ application }, { licensing }]) => {
-        licensing.license$.subscribe((license) => {
-          const results = license.check('reporting', 'basic');
-          const { showLinks } = checkLicense(results);
-          this.licenseHasDownloadCsv = showLinks;
-        });
-
-        if (this.usesUiCapabilities) {
-          this.capabilityHasDownloadCsv = application.capabilities.dashboard?.downloadCsv === true;
-        } else {
-          this.capabilityHasDownloadCsv = true; // deprecated
-        }
-
-        resolve();
-      });
-    });
-
-    if (!this.licenseHasDownloadCsv || !this.capabilityHasDownloadCsv) {
-      return false;
-    }
-
     const { embeddable } = context;
 
     if (embeddable.type !== 'search') {
+      return false;
+    }
+
+    const [{ application }, { licensing }] = await firstValueFrom(this.startServices$);
+    const license = await firstValueFrom(licensing.license$);
+    const licenseHasDownloadCsv = checkLicense(license.check('reporting', 'basic')).showLinks;
+    const capabilityHasDownloadCsv = this.usesUiCapabilities
+      ? application.capabilities.dashboard?.downloadCsv === true
+      : true; // deprecated
+
+    if (!licenseHasDownloadCsv || !capabilityHasDownloadCsv) {
       return false;
     }
 

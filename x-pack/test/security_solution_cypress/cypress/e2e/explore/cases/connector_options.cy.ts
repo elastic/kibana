@@ -27,15 +27,9 @@ import {
 import { goToCreateNewCase } from '../../../tasks/all_cases';
 import { CASES_URL } from '../../../urls/navigation';
 import { CONNECTOR_CARD_DETAILS, CONNECTOR_TITLE } from '../../../screens/case_details';
-import { cleanKibana } from '../../../tasks/common';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165712
 describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-    login();
-  });
-
   beforeEach(() => {
     login();
     cy.intercept('GET', '/api/cases/configure/connectors/_find', getMockConnectorsResponse());
@@ -82,7 +76,7 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
     cy.get(CONNECTOR_TITLE).should('have.text', getIbmResilientConnectorOptions().title);
     cy.get(CONNECTOR_CARD_DETAILS).should(
       'have.text',
-      `Incident Types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
+      `Incident types: ${getIbmResilientConnectorOptions().incidentTypes.join(', ')}Severity: ${
         getIbmResilientConnectorOptions().severity
       }`
     );

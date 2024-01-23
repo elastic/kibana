@@ -21,7 +21,6 @@ import {
   CLIENT_GEO_REGION_ISO_CODE,
   SESSION_ID,
 } from '../../../../../../../common/es_fields/apm';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../../../common/data_view_constants';
 import { getLayerStyle, PalleteColors } from './get_map_layer_style';
 
 interface VectorLayerDescriptor extends BaseVectorLayerDescriptor {
@@ -40,7 +39,10 @@ const label = i18n.translate(
     defaultMessage: 'Sessions',
   }
 );
-export async function getSessionMapLayerList(maps?: MapsStartApi) {
+export async function getSessionMapLayerList(
+  maps: MapsStartApi | undefined,
+  dataViewId: string
+) {
   const basemapLayerDescriptor =
     await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
 
@@ -59,7 +61,7 @@ export async function getSessionMapLayerList(maps?: MapsStartApi) {
               label,
             },
           ],
-          indexPatternId: APM_STATIC_DATA_VIEW_ID,
+          indexPatternId: dataViewId,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           applyForceRefresh: true,
@@ -101,7 +103,7 @@ export async function getSessionMapLayerList(maps?: MapsStartApi) {
               label,
             },
           ],
-          indexPatternId: APM_STATIC_DATA_VIEW_ID,
+          indexPatternId: dataViewId,
           applyGlobalQuery: true,
           applyGlobalTime: true,
           applyForceRefresh: true,

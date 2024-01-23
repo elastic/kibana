@@ -13,12 +13,13 @@ import { createToolingLogger } from '../../../../common/endpoint/data_loaders/ut
  * @param config
  */
 export const setupToolingLogLevel = (config: Cypress.PluginConfigOptions) => {
+  const log = createToolingLogger();
   const defaultToolingLogLevel = config.env.TOOLING_LOG_LEVEL;
+
+  log.info(`Cypress config 'env.TOOLING_LOG_LEVEL': ${defaultToolingLogLevel}`);
 
   if (defaultToolingLogLevel && defaultToolingLogLevel !== createToolingLogger.defaultLogLevel) {
     createToolingLogger.defaultLogLevel = defaultToolingLogLevel;
-    createToolingLogger().info(
-      `Default log level for 'createToolingLogger()' set to ${defaultToolingLogLevel}`
-    );
+    log.info(`Default log level for 'createToolingLogger()' set to ${defaultToolingLogLevel}`);
   }
 };

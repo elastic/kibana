@@ -128,6 +128,8 @@ export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
 
 export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
 
+export const SUPPRESS_MISSING_FIELD = 'If a suppression field is missing';
+
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };

@@ -15,7 +15,7 @@ export interface ClusterInfo {
   cluster_name: string;
   cluster_uuid: string;
   cluster_version: string;
-  cluster_build_flavor: string;
+  cluster_build_flavor?: string;
 }
 
 /**

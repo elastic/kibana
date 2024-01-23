@@ -17,6 +17,8 @@ export const BEDROCK_CONNECTOR_ID = '.bedrock';
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',
+  INVOKE_STREAM = 'invokeStream',
+  DASHBOARD = 'getDashboard',
   TEST = 'test',
 }
 

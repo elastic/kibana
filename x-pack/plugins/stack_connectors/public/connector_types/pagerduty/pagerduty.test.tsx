@@ -43,6 +43,8 @@ describe('pagerduty action params validation', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
+      customDetails: '{}',
+      links: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -50,6 +52,8 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: [],
+        links: [],
+        customDetails: [],
       },
     });
   });
@@ -74,6 +78,142 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: expect.arrayContaining(expected),
+        links: [],
+        customDetails: [],
+      },
+    });
+  });
+
+  test('action params validation fails when customDetails are not valid JSON', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{foo:bar}',
+      links: [],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: [],
+        customDetails: ['Custom details must be a valid JSON.'],
+      },
+    });
+  });
+
+  test('action params validation does not fail when customDetails are not JSON but have mustache templates inside', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{"details": {{alert.flapping}}}',
+      links: [],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: [],
+        customDetails: [],
+      },
+    });
+  });
+
+  test('action params validation fails when a link is missing the href field', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [{ href: '', text: 'foobar' }],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Link properties cannot be empty.'],
+        customDetails: [],
+      },
+    });
+  });
+
+  test('action params validation fails when a link is missing the text field', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [{ href: 'foobar', text: '' }],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Link properties cannot be empty.'],
+        customDetails: [],
+      },
+    });
+  });
+
+  test('action params validation does not throw the same error multiple times for links', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [
+        { href: 'foobar', text: '' },
+        { href: '', text: 'foobar' },
+        { href: '', text: '' },
+      ],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Link properties cannot be empty.'],
+        customDetails: [],
       },
     });
   });

@@ -22,5 +22,6 @@
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
   ]
 }

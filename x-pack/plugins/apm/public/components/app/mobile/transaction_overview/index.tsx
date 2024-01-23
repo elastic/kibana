@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -62,9 +57,6 @@ export function MobileTransactionOverview() {
 
   return (
     <>
-      <EuiFlexItem>
-        <EuiHorizontalRule />
-      </EuiFlexItem>
       <EuiFlexItem grow={10}>
         <EuiPanel hasBorder={true}>
           <MobileTreemap

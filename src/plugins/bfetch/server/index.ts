@@ -7,10 +7,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { BfetchServerPlugin } from './plugin';
 
 export type { BfetchServerSetup, BfetchServerStart, BatchProcessingRouteParams } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { BfetchServerPlugin } = await import('./plugin');
   return new BfetchServerPlugin(initializerContext);
 }

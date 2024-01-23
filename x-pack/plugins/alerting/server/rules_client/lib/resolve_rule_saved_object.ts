@@ -11,6 +11,7 @@ import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { resolveRuleSo } from '../../data/rule';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 interface ResolveRuleSavedObjectParams {
   ruleId: string;
@@ -26,7 +27,7 @@ export async function resolveRuleSavedObject(
     ruleAuditEvent({
       action: RuleAuditAction.RESOLVE,
       outcome: 'unknown',
-      savedObject: { type: 'alert', id: ruleId },
+      savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: ruleId },
     })
   );
 

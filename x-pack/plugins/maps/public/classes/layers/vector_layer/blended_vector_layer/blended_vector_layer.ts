@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
@@ -183,7 +184,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return layerDescriptor;
   }
 
-  private readonly _isClustered: boolean;
+  private _isClustered: boolean;
   private readonly _clusterSource: ESGeoGridSource;
   private readonly _clusterStyle: VectorStyle;
   private readonly _documentSource: ESSearchSource;
@@ -313,21 +314,34 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       let isSyncClustered;
       try {
         syncContext.startLoading(dataRequestId, requestToken, requestMeta);
+        const warnings: SearchResponseWarning[] = [];
         isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
+          await this.getDisplayName(this._documentSource),
           requestMeta,
-          syncContext.registerCancelCallback.bind(null, requestToken)
+          syncContext.registerCancelCallback.bind(null, requestToken),
+          syncContext.inspectorAdapters,
+          (warning) => {
+            warnings.push(warning);
+          }
         ));
-        syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, requestMeta);
+        syncContext.stopLoading(
+          dataRequestId,
+          requestToken,
+          { isSyncClustered },
+          { ...requestMeta, warnings }
+        );
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
-          syncContext.onLoadError(dataRequestId, requestToken, error.message);
+          syncContext.onLoadError(dataRequestId, requestToken, error);
         }
         return;
       }
       if (isSyncClustered) {
+        this._isClustered = true;
         activeSource = this._clusterSource;
         activeStyle = this._clusterStyle;
       } else {
+        this._isClustered = false;
         activeSource = this._documentSource;
         activeStyle = this._documentStyle;
       }

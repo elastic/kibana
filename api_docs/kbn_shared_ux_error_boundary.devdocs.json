@@ -63,10 +63,12 @@
         "tags": [],
         "label": "KibanaErrorBoundaryProvider",
         "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
+          "\nProvider that uses dependencies to give context to the KibanaErrorBoundary component\nThis provider is aware if services were already created from a higher level of the component tree"
         ],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children, analytics, }: React.PropsWithChildren<",
+          "KibanaErrorBoundaryProviderDeps",
+          ">) => JSX.Element"
         ],
         "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
         "deprecated": false,
@@ -75,12 +77,14 @@
           {
             "parentPluginId": "@kbn/shared-ux-error-boundary",
             "id": "def-common.KibanaErrorBoundaryProvider.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{ children }",
+            "label": "{\n  children,\n  analytics,\n}",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; }"
+              "React.PropsWithChildren<",
+              "KibanaErrorBoundaryProviderDeps",
+              ">"
             ],
             "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
             "deprecated": false,

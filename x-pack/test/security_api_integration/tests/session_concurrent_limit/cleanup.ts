@@ -180,7 +180,10 @@ export default function ({ getService }: FtrProviderContext) {
       await setTimeoutAsync(500);
       const basicSessionCookieThree = await loginWithBasic(testUser);
 
-      expect(await getNumberOfSessionDocuments()).to.be(3);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
 
       // Poke the background task to run
       await runCleanupTaskSoon();
@@ -209,7 +212,10 @@ export default function ({ getService }: FtrProviderContext) {
       const basicSessionCookieThree = await loginWithBasic(testUser);
       const samlSessionCookieThree = await loginWithSAML();
 
-      expect(await getNumberOfSessionDocuments()).to.be(6);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(6);
+      });
 
       // Poke the background task to run
       await runCleanupTaskSoon();
@@ -234,15 +240,36 @@ export default function ({ getService }: FtrProviderContext) {
       log.debug(`Log in as ${testUser.username} and SAML user 3 times each with a 0.5s delay.`);
 
       const basicSessionCookieOne = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(1);
+      });
+
       const samlSessionCookieOne = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
+
       const basicSessionCookieTwo = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
+
       const samlSessionCookieTwo = await loginWithSAML();
-      await setTimeoutAsync(500);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(4);
+      });
+
       const basicSessionCookieThree = await loginWithBasic(testUser);
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(5);
+      });
+
       const samlSessionCookieThree = await loginWithSAML();
 
-      expect(await getNumberOfSessionDocuments()).to.be(6);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(6);
+      });
 
       // Remove `createdAt` field from the most recent sessions to emulate legacy sessions.
       // 1. Get the latest session for every unique credentials.
@@ -304,7 +331,10 @@ export default function ({ getService }: FtrProviderContext) {
       await setTimeoutAsync(500);
       const basicSessionCookieTwo = await loginWithBasic(testUser);
 
-      expect(await getNumberOfSessionDocuments()).to.be(2);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(2);
+      });
 
       // Poke the background task to run
       await runCleanupTaskSoon();
@@ -327,7 +357,10 @@ export default function ({ getService }: FtrProviderContext) {
       const anonymousSessionCookieTwo = await loginWithAnonymous();
       const anonymousSessionCookieThree = await loginWithAnonymous();
 
-      expect(await getNumberOfSessionDocuments()).to.be(3);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
 
       // Poke the background task to run
       await runCleanupTaskSoon();
@@ -356,7 +389,10 @@ export default function ({ getService }: FtrProviderContext) {
       const unauthenticatedSessionTwo = await startSAMLHandshake();
       const unauthenticatedSessionThree = await startSAMLHandshake();
 
-      expect(await getNumberOfSessionDocuments()).to.be(3);
+      log.debug('Waiting for all sessions to be persisted...');
+      await retry.tryForTime(20000, async () => {
+        expect(await getNumberOfSessionDocuments()).to.be(3);
+      });
 
       // Poke the background task to run
       await runCleanupTaskSoon();

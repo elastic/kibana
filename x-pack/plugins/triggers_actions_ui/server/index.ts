@@ -6,7 +6,6 @@
  */
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, ConfigSchema } from './config';
-import { TriggersActionsPlugin } from './plugin';
 
 export type { PluginStartContract } from './plugin';
 export type { TimeSeriesQuery, CoreQueryParams } from './data';
@@ -29,4 +28,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export const plugin = (ctx: PluginInitializerContext) => new TriggersActionsPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { TriggersActionsPlugin } = await import('./plugin');
+  return new TriggersActionsPlugin(ctx);
+};

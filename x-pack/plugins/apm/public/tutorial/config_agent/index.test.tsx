@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { HttpStart } from '@kbn/core/public';
 import React from 'react';
 import {
@@ -80,9 +80,17 @@ describe('TutorialConfigAgent', () => {
           kibanaVersion="8.0.0"
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
+
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_onPrem'
+      );
+      expect(policySelectorWrapper).toBeInTheDocument();
+
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
+      expect(input).toHaveValue('Default Standalone configuration');
+
       let commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
@@ -128,12 +136,17 @@ describe('TutorialConfigAgent', () => {
             kibanaVersion="8.0.0"
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_onPrem')
-        ).toBeInTheDocument();
+
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
+        expect(policySelectorWrapper).toBeInTheDocument();
+
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
+        expect(input).toHaveValue('Default Standalone configuration');
+
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -164,12 +177,17 @@ describe('TutorialConfigAgent', () => {
             kibanaVersion="8.0.0"
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_onPrem')
-        ).toBeInTheDocument();
+
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
+        expect(policySelectorWrapper).toBeInTheDocument();
+
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
+        expect(input).toHaveValue('Default Standalone configuration');
+
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -206,12 +224,17 @@ describe('TutorialConfigAgent', () => {
             kibanaVersion="8.0.0"
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_cloud')
-        ).toBeInTheDocument();
+
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_cloud'
+        );
+        expect(policySelectorWrapper).toBeInTheDocument();
+
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
+        expect(input).toHaveValue('Default Standalone configuration');
+
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -245,12 +268,17 @@ describe('TutorialConfigAgent', () => {
             kibanaVersion="8.0.0"
           />
         );
-        expect(
-          await screen.findByText('Elastic Cloud agent policy')
-        ).toBeInTheDocument();
-        expect(
-          component.getByTestId('policySelector_policy-elastic-agent-on-cloud')
-        ).toBeInTheDocument();
+
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_policy-elastic-agent-on-cloud'
+        );
+        expect(policySelectorWrapper).toBeInTheDocument();
+
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
+        expect(input).toHaveValue('Elastic Cloud agent policy');
+
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -280,9 +308,17 @@ describe('TutorialConfigAgent', () => {
             kibanaVersion="8.0.0"
           />
         );
-        expect(
-          await screen.findByText('Default Standalone configuration')
-        ).toBeInTheDocument();
+
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
+        expect(policySelectorWrapper).toBeInTheDocument();
+
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
+        expect(input).toHaveValue('Default Standalone configuration');
+
         const commands = component.getByTestId('commands').innerHTML;
         expect(commands).not.toEqual('');
         expect(commands).toMatchInlineSnapshot(`
@@ -340,12 +376,17 @@ describe('TutorialConfigAgent', () => {
           kibanaVersion="8.0.0"
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
-      expect(
-        component.getByTestId('policySelector_onPrem')
-      ).toBeInTheDocument();
+
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_onPrem'
+      );
+      expect(policySelectorWrapper).toBeInTheDocument();
+
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
+      expect(input).toHaveValue('Default Standalone configuration');
+
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`
@@ -379,10 +420,16 @@ describe('TutorialConfigAgent', () => {
           kibanaVersion="8.0.0"
         />
       );
-      expect(
-        await screen.findByText('Default Standalone configuration')
-      ).toBeInTheDocument();
-      expect(component.getByTestId('policySelector_cloud')).toBeInTheDocument();
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_cloud'
+      );
+      expect(policySelectorWrapper).toBeInTheDocument();
+
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
+      expect(input).toHaveValue('Default Standalone configuration');
+
       const commands = component.getByTestId('commands').innerHTML;
       expect(commands).not.toEqual('');
       expect(commands).toMatchInlineSnapshot(`

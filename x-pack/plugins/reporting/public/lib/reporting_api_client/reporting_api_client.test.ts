@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-jest.mock('moment', () => ({ tz: { guess: jest.fn() } }));
+import { tz } from 'moment-timezone';
 
-import { tz } from 'moment';
 import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { httpServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { Job } from '../job';

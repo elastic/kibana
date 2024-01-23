@@ -9,7 +9,6 @@ import React, { memo, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import type { FieldSpec } from '@kbn/data-plugin/common';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { useStartServices } from '../../../../../hooks';
@@ -28,8 +27,12 @@ export const LogQueryBar: React.FunctionComponent<{
   isQueryValid: boolean;
   onUpdateQuery: (query: string, runQuery?: boolean) => void;
 }> = memo(({ query, isQueryValid, onUpdateQuery }) => {
-  const { data, notifications, http, docLinks, uiSettings, unifiedSearch, storage, dataViews } =
-    useStartServices();
+  const {
+    data,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useStartServices();
   const [indexPatternFields, setIndexPatternFields] = useState<FieldSpec[]>();
 
   useEffect(() => {
@@ -81,7 +84,6 @@ export const LogQueryBar: React.FunctionComponent<{
         onUpdateQuery(newQuery.query as string, true);
       }}
       appName={i18n.translate('xpack.fleet.appTitle', { defaultMessage: 'Fleet' })}
-      deps={{ unifiedSearch, notifications, http, docLinks, uiSettings, data, dataViews, storage }}
     />
   );
 });

@@ -8,29 +8,59 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { CardStep } from '.';
 import type { StepId } from '../types';
-import { GetSetUpCardId, IntroductionSteps, SectionId } from '../types';
-import { ProductLine } from '../../../common/product';
+
+import {
+  EnablePrebuiltRulesSteps,
+  GetStartedWithAlertsCardsId,
+  QuickStartSectionCardsId,
+  SectionId,
+  OverviewSteps,
+  CreateProjectSteps,
+} from '../types';
+import { ALL_DONE_TEXT } from '../translations';
+import { fetchRuleManagementFilters } from '../apis';
+import { createProjectSteps, enablePrebuildRuleSteps, overviewVideoSteps } from '../sections';
+
+jest.mock('./step_content', () => ({
+  StepContent: () => <div data-test-subj="mock-step-content" />,
+}));
+
+jest.mock('../context/step_context');
+jest.mock('../apis');
+
+jest.mock('../../common/services');
+
+jest.mock('@kbn/security-solution-plugin/public', () => ({
+  useSourcererDataView: jest.fn().mockReturnValue({ indicesExist: false }),
+}));
+
+jest.mock('@kbn/security-solution-navigation', () => ({
+  useNavigateTo: jest.fn().mockReturnValue({ navigateTo: jest.fn() }),
+  SecurityPageName: {
+    landing: 'landing',
+  },
+}));
 
 describe('CardStepComponent', () => {
-  const step = {
-    id: IntroductionSteps.getToKnowElasticSecurity,
-  };
-
   const onStepClicked = jest.fn();
-  const onStepButtonClicked = jest.fn();
-  const expandedSteps = new Set([IntroductionSteps.getToKnowElasticSecurity]);
+  const toggleTaskCompleteStatus = jest.fn();
+  const expandedSteps = new Set([]);
 
   const props = {
-    activeProducts: new Set([ProductLine.security]),
-    cardId: GetSetUpCardId.introduction,
+    cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
     expandedSteps,
-    finishedStepsByCard: new Set<StepId>(),
-    onStepButtonClicked,
+    finishedSteps: new Set<StepId>(),
+    isExpandedCard: true,
+    toggleTaskCompleteStatus,
     onStepClicked,
-    sectionId: SectionId.getSetUp,
-    stepId: step.id,
+    sectionId: SectionId.quickStart,
+    step: overviewVideoSteps[0],
   };
-  const testStepTitle = 'Get to know Elastic Security';
+  const testStepTitle = 'Watch the overview video';
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   it('should toggle step expansion on click', () => {
     const { getByText } = render(<CardStep {...props} />);
@@ -40,54 +70,64 @@ describe('CardStepComponent', () => {
 
     expect(onStepClicked).toHaveBeenCalledTimes(1);
     expect(onStepClicked).toHaveBeenCalledWith({
-      sectionId: SectionId.getSetUp,
-      stepId: IntroductionSteps.getToKnowElasticSecurity,
-      cardId: GetSetUpCardId.introduction,
-      isExpanded: false,
+      sectionId: SectionId.quickStart,
+      stepId: OverviewSteps.getToKnowElasticSecurity,
+      cardId: QuickStartSectionCardsId.watchTheOverviewVideo,
+      isExpanded: true,
     });
   });
 
-  it('should render step title, badges, and description when expanded', () => {
-    const { getByText, getByTestId } = render(<CardStep {...props} />);
+  it('should render step content when expanded', () => {
+    const mockProps = {
+      ...props,
+      expandedSteps: new Set([
+        QuickStartSectionCardsId.watchTheOverviewVideo,
+      ]) as unknown as Set<StepId>,
+    };
+    const { getByTestId } = render(<CardStep {...mockProps} />);
 
-    const stepTitle = getByText(testStepTitle);
+    const content = getByTestId('mock-step-content');
+
+    expect(content).toBeInTheDocument();
+  });
+
+  it('should not toggle step expansion on click when there is no content', () => {
+    const mockProps = {
+      ...props,
+      stepId: CreateProjectSteps.createFirstProject,
+      cardId: QuickStartSectionCardsId.createFirstProject,
+      finishedSteps: new Set<StepId>([CreateProjectSteps.createFirstProject]),
+      step: { ...createProjectSteps[0], description: undefined, splitPanel: undefined },
+    };
+    const { getByText } = render(<CardStep {...mockProps} />);
+
+    const stepTitle = getByText('Create your first project');
     fireEvent.click(stepTitle);
 
-    const badge1 = getByText('Analytics');
-    const badge2 = getByText('Cloud');
-    const badge3 = getByText('EDR');
-    expect(badge1).toBeInTheDocument();
-    expect(badge2).toBeInTheDocument();
-    expect(badge3).toBeInTheDocument();
-
-    const description1 = getByTestId(`${IntroductionSteps.getToKnowElasticSecurity}-description-0`);
-    const description2 = getByTestId(`${IntroductionSteps.getToKnowElasticSecurity}-description-1`);
-    expect(description1).toBeInTheDocument();
-    expect(description2).toBeInTheDocument();
+    expect(onStepClicked).toHaveBeenCalledTimes(0);
   });
 
-  it('should render expended steps', () => {
-    const { getByTestId } = render(<CardStep {...props} />);
+  it('should not show the step as completed when it is not', () => {
+    const { queryByText } = render(<CardStep {...props} />);
 
-    const splitPanel = getByTestId('split-panel');
-    expect(splitPanel).toBeInTheDocument();
+    const text = queryByText(ALL_DONE_TEXT);
+    expect(text).not.toBeInTheDocument();
   });
 
-  it('should render collapsed steps', () => {
-    const { queryByTestId } = render(<CardStep {...props} expandedSteps={new Set()} />);
+  it('should show the step as completed when it is done', async () => {
+    (fetchRuleManagementFilters as jest.Mock).mockResolvedValue({
+      total: 1,
+    });
+    const mockProps = {
+      ...props,
+      cardId: GetStartedWithAlertsCardsId.enablePrebuiltRules,
+      finishedSteps: new Set<StepId>([EnablePrebuiltRulesSteps.enablePrebuiltRules]),
+      sectionId: SectionId.getStartedWithAlerts,
+      step: enablePrebuildRuleSteps[0],
+    };
+    const { queryByText } = render(<CardStep {...mockProps} />);
 
-    const splitPanel = queryByTestId('split-panel');
-    expect(splitPanel).not.toBeInTheDocument();
-  });
-
-  it('should render check icon when stepId is in finishedStepsByCard', () => {
-    const finishedStepsByCard = new Set([IntroductionSteps.getToKnowElasticSecurity]);
-
-    const { getByTestId } = render(
-      <CardStep {...props} finishedStepsByCard={finishedStepsByCard} />
-    );
-
-    const checkIcon = getByTestId(`${step.id}-icon`);
-    expect(checkIcon.getAttribute('data-euiicon-type')).toEqual('checkInCircleFilled');
+    const text = queryByText(ALL_DONE_TEXT);
+    expect(text).toBeInTheDocument();
   });
 });

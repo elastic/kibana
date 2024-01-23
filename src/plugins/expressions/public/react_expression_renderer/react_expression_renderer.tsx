@@ -8,7 +8,8 @@
 
 import React, { useRef } from 'react';
 import classNames from 'classnames';
-import { EuiLoadingChart, EuiProgress, useEuiTheme } from '@elastic/eui';
+import { PanelLoader } from '@kbn/panel-loader';
+import { EuiProgress, useEuiTheme } from '@elastic/eui';
 import { ExpressionRenderError } from '../types';
 import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
@@ -24,7 +25,6 @@ export interface ReactExpressionRendererProps
     error?: ExpressionRenderError | null
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
@@ -57,7 +57,7 @@ export function ReactExpressionRenderer({
 
   return (
     <div {...dataAttrs} className={classes}>
-      {isEmpty && <EuiLoadingChart mono size="l" />}
+      {isEmpty && <PanelLoader />}
       {isLoading && (
         <EuiProgress size="xs" color="accent" position="absolute" style={{ zIndex: 1 }} />
       )}

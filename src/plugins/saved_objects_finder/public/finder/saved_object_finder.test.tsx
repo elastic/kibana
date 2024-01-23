@@ -203,18 +203,13 @@ describe('SavedObjectsFinder', () => {
       await nextTick();
       const searchBar = wrapper.find(EuiInMemoryTable).prop('search') as EuiSearchBarProps;
       const toolsLeft = searchBar!.toolsLeft;
-      expect(toolsLeft).toMatchInlineSnapshot(
-        `
+      expect(toolsLeft).toMatchInlineSnapshot(`
         <React.Fragment>
-          <EuiButton
-            color="primary"
-            size="m"
-          >
+          <EuiButton>
             Hello
           </EuiButton>
         </React.Fragment>
-      `
-      );
+      `);
     });
   });
 

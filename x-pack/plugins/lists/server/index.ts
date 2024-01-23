@@ -8,9 +8,9 @@
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
-import { ListPlugin } from './plugin';
+import type { ListPlugin } from './plugin';
 
-// exporting these since its required at top level in siem plugin
+// exporting these since it's required at top level in siem plugin
 export { ListClient } from './services/lists/list_client';
 export type {
   CreateExceptionListItemOptions,
@@ -40,5 +40,7 @@ export const config: PluginConfigDescriptor = {
 
 export { ErrorWithStatusCode as ListsErrorWithStatusCode } from './error_with_status_code';
 
-export const plugin = (initializerContext: PluginInitializerContext): ListPlugin =>
-  new ListPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext): Promise<ListPlugin> => {
+  const { ListPlugin } = await import('./plugin');
+  return new ListPlugin(initializerContext);
+};

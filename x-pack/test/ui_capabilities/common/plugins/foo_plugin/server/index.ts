@@ -8,7 +8,7 @@
 import { CoreSetup, Plugin } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesPluginSetupContract } from '@kbn/features-plugin/server';
 
-export const plugin = () => new FooPlugin();
+export const plugin = async () => new FooPlugin();
 
 interface SetupDeps {
   features: FeaturesPluginSetupContract;

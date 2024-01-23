@@ -408,7 +408,7 @@ describe('Options', () => {
     });
 
     describe('idleSocket', () => {
-      it.skip('should timeout if payload sending has too long of an idle period', async () => {
+      it('should timeout if payload sending has too long of an idle period', async () => {
         const { server: innerServer, createRouter } = await server.setup(setupDeps);
         const router = createRouter('/');
 
@@ -420,7 +420,7 @@ describe('Options', () => {
               body: {
                 accepts: ['application/json'],
               },
-              timeout: { idleSocket: 10 },
+              timeout: { idleSocket: 5 },
             },
           },
           async (context, req, res) => {
@@ -2058,7 +2058,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });
@@ -2093,7 +2095,9 @@ describe('registerRouterAfterListening', () => {
 
     const otherRouter = new Router('/test', loggerMock.create(), enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     otherRouter.get({ path: '/afterListening', validate: false }, (context, req, res) => {
       return res.ok({ body: 'hello from other router' });

@@ -13,7 +13,7 @@ import { DataPublicPluginStart, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
   DatasourceFixAction,
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -1594,7 +1594,7 @@ export function getErrorMessages(
         fixAction: errorMessage.fixAction
           ? {
               ...errorMessage.fixAction,
-              newState: async (frame: FrameDatasourceAPI) => ({
+              newState: async (frame: FramePublicAPI) => ({
                 ...state,
                 layers: {
                   ...state.layers,

@@ -14,6 +14,13 @@ export const ADDED_NOTE_TO_TIMELINE = i18n.translate(
   }
 );
 
+export const VIEW_APM_TRACE = i18n.translate(
+  'xpack.securitySolution.assistant.commentActions.viewAPMTraceLabel',
+  {
+    defaultMessage: 'View APM Trace for this message',
+  }
+);
+
 export const ADD_MESSAGE_CONTENT_AS_TIMELINE_NOTE = i18n.translate(
   'xpack.securitySolution.assistant.commentActions.addMessageContentAsTimelineNoteAriaLabel',
   {

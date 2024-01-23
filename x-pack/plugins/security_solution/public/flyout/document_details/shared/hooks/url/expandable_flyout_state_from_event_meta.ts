@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { ExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../../../right';
+import { DocumentDetailsRightPanelKey } from '../../../right';
 
 interface RedirectParams {
   index: string;
@@ -19,14 +18,10 @@ interface RedirectParams {
  * This value can be used to open the flyout either by passing it directly to the flyout api (exposed via ref) or
  * by serializing it to the url & performing a redirect
  */
-export const expandableFlyoutStateFromEventMeta = ({
-  index,
-  eventId,
-  scopeId,
-}: RedirectParams): ExpandableFlyoutContext['panels'] => {
+export const expandableFlyoutStateFromEventMeta = ({ index, eventId, scopeId }: RedirectParams) => {
   return {
     right: {
-      id: RightPanelKey,
+      id: DocumentDetailsRightPanelKey,
       params: {
         id: eventId,
         indexName: index,

@@ -15,23 +15,23 @@ import React, {
   type SetStateAction,
 } from 'react';
 
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-type SignificantTermOrNull = SignificantTerm | null;
+type SignificantItemOrNull = SignificantItem | null;
 type GroupOrNull = GroupTableItem | null;
 
 interface LogRateAnalysisResultsTableRow {
-  pinnedSignificantTerm: SignificantTermOrNull;
-  setPinnedSignificantTerm: Dispatch<SetStateAction<SignificantTermOrNull>>;
+  pinnedSignificantItem: SignificantItemOrNull;
+  setPinnedSignificantItem: Dispatch<SetStateAction<SignificantItemOrNull>>;
   pinnedGroup: GroupOrNull;
   setPinnedGroup: Dispatch<SetStateAction<GroupOrNull>>;
-  selectedSignificantTerm: SignificantTermOrNull;
-  setSelectedSignificantTerm: Dispatch<SetStateAction<SignificantTermOrNull>>;
+  selectedSignificantItem: SignificantItemOrNull;
+  setSelectedSignificantItem: Dispatch<SetStateAction<SignificantItemOrNull>>;
   selectedGroup: GroupOrNull;
   setSelectedGroup: Dispatch<SetStateAction<GroupOrNull>>;
-  currentSelectedSignificantTerm?: SignificantTerm;
+  currentSelectedSignificantItem?: SignificantItem;
   currentSelectedGroup?: GroupTableItem;
   clearAllRowState: () => void;
 }
@@ -42,20 +42,20 @@ export const logRateAnalysisResultsTableRowContext = createContext<
 
 export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) => {
   // State that will be shared with all components
-  const [pinnedSignificantTerm, setPinnedSignificantTerm] = useState<SignificantTermOrNull>(null);
+  const [pinnedSignificantItem, setPinnedSignificantItem] = useState<SignificantItemOrNull>(null);
   const [pinnedGroup, setPinnedGroup] = useState<GroupOrNull>(null);
-  const [selectedSignificantTerm, setSelectedSignificantTerm] =
-    useState<SignificantTermOrNull>(null);
+  const [selectedSignificantItem, setSelectedSignificantItem] =
+    useState<SignificantItemOrNull>(null);
   const [selectedGroup, setSelectedGroup] = useState<GroupOrNull>(null);
 
   // If a row is pinned, still overrule with a potentially hovered row.
-  const currentSelectedSignificantTerm = useMemo(() => {
-    if (selectedSignificantTerm) {
-      return selectedSignificantTerm;
-    } else if (pinnedSignificantTerm) {
-      return pinnedSignificantTerm;
+  const currentSelectedSignificantItem = useMemo(() => {
+    if (selectedSignificantItem) {
+      return selectedSignificantItem;
+    } else if (pinnedSignificantItem) {
+      return pinnedSignificantItem;
     }
-  }, [pinnedSignificantTerm, selectedSignificantTerm]);
+  }, [pinnedSignificantItem, selectedSignificantItem]);
 
   // If a group is pinned, still overrule with a potentially hovered group.
   const currentSelectedGroup = useMemo(() => {
@@ -68,33 +68,33 @@ export const LogRateAnalysisResultsTableRowStateProvider: FC = ({ children }) =>
 
   const contextValue: LogRateAnalysisResultsTableRow = useMemo(
     () => ({
-      pinnedSignificantTerm,
-      setPinnedSignificantTerm,
+      pinnedSignificantItem,
+      setPinnedSignificantItem,
       pinnedGroup,
       setPinnedGroup,
-      selectedSignificantTerm,
-      setSelectedSignificantTerm,
+      selectedSignificantItem,
+      setSelectedSignificantItem,
       selectedGroup,
       setSelectedGroup,
-      currentSelectedSignificantTerm,
+      currentSelectedSignificantItem,
       currentSelectedGroup,
       clearAllRowState: () => {
-        setPinnedSignificantTerm(null);
+        setPinnedSignificantItem(null);
         setPinnedGroup(null);
-        setSelectedSignificantTerm(null);
+        setSelectedSignificantItem(null);
         setSelectedGroup(null);
       },
     }),
     [
-      pinnedSignificantTerm,
-      setPinnedSignificantTerm,
+      pinnedSignificantItem,
+      setPinnedSignificantItem,
       pinnedGroup,
       setPinnedGroup,
-      selectedSignificantTerm,
-      setSelectedSignificantTerm,
+      selectedSignificantItem,
+      setSelectedSignificantItem,
       selectedGroup,
       setSelectedGroup,
-      currentSelectedSignificantTerm,
+      currentSelectedSignificantItem,
       currentSelectedGroup,
     ]
   );

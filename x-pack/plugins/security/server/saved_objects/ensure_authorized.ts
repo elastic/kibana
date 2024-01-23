@@ -6,9 +6,11 @@
  */
 
 import type { SavedObjectsErrorHelpers } from '@kbn/core/server';
-
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
+import type {
+  Actions,
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 export interface EnsureAuthorizedDependencies {
   actions: Actions;
@@ -104,7 +106,10 @@ export async function ensureAuthorized<T extends string>(
 
   // Neither fully nor partially authorized. Bail with error.
   const uniqueUnauthorizedPrivileges = [...missingPrivileges.entries()].reduce(
-    (acc, [, privilegeSet]) => new Set([...acc, ...privilegeSet]),
+    (acc, [, privilegeSet]) => {
+      privilegeSet.forEach((entry) => acc.add(entry));
+      return acc;
+    },
     new Set<string>()
   );
   const targetTypesAndActions = [...uniqueUnauthorizedPrivileges]

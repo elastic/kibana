@@ -11,6 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { type AppMountParameters, AppStatus } from '@kbn/core-application-browser';
 import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { AppContainer } from './app_container';
@@ -211,19 +212,20 @@ describe('AppContainer', () => {
 
   it('should call setIsMounting(false) if mounting throws', async () => {
     const [waitPromise, resolvePromise] = createResolver();
+    const analytics = analyticsServiceMock.createAnalyticsServiceStart();
     const mounter = {
       appBasePath: '/base-path/some-route',
       appRoute: '/some-route',
       unmountBeforeMounting: false,
       exactRoute: false,
-      mount: async ({ element }: AppMountParameters) => {
+      mount: async () => {
         await waitPromise;
         throw new Error(`Mounting failed!`);
       },
     };
 
     const wrapper = mountWithIntl(
-      <KibanaErrorBoundaryProvider>
+      <KibanaErrorBoundaryProvider analytics={analytics}>
         <KibanaErrorBoundary>
           <AppContainer
             appPath={`/app/${appId}`}

@@ -371,9 +371,7 @@ export const serviceDetailRoute = {
           }),
           element: <ProfilingOverview />,
           searchBarOptions: {
-            showTimeComparison: false,
-            showTransactionTypeSelector: false,
-            showQueryInput: false,
+            hidden: true,
           },
         }),
       },

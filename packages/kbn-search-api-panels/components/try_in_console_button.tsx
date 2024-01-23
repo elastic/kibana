@@ -43,7 +43,7 @@ export const TryInConsoleButton = ({
     <EuiButtonEmpty href={consolePreviewLink} iconType="popout" target="_blank" size="s">
       <FormattedMessage
         id="searchApiPanels.welcomeBanner.tryInConsoleButton"
-        defaultMessage="Try in console"
+        defaultMessage="Try in Console"
       />
     </EuiButtonEmpty>
   );

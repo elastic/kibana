@@ -10,6 +10,7 @@ import type {
   GetAgentsResponse,
   GetInfoResponse,
   GetPackagePoliciesResponse,
+  GetOneAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import {
   agentRouteService,
@@ -26,6 +27,7 @@ import type {
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services/routes';
 import type { GetUninstallTokensMetadataResponse } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import type { UninstallToken } from '@kbn/fleet-plugin/common/types/models/uninstall_token';
+import { logger } from './logger';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { request } from './common';
 
@@ -81,15 +83,20 @@ export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
 
 export const createAgentPolicyTask = (
   version: string,
-  policyPrefix?: string
+  policyPrefix?: string,
+  timeout?: number
 ): Cypress.Chainable<IndexedFleetEndpointPolicyResponse> => {
   const policyName = `${policyPrefix || 'Reassign'} ${Math.random().toString(36).substring(2, 7)}`;
 
-  return cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-    policyName,
-    endpointPackageVersion: version,
-    agentPolicyName: policyName,
-  });
+  return cy.task<IndexedFleetEndpointPolicyResponse>(
+    'indexFleetEndpointPolicy',
+    {
+      policyName,
+      endpointPackageVersion: version,
+      agentPolicyName: policyName,
+    },
+    { timeout: timeout ?? 5 * 60 * 1000 }
+  );
 };
 
 export const enableAgentTamperProtectionFeatureFlagInPolicy = (agentPolicyId: string) => {
@@ -133,21 +140,33 @@ export const unenrollAgent = (agentId: string): Cypress.Chainable<boolean> => {
   });
 };
 
-export const changeAgentPolicy = (
+export const fetchFleetAgentPolicy = (
+  agentPolicyId: string
+): Cypress.Chainable<GetOneAgentPolicyResponse['item']> => {
+  return request<GetOneAgentPolicyResponse>({
+    method: 'GET',
+    url: agentPolicyRouteService.getInfoPath(agentPolicyId),
+  }).then((res) => res.body.item);
+};
+
+export const reAssignFleetAgentToPolicy = (
   agentId: string,
-  policyId: string,
-  policyRevision: number
+  policyId: string
 ): Cypress.Chainable<boolean> => {
-  return request({
-    method: 'POST',
-    url: agentRouteService.getReassignPath(agentId),
-    body: {
-      policy_id: policyId,
-    },
-    headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
-  }).then(() => {
-    return waitForHasAgentPolicyChanged(agentId, policyId, policyRevision);
-  });
+  return fetchFleetAgentPolicy(policyId)
+    .then((agentPolicy) => {
+      return request({
+        method: 'POST',
+        url: agentRouteService.getReassignPath(agentId),
+        body: {
+          policy_id: policyId,
+        },
+        headers: { 'Elastic-Api-Version': API_VERSIONS.public.v1 },
+      }).then(() => agentPolicy);
+    })
+    .then((agentPolicy) => {
+      return waitForHasAgentPolicyChanged(agentId, policyId, agentPolicy.revision);
+    });
 };
 
 // only used in "real" endpoint tests not in mocked ones
@@ -200,9 +219,11 @@ const waitForIsAgentUnenrolled = (agentId: string): Cypress.Chainable<boolean> =
 const waitForHasAgentPolicyChanged = (
   agentId: string,
   policyId: string,
+  /** The minimum revision number that the agent must report before it is considered "changed" */
   policyRevision: number
 ): Cypress.Chainable<boolean> => {
   let isPolicyUpdated = false;
+
   return cy
     .waitUntil(
       () => {
@@ -213,19 +234,24 @@ const waitForHasAgentPolicyChanged = (
             'elastic-api-version': API_VERSIONS.public.v1,
           },
         }).then((response) => {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          const { status, policy_revision, policy_id } = response.body.item;
+
+          logger.debug('Checking policy data:', { status, policy_revision, policy_id });
+
           if (
-            response.body.item.status !== 'updating' &&
-            response.body.item?.policy_revision === policyRevision &&
-            response.body.item?.policy_id === policyId
+            status !== 'updating' &&
+            (policy_revision ?? 0) >= policyRevision &&
+            policy_id === policyId
           ) {
             isPolicyUpdated = true;
-            return true;
           }
 
-          return false;
+          return cy.wrap(isPolicyUpdated);
         });
       },
-      { timeout: 120000 }
+      { timeout: 120000 },
+      `Wait for Fleet Agent to report policy id [${policyId}] with revision [${policyRevision}]`
     )
     .then(() => {
       return isPolicyUpdated;

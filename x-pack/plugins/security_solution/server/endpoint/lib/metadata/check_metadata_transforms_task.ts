@@ -19,10 +19,7 @@ import type {
 import { throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
 import { ElasticsearchAssetType, FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 import type { EndpointAppContext } from '../../types';
-import {
-  METADATA_TRANSFORMS_PATTERN,
-  METADATA_TRANSFORMS_PATTERN_V2,
-} from '../../../../common/endpoint/constants';
+import { METADATA_TRANSFORMS_PATTERN } from '../../../../common/endpoint/constants';
 import { WARNING_TRANSFORM_STATES } from '../../../../common/constants';
 import { wrapErrorIfNeeded } from '../../utils';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
@@ -50,6 +47,7 @@ export class CheckMetadataTransformsTask {
   private endpointAppContext: EndpointAppContext;
   private logger: Logger;
   private wasStarted: boolean = false;
+  private taskManagerStart: TaskManagerStartContract | undefined;
 
   constructor(setupContract: CheckMetadataTransformsTaskSetupContract) {
     const { endpointAppContext, core, taskManager } = setupContract;
@@ -79,6 +77,7 @@ export class CheckMetadataTransformsTask {
     }
 
     this.wasStarted = true;
+    this.taskManagerStart = taskManager;
 
     try {
       await taskManager.ensureScheduled({
@@ -119,14 +118,17 @@ export class CheckMetadataTransformsTask {
       return { state: taskInstance.state };
     }
 
-    const transformName = isEndpointPackageV2(installation.version)
-      ? METADATA_TRANSFORMS_PATTERN_V2
-      : METADATA_TRANSFORMS_PATTERN;
+    if (isEndpointPackageV2(installation.version)) {
+      this.logger.debug('endpoint package spec v2 detected, stopping health checks');
+      await this.taskManagerStart?.bulkDisable([taskInstance.id]);
+      return { state: taskInstance.state };
+    }
+
     let transformStatsResponse: TransportResult<TransformGetTransformStatsResponse>;
     try {
       transformStatsResponse = await esClient?.transform.getTransformStats(
         {
-          transform_id: transformName,
+          transform_id: METADATA_TRANSFORMS_PATTERN,
         },
         { meta: true }
       );

@@ -47,6 +47,25 @@ properties:
     type: string
   install_format_schema_version:
     type: string
+  latest_install_failed_attempts:
+    description: Latest failed install errors
+    type: array
+    items:
+      type: object
+      properties:
+        created_at:
+          type: string
+        target_version:
+          type: string
+        error:
+          type: object
+          properties:
+            name:
+              type: string
+            message:
+              type: string
+            stack:
+              type: string
   verification_status:
     type: string
     enum:
@@ -86,3 +105,4 @@ required:
   - install_started_at
   - install_source
   - verification_status
+  - latest_install_failed_attempts

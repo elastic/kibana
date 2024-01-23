@@ -177,7 +177,7 @@ export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
 };
 
-export const stringifyToURL = (parsedParams: Record<string, string>) =>
+export const stringifyToURL = (parsedParams: Record<string, string> | URLSearchParams) =>
   new URLSearchParams(parsedParams).toString();
 export const parseURL = (queryString: string) =>
   Object.fromEntries(new URLSearchParams(queryString));

@@ -7,7 +7,6 @@
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { AlertingBuiltinsPlugin } from './plugin';
 export { ID as INDEX_THRESHOLD_ID } from './rule_types/index_threshold/rule_type';
 
 export const configSchema = schema.object({});
@@ -34,4 +33,7 @@ export const config: PluginConfigDescriptor<Config> = {
   ],
 };
 
-export const plugin = (ctx: PluginInitializerContext) => new AlertingBuiltinsPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { AlertingBuiltinsPlugin } = await import('./plugin');
+  return new AlertingBuiltinsPlugin(ctx);
+};

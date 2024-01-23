@@ -7,11 +7,13 @@
 import qs from 'query-string';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { TopNType } from '@kbn/profiling-utils';
 
 export interface StacktracesLocatorParams extends SerializableRecord {
   kuery?: string;
   rangeFrom?: string;
   rangeTo?: string;
+  type?: TopNType;
 }
 
 export type StacktracesLocator = LocatorPublic<StacktracesLocatorParams>;
@@ -19,11 +21,16 @@ export type StacktracesLocator = LocatorPublic<StacktracesLocatorParams>;
 export class StacktracesLocatorDefinition implements LocatorDefinition<StacktracesLocatorParams> {
   public readonly id = 'stacktracesLocator';
 
-  public readonly getLocation = async ({ rangeFrom, rangeTo, kuery }: StacktracesLocatorParams) => {
+  public readonly getLocation = async ({
+    rangeFrom,
+    rangeTo,
+    kuery,
+    type = TopNType.Threads,
+  }: StacktracesLocatorParams) => {
     const params = { rangeFrom, rangeTo, kuery };
     return {
       app: 'profiling',
-      path: `/stacktraces/threads?${qs.stringify(params)}`,
+      path: `/stacktraces/${type}?${qs.stringify(params)}`,
       state: {},
     };
   };

@@ -223,20 +223,24 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return Array.from(this.actionTypes)
-      .filter(([_, actionType]) =>
-        featureId ? actionType.supportedFeatureIds.includes(featureId) : true
-      )
-      .map(([actionTypeId, actionType]) => ({
-        id: actionTypeId,
-        name: actionType.name,
-        minimumLicenseRequired: actionType.minimumLicenseRequired,
-        enabled: this.isActionTypeEnabled(actionTypeId),
-        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-        supportedFeatureIds: actionType.supportedFeatureIds,
-        isSystemActionType: !!actionType.isSystemActionType,
-      }));
+    return (
+      Array.from(this.actionTypes)
+        .filter(([_, actionType]) =>
+          featureId ? actionType.supportedFeatureIds.includes(featureId) : true
+        )
+        // Temporarily don't return SentinelOne connector for Security Solution Rule Actions
+        .filter(([actionTypeId]) => (featureId ? actionTypeId !== '.sentinelone' : true))
+        .map(([actionTypeId, actionType]) => ({
+          id: actionTypeId,
+          name: actionType.name,
+          minimumLicenseRequired: actionType.minimumLicenseRequired,
+          enabled: this.isActionTypeEnabled(actionTypeId),
+          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+          supportedFeatureIds: actionType.supportedFeatureIds,
+          isSystemActionType: !!actionType.isSystemActionType,
+        }))
+    );
   }
 
   /**

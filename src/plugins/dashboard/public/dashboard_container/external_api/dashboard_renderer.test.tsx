@@ -11,14 +11,16 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { NotFoundPrompt } from '@kbn/shared-ux-prompt-not-found';
+import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 
 import { DashboardContainerFactory } from '..';
 import { DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardRenderer } from './dashboard_renderer';
 import { pluginServices } from '../../services/plugin_services';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { DashboardContainer } from '../embeddable/dashboard_container';
 import { DashboardCreationOptions } from '../embeddable/dashboard_container_factory';
-import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
+import { setStubKibanaServices as setPresentationPanelMocks } from '@kbn/presentation-panel-plugin/public/mocks';
 
 describe('dashboard renderer', () => {
   let mockDashboardContainer: DashboardContainer;
@@ -37,6 +39,7 @@ describe('dashboard renderer', () => {
     pluginServices.getServices().embeddable.getEmbeddableFactory = jest
       .fn()
       .mockReturnValue(mockDashboardFactory);
+    setPresentationPanelMocks();
   });
 
   test('calls create method on the Dashboard embeddable factory', async () => {
@@ -168,6 +171,9 @@ describe('dashboard renderer', () => {
   });
 
   test('renders a 404 page when initial dashboard creation returns a savedObjectNotFound error', async () => {
+    // mock embeddable dependencies so that the embeddable panel renders
+    setStubKibanaServices();
+
     // ensure that the first attempt at creating a dashboard results in a 404
     const mockErrorEmbeddable = {
       error: new SavedObjectNotFound('dashboard', 'gat em'),

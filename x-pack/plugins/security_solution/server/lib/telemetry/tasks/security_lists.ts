@@ -6,10 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
@@ -21,9 +18,10 @@ import type { ESClusterInfo, ESLicense } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  tlog,
   createTaskMetric,
   formatValueListMetaData,
+  createUsageCounterLabel,
+  tlog,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -43,10 +41,16 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       sender: ITelemetryEventsSender,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const usageCollector = sender.getTelemetryUsageCluster();
+
+      const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
+
       const startTime = Date.now();
       const taskName = 'Security Solution Lists Telemetry';
       try {
-        let count = 0;
+        let trustedApplicationsCount = 0;
+        let endpointExceptionsCount = 0;
+        let endpointEventFiltersCount = 0;
 
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
@@ -72,8 +76,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_TRUSTED_APPLICATION
           );
-          tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
-          count += trustedAppsJson.length;
+          trustedApplicationsCount = trustedAppsJson.length;
+          tlog(logger, `Trusted Apps: ${trustedApplicationsCount}`);
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix),
+            counterType: 'trusted_apps_count',
+            incrementBy: trustedApplicationsCount,
+          });
 
           const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -91,8 +101,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EXCEPTION
           );
-          tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
-          count += epExceptionsJson.length;
+          endpointExceptionsCount = epExceptionsJson.length;
+          tlog(logger, `EP Exceptions: ${endpointExceptionsCount}`);
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix),
+            counterType: 'endpoint_exceptions_count',
+            incrementBy: endpointExceptionsCount,
+          });
 
           const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -102,7 +118,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Event Filters
 
-        const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+        const epFilters = await receiver.fetchEndpointList(ENDPOINT_ARTIFACT_LISTS.eventFilters.id);
         if (epFilters?.data) {
           const epFiltersJson = templateExceptionList(
             epFilters.data,
@@ -110,8 +126,14 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EVENT_FILTER
           );
-          tlog(logger, `EP Event Filters: ${epFiltersJson}`);
-          count += epFiltersJson.length;
+          endpointEventFiltersCount = epFiltersJson.length;
+          tlog(logger, `EP Event Filters: ${endpointEventFiltersCount}`);
+
+          usageCollector?.incrementCounter({
+            counterName: createUsageCounterLabel(usageLabelPrefix),
+            counterType: 'endpoint_event_filters_count',
+            incrementBy: endpointEventFiltersCount,
+          });
 
           const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
           for (const batch of batches) {
@@ -128,14 +150,13 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           clusterInfo,
           licenseInfo
         );
-        tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return count;
+        return trustedApplicationsCount + endpointExceptionsCount + endpointEventFiltersCount;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),

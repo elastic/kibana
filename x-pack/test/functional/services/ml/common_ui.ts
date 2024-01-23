@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
-import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 import type { CanvasElementColorStats } from '../canvas_element';
@@ -363,15 +363,21 @@ export function MachineLearningCommonUIProvider({
       });
     },
 
-    async selectButtonGroupValue(inputTestSubj: string, value: string) {
+    async selectButtonGroupValue(inputTestSubj: string, value: string, valueTestSubj?: string) {
       await retry.tryForTime(5000, async () => {
         // The input element can not be clicked directly.
         // Instead, we need to click the corresponding label
 
-        const fieldSetElement = await testSubjects.find(inputTestSubj);
+        let labelElement: WebElementWrapper;
 
-        const labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
-        await labelElement.click();
+        if (valueTestSubj) {
+          await testSubjects.click(valueTestSubj);
+          labelElement = await testSubjects.find(valueTestSubj);
+        } else {
+          const fieldSetElement = await testSubjects.find(inputTestSubj);
+          labelElement = await fieldSetElement.findByCssSelector(`label[title="${value}"]`);
+          await labelElement.click();
+        }
 
         const labelClasses = await labelElement.getAttribute('class');
         expect(labelClasses).to.contain(

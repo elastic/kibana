@@ -5,10 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { PropsWithChildren } from 'react';
-import { type UserContentCommonSchema } from '@kbn/content-management-table-list-view-table';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { DashboardApplicationService } from '../services/application/types';
+import type { PropsWithChildren } from 'react';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { ViewMode } from '@kbn/embeddable-plugin/public';
+import type { DashboardApplicationService } from '../services/application/types';
 
 export type DashboardListingProps = PropsWithChildren<{
   disableCreateDashboardButton?: boolean;

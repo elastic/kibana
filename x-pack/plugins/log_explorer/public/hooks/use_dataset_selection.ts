@@ -8,20 +8,20 @@
 import { useSelector } from '@xstate/react';
 import { useCallback } from 'react';
 import { DatasetSelectionChange } from '../../common/dataset_selection';
-import { LogExplorerProfileStateService } from '../state_machines/log_explorer_profile';
+import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
 
 export const useDatasetSelection = (
-  logExplorerProfileStateService: LogExplorerProfileStateService
+  logExplorerControllerStateService: LogExplorerControllerStateService
 ) => {
-  const datasetSelection = useSelector(logExplorerProfileStateService, (state) => {
+  const datasetSelection = useSelector(logExplorerControllerStateService, (state) => {
     return state.context.datasetSelection;
   });
 
   const handleDatasetSelectionChange: DatasetSelectionChange = useCallback(
     (data) => {
-      logExplorerProfileStateService.send({ type: 'UPDATE_DATASET_SELECTION', data });
+      logExplorerControllerStateService.send({ type: 'UPDATE_DATASET_SELECTION', data });
     },
-    [logExplorerProfileStateService]
+    [logExplorerControllerStateService]
   );
 
   return { datasetSelection, handleDatasetSelectionChange };

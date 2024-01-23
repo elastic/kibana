@@ -6,7 +6,6 @@
  */
 
 export const DEFAULT_MAX_TABLE_QUERY_SIZE = 10000;
-export const DEFAULT_DARK_MODE = 'theme:darkMode';
 export const OSQUERY_INTEGRATION_NAME = 'osquery_manager';
 export const BASE_PATH = '/app/osquery';
 
@@ -29,3 +28,8 @@ export const API_VERSIONS = {
     v1: '1',
   },
 };
+
+export enum QUERY_TIMEOUT {
+  DEFAULT = 60, // 60 seconds
+  MAX = 60 * 15,
+}

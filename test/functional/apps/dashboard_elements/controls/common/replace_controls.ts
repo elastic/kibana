@@ -26,9 +26,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const DASHBOARD_NAME = 'Test Replace Controls';
 
-  const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
+  const changeFieldType = async (controlId: string, newField: string, type: string) => {
     await dashboardControls.editExistingControl(controlId);
-    await dashboardControls.controlsEditorSetfield(newField, expectedType);
+    await dashboardControls.controlsEditorSetfield(newField);
+    await dashboardControls.controlsEditorSetControlType(type);
     await dashboardControls.controlEditorSave();
   };
 

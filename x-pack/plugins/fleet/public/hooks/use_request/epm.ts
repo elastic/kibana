@@ -82,15 +82,21 @@ export const useGetPackages = (query: GetPackagesRequest['query'] = {}) => {
   });
 };
 
-export const useGetPackagesQuery = (query: GetPackagesRequest['query']) => {
-  return useQuery<GetPackagesResponse, RequestError>(['get-packages', query], () =>
-    sendRequestForRq<GetPackagesResponse>({
-      path: epmRouteService.getListPath(),
-      method: 'get',
-      version: API_VERSIONS.public.v1,
-      query,
-    })
-  );
+export const useGetPackagesQuery = (
+  query: GetPackagesRequest['query'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetPackagesResponse, RequestError>({
+    queryKey: ['get-packages', query],
+    queryFn: () =>
+      sendRequestForRq<GetPackagesResponse>({
+        path: epmRouteService.getListPath(),
+        method: 'get',
+        version: API_VERSIONS.public.v1,
+        query,
+      }),
+    enabled: options?.enabled,
+  });
 };
 
 export const sendGetPackages = (query: GetPackagesRequest['query'] = {}) => {

@@ -9,7 +9,7 @@ import { useAddToCase } from './use_add_to_case';
 import React, { useEffect } from 'react';
 import { render } from '../rtl_helpers';
 import { EuiButton } from '@elastic/eui';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
 
 describe('useAddToCase', function () {

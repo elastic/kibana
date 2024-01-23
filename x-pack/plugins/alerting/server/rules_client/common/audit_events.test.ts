@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { RuleAuditAction, ruleAuditEvent } from './audit_events';
 
 describe('#ruleAuditEvent', () => {
@@ -13,7 +14,7 @@ describe('#ruleAuditEvent', () => {
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
         outcome: 'unknown',
-        savedObject: { type: 'alert', id: 'ALERT_ID' },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'ALERT_ID' },
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -43,7 +44,7 @@ describe('#ruleAuditEvent', () => {
     expect(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: 'alert', id: 'ALERT_ID' },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'ALERT_ID' },
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -73,7 +74,7 @@ describe('#ruleAuditEvent', () => {
     expect(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: 'alert', id: 'ALERT_ID' },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: 'ALERT_ID' },
         error: new Error('ERROR_MESSAGE'),
       })
     ).toMatchInlineSnapshot(`

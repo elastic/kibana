@@ -40,7 +40,11 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  RuleCreationValidConsumer,
+  ruleDetailsRoute as commonRuleDetailsRoute,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
@@ -133,6 +137,7 @@ export interface RulesListProps {
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 export const percentileFields = {
@@ -173,6 +178,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -1004,6 +1010,7 @@ export const RulesList = ({
               ruleTypeRegistry={ruleTypeRegistry}
               ruleTypeIndex={ruleTypesState.data}
               onSave={refreshRules}
+              initialSelectedConsumer={initialSelectedConsumer}
             />
           </Suspense>
         )}

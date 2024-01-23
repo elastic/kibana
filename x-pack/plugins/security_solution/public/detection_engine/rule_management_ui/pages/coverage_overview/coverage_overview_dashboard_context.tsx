@@ -15,7 +15,7 @@ import React, {
 } from 'react';
 import { invariant } from '../../../../../common/utils/invariant';
 import {
-  BulkActionType,
+  BulkActionTypeEnum,
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
 } from '../../../../../common/api/detection_engine';
@@ -114,7 +114,7 @@ export const CoverageOverviewDashboardContextProvider = ({
 
   const enableAllDisabled = useCallback(
     async (ruleIds: string[]) => {
-      await executeBulkAction({ type: BulkActionType.enable, ids: ruleIds });
+      await executeBulkAction({ type: BulkActionTypeEnum.enable, ids: ruleIds });
     },
     [executeBulkAction]
   );

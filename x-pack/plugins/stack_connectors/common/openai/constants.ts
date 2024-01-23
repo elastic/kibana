@@ -17,6 +17,7 @@ export const OPENAI_CONNECTOR_ID = '.gen-ai';
 export enum SUB_ACTION {
   RUN = 'run',
   INVOKE_AI = 'invokeAI',
+  INVOKE_STREAM = 'invokeStream',
   STREAM = 'stream',
   DASHBOARD = 'getDashboard',
   TEST = 'test',

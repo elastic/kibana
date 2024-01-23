@@ -13,11 +13,11 @@ import { createBrowserHistory, History } from 'history';
 
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpSetup, InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -46,7 +46,7 @@ import {
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
 
 export interface SetupDeps {
-  http: HttpSetup;
+  http: InternalHttpSetup;
   analytics: AnalyticsServiceSetup;
   history?: History<any>;
   /** Used to redirect to external urls */
@@ -54,7 +54,8 @@ export interface SetupDeps {
 }
 
 export interface StartDeps {
-  http: HttpStart;
+  http: InternalHttpStart;
+  analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
@@ -225,6 +226,7 @@ export class ApplicationService {
   }
 
   public async start({
+    analytics,
     http,
     overlays,
     theme,
@@ -364,6 +366,7 @@ export class ApplicationService {
         }
         return (
           <AppRouter
+            analytics={analytics}
             history={this.history}
             theme$={theme.theme$}
             mounters={availableMounters}

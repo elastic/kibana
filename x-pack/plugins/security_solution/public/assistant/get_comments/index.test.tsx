@@ -9,43 +9,47 @@ import { getComments } from '.';
 import type { ConversationRole } from '@kbn/elastic-assistant/impl/assistant_context/types';
 
 const user: ConversationRole = 'user';
+const currentConversation = {
+  apiConfig: {},
+  id: '1',
+  messages: [
+    {
+      role: user,
+      content: 'Hello {name}',
+      timestamp: '2022-01-01',
+      isError: false,
+    },
+  ],
+};
+const showAnonymizedValues = false;
+const testProps = {
+  amendMessage: jest.fn(),
+  regenerateMessage: jest.fn(),
+  isFetchingResponse: false,
+  currentConversation,
+  showAnonymizedValues,
+};
 describe('getComments', () => {
   it('Does not add error state message has no error', () => {
-    const currentConversation = {
-      apiConfig: {},
-      id: '1',
-      messages: [
-        {
-          role: user,
-          content: 'Hello {name}',
-          timestamp: '2022-01-01',
-          isError: false,
-        },
-      ],
-    };
-    const lastCommentRef = { current: null };
-    const showAnonymizedValues = false;
-
-    const result = getComments({ currentConversation, lastCommentRef, showAnonymizedValues });
+    const result = getComments(testProps);
     expect(result[0].eventColor).toEqual(undefined);
   });
   it('Adds error state when message has error', () => {
-    const currentConversation = {
-      apiConfig: {},
-      id: '1',
-      messages: [
-        {
-          role: user,
-          content: 'Hello {name}',
-          timestamp: '2022-01-01',
-          isError: true,
-        },
-      ],
-    };
-    const lastCommentRef = { current: null };
-    const showAnonymizedValues = false;
-
-    const result = getComments({ currentConversation, lastCommentRef, showAnonymizedValues });
+    const result = getComments({
+      ...testProps,
+      currentConversation: {
+        apiConfig: {},
+        id: '1',
+        messages: [
+          {
+            role: user,
+            content: 'Hello {name}',
+            timestamp: '2022-01-01',
+            isError: true,
+          },
+        ],
+      },
+    });
     expect(result[0].eventColor).toEqual('danger');
   });
 });

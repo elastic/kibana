@@ -21,6 +21,7 @@ export interface State {
   initialItems: ExceptionsBuilderExceptionItem[];
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
   newComment: string;
+  commentErrorExists: boolean;
   addExceptionToRadioSelection: string;
   itemConditionValidationErrorExists: boolean;
   closeSingleAlert: boolean;
@@ -40,6 +41,7 @@ export const initialState: State = {
   exceptionItems: [],
   exceptionItemMeta: { name: '' },
   newComment: '',
+  commentErrorExists: false,
   itemConditionValidationErrorExists: false,
   closeSingleAlert: false,
   bulkCloseAlerts: false,
@@ -75,6 +77,10 @@ export type Action =
   | {
       type: 'setComment';
       comment: string;
+    }
+  | {
+      type: 'setCommentError';
+      errorExists: boolean;
     }
   | {
       type: 'setCloseSingleAlert';
@@ -127,6 +133,7 @@ export type Action =
 
 export const createExceptionItemsReducer =
   () =>
+  /* eslint complexity: ["error", 21]*/
   (state: State, action: Action): State => {
     switch (action.type) {
       case 'setExceptionItemMeta': {
@@ -170,6 +177,14 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           newComment: comment,
+        };
+      }
+      case 'setCommentError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          commentErrorExists: errorExists,
         };
       }
       case 'setCloseSingleAlert': {

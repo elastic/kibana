@@ -45,9 +45,6 @@ export default defineCypressConfig({
   experimentalStudio: true,
 
   env: {
-    'cypress-react-selector': {
-      root: '#osquery-app',
-    },
     grepFilterSpecs: true,
     grepTags: '@ess',
     grepOmitFiltered: true,

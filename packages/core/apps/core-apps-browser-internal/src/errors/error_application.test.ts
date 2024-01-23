@@ -22,7 +22,7 @@ describe('renderApp', () => {
   let unmount: () => void;
 
   beforeEach(() => {
-    basePath = new BasePath();
+    basePath = new BasePath({ basePath: '' });
     element = document.createElement('div');
     history = createMemoryHistory();
     unmount = renderApp(

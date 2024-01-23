@@ -693,17 +693,9 @@
             "label": "setup",
             "description": [],
             "signature": [
-              "(config: ",
-              {
-                "pluginId": "@kbn/core-http-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                "section": "def-common.HttpConfig",
-                "text": "HttpConfig"
-              },
-              ", executionContext?: ",
-              "IExecutionContext",
-              " | undefined) => Promise<",
+              "({ config$, executionContext, }: ",
+              "HttpServerSetupOptions",
+              ") => Promise<",
               "HttpServerSetup",
               ">"
             ],
@@ -716,37 +708,15 @@
                 "id": "def-common.HttpServer.setup.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "config",
+                "label": "{\n    config$,\n    executionContext,\n  }",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-http-server-internal",
-                    "scope": "common",
-                    "docId": "kibKbnCoreHttpServerInternalPluginApi",
-                    "section": "def-common.HttpConfig",
-                    "text": "HttpConfig"
-                  }
+                  "HttpServerSetupOptions"
                 ],
                 "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/core-http-server-internal",
-                "id": "def-common.HttpServer.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "executionContext",
-                "description": [],
-                "signature": [
-                  "IExecutionContext",
-                  " | undefined"
-                ],
-                "path": "packages/core/http/core-http-server-internal/src/http_server.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []

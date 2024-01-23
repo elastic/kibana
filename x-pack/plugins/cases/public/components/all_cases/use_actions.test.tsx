@@ -6,8 +6,12 @@
  */
 
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
+import {
+  waitForEuiPopoverOpen,
+  waitForEuiContextMenuPanelTransition,
+} from '@elastic/eui/lib/test/rtl';
 
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
@@ -43,6 +47,7 @@ describe('useActions', () => {
           "align": "right",
           "name": "Actions",
           "render": [Function],
+          "width": "100px",
         },
       }
     `);
@@ -68,13 +73,12 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(res.getByText('Actions')).toBeInTheDocument();
-      expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-    });
+    expect(res.getByText('Actions')).toBeInTheDocument();
+    expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+    expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
   });
 
   it('change the status of the case', async () => {
@@ -88,20 +92,14 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-    });
+    userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
 
-    userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
-      skipPointerEventsCheck: true,
-    });
-
-    await waitFor(() => {
-      expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-status-in-progress')).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
-    });
+    expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-status-in-progress')).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
 
     userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
 
@@ -121,21 +119,15 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
-    });
+    userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`));
+    await waitForEuiContextMenuPanelTransition();
 
-    userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`), undefined, {
-      skipPointerEventsCheck: true,
-    });
-
-    await waitFor(() => {
-      expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
-      expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
-    });
+    expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
+    expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
 
     userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
 
@@ -162,14 +154,9 @@ describe('useActions', () => {
     const res = appMockRender.render(comp);
 
     userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+    await waitForEuiPopoverOpen();
 
-    await waitFor(() => {
-      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-    });
-
-    userEvent.click(res.getByTestId('cases-action-copy-id'), undefined, {
-      skipPointerEventsCheck: true,
-    });
+    userEvent.click(res.getByTestId('cases-action-copy-id'));
 
     expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
 
@@ -190,14 +177,9 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      });
-
-      userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
@@ -219,22 +201,15 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-      });
-
-      userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(res.getByTestId('cases-bulk-action-delete'));
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      userEvent.click(res.getByTestId('confirmModalCancelButton'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(res.getByTestId('confirmModalCancelButton'));
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
     });
@@ -252,14 +227,9 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-tags')).toBeInTheDocument();
-      });
-
-      userEvent.click(res.getByTestId('cases-bulk-action-tags'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(res.getByTestId('cases-bulk-action-tags'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
@@ -292,14 +262,9 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-assignees')).toBeInTheDocument();
-      });
-
-      userEvent.click(res.getByTestId('cases-bulk-action-assignees'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
@@ -333,14 +298,13 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-        expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-        expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
-        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-      });
+      expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
     });
 
     it('shows the correct actions with no delete permissions', async () => {
@@ -353,14 +317,13 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
-        expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
-        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-        expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
-        expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
-      });
+      expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+      expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+      expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
     });
 
     it('shows the correct actions with only delete permissions', async () => {
@@ -373,14 +336,13 @@ describe('useActions', () => {
       const res = appMockRender.render(comp);
 
       userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+      await waitForEuiPopoverOpen();
 
-      await waitFor(() => {
-        expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
-        expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
-        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-        expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
-      });
+      expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+      expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
     });
 
     it('returns null if the user does not have update or delete permissions', async () => {

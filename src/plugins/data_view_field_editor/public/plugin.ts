@@ -55,8 +55,4 @@ export class IndexPatternFieldEditorPlugin
       DeleteRuntimeFieldProvider: getDeleteFieldProvider(openDeleteModal),
     };
   }
-
-  public stop() {
-    return {};
-  }
 }

@@ -23,11 +23,10 @@ export class AllDatasetsLocatorDefinition implements LocatorDefinition<AllDatase
 
   public readonly getLocation = (params: AllDatasetsLocatorParams) => {
     const { useHash } = this.deps;
-    const index = AllDatasetSelection.create().toDataviewSpec().id;
 
     return constructLocatorPath({
+      datasetSelection: AllDatasetSelection.create().toPlainSelection(),
       locatorParams: params,
-      index,
       useHash,
     });
   };

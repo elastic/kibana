@@ -8,7 +8,6 @@
 
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { configSchema, PieConfig } from '../config';
-import { VisTypePieServerPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<PieConfig> = {
   exposeToBrowser: {
@@ -17,5 +16,7 @@ export const config: PluginConfigDescriptor<PieConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new VisTypePieServerPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypePieServerPlugin } = await import('./plugin');
+  return new VisTypePieServerPlugin(initializerContext);
+};

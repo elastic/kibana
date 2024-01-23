@@ -34,7 +34,7 @@ export async function getAllLocations({
       throttling,
       allLocations: [
         ...publicLocations,
-        ...toClientContract({ locations: privateLocations }, agentPolicies).locations,
+        ...toClientContract({ locations: privateLocations }, agentPolicies),
       ],
     };
   } catch (e) {

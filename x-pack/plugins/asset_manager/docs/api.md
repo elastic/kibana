@@ -41,7 +41,7 @@ publicMethodA(...options: MethodAPublicOptions)
       injects some internal dependencies from the plugin's config on your behalf
 ```
 
-The public and server clientss are both accessible to plugin dependants, but the REST API is NOT.
+The public and server clients are both accessible to plugin dependants, but the REST API is NOT.
 
 ### Required dependency setup
 
@@ -175,14 +175,40 @@ Get a list of host assets found within a specified time range.
 | :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
 | from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
 | to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
+| filters   | object          | no        | key/value pairs filtering the assets returned. See [supported filters](https://github.com/klacabane/kibana/blob/main/x-pack/plugins/asset_manager/common/types_api.ts#L168-L178) |
+
+**Example**
+
+```js
+getHosts({
+    from: '2023-12-04T09:42:00.000Z',
+    to: '2023-12-04T09:44:00.000Z',
+    filters: {
+        'cloud.provider': 'gcp'
+    }
+})
+```
 
 **Response**
 
 ```json
 {
-  "hosts": [
-    ...found host assets
-  ]
+    "hosts": [
+        {
+            "@timestamp": "2023-12-04T09:42:52.538Z",
+            "asset.kind": "host",
+            "asset.id": "gcp-host-2zze1241",
+            "asset.name": "gcp-host-2zze1241",
+            "asset.ean": "host:gcp-host-2zze1241",
+            "cloud.provider": "gcp",
+            "cloud.instance.id": "235111598995020799",
+            "cloud.service.name": "GCE",
+            "cloud.region": "us-central1",
+            "asset.children": [
+                "pod:3ca933f5-effa-47f6-b991-fa1b528cc2e4"
+            ]
+        }
+    ]
 }
 ```
 
@@ -194,14 +220,159 @@ Get a list of service assets found within a specified time range.
 | :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
 | from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
 | to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
-| parent    | string          | no        | EAN value for a given parent service to filter services by             |
+| filters   | object          | no        | key/value pairs filtering the assets returned. See [supported filters](https://github.com/klacabane/kibana/blob/main/x-pack/plugins/asset_manager/common/types_api.ts#L168-L178) |
+
+**Example**
+
+```js
+getServices({
+    from: '2023-12-04T09:42:00.000Z',
+    to: '2023-12-04T09:44:00.000Z'
+})
+```
 
 **Response**
 
 ```json
 {
-  "services": [
-    ...found service assets
-  ]
+    "services": [
+        {
+            "@timestamp": "2023-12-03T09:44:00.000Z",
+            "asset.kind": "service",
+            "asset.id": "adservice",
+            "asset.ean": "service:adservice",
+            "asset.parents": [
+                "container:50041db622002301a71b15e3c8468aa2b0cdb716b2ebd3091e20975580a397ae"
+            ]
+        }
+    ]
+}
+```
+
+#### getContainers
+
+Get a list of container assets found within a specified time range.
+
+| Parameter | Type            | Required? | Description                                                            |
+| :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
+| from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
+| to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
+| filters   | object          | no        | key/value pairs filtering the assets returned. See [supported filters](https://github.com/klacabane/kibana/blob/main/x-pack/plugins/asset_manager/common/types_api.ts#L168-L178) |
+
+**Example**
+
+```js
+getContainers({
+    from: '2023-12-04T09:42:00.000Z',
+    to: '2023-12-04T09:44:00.000Z'
+})
+```
+
+**Response**
+
+```json
+{
+    "containers": [
+        {
+            "@timestamp": "2023-12-03T09:42:11.427Z",
+            "asset.kind": "container",
+            "asset.id": "040744a58fdbdf9a7d628c4e71842301ccc3ed54a1efa8ff47747af251e5896c",
+            "asset.ean": "container:040744a58fdbdf9a7d628c4e71842301ccc3ed54a1efa8ff47747af251e5896c",
+            "asset.parents": [
+                "pod:928db0ae-2b63-48f3-8725-a8ddc490d69e"
+            ],
+            "asset.references": [
+                "host:gcp-host-2zze1241"
+            ]
+        }
+    ]
+}
+```
+
+#### getPods
+
+Get a list of pod assets found within a specified time range.
+
+| Parameter | Type            | Required? | Description                                                            |
+| :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
+| from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
+| to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
+| filters   | object          | no        | key/value pairs filtering the assets returned. See [supported filters](https://github.com/klacabane/kibana/blob/main/x-pack/plugins/asset_manager/common/types_api.ts#L168-L178) |
+
+**Example**
+
+```js
+getPods({
+    from: '2023-12-04T09:42:00.000Z',
+    to: '2023-12-04T09:44:00.000Z'
+})
+```
+
+**Response**
+
+```json
+{
+    "pods": [
+        {
+            "@timestamp": "2023-12-03T09:42:14.680Z",
+            "asset.kind": "pod",
+            "asset.id": "00b2bad4-b878-4647-aa00-d8b24c9216f1",
+            "asset.ean": "pod:00b2bad4-b878-4647-aa00-d8b24c9216f1",
+            "asset.parents": [
+                "host:gcp-host-2zze1241"
+            ],
+            "cloud.provider": "gcp"
+        }
+    ]
+}
+```
+
+#### getAssets
+
+Get a list of service assets found within a specified time range, sorted by timestamp desc.
+
+| Parameter | Type            | Required? | Description                                                            |
+| :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
+| from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
+| to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
+| filters   | object          | no        | key/value pairs filtering the assets returned. See [supported filters](https://github.com/klacabane/kibana/blob/main/x-pack/plugins/asset_manager/common/types_api.ts#L168-L178) |
+
+**Example**
+
+```js
+getAssets({
+    from: '2023-12-04T09:42:00.000Z',
+    to: '2023-12-04T09:44:00.000Z'
+})
+```
+
+**Response**
+
+```json
+{
+    "assets": [
+        {
+            "@timestamp": "2023-12-03T09:44:00.000Z",
+            "asset.kind": "service",
+            "asset.id": "adservice",
+            "asset.ean": "service:adservice",
+            "asset.parents": [
+                "container:50041db622002301a71b15e3c8468aa2b0cdb716b2ebd3091e20975580a397ae"
+            ]
+        },
+        {
+            "@timestamp": "2023-12-04T09:42:52.538Z",
+            "asset.kind": "host",
+            "asset.id": "gcp-host-2zze1241",
+            "asset.name": "gcp-host-2zze1241",
+            "asset.ean": "host:gcp-host-2zze1241",
+            "cloud.provider": "gcp",
+            "cloud.instance.id": "235111598995020799",
+            "cloud.region": "us-central1",
+            "asset.children": [
+                "pod:3ca933f5-effa-47f6-b991-fa1b528cc2e4"
+            ]
+        }
+    ]
 }
 ```

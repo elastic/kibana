@@ -54,7 +54,7 @@ export const createRestrictInternalRoutesPostAuthHandler = (
     if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
       // throw 400
       return response.badRequest({
-        body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
+        body: `uri [${request.url.pathname}] with method [${request.route.method}] exists but is not available with the current configuration`,
       });
     }
     return toolkit.next();
@@ -89,14 +89,15 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     csp: { header: cspHeader },
   } = config;
 
+  const additionalHeaders = {
+    ...securityResponseHeaders,
+    ...customResponseHeaders,
+    'Content-Security-Policy': cspHeader,
+    [KIBANA_NAME_HEADER]: serverName,
+  };
+
   return (request, response, toolkit) => {
-    const additionalHeaders = {
-      ...securityResponseHeaders,
-      ...customResponseHeaders,
-      'Content-Security-Policy': cspHeader,
-      [KIBANA_NAME_HEADER]: serverName,
-    };
-    return toolkit.next({ headers: additionalHeaders });
+    return toolkit.next({ headers: { ...additionalHeaders } });
   };
 };
 

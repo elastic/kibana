@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { screen, waitFor } from '@testing-library/dom';
+import { screen, waitFor } from '@testing-library/react';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';

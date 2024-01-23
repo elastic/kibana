@@ -99,7 +99,9 @@ export function usePackagePolicyWithRelatedData(
       policy: { elasticsearch, ...restPackagePolicy },
     } = await prepareInputPackagePolicyDataset(packagePolicy);
     const result = await sendUpdatePackagePolicy(packagePolicyId, restPackagePolicy);
+
     setFormState('SUBMITTED');
+
     return result;
   };
   // Update package policy validation

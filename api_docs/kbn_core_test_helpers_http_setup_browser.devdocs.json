@@ -49,11 +49,11 @@
           },
           ">; http: ",
           {
-            "pluginId": "@kbn/core-http-browser",
+            "pluginId": "@kbn/core-http-browser-internal",
             "scope": "common",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-common.HttpSetup",
-            "text": "HttpSetup"
+            "docId": "kibKbnCoreHttpBrowserInternalPluginApi",
+            "section": "def-common.InternalHttpSetup",
+            "text": "InternalHttpSetup"
           },
           "; }"
         ],
@@ -123,7 +123,7 @@
             "label": "injectedMetadata",
             "description": [],
             "signature": [
-              "{ getBasePath: jest.MockInstance<string, [], unknown>; getServerBasePath: jest.MockInstance<string, [], unknown>; getPublicBaseUrl: jest.MockInstance<string | undefined, [], unknown>; getKibanaBuildNumber: jest.MockInstance<number, [], unknown>; getKibanaBranch: jest.MockInstance<string, [], unknown>; getKibanaVersion: jest.MockInstance<string, [], unknown>; getCspConfig: jest.MockInstance<{ warnLegacyBrowsers: boolean; }, [], unknown>; getExternalUrlConfig: jest.MockInstance<{ policy: ",
+              "{ getBasePath: jest.MockInstance<string, [], unknown>; getServerBasePath: jest.MockInstance<string, [], unknown>; getPublicBaseUrl: jest.MockInstance<string | undefined, [], unknown>; getAssetsHrefBase: jest.MockInstance<string, [], unknown>; getKibanaBuildNumber: jest.MockInstance<number, [], unknown>; getKibanaBranch: jest.MockInstance<string, [], unknown>; getKibanaVersion: jest.MockInstance<string, [], unknown>; getCspConfig: jest.MockInstance<{ warnLegacyBrowsers: boolean; }, [], unknown>; getExternalUrlConfig: jest.MockInstance<{ policy: ",
               "InjectedMetadataExternalUrlPolicy",
               "[]; }, [], unknown>; getTheme: jest.MockInstance<{ darkMode: boolean; version: \"v8\"; }, [], unknown>; getElasticsearchInfo: jest.MockInstance<",
               "InjectedMetadataClusterInfo",

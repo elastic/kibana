@@ -26,7 +26,7 @@ import type { Space } from '@kbn/spaces-plugin/public';
 import { getSpaceColor } from '@kbn/spaces-plugin/public';
 
 import { PrivilegeDisplay } from './privilege_display';
-import type { FeaturesPrivileges, Role } from '../../../../../../../common/model';
+import type { FeaturesPrivileges, Role } from '../../../../../../../common';
 import { copyRole } from '../../../../../../../common/model';
 import { isGlobalPrivilegeDefinition } from '../../../privilege_utils';
 import { CUSTOM_PRIVILEGE_VALUE } from '../constants';

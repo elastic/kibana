@@ -21,29 +21,99 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('renders correctly', async () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     expect(screen.getByTestId('ruleFormConsumerSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveAttribute(
+      'placeholder',
+      'Select a scope'
+    );
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(screen.getByText('Metrics')).toBeInTheDocument();
     expect(screen.getByText('Stack Rules')).toBeInTheDocument();
   });
 
-  it('should initialize dropdown to null', () => {
+  it('should be able to initialize to the prop initialSelectedConsumer', () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        initialSelectedConsumer={'logs'}
+        errors={{}}
+      />
     );
+    expect(mockOnChange).toHaveBeenLastCalledWith('logs');
+  });
 
-    // Selects first option if no initial value is provided
-    expect(mockOnChange).toHaveBeenLastCalledWith(null);
-    mockOnChange.mockClear();
+  it('should NOT initialize if initialSelectedConsumer is equal to null', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        initialSelectedConsumer={null}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).not.toBeCalled();
+  });
+
+  it('should initialize to the first valid consumers if initialSelectedConsumer is not valid', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={['logs', 'infrastructure']}
+        onChange={mockOnChange}
+        initialSelectedConsumer={'apm' as RuleCreationValidConsumer}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).toHaveBeenLastCalledWith('logs');
+  });
+
+  it('should initialize to stackAlerts if the initialSelectedConsumer is not a valid and consumers has stackAlerts', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={['infrastructure', 'stackAlerts']}
+        onChange={mockOnChange}
+        initialSelectedConsumer={'logs'}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
+  });
+
+  it('should initialize to stackAlerts if the initialSelectedConsumer is undefined and consumers has stackAlerts', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={['infrastructure', 'stackAlerts']}
+        onChange={mockOnChange}
+        initialSelectedConsumer={undefined}
+        errors={{}}
+      />
+    );
+    expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
   });
 
   it('should be able to select infrastructure and call onChange', () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
@@ -53,7 +123,12 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('should be able to select logs and call onChange', () => {
     render(
-      <RuleFormConsumerSelection consumers={mockConsumers} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     fireEvent.click(screen.getByTestId('comboBoxToggleListButton'));
@@ -64,6 +139,7 @@ describe('RuleFormConsumerSelectionModal', () => {
   it('should be able to show errors when there is one', () => {
     render(
       <RuleFormConsumerSelection
+        selectedConsumer={null}
         consumers={mockConsumers}
         onChange={mockOnChange}
         errors={{ consumer: ['Scope is required'] }}
@@ -74,23 +150,53 @@ describe('RuleFormConsumerSelectionModal', () => {
 
   it('should display nothing if there is only 1 consumer to select', () => {
     render(
-      <RuleFormConsumerSelection consumers={['stackAlerts']} onChange={mockOnChange} errors={{}} />
+      <RuleFormConsumerSelection
+        selectedConsumer={null}
+        consumers={['stackAlerts']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
     );
 
     expect(mockOnChange).toHaveBeenLastCalledWith('stackAlerts');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 
-  it('should display nothing if observability is one of the consumer', () => {
+  it('should display nothing if observability is one of the consumers', () => {
     render(
       <RuleFormConsumerSelection
+        selectedConsumer={null}
         consumers={['logs', 'observability']}
         onChange={mockOnChange}
         errors={{}}
       />
     );
 
-    expect(mockOnChange).toHaveBeenLastCalledWith('observability');
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
+  });
+
+  it('should display the initial selected consumer', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={mockConsumers}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('Logs');
+  });
+
+  it('should not display the initial selected consumer if it is not a selectable option', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={['stackAlerts', 'infrastructure']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+    expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('');
   });
 });

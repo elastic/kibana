@@ -1,0 +1,22 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { i18n } from '@kbn/i18n';
+
+export const MAINTENANCE_WINDOW_RUNNING_DESCRIPTION = i18n.translate(
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveDescription',
+  {
+    defaultMessage: 'Rule notifications are stopped while maintenance windows are running.',
+  }
+);
+export const MAINTENANCE_WINDOW_NO_CATEGORY_TITLE = i18n.translate(
+  'alertsUIShared.maintenanceWindowCallout.maintenanceWindowActiveNoCategories',
+  {
+    defaultMessage: 'One or more maintenance windows are running',
+  }
+);

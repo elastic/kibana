@@ -9,7 +9,7 @@
         "tags": [],
         "label": "DataRequest",
         "description": [],
-        "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+        "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -23,7 +23,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -37,7 +37,7 @@
                 "signature": [
                   "DataRequestDescriptor"
                 ],
-                "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+                "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -55,7 +55,7 @@
             "signature": [
               "() => object | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -71,7 +71,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -88,7 +88,7 @@
               "() => ",
               "DataRequestMeta"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -104,7 +104,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -120,7 +120,7 @@
             "signature": [
               "() => boolean"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -136,7 +136,7 @@
             "signature": [
               "() => string"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -152,7 +152,23 @@
             "signature": [
               "() => symbol | undefined"
             ],
-            "path": "x-pack/plugins/maps/public/classes/util/data_request.ts",
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.DataRequest.renderError",
+            "type": "Function",
+            "tags": [],
+            "label": "renderError",
+            "description": [],
+            "signature": [
+              "() => React.ReactNode"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/util/data_request.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -513,7 +529,7 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "() => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -521,7 +537,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]>"
+              "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -537,7 +553,7 @@
             "label": "getQuery",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "() => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -545,7 +561,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined>"
+              " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -1668,12 +1684,12 @@
           {
             "parentPluginId": "maps",
             "id": "def-public.GeoJsonWithMeta.meta",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "meta",
             "description": [],
             "signature": [
-              "ESSearchSourceResponseMeta",
+              "DataRequestMeta",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
@@ -3354,6 +3370,22 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "maps",
+            "id": "def-public.IVectorSource.getInspectorRequestIds",
+            "type": "Function",
+            "tags": [],
+            "label": "getInspectorRequestIds",
+            "description": [],
+            "signature": [
+              "() => string[]"
+            ],
+            "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3973,7 +4005,7 @@
             "section": "def-common.LayerDescriptor",
             "text": "LayerDescriptor"
           },
-          "[]) => void; mapColors: string[]; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
+          "[]) => void; mapColors: string[]; mostCommonDataViewId?: string | undefined; currentStepId: string | null; isOnFinalStep: boolean; enableNextBtn: () => void; disableNextBtn: () => void; startStepLoading: () => void; stopStepLoading: () => void; advanceToNextStep: () => void; }"
         ],
         "path": "x-pack/plugins/maps/public/classes/layers/wizards/layer_wizard_registry.ts",
         "deprecated": false,
@@ -4604,7 +4636,7 @@
         "signature": [
           "{ __dataRequests?: ",
           "DataRequestDescriptor",
-          "[] | undefined; __isInErrorState?: boolean | undefined; __isPreviewLayer?: boolean | undefined; __errorMessage?: string | undefined; __trackedLayerDescriptor?: ",
+          "[] | undefined; __isPreviewLayer?: boolean | undefined; __trackedLayerDescriptor?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -4612,8 +4644,10 @@
             "section": "def-common.LayerDescriptor",
             "text": "LayerDescriptor"
           },
-          " | undefined; __areTilesLoaded?: boolean | undefined; __metaFromTiles?: ",
+          " | undefined; __areTilesLoaded?: boolean | undefined; __tileMetaFeatures?: ",
           "TileMetaFeature",
+          "[] | undefined; __tileErrors?: ",
+          "TileError",
           "[] | undefined; alpha?: number | undefined; attribution?: ",
           "Attribution",
           " | undefined; id: string; label?: string | null | undefined; locale?: string | null | undefined; areLabelsOnTop?: boolean | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; sourceDescriptor: ",

@@ -15,14 +15,13 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { orderBy } from 'lodash';
-
 import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';
 import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
 import { TableVisControls } from './table_vis_controls';
 import { createGridColumns } from './table_vis_columns';
+import { sortNullsLast } from './utils';
 
 interface TableVisBasicProps {
   fireEvent: IInterpreterRenderHandlers['event'];
@@ -45,13 +44,14 @@ export const TableVisBasic = memo(
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
-    const sortedRows = useMemo(
-      () =>
-        sort.columnIndex !== null && sort.direction
-          ? orderBy(rows, columns[sort.columnIndex]?.id, sort.direction)
-          : rows,
-      [columns, rows, sort]
-    );
+    const sortedRows = useMemo(() => {
+      if (sort.columnIndex !== null && sort.direction) {
+        const id = columns[sort.columnIndex]?.id;
+        return sortNullsLast(rows, sort.direction, id);
+      }
+
+      return rows;
+    }, [columns, rows, sort.columnIndex, sort.direction]);
 
     // renderCellValue is a component which renders a cell based on column and row indexes
     const renderCellValue = useMemo(

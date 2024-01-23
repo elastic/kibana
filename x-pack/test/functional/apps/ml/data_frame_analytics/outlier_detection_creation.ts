@@ -17,7 +17,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_ihp_outlier',
+  indexName: 'ft_ihp_outlier',
   queryEntityFieldNames: ['SaleType'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
@@ -44,7 +44,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier');
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteDataViewByTitle('ft_ihp_outlier');
     });
 
     const jobId = `ihp_1_${Date.now()}`;
@@ -83,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
         },
         modelMemory: '5mb',
-        createIndexPattern: true,
+        createDataView: true,
         advancedEditorContent: [
           '{',
           '  "description": "Outlier detection job based on ft_ihp_outlier dataset with runtime fields",',
@@ -192,7 +192,7 @@ export default function ({ getService }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await ml.api.deleteIndices(testData.destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the data frame analytics wizard', async () => {
@@ -305,6 +305,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertDestIndexInputExists();
           await ml.dataFrameAnalyticsCreation.setDestIndex(testData.destinationIndex);
 
+          await ml.testExecution.logTestStep('displays the create data view switch');
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
+          await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchCheckState(true);
+
           await ml.testExecution.logTestStep('continues to the validation step');
           await ml.dataFrameAnalyticsCreation.continueToValidationStep();
 
@@ -322,18 +326,12 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();
-
-          await ml.testExecution.logTestStep('sets the create data view switch');
-          await ml.dataFrameAnalyticsCreation.assertCreateIndexPatternSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateIndexPatternSwitchState(
-            testData.createIndexPattern
-          );
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep('creates and starts the analytics job');
           await ml.dataFrameAnalyticsCreation.assertCreateButtonExists();
-          await ml.dataFrameAnalyticsCreation.assertStartJobCheckboxCheckState(true);
+          await ml.dataFrameAnalyticsCreation.assertStartJobSwitchCheckState(true);
           await ml.dataFrameAnalyticsCreation.createAnalyticsJob(testData.jobId);
 
           await ml.testExecution.logTestStep('finishes analytics processing');

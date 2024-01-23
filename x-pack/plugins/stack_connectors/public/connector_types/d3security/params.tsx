@@ -89,7 +89,7 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
         label={i18n.translate('xpack.stackConnectors.components.d3security.bodyFieldLabel', {
           defaultMessage: 'Body',
         })}
-        aria-label={i18n.translate(
+        ariaLabel={i18n.translate(
           'xpack.stackConnectors.components.d3security.bodyCodeEditorAriaLabel',
           {
             defaultMessage: 'Code editor',
@@ -104,6 +104,7 @@ const D3ParamsFields: React.FunctionComponent<ActionParamsProps<D3SecurityAction
             editSubActionParams({ body: '' });
           }
         }}
+        dataTestSubj="actionJsonEditor"
       />
     </>
   );

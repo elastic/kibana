@@ -6,7 +6,7 @@
  */
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   ScheduleUnit,
   MonitorFields,
   Validator,
@@ -87,7 +87,7 @@ const validateCommon: ValidationLibrary = {
     const { number, unit } = schedule as MonitorFields[ConfigKey.SCHEDULE];
 
     // Timeout is not currently supported by browser monitors
-    if (monitorType === DataStream.BROWSER) {
+    if (monitorType === MonitorTypeEnum.BROWSER) {
       return false;
     }
 
@@ -163,11 +163,11 @@ const validateBrowser: ValidationLibrary = {
     params ? !validJSONFormat(params) : false,
 };
 
-export type ValidateDictionary = Record<DataStream, Validation>;
+export type ValidateDictionary = Record<MonitorTypeEnum, Validation>;
 
 export const validate: ValidateDictionary = {
-  [DataStream.HTTP]: validateHTTP,
-  [DataStream.TCP]: validateTCP,
-  [DataStream.ICMP]: validateICMP,
-  [DataStream.BROWSER]: validateBrowser,
+  [MonitorTypeEnum.HTTP]: validateHTTP,
+  [MonitorTypeEnum.TCP]: validateTCP,
+  [MonitorTypeEnum.ICMP]: validateICMP,
+  [MonitorTypeEnum.BROWSER]: validateBrowser,
 };

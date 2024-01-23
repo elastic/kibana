@@ -7,11 +7,6 @@
 
 import { createMemoryHistory } from 'history';
 import { IBasePath } from '@kbn/core/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import {
-  LogsLocatorParams,
-  NodeLogsLocatorParams,
-} from '@kbn/logs-shared-plugin/common';
 import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 import { getSections } from './sections';
 import {
@@ -19,7 +14,7 @@ import {
   ApmRouter,
 } from '../../routing/apm_route_config';
 import {
-  infraLocatorsMock,
+  logsLocatorsMock,
   observabilityLogExplorerLocatorsMock,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
 
@@ -30,11 +25,11 @@ const apmRouter = {
 } as ApmRouter;
 
 const { allDatasetsLocator } = observabilityLogExplorerLocatorsMock;
-const { nodeLogsLocator, logsLocator } = infraLocatorsMock;
+const { nodeLogsLocator, traceLogsLocator } = logsLocatorsMock;
 
-const expectInfraLocatorsToBeCalled = () => {
+const expectLogsLocatorsToBeCalled = () => {
   expect(nodeLogsLocator.getRedirectUrl).toBeCalledTimes(3);
-  expect(logsLocator.getRedirectUrl).toBeCalledTimes(1);
+  expect(traceLogsLocator.getRedirectUrl).toBeCalledTimes(1);
 };
 
 describe('Transaction action menu', () => {
@@ -70,13 +65,12 @@ describe('Transaction action menu', () => {
         location,
         apmRouter,
         allDatasetsLocator,
-        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
-        nodeLogsLocator:
-          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
+        logsLocators: logsLocatorsMock,
         infraLinksAvailable: false,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -113,14 +107,14 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
-    expectInfraLocatorsToBeCalled();
+    expectLogsLocatorsToBeCalled();
   });
 
   it('shows pod and required sections only', () => {
@@ -137,14 +131,13 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
-        nodeLogsLocator:
-          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         allDatasetsLocator,
+        logsLocators: logsLocatorsMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -200,14 +193,14 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
-    expectInfraLocatorsToBeCalled();
+    expectLogsLocatorsToBeCalled();
   });
 
   it('shows host and required sections only', () => {
@@ -224,14 +217,13 @@ describe('Transaction action menu', () => {
         basePath,
         location,
         apmRouter,
-        logsLocator: logsLocator as unknown as LocatorPublic<LogsLocatorParams>,
-        nodeLogsLocator:
-          nodeLogsLocator as unknown as LocatorPublic<NodeLogsLocatorParams>,
         allDatasetsLocator,
+        logsLocators: logsLocatorsMock,
         infraLinksAvailable: true,
         rangeFrom: 'now-24h',
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
+        dataViewId: 'apm_static_data_view_id_default',
       })
     ).toEqual([
       [
@@ -286,13 +278,13 @@ describe('Transaction action menu', () => {
             {
               key: 'sampleDocument',
               label: 'View transaction in Discover',
-              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_index_pattern_id,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
+              href: 'some-basepath/app/discover#/?_g=(refreshInterval:(pause:!t,value:0),time:(from:now-24h,to:now))&_a=(index:apm_static_data_view_id_default,interval:auto,query:(language:kuery,query:\'processor.event:"transaction" AND transaction.id:"123" AND trace.id:"123"\'))',
               condition: true,
             },
           ],
         },
       ],
     ]);
-    expectInfraLocatorsToBeCalled();
+    expectLogsLocatorsToBeCalled();
   });
 });

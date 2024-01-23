@@ -12,7 +12,6 @@ export const PrivateLocationAttributesCodec = t.intersection([
     label: t.string,
     id: t.string,
     agentPolicyId: t.string,
-    concurrentMonitors: t.number,
     isServiceManaged: t.boolean,
   }),
   t.partial({

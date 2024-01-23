@@ -11,7 +11,7 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { shallow } from 'enzyme';
 
 import { EuiComboBox, EuiComboBoxOptionOption, EuiRadioGroup } from '@elastic/eui';

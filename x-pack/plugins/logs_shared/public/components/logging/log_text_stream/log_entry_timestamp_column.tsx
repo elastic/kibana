@@ -11,10 +11,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { TimeFormat, useFormattedTime } from '../../formatted_time';
 import { LogEntryColumnContent } from './log_entry_column';
 
-interface LogEntryTimestampColumnProps {
+export interface LogEntryTimestampColumnProps {
   format?: TimeFormat;
-  time: number;
-  render?: (timestamp: number) => React.ReactNode;
+  time: string;
+  render?: (time: string) => React.ReactNode;
 }
 
 export const LogEntryTimestampColumn = memo<LogEntryTimestampColumnProps>(

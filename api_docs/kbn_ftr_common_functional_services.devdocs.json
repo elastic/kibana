@@ -48,7 +48,7 @@
             "label": "tryForTime",
             "description": [],
             "signature": [
-              "<T>(timeout: number, block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+              "<T>(timeout: number, block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined, retryDelay?: number | undefined) => Promise<T>"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
@@ -98,6 +98,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.tryForTime.$4",
+                "type": "number",
+                "tags": [],
+                "label": "retryDelay",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -110,7 +125,7 @@
             "label": "try",
             "description": [],
             "signature": [
-              "<T>(block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined) => Promise<T>"
+              "<T>(block: () => Promise<T>, onFailureBlock?: (() => Promise<T>) | undefined, retryDelay?: number | undefined) => Promise<T>"
             ],
             "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
             "deprecated": false,
@@ -140,6 +155,21 @@
                 "description": [],
                 "signature": [
                   "(() => Promise<T>) | undefined"
+                ],
+                "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-services",
+                "id": "def-common.RetryService.try.$3",
+                "type": "number",
+                "tags": [],
+                "label": "retryDelay",
+                "description": [],
+                "signature": [
+                  "number | undefined"
                 ],
                 "path": "packages/kbn-ftr-common-functional-services/services/retry/retry.ts",
                 "deprecated": false,

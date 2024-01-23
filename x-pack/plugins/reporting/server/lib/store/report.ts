@@ -8,18 +8,16 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 import Puid from 'puid';
-import { JOB_STATUSES } from '../../../common/constants';
+
+import { JOB_STATUS } from '@kbn/reporting-common';
 import {
   ReportApiJSON,
-  ReportDocument,
   ReportDocumentHead,
   ReportFields,
   ReportSource,
-} from '../../../common/types';
-import type { ReportTaskParams } from '../tasks';
+} from '@kbn/reporting-common/types';
 
-export type { ReportDocument };
-export type { ReportApiJSON, ReportSource };
+import type { ReportTaskParams } from '../tasks';
 
 const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';
@@ -47,6 +45,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly kibana_name: ReportSource['kibana_name'];
   public readonly kibana_id: ReportSource['kibana_id'];
   public readonly output: ReportSource['output'];
+  public readonly error: ReportSource['error'];
   public readonly started_at: ReportSource['started_at'];
   public readonly completed_at: ReportSource['completed_at'];
   public readonly timeout: ReportSource['timeout'];
@@ -95,8 +94,9 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     this.meta = opts.meta || { objectType: 'unknown' };
     this.metrics = opts.metrics;
 
-    this.status = opts.status || JOB_STATUSES.PENDING;
+    this.status = opts.status || JOB_STATUS.PENDING;
     this.output = opts.output || null;
+    this.error = opts.error;
 
     this.queue_time_ms = fields?.queue_time_ms;
     this.execution_time_ms = fields?.execution_time_ms;

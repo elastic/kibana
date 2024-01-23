@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Please also add new aliases to test/scripts/jenkins_storybook.sh
+// Please also add new aliases to .buildkite/scripts/steps/storybooks/build_and_upload.ts
 //
 // If you wish for your Storybook to be built and included in CI, also add your
 // alias to .buildkite/scripts/steps/storybooks/build_and_upload.ts
@@ -15,13 +15,13 @@ export const storybookAliases = {
   canvas: 'x-pack/plugins/canvas/storybook',
   cases: 'packages/kbn-cases-components/.storybook',
   cell_actions: 'packages/kbn-cell-actions/.storybook',
-  ci_composite: '.ci/.storybook',
   cloud_chat: 'x-pack/plugins/cloud_integrations/cloud_chat/.storybook',
   coloring: 'packages/kbn-coloring/.storybook',
   language_documentation_popover: 'packages/kbn-language-documentation-popover/.storybook',
   chart_icons: 'packages/kbn-chart-icons/.storybook',
   content_management_examples: 'examples/content_management_examples/.storybook',
   controls: 'src/plugins/controls/storybook',
+  custom_icons: 'packages/kbn-custom-icons/.storybook',
   custom_integrations: 'src/plugins/custom_integrations/storybook',
   dashboard_enhanced: 'x-pack/plugins/dashboard_enhanced/.storybook',
   dashboard: 'src/plugins/dashboard/.storybook',

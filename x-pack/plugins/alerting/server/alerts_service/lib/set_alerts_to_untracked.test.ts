@@ -104,6 +104,7 @@ describe('setAlertsToUntracked()', () => {
           "index": Array [
             "test-index",
           ],
+          "refresh": true,
         },
       ]
     `);
@@ -172,6 +173,7 @@ describe('setAlertsToUntracked()', () => {
           "index": Array [
             "test-index",
           ],
+          "refresh": true,
         },
       ]
     `);

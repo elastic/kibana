@@ -1,0 +1,13 @@
+openapi: 3.0.3
+info:
+  title: Test endpoint
+  version: '2023-10-31'
+paths: {}
+
+components:
+  schemas:
+    TestSchema:
+      type: string
+      enum:
+        - value1
+        - value2

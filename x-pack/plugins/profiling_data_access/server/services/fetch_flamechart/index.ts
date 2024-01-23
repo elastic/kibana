@@ -5,62 +5,52 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import { createBaseFlameGraph, createCalleeTree } from '@kbn/profiling-utils';
+import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
+import {
+  profilingAWSCostDiscountRate,
+  profilingCo2PerKWH,
+  profilingCostPervCPUPerHour,
+  profilingDatacenterPUE,
+  profilingPervCPUWattArm64,
+  profilingPervCPUWattX86,
+} from '@kbn/observability-plugin/common';
+import { percentToFactor } from '../../utils/percent_to_factor';
 import { kqlQuery } from '../../utils/query';
-import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
-import { searchStackTraces } from '../search_stack_traces';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
+  core: CoreRequestHandlerContext;
   rangeFromMs: number;
   rangeToMs: number;
   kuery: string;
-  useLegacyFlamegraphAPI?: boolean;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({
-    esClient,
-    rangeFromMs,
-    rangeToMs,
-    kuery,
-    useLegacyFlamegraphAPI = false,
-  }: FetchFlamechartParams) => {
+  return async ({ core, esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
 
+    const [
+      co2PerKWH,
+      datacenterPUE,
+      pervCPUWattX86,
+      pervCPUWattArm64,
+      awsCostDiscountRate,
+      costPervCPUPerHour,
+    ] = await Promise.all([
+      core.uiSettings.client.get<number>(profilingCo2PerKWH),
+      core.uiSettings.client.get<number>(profilingDatacenterPUE),
+      core.uiSettings.client.get<number>(profilingPervCPUWattX86),
+      core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
+      core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
+      core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+    ]);
+
     const profilingEsClient = createProfilingEsClient({ esClient });
-
     const totalSeconds = rangeToSecs - rangeFromSecs;
-    // Use legacy stack traces API to fetch the flamegraph
-    if (useLegacyFlamegraphAPI) {
-      const { events, stackTraces, executables, stackFrames, totalFrames, samplingRate } =
-        await searchStackTraces({
-          client: profilingEsClient,
-          rangeFrom: rangeFromSecs,
-          rangeTo: rangeToSecs,
-          kuery,
-          sampleSize: targetSampleSize,
-        });
-
-      return await withProfilingSpan('create_flamegraph', async () => {
-        const tree = createCalleeTree(
-          events,
-          stackTraces,
-          stackFrames,
-          executables,
-          totalFrames,
-          samplingRate
-        );
-
-        return createBaseFlameGraph(tree, samplingRate, totalSeconds);
-      });
-    }
-
     const flamegraph = await profilingEsClient.profilingFlamegraph({
       query: {
         bool: {
@@ -79,6 +69,13 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
         },
       },
       sampleSize: targetSampleSize,
+      durationSeconds: totalSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      pervCPUWattX86,
+      pervCPUWattArm64,
+      awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
+      costPervCPUPerHour,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };

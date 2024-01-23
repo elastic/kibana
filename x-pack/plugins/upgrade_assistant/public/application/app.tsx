@@ -163,18 +163,24 @@ export const RootComponent = (dependencies: AppDependencies) => {
   executionContext.set({ type: 'application', page: 'upgradeAssistant' });
 
   return (
-    <RedirectAppLinks application={application} className={APP_WRAPPER_CLASS}>
-      <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
-        <i18n.Context>
-          <KibanaThemeProvider theme$={dependencies.theme$}>
-            <AppContextProvider value={dependencies}>
-              <GlobalFlyoutProvider>
-                <App history={history} />
-              </GlobalFlyoutProvider>
-            </AppContextProvider>
-          </KibanaThemeProvider>
-        </i18n.Context>
-      </AuthorizationProvider>
-    </RedirectAppLinks>
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
+        <AuthorizationProvider httpClient={http} privilegesEndpoint={`${API_BASE_PATH}/privileges`}>
+          <i18n.Context>
+            <KibanaThemeProvider theme$={dependencies.theme$}>
+              <AppContextProvider value={dependencies}>
+                <GlobalFlyoutProvider>
+                  <App history={history} />
+                </GlobalFlyoutProvider>
+              </AppContextProvider>
+            </KibanaThemeProvider>
+          </i18n.Context>
+        </AuthorizationProvider>
+      </RedirectAppLinks>
+    </div>
   );
 };

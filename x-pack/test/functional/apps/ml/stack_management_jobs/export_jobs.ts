@@ -257,16 +257,16 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_bank_marketing', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
-      await ml.testResources.createIndexPatternIfNeeded('ft_egs_regression', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_egs_regression', '@timestamp');
 
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -289,10 +289,10 @@ export default function ({ getService }: FtrProviderContext) {
         'anomaly_detection_jobs',
         'data_frame_analytics_jobs',
       ]);
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
-      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
-      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
-      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_bank_marketing');
+      await ml.testResources.deleteDataViewByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteDataViewByTitle('ft_egs_regression');
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {

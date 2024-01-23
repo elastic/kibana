@@ -43,7 +43,7 @@ function createPlugin(
     type?: PluginType;
   } = {}
 ): PluginWrapper<any, any> {
-  return new PluginWrapper<any, any>({
+  const plugin = new PluginWrapper<any, any>({
     path: 'some-path',
     manifest: {
       id,
@@ -62,6 +62,8 @@ function createPlugin(
     opaqueId: Symbol(id),
     initializerContext: { logger } as any,
   });
+  jest.spyOn(plugin, 'init').mockResolvedValue();
+  return plugin;
 }
 
 const prebootDeps = coreInternalLifecycleMock.createInternalPreboot();
@@ -602,7 +604,10 @@ describe('setup', () => {
     mockCreatePluginSetupContext.mockImplementation(() => ({}));
 
     const promise = pluginsSystem.setupPlugins(setupDeps);
-    jest.runAllTimers();
+    process.nextTick(() => {
+      // let the await init go through. then simulate the timeout
+      jest.runAllTimers();
+    });
 
     await expect(promise).rejects.toMatchInlineSnapshot(
       `[Error: Setup lifecycle of "timeout-setup" plugin wasn't completed in 10sec. Consider disabling the plugin and re-start.]`

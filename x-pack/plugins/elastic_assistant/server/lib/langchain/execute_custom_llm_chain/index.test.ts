@@ -7,6 +7,7 @@
 
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -16,7 +17,6 @@ import { langChainMessages } from '../../../__mocks__/lang_chain_messages';
 import { ESQL_RESOURCE } from '../../../routes/knowledge_base/constants';
 import { ResponseBody } from '../types';
 import { callAgentExecutor } from '.';
-import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 
 jest.mock('../llm/actions_client_llm');
 
@@ -56,6 +56,7 @@ const mockRequest: KibanaRequest<unknown, unknown, any, any> = {} as KibanaReque
 
 const mockActions: ActionsPluginStart = {} as ActionsPluginStart;
 const mockLogger = loggerMock.create();
+const mockTelemetry = coreMock.createSetup().analytics;
 const esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 
 describe('callAgentExecutor', () => {
@@ -70,12 +71,15 @@ describe('callAgentExecutor', () => {
   it('creates an instance of ActionsClientLlm with the expected context from the request', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
+      telemetry: mockTelemetry,
     });
 
     expect(ActionsClientLlm).toHaveBeenCalledWith({
@@ -89,17 +93,24 @@ describe('callAgentExecutor', () => {
   it('kicks off the chain with (only) the last message', async () => {
     await callAgentExecutor({
       actions: mockActions,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
+      telemetry: mockTelemetry,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: '\n\nDo you know my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: '\n\nDo you know my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('kicks off the chain with the expected message when langChainMessages has only one entry', async () => {
@@ -107,28 +118,38 @@ describe('callAgentExecutor', () => {
 
     await callAgentExecutor({
       actions: mockActions,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages: onlyOneMessage,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
+      telemetry: mockTelemetry,
     });
 
-    expect(mockCall).toHaveBeenCalledWith({
-      input: 'What is my name?',
-    });
+    // We don't care about the `config` argument, so we use `expect.anything()`
+    expect(mockCall).toHaveBeenCalledWith(
+      {
+        input: 'What is my name?',
+      },
+      expect.anything()
+    );
   });
 
   it('returns the expected response body', async () => {
     const result: ResponseBody = await callAgentExecutor({
       actions: mockActions,
+      isEnabledKnowledgeBase: true,
       connectorId: mockConnectorId,
       esClient: esClientMock,
       langChainMessages,
       logger: mockLogger,
+      onNewReplacements: jest.fn(),
       request: mockRequest,
       kbResource: ESQL_RESOURCE,
+      telemetry: mockTelemetry,
     });
 
     expect(result).toEqual({
@@ -136,25 +157,5 @@ describe('callAgentExecutor', () => {
       data: mockActionResponse,
       status: 'ok',
     });
-  });
-
-  it('throws an error if ELSER model is not installed', async () => {
-    (ElasticsearchStore as unknown as jest.Mock).mockImplementationOnce(() => ({
-      isModelInstalled: jest.fn().mockResolvedValue(false),
-    }));
-
-    await expect(
-      callAgentExecutor({
-        actions: mockActions,
-        connectorId: mockConnectorId,
-        esClient: esClientMock,
-        langChainMessages,
-        logger: mockLogger,
-        request: mockRequest,
-        kbResource: ESQL_RESOURCE,
-      })
-    ).rejects.toThrow(
-      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
-    );
   });
 });

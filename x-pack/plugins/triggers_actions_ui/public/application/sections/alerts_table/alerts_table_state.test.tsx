@@ -270,11 +270,7 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
             <button
               data-test-subj="expandColumnCellOpenFlyoutButton-0"
               onClick={() => {
-                setFlyoutAlert({
-                  fields: {
-                    [ALERT_UUID]: 'alert-id-1',
-                  },
-                });
+                setFlyoutAlert('alert-id-1');
               }}
             />
           );
@@ -582,10 +578,12 @@ describe('AlertsTableState', () => {
     it('should pass the correct maintenance window ids to useBulkGetMaintenanceWindows', async () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-1', 'test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-1', 'test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -600,10 +598,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-1', 'test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-1', 'test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -621,10 +621,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...tableProps} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-2'],
-          canFetchMaintenanceWindows: true,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-2'],
+            canFetchMaintenanceWindows: true,
+          })
+        );
       });
     });
 
@@ -652,10 +654,12 @@ describe('AlertsTableState', () => {
 
       render(<AlertsTableWithLocale {...props} />);
       await waitFor(() => {
-        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith({
-          ids: ['test-mw-id-2'],
-          canFetchMaintenanceWindows: false,
-        });
+        expect(useBulkGetMaintenanceWindowsMock).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ids: ['test-mw-id-2'],
+            canFetchMaintenanceWindows: false,
+          })
+        );
       });
     });
   });

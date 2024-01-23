@@ -38,7 +38,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       // Wait for snapshot to be ready
-      await pageObjects.common.sleep(1000);
+      await pageObjects.common.sleep(2000);
 
       // Refresh page so that the snapshot shows up in the snapshots table
       await browser.refresh();
