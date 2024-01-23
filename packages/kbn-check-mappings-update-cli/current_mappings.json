@@ -1058,21 +1058,6 @@
       }
     }
   },
-  "links": {
-    "dynamic": false,
-    "properties": {
-      "title": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "links": {
-        "dynamic": false,
-        "properties": {}
-      }
-    }
-  },
   "lens": {
     "properties": {
       "title": {
@@ -1103,32 +1088,6 @@
       },
       "count": {
         "type": "integer"
-      }
-    }
-  },
-  "map": {
-    "properties": {
-      "description": {
-        "type": "text"
-      },
-      "title": {
-        "type": "text"
-      },
-      "version": {
-        "type": "integer"
-      },
-      "mapStateJSON": {
-        "type": "text"
-      },
-      "layerListJSON": {
-        "type": "text"
-      },
-      "uiStateJSON": {
-        "type": "text"
-      },
-      "bounds": {
-        "dynamic": false,
-        "properties": {}
       }
     }
   },
@@ -1461,17 +1420,24 @@
     "dynamic": false,
     "properties": {}
   },
-  "infrastructure-monitoring-log-view": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      }
-    }
-  },
   "metrics-data-source": {
     "dynamic": false,
     "properties": {}
+  },
+  "links": {
+    "dynamic": false,
+    "properties": {
+      "title": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "links": {
+        "dynamic": false,
+        "properties": {}
+      }
+    }
   },
   "canvas-element": {
     "dynamic": false,
@@ -1564,10 +1530,10 @@
       "prerelease_integrations_enabled": {
         "type": "boolean"
       },
-      "output_secret_storage_requirements_met": {
+      "secret_storage_requirements_met": {
         "type": "boolean"
       },
-      "secret_storage_requirements_met": {
+      "output_secret_storage_requirements_met": {
         "type": "boolean"
       }
     }
@@ -2356,58 +2322,29 @@
     "dynamic": false,
     "properties": {}
   },
-  "slo": {
-    "dynamic": false,
+  "map": {
     "properties": {
-      "id": {
-        "type": "keyword"
-      },
-      "name": {
-        "type": "text"
-      },
       "description": {
         "type": "text"
       },
-      "indicator": {
-        "properties": {
-          "type": {
-            "type": "keyword"
-          },
-          "params": {
-            "type": "flattened"
-          }
-        }
-      },
-      "budgetingMethod": {
-        "type": "keyword"
-      },
-      "enabled": {
-        "type": "boolean"
-      },
-      "tags": {
-        "type": "keyword"
+      "title": {
+        "type": "text"
       },
       "version": {
-        "type": "long"
-      }
-    }
-  },
-  "threshold-explorer-view": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "observability-onboarding-state": {
-    "properties": {
-      "type": {
-        "type": "keyword"
+        "type": "integer"
       },
-      "state": {
-        "type": "object",
-        "dynamic": false
+      "mapStateJSON": {
+        "type": "text"
       },
-      "progress": {
-        "type": "object",
-        "dynamic": false
+      "layerListJSON": {
+        "type": "text"
+      },
+      "uiStateJSON": {
+        "type": "text"
+      },
+      "bounds": {
+        "dynamic": false,
+        "properties": {}
       }
     }
   },
@@ -2525,6 +2462,66 @@
         }
       }
     }
+  },
+  "infrastructure-monitoring-log-view": {
+    "dynamic": false,
+    "properties": {
+      "name": {
+        "type": "text"
+      }
+    }
+  },
+  "enterprise_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "app_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "workplace_search_telemetry": {
+    "dynamic": false,
+    "properties": {}
+  },
+  "slo": {
+    "dynamic": false,
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "indicator": {
+        "properties": {
+          "type": {
+            "type": "keyword"
+          },
+          "params": {
+            "type": "flattened"
+          }
+        }
+      },
+      "budgetingMethod": {
+        "type": "keyword"
+      },
+      "enabled": {
+        "type": "boolean"
+      },
+      "tags": {
+        "type": "keyword"
+      },
+      "version": {
+        "type": "long"
+      }
+    }
+  },
+  "threshold-explorer-view": {
+    "dynamic": false,
+    "properties": {}
   },
   "uptime-dynamic-settings": {
     "dynamic": false,
@@ -2670,6 +2667,21 @@
     "dynamic": false,
     "properties": {}
   },
+  "observability-onboarding-state": {
+    "properties": {
+      "type": {
+        "type": "keyword"
+      },
+      "state": {
+        "type": "object",
+        "dynamic": false
+      },
+      "progress": {
+        "type": "object",
+        "dynamic": false
+      }
+    }
+  },
   "infrastructure-ui-source": {
     "dynamic": false,
     "properties": {}
@@ -2714,17 +2726,114 @@
       }
     }
   },
-  "enterprise_search_telemetry": {
+  "apm-telemetry": {
     "dynamic": false,
     "properties": {}
   },
-  "app_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
+  "apm-server-schema": {
+    "properties": {
+      "schemaJson": {
+        "type": "text",
+        "index": false
+      }
+    }
   },
-  "workplace_search_telemetry": {
-    "dynamic": false,
-    "properties": {}
+  "apm-service-group": {
+    "properties": {
+      "groupName": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "description": {
+        "type": "text"
+      },
+      "color": {
+        "type": "text"
+      }
+    }
+  },
+  "apm-custom-dashboards": {
+    "properties": {
+      "dashboardSavedObjectId": {
+        "type": "keyword"
+      },
+      "kuery": {
+        "type": "text"
+      },
+      "serviceEnvironmentFilterEnabled": {
+        "type": "boolean"
+      },
+      "serviceNameFilterEnabled": {
+        "type": "boolean"
+      }
+    }
+  },
+  "elastic-ai-assistant-prompts": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "is_default": {
+        "type": "boolean"
+      },
+      "is_shared": {
+        "type": "boolean"
+      },
+      "is_new_conversation_default": {
+        "type": "boolean"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "prompt_type": {
+        "type": "keyword"
+      },
+      "content": {
+        "type": "keyword"
+      },
+      "updated_at": {
+        "type": "keyword"
+      },
+      "updated_by": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "keyword"
+      },
+      "created_by": {
+        "type": "keyword"
+      }
+    }
+  },
+  "elastic-ai-assistant-anonimization-fields": {
+    "properties": {
+      "id": {
+        "type": "keyword"
+      },
+      "field_id": {
+        "type": "keyword"
+      },
+      "default_allow": {
+        "type": "boolean"
+      },
+      "default_allow_replacement": {
+        "type": "boolean"
+      },
+      "updated_at": {
+        "type": "keyword"
+      },
+      "updated_by": {
+        "type": "keyword"
+      },
+      "created_at": {
+        "type": "keyword"
+      },
+      "created_by": {
+        "type": "keyword"
+      }
+    }
   },
   "siem-ui-timeline-note": {
     "properties": {
@@ -3185,50 +3294,6 @@
       "note": {
         "type": "text",
         "index": false
-      }
-    }
-  },
-  "apm-telemetry": {
-    "dynamic": false,
-    "properties": {}
-  },
-  "apm-server-schema": {
-    "properties": {
-      "schemaJson": {
-        "type": "text",
-        "index": false
-      }
-    }
-  },
-  "apm-service-group": {
-    "properties": {
-      "groupName": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "description": {
-        "type": "text"
-      },
-      "color": {
-        "type": "text"
-      }
-    }
-  },
-  "apm-custom-dashboards": {
-    "properties": {
-      "dashboardSavedObjectId": {
-        "type": "keyword"
-      },
-      "kuery": {
-        "type": "text"
-      },
-      "serviceEnvironmentFilterEnabled": {
-        "type": "boolean"
-      },
-      "serviceNameFilterEnabled": {
-        "type": "boolean"
       }
     }
   }
