@@ -21,12 +21,12 @@ interface CSVOptions {
   escapeFormulaValues: boolean;
   formatFactory: FormatFactory;
   raw?: boolean;
-  sortedColumns?: string[];
+  columnsSorting?: string[];
 }
 
 export function datatableToCSV(
   { columns, rows }: Datatable,
-  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, sortedColumns }: CSVOptions
+  { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions
 ) {
   const escapeValues = createEscapeValue({
     separator: csvSeparator,
@@ -34,7 +34,7 @@ export function datatableToCSV(
     escapeFormulaValues,
   });
 
-  const sortedIds = sortedColumns || columns.map((col) => col.id);
+  const sortedIds = columnsSorting || columns.map((col) => col.id);
 
   // Build an index lookup table
   const columnIndexLookup = sortedIds.reduce((memo, id, index) => {

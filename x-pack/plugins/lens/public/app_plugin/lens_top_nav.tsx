@@ -606,7 +606,7 @@ export const LensTopNavMenu = ({
 
             const sharingData = {
               activeData,
-              sortedColumns: visualizationMap[visualization.activeId].getSortedColumns?.(
+              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
                 visualization.state,
                 getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
               ),
