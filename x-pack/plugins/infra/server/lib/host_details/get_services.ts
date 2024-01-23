@@ -77,7 +77,6 @@ export const getServices = async (
       },
     },
   };
-  console.log(JSON.stringify(body, null, 2));
   const result = await client<{}, ServicesAPIQueryAggregation>({
     body,
     index: [transaction, error, metric],
