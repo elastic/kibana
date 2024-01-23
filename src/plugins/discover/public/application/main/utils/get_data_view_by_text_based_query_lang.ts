@@ -10,7 +10,7 @@ import {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
 } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, ESQL_TYPE } from '@kbn/data-views-plugin/common';
 import { DiscoverServices } from '../../../build_services';
 
 export async function getDataViewByTextBasedQueryLang(
@@ -36,7 +36,7 @@ export async function getDataViewByTextBasedQueryLang(
   ) {
     const dataViewObj = await services.dataViews.create({
       title: indexPatternFromQuery,
-      type: isEsql ? 'esql' : undefined,
+      type: isEsql ? ESQL_TYPE : undefined,
     });
 
     if (dataViewObj.fields.getByName('@timestamp')?.type === 'date') {

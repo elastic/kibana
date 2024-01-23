@@ -8,6 +8,8 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 
+import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
+
 import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
@@ -91,6 +93,7 @@ export async function getStateFromAggregateQuery(
   try {
     const dataView = await dataViews.create({
       title: indexPattern,
+      type: ESQL_TYPE,
     });
     if (dataView && dataView.id) {
       if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {

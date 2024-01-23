@@ -9,6 +9,7 @@ import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
@@ -51,6 +52,7 @@ export const getSuggestions = async (
     const dataView = await deps.dataViews.create(
       dataViewSpec ?? {
         title: indexPattern,
+        type: 'esql' in query ? ESQL_TYPE : undefined,
       }
     );
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {

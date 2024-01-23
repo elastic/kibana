@@ -14,7 +14,7 @@ echo "--- Serverless Security Second Quality Gate"
 cd x-pack/test/security_solution_api_integration
 set +e
 
-QA_API_KEY=$(vault_get security-solution-qg-enc-key qa_api_key)
+QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))

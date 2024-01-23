@@ -20,6 +20,7 @@ import { withKibana, KibanaReactContextValue } from '@kbn/kibana-react-plugin/pu
 import type { TimeHistoryContract, SavedQuery } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { ESQL_TYPE } from '@kbn/data-views-plugin/common';
 
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
@@ -531,7 +532,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     const esqlIndexPatternMap = new Map<string, boolean>();
     const indexPatterns = this.props.indexPatterns
       ? this.props.indexPatterns.reduce((collector, dataView) => {
-          if (dataView.type !== 'esql') {
+          if (dataView.type !== ESQL_TYPE) {
             collector.push(dataView);
           } else {
             const indexPattern = dataView.getIndexPattern();
