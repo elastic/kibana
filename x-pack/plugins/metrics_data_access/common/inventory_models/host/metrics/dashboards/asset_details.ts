@@ -13,7 +13,6 @@ import {
   diskIOReadWrite,
   diskThroughputReadWrite,
   memoryUsageBreakdown,
-  normalizedLoad1m,
   loadBreakdown,
   rxTx,
 } from '../charts';
@@ -30,35 +29,26 @@ export const assetDetails = {
       chartType: 'xy',
       fromFormulas: ['cpuUsage', 'memoryUsage'],
       chartConfig: {
-        fittingFunction: 'Linear',
         yBounds: {
           mode: 'custom',
           lowerBound: 0,
           upperBound: 1,
         },
-        ...(metricsDataViewId
-          ? {
-              dataset: {
-                index: metricsDataViewId,
-              },
-            }
-          : {}),
       },
+      dataViewId: metricsDataViewId,
     });
+
+    const { normalizedLoad1m } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['normalizedLoad1m'],
+      dataViewId: metricsDataViewId,
+    });
+    normalizedLoad1m.layers.push({ type: 'reference', yAxis: [{ value: '1' }] });
 
     const { logRate } = createBasicCharts({
       chartType: 'xy',
       fromFormulas: ['logRate'],
-      chartConfig: {
-        fittingFunction: 'Linear',
-        ...(logsDataViewId
-          ? {
-              dataset: {
-                index: logsDataViewId,
-              },
-            }
-          : {}),
-      },
+      dataViewId: logsDataViewId,
     });
 
     return createDashboardModel({
@@ -67,7 +57,7 @@ export const assetDetails = {
         cpuUsageBreakdown.get({ dataViewId: metricsDataViewId }),
         memoryUsage,
         memoryUsageBreakdown.get({ dataViewId: metricsDataViewId }),
-        normalizedLoad1m.get({ dataViewId: metricsDataViewId }),
+        normalizedLoad1m,
         loadBreakdown.get({ dataViewId: metricsDataViewId }),
         logRate,
         diskSpaceUsageAvailable.get({ dataViewId: metricsDataViewId }),

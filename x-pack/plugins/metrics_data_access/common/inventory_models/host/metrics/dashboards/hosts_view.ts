@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
-import { createBasicCharts, normalizedLoad1m } from '../charts';
+import { createBasicCharts } from '../charts';
 
 export const hostsView = {
   get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
+    const breakdown: LensBreakdownConfig = {
+      field: 'host.name',
+      type: 'topValues',
+      size: 20,
+    };
+
     const {
       memoryUsage,
       memoryFree,
@@ -35,54 +42,44 @@ export const hostsView = {
       ],
       chartConfig: {
         layerConfig: {
-          breakdown: {
-            field: 'host.name',
-            type: 'topValues',
-            size: 20,
-          },
+          breakdown,
         },
-        fittingFunction: 'Linear',
-        ...(metricsDataViewId
-          ? {
-              dataset: {
-                index: metricsDataViewId,
-              },
-            }
-          : {}),
       },
+      dataViewId: metricsDataViewId,
     });
+
+    const { normalizedLoad1m } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['normalizedLoad1m'],
+      chartConfig: {
+        layerConfig: {
+          breakdown,
+        },
+      },
+      dataViewId: metricsDataViewId,
+    });
+    normalizedLoad1m.layers.push({ type: 'reference', yAxis: [{ value: '1' }] });
 
     const { cpuUsage, diskUsage } = createBasicCharts({
       chartType: 'xy',
       fromFormulas: ['cpuUsage', 'diskUsage'],
       chartConfig: {
         layerConfig: {
-          breakdown: {
-            field: 'host.name',
-            type: 'topValues',
-            size: 20,
-          },
+          breakdown,
         },
         yBounds: {
           mode: 'custom',
           lowerBound: 0,
           upperBound: 1,
         },
-        fittingFunction: 'Linear',
-        ...(metricsDataViewId
-          ? {
-              dataset: {
-                index: metricsDataViewId,
-              },
-            }
-          : {}),
       },
+      dataViewId: metricsDataViewId,
     });
 
     return createDashboardModel({
       charts: [
         cpuUsage,
-        normalizedLoad1m.get({ dataViewId: metricsDataViewId }),
+        normalizedLoad1m,
         memoryUsage,
         memoryFree,
         diskUsage,

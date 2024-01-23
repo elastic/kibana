@@ -28,14 +28,8 @@ export const kpi = {
         trendLine: true,
         subtitle: options?.subtitle ?? AVERAGE,
         seriesColor: options?.seriesColor,
-        ...(metricsDataViewId
-          ? {
-              dataset: {
-                index: metricsDataViewId,
-              },
-            }
-          : {}),
       },
+      dataViewId: metricsDataViewId,
     });
 
     return createDashboardModel({

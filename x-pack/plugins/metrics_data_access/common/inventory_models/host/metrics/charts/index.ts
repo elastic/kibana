@@ -13,29 +13,43 @@ import { formulas } from '../formulas';
 type CustomLensConfig<T extends ChartType> = { id: string } & ChartTypeLensConfig<T>;
 
 type Args<T extends ChartType> = T extends 'xy'
-  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'chartType'> & {
+  ? Omit<Partial<ChartTypeLensConfig<'xy'>>, 'layers' | 'chartType' | 'dataset'> & {
       layerConfig?: Partial<ChartTypeLensConfig<'xy'>['layers'][number]>;
     }
-  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'chartType'>;
+  : Omit<Partial<ChartTypeLensConfig<T>>, 'value' | 'chartType' | 'dataset'>;
 
 export const createBasicCharts = <T extends ChartType>({
   chartType,
   fromFormulas,
   chartConfig,
+  dataViewId,
 }: {
   chartType: T;
   fromFormulas: HostFormulaNames[];
-  chartConfig: Args<T>;
+  chartConfig?: Args<T>;
+  dataViewId?: string;
 }): Record<HostFormulaNames, CustomLensConfig<T>> => {
   return fromFormulas.reduce((acc, curr) => {
     const baseConfig = {
       ...chartConfig,
       id: curr,
-      title: formulas[curr].label ?? chartConfig.title ?? '',
+      title: formulas[curr].label ?? chartConfig?.title ?? '',
+      ...(dataViewId
+        ? {
+            dataset: {
+              index: dataViewId,
+            },
+          }
+        : {}),
     } as LensConfigWithId;
 
     if (chartType === 'xy') {
-      const { layerConfig, legend, ...xyConfig } = baseConfig as Args<'xy'>;
+      const {
+        layerConfig,
+        legend,
+        fittingFunction = 'Linear',
+        ...xyConfig
+      } = baseConfig as Args<'xy'>;
       return {
         ...acc,
         [curr]: {
@@ -50,6 +64,7 @@ export const createBasicCharts = <T extends ChartType>({
             showXAxisTitle: false,
             showYAxisTitle: false,
           },
+          fittingFunction,
           layers: [
             {
               seriesType: 'line',
@@ -75,7 +90,8 @@ export const createBasicCharts = <T extends ChartType>({
 };
 
 // custom charts
-export { cpuUsageBreakdown, normalizedLoad1m, loadBreakdown } from './cpu_charts';
+export { cpuUsageBreakdown } from './cpu_charts';
+export { loadBreakdown } from './load_charts';
 export {
   diskIOReadWrite,
   diskSpaceUsageAvailable,
