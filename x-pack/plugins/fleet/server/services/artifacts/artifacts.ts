@@ -140,10 +140,10 @@ export const bulkCreateArtifacts = async (
     artifacts,
     appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
-
   const logger = appContextService.getLogger();
   const nonConflictErrors = [];
   logger.debug(`Number of batches generated for fleet artifacts: ${batches.length}`);
+
   for (let batchN = 0; batchN < batches.length; batchN++) {
     logger.debug(
       `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
@@ -157,10 +157,12 @@ export const bulkCreateArtifacts = async (
         refresh,
       })
     );
+
     // Track errors of the bulk create action
     if (res.errors) {
       nonConflictErrors.push(
         ...res.items.reduce<Error[]>((acc, item) => {
+          // 409's (conflict - record already exists) are ignored since the artifact already exists
           if (item.create && item.create.status !== 409) {
             acc.push(
               new Error(
@@ -178,11 +180,6 @@ export const bulkCreateArtifacts = async (
     }
   }
 
-  // If any non conflict error, it returns only the errors
-  if (nonConflictErrors.length > 0) {
-    return { errors: nonConflictErrors };
-  }
-
   // Use non sorted artifacts array to preserve the artifacts order in the response
   const nonSortedEsArtifactsResponse: Artifact[] = artifacts.map((artifact) => {
     return esSearchHitToArtifact({
@@ -193,6 +190,7 @@ export const bulkCreateArtifacts = async (
 
   return {
     artifacts: nonSortedEsArtifactsResponse,
+    errors: nonConflictErrors.length ? nonConflictErrors : undefined,
   };
 };
 
@@ -317,7 +315,6 @@ export const fetchAllArtifacts = (
     esClient,
     searchRequest: {
       index: FLEET_SERVER_ARTIFACTS_INDEX,
-      ignore_unavailable: true,
       rest_total_hits_as_int: true,
       track_total_hits: false,
       q: kuery,
