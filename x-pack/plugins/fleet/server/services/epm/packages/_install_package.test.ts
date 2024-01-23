@@ -138,7 +138,6 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: true,
-          disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
           retrySetupOnBoot: false,
@@ -199,7 +198,6 @@ describe('_installPackage', () => {
     appContextService.start(
       createAppContextStartContractMock({
         internal: {
-          disableProxies: false,
           disableILMPolicies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
@@ -277,7 +275,6 @@ describe('_installPackage', () => {
         createAppContextStartContractMock({
           internal: {
             disableILMPolicies: true,
-            disableProxies: false,
             fleetServerStandalone: false,
             onlyAllowAgentUpgradeToKnownVersions: false,
             retrySetupOnBoot: false,
@@ -392,7 +389,6 @@ describe('_installPackage', () => {
       createAppContextStartContractMock({
         internal: {
           disableILMPolicies: false,
-          disableProxies: false,
           fleetServerStandalone: false,
           onlyAllowAgentUpgradeToKnownVersions: false,
           retrySetupOnBoot: false,

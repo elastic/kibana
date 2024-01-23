@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
 
-import type { ValueOf } from '@elastic/eui';
-
-import { outputType } from '../../../common/constants';
+import { DEFAULT_OUTPUT_ID, outputType } from '../../../common/constants';
 
 import type {
   DeleteOutputRequestSchema,
@@ -26,13 +24,13 @@ import type {
   GetOneOutputResponse,
   GetOutputsResponse,
   Output,
-  OutputType,
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService, appContextService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+import { isEqual } from 'lodash';
 
 function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
@@ -105,7 +103,7 @@ export const putOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const outputUpdate = request.body;
   try {
-    validateOutputServerless(outputUpdate.type);
+    await validateOutputServerless(outputUpdate, soClient);
     ensureNoDuplicateSecrets(outputUpdate);
     await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
@@ -141,7 +139,7 @@ export const postOutputHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
     const { id, ...newOutput } = request.body;
-    validateOutputServerless(newOutput.type);
+    await validateOutputServerless(newOutput, soClient);
     ensureNoDuplicateSecrets(newOutput);
     const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
@@ -158,10 +156,21 @@ export const postOutputHandler: RequestHandler<
   }
 };
 
-function validateOutputServerless(type?: ValueOf<OutputType>): void {
+async function validateOutputServerless(
+  output: Partial<Output>,
+  soClient: SavedObjectsClientContract
+): Promise<void> {
   const cloudSetup = appContextService.getCloud();
-  if (cloudSetup?.isServerlessEnabled && type === outputType.RemoteElasticsearch) {
+  if (!cloudSetup?.isServerlessEnabled) {
+    return;
+  }
+  if (output.type === outputType.RemoteElasticsearch) {
     throw Boom.badRequest('Output type remote_elasticsearch not supported in serverless');
+  }
+  // Elasticsearch outputs must have the default host URL
+  const defaultOutput = await outputService.get(soClient, DEFAULT_OUTPUT_ID);
+  if (output.type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
+    throw Boom.badRequest('Elasticsearch output host must equal default output host in serverless');
   }
 }
 

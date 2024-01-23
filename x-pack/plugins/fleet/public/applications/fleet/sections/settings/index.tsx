@@ -123,7 +123,11 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
           <EuiPortal>
-            <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+            <EditOutputFlyout
+              proxies={proxies.data.items}
+              onClose={onCloseCallback}
+              defaultOuput={outputs.data?.items.find((o) => o.id === 'fleet-default-output')}
+            />
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>

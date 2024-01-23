@@ -65,12 +65,14 @@ import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
+  defaultOuput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
 }
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
+  defaultOuput,
   onClose,
   output,
   proxies,
@@ -124,7 +126,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   };
 
   const renderElasticsearchSection = () => {
-    return <OutputFormElasticsearchSection inputs={inputs} />;
+    return (
+      <OutputFormElasticsearchSection
+        inputs={inputs}
+        defaultOuput={defaultOuput}
+        isStateful={isStateful}
+      />
+    );
   };
 
   const renderRemoteElasticsearchSection = () => {
