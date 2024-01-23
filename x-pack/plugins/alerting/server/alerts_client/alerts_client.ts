@@ -242,12 +242,10 @@ export class AlertsClient<
       this.reportedAlerts[alert.id] = alert.payload;
     }
 
-    const alertDoc: AlertData | undefined = this.fetchedAlerts.data[alert.id];
-
     return {
       uuid: legacyAlert.getUuid(),
       start: legacyAlert.getStart() ?? this.startedAtString,
-      alertDoc,
+      alertDoc: this.fetchedAlerts.data[alert.id],
     };
   }
 
