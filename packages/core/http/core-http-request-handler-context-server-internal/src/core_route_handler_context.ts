@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreId } from '@kbn/core-base-common-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
@@ -32,6 +34,10 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
+import {
+  CoreInjectionRouteHandlerContext,
+  type InternalCoreDiServiceStart,
+} from '@kbn/core-di-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -44,6 +50,7 @@ export interface CoreRouteHandlerContextParams {
   deprecations: InternalDeprecationsServiceStart;
   security: InternalSecurityServiceStart;
   userProfile: InternalUserProfileServiceStart;
+  injection: InternalCoreDiServiceStart;
 }
 
 /**
@@ -58,10 +65,12 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   #deprecations?: CoreDeprecationsRouteHandlerContext;
   #security?: CoreSecurityRouteHandlerContext;
   #userProfile?: CoreUserProfileRouteHandlerContext;
+  #injection?: CoreInjectionRouteHandlerContext;
 
   constructor(
     private readonly coreStart: CoreRouteHandlerContextParams,
-    private readonly request: KibanaRequest
+    private readonly request: KibanaRequest,
+    private callerId: PluginOpaqueId | CoreId
   ) {}
 
   public get elasticsearch() {
@@ -72,6 +81,17 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
       );
     }
     return this.#elasticsearch;
+  }
+
+  public get injection() {
+    if (!this.#injection) {
+      this.#injection = new CoreInjectionRouteHandlerContext(
+        this.coreStart.injection,
+        this.request,
+        this.callerId
+      );
+    }
+    return this.#injection;
   }
 
   public get savedObjects() {

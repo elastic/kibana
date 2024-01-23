@@ -3879,6 +3879,26 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-common-internal@link:packages/core/di/core-di-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-common@link:packages/core/di/core-di-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server-internal@link:packages/core/di/core-di-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server-mocks@link:packages/core/di/core-di-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-di-server@link:packages/core/di/core-di-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-doc-links-browser-internal@link:packages/core/doc-links/core-doc-links-browser-internal":
   version "0.0.0"
   uid ""
@@ -20026,6 +20046,11 @@ invariant@^2.1.0, invariant@^2.2.4:
   integrity sha512-phJfQVBuaJM5raOpJjSfkiD6BpbCE4Ns//LaXl6wGYtUBY83nWS6Rf9tXm2e8VaK60JEjYldbPif/A2B1C2gNA==
   dependencies:
     loose-envify "^1.0.0"
+
+inversify@^6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/inversify/-/inversify-6.0.2.tgz#dc7fa0348213d789d35ffb719dea9685570989c7"
+  integrity sha512-i9m8j/7YIv4mDuYXUAcrpKPSaju/CIly9AHK5jvCBeoiM/2KEsuCQTTP+rzSWWpLYWRukdXFSl6ZTk2/uumbiA==
 
 invert-kv@^1.0.0:
   version "1.0.0"
