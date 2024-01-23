@@ -4,14 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useState } from 'react';
+import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { useGetGroupSelectorStateless } from '@kbn/securitysolution-grouping/src/hooks/use_get_group_selector';
-import {
-  GROUPING_ID,
-  MAX_GROUPING_LEVELS,
-} from '@kbn/cloud-security-posture-plugin/public/components/cloud_security_grouping/use_cloud_security_grouping';
 import { useGrouping } from '@kbn/securitysolution-grouping';
 import { ParsedGroupingAggregation } from '@kbn/securitysolution-grouping/src';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
@@ -44,23 +39,14 @@ const SubGrouping = ({
   groupingLevel,
   parentGroupFilters,
   selectedGroup,
-  setSelectedGroups,
+  groupSelectorComponent,
 }: {
   renderChildComponent: (groupFilters: Filter[]) => JSX.Element;
   groupingLevel: number;
   parentGroupFilters?: string;
   selectedGroup: string;
-  setSelectedGroups: (selectedGroups: string[]) => void;
+  groupSelectorComponent?: JSX.Element;
 }) => {
-  // This is the callback that will be called when the user changes the group selector from the grouping component
-  const onGroupChange = (param: {
-    groupByField: string;
-    tableId: string;
-    selectedGroups: string[];
-  }) => {
-    setSelectedGroups(param.selectedGroups);
-  };
-
   const {
     groupData,
     grouping,
@@ -76,7 +62,6 @@ const SubGrouping = ({
     groupingLevel,
     selectedGroup,
     groupFilters: parentGroupFilters ? JSON.parse(parentGroupFilters) : [],
-    onGroupChange,
   });
 
   return (
@@ -92,6 +77,7 @@ const SubGrouping = ({
       selectedGroup={selectedGroup}
       isGroupLoading={isGroupLoading}
       groupingLevel={groupingLevel}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 };
@@ -137,55 +123,51 @@ export const LatestFindingsContainer = () => {
   } = useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
   const dataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN).data!;
-  const [selectedGroups, setSelectedGroups] = useState<string[]>(grouping.selectedGroups);
 
-  // Initializes the selected groups with Grouping Component state selected groups
-  useEffect(() => {
-    setSelectedGroups(grouping.selectedGroups);
-  }, [grouping.selectedGroups]);
-
-  const onStatelessGroupSelectorChange = useCallback((statelessSelectedGroups: string[]) => {
-    setSelectedGroups(statelessSelectedGroups);
-  }, []);
-
-  const statelessGroupSelector = useGetGroupSelectorStateless({
-    groupingId: GROUPING_ID,
-    onGroupChange: onStatelessGroupSelectorChange,
-    fields: grouping.groupSelector.props.fields,
-    defaultGroupingOptions: grouping.groupSelector.props.options,
-    maxGroupingLevels: MAX_GROUPING_LEVELS,
-  });
-
-  const renderChildComponent = (
-    level: number,
-    currentSelectedGroup: string,
-    selectedGroupOptions: string[],
-    setSelectedGroupOptions: (selectedGroups: string[]) => void,
-    parentGroupFilters?: string
-  ) => {
+  const renderChildComponent = ({
+    level,
+    currentSelectedGroup,
+    selectedGroupOptions,
+    parentGroupFilters,
+    groupSelectorComponent,
+  }: {
+    level: number;
+    currentSelectedGroup: string;
+    selectedGroupOptions: string[];
+    parentGroupFilters?: string;
+    groupSelectorComponent?: JSX.Element;
+  }) => {
     let getChildComponent;
-    const hiddenGroupSelector =
-      level === selectedGroupOptions.length - 1 && !selectedGroupOptions.includes('none');
+
+    if (selectedGroupOptions.length === 1 && currentSelectedGroup === 'none') {
+      return (
+        <LatestFindingsTable
+          groupSelectorComponent={groupSelectorComponent}
+          nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
+          height={DEFAULT_TABLE_HEIGHT}
+          showDistributionBar={selectedGroupOptions.includes('none')}
+        />
+      );
+    }
 
     if (level < selectedGroupOptions.length - 1 && !selectedGroupOptions.includes('none')) {
       getChildComponent = (currentGroupFilters: Filter[]) => {
         const nextGroupingLevel = level + 1;
-        return renderChildComponent(
-          nextGroupingLevel,
-          selectedGroupOptions[nextGroupingLevel],
+        return renderChildComponent({
+          level: nextGroupingLevel,
+          currentSelectedGroup: selectedGroupOptions[nextGroupingLevel],
           selectedGroupOptions,
-          setSelectedGroupOptions,
-          JSON.stringify([
+          parentGroupFilters: JSON.stringify([
             ...currentGroupFilters,
             ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
-          ])
-        );
+          ]),
+          groupSelectorComponent,
+        });
       };
     } else {
       getChildComponent = (currentGroupFilters: Filter[]) => {
         return (
           <LatestFindingsTable
-            groupSelectorComponent={hiddenGroupSelector ? undefined : statelessGroupSelector}
             nonPersistedFilters={[
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
@@ -201,8 +183,8 @@ export const LatestFindingsContainer = () => {
         renderChildComponent={getChildComponent}
         selectedGroup={selectedGroupOptions[level]}
         groupingLevel={level}
-        setSelectedGroups={setSelectedGroupOptions}
         parentGroupFilters={parentGroupFilters}
+        groupSelectorComponent={groupSelectorComponent}
       />
     );
   };
@@ -226,8 +208,12 @@ export const LatestFindingsContainer = () => {
     <>
       <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       <div>
-        <EuiSpacer size="m" />
-        {renderChildComponent(0, selectedGroups[0], selectedGroups, setSelectedGroups)}
+        {renderChildComponent({
+          level: 0,
+          currentSelectedGroup: grouping.selectedGroups[0],
+          selectedGroupOptions: grouping.selectedGroups,
+          groupSelectorComponent: grouping.groupSelector,
+        })}
       </div>
     </>
   );

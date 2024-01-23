@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import React from 'react';
 import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { UseGrouping } from '@kbn/securitysolution-grouping/src';
 import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
 import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
 
@@ -22,7 +24,6 @@ import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
-import { UseGrouping } from "@kbn/securitysolution-grouping/src";
 
 interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
@@ -32,7 +33,7 @@ interface LatestFindingsTableProps {
   nonPersistedFilters?: Filter[];
   dataViewRefetch?: () => void;
   dataViewIsRefetching?: boolean;
-};
+}
 
 /**
  * Type Guard for checking if the given source is a CspFinding

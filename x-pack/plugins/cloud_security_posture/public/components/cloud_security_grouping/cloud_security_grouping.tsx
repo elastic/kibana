@@ -23,6 +23,7 @@ interface CloudSecurityGroupingProps {
   selectedGroup: string;
   isGroupLoading?: boolean;
   groupingLevel?: number;
+  groupSelectorComponent?: JSX.Element;
 }
 
 export const CloudSecurityGrouping = ({
@@ -36,11 +37,13 @@ export const CloudSecurityGrouping = ({
   onChangeGroupsPage,
   selectedGroup,
   groupingLevel = 0,
+  groupSelectorComponent,
 }: CloudSecurityGroupingProps) => {
   return (
     <div
       data-test-subj={CSP_GROUPING}
       css={css`
+        position: relative;
         && [data-test-subj='group-stats'] > .euiFlexItem:last-child {
           display: none;
         }
@@ -50,20 +53,37 @@ export const CloudSecurityGrouping = ({
         }
       `}
     >
-      {grouping.getGrouping({
-        activePage: activePageIndex,
-        data,
-        groupingLevel,
-        selectedGroup,
-        inspectButton: undefined,
-        isLoading: isFetching,
-        itemsPerPage: pageSize,
-        onChangeGroupsItemsPerPage,
-        onChangeGroupsPage,
-        renderChildComponent,
-        onGroupClose: () => {},
-        takeActionItems: () => [],
-      })}
+      <div
+        css={css`
+          position: absolute;
+          right: 0;
+          top: 16px;
+        `}
+      >
+        {groupSelectorComponent}
+      </div>
+      <div
+        css={css`
+          && [data-test-subj='alerts-table-group-selector'] {
+            display: none;
+          }
+        `}
+      >
+        {grouping.getGrouping({
+          activePage: activePageIndex,
+          data,
+          groupingLevel,
+          selectedGroup,
+          inspectButton: undefined,
+          isLoading: isFetching,
+          itemsPerPage: pageSize,
+          onChangeGroupsItemsPerPage,
+          onChangeGroupsPage,
+          renderChildComponent,
+          onGroupClose: () => {},
+          takeActionItems: () => [],
+        })}
+      </div>
     </div>
   );
 };
