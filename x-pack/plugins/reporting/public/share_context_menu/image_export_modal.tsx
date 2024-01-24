@@ -325,7 +325,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           >
             <FormattedMessage
               id="xpack.reporting.modalContent.copyUrlButtonLabel"
-              defaultMessage="Copy URL  "
+              defaultMessage="Copy POST URL  "
             />
           </EuiButtonEmpty>
         )}
