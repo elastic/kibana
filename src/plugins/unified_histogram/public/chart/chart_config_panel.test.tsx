@@ -13,9 +13,11 @@ import { act } from 'react-dom/test-utils';
 import { setTimeout } from 'timers/promises';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
+import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { ChartConfigPanel } from './chart_config_panel';
 import type { LensAttributesContext } from '../types';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('ChartConfigPanel', () => {
   it('should return a jsx element to edit the visualization', async () => {
@@ -37,6 +39,11 @@ describe('ChartConfigPanel', () => {
           lensAdapters: lensAdaptersMock,
           query: {
             esql: 'from test',
+          },
+          currentSuggestionContext: {
+            suggestion: currentSuggestionMock,
+            type: UnifiedHistogramSuggestionType.supportedLensSuggestion,
+            suggestionDeps: [undefined, undefined, undefined],
           },
         }}
       />
@@ -61,6 +68,11 @@ describe('ChartConfigPanel', () => {
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           isPlainRecord: false,
+          currentSuggestionContext: {
+            suggestion: currentSuggestionMock,
+            type: UnifiedHistogramSuggestionType.localHistogramDefault,
+            suggestionDeps: [undefined, undefined, undefined],
+          },
         }}
       />
     );
