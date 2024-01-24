@@ -68,7 +68,7 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
-      const onNewReplacements = async (newReplacements: Record<string, string>) =>
+      const onNewReplacements = (newReplacements: Record<string, string>) =>
         appendReplacements({
           conversationId: currentConversation.id,
           replacements: newReplacements,

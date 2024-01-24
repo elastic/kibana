@@ -58,20 +58,22 @@ export async function getCombinedMessage({
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
 }): Promise<Message> {
-  const promptContextsContent = Object.keys(selectedPromptContexts)
-    .sort()
-    .map(async (id) => {
-      const promptContext = await transformRawData({
-        allow: selectedPromptContexts[id].allow,
-        allowReplacement: selectedPromptContexts[id].allowReplacement,
-        currentReplacements,
-        getAnonymizedValue,
-        onNewReplacements,
-        rawData: selectedPromptContexts[id].rawData,
-      });
+  const promptContextsContent = await Promise.all(
+    Object.keys(selectedPromptContexts)
+      .sort()
+      .map(async (id) => {
+        const promptContext = await transformRawData({
+          allow: selectedPromptContexts[id].allow,
+          allowReplacement: selectedPromptContexts[id].allowReplacement,
+          currentReplacements,
+          getAnonymizedValue,
+          onNewReplacements,
+          rawData: selectedPromptContexts[id].rawData,
+        });
 
-      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
-    });
+        return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
+      })
+  );
 
   return {
     content: `${
