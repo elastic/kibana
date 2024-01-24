@@ -1177,7 +1177,6 @@ async function getOptionArgsSuggestions(
   }
 
   if (command.name === 'stats') {
-    // keep on suggesting columns for now
     suggestions.push(
       ...(await getFieldsOrFunctionsSuggestions(
         ['column'],
@@ -1195,11 +1194,8 @@ async function getOptionArgsSuggestions(
 
     const nodeArgType = extractFinalTypeFromArg(nodeArg, references);
     // These cases can happen here, so need to identify each and provide the right suggestion
-    // i.e. ... | STATS ... BY field <suggest>
     // i.e. ... | STATS ... BY field + <suggest>
     // i.e. ... | STATS ... BY field >= <suggest>
-    // i.e. ... | STATS field > 0 <suggest>
-    // i.e. ... | STATS field + otherN <suggest>
 
     if (nodeArgType) {
       if (isFunctionItem(nodeArg) && !isFunctionArgComplete(nodeArg, references).complete) {
@@ -1220,7 +1216,9 @@ async function getOptionArgsSuggestions(
 
   if (optionDef) {
     if (!suggestions.length) {
-      const argDefIndex = Math.max(option.args.length - 1, 0);
+      const argDefIndex = optionDef.signature.multipleParams
+        ? 0
+        : Math.max(option.args.length - 1, 0);
       const types = [optionDef.signature.params[argDefIndex].type].filter(nonNullable);
       // If it's a complete expression then proposed some final suggestions
       // A complete expression is either a function or a column: <COMMAND> <OPTION> field <here>
@@ -1243,7 +1241,7 @@ async function getOptionArgsSuggestions(
             option.name,
             getFieldsByType,
             {
-              functions: false,
+              functions: option.name === 'by',
               fields: true,
             }
           ))
