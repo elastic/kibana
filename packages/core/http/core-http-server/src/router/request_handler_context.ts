@@ -14,6 +14,13 @@ import type { AwaitedProperties } from '@kbn/utility-types';
  **/
 export interface RequestHandlerContextBase {
   /**
+   * The source (either CoreId or PluginOpaqueId) that this context
+   * was invoked for.
+   *
+   * @internal should only be used internally by Core.
+   */
+  _source: symbol;
+  /**
    * Await all the specified context parts and return them.
    *
    * @example
@@ -23,7 +30,7 @@ export interface RequestHandlerContextBase {
    * const pluginAService = resolved.pluginA.someService;
    * ```
    */
-  resolve: <T extends keyof Omit<this, 'resolve'>>(
+  resolve: <T extends keyof Omit<this, keyof RequestHandlerContextBase>>(
     parts: T[]
   ) => Promise<AwaitedProperties<Pick<this, T>>>;
 }

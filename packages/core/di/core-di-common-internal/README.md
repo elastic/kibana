@@ -7,3 +7,5 @@ node scripts/generate package @kbn/core-di-common-internal --web --dir ./package
 node scripts/generate package @kbn/core-di-common --web --dir ./packages/core/di/core-di-common
 node scripts/generate package @kbn/core-di-server --web --dir ./packages/core/di/core-di-server
 node scripts/generate package @kbn/core-di-server-internal --web --dir ./packages/core/di/core-di-server-internal
+
+node scripts/generate package @kbn/core-di-server-mocks --dir ./packages/core/di/core-di-server-mocks

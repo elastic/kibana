@@ -8,14 +8,14 @@
 
 // TODO: will need to move somewhere more global - must be imported exactly once
 import 'reflect-metadata';
-import { Container, ContainerModule, inject, injectable, interfaces } from 'inversify';
+// import { Container, ContainerModule, inject, injectable, interfaces } from 'inversify';
 
-type foo = interfaces.Context;
+// type foo = interfaces.Context;
 
-const containerModule = new ContainerModule((bind) => {});
+// const containerModule = new ContainerModule((bind) => {});
 
 describe('inversify', () => {
-  const someFactoryToken: interfaces.ServiceIdentifier<{ foo: string }> = Symbol.for('someFactory');
+  // const someFactoryToken: interfaces.ServiceIdentifier<{ foo: string }> = Symbol.for('someFactory');
   /*
   it('test', () => {
     const container = new Container({ skipBaseClassChecks: true, defaultScope: 'Singleton' });
@@ -82,7 +82,6 @@ describe('inversify', () => {
     }
   });
    */
-
   /*
   it('test3', () => {
     type PluginConfig = unknown; // marker interface for plugin config for example
