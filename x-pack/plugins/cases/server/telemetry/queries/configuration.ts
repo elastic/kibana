@@ -34,17 +34,14 @@ export const getConfigurationTelemetryData = async ({
 
   const allCustomFields = res.saved_objects.map((sObj) => sObj.attributes.customFields).flat();
 
-  const secCustomFields = res.saved_objects.filter(
-    (secSO) => secSO.attributes.owner === 'securitySolution'
-  )[0]?.attributes.customFields;
+  const getCustomFieldsPerOwner = (owner: Owner) =>
+    res.saved_objects.find((secSO) => secSO.attributes.owner === owner)?.attributes.customFields;
 
-  const obsCustomFields = res.saved_objects.filter(
-    (obsSO) => obsSO.attributes.owner === 'observability'
-  )[0]?.attributes.customFields;
+  const secCustomFields = getCustomFieldsPerOwner('securitySolution');
 
-  const mainCustomFields = res.saved_objects.filter(
-    (mainSO) => mainSO.attributes.owner === 'cases'
-  )[0]?.attributes.customFields;
+  const obsCustomFields = getCustomFieldsPerOwner('observability');
+
+  const mainCustomFields = getCustomFieldsPerOwner('cases');
 
   return {
     all: {

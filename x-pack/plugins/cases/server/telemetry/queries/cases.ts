@@ -165,7 +165,7 @@ const getCasesSavedObjectTelemetry = async (
     {}
   );
 
-  const result = savedObjectsClient.find<unknown, CaseAggregationResult>({
+  return savedObjectsClient.find<unknown, CaseAggregationResult>({
     page: 0,
     perPage: 0,
     type: CASE_SAVED_OBJECT,
@@ -196,8 +196,6 @@ const getCasesSavedObjectTelemetry = async (
       },
     },
   });
-
-  return result;
 };
 
 const getAssigneesAggregations = () => ({
