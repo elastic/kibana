@@ -22,7 +22,7 @@ export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
       size="s"
       title={i18nTexts.title}
       iconType="warning"
-      color="danger"
+      color="warning"
       data-test-subj="shareReportingUnsavedState"
     >
       <EuiText size="s">
