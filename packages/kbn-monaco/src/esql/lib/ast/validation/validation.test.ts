@@ -38,6 +38,7 @@ function getCallbackMocks() {
               type,
             })),
             { name: 'geoPointField', type: 'geo_point' },
+            { name: 'cartesianPointField', type: 'cartesian_point' },
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
             {
