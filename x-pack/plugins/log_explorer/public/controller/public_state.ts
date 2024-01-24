@@ -15,11 +15,7 @@ import {
   DEFAULT_CONTEXT,
   LogExplorerControllerContext,
 } from '../state_machines/log_explorer_controller';
-import {
-  LogExplorerPublicState,
-  LogExplorerPublicStateUpdate,
-  OptionsListControlOption,
-} from './types';
+import { LogExplorerPublicState, LogExplorerPublicStateUpdate, OptionsListControl } from './types';
 
 export const getPublicStateFromContext = (
   context: LogExplorerControllerContext
@@ -80,7 +76,7 @@ const getPublicControlsStateFromControlPanels = (
 
 const getOptionsListPublicControlStateFromControlPanel = (
   optionsListControlPanel: ControlPanels[string]
-): OptionsListControlOption => ({
+): OptionsListControl => ({
   mode: optionsListControlPanel.explicitInput.exclude ? 'exclude' : 'include',
   selection: optionsListControlPanel.explicitInput.existsSelected
     ? { type: 'exists' }
@@ -113,7 +109,7 @@ const getControlPanelsFromPublicControlsState = (
 
 const getControlPanelFromOptionsListPublicControlState = (
   controlId: string,
-  publicControlState: OptionsListControlOption
+  publicControlState: OptionsListControl
 ): ControlPanels[string] => {
   const defaultControlPanelConfig = controlPanelConfigs[controlId];
 

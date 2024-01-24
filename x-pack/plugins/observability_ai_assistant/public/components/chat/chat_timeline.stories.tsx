@@ -119,11 +119,12 @@ const defaultProps: ComponentProps<typeof Component> = {
       },
     }),
   ],
+  onActionClick: async () => {},
   onEdit: async () => {},
   onFeedback: () => {},
   onRegenerate: () => {},
+  onSendTelemetry: () => {},
   onStopGenerating: () => {},
-  onActionClick: async () => {},
 };
 
 export const ChatTimeline = Template.bind({});

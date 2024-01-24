@@ -215,7 +215,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                 content={
                   <FormattedMessage
                     id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes"
+                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
                   />
                 }
               >
@@ -293,16 +293,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <AgentUpgradeStatus
-                  isAgentUpgradable={
-                    !!(
-                      isAgentSelectable(agent) &&
-                      latestAgentVersion &&
-                      isAgentUpgradeable(agent, latestAgentVersion)
-                    )
-                  }
-                  agentUpgradeStartedAt={agent.upgrade_started_at}
-                  agentUpgradedAt={agent.upgraded_at}
-                  agentUpgradeDetails={agent.upgrade_details}
+                  isAgentUpgradable={!!(isAgentSelectable(agent) && isAgentUpgradeable(agent))}
+                  agent={agent}
+                  latestAgentVersion={latestAgentVersion}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -334,12 +327,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       items={
         totalAgents
           ? showUpgradeable
-            ? agents.filter(
-                (agent) =>
-                  isAgentSelectable(agent) &&
-                  latestAgentVersion &&
-                  isAgentUpgradeable(agent, latestAgentVersion)
-              )
+            ? agents.filter((agent) => isAgentSelectable(agent) && isAgentUpgradeable(agent))
             : agents
           : []
       }

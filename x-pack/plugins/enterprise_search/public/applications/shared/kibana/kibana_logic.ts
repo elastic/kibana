@@ -19,13 +19,16 @@ import {
   IUiSettingsClient,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
+import { ESConfig } from '../../../plugin';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -40,6 +43,7 @@ export interface KibanaLogicProps {
   cloud?: CloudSetup;
   config: ClientConfigType;
   data: DataPublicPluginStart;
+  esConfig: ESConfig;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   history: ScopedHistory;
   isSidebarEnabled: boolean;
@@ -75,6 +79,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     cloud: [props.cloud || {}, {}],
     config: [props.config || {}, {}],
     data: [props.data, {}],
+    esConfig: [props.esConfig || { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER }, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
     isSidebarEnabled: [props.isSidebarEnabled, {}],

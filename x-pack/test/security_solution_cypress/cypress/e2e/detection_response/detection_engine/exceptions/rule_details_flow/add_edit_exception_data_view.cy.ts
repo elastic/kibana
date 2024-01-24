@@ -165,8 +165,8 @@ describe(
         .eq(0)
         .find(FIELD_INPUT_PARENT)
         .eq(0)
-        .should('have.text', ITEM_FIELD);
-      cy.get(VALUES_INPUT).should('have.text', 'foo');
+        .should('have.value', ITEM_FIELD);
+      cy.get(VALUES_INPUT).should('have.value', 'foo');
 
       // edit conditions
       editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);

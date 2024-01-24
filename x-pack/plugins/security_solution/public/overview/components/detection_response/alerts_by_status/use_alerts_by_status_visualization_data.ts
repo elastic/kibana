@@ -13,15 +13,15 @@ export const acknowledgedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY
 export const closedAlertsVisualizationId = `${DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}-closed`;
 
 export const useAlertsByStatusVisualizationData = () => {
-  const openAlertsResponse = useVisualizationResponse({
+  const { responses: openAlertsResponse } = useVisualizationResponse({
     visualizationId: openAlertsVisualizationId,
   });
 
-  const acknowledgedAlertsResponse = useVisualizationResponse({
+  const { responses: acknowledgedAlertsResponse } = useVisualizationResponse({
     visualizationId: acknowledgedAlertsVisualizationId,
   });
 
-  const closedAlertsResponse = useVisualizationResponse({
+  const { responses: closedAlertsResponse } = useVisualizationResponse({
     visualizationId: closedAlertsVisualizationId,
   });
 

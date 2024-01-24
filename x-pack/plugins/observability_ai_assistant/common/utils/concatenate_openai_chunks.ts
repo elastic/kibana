@@ -7,10 +7,23 @@
 
 import { cloneDeep } from 'lodash';
 import { type Observable, scan } from 'rxjs';
-import { CreateChatCompletionResponseChunk, MessageRole } from '../types';
+import { type CreateChatCompletionResponseChunk, MessageRole } from '../types';
 
 export const concatenateOpenAiChunks =
-  () => (source: Observable<CreateChatCompletionResponseChunk>) =>
+  () =>
+  (
+    source: Observable<CreateChatCompletionResponseChunk>
+  ): Observable<{
+    message: {
+      content: string;
+      role: MessageRole;
+      function_call: {
+        name: string;
+        arguments: string;
+        trigger: MessageRole.Assistant | MessageRole.User;
+      };
+    };
+  }> =>
     source.pipe(
       scan(
         (acc, { choices }) => {

@@ -6,7 +6,6 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
 const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
@@ -107,9 +106,14 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
    * benchmark id
    */
   benchmarkId: schema.maybe(
-    schema.oneOf([schema.literal('cis_k8s'), schema.literal('cis_eks'), schema.literal('cis_aws')])
+    schema.oneOf([
+      schema.literal('cis_k8s'),
+      schema.literal('cis_eks'),
+      schema.literal('cis_aws'),
+      schema.literal('cis_azure'),
+      schema.literal('cis_gcp'),
+    ])
   ),
-
   /**
    * package_policy_id
    */
@@ -129,3 +133,5 @@ export interface FindCspBenchmarkRuleResponse {
   page: number;
   perPage: number;
 }
+
+export type PageUrlParams = Record<'policyId' | 'packagePolicyId', string>;

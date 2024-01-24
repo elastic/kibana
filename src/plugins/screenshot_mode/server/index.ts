@@ -14,8 +14,8 @@ export {
 
 export type {
   ScreenshotModeRequestHandlerContext,
-  ScreenshotModePluginSetup,
-  ScreenshotModePluginStart,
+  ScreenshotModeServerSetup as ScreenshotModePluginSetup,
+  ScreenshotModeServerStart as ScreenshotModePluginStart,
 } from './types';
 
 export async function plugin() {

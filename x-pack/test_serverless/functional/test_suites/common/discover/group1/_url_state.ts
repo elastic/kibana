@@ -77,6 +77,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Side nav', function () {
+      this.tags([
+        'skipSvlOblt', // the "Discover" side nav entry does something different in oblt
+      ]);
+
       it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.common.navigateToApp('lens');

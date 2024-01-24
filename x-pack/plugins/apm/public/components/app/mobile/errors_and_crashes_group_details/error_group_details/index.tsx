@@ -217,7 +217,6 @@ export function ErrorGroupDetails() {
 
   return (
     <>
-      <EuiSpacer size="m" />
       <ErrorGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}

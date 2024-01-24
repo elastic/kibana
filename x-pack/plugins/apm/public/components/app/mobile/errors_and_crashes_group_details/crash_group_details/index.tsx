@@ -218,7 +218,6 @@ export function CrashGroupDetails() {
 
   return (
     <>
-      <EuiSpacer size="m" />
       <CrashGroupHeader
         groupId={groupId}
         occurrencesCount={errorSamplesData?.occurrencesCount}

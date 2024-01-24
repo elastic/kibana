@@ -13,7 +13,8 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./status/status_not_deployed_not_installed'));
     loadTestFile(require.resolve('./status/status_indexed'));
     loadTestFile(require.resolve('./status/status_indexing'));
-    loadTestFile(require.resolve('./benchmark'));
+    loadTestFile(require.resolve('./benchmark/v1'));
+    loadTestFile(require.resolve('./benchmark/v2'));
     loadTestFile(require.resolve('./find_csp_benchmark_rule'));
     loadTestFile(require.resolve('./telemetry'));
 

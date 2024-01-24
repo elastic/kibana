@@ -21,6 +21,7 @@ export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
 export {
   getDiscoverColumnsFromDisplayOptions,
   getDiscoverGridFromDisplayOptions,
+  getDiscoverFiltersFromState,
 } from './utils/convert_discover_app_state';
 
 export function plugin(context: PluginInitializerContext<LogExplorerConfig>) {

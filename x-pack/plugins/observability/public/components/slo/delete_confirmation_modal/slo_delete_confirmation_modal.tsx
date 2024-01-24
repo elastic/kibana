@@ -42,14 +42,11 @@ export function SloDeleteConfirmationModal({
       onConfirm={onConfirm}
     >
       {groupBy !== ALL_VALUE
-        ? i18n.translate(
-            'xpack.observability.slo.deleteConfirmationModal.partitionByDisclaimerText',
-            {
-              defaultMessage:
-                'This SLO has been generated with a partition key on "{partitionKey}". Deleting this SLO definition will result in all instances being deleted.',
-              values: { partitionKey: groupBy },
-            }
-          )
+        ? i18n.translate('xpack.observability.slo.deleteConfirmationModal.groupByDisclaimerText', {
+            defaultMessage:
+              'This SLO has been generated with a group key on "{groupKey}". Deleting this SLO definition will result in all instances being deleted.',
+            values: { groupKey: groupBy },
+          })
         : i18n.translate('xpack.observability.slo.deleteConfirmationModal.descriptionText', {
             defaultMessage: "You can't recover this SLO after deleting it.",
           })}

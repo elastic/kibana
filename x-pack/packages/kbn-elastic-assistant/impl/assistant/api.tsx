@@ -19,17 +19,16 @@ import {
 import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
-  alerts: boolean;
+  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
   onNewReplacements: (newReplacements: Record<string, string>) => void;
-  ragOnAlerts: boolean;
   replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
   size?: number;
@@ -46,16 +45,15 @@ export interface FetchConnectorExecuteResponse {
 }
 
 export const fetchConnectorExecuteAction = async ({
-  alerts,
+  isEnabledRAGAlerts,
   alertsIndexPattern,
   allow,
   allowReplacement,
-  assistantLangChain,
+  isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
   messages,
   onNewReplacements,
-  ragOnAlerts,
   replacements,
   apiConfig,
   signal,
@@ -84,13 +82,12 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !assistantLangChain;
+  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
   const optionalRequestParams = getOptionalRequestParams({
-    alerts,
+    isEnabledRAGAlerts,
     alertsIndexPattern,
     allow,
     allowReplacement,
-    ragOnAlerts,
     replacements,
     size,
   });
@@ -101,7 +98,8 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeStream',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       }
     : {
@@ -109,7 +107,8 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeAI',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       };
 
@@ -190,9 +189,8 @@ export const fetchConnectorExecuteAction = async ({
 
     return {
       response: hasParsableResponse({
-        alerts,
-        assistantLangChain,
-        ragOnAlerts,
+        isEnabledRAGAlerts,
+        isEnabledKnowledgeBase,
       })
         ? getFormattedMessageContent(response.data)
         : response.data,

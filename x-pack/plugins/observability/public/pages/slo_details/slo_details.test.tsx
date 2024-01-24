@@ -8,6 +8,7 @@
 import React from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import type { Capabilities } from '@kbn/core/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 import { useKibana } from '../../utils/kibana_react';
 import { useParams, useLocation } from 'react-router-dom';
@@ -17,7 +18,6 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useFetchActiveAlerts } from '../../hooks/slo/use_fetch_active_alerts';
 import { ActiveAlerts } from '../../hooks/slo/active_alerts';
-import { useCloneSlo } from '../../hooks/slo/use_clone_slo';
 import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { render } from '../../utils/test_helper';
 import { SloDetailsPage } from './slo_details';
@@ -30,6 +30,7 @@ import {
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 import { ALL_VALUE } from '@kbn/slo-schema';
+import { encode } from '@kbn/rison';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -44,7 +45,6 @@ jest.mock('../../hooks/slo/use_capabilities');
 jest.mock('../../hooks/slo/use_fetch_active_alerts');
 jest.mock('../../hooks/slo/use_fetch_slo_details');
 jest.mock('../../hooks/slo/use_fetch_historical_summary');
-jest.mock('../../hooks/slo/use_clone_slo');
 jest.mock('../../hooks/slo/use_delete_slo');
 
 const useKibanaMock = useKibana as jest.Mock;
@@ -55,12 +55,10 @@ const useCapabilitiesMock = useCapabilities as jest.Mock;
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 const useFetchSloDetailsMock = useFetchSloDetails as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
-const useCloneSloMock = useCloneSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 
 const mockNavigate = jest.fn();
 const mockLocator = jest.fn();
-const mockClone = jest.fn();
 const mockDelete = jest.fn();
 const mockCapabilities = {
   apm: { show: true },
@@ -87,6 +85,7 @@ const mockKibana = () => {
           addError: jest.fn(),
         },
       },
+      observabilityAIAssistant: observabilityAIAssistantPluginMock.createStartContract(),
       share: {
         url: {
           locators: {
@@ -120,7 +119,6 @@ describe('SLO Details Page', () => {
       data: historicalSummaryData,
     });
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
-    useCloneSloMock.mockReturnValue({ mutate: mockClone });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
     useLocationMock.mockReturnValue({ search: '' });
   });
@@ -248,29 +246,12 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(button!);
 
-    const {
-      id,
-      createdAt,
-      enabled,
-      revision,
-      summary,
-      settings,
-      updatedAt,
-      instanceId,
-      version,
-      ...newSlo
-    } = slo;
-
-    expect(mockClone).toBeCalledWith({
-      originalSloId: slo.id,
-      slo: {
-        ...newSlo,
-        name: `[Copy] ${newSlo.name}`,
-      },
-    });
-
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.observability.slos);
+      expect(mockNavigate).toBeCalledWith(
+        paths.observability.sloCreateWithEncodedForm(
+          encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+        )
+      );
     });
   });
 

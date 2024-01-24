@@ -690,6 +690,7 @@ export interface AlertsTableConfigurationRegistry {
   cases?: {
     featureId: string;
     owner: string[];
+    appId?: string;
     syncAlerts?: boolean;
   };
   columns: EuiDataGridColumn[];
@@ -708,6 +709,7 @@ export interface AlertsTableConfigurationRegistry {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
+  ruleTypeIds?: string[];
   useFetchPageContext?: PreFetchPageContext;
 }
 

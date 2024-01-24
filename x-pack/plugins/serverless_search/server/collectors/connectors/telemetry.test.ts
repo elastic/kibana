@@ -8,6 +8,16 @@
 import { registerTelemetryUsageCollector } from './telemetry';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
+const indexNotFoundError = {
+  meta: {
+    body: {
+      error: {
+        type: 'index_not_found_exception',
+      },
+    },
+  },
+};
+
 describe('Connectors Serverless Telemetry Usage Collector', () => {
   const makeUsageCollectorStub = jest.fn();
   const registerStub = jest.fn();
@@ -50,6 +60,24 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
         },
         clients: {
           total: 2,
+        },
+      });
+    });
+    it('should return default telemetry on index not found error', async () => {
+      const fetchContextMock = createCollectorFetchContextMock();
+      fetchContextMock.esClient.count = jest
+        .fn()
+        .mockImplementation(() => Promise.reject(indexNotFoundError));
+      registerTelemetryUsageCollector(usageCollectionMock);
+      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
+        fetchContextMock
+      );
+      expect(telemetryMetrics).toEqual({
+        native: {
+          total: 0,
+        },
+        clients: {
+          total: 0,
         },
       });
     });

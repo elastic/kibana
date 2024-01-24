@@ -6,12 +6,12 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { DataStreamType } from '../../../../common/types';
 import { dataStreamService } from '../../../services';
-import { DataStreamTypes } from '../../../types/data_stream';
 
 export async function getDataStreamsStats(options: {
   esClient: ElasticsearchClient;
-  type?: DataStreamTypes;
+  type?: DataStreamType;
   datasetQuery?: string;
 }) {
   const { esClient, type, datasetQuery } = options;
@@ -24,9 +24,9 @@ export async function getDataStreamsStats(options: {
   const mappedDataStreams = matchingDataStreamsStats.map((dataStream) => {
     return {
       name: dataStream.data_stream,
-      size: dataStream.store_size,
-      size_bytes: dataStream.store_size_bytes,
-      last_activity: dataStream.maximum_timestamp,
+      size: dataStream.store_size?.toString(),
+      sizeBytes: dataStream.store_size_bytes,
+      lastActivity: dataStream.maximum_timestamp,
     };
   });
 

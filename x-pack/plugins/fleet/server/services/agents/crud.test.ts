@@ -25,7 +25,7 @@ import {
 
 jest.mock('../audit_logging');
 jest.mock('../../../common/services/is_agent_upgradeable', () => ({
-  isAgentUpgradeable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
+  isAgentUpgradeAvailable: jest.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
 }));
 jest.mock('./versions', () => {
   return {

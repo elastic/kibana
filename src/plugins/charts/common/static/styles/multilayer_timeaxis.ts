@@ -20,7 +20,7 @@ export const MULTILAYER_TIME_AXIS_STYLE: RecursivePartial<AxisStyle> = {
   },
   tickLine: {
     visible: true,
-    size: 0.0001,
+    size: 0,
     padding: 4,
   },
 };

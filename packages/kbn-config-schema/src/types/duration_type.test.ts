@@ -8,6 +8,7 @@
 
 import { duration as momentDuration } from 'moment';
 import { schema } from '../..';
+import { ensureDuration } from '../duration';
 
 const { duration, object, contextRef, siblingRef } = schema;
 
@@ -132,6 +133,28 @@ describe('#defaultValue', () => {
         "target": "PT1H",
       }
     `);
+  });
+});
+
+describe('#min', () => {
+  it('returns the value when larger', () => {
+    expect(duration({ min: '5m' }).validate('7m')).toEqual(ensureDuration('7m'));
+  });
+  it('throws error when value is smaller', () => {
+    expect(() => duration({ min: '5m' }).validate('3m')).toThrowErrorMatchingInlineSnapshot(
+      `"Value must be equal to or greater than [PT5M]"`
+    );
+  });
+});
+
+describe('#max', () => {
+  it('returns the value when smaller', () => {
+    expect(duration({ max: '10d' }).validate('7d')).toEqual(ensureDuration('7d'));
+  });
+  it('throws error when value is greater', () => {
+    expect(() => duration({ max: '10h' }).validate('17h')).toThrowErrorMatchingInlineSnapshot(
+      `"Value must be equal to or less than [PT10H]"`
+    );
   });
 });
 

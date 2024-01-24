@@ -66,7 +66,9 @@
             "type": "Object",
             "tags": [],
             "label": "theme$",
-            "description": [],
+            "description": [
+              "\nAn observable of the currently active theme.\nNote that the observable has a replay effect, so it will emit once during subscriptions."
+            ],
             "signature": [
               "Observable",
               "<",
@@ -82,50 +84,60 @@
             "path": "packages/core/theme/core-theme-browser/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-theme-browser",
-        "id": "def-common.ThemeServiceStart",
-        "type": "Interface",
-        "tags": [],
-        "label": "ThemeServiceStart",
-        "description": [],
-        "path": "packages/core/theme/core-theme-browser/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "@kbn/core-theme-browser",
-            "id": "def-common.ThemeServiceStart.theme$",
-            "type": "Object",
+            "id": "def-common.ThemeServiceSetup.getTheme",
+            "type": "Function",
             "tags": [],
-            "label": "theme$",
-            "description": [],
+            "label": "getTheme",
+            "description": [
+              "\nReturns the theme currently in use.\nNote that when possible, using the `theme$` observable instead is strongly encouraged, as\nit will allow to react to dynamic theme switch (even if those are not implemented at the moment)"
+            ],
             "signature": [
-              "Observable",
-              "<",
+              "() => ",
               {
                 "pluginId": "@kbn/core-theme-browser",
                 "scope": "common",
                 "docId": "kibKbnCoreThemeBrowserPluginApi",
                 "section": "def-common.CoreTheme",
                 "text": "CoreTheme"
-              },
-              ">"
+              }
             ],
             "path": "packages/core/theme/core-theme-browser/src/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-theme-browser",
+        "id": "def-common.ThemeServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "ThemeServiceStart",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-theme-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreThemeBrowserPluginApi",
+            "section": "def-common.ThemeServiceSetup",
+            "text": "ThemeServiceSetup"
+          }
+        ],
+        "path": "packages/core/theme/core-theme-browser/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

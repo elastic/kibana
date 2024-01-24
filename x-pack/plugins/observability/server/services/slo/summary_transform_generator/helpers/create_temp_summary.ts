@@ -9,14 +9,16 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { SLO } from '../../../../domain/models';
 
 export function createTempSummaryDocument(slo: SLO, spaceId: string) {
+  const apmParams = 'environment' in slo.indicator.params ? slo.indicator.params : null;
+
   return {
     service: {
-      environment: null,
-      name: null,
+      environment: apmParams?.environment ?? null,
+      name: apmParams?.service ?? null,
     },
     transaction: {
-      name: null,
-      type: null,
+      name: apmParams?.transactionName ?? null,
+      type: apmParams?.transactionType ?? null,
     },
     slo: {
       indicator: {

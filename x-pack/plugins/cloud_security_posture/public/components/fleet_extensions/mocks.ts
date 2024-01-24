@@ -6,7 +6,7 @@
  */
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
-import { createNewPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createNewPackagePolicyMock, createAgentPolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
@@ -24,6 +24,9 @@ export const getMockPolicyK8s = () => getPolicyMock(CLOUDBEAT_VANILLA, 'kspm', '
 export const getMockPolicyEKS = () => getPolicyMock(CLOUDBEAT_EKS, 'kspm', 'eks');
 export const getMockPolicyVulnMgmtAWS = () =>
   getPolicyMock(CLOUDBEAT_VULN_MGMT_AWS, 'vuln_mgmt', 'aws');
+export const getMockAgentlessAgentPolicy = () => {
+  return createAgentPolicyMock({ id: 'agentless' });
+};
 
 export const getMockPackageInfoVulnMgmtAWS = () => {
   return {

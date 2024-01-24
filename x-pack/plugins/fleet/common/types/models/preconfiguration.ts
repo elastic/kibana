@@ -35,6 +35,7 @@ export interface PreconfiguredAgentPolicy extends Omit<NewAgentPolicy, 'namespac
 
 export interface PreconfiguredPackage extends Omit<PackagePolicyPackage, 'title'> {
   prerelease?: boolean;
+  skipDataStreamRollover?: boolean;
 }
 
 export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {

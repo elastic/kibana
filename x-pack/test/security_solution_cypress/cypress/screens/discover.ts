@@ -43,7 +43,7 @@ export const DISCOVER_FILTER_BADGES = `${DISCOVER_CONTAINER} ${getDataTestSubjec
   'filter-badge-'
 )}`;
 
-export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('unifiedHistogramQueryHits');
+export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('discoverQueryHits');
 
 export const DISCOVER_FIELDS_LOADING = getDataTestSubjectSelector(
   'fieldListGroupedAvailableFields-countLoading'

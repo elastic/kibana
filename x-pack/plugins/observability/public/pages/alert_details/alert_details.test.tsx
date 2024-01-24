@@ -13,6 +13,9 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
+import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { Subset } from '../../typings';
 import { render } from '../../utils/test_helper';
@@ -22,8 +25,6 @@ import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { AlertDetails } from './alert_details';
 import { ConfigSchema } from '../../plugin';
 import { alert, alertWithNoData } from './mock/alert';
-import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';
-import { RuleTypeModel, ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -45,17 +46,20 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
 const useKibanaMock = useKibana as jest.Mock;
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
       ...kibanaStartMock.startContract(),
-      theme: {},
       cases: casesPluginMock.createStartContract(),
       http: {
         basePath: {
           prepend: jest.fn(),
         },
       },
+      observabilityAIAssistant: mockObservabilityAIAssistant,
+      theme: {},
       triggersActionsUi: {
         ruleTypeRegistry,
       },

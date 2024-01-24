@@ -304,8 +304,51 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-#### Known limitations 
-- Currently RBAC cannot be tested.
+Store the email and password of the account you used to login in the QA Environment at the root directory of your Kibana project on `.ftr/role_users.json`, using the following format:
+
+```json
+{
+  "admin": {
+    "email": "<email>",
+    "password": "<password>"
+  }
+}
+```
+
+#### Testing with different roles 
+
+If you want to execute a test using Cypress on visual mode with MKI, you need to make sure you have the user created in your organization, and add it tot he `.ftr/role_users.json`:
+
+```json
+{
+  "admin": {
+    "email": "<email>",
+    "password": "<password>"
+  },
+  "<roleName>": {
+    "email": "<email>",
+    "password": "<password>"
+  }
+}
+```
+
+As role names please use:
+- admin
+- detections_admin
+- editor
+- endpoint_operations_analyst
+- endpoint_policy_manager
+- none
+- platform_engineer
+- rule_author
+- soc_manager
+- t1_analyst
+- t2_analyst
+- t3_analyst
+- threat_intelligence_analyst
+- viewer
+
+The above should be the same used on the automation.
 
 #### PLIs
 

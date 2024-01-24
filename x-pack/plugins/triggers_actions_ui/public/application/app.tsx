@@ -11,7 +11,6 @@ import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { ChromeBreadcrumb, CoreStart, CoreTheme, ScopedHistory } from '@kbn/core/public';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
-import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { KibanaFeature } from '@kbn/features-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -24,6 +23,7 @@ import { PluginStartContract as AlertingStart } from '@kbn/alerting-plugin/publi
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -75,6 +75,7 @@ export interface TriggersAndActionsUiServices extends CoreStart {
   expressions: ExpressionsStart;
   isServerless: boolean;
   fieldFormats: FieldFormatsStart;
+  lens: LensPublicStart;
 }
 
 export const renderApp = (deps: TriggersAndActionsUiServices) => {
@@ -86,17 +87,17 @@ export const renderApp = (deps: TriggersAndActionsUiServices) => {
 };
 
 export const App = ({ deps }: { deps: TriggersAndActionsUiServices }) => {
-  const { dataViews, uiSettings, theme$ } = deps;
+  const { dataViews, theme } = deps;
   const sections: Section[] = ['rules', 'logs', 'alerts'];
-  const isDarkMode = useObservable<boolean>(uiSettings.get$('theme:darkMode'));
+  const isDarkMode = theme.getTheme().darkMode;
 
   const sectionsRegex = sections.join('|');
   setDataViewsService(dataViews);
   return (
     <I18nProvider>
       <EuiThemeProvider darkMode={isDarkMode}>
-        <KibanaThemeProvider theme$={theme$}>
-          <KibanaContextProvider services={{ ...deps, theme: { theme$ } }}>
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <KibanaContextProvider services={{ ...deps }}>
             <Router history={deps.history}>
               <QueryClientProvider client={queryClient}>
                 <AppWithoutRouter sectionsRegex={sectionsRegex} />

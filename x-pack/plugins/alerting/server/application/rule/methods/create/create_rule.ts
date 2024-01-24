@@ -8,6 +8,7 @@ import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
@@ -58,7 +59,10 @@ export async function createRule<Params extends RuleParams = never>(
   // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
   const data = {
     ...initialData,
-    actions: addGeneratedActionValues(initialData.actions as NormalizedAlertAction[]),
+    actions: await addGeneratedActionValues(
+      initialData.actions as NormalizedAlertAction[],
+      context
+    ),
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();
@@ -101,7 +105,7 @@ export async function createRule<Params extends RuleParams = never>(
     context.auditLogger?.log(
       ruleAuditEvent({
         action: RuleAuditAction.CREATE,
-        savedObject: { type: 'alert', id },
+        savedObject: { type: RULE_SAVED_OBJECT_TYPE, id },
         error,
       })
     );

@@ -354,7 +354,13 @@
             "label": "categoryCounts",
             "description": [],
             "signature": [
-              "{ [category: string]: number; }"
+              {
+                "pluginId": "@kbn/management-settings-types",
+                "scope": "common",
+                "docId": "kibKbnManagementSettingsTypesPluginApi",
+                "section": "def-common.CategoryCounts",
+                "text": "CategoryCounts"
+              }
             ],
             "path": "packages/kbn-management/settings/components/field_category/categories.tsx",
             "deprecated": false,

@@ -5,47 +5,43 @@
  * 2.0.
  */
 
-import type { RiskScoreState } from '../../../../explore/containers/risk_score';
-import type { RiskScoreEntity, UserRiskScore } from '../../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskCategories } from '../../../../../common/entity_analytics/risk_engine';
+import { mockAnomalies } from '../../../../common/components/ml/mock';
+import type { UserItem } from '../../../../../common/search_strategy';
+import type { ObservedEntityData } from '../../shared/components/observed_entity/types';
 
-const userRiskScore: UserRiskScore = {
-  '@timestamp': '626569200000',
+const anomaly = mockAnomalies.anomalies[0];
+
+const observedUserDetails = {
   user: {
-    name: 'test',
-    risk: {
-      rule_risks: [],
-      calculated_score_norm: 70,
-      multipliers: [],
-      calculated_level: RiskSeverity.high,
-      inputs: [
-        {
-          id: '_id',
-          index: '_index',
-          category: RiskCategories.category_1,
-          description: 'Alert from Rule: My rule',
-          risk_score: 30,
-          timestamp: '2021-08-19T18:55:59.000Z',
-        },
-      ],
+    id: ['1234', '321'],
+    domain: ['test domain', 'another test domain'],
+  },
+  host: {
+    ip: ['10.0.0.1', '127.0.0.1'],
+    os: {
+      name: ['testOs'],
+      family: ['testFamily'],
     },
   },
-  alertsCount: 0,
-  oldestAlertTimestamp: '626569200000',
 };
 
-export const mockRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
-  data: [userRiskScore],
-  inspect: {
-    dsl: [],
-    response: [],
+export const mockObservedUser: ObservedEntityData<UserItem> = {
+  details: observedUserDetails,
+  isLoading: false,
+  firstSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
   },
-  isInspected: false,
-  refetch: () => {},
-  totalCount: 0,
-  isModuleEnabled: true,
-  isAuthorized: true,
-  isDeprecated: false,
-  loading: false,
+  lastSeen: {
+    isLoading: false,
+    date: '2023-02-23T20:03:17.489Z',
+  },
+  anomalies: {
+    isLoading: false,
+    anomalies: {
+      anomalies: [anomaly],
+      interval: '',
+    },
+    jobNameById: { [anomaly.jobId]: 'job_name' },
+  },
 };

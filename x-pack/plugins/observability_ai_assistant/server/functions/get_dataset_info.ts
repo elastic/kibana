@@ -63,15 +63,19 @@ export function registerGetDatasetInfoFunction({
 
       if (index === '') {
         return {
-          indices,
-          fields: [],
+          content: {
+            indices,
+            fields: [],
+          },
         };
       }
 
       if (indices.length === 0) {
         return {
-          indices,
-          fields: [],
+          content: {
+            indices,
+            fields: [],
+          },
         };
       }
 

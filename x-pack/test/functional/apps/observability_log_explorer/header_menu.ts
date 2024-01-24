@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             '@timestamp',
             'service.name',
             'host.name',
-            'message',
+            'content',
           ]);
         });
 

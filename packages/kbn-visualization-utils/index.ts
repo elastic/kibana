@@ -7,3 +7,4 @@
  */
 
 export { getTimeZone } from './src/get_timezone';
+export { TooltipWrapper } from './src/tooltip_wrapper';

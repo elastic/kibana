@@ -13,15 +13,14 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/analytics-client",
     "@kbn/core",
     "@kbn/core-http-server",
     "@kbn/licensing-plugin",
-    "@kbn/core-http-request-handler-context-server",
     "@kbn/securitysolution-es-utils",
     "@kbn/securitysolution-io-ts-utils",
     "@kbn/actions-plugin",
     "@kbn/elastic-assistant",
-    "@kbn/elastic-assistant-common",
     "@kbn/logging-mocks",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
@@ -33,6 +32,9 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
+    "@kbn/core-analytics-server",
+    "@kbn/elastic-assistant-common",
+    "@kbn/core-http-router-server-mocks",
   ],
   "exclude": [
     "target/**/*",

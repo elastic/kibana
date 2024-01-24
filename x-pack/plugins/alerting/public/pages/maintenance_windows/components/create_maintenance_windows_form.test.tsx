@@ -131,7 +131,9 @@ describe('CreateMaintenanceWindowForm', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
-    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('input');
+    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
+      'comboBoxSearchInput'
+    );
 
     await waitFor(() => {
       expect(
@@ -156,7 +158,7 @@ describe('CreateMaintenanceWindowForm', () => {
     expect(dateInputs[0]).toHaveValue('03/23/2023 09:00 PM');
     expect(dateInputs[1]).toHaveValue('03/25/2023 09:00 PM');
     expect(recurringInput).toBeChecked();
-    expect(timezoneInput).toHaveTextContent('America/Los_Angeles');
+    expect(timezoneInput).toHaveValue('America/Los_Angeles');
   });
 
   it('should initialize MWs without category ids properly', async () => {

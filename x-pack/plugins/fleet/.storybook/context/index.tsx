@@ -93,6 +93,7 @@ export const StorybookContext: React.FC<{ storyContext?: Parameters<DecoratorFn>
       settings: getSettings(),
       theme: {
         theme$: EMPTY,
+        getTheme: () => ({ darkMode: false }),
       },
       plugins: {} as unknown as PluginsServiceStart,
       authz: {

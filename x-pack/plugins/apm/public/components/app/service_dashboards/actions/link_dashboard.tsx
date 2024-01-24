@@ -14,10 +14,12 @@ export function LinkDashboard({
   onRefresh,
   emptyButton = false,
   serviceDashboards,
+  serviceName,
 }: {
   onRefresh: () => void;
   emptyButton?: boolean;
   serviceDashboards?: MergedServiceDashboard[];
+  serviceName: string;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -51,6 +53,7 @@ export function LinkDashboard({
           onClose={() => setIsModalVisible(false)}
           onRefresh={onRefresh}
           serviceDashboards={serviceDashboards}
+          serviceName={serviceName}
         />
       )}
     </>

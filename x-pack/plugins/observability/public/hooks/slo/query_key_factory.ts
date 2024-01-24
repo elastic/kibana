@@ -10,8 +10,11 @@ import type { Indicator } from '@kbn/slo-schema';
 interface SloListFilter {
   kqlQuery: string;
   page: number;
+  perPage: number;
   sortBy: string;
   sortDirection: string;
+  filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {

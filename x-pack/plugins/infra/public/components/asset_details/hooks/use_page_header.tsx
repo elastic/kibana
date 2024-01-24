@@ -5,22 +5,23 @@
  * 2.0.
  */
 import {
-  EuiIcon,
-  type EuiPageHeaderProps,
-  type EuiBreadcrumbsProps,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
+  type EuiBreadcrumbsProps,
+  type EuiPageHeaderProps,
 } from '@elastic/eui';
-import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useMemo } from 'react';
-import { capitalize } from 'lodash';
-import { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { capitalize } from 'lodash';
+import React, { useCallback, useMemo } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { useProfilingIntegrationSetting } from '../../../hooks/use_profiling_integration_setting';
 import { APM_HOST_FILTER_FIELD } from '../constants';
 import { LinkToAlertsRule, LinkToApmServices, LinkToNodeDetails } from '../links';
-import { ContentTabIds, type RouteState, type LinkOptions, type Tab, type TabIds } from '../types';
+import { ContentTabIds, type LinkOptions, type RouteState, type Tab, type TabIds } from '../types';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 import { useTabSwitcherContext } from './use_tab_switcher';
 
@@ -110,12 +111,14 @@ const useRightSideItems = (links?: LinkOptions[]) => {
 
 const useFeatureFlagTabs = () => {
   const { featureFlags } = usePluginConfig();
+  const isProfilingEnabled = useProfilingIntegrationSetting();
+
   const featureFlagControlledTabs: Partial<Record<ContentTabIds, boolean>> = useMemo(
     () => ({
       [ContentTabIds.OSQUERY]: featureFlags.osqueryEnabled,
-      [ContentTabIds.PROFILING]: featureFlags.profilingEnabled,
+      [ContentTabIds.PROFILING]: isProfilingEnabled,
     }),
-    [featureFlags.osqueryEnabled, featureFlags.profilingEnabled]
+    [featureFlags.osqueryEnabled, isProfilingEnabled]
   );
 
   const isTabEnabled = useCallback(

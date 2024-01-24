@@ -11,6 +11,7 @@ export default function ({ getPageObjects, getService }) {
   const PageObjects = getPageObjects(['maps', 'header']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
+  const comboBox = getService('comboBox');
 
   describe('layer errors', () => {
     before(async () => {
@@ -33,8 +34,9 @@ export default function ({ getPageObjects, getService }) {
       it('should open request in inspector', async () => {
         await testSubjects.click('viewEsErrorButton');
 
-        const selectedRequest = await testSubjects.getVisibleText('euiComboBoxPill');
-        expect(selectedRequest).to.equal('load layer features (connections)');
+        expect(await comboBox.getComboBoxSelectedOptions('inspectorRequestChooser')).to.eql([
+          'load layer features (connections)',
+        ]);
       });
     });
 

@@ -39,10 +39,11 @@ export function ChatFlyout({
   startedFrom: StartedFrom;
   onClose: () => void;
 }) {
-  const { euiTheme } = useEuiTheme();
   const {
     services: { http },
   } = useKibana();
+
+  const { euiTheme } = useEuiTheme();
 
   const currentUser = useCurrentUser();
 
@@ -53,6 +54,12 @@ export function ChatFlyout({
   const knowledgeBase = useKnowledgeBase();
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+
+  const conversationsHeaderClassName = css`
+    padding-top: 12px;
+    padding-bottom: 12px;
+    border-bottom: solid 1px ${euiTheme.border.color};
+  `;
 
   return isOpen ? (
     <EuiFlyout onClose={onClose}>
@@ -67,7 +74,7 @@ export function ChatFlyout({
             hasShadow={false}
             hasBorder={false}
             borderRadius="none"
-            css={{ borderBottom: `solid 1px ${euiTheme.border.color}` }}
+            className={conversationsHeaderClassName}
           >
             {conversationId ? (
               <EuiLink

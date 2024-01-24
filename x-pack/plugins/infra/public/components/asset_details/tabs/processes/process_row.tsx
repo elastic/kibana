@@ -23,12 +23,8 @@ import {
 } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import useToggle from 'react-use/lib/useToggle';
-import {
-  useObservabilityAIAssistant,
-  type Message,
-  MessageRole,
-  ContextualInsight,
-} from '@kbn/observability-ai-assistant-plugin/public';
+import { type Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { Process } from './types';
 import { ProcessRowCharts } from './process_row_charts';
 
@@ -38,7 +34,10 @@ interface Props {
   supportAIAssistant?: boolean;
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
-  const aiAssistant = useObservabilityAIAssistant();
+  const {
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  } = useKibanaContextForPlugin().services;
+
   const explainProcessMessages = useMemo<Message[] | undefined>(() => {
     if (!command) {
       return undefined;
@@ -98,11 +97,11 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
   }, [command]);
   return (
     <>
-      {aiAssistant.isEnabled() && explainProcessMessages ? (
+      {ObservabilityAIAssistantContextualInsight && explainProcessMessages ? (
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <ContextualInsight
+              <ObservabilityAIAssistantContextualInsight
                 title={explainProcessMessageTitle}
                 messages={explainProcessMessages}
               />

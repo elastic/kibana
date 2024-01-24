@@ -144,7 +144,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           },
           disabled: isGlobal,
           toolTipContent: isGlobal ? labels.listRemoveActionNotAllowedMessage : undefined,
-          toolTipPosition: 'top' as const,
+          toolTipProps: { position: 'top' as const },
           'data-test-subj': 'remove-from-policy-action',
         };
         return {
