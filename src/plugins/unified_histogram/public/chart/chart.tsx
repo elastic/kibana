@@ -271,9 +271,8 @@ export function Chart({
 
   const removeTables = (attributes: LensAttributes) => {
     if (!attributes.state.datasourceStates.textBased) {
-       return attributes;
+      return attributes;
     }
-    
     const layers = attributes.state.datasourceStates.textBased?.layers;
 
     const newState = {
