@@ -61,7 +61,6 @@ export const LoginPage = () => {
     const fetchData = async () => {
       const response = await fetchRoles(services.http);
       setRoles(response.roles);
-      // formik.setFieldValue('role', response.roles[0]);
       formikRef.current.setFieldValue('role', response.roles[0]);
     };
 
