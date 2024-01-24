@@ -28,7 +28,9 @@ import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identi
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
 import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -39,6 +41,7 @@ import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handl
 import {
   isAccessControlDisabledException,
   isExpensiveQueriesNotAllowedException,
+  isIndexNotFoundException,
 } from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
@@ -548,18 +551,22 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         query: schema.object({
           connectorId: schema.string(),
-          indexToDelete: schema.maybe(schema.string()),
+          indexNameToDelete: schema.maybe(schema.string()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connectorId, indexToDelete } = request.query;
+      const { connectorId, indexNameToDelete } = request.query;
 
       let connectorResponse;
       try {
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
-        // TODO if indexToDelete is available delete index too.
+        if (indexNameToDelete) {
+          await deleteIndexPipelines(client, indexNameToDelete);
+          await deleteAccessControlIndex(client, indexNameToDelete);
+          await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+        }
       } catch (error) {
         if (isResourceNotFoundException(error)) {
           return createError({
@@ -575,6 +582,16 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
             statusCode: 404,
           });
         }
+
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
         throw error;
       }
 

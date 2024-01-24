@@ -13,6 +13,10 @@ import { Status } from '../../../../../common/types/api';
 
 import { Meta } from '../../../../../common/types/pagination';
 import {
+  DeleteConnectorApiLogic,
+  DeleteConnectorApiLogicActions,
+} from '../../api/connector/delete_connector_api_logic';
+import {
   FetchConnectorsApiLogic,
   FetchConnectorsApiLogicActions,
 } from '../../api/connector/fetch_connectors.api';
@@ -22,6 +26,9 @@ export interface ConnectorsActions {
   apiError: FetchConnectorsApiLogicActions['apiError'];
   apiSuccess: FetchConnectorsApiLogicActions['apiSuccess'];
   closeDeleteModal(): void;
+  deleteConnector: DeleteConnectorApiLogicActions['makeRequest'];
+  deleteError: DeleteConnectorApiLogicActions['apiError'];
+  deleteSuccess: DeleteConnectorApiLogicActions['apiSuccess'];
   fetchConnectors({
     fetchCrawlersOnly,
     from,
@@ -54,8 +61,11 @@ export interface ConnectorsActions {
 export interface ConnectorsValues {
   connectors: ConnectorViewItem[];
   data: typeof FetchConnectorsApiLogic.values.data;
+  deleteModalConnectorId: string;
   deleteModalConnectorName: string;
   deleteModalIndexName: string | null;
+  deleteStatus: typeof DeleteConnectorApiLogic.values.status;
+  isDeleteLoading: boolean;
   isDeleteModalVisible: boolean;
   isEmpty: boolean;
   isFetchConnectorsDetailsLoading: boolean;
@@ -89,10 +99,24 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     setIsFirstRequest: true,
   },
   connect: {
-    actions: [FetchConnectorsApiLogic, ['makeRequest', 'apiSuccess', 'apiError']],
-    values: [FetchConnectorsApiLogic, ['data', 'status']],
+    actions: [
+      FetchConnectorsApiLogic,
+      ['makeRequest', 'apiSuccess', 'apiError'],
+      DeleteConnectorApiLogic,
+      ['makeRequest as deleteConnector', 'apiSuccess as deleteSuccess', 'apiError as deleteError'],
+    ],
+    values: [
+      FetchConnectorsApiLogic,
+      ['data', 'status'],
+      DeleteConnectorApiLogic,
+      ['status as deleteStatus'],
+    ],
   },
-  listeners: ({ actions }) => ({
+  listeners: ({ actions, values }) => ({
+    deleteSuccess: () => {
+      actions.closeDeleteModal();
+      actions.makeRequest(values.searchParams);
+    },
     fetchConnectors: async (input, breakpoint) => {
       await breakpoint(150);
       actions.makeRequest(input);
@@ -100,6 +124,13 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
   }),
   path: ['enterprise_search', 'content', 'connectors_logic'],
   reducers: () => ({
+    deleteModalConnectorId: [
+      '',
+      {
+        closeDeleteModal: () => '',
+        openDeleteModal: (_, { connectorId }) => connectorId,
+      },
+    ],
     deleteModalConnectorName: [
       '',
       {
@@ -167,6 +198,10 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
           }) || []
         );
       },
+    ],
+    isDeleteLoading: [
+      () => [selectors.deleteStatus],
+      (deleteStatus) => Status.LOADING === deleteStatus,
     ],
     isEmpty: [
       () => [selectors.data],

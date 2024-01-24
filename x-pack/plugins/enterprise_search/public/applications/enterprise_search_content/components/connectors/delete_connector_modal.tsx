@@ -17,20 +17,25 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { deleteConnector } from '../../api/connector/delete_connector_api_logic';
+
 import { ConnectorsLogic } from './connectors_logic';
 
 export const DeleteConnectorModal: React.FC = () => {
   const { closeDeleteModal } = useActions(ConnectorsLogic);
   const {
-    isDeleteModalVisible,
+    deleteModalConnectorId: connectorId,
     deleteModalConnectorName: connectorName,
     deleteModalIndexName,
+    isDeleteLoading,
+    isDeleteModalVisible,
   } = useValues(ConnectorsLogic);
 
   const [inputConnectorName, setInputConnectorName] = useState('');
@@ -51,10 +56,13 @@ export const DeleteConnectorModal: React.FC = () => {
         closeDeleteModal();
       }}
       onConfirm={() => {
-        // TODO delete endpoint
+        deleteConnector({
+          connectorId,
+          indexNameToDelete: shouldDeleteIndex ? deleteModalIndexName : null,
+        });
       }}
       cancelButtonText={
-        false
+        isDeleteLoading
           ? i18n.translate(
               'xpack.enterpriseSearch.content.connectors.deleteModal.closeButton.title',
               {
@@ -77,7 +85,7 @@ export const DeleteConnectorModal: React.FC = () => {
       defaultFocusedButton="confirm"
       buttonColor="danger"
       confirmButtonDisabled={inputConnectorName.trim() !== connectorName}
-      isLoading={false}
+      isLoading={isDeleteLoading}
     >
       <p>
         {i18n.translate(
@@ -101,22 +109,21 @@ export const DeleteConnectorModal: React.FC = () => {
           </li>
         </ul>
       </p>
-      <EuiText>
-        <p>
+      <p>
+        <EuiText>
           <FormattedMessage
             id="xpack.enterpriseSearch.content.connectors.deleteModal.syncsWarning.indexNameDescription"
             defaultMessage="This action cannot be undone. Please type {connectorName} to confirm."
             values={{
               connectorName: (
-                <EuiText color="danger" grow={false}>
-                  {connectorName}
-                </EuiText>
+                <strong>
+                  <EuiTextColor color="danger">{connectorName}</EuiTextColor>
+                </strong>
               ),
             }}
           />
-        </p>
-      </EuiText>
-      <EuiSpacer />
+        </EuiText>
+      </p>
       {deleteModalIndexName && (
         <>
           <EuiCheckbox

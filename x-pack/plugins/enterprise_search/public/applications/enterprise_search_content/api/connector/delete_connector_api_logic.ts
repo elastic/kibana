@@ -5,15 +5,30 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { DeleteConnectorResponse } from '../../../../../common/types/connectors';
+
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
-export const deleteConnector = async (connectorId: string) => {
-  return await HttpLogic.values.http.delete(
+export interface DeleteConnectorApiLogicArgs {
+  connectorId: string;
+  indexNameToDelete: string | null;
+}
+
+export interface DeleteConnectorApiLogicResponse {
+  acknowledged: boolean;
+}
+
+export const deleteConnector = async ({
+  connectorId,
+  indexNameToDelete,
+}: DeleteConnectorApiLogicArgs) => {
+  return await HttpLogic.values.http.delete<DeleteConnectorResponse>(
     '/internal/enterprise_search/connectors/{connectorId}',
     {
       query: {
         connectorId,
+        indexNameToDelete,
       },
     }
   );
@@ -23,3 +38,8 @@ export const DeleteConnectorApiLogic = createApiLogic(
   ['delete_connector_api_logic'],
   deleteConnector
 );
+
+export type DeleteConnectorApiLogicActions = Actions<
+  DeleteConnectorApiLogicArgs,
+  DeleteConnectorApiLogicResponse
+>;
