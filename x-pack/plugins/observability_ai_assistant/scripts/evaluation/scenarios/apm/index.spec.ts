@@ -8,26 +8,22 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
+import moment from 'moment';
+import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
+import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
 import { MessageRole } from '../../../../common';
 import { apm_error_count_AIAssistant } from '../../alert_templates';
 
-import moment from 'moment';
-import { apm, timerange, serviceMap } from '@kbn/apm-synthtrace-client';
-
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1'
-
-
 describe('apm', () => {
-  let rule_ids: any[] = []
+  const ruleIds: any[] = [];
   before(async () => {
-
-    console.log("Creating APM rule")
-    let response_apm_rule = await kibanaClient.callKibana<RuleResponse>("post",
-      { pathname: "/api/alerting/rule" },
-      apm_error_count_AIAssistant.ruleParams,
+    const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
+      'post',
+      { pathname: '/api/alerting/rule' },
+      apm_error_count_AIAssistant.ruleParams
     );
-    rule_ids.push(response_apm_rule.data.id);
+    ruleIds.push(responseApmRule.data.id);
 
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
@@ -41,24 +37,25 @@ describe('apm', () => {
               { 'ai-assistant-service-front': 'go' },
               { 'ai-assistant-service-back': 'python' },
             ],
-            environment: "test",
+            environment: 'test',
             definePaths([main, reco]) {
               return [
                 [
                   [main, 'fetchReco'],
                   [reco, 'GET /api'],
                 ],
-                [reco]
+                [reco],
               ];
             },
           })
-        ));
+        )
+    );
 
     const aiAssistantService = apm
       .service('ai-assistant-service', 'test', 'go')
       .instance('my-instance');
 
-    const aiAssistantService_python = apm
+    const aiAssistantServicePython = apm
       .service('ai-assistant-service-reco', 'test', 'python')
       .instance('my-instance');
 
@@ -72,7 +69,8 @@ describe('apm', () => {
             .timestamp(timestamp)
             .duration(50)
             .outcome('success')
-        ));
+        )
+    );
 
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
@@ -85,9 +83,12 @@ describe('apm', () => {
             .duration(50)
             .failure()
             .errors(
-              aiAssistantService.error({ message: "ERROR removeReco not suported", type: 'My Type' }).timestamp(timestamp)
+              aiAssistantService
+                .error({ message: 'ERROR removeReco not suported', type: 'My Type' })
+                .timestamp(timestamp)
             )
-        ));
+        )
+    );
 
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
@@ -99,23 +100,26 @@ describe('apm', () => {
             .timestamp(timestamp)
             .duration(50)
             .outcome('success')
-        ));
+        )
+    );
 
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
         .rate(10)
         .generator((timestamp) =>
-          aiAssistantService_python
+          aiAssistantServicePython
             .transaction('GET /api_v2')
             .timestamp(timestamp)
             .duration(50)
             .failure()
             .errors(
-              aiAssistantService_python.error({ message: "ERROR api_v2 not supported", type: 'My Type' }).timestamp(timestamp)
+              aiAssistantServicePython
+                .error({ message: 'ERROR api_v2 not supported', type: 'My Type' })
+                .timestamp(timestamp)
             )
-        ));
-
+        )
+    );
   });
 
   it('service summary, troughput, dependencies and errors', async () => {
@@ -126,8 +130,9 @@ describe('apm', () => {
     conversation = await chatClient.complete(
       conversation.conversationId!,
       conversation.messages.concat({
-        content: 'What is the average throughput for the ai-assistant-service service over the past 4 hours?',
-        role: MessageRole.User
+        content:
+          'What is the average throughput for the ai-assistant-service service over the past 4 hours?',
+        role: MessageRole.User,
       })
     );
 
@@ -135,10 +140,9 @@ describe('apm', () => {
       conversation.conversationId!,
       conversation.messages.concat({
         content: 'What are the downstream dependencies of the ai-assistant-service-front service?',
-        role: MessageRole.User
+        role: MessageRole.User,
       })
     );
-
 
     const result = await chatClient.evaluate(conversation, [
       'Uses get_apm_service_summary to obtain the status of the ai-assistant-service service',
@@ -158,15 +162,16 @@ describe('apm', () => {
       conversation.conversationId!,
       conversation.messages.concat({
         content: 'What is the average error rate per service over the past 4 hours?',
-        role: MessageRole.User
+        role: MessageRole.User,
       })
     );
 
     conversation = await chatClient.complete(
       conversation.conversationId!,
       conversation.messages.concat({
-        content: 'What are the top 2 most frequent errors in the services in the test environment in the last hour?',
-        role: MessageRole.User
+        content:
+          'What are the top 2 most frequent errors in the services in the test environment in the last hour?',
+        role: MessageRole.User,
       })
     );
 
@@ -174,16 +179,15 @@ describe('apm', () => {
       conversation.conversationId!,
       conversation.messages.concat({
         content: 'Are there any alert for those services?',
-        role: MessageRole.User
+        role: MessageRole.User,
       })
     );
-
 
     const result = await chatClient.evaluate(conversation, [
       'Responds with the active services in the environment "test"',
       'Executes get_apm_timeseries to obtain the error rate of the services for the last 4 hours, for the specified services in test environment',
       'Obtains the top 2 frequent errors of the services in the last hour, for the specified services in test environment',
-      'Returns the current alerts for the services, for the specified services in test environment'
+      'Returns the current alerts for the services, for the specified services in test environment',
     ]);
 
     expect(result.passed).to.be(true);
@@ -192,11 +196,8 @@ describe('apm', () => {
   after(async () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    for (let i in rule_ids) {
-      await kibanaClient.callKibana("delete",
-        { pathname: `/api/alerting/rule/${rule_ids[i]}` },
-      )
+    for (const ruleId of ruleIds) {
+      await kibanaClient.callKibana('delete', { pathname: `/api/alerting/rule/${ruleId}` });
     }
-
-  })
-})
+  });
+});

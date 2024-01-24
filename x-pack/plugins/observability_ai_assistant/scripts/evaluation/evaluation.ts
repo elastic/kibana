@@ -196,6 +196,7 @@ function runEvaluations() {
             esClient,
             chatClient,
             synthtraceEsClients,
+            logger: log,
           });
 
           mocha.suite.beforeAll(async () => {

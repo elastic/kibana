@@ -7,81 +7,78 @@
 
 /// <reference types="@kbn/ambient-ftr-types"/>
 
-
 import expect from '@kbn/expect';
-import { chatClient, kibanaClient, synthtraceEsClients } from '../../services';
-import { apm_transaction_rate_AIAssistant, custom_threshold_AIAssistant_log_count } from '../../alert_templates';
-import { MessageRole } from '../../../../common';
-
-import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1'
-
+import { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
 import moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-
+import { chatClient, kibanaClient, synthtraceEsClients, logger } from '../../services';
+import {
+  apm_transaction_rate_AIAssistant,
+  custom_threshold_AIAssistant_log_count,
+} from '../../alert_templates';
+import { MessageRole } from '../../../../common';
 
 describe('alert function', () => {
-  let rule_ids: any[] = []
+  const ruleIds: any[] = [];
 
   before(async () => {
-    console.log("Creating APM rule")
-    const responseApmRule = await kibanaClient.callKibana<RuleResponse>("post",
-      { pathname: "/api/alerting/rule" },
-      apm_transaction_rate_AIAssistant.ruleParams,
+    logger.info('Creating APM rule');
+    const responseApmRule = await kibanaClient.callKibana<RuleResponse>(
+      'post',
+      { pathname: '/api/alerting/rule' },
+      apm_transaction_rate_AIAssistant.ruleParams
     );
-    rule_ids.push(responseApmRule.data.id);
+    ruleIds.push(responseApmRule.data.id);
 
-    console.log("Creating dataview")
-    await kibanaClient.callKibana("post",
-      { pathname: "/api/content_management/rpc/create" },
-      custom_threshold_AIAssistant_log_count.dataViewParams,
+    logger.info('Creating dataview');
+    await kibanaClient.callKibana(
+      'post',
+      { pathname: '/api/content_management/rpc/create' },
+      custom_threshold_AIAssistant_log_count.dataViewParams
     );
 
-    console.log("Creating logs rule")
-    const responseLogsRule = await kibanaClient.callKibana<RuleResponse>("post",
-      { pathname: "/api/alerting/rule" },
-      custom_threshold_AIAssistant_log_count.ruleParams,
+    logger.info('Creating logs rule');
+    const responseLogsRule = await kibanaClient.callKibana<RuleResponse>(
+      'post',
+      { pathname: '/api/alerting/rule' },
+      custom_threshold_AIAssistant_log_count.ruleParams
     );
-    rule_ids.push(responseLogsRule.data.id);
+    ruleIds.push(responseLogsRule.data.id);
+
+    logger.debug('Cleaning APM indices');
 
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    const myServiceInstance = apm
-      .service('my-service', 'production', 'go')
-      .instance('my-instance');
+    const myServiceInstance = apm.service('my-service', 'production', 'go').instance('my-instance');
+
+    logger.debug('Indexing synthtrace data');
 
     await synthtraceEsClients.apmSynthtraceEsClient.index(
       timerange(moment().subtract(15, 'minutes'), moment())
         .interval('1m')
         .rate(10)
-        .generator((timestamp) =>
+        .generator((timestamp) => [
           myServiceInstance
             .transaction('GET /api')
             .timestamp(timestamp)
             .duration(50)
             .failure()
             .errors(
-              myServiceInstance.error({ message: "errorMessage", type: 'My Type' }).timestamp(timestamp)
-            )
-        ));
-
-    await synthtraceEsClients.apmSynthtraceEsClient.index(
-      timerange(moment().subtract(15, 'minutes'), moment())
-        .interval('1m')
-        .rate(10)
-        .generator((timestamp) =>
+              myServiceInstance
+                .error({ message: 'errorMessage', type: 'My Type' })
+                .timestamp(timestamp)
+            ),
           myServiceInstance
             .transaction('GET /api')
             .timestamp(timestamp)
             .duration(50)
-            .outcome('success')
-        ));
-
+            .outcome('success'),
+        ])
+    );
   });
 
   it('summary of active alerts', async () => {
-    let conversation = await chatClient.complete(
-      'Are there any active alerts?'
-    );
+    const conversation = await chatClient.complete('Are there any active alerts?');
 
     const result = await chatClient.evaluate(conversation, [
       'Uses alerts function to retrieve active alerts',
@@ -100,7 +97,7 @@ describe('alert function', () => {
       conversation.conversationId!,
       conversation.messages.concat({
         content: 'Do I have any alerts on the service my-service?',
-        role: MessageRole.User
+        role: MessageRole.User,
       })
     );
 
@@ -117,13 +114,12 @@ describe('alert function', () => {
   after(async () => {
     await synthtraceEsClients.apmSynthtraceEsClient.clean();
 
-    for (let i in rule_ids) {
-      await kibanaClient.callKibana("delete",
-        { pathname: `/api/alerting/rule/${rule_ids[i]}` },
-      )
+    for (const ruleId of ruleIds) {
+      await kibanaClient.callKibana('delete', { pathname: `/api/alerting/rule/${ruleId}` });
     }
 
-    await kibanaClient.callKibana("post",
+    await kibanaClient.callKibana(
+      'post',
       { pathname: `/api/content_management/rpc/delete` },
       {
         contentTypeId: 'index-pattern',
@@ -131,7 +127,6 @@ describe('alert function', () => {
         options: { force: true },
         version: 1,
       }
-    )
-
-  })
+    );
+  });
 });

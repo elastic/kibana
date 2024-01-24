@@ -462,6 +462,8 @@ export class ObservabilityAIAssistantClient {
       },
     });
 
+    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+
     if (executeResult.status === 'error') {
       throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
     }

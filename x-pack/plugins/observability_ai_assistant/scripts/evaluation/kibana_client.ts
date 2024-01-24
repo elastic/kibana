@@ -41,7 +41,7 @@ export interface ChatClient {
   ) => Promise<{ conversationId?: string; messages: InnerMessage[] }>;
 
   evaluate: (
-    { }: { conversationId?: string; messages: InnerMessage[] },
+    {}: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
   getResults: () => EvaluationResult[];
@@ -86,7 +86,7 @@ export class KibanaClient {
     data?: any
   ) {
     const url = this.getUrl(props);
-    return axios<T>({
+    return this.axios<T>({
       method,
       url,
       data: data || {},
@@ -94,7 +94,6 @@ export class KibanaClient {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'foo',
       },
-      timeout: 60000,
     });
   }
 
@@ -197,12 +196,12 @@ export class KibanaClient {
       functionCall?: string;
     }) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
-      {
-        messages,
-        connectorId,
-        functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
-        functionCall,
-      };
+        {
+          messages,
+          connectorId,
+          functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
+          functionCall,
+        };
       const stream$ = streamIntoObservable(
         (
           await that.axios.post(
@@ -211,7 +210,7 @@ export class KibanaClient {
               query: { stream: true },
             }),
             params,
-            { responseType: 'stream' }
+            { responseType: 'stream', timeout: NaN }
           )
         ).data
       ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
@@ -260,7 +259,7 @@ export class KibanaClient {
                 persist,
                 title: currentTitle,
               },
-              { responseType: 'stream' }
+              { responseType: 'stream', timeout: NaN }
             )
           ).data
         ).pipe(
