@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { takeRight } from 'lodash';
 import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
 import type {
   ActionGroup,
@@ -90,6 +91,8 @@ export const ANOMALY_SCORE_MATCH_GROUP_ID = 'anomaly_score_match';
 export type AnomalyScoreMatchGroupId = typeof ANOMALY_SCORE_MATCH_GROUP_ID;
 
 export const ANOMALY_DETECTION_AAD_INDEX_NAME = 'ml.anomaly-detection';
+
+const ANOMALY_SCORE_HISTORY_LIMIT = 20;
 
 export const ANOMALY_DETECTION_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
   context: ANOMALY_DETECTION_AAD_INDEX_NAME,
@@ -289,7 +292,10 @@ export function registerAnomalyDetectionAlertType({
           }
           resultPayload = {
             ...resultPayload,
-            [ALERT_ANOMALY_SCORE]: [...anomalyScore, ...(payload.anomaly_score ?? [])],
+            [ALERT_ANOMALY_SCORE]: takeRight(
+              [...anomalyScore, ...(payload.anomaly_score ?? [])],
+              ANOMALY_SCORE_HISTORY_LIMIT
+            ),
           };
         }
 
