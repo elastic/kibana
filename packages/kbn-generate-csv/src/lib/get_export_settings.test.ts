@@ -75,6 +75,8 @@ describe('getExportSettings', () => {
   });
 
   test('does not add a default scroll strategy', async () => {
+    // @ts-expect-error undefined isn't allowed
+    config = { ...config, scroll: { strategy: undefined } };
     expect(await getExportSettings(uiSettingsClient, config, '', logger)).toMatchObject(
       expect.objectContaining({ scroll: expect.objectContaining({ strategy: undefined }) })
     );
