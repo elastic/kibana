@@ -1,0 +1,17 @@
+{
+  "index_patterns": ["kbn-data-forge-fake_stack.message_processor-*"],
+  "order": 1,
+  "settings": {
+    "index": {
+      "codec" : "best_compression",
+      "mapping": {
+        "total_fields": {
+          "limit": 2000
+        }
+      },
+      "refresh_interval": "2s"
+    }
+  }
+}
+
+
