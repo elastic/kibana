@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { ESQLColumn } from '@kbn/es-types';
-import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
@@ -29,7 +30,7 @@ export function CreateSourceEditor(props: Props) {
   const [dateFields, setDateFields] = useState<string[]>([]);
   const [geoField, setGeoField] = useState<string | undefined>();
   const [geoFields, setGeoFields] = useState<string[]>([]);
-  const [narrowByGlobalSearch] = useState(true);
+  const [narrowByGlobalSearch, setNarrowByGlobalSearch] = useState(true);
   const [narrowByGlobalTime, setNarrowByGlobalTime] = useState(true);
   const [narrowByMapBounds, setNarrowByMapBounds] = useState(true);
 
@@ -112,7 +113,6 @@ export function CreateSourceEditor(props: Props) {
   }, []);
 
   useEffect(() => {
-    console.log('running effect onSourceConfigChange');
     const sourceConfig = esql && esql.length
     ? {
         columns,
@@ -128,70 +128,89 @@ export function CreateSourceEditor(props: Props) {
   }, [columns, dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]);
 
   return (
-    <EuiSkeletonText lines={3} isLoading={!isInitialized}>
-      <ESQLEditor
-        esql={esql}
-        onESQLChange={(change) => {
-          setColumns(change.columns);
-          setEsql(change.esql);
-          setDateFields(change.dateFields);
-          setGeoFields(change.geoFields);
+    <EuiPanel>
+      <EuiSkeletonText lines={3} isLoading={!isInitialized}>
+        <ESQLEditor
+          esql={esql}
+          onESQLChange={(change) => {
+            setColumns(change.columns);
+            setEsql(change.esql);
+            setDateFields(change.dateFields);
+            setGeoFields(change.geoFields);
 
-          if (!dateField || !change.dateFields.includes(dateField)) {
-            if (change.dateFields.length) {
-              setDateField(change.dateFields[0]);
-            } else {
-              setDateField(undefined);
-              setNarrowByGlobalTime(false);
+            if (!dateField || !change.dateFields.includes(dateField)) {
+              if (change.dateFields.length) {
+                setDateField(change.dateFields[0]);
+              } else {
+                setDateField(undefined);
+                setNarrowByGlobalTime(false);
+              }
             }
-          }
 
-          if (!geoField || !change.geoFields.includes(geoField)) {
-            if (change.geoFields.length) {
-              setGeoField(change.geoFields[0]);
-            } else {
-              setGeoField(undefined);
-              setNarrowByMapBounds(false);
+            if (!geoField || !change.geoFields.includes(geoField)) {
+              if (change.geoFields.length) {
+                setGeoField(change.geoFields[0]);
+              } else {
+                setGeoField(undefined);
+                setNarrowByMapBounds(false);
+              }
             }
-          }
-        }}
-      />
+          }}
+        />
 
-      <EuiSpacer size="m" />
+        {esql && (
+          <>
+            <EuiSpacer size="m" />
 
-      <NarrowByMapBounds
-        esql={esql}
-        field={geoField}
-        fields={geoFields}
-        narrowByField={narrowByMapBounds}
-        onFieldChange={(fieldName: string) => {
-          setGeoField(fieldName);
-        }}
-        onNarrowByFieldChange={(narrowByField: boolean) => {
-          setNarrowByMapBounds(narrowByField);
-          // auto select first geo field when enabling narrowByMapBounds and geoField is not set
-          if (narrowByField && geoFields.length && !!geoField) {
-            setGeoField(geoFields[0])
-          }
-        }}
-      />
+            <NarrowByMapBounds
+              esql={esql}
+              field={geoField}
+              fields={geoFields}
+              narrowByField={narrowByMapBounds}
+              onFieldChange={(fieldName: string) => {
+                setGeoField(fieldName);
+              }}
+              onNarrowByFieldChange={(narrowByField: boolean) => {
+                setNarrowByMapBounds(narrowByField);
+                // auto select first geo field when enabling narrowByMapBounds and geoField is not set
+                if (narrowByField && geoFields.length && !!geoField) {
+                  setGeoField(geoFields[0])
+                }
+              }}
+            />
 
-      <NarrowByTime
-        esql={esql}
-        field={dateField}
-        fields={dateFields}
-        narrowByField={narrowByGlobalTime}
-        onFieldChange={(fieldName: string) => {
-          setDateField(fieldName);
-        }}
-        onNarrowByFieldChange={(narrowByField: boolean) => {
-          setNarrowByGlobalTime(narrowByField);
-          // auto select first geo field when enabling narrowByMapBounds and geoField is not set
-          if (narrowByField && dateFields.length && !!dateField) {
-            setDateField(dateFields[0])
-          }
-        }}
-      />
-    </EuiSkeletonText>
+            <EuiFormRow>
+              <EuiSwitch
+                label={i18n.translate('xpack.maps.esqlSource.narrowByGlobalSearchLabel', {
+                  defaultMessage: `Narrow ES|QL statement by global search`,
+                })}
+                checked={narrowByGlobalSearch}
+                onChange={(event: EuiSwitchEvent) => {
+                  setNarrowByGlobalSearch(event.target.checked);
+                }}
+                compressed
+              />
+            </EuiFormRow>
+
+            <NarrowByTime
+              esql={esql}
+              field={dateField}
+              fields={dateFields}
+              narrowByField={narrowByGlobalTime}
+              onFieldChange={(fieldName: string) => {
+                setDateField(fieldName);
+              }}
+              onNarrowByFieldChange={(narrowByField: boolean) => {
+                setNarrowByGlobalTime(narrowByField);
+                // auto select first geo field when enabling narrowByMapBounds and geoField is not set
+                if (narrowByField && dateFields.length && !!dateField) {
+                  setDateField(dateFields[0])
+                }
+              }}
+            />
+          </>
+        )}
+      </EuiSkeletonText>
+    </EuiPanel>
   );
 }

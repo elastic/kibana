@@ -73,10 +73,8 @@ export function ESQLEditor(props: Props) {
               );
             }
             props.onESQLChange({
-              columns: esqlMeta.columns,
-              dateFields: esqlMeta.dateFields,
-              geoFields: esqlMeta.geoFields,
               esql,
+              ...esqlMeta,
             });
           } catch (err) {
             if (!isMounted()) {
