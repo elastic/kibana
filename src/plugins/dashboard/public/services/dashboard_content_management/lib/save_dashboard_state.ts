@@ -13,7 +13,6 @@ import {
   controlGroupInputToRawControlGroupAttributes,
   generateNewControlIds,
   getDefaultControlGroupInput,
-  PersistableControlGroupInput,
   persistableControlGroupInputIsEqual,
 } from '@kbn/controls-plugin/common';
 import { extractSearchSourceReferences, RefreshInterval } from '@kbn/data-plugin/public';
@@ -31,10 +30,13 @@ import {
   DashboardContentManagementRequiredServices,
   SaveDashboardProps,
   SaveDashboardReturn,
+  SavedDashboardInput,
 } from '../types';
 import { convertDashboardVersionToNumber } from './dashboard_versioning';
 
-export const serializeControlGroupInput = (controlGroupInput?: PersistableControlGroupInput) => {
+export const serializeControlGroupInput = (
+  controlGroupInput: SavedDashboardInput['controlGroupInput']
+) => {
   // only save to saved object if control group is not default
   if (
     !controlGroupInput ||

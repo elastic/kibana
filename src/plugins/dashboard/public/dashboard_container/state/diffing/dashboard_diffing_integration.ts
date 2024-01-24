@@ -35,7 +35,7 @@ export const reducersToIgnore: Array<keyof typeof dashboardContainerReducers> = 
 /**
  * Some keys will often have deviated from their last saved state, but should not persist over reloads
  */
-export const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
+const keysToOmitFromSessionStorage: Array<keyof DashboardContainerInput> = [
   'lastReloadRequestTime',
   'executionContext',
   'timeslice',
@@ -103,7 +103,6 @@ export function startDiffingDashboardState(
                 this.unsavedChanges.next(hasChanges);
 
                 if (creationOptions?.useSessionStorageIntegration) {
-                  console.log('HEREEEE', omit(unsavedChanges, keysToOmitFromSessionStorage));
                   this.backupUnsavedChanges.next(
                     omit(unsavedChanges, keysToOmitFromSessionStorage)
                   );

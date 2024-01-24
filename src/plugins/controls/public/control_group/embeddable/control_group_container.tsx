@@ -158,7 +158,6 @@ export class ControlGroupContainer extends Container<
       this.recalculateDataViews();
       this.recalculateFilters();
       this.setupSubscriptions();
-      // this.dispatch.setLastSavedInput(initialInput);
       this.initialized$.next(true);
     });
 

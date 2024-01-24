@@ -106,7 +106,6 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
-          // this.dispatch.setLastSavedInput(omit(stateToSave, 'controlGroupInput'));
           if (this.controlGroup) {
             this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getPersistableInput());
           }
