@@ -14,6 +14,8 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
   flex-direction: column;
 
   @include euiBreakpoint('m', 'l', 'xl') {
+    // This size is also tracked with a variable in solution_nav.tsx, if updated
+    // update there as well
     width: 248px;
     padding: $euiSizeL;
   }
