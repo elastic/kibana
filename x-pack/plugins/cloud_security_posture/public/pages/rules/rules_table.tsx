@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import {
   Criteria,
   EuiButtonEmpty,
@@ -222,7 +221,7 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
       defaultMessage: 'Rule Number',
     }),
-    width: '15%',
+    width: '100px',
     sortable: true,
   },
   {
@@ -258,7 +257,8 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
       defaultMessage: 'Enabled',
     }),
-    width: '65px',
+    align: 'right',
+    width: '100px',
     truncateText: true,
     render: (name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {
@@ -287,9 +287,6 @@ const getColumns = ({
               data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
               label=""
               compressed={true}
-              css={css`
-                padding-left: 18px;
-              `}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
