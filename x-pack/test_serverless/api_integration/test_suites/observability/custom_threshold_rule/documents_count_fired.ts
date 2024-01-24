@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
               },
@@ -193,7 +193,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],
               },
