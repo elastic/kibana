@@ -45,6 +45,7 @@ export { useInspectorContext } from './contexts/inspector/use_inspector_context'
 export { useTheme } from './hooks/use_theme';
 export { useEditableSettings } from './hooks/use_editable_settings';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
+export { useValuesList } from './hooks/use_values_list';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export type { FetcherResult } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';
@@ -94,3 +95,4 @@ export {
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
 export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
+export { FieldValueSelection, FieldValueSuggestions } from './components';
