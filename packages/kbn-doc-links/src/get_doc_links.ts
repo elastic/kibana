@@ -52,17 +52,27 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
-      supportedServiceMaps: `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
-      customLinks: `${KIBANA_DOCS}custom-links.html`,
+      supportedServiceMaps: isServerless
+        ? `${SERVERLESS_DOCS}apm-service-map`
+        : `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
+      customLinks: isServerless
+        ? `${SERVERLESS_DOCS}apm-create-custom-links`
+        : `${KIBANA_DOCS}custom-links.html`,
       droppedTransactionSpans: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-spans.html#data-model-dropped-spans`,
       upgrading: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade.html`,
       metaData: `${APM_DOCS}guide/${DOC_LINK_VERSION}/data-model-metadata.html`,
       overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
-      tailSamplingPolicies: `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
+      tailSamplingPolicies: isServerless
+        ? `${SERVERLESS_DOCS}apm-transaction-sampling`
+        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
       elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
       storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
-      spanCompression: `${APM_DOCS}guide/${DOC_LINK_VERSION}/span-compression.html`,
-      transactionSampling: `${APM_DOCS}guide/${DOC_LINK_VERSION}/sampling.html`,
+      spanCompression: isServerless
+        ? `${SERVERLESS_DOCS}apm-compress-spans`
+        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/span-compression.html`,
+      transactionSampling: isServerless
+        ? `${SERVERLESS_DOCS}apm-transaction-sampling`
+        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/sampling.html`,
       indexLifecycleManagement: `${APM_DOCS}guide/${DOC_LINK_VERSION}/ilm-how-to.html`,
     },
     canvas: {
@@ -553,7 +563,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       logsThreshold: `${OBSERVABILITY_DOCS}logs-threshold-alert.html`,
       metricsThreshold: `${OBSERVABILITY_DOCS}metrics-threshold-alert.html`,
       customThreshold: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-custom-threshold-alert-rule`
+        ? `${SERVERLESS_OBSERVABILITY_DOCS} `
         : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
       monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
       monitorUptime: `${OBSERVABILITY_DOCS}monitor-uptime.html`,
