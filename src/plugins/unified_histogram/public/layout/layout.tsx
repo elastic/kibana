@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -242,13 +242,29 @@ export const UnifiedHistogramLayout = ({
   });
 
   // apply table to current suggestion
-  if (table) {
-    const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
-    Object.keys(layers).forEach((key) => {
-      const layer = layers[key];
-      layer.table = table;
-    });
-  }
+
+  const usedSuggestion = useMemo(() => {
+    if (table) {
+      const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+
+      const newState = {
+        ...currentSuggestion,
+        datasourceState: {
+          ...(currentSuggestion.datasourceState as TextBasedPersistedState),
+          layers: {} as Record<string, unknown>,
+        },
+      };
+
+      for (const key of Object.keys(layers)) {
+        const newLayer = { ...layers[key], table };
+        newState.datasourceState.layers[key] = newLayer;
+      }
+
+      return newState;
+    } else {
+      return currentSuggestion;
+    }
+  }, [currentSuggestion, table]);
 
   const chart = suggestionUnsupported ? undefined : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
@@ -296,7 +312,7 @@ export const UnifiedHistogramLayout = ({
           relativeTimeRange={relativeTimeRange}
           request={request}
           hits={hits}
-          currentSuggestion={currentSuggestion}
+          currentSuggestion={usedSuggestion}
           isChartLoading={isChartLoading}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}
