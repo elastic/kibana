@@ -895,7 +895,68 @@
                         }
                       },
                       "alerts": {
-                        "type": "object"
+                        "type": "object",
+                        "description": "Details for writing alerts as data documents for this rule type.\n",
+                        "properties": {
+                          "context": {
+                            "type": "string",
+                            "description": "The namespace for this rule type.\n",
+                            "enum": [
+                              "ml.anomaly-detection",
+                              "observability.apm",
+                              "observability.logs",
+                              "observability.metrics",
+                              "observability.slo",
+                              "observability.threshold",
+                              "observability.uptime",
+                              "security",
+                              "stack"
+                            ]
+                          },
+                          "dynamic": {
+                            "type": "string",
+                            "description": "Indicates whether new fields are added dynamically.",
+                            "enum": [
+                              "false",
+                              "runtime",
+                              "strict",
+                              "true"
+                            ]
+                          },
+                          "isSpaceAware": {
+                            "type": "boolean",
+                            "description": "Indicates whether the alerts are space-aware. If true, space-specific alert indices are used.\n"
+                          },
+                          "mappings": {
+                            "type": "object",
+                            "properties": {
+                              "fieldMap": {
+                                "type": "object",
+                                "description": "Mapping information for each field supported in alerts as data documents for this rule type. For more information about mapping parameters, refer to the Elasticsearch documentation.\n",
+                                "additionalProperties": {
+                                  "$ref": "#/components/schemas/fieldmap_properties"
+                                }
+                              }
+                            }
+                          },
+                          "secondaryAlias": {
+                            "type": "string",
+                            "description": "A secondary alias. It is typically used to support the signals alias for detection rules.\n"
+                          },
+                          "shouldWrite": {
+                            "type": "boolean",
+                            "description": "Indicates whether the rule should write out alerts as data.\n"
+                          },
+                          "useEcs": {
+                            "type": "boolean",
+                            "description": "Indicates whether to include the ECS component template for the alerts.\n"
+                          },
+                          "useLegacyAlerts": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Indicates whether to include the legacy component template for the alerts.\n"
+                          }
+                        }
                       },
                       "authorized_consumers": {
                         "description": "The list of the plugins IDs that have access to the rule type.",
@@ -1046,7 +1107,8 @@
                         "type": "boolean"
                       },
                       "has_alerts_mappings": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Indicates whether the rule type has custom mappings for the alert data."
                       },
                       "has_fields_for_a_a_d": {
                         "type": "boolean"
@@ -6774,6 +6836,62 @@
           },
           "throttle": {
             "$ref": "#/components/schemas/throttle"
+          }
+        }
+      },
+      "fieldmap_properties": {
+        "title": "Field map objects in the get rule types response",
+        "type": "object",
+        "properties": {
+          "array": {
+            "type": "boolean",
+            "description": "Indicates whether the field is an array."
+          },
+          "dynamic": {
+            "type": "boolean",
+            "description": "Indicates whether it is a dynamic field mapping."
+          },
+          "format": {
+            "type": "string",
+            "description": "Indicates the format of the field. For example, if the `type` is `date_range`, the `format` can be `epoch_millis||strict_date_optional_time`.\n"
+          },
+          "ignore_above": {
+            "type": "integer",
+            "description": "Specifies the maximum length of a string field. Longer strings are not indexed or stored."
+          },
+          "index": {
+            "type": "boolean",
+            "description": "Indicates whether field values are indexed."
+          },
+          "path": {
+            "type": "string",
+            "description": "TBD"
+          },
+          "properties": {
+            "type": "object",
+            "description": "Details about the object properties. This property is applicable when `type` is `object`.\n",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "The data type for each object property."
+                }
+              }
+            }
+          },
+          "required": {
+            "type": "boolean",
+            "description": "Indicates whether the field is required."
+          },
+          "scaling_factor": {
+            "type": "integer",
+            "description": "The scaling factor to use when encoding values. This property is applicable when `type` is `scaled_float`. Values will be multiplied by this factor at index time and rounded to the closest long value. \n"
+          },
+          "type": {
+            "type": "string",
+            "description": "Specifies the data type for the field.",
+            "example": "scaled_float"
           }
         }
       },
