@@ -36,7 +36,7 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
 /**
  * Only parts of the Control Group Input should be persisted
  */
-export const PersistableControlGroupInputKeys = [
+export const persistableControlGroupInputKeys = [
   'panels',
   'chainingSystem',
   'controlStyle',
@@ -44,7 +44,7 @@ export const PersistableControlGroupInputKeys = [
 ] as const;
 export type PersistableControlGroupInput = Pick<
   ControlGroupInput,
-  typeof PersistableControlGroupInputKeys[number]
+  typeof persistableControlGroupInputKeys[number]
 >;
 
 /**

@@ -21,7 +21,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import {
   PersistableControlGroupInput,
   persistableControlGroupInputIsEqual,
-  PersistableControlGroupInputKeys,
+  persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
@@ -217,7 +217,7 @@ export class ControlGroupContainer extends Container<
 
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
     const input = this.getInput();
-    return pick(input, [...PersistableControlGroupInputKeys, 'id']);
+    return pick(input, [...persistableControlGroupInputKeys, 'id']);
   };
 
   public updateInputAndReinitialize = (newInput: Partial<ControlGroupInput>) => {

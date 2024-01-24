@@ -108,7 +108,7 @@ export const createDashboard = async (
   // Build and return the dashboard container.
   // --------------------------------------------------------------------------------------
   const initialComponentState: DashboardPublicState = {
-    lastSavedInput: savedObjectResult?.dashboardInput ?? {
+    lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
       ...DEFAULT_DASHBOARD_INPUT,
       id: input.id,
     },
@@ -207,14 +207,17 @@ export const initializeDashboard = async ({
   })();
 
   const overrideInput = getInitialInput?.();
-  const initialDashboardInput: DashboardContainerInput = cloneDeep({
-    ...DEFAULT_DASHBOARD_INPUT,
-    ...omit(loadDashboardReturn?.dashboardInput ?? {}, 'controlGroupInput'),
-    ...sessionStorageInput,
+  const initialDashboardInput: DashboardContainerInput = omit(
+    cloneDeep({
+      ...DEFAULT_DASHBOARD_INPUT,
+      ...(loadDashboardReturn?.dashboardInput ?? {}),
+      ...sessionStorageInput,
 
-    ...(initialViewMode ? { viewMode: initialViewMode } : {}),
-    ...omit(overrideInput, 'controlGroupInput'),
-  });
+      ...(initialViewMode ? { viewMode: initialViewMode } : {}),
+      ...overrideInput,
+    }),
+    'controlGroupInput'
+  );
   const initialControlGroupInput: PersistableControlGroupInput | {} = {
     ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
     ...(sessionStorageInput?.controlGroupInput ?? {}),
@@ -463,25 +466,33 @@ export const initializeDashboard = async ({
         .pipe(
           combineLatestWith(
             dashboard.controlGroup?.unsavedChanges ?? new BehaviorSubject(undefined)
-          ),
-          distinctUntilChanged(
-            ([dashboardChanges1, controlChanges1], [dashboardChanges2, controlChanges2]) =>
-              fastIsEqual(dashboardChanges1, dashboardChanges2) &&
-              fastIsEqual(controlChanges1, controlChanges2)
           )
+          //   distinctUntilChanged(
+          //     ([dashboardChanges1, controlChanges1], [dashboardChanges2, controlChanges2]) =>
+          //       fastIsEqual(dashboardChanges1, dashboardChanges2) &&
+          //       fastIsEqual(controlChanges1, controlChanges2)
+          //   )
         )
         .subscribe(([dashboardChanges, controlGroupChanges]) => {
           const dashboardHasUnsavedChanges =
-            omit(Object.keys(dashboardChanges ?? {}), keysNotConsideredUnsavedChanges).length > 0;
+            Object.keys(omit(dashboardChanges ?? {}, keysNotConsideredUnsavedChanges)).length > 0;
+          const controlGroupHasChanges = Object.keys(controlGroupChanges ?? {}).length > 0;
           dashboard.dispatch.setHasUnsavedChanges(
-            dashboardHasUnsavedChanges || Boolean(controlGroupChanges)
+            dashboardHasUnsavedChanges || controlGroupHasChanges
           );
-
+          console.log({
+            dashboardHasUnsavedChanges,
+            keys: Object.keys(omit(dashboardChanges ?? {}, keysNotConsideredUnsavedChanges)),
+            dashboardChanges,
+            controlGroupHasChanges,
+            controlGroupChanges,
+          });
           if (creationOptions?.useSessionStorageIntegration) {
             const backup: Partial<SavedDashboardInput> = omit(
               dashboardChanges ?? {},
               keysToOmitFromSessionStorage
             );
+            console.log({ backup });
             if (controlGroupChanges) {
               backup.controlGroupInput = controlGroupChanges;
             }

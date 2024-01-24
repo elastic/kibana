@@ -64,6 +64,7 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
+import { omit } from 'lodash';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -473,12 +474,15 @@ export class DashboardContainer
     this.searchSessionId = searchSessionId;
 
     batch(() => {
-      this.dispatch.setLastSavedInput(loadDashboardReturn?.dashboardInput);
+      this.dispatch.setLastSavedInput(
+        omit(loadDashboardReturn?.dashboardInput, 'controlGroupInput')
+      );
       this.dispatch.setManaged(loadDashboardReturn?.managed);
-      // console.log('LAST SAVED INPUT', loadDashboardReturn?.dashboardInput.controlGroupInput);
-      // this.controlGroup?.dispatch.setLastSavedInput(
-      //   loadDashboardReturn?.dashboardInput.controlGroupInput
-      // );
+      if (this.controlGroup && loadDashboardReturn?.dashboardInput.controlGroupInput) {
+        this.controlGroup.dispatch.setLastSavedInput(
+          loadDashboardReturn?.dashboardInput.controlGroupInput
+        );
+      }
       this.dispatch.setAnimatePanelTransforms(false); // prevents panels from animating on navigate.
       this.dispatch.setLastSavedId(newSavedObjectId);
     });

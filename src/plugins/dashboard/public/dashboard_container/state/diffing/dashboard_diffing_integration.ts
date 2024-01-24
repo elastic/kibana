@@ -95,8 +95,8 @@ export function startDiffingDashboardState(this: DashboardContainer) {
               .bind(this)(lastSavedInput, currentInput)
               .then((unsavedChanges) => {
                 if (observer.closed) return;
-                const hasChanges =
-                  Object.keys(omit(unsavedChanges, keysNotConsideredUnsavedChanges)).length > 0;
+                const validUnsavedChanges = omit(unsavedChanges, keysNotConsideredUnsavedChanges);
+                const hasChanges = Object.keys(validUnsavedChanges).length > 0;
                 this.unsavedChanges.next(hasChanges ? unsavedChanges : undefined);
               });
           });

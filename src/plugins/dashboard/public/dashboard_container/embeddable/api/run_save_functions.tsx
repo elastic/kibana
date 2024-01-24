@@ -24,6 +24,7 @@ import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
+import { omit } from 'lodash';
 
 export function runSaveAs(this: DashboardContainer) {
   const {
@@ -82,15 +83,10 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      let stateToSave: DashboardContainerInput & {
-        controlGroupInput?: PersistableControlGroupInput;
-      } = {
+      const stateToSave: DashboardContainerInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
-      if (this.controlGroup) {
-        stateToSave = { ...stateToSave, controlGroupInput: this.controlGroup.getInput() };
-      }
       const beforeAddTime = window.performance.now();
       const saveResult = await saveDashboardState({
         currentState: stateToSave,
@@ -111,6 +107,7 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
+          // this.dispatch.setLastSavedInput(omit(stateToSave, 'controlGroupInput'));
           if (this.controlGroup) {
             this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getPersistableInput());
           }

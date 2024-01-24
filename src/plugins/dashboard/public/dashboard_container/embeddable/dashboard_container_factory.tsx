@@ -9,7 +9,6 @@
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 
-import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
