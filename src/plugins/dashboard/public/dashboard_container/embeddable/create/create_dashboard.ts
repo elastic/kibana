@@ -7,7 +7,7 @@
  */
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, Subject } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, distinctUntilChanged, map, Subject } from 'rxjs';
 import { v4 } from 'uuid';
 
 import {
@@ -461,43 +461,42 @@ export const initializeDashboard = async ({
   // Start diffing subscription to keep track of unsaved changes
   // --------------------------------------------------------------------------------------
   untilDashboardReady().then((dashboard) => {
+    // subscription that handles the unsaved changes badge
     dashboard.integrationSubscriptions.add(
       dashboard.unsavedChanges
         .pipe(
           combineLatestWith(
+            dashboard.controlGroup?.unsavedChanges.pipe(
+              map((unsavedControlchanges) => Boolean(unsavedControlchanges))
+            ) ?? new BehaviorSubject(false)
+          ),
+          distinctUntilChanged(
+            (
+              [dashboardHasChanges1, controlHasChanges1],
+              [dashboardHasChanges2, controlHasChanges2]
+            ) =>
+              (dashboardHasChanges1 || controlHasChanges1) ===
+              (dashboardHasChanges2 || controlHasChanges2)
+          )
+        )
+        .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
+          dashboard.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
+        })
+    );
+
+    // subscription that handles backing up the unsaved changes to the session storage
+    dashboard.integrationSubscriptions.add(
+      dashboard.backupUnsavedChanges
+        .pipe(
+          combineLatestWith(
             dashboard.controlGroup?.unsavedChanges ?? new BehaviorSubject(undefined)
           )
-          //   distinctUntilChanged(
-          //     ([dashboardChanges1, controlChanges1], [dashboardChanges2, controlChanges2]) =>
-          //       fastIsEqual(dashboardChanges1, dashboardChanges2) &&
-          //       fastIsEqual(controlChanges1, controlChanges2)
-          //   )
         )
         .subscribe(([dashboardChanges, controlGroupChanges]) => {
-          const dashboardHasUnsavedChanges =
-            Object.keys(omit(dashboardChanges ?? {}, keysNotConsideredUnsavedChanges)).length > 0;
-          const controlGroupHasChanges = Object.keys(controlGroupChanges ?? {}).length > 0;
-          dashboard.dispatch.setHasUnsavedChanges(
-            dashboardHasUnsavedChanges || controlGroupHasChanges
-          );
-          console.log({
-            dashboardHasUnsavedChanges,
-            keys: Object.keys(omit(dashboardChanges ?? {}, keysNotConsideredUnsavedChanges)),
-            dashboardChanges,
-            controlGroupHasChanges,
-            controlGroupChanges,
+          dashboardBackup.setState(dashboard.getDashboardSavedObjectId(), {
+            ...dashboardChanges,
+            controlGroupInput: controlGroupChanges,
           });
-          if (creationOptions?.useSessionStorageIntegration) {
-            const backup: Partial<SavedDashboardInput> = omit(
-              dashboardChanges ?? {},
-              keysToOmitFromSessionStorage
-            );
-            console.log({ backup });
-            if (controlGroupChanges) {
-              backup.controlGroupInput = controlGroupChanges;
-            }
-            dashboardBackup.setState(dashboard.getDashboardSavedObjectId(), backup);
-          }
         })
     );
   });

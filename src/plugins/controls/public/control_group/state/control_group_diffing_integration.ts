@@ -46,6 +46,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
               currentInput,
               lastSavedInput
             );
+            console.log('checkForUnsavedChangesSubject$', hasUnsavedChanges);
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);
           });
         })

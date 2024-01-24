@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
@@ -64,7 +65,7 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { omit } from 'lodash';
+import { SavedDashboardInput } from '../../services/dashboard_content_management/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -113,9 +114,8 @@ export class DashboardContainer
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
 
-  // public hasUnsavedChanges: BehaviorSubject<boolean>;
-  public unsavedChanges: BehaviorSubject<Partial<DashboardContainerInput> | undefined>;
-  private hasUnsavedChangesSubscription: Subscription | undefined;
+  public unsavedChanges: BehaviorSubject<boolean>;
+  public backupUnsavedChanges: BehaviorSubject<Partial<SavedDashboardInput> | undefined>;
 
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
@@ -177,10 +177,11 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    this.unsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
+    this.unsavedChanges = new BehaviorSubject(false);
+    this.backupUnsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
       undefined
     );
-    const diffingMiddleware = startDiffingDashboardState.bind(this)();
+    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
     const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -192,7 +193,6 @@ export class DashboardContainer
       additionalMiddleware: [diffingMiddleware],
       initialComponentState,
     });
-    // console.log('initialComponentState', initialComponentState);
     this.onStateChange = reduxTools.onStateChange;
     this.cleanupStateTools = reduxTools.cleanup;
     this.getState = reduxTools.getState;
@@ -350,7 +350,6 @@ export class DashboardContainer
     this.diffingSubscription.unsubscribe();
     this.publishingSubscription.unsubscribe();
     this.integrationSubscriptions.unsubscribe();
-    this.hasUnsavedChangesSubscription?.unsubscribe();
     this.stopSyncingWithUnifiedSearch?.();
     if (this.domNode) ReactDOM.unmountComponentAtNode(this.domNode);
   }

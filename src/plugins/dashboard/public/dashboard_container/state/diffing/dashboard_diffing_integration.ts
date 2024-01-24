@@ -16,7 +16,7 @@ import {
   unsavedChangesDiffingFunctions,
 } from './dashboard_diffing_functions';
 import { DashboardContainerInput } from '../../../../common';
-import { DashboardContainer } from '../..';
+import { DashboardContainer, DashboardCreationOptions } from '../..';
 import { CHANGE_CHECK_DEBOUNCE } from '../../../dashboard_constants';
 import { dashboardContainerReducers } from '../dashboard_container_reducers';
 
@@ -78,7 +78,10 @@ const sessionChangeKeys: Array<keyof Omit<DashboardContainerInput, 'panels'>> = 
  * Does an initial diff between @param initialInput and @param initialLastSavedInput, and created a middleware
  * which listens to the redux store and checks for & publishes the unsaved changes on dispatches.
  */
-export function startDiffingDashboardState(this: DashboardContainer) {
+export function startDiffingDashboardState(
+  this: DashboardContainer,
+  creationOptions?: DashboardCreationOptions
+) {
   const checkForUnsavedChangesSubject$ = new Subject<null>();
   this.diffingSubscription.add(
     checkForUnsavedChangesSubject$
@@ -97,7 +100,14 @@ export function startDiffingDashboardState(this: DashboardContainer) {
                 if (observer.closed) return;
                 const validUnsavedChanges = omit(unsavedChanges, keysNotConsideredUnsavedChanges);
                 const hasChanges = Object.keys(validUnsavedChanges).length > 0;
-                this.unsavedChanges.next(hasChanges ? unsavedChanges : undefined);
+                this.unsavedChanges.next(hasChanges);
+
+                if (creationOptions?.useSessionStorageIntegration) {
+                  console.log('HEREEEE', omit(unsavedChanges, keysToOmitFromSessionStorage));
+                  this.backupUnsavedChanges.next(
+                    omit(unsavedChanges, keysToOmitFromSessionStorage)
+                  );
+                }
               });
           });
         })
