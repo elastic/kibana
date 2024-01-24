@@ -23,7 +23,7 @@ For the most up-to-date API details, refer to the
 [[data-views-api-swap-references-preview-request-body]]
 ==== Request body
 
-`formId`::
+`fromId`::
 (Required, string) Saved object reference to change.
 
 `toId`::
