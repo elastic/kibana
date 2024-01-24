@@ -12,94 +12,54 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiTitle,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
-import { ErrorRateChart } from '../../../components/slo/error_rate_chart';
+import React, { useState } from 'react';
 import { useFetchSloBurnRates } from '../../../hooks/slo/use_fetch_slo_burn_rates';
+import { ErrorRateChart } from '../error_rate_chart';
 import { BurnRate } from './burn_rate';
 
 interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing?: boolean;
+  burnRateOptions: BurnRateOption[];
 }
 
-const CRITICAL = 'CRITICAL';
-const HIGH = 'HIGH';
-const MEDIUM = 'MEDIUM';
-const LOW = 'LOW';
+export interface BurnRateOption {
+  id: string;
+  label: string;
+  windowName: string;
+  threshold: number;
+  duration: number;
+}
 
-const WINDOWS = [
-  { name: CRITICAL, duration: '1h' },
-  { name: HIGH, duration: '6h' },
-  { name: MEDIUM, duration: '24h' },
-  { name: LOW, duration: '72h' },
-];
+function getWindowsFromOptions(opts: BurnRateOption[]): Array<{ name: string; duration: string }> {
+  return opts.map((opt) => ({ name: opt.windowName, duration: `${opt.duration}h` }));
+}
 
-const TIME_RANGE_OPTIONS = [
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.1hLabel', {
-      defaultMessage: '1h',
-    }),
-    windowName: CRITICAL,
-    threshold: 14.4,
-    duration: 1,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.6hLabel', {
-      defaultMessage: '6h',
-    }),
-    windowName: HIGH,
-    threshold: 6,
-    duration: 6,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.24hLabel', {
-      defaultMessage: '24h',
-    }),
-    windowName: MEDIUM,
-    threshold: 3,
-    duration: 24,
-  },
-  {
-    id: htmlIdGenerator()(),
-    label: i18n.translate('xpack.observability.slo.burnRates.fromRange.72hLabel', {
-      defaultMessage: '72h',
-    }),
-    windowName: LOW,
-    threshold: 1,
-    duration: 72,
-  },
-];
-
-export function BurnRates({ slo, isAutoRefreshing }: Props) {
+export function BurnRates({ slo, isAutoRefreshing, burnRateOptions }: Props) {
+  const [burnRateOption, setBurnRateOption] = useState(burnRateOptions[0]);
   const { isLoading, data } = useFetchSloBurnRates({
     slo,
     shouldRefetch: isAutoRefreshing,
-    windows: WINDOWS,
+    windows: getWindowsFromOptions(burnRateOptions),
   });
 
-  const [timeRangeIdSelected, setTimeRangeIdSelected] = useState(TIME_RANGE_OPTIONS[0].id);
-  const [timeRange, setTimeRange] = useState(TIME_RANGE_OPTIONS[0]);
-  const onChange = (optionId: string) => {
-    setTimeRangeIdSelected(optionId);
+  const onBurnRateOptionChange = (optionId: string) => {
+    const selected = burnRateOptions.find((opt) => opt.id === optionId) ?? burnRateOptions[0];
+    setBurnRateOption(selected);
   };
 
-  useEffect(() => {
-    const selected =
-      TIME_RANGE_OPTIONS.find((opt) => opt.id === timeRangeIdSelected) ?? TIME_RANGE_OPTIONS[0];
-    setTimeRange(selected);
-  }, [timeRangeIdSelected]);
-
-  const fromRange = moment().subtract(timeRange.duration, 'hour').toDate();
-  const threshold = timeRange.threshold;
-  const burnRate = data?.burnRates.find((br) => br.name === timeRange.windowName)?.burnRate;
+  const dataTimeRange = {
+    from: moment().subtract(burnRateOption.duration, 'hour').toDate(),
+    to: new Date(),
+  };
+  const threshold = burnRateOption.threshold;
+  const burnRate = data?.burnRates.find(
+    (curr) => curr.name === burnRateOption.windowName
+  )?.burnRate;
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="burnRatePanel">
@@ -111,7 +71,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
                 <h2>
                   {i18n.translate('xpack.observability.slo.burnRate.title', {
                     defaultMessage: 'Burn rate',
-                  })}{' '}
+                  })}
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
@@ -140,9 +100,9 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
               legend={i18n.translate('xpack.observability.slo.burnRate.timeRangeBtnLegend', {
                 defaultMessage: 'Select the time range',
               })}
-              options={TIME_RANGE_OPTIONS}
-              idSelected={timeRangeIdSelected}
-              onChange={(id) => onChange(id)}
+              options={burnRateOptions.map((opt) => ({ id: opt.id, label: opt.label }))}
+              idSelected={burnRateOption.id}
+              onChange={onBurnRateOptionChange}
               buttonSize="compressed"
             />
           </EuiFlexItem>
@@ -152,7 +112,7 @@ export function BurnRates({ slo, isAutoRefreshing }: Props) {
             <BurnRate threshold={threshold} burnRate={burnRate} slo={slo} isLoading={isLoading} />
           </EuiFlexItem>
           <EuiFlexItem grow={3}>
-            <ErrorRateChart slo={slo} fromRange={fromRange} />
+            <ErrorRateChart slo={slo} dataTimeRange={dataTimeRange} threshold={threshold} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexGroup>
