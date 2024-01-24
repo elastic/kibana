@@ -82,10 +82,15 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      const stateToSave: DashboardContainerInput = {
+      let stateToSave: SavedDashboardInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
+      let persistableControlGroupInput: PersistableControlGroupInput | undefined;
+      if (this.controlGroup) {
+        persistableControlGroupInput = this.controlGroup.getPersistableInput();
+        stateToSave = { ...stateToSave, controlGroupInput: persistableControlGroupInput };
+      }
       const beforeAddTime = window.performance.now();
       const saveResult = await saveDashboardState({
         currentState: stateToSave,
@@ -106,8 +111,8 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(stateToSave);
-          if (this.controlGroup) {
-            this.controlGroup.dispatch.setLastSavedInput(this.controlGroup.getPersistableInput());
+          if (this.controlGroup && persistableControlGroupInput) {
+            this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
           }
         });
       }
