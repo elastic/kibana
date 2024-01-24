@@ -772,8 +772,13 @@ describe('rule_details', () => {
 
       disableButton.simulate('click');
 
+      const modal = wrapper.find('[data-test-subj="untrackAlertsModal"]');
+      expect(modal.exists()).toBeTruthy();
+
+      modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
+
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id] });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], untrack: true });
     });
 
     it('should enable the rule when clicked', async () => {

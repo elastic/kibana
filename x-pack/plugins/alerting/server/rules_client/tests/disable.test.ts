@@ -440,6 +440,55 @@ describe('disable()', () => {
     );
   });
 
+  test('should not untrack rule alert if untrack is false', async () => {
+    await rulesClient.disable({ id: '1', untrack: false });
+    expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
+    expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        namespace: 'default',
+      }
+    );
+    expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      '1',
+      {
+        consumer: 'myApp',
+        schedule: { interval: '10s' },
+        alertTypeId: 'myType',
+        enabled: false,
+        meta: {
+          versionApiKeyLastmodified: 'v7.10.0',
+        },
+        revision: 0,
+        scheduledTaskId: '1',
+        apiKey: 'MTIzOmFiYw==',
+        apiKeyOwner: 'elastic',
+        updatedAt: '2019-02-12T21:01:22.479Z',
+        updatedBy: 'elastic',
+        actions: [
+          {
+            group: 'default',
+            id: '1',
+            actionTypeId: '1',
+            actionRef: '1',
+            params: {
+              foo: true,
+            },
+          },
+        ],
+        nextRun: null,
+      },
+      {
+        version: '123',
+      }
+    );
+    expect(taskManager.bulkDisable).toHaveBeenCalledWith(['1'], false);
+    expect(taskManager.get).not.toHaveBeenCalled();
+    expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+  });
+
   test('falls back when getDecryptedAsInternalUser throws an error', async () => {
     encryptedSavedObjects.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Fail'));
     await rulesClient.disable({ id: '1' });

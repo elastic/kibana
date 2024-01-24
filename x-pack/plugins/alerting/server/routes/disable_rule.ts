@@ -13,6 +13,7 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types'
 
 const paramSchema = schema.object({
   id: schema.string(),
+  untrack: schema.maybe(schema.boolean({ defaultValue: true })),
 });
 
 export const disableRuleRoute = (
@@ -29,9 +30,9 @@ export const disableRuleRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id } = req.params;
+        const { id, untrack = true } = req.params;
         try {
-          await rulesClient.disable({ id });
+          await rulesClient.disable({ id, untrack });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {

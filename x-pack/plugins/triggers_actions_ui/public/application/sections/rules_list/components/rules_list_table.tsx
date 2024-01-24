@@ -126,7 +126,7 @@ export interface RulesListTableProps {
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
   onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
-  onDisableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
+  onDisableRule: (rule: RuleTableItem, untrack: boolean) => Promise<BulkOperationResponse>;
   onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   onSelectAll: () => void;
@@ -281,7 +281,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
-          disableRule={async () => await onDisableRule(rule)}
+          disableRule={async (untrack) => await onDisableRule(rule, untrack)}
           enableRule={async () => await onEnableRule(rule)}
           snoozeRule={async () => {}}
           unsnoozeRule={async () => {}}
