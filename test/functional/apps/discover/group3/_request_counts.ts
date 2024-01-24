@@ -250,11 +250,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRefreshRequest: 2,
       });
 
-      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 2, async () => {
+      it(`should send 3 requests (documents + chart) when toggling the chart visibility`, async () => {
+        await expectSearches(type, 3, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
-        await expectSearches(type, 1, async () => {
+        await expectSearches(type, 2, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
       });
