@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-declare module 'puid' {
-  class Puid {
-    generate(): string;
-  }
+import { i18n } from '@kbn/i18n';
 
-  // eslint-disable-next-line import/no-default-export
-  export default Puid;
-}
+export const API_RESULTS_INDEX_NOT_AVAILABLE = i18n.translate(
+  'xpack.ecsDataQualityDashboard.api.results.indexNotAvailable',
+  {
+    defaultMessage: 'Data Quality Dashboard result persistence not available',
+  }
+);
