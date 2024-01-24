@@ -23,12 +23,12 @@ import {
   htmlIdGenerator,
   useIsWithinBreakpoints,
   useIsWithinMinBreakpoint,
+  useEuiTheme,
   useEuiThemeCSSVariables,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { KibanaSolutionAvatar } from '@kbn/shared-ux-avatar-solution';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { SolutionNavCollapseButton } from './collapse_button';
 
@@ -73,6 +73,7 @@ export type SolutionNavProps = Omit<EuiSideNavProps<{}>, 'children' | 'items' | 
 };
 
 const FLYOUT_SIZE = 248;
+const FLYOUT_SIZE_CSS = `${FLYOUT_SIZE}px`;
 
 const setTabIndex = (items: Array<EuiSideNavItemType<{}>>, isHidden: boolean) => {
   return items.map((item) => {
@@ -176,17 +177,17 @@ export const SolutionNav: FC<SolutionNavProps> = ({
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
+  const { euiTheme } = useEuiTheme();
   const navWidth = useMemo(() => {
     if (isLargerBreakpoint) {
-      return isOpenOnDesktop ? `${FLYOUT_SIZE}px` : euiThemeVars.euiSizeXXL;
+      return isOpenOnDesktop ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
     if (isMediumBreakpoint) {
-      return isSideNavOpenOnMobile || !canBeCollapsed
-        ? `${FLYOUT_SIZE}px`
-        : euiThemeVars.euiSizeXXL;
+      return isSideNavOpenOnMobile || !canBeCollapsed ? FLYOUT_SIZE_CSS : euiTheme.size.xxl;
     }
     return '0';
   }, [
+    euiTheme,
     isOpenOnDesktop,
     isSideNavOpenOnMobile,
     canBeCollapsed,
