@@ -81,32 +81,27 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'columns', value: change.columns },
                 { propName: 'esql', value: change.esql },
               ];
-              if (
-                props.sourceDescriptor.dateField &&
-                !change.dateFields.includes(props.sourceDescriptor.dateField)
-              ) {
-                const autoSelectedDateField = change.dateFields.length ? change.dateFields[0] : undefined;
-                changes.push({
-                  propName: 'dateField',
-                  value: autoSelectedDateField,
-                });
-                if (!autoSelectedDateField) {
-                  changes.push({ propName: 'narrowByGlobalTime', value: false });
+              function cleanupField(key: 'dateField' | 'geoField', fields: string[]) {
+                if (
+                  props.sourceDescriptor[key] &&
+                  !fields.includes(props.sourceDescriptor[key]!)
+                ) {
+                  const value = fields.length ? fields[0] : undefined;
+                  changes.push({
+                    propName: key,
+                    value,
+                  });
+                  // uncheck narrowing if there are no fields
+                  if (!value) {
+                    changes.push({
+                      propName: key === 'dateField' ? 'narrowByGlobalTime' : 'narrowByMapBounds',
+                      value: false
+                    });
+                  }
                 }
               }
-              if (
-                props.sourceDescriptor.geoField &&
-                !change.geoFields.includes(props.sourceDescriptor.geoField)
-              ) {
-                const autoSelectedGeoField = change.geoFields.length ? change.geoFields[0] : undefined;
-                changes.push({
-                  propName: 'geoField',
-                  value: autoSelectedGeoField,
-                });
-                if (!autoSelectedGeoField) {
-                  changes.push({ propName: 'narrowByMapBounds', value: false });
-                }
-              }
+              cleanupField('dateField', change.dateFields);
+              cleanupField('geoField', change.geoFields);
               props.onChange(...changes);
             }}
           />
