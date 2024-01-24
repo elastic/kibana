@@ -27,6 +27,10 @@
     "@kbn/core-security-server-mocks",
     "@kbn/core-user-profile-server-internal",
     "@kbn/core-user-profile-server-mocks",
+    "@kbn/core-base-common",
+    "@kbn/core-base-common-internal",
+    "@kbn/core-di-server-internal",
+    "@kbn/core-di-server-mocks",
   ],
   "exclude": [
     "target/**/*",
