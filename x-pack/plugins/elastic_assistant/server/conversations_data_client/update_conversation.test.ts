@@ -59,6 +59,8 @@ describe('updateConversation', () => {
     const options = getupdateConversationOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 0 });
-    await expect(updateConversation({ ...options, esClient })).rejects.toThrow('No list has been updated');
+    await expect(updateConversation({ ...options, esClient })).rejects.toThrow(
+      'No list has been updated'
+    );
   });
 });

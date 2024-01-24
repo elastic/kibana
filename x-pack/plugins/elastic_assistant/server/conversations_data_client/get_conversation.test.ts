@@ -21,7 +21,7 @@ describe('getConversation', () => {
     const data = getSearchListMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(esClient, LIST_INDEX, id );
+    const conversation = await getConversation(esClient, LIST_INDEX, id);
     const expected = getListResponseMock();
     expect(conversation).toEqual(expected);
   });
