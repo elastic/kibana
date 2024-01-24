@@ -19,24 +19,18 @@ import {
 } from '@elastic/eui';
 import React, { ChangeEvent, useEffect, useState } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
-import { useAuthenticator } from './role_switcher';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { type HttpSetup } from '@kbn/core-http-browser';
+import { useAuthenticator } from './role_switcher';
 
-export const fetchRoles = (http: HttpSetup) => http.get<{roles: string[]}>('/mock_idp/supported_roles')
+export const fetchRoles = (http: HttpSetup) =>
+  http.get<{ roles: string[] }>('/mock_idp/supported_roles');
 
 export const LoginPage = () => {
   const { services } = useKibana<CoreStart>();
   const [roles, setRoles] = useState<string[]>([]);
   const isRolesDefined = () => roles.length > 0;
-
-  useEffect(() => {
-    fetchRoles(services.http).then(response => {
-      setRoles(response.roles);
-      formik.setFieldValue('role', response.roles[0]);
-    });
-  }, []);
 
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
@@ -56,6 +50,13 @@ export const LoginPage = () => {
       });
     },
   });
+
+  useEffect(() => {
+    fetchRoles(services.http).then((response) => {
+      setRoles(response.roles);
+      formik.setFieldValue('role', response.roles[0]);
+    });
+  }, [services, formik]);
 
   return (
     <FormikProvider value={formik}>
@@ -149,7 +150,7 @@ export const LoginPage = () => {
       </EuiPageTemplate>
     </FormikProvider>
   );
-  };
+};
 
 const sanitizeUsername = (username: string) =>
   username.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();

@@ -12,10 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import {
-  MOCK_IDP_REALM_NAME,
-  MOCK_IDP_REALM_TYPE,
-} from '@kbn/mock-idp-utils/src/constants';
+import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
 import { fetchRoles } from './login_page';
@@ -60,8 +57,8 @@ export const RoleSwitcher = () => {
 
   useEffect(() => {
     getCurrentUser();
-    fetchRoles(services.http).then(response => setRoles(response.roles));
-  }, [getCurrentUser, authenticateUserState.value]);
+    fetchRoles(services.http).then((response) => setRoles(response.roles));
+  }, [getCurrentUser, authenticateUserState.value, services]);
 
   useEffect(() => {
     if (authenticateUserState.value) {
@@ -75,7 +72,11 @@ export const RoleSwitcher = () => {
     }
   }, [authenticateUserState.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!currentUserState.value || !isAuthenticatedWithMockIDP(currentUserState.value) || roles.length === 0) {
+  if (
+    !currentUserState.value ||
+    !isAuthenticatedWithMockIDP(currentUserState.value) ||
+    roles.length === 0
+  ) {
     return null;
   }
 
