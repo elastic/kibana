@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import {
   OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
-  urlSchemaV1,
+  logExplorerUrlSchemaV1,
 } from '@kbn/observability-log-explorer-plugin/common';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
@@ -105,7 +105,7 @@ const packages: IntegrationPackage[] = [
 const initialPackages = packages.slice(0, 3);
 const additionalPackages = packages.slice(3);
 
-const defaultPageState: urlSchemaV1.UrlSchema = {
+const defaultPageState: logExplorerUrlSchemaV1.UrlSchema = {
   v: 1,
   time: {
     from: '2023-08-03T10:24:14.035Z',
@@ -212,11 +212,11 @@ export function ObservabilityLogExplorerPageObject({
     async navigateTo({
       pageState,
     }: {
-      pageState?: urlSchemaV1.UrlSchema;
+      pageState?: logExplorerUrlSchemaV1.UrlSchema;
     } = {}) {
       const queryStringParams = querystring.stringify({
         [OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY]: rison.encode(
-          urlSchemaV1.urlSchemaRT.encode({
+          logExplorerUrlSchemaV1.urlSchemaRT.encode({
             ...defaultPageState,
             ...pageState,
           })

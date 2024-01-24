@@ -94,17 +94,9 @@ export const createPureDatasetQualityControllerStateMachine = (
         },
         idle: {
           on: {
-            CHANGE_PAGE: {
+            UPDATE_TABLE_CRITERIA: {
               target: 'idle',
-              actions: ['storeTablePage'],
-            },
-            CHANGE_ROWS_PER_PAGE: {
-              target: 'idle',
-              actions: ['storeTableRowsPerPage'],
-            },
-            CHANGE_SORT: {
-              target: 'idle',
-              actions: ['storeSortOptions'],
+              actions: ['storeTableOptions'],
             },
             OPEN_FLYOUT: {
               target: 'fetchingFlyoutData',
@@ -133,33 +125,10 @@ export const createPureDatasetQualityControllerStateMachine = (
     },
     {
       actions: {
-        storeTablePage: assign((context, event) => {
-          return 'page' in event
+        storeTableOptions: assign((_context, event) => {
+          return 'criteria' in event
             ? {
-                table: {
-                  ...context.table,
-                  page: event.page,
-                },
-              }
-            : {};
-        }),
-        storeTableRowsPerPage: assign((context, event) => {
-          return 'rowsPerPage' in event
-            ? {
-                table: {
-                  ...context.table,
-                  rowsPerPage: event.rowsPerPage,
-                },
-              }
-            : {};
-        }),
-        storeSortOptions: assign((context, event) => {
-          return 'sort' in event
-            ? {
-                table: {
-                  ...context.table,
-                  sort: event.sort,
-                },
+                table: event.criteria,
               }
             : {};
         }),

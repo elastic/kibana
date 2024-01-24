@@ -78,18 +78,14 @@ export const useDatasetQualityTable = () => {
       sort?: { field: SortField; direction: Direction };
     }) => {
       service.send({
-        type: 'CHANGE_PAGE',
-        page: options.page.index,
-      });
-      service.send({
-        type: 'CHANGE_ROWS_PER_PAGE',
-        rowsPerPage: options.page.size,
-      });
-      service.send({
-        type: 'CHANGE_SORT',
-        sort: {
-          field: options.sort?.field || DEFAULT_SORT_FIELD,
-          direction: options.sort?.direction || DEFAULT_SORT_DIRECTION,
+        type: 'UPDATE_TABLE_CRITERIA',
+        criteria: {
+          page: options.page.index,
+          rowsPerPage: options.page.size,
+          sort: {
+            field: options.sort?.field || DEFAULT_SORT_FIELD,
+            direction: options.sort?.direction || DEFAULT_SORT_DIRECTION,
+          },
         },
       });
     },

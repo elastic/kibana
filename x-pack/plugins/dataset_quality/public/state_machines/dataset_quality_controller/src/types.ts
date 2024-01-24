@@ -15,15 +15,17 @@ import {
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
-interface WithTableOptions {
-  table: {
-    page: number;
-    rowsPerPage: number;
-    sort: {
-      field: SortField;
-      direction: Direction;
-    };
+interface TableCriteria {
+  page: number;
+  rowsPerPage: number;
+  sort: {
+    field: SortField;
+    direction: Direction;
   };
+}
+
+interface WithTableOptions {
+  table: TableCriteria;
 }
 
 export interface FlyoutDataset {
@@ -87,19 +89,8 @@ export type DatasetQualityControllerContext = DatasetQualityControllerTypeState[
 
 export type DatasetQualityControllerEvent =
   | {
-      type: 'CHANGE_PAGE';
-      page: number;
-    }
-  | {
-      type: 'CHANGE_ROWS_PER_PAGE';
-      rowsPerPage: number;
-    }
-  | {
-      type: 'CHANGE_SORT';
-      sort: {
-        field: SortField;
-        direction: Direction;
-      };
+      type: 'UPDATE_TABLE_CRITERIA';
+      criteria: TableCriteria;
     }
   | {
       type: 'OPEN_FLYOUT';
