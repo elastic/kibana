@@ -131,30 +131,31 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
     isUnsaved: boolean;
     exceedsMaxLength: boolean;
   }) => {
-    if (isUnsaved) {
-      if (exceedsMaxLength) {
-        return <ErrorUrlTooLongPanel isUnsaved />;
-      }
-      return <ErrorUnsavedWorkPanel />;
+    if (isUnsaved && exceedsMaxLength) {
+      return <ErrorUrlTooLongPanel isUnsaved />;
     } else if (exceedsMaxLength) {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButtonEmpty
-            iconType="copy"
-            flush="both"
-            onClick={copy}
-            data-test-subj="shareReportingCopyURL"
-          >
-            <FormattedMessage
-              id="xpack.reporting.modalContent.copyUrlButtonLabel"
-              defaultMessage="Copy POST URL  "
-            />
-          </EuiButtonEmpty>
-        )}
-      </EuiCopy>
+      <>
+        {isUnsaved && <ErrorUnsavedWorkPanel />}
+        <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
+          {(copy) => (
+            <EuiButtonEmpty
+              iconType="copy"
+              disabled={isUnsaved}
+              flush="both"
+              onClick={copy}
+              data-test-subj="shareReportingCopyURL"
+            >
+              <FormattedMessage
+                id="xpack.reporting.modalContent.copyUrlButtonLabel"
+                defaultMessage="Copy POST URL  "
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
+      </>
     );
   };
 
@@ -167,11 +168,13 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
       </EuiModalHeader>
       <EuiModalBody>
         <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
-          <EuiCallOut
-            size="s"
-            title="CSV reports can take a few minutes to generate based upon the size of your report"
-            iconType="iInCircle"
-          />
+          {!isSaved && (
+            <EuiCallOut
+              size="s"
+              title="CSV reports can take a few minutes to generate based upon the size of your report"
+              iconType="iInCircle"
+            />
+          )}
           <EuiSpacer size="m" />
           {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         </EuiForm>
