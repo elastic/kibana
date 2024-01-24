@@ -98,7 +98,7 @@ export const reportingCsvShareProvider = ({
           { theme, i18n: i18nStart }
         ),
         {
-          maxWidth: 400,
+          maxWidth: 500,
           'data-test-subj': 'export-csv-modal',
         }
       );
@@ -112,7 +112,7 @@ export const reportingCsvShareProvider = ({
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'CSV Download',
+        defaultMessage: 'Download CSV',
       });
 
       shareActions.push({

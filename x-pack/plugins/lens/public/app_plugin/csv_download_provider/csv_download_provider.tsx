@@ -125,7 +125,7 @@ export const downloadCsvShareProvider = ({
     const panelTitle = i18n.translate(
       'xpack.lens.reporting.shareContextMenu.csvReportsButtonLabel',
       {
-        defaultMessage: 'CSV Download',
+        defaultMessage: 'Download CSV',
       }
     );
 
@@ -152,7 +152,7 @@ export const downloadCsvShareProvider = ({
           { theme, i18n: i18nStart }
         ),
         {
-          maxWidth: 400,
+          maxWidth: 500,
           'data-test-subj': 'csv-download-modal',
         }
       );

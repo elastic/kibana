@@ -163,7 +163,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
     <>
       <EuiModalHeader>
         <EuiModalHeaderTitle>
-          <FormattedMessage id="xpack.reporting.csvModalHeader" defaultMessage="Generate a CSV" />
+          <FormattedMessage id="xpack.reporting.csvModalHeader" defaultMessage="Download CSV" />
         </EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
@@ -195,7 +195,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
             >
               <FormattedMessage
                 id="xpack.reporting.generateButtonLabel"
-                defaultMessage="Export as CSV"
+                defaultMessage="Download CSV"
               />
             </EuiButton>
           </EuiFlexItem>

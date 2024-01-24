@@ -415,7 +415,9 @@ export class LinkModal extends Component<LinkModalProps, State> {
     return (
       <EuiModal onClose={this.props.onClose}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>{`Get link to this ${this.props.objectType}`}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{`Get link to this ${
+            this.props.objectType === 'lens' ? 'visualization' : this.props.objectType
+          }`}</EuiModalHeaderTitle>
         </EuiModalHeader>
         <EuiModalBody>
           <EuiForm className="kbnShareContextMenu__finalPanel" data-test-subj="shareUrlForm">

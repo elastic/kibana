@@ -22,6 +22,7 @@ import {
   EuiSpacer,
   EuiSwitch,
   EuiSwitchEvent,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -335,26 +336,21 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
 
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' || !isSaved || props.isDirty || isStale ? (
-      <EuiFormRow
-        helpText={
-          <FormattedMessage
-            id="xpack.reporting.modalContent.saveWorkDescription"
-            defaultMessage="Please save your work before generating a report."
-          />
-        }
-      >
-        <EuiButton
-          disabled={Boolean(createReportingJob)}
-          fill
-          onClick={() => generateReportingJob()}
-          data-test-subj="generateReportButton"
-          isLoading={Boolean(createReportingJob)}
-        >
-          <FormattedMessage
-            id="xpack.reporting.modalContent.generateButtonLabel"
-            defaultMessage="Generate report"
-          />
-        </EuiButton>
+      <EuiFormRow>
+        <EuiToolTip content="Please save your work before generating a report.">
+          <EuiButton
+            disabled={Boolean(createReportingJob)}
+            fill
+            onClick={() => generateReportingJob()}
+            data-test-subj="generateReportButton"
+            isLoading={Boolean(createReportingJob)}
+          >
+            <FormattedMessage
+              id="xpack.reporting.modalContent.generateButtonLabel"
+              defaultMessage="Generate report"
+            />
+          </EuiButton>
+        </EuiToolTip>
       </EuiFormRow>
     ) : (
       <EuiButton
@@ -373,7 +369,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>{`Export this ${objectType}`}</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{`Generate report`}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
         {objectType === 'dashboard' && (
@@ -406,11 +402,11 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           {renderOptions()}
+          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-        <EuiFlexGroup>
+        <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={0}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem>

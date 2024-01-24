@@ -37,7 +37,7 @@ export function DownloadPanelContent({
   return (
     <>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>Generate a CSV</EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>Download CSV</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody className="kbnShareContextMenu__finalPanel" data-test-subj="shareReportingForm">
         <EuiForm>
@@ -50,7 +50,7 @@ export function DownloadPanelContent({
         <EuiSpacer size="m" />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
           <EuiFlexItem>
             <EuiButtonEmpty onClick={onClose} data-test-subj="share.doneButton">
               <FormattedMessage id="xpack.lens.doneButton" defaultMessage="Done" />
@@ -67,7 +67,7 @@ export function DownloadPanelContent({
             >
               <FormattedMessage
                 id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
-                defaultMessage="Export as CSV"
+                defaultMessage="Download CSV"
               />
             </EuiButton>
           </EuiFlexItem>

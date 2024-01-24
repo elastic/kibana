@@ -107,7 +107,7 @@ export const reportingScreenshotShareProvider = ({
           { theme, i18n: i18nStart }
         ),
         {
-          maxWidth: 400,
+          maxWidth: 500,
           'data-test-subj': 'export-image-modal',
         }
       );
@@ -115,7 +115,7 @@ export const reportingScreenshotShareProvider = ({
     const imageModal = {
       shareMenuItem: {
         name: i18n.translate('xpack.reporting.shareContextMenu.ExportsButtonLabel', {
-          defaultMessage: 'Reports',
+          defaultMessage: 'Generate report',
         }),
         icon: 'document',
         toolTipContent: licenseToolTipContent,
@@ -127,7 +127,7 @@ export const reportingScreenshotShareProvider = ({
       panel: {
         id: 'reportingImageModal',
         title: i18n.translate('xpack.reporting.shareContextMenu.ReportsButtonLabel', {
-          defaultMessage: 'Reports',
+          defaultMessage: 'Generate report',
         }),
         content: openImageModal,
       },

@@ -7,22 +7,33 @@
 import { i18n } from '@kbn/i18n';
 import type { FunctionComponent } from 'react';
 import React from 'react';
-import { EuiIconTip } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 
 const i18nTexts = {
-  title: i18n.translate('xpack.reporting.modalContent.unsavedStateErrorTitle', {
-    defaultMessage: 'Save your work before copying this URL.',
+  title: i18n.translate('xpack.reporting.panelContent.unsavedStateErrorTitle', {
+    defaultMessage: 'Unsaved work',
   }),
 };
 
 export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
   return (
-    <EuiIconTip
-      size="m"
-      content={i18nTexts.title}
-      type="warning"
-      color="warning"
+    <EuiCallOut
+      size="s"
+      title={i18nTexts.title}
+      iconType="warning"
+      color="danger"
       data-test-subj="shareReportingUnsavedState"
-    />
+    >
+      <EuiText size="s">
+        <p>
+          <FormattedMessage
+            id="xpack.reporting.panelContent.unsavedStateErrorText"
+            defaultMessage="Save your work before copying this URL."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="s" />
+    </EuiCallOut>
   );
 };
