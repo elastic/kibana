@@ -34,13 +34,24 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload '.es/**/*.hprof'
   buildkite-agent artifact upload 'data/es_debug_*.tar.gz'
 
+  set +e
+  TEST_REPORT_EXIT_CODE=0
   if [[ $BUILDKITE_COMMAND_EXIT_STATUS -ne 0 ]]; then
     echo "--- Run Failed Test Reporter"
     node scripts/report_failed_tests --build-url="${BUILDKITE_BUILD_URL}#${BUILDKITE_JOB_ID}" 'target/junit/**/*.xml'
+    TEST_REPORT_EXIT_CODE=$TEST_REPORT_EXIT_CODE || TEST_REPORT_EXIT_CODE=$?
   fi
 
   if [[ -d 'target/test_failures' ]]; then
     buildkite-agent artifact upload 'target/test_failures/**/*'
+    TEST_REPORT_EXIT_CODE=$TEST_REPORT_EXIT_CODE || TEST_REPORT_EXIT_CODE=$?
     ts-node .buildkite/scripts/lifecycle/annotate_test_failures.ts
+    TEST_REPORT_EXIT_CODE=$TEST_REPORT_EXIT_CODE || TEST_REPORT_EXIT_CODE=$?
+  fi
+  set -e
+
+  if [[ $TEST_REPORT_EXIT_CODE -ne 0 ]]; then
+    echo "Failed to archive artifacts! See above for details." >&2
+    exit $TEST_REPORT_EXIT_CODE
   fi
 fi
