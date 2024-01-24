@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(sections).to.have.length(1);
         expect(sections[0]).to.eql({
           sectionId: 'kibana',
-          sectionLinks: ['search_sessions'],
+          sectionLinks: ['search_sessions', 'settings'],
         });
       });
     });

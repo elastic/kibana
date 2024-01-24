@@ -62,7 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render the "Stack" section with License Management and Upgrade Assistant', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();
-          expect(sections).to.have.length(3);
+          expect(sections).to.have.length(4);
           expect(sections[2]).to.eql({
             sectionId: 'stack',
             sectionLinks: ['license_management', 'upgrade_assistant'],

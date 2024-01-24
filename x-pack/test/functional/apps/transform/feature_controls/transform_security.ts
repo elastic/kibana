@@ -61,7 +61,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with Transform', async () => {
         await pageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+        expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'data',
           sectionLinks: ['transform'],

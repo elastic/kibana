@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Ingest" section with Logstash Pipelines', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(1);
+        expect(sections).to.have.length(2);
         expect(sections[0]).to.eql({
           sectionId: 'ingest',
           sectionLinks: ['pipelines'],
