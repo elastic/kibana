@@ -18,8 +18,6 @@ import { createSearchClient } from '../../lib/create_search_client';
 import { buildRouteValidationWithExcess } from '../../utils/route_validation';
 
 export const initServicesRoute = (libs: InfraBackendLibs) => {
-  const validate = buildRouteValidationWithExcess(GetServicesRequestQueryRT);
-
   const { framework } = libs;
   framework.registerRoute<unknown, GetServicesRequestQuery, unknown>(
     {
@@ -32,7 +30,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
             return invalidResponse;
           }
           q.validatedFilters = parsedFilters;
-          return validate(q, res);
+          return buildRouteValidationWithExcess(GetServicesRequestQueryRT)(q, res);
         },
       },
     },
