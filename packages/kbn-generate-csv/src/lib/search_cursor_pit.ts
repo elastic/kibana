@@ -1,0 +1,149 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/core/server';
+import { lastValueFrom } from 'rxjs';
+import {
+  ES_SEARCH_STRATEGY,
+  SearchSourceFields,
+  type ISearchSource,
+  type SearchRequest,
+} from '@kbn/data-plugin/common';
+import { SearchCursor, type SearchCursorClients, type SearchCursorSettings } from './search_cursor';
+import { i18nTexts } from './i18n_texts';
+
+export class SearchCursorPit extends SearchCursor {
+  constructor(
+    indexPatternTitle: string,
+    settings: SearchCursorSettings,
+    clients: SearchCursorClients,
+    logger: Logger
+  ) {
+    super(indexPatternTitle, settings, clients, logger);
+  }
+
+  /**
+   * When point-in-time strategy is used, the first step is to open a PIT ID for search context.
+   */
+  public async initialize() {
+    this.cursorId = await this.openPointInTime();
+  }
+
+  private async openPointInTime() {
+    const { includeFrozen, maxConcurrentShardRequests, scroll } = this.settings;
+
+    let pitId: string | undefined;
+
+    this.logger.debug(`Requesting PIT for: [${this.indexPatternTitle}]...`);
+    try {
+      // NOTE: if ES is overloaded, this request could time out
+      const response = await this.clients.es.asCurrentUser.openPointInTime(
+        {
+          index: this.indexPatternTitle,
+          keep_alive: scroll.duration,
+          ignore_unavailable: true,
+          // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
+          ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+        },
+        {
+          requestTimeout: scroll.duration,
+          maxRetries: 0,
+          maxConcurrentShardRequests,
+        }
+      );
+      pitId = response.id;
+    } catch (err) {
+      this.logger.error(err);
+    }
+
+    if (!pitId) {
+      throw new Error(`Could not receive a PIT ID!`);
+    }
+
+    this.logger.debug(`Opened PIT ID: ${this.formatCursorId(pitId)}`);
+
+    return pitId;
+  }
+
+  private async searchWithPit(searchBody: SearchRequest) {
+    const searchParamsPit = {
+      params: {
+        body: searchBody,
+        max_concurrent_shard_requests: this.settings.maxConcurrentShardRequests,
+      },
+    };
+    return await lastValueFrom(
+      this.clients.data.search(searchParamsPit, {
+        strategy: ES_SEARCH_STRATEGY,
+        transport: {
+          maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
+          requestTimeout: this.settings.scroll.duration,
+        },
+      })
+    );
+  }
+
+  public async getPage(searchSource: ISearchSource) {
+    this.logger.debug(
+      `Executing search request with PIT ID: [${this.formatCursorId(this.cursorId)}]` +
+        (this.searchAfter ? ` search_after: [${this.searchAfter}]` : '')
+    );
+
+    const searchBody: estypes.SearchRequest = searchSource.getSearchRequestBody();
+    if (searchBody == null) {
+      throw new Error('Could not retrieve the search body!');
+    }
+
+    const response = await this.searchWithPit(searchBody);
+
+    if (!response) {
+      throw new Error(`Response could not be retrieved!`);
+    }
+
+    const { rawResponse, ...rawDetails } = response;
+
+    this.logSearchResults(rawDetails, rawResponse);
+    this.logger.debug(`Received PIT ID: [${this.formatCursorId(rawResponse.pit_id)}]`);
+
+    return rawResponse;
+  }
+
+  public updateIdFromResults(results: Pick<estypes.SearchResponse<unknown>, 'pit_id'>) {
+    const cursorId = results.pit_id;
+    this.cursorId = cursorId ?? this.cursorId;
+  }
+
+  /**
+   * Returns fields to set into a SearchSource so the correct paging parameters are sent in search requests.
+   */
+  public getPagingFieldsForSearchSource(): [keyof SearchSourceFields, object] | undefined {
+    // set the latest pit, which could be different from the last request
+    return ['pit' as const, { id: this.cursorId, keep_alive: this.settings.scroll.duration }];
+  }
+
+  public setSearchAfter(hits: Array<estypes.SearchHit<unknown>>) {
+    // Update last sort results for next query. PIT is used, so the sort results
+    // automatically include _shard_doc as a tiebreaker
+    this.searchAfter = hits[hits.length - 1]?.sort as estypes.SortResults | undefined;
+    this.logger.debug(`Received search_after: [${this.searchAfter}]`);
+  }
+
+  public async closeCursorId() {
+    if (this.cursorId) {
+      this.logger.debug(`Executing close PIT on ${this.formatCursorId(this.cursorId)}`);
+      await this.clients.es.asCurrentUser.closePointInTime({ body: { id: this.cursorId } });
+    } else {
+      this.logger.warn(`No PIT Id to clear!`);
+    }
+  }
+
+  public getUnableToCloseCursorMessage() {
+    return i18nTexts.csvUnableToClosePit();
+  }
+}

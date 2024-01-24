@@ -8,10 +8,11 @@
 
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ISearchClient } from '@kbn/data-plugin/common';
+import type { ISearchClient } from '@kbn/data-plugin/common';
 import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { createSearchRequestHandlerContext } from '@kbn/data-plugin/server/search/mocks';
-import { SearchCursor, SearchCursorSettings } from './search_cursor';
+import type { SearchCursor, SearchCursorSettings } from './search_cursor';
+import { SearchCursorPit } from './search_cursor_pit';
 
 describe('CSV Export Search Cursor', () => {
   let settings: SearchCursorSettings;
@@ -32,37 +33,26 @@ describe('CSV Export Search Cursor', () => {
 
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
-    jest.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({ id: 'what-a-pit-id' });
+    jest.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({ id: 'somewhat-pit-id' });
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursor(
-      'test-index-pattern-string',
-      undefined,
-      settings,
-      { data, es },
-      logger
-    );
-    await cursor.initialize();
-  });
+    cursor = new SearchCursorPit('test-index-pattern-string', settings, { data, es }, logger);
 
-  it('selects the point-in-time strategy by default', async () => {
-    const searchWithPitSpy = jest
+    const openPointInTimeSpy = jest
       // @ts-expect-error create spy on private method
-      .spyOn(cursor, 'searchWithPit')
-      // @ts-expect-error mock resolved value for spy on private method
-      .mockResolvedValueOnce({ rawResponse: { hits: [] } });
+      .spyOn(cursor, 'openPointInTime');
 
-    const searchSource = createSearchSourceMock();
-    await cursor.getPage(searchSource);
-    expect(searchWithPitSpy).toBeCalledTimes(1);
+    await cursor.initialize();
+
+    expect(openPointInTimeSpy).toBeCalledTimes(1);
   });
 
   it('can update internal cursor ID', () => {
-    cursor.updateIdFromResults({ pit_id: 'yes-this-really-is-a-new-id' });
+    cursor.updateIdFromResults({ pit_id: 'very-typical-point-in-time-id' });
     expect(cursor.getPagingFieldsForSearchSource()).toMatchObject([
       'pit',
-      { id: 'yes-this-really-is-a-new-id', keep_alive: '10m' },
+      { id: 'very-typical-point-in-time-id', keep_alive: '10m' },
     ]);
   });
 
@@ -77,28 +67,15 @@ describe('CSV Export Search Cursor', () => {
     expect(cursor.getSearchAfter()).toEqual(['Wed Jan 17 15:35:47 MST 2024', 42]);
   });
 
-  describe('scroll strategy', () => {
-    beforeEach(async () => {
-      cursor = new SearchCursor(
-        'test-index-pattern-string',
-        'scroll',
-        settings,
-        { data, es },
-        logger
-      );
-      await cursor.initialize();
-    });
+  it('supports point-in-time', async () => {
+    const searchWithPitSpy = jest
+      // @ts-expect-error create spy on private method
+      .spyOn(cursor, 'searchWithPit')
+      // @ts-expect-error mock resolved value for spy on private method
+      .mockResolvedValueOnce({ rawResponse: { hits: [] } });
 
-    it('supports scroll', async () => {
-      const scanSpy = jest
-        // @ts-expect-error create spy on private method
-        .spyOn(cursor, 'scan')
-        // @ts-expect-error mock resolved value for spy on private method
-        .mockResolvedValueOnce({ rawResponse: { hits: [] } });
-
-      const searchSource = createSearchSourceMock();
-      await cursor.getPage(searchSource);
-      expect(scanSpy).toBeCalledTimes(1);
-    });
+    const searchSource = createSearchSourceMock();
+    await cursor.getPage(searchSource);
+    expect(searchWithPitSpy).toBeCalledTimes(1);
   });
 });

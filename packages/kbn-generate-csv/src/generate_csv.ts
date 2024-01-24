@@ -30,10 +30,12 @@ import type { ReportingConfigType } from '@kbn/reporting-server';
 
 import { CONTENT_TYPE_CSV } from '../constants';
 import type { JobParamsCSV } from '../types';
-import { type CsvExportSettings, getExportSettings } from './lib/get_export_settings';
+import { getExportSettings, type CsvExportSettings } from './lib/get_export_settings';
 import { i18nTexts } from './lib/i18n_texts';
 import { MaxSizeStringBuilder } from './lib/max_size_string_builder';
-import { SearchCursor } from './lib/search_cursor';
+import type { SearchCursor } from './lib/search_cursor';
+import { SearchCursorPit } from './lib/search_cursor_pit';
+import { SearchCursorScroll } from './lib/search_cursor_scroll';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -251,13 +253,16 @@ export class CsvGenerator {
     let reportingError: undefined | ReportingError;
 
     // use a class to internalize the paging strategy
-    const cursor = new SearchCursor(
-      indexPatternTitle,
-      this.job.pagingStrategy,
-      settings,
-      this.clients,
-      this.logger
-    );
+    let cursor: SearchCursor;
+    if (this.job.pagingStrategy === 'scroll') {
+      // Optional strategy: scan-and-scroll
+      cursor = new SearchCursorScroll(indexPatternTitle, settings, this.clients, this.logger);
+      logger.debug('Using search strategy: scroll');
+    } else {
+      // Default strategy: point-in-time
+      cursor = new SearchCursorPit(indexPatternTitle, settings, this.clients, this.logger);
+      logger.debug('Using search strategy: pit');
+    }
     await cursor.initialize();
 
     // apply timezone from the job to all date field formatters
