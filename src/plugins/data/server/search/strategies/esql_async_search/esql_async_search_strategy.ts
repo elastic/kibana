@@ -63,17 +63,17 @@ export const esqlAsyncSearchStrategyProvider = (
             ...request.params,
           };
       const { body, headers, meta } = id
-        ? await client.transport.request(
+        ? await client.transport.request<SqlGetAsyncResponse>(
             { method: 'GET', path: `/_query/async/${id}`, querystring: { ...params } },
             { ...options.transport, signal: options.abortSignal, meta: true }
           )
-        : await client.transport.request(
+        : await client.transport.request<SqlGetAsyncResponse>(
             { method: 'POST', path: `/_query/async`, body: params },
             { ...options.transport, signal: options.abortSignal, meta: true }
           );
 
       const finalResponse = toAsyncKibanaSearchResponse(
-        body as SqlGetAsyncResponse,
+        body,
         headers?.warning,
         // do not return requestParams on polling calls
         id ? undefined : meta?.request?.params
@@ -110,7 +110,7 @@ export const esqlAsyncSearchStrategyProvider = (
      * @param request
      * @param options
      * @param deps `SearchStrategyDependencies`
-     * @returns `Observable<IEsSearchResponse<any>>`
+     * @returns `Observable<IKibanaResponse<SqlGetAsyncResponse>>`
      * @throws `KbnSearchError`
      */
     search: (request, options: IAsyncSearchOptions, deps) => {

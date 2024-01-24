@@ -47,10 +47,7 @@ export async function getDefaultAsyncSubmitParams(
     | 'keep_on_completion'
   >
 > {
-  return getCommonDefaultAsyncSubmitParams(searchConfig, options)
-    // Decreases delays due to network when using CCS
-    ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
-  };
+  return getCommonDefaultAsyncSubmitParams(searchConfig, options);
 }
 
 /**
@@ -60,7 +57,5 @@ export function getDefaultAsyncGetParams(
   searchConfig: SearchConfigSchema,
   options: ISearchOptions
 ): Pick<AsyncSearchGetRequest, 'keep_alive' | 'wait_for_completion_timeout'> {
-  return {
-    ...getCommonDefaultAsyncGetParams(searchConfig, options),
-  };
+  return getCommonDefaultAsyncGetParams(searchConfig, options);
 }
