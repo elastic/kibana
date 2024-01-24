@@ -12,7 +12,7 @@ import type { CoreDiSetupModuleCallback } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 /** @internal */
-export type InternalCoreDiServiceSetup = {
+export interface InternalCoreDiServiceSetup {
   // public interfaces to be bridged to the public contract
 
   configurePluginModule(pluginId: PluginOpaqueId, callback: CoreDiSetupModuleCallback): void;
@@ -27,15 +27,16 @@ export type InternalCoreDiServiceSetup = {
    */
   registerPluginModule(module: ContainerModule): void;
 
-  // TODO
   registerGlobalModule(module: ContainerModule): void;
+
   registerRequestModule(module: ContainerModule): void;
-};
+}
 
 /** @internal */
 export interface InternalCoreDiServiceStart {
   getPluginContainer(pluginId: PluginOpaqueId): ReadonlyContainer;
 
   createRequestContainer(request: KibanaRequest, pluginId: PluginOpaqueId): ReadonlyContainer;
+
   disposeRequestContainer(request: KibanaRequest): boolean;
 }
