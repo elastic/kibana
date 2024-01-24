@@ -7,20 +7,18 @@
 
 /* eslint-disable complexity */
 
-import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
+import type { EuiButtonEmpty, EuiButtonIcon, EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { isNumber, isEmpty } from 'lodash/fp';
-import React from 'react';
-import { css } from '@emotion/css';
+import { head, getOr, get, isEmpty, isNumber } from 'lodash/fp';
+import React, { useMemo } from 'react';
 
-import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
-import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
+import type { BrowserField, ColumnHeaderOptions, TimelineItem } from '@kbn/timelines-plugin/common';
+import {} from '@kbn/timelines-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
 import { INDICATOR_REFERENCE } from '../../../../../../common/cti/constants';
-import { DefaultDraggable } from '../../../../../common/components/draggables';
 import { Bytes, BYTES_FORMAT } from './bytes';
 import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
-import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
 import { Port } from '../../../../../explore/network/components/port';
@@ -45,16 +43,177 @@ import { RenderRuleName, renderEventModule, renderUrl } from './formatted_field_
 import { RuleStatus } from './rule_status';
 import { HostName } from './host_name';
 import { UserName } from './user_name';
+import {
+  EmptyComponent,
+  getLinkColumnDefinition,
+} from '../../../../../common/lib/cell_actions/helpers';
+import { useGetMappedNonEcsValue } from '../data_driven_columns';
+import { parseValue } from './parse_value';
+import { getField, getFieldKey } from '../../../../../helpers';
 
 // simple black-list to prevent dragging and dropping fields such as message name
 const columnNamesNotDraggable = [MESSAGE_FIELD_NAME];
 
-// Offset top-aligned tooltips so that cell actions are more visible
-const dataGridToolTipOffset = css`
-  &[data-position='top'] {
-    margin-block-start: -8px;
+export const useFormattedFieldProps = ({
+  dataTableRow,
+  columnId,
+  header,
+}: {
+  dataTableRow: DataTableRecord & TimelineItem;
+  header?: ColumnHeaderOptions;
+  columnId: string;
+}) => {
+  const ecs = dataTableRow.ecs;
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
+  const linkField = header?.linkField ? header?.linkField : link?.linkField;
+  const linkValues = header && getOr([], linkField ?? '', ecs);
+  const eventId = (header && get('_id' ?? '', ecs)) || '';
+  const rowData = useMemo(() => {
+    return {
+      data: dataTableRow,
+      fieldName: columnId,
+    };
+  }, [columnId, dataTableRow]);
+
+  const values = useGetMappedNonEcsValue({ data: rowData.data.data, fieldName: rowData.fieldName });
+  const value = parseValue(head(values));
+  const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
+  // if linkField is defined but link values is empty, it's possible we are trying to look for a column definition for an old event set
+  if (linkField !== undefined && linkValues.length === 0 && values !== undefined) {
+    const normalizedLinkValue = getField(ecs, linkField);
+    const normalizedLinkField = getFieldKey(ecs, linkField);
+    const normalizedColumnId = getFieldKey(ecs, columnId);
+    const normalizedLink = getLinkColumnDefinition(
+      normalizedColumnId,
+      header?.type,
+      normalizedLinkField
+    );
+    return {
+      link: normalizedLink,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: normalizedColumnId,
+      fieldType: header?.type || '',
+      value: parseValue(head(normalizedColumnId)),
+      values,
+      title,
+      linkValue: head<string>(normalizedLinkValue),
+    };
+  } else {
+    return {
+      link,
+      eventId,
+      fieldFormat: header?.format || '',
+      fieldName: columnId,
+      fieldType: header?.type || '',
+      value,
+      values,
+      title,
+      linkValue: head<string>(linkValues),
+    };
   }
-`;
+};
+
+const FieldValueCell = (
+  dataTableRows: Array<DataTableRecord & TimelineItem>,
+  scopeId: string,
+  browserFieldsByName: { [fieldName: string]: Partial<BrowserField> },
+  closeCellPopover?: () => void
+) => {
+  return function FieldValue(props: EuiDataGridCellValueElementProps) {
+    const header = browserFieldsByName[props.columnId] as ColumnHeaderOptions;
+    const { link, eventId, value, values, title, fieldName, fieldFormat, fieldType, linkValue } =
+      useFormattedFieldProps({
+        dataTableRow: dataTableRows[props.rowIndex],
+        columnId: props.columnId,
+        header,
+      });
+
+    const showEmpty = useMemo(() => {
+      const hasLink = link !== undefined && values && !isEmpty(value);
+      return hasLink !== true;
+    }, [link, value, values]);
+
+    return (header.linkField && showEmpty === false) || !header.linkField ? (
+      <FormattedFieldValue
+        contextId={`expanded-value-${props.columnId}-row-${props.rowIndex}-${scopeId}`}
+        eventId={eventId}
+        fieldFormat={fieldFormat}
+        isAggregatable={header?.aggregatable ?? false}
+        fieldName={fieldName}
+        fieldType={fieldType}
+        isButton={false}
+        isDraggable={false}
+        value={value}
+        truncate={false}
+        title={title}
+        linkValue={linkValue}
+        onClick={closeCellPopover}
+      />
+    ) : (
+      // data grid expects each cell action always return an element, it crashes if returns null
+      EmptyComponent
+    );
+  };
+};
+
+export const getFormattedFields = ({
+  dataTableRows,
+  headers,
+  scopeId,
+  closeCellPopover,
+  browserFieldsByName,
+}: {
+  dataTableRows: Array<DataTableRecord & TimelineItem>;
+  headers?: ColumnHeaderOptions[];
+  scopeId: string;
+  closeCellPopover?: () => void;
+  browserFieldsByName: { [fieldName: string]: Partial<BrowserField> };
+}) => {
+  const ipFieldTypeFields =
+    headers
+      ?.filter((h) => browserFieldsByName[h.id] && browserFieldsByName[h.id].type === IP_FIELD_TYPE)
+      .map((c) => c.id) ?? [];
+  const geoFieldTypeFields =
+    headers
+      ?.filter(
+        (h) => browserFieldsByName[h.id] && browserFieldsByName[h.id].type === GEO_FIELD_TYPE
+      )
+      .map((c) => c.id) ?? [];
+  const byteFormattedFields =
+    headers
+      ?.filter(
+        (h) => browserFieldsByName[h.id] && browserFieldsByName[h.id].format === BYTES_FORMAT
+      )
+      .map((c) => c.id) ?? [];
+  return [
+    ...PORT_NAMES,
+    EVENT_DURATION_FIELD_NAME,
+    HOST_NAME_FIELD_NAME,
+    USER_NAME_FIELD_NAME,
+    SIGNAL_RULE_NAME_FIELD_NAME,
+    EVENT_MODULE_FIELD_NAME,
+    SIGNAL_STATUS_FIELD_NAME,
+    AGENT_STATUS_FIELD_NAME,
+    RULE_REFERENCE_FIELD_NAME,
+    REFERENCE_URL_FIELD_NAME,
+    EVENT_URL_FIELD_NAME,
+    INDICATOR_REFERENCE,
+    ...ipFieldTypeFields,
+    ...geoFieldTypeFields,
+    ...byteFormattedFields,
+    ...columnNamesNotDraggable,
+  ].reduce(
+    (
+      obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
+      field: string
+    ) => {
+      obj[field] = FieldValueCell(dataTableRows, scopeId, browserFieldsByName, closeCellPopover);
+      return obj;
+    },
+    {}
+  );
+};
 
 const FormattedFieldValueComponent: React.FC<{
   asPlainText?: boolean;
@@ -64,7 +223,6 @@ const FormattedFieldValueComponent: React.FC<{
   eventId: string;
   isAggregatable?: boolean;
   isObjectArray?: boolean;
-  isUnifiedDataTable?: boolean,
   fieldFormat?: string;
   fieldName: string;
   fieldType?: string;
@@ -83,7 +241,6 @@ const FormattedFieldValueComponent: React.FC<{
   eventId,
   fieldFormat,
   isAggregatable = false,
-  isUnifiedDataTable,
   fieldName,
   fieldType = '',
   isButton,
@@ -119,29 +276,10 @@ const FormattedFieldValueComponent: React.FC<{
     return <>{value}</>;
   } else if (fieldType === DATE_FIELD_TYPE) {
     const classNames = truncate ? 'eui-textTruncate eui-alignMiddle' : undefined;
-    const date = (
-      <FormattedDate
-        className={classNames}
-        fieldName={fieldName}
-        value={value}
-        tooltipProps={isUnifiedDataTable ? undefined : { position: 'bottom', className: dataGridToolTipOffset }}
-      />
-    );
-    if (isUnifiedDataTable) return date;
     return isDraggable ? (
-      <DefaultDraggable
-        field={fieldName}
-        fieldType={fieldType}
-        isAggregatable={isAggregatable}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        isDraggable={isDraggable}
-        tooltipContent={null}
-        value={`${value}`}
-      >
-        {date}
-      </DefaultDraggable>
+      <FormattedDate className={classNames} fieldName={fieldName} value={value} />
     ) : (
-      date
+      <FormattedDate className={classNames} fieldName={fieldName} value={value} />
     );
   } else if (PORT_NAMES.some((portName) => fieldName === portName)) {
     return (
@@ -266,8 +404,6 @@ const FormattedFieldValueComponent: React.FC<{
         data-test-subj="endpointHostAgentStatus"
       />
     );
-  } else if (fieldName === SENTINEL_ONE_AGENT_ID_FIELD) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (
     [
       RULE_REFERENCE_FIELD_NAME,
@@ -288,13 +424,11 @@ const FormattedFieldValueComponent: React.FC<{
       title,
       value,
     });
-  } else if (isUnifiedDataTable || columnNamesNotDraggable.includes(fieldName) || !isDraggable) {
+  } else {
     return truncate && !isEmpty(value) ? (
       <TruncatableText data-test-subj="truncatable-message">
         <EuiToolTip
           data-test-subj="message-tool-tip"
-          position="bottom"
-          className={dataGridToolTipOffset}
           content={
             <EuiFlexGroup direction="column" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -311,27 +445,6 @@ const FormattedFieldValueComponent: React.FC<{
       </TruncatableText>
     ) : (
       <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>
-    );
-  } else {
-    // This should not be reached for the unified data table
-    const contentValue = getOrEmptyTagFromValue(value);
-    const content = truncate ? <TruncatableText>{contentValue}</TruncatableText> : contentValue;
-    return (
-      <DefaultDraggable
-        field={fieldName}
-        id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
-        fieldType={fieldType ?? ''}
-        isAggregatable={isAggregatable}
-        isDraggable={isDraggable}
-        value={`${value}`}
-        tooltipContent={
-          fieldType === DATE_FIELD_TYPE || fieldType === EVENT_DURATION_FIELD_NAME
-            ? null
-            : fieldName
-        }
-      >
-        {content}
-      </DefaultDraggable>
     );
   }
 };

@@ -8,7 +8,7 @@
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import { head, getOr, get, isEmpty } from 'lodash/fp';
 import React, { useMemo } from 'react';
-
+import type { BrowserField, TimelineItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { getPageRowIndex } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions } from '../../../../common/types';
@@ -18,6 +18,7 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
+import { DataTableRecord } from '@kbn/discover-utils/types';
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -26,6 +27,7 @@ const useFormattedFieldProps = ({
   columnId,
   header,
   data,
+  unifiedDataTableRow,
 }: {
   rowIndex: number;
   data: TimelineNonEcsData[][];
@@ -33,20 +35,22 @@ const useFormattedFieldProps = ({
   header?: ColumnHeaderOptions;
   columnId: string;
   pageSize: number;
+  unifiedDataTableRow?: DataTableRecord & TimelineItem;
 }) => {
   const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-  const ecs = ecsData[pageRowIndex];
+
+  const rowData = useMemo(() => {
+    return {
+      data: unifiedDataTableRow ? unifiedDataTableRow.data : data[pageRowIndex],
+      fieldName: columnId,
+    };
+  }, [pageRowIndex, columnId, data, unifiedDataTableRow]);
+  const ecs = unifiedDataTableRow ? unifiedDataTableRow.ecs :  ecsData[pageRowIndex];
+
   const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
-  const rowData = useMemo(() => {
-    return {
-      data: data[pageRowIndex],
-      fieldName: columnId,
-    };
-  }, [pageRowIndex, columnId, data]);
-
   const values = useGetMappedNonEcsValue(rowData);
   const value = parseValue(head(values));
   const title = values && values.length > 1 ? `${link?.label}: ${value}` : link?.label;
@@ -71,6 +75,7 @@ const useFormattedFieldProps = ({
       values,
       title,
       linkValue: head<string>(normalizedLinkValue),
+
     };
   } else {
     return {
@@ -88,27 +93,35 @@ const useFormattedFieldProps = ({
   }
 };
 
+
+
 export const FieldValueCell = ({
+  browserFieldsByName,
   data,
   ecsData,
   header,
   scopeId,
   pageSize,
   closeCellPopover,
+  unifiedDataTableRows,
 }: {
+  browserFieldsByName?: { [fieldName: string]: Partial<BrowserField> },
   data: TimelineNonEcsData[][];
   ecsData: Ecs[];
   header?: ColumnHeaderOptions;
   scopeId: string;
   pageSize: number;
   closeCellPopover?: () => void;
+  unifiedDataTableRows?: Array<DataTableRecord & TimelineItem>;
 }) => {
-  if (header !== undefined) {
+  if (header !== undefined || browserFieldsByName) {
     return function FieldValue({
       rowIndex,
       columnId,
       Component,
     }: EuiDataGridColumnCellActionProps) {
+      let columnHeader = browserFieldsByName ? browserFieldsByName[columnId] : header;
+      const unifiedDataTableRow = unifiedDataTableRows ? unifiedDataTableRows[rowIndex] : undefined;
       const {
         pageRowIndex,
         link,
@@ -120,10 +133,13 @@ export const FieldValueCell = ({
         fieldFormat,
         fieldType,
         linkValue,
-      } = useFormattedFieldProps({ rowIndex, pageSize, ecsData, columnId, header, data });
+      } = useFormattedFieldProps({ unifiedDataTableRow, rowIndex, pageSize, ecsData, columnId, header: columnHeader, data });
 
       const showEmpty = useMemo(() => {
         const hasLink = link !== undefined && values && !isEmpty(value);
+        if (unifiedDataTableRow) {
+          return hasLink !== true;
+        }
         if (pageRowIndex >= data.length) {
           return true;
         } else {
@@ -133,14 +149,14 @@ export const FieldValueCell = ({
 
       return showEmpty === false ? (
         <FormattedFieldValue
-          Component={Component}
+          Component={unifiedDataTableRow ? undefined : Component}
           contextId={`expanded-value-${columnId}-row-${pageRowIndex}-${scopeId}`}
           eventId={eventId}
           fieldFormat={fieldFormat}
-          isAggregatable={header.aggregatable ?? false}
+          isAggregatable={columnHeader?.aggregatable ?? false}
           fieldName={fieldName}
           fieldType={fieldType}
-          isButton={true}
+          isButton={unifiedDataTableRow ? false : true}
           isDraggable={false}
           value={value}
           truncate={false}
