@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { CsvPagingStrategy } from '@kbn/reporting-export-types-csv-common';
 import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
@@ -65,7 +64,7 @@ export interface BaseParams {
   title: string;
   version: string; // to handle any state migrations
   layout?: LayoutParams; // png & pdf only
-  searchStrategy?: CsvPagingStrategy; // csv only
+  searchStrategy?: 'pit' | 'scroll'; // csv only
 }
 
 /**
