@@ -14,11 +14,11 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_DURATION,
-  ALERT_GROUP_VALUE,
   ALERT_REASON,
   ALERT_RULE_NAME,
   ALERT_START,
   ALERT_STATUS,
+  ALERT_INSTANCE_ID,
   TAGS,
 } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn } from '@elastic/eui';
@@ -89,7 +89,7 @@ export const getColumns = (
       displayAsText: i18n.translate('xpack.observability.alertsTGrid.sourceColumnDescription', {
         defaultMessage: 'Group',
       }),
-      id: ALERT_GROUP_VALUE,
+      id: ALERT_INSTANCE_ID,
       initialWidth: 100,
     },
     {
