@@ -84,7 +84,7 @@ export const useDataVisualizerGridData = (
 
   useExecutionContext(executionContext, embeddableExecutionContext);
 
-  const { samplerShardSize, visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
+  const { visibleFieldTypes, showEmptyFields } = dataVisualizerListState;
 
   const [lastRefresh, setLastRefresh] = useState(0);
   const searchSessionId = input.sessionId;
@@ -244,7 +244,6 @@ export const useDataVisualizerGridData = (
         aggInterval,
         intervalMs: aggInterval?.asMilliseconds(),
         searchQuery,
-        samplerShardSize,
         sessionId: searchSessionId,
         index: currentDataView.title,
         timeFieldName: currentDataView.timeFieldName,
@@ -266,7 +265,6 @@ export const useDataVisualizerGridData = (
       JSON.stringify(searchQuery),
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(samplingOption),
-      samplerShardSize,
       searchSessionId,
       lastRefresh,
       fieldsToFetch,
@@ -534,10 +532,10 @@ export const useDataVisualizerGridData = (
           const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
-                ...c,
-                loading: false,
-                stats: { ...c.stats, ...loadedFullStats },
-              }
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
             : c;
         });
       }

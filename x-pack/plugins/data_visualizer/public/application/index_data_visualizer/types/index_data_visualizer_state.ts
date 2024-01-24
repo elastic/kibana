@@ -11,7 +11,6 @@ import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
 import type { RandomSamplerOption } from '../constants/random_sampler';
 
 import type { DATA_VISUALIZER_INDEX_VIEWER } from '../constants/index_data_visualizer_viewer';
-import type { ESQLDefaultLimitSizeOption } from '../components/search_panel/esql/limit_size';
 
 export interface DataVisualizerIndexBasedPageUrlState {
   pageKey: typeof DATA_VISUALIZER_INDEX_VIEWER;
@@ -32,7 +31,6 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
   searchQueryLanguage?: SearchQueryLanguage;
   visibleFieldTypes?: string[];
   visibleFieldNames?: string[];
-  limitSize?: ESQLDefaultLimitSizeOption;
   showDistributions?: boolean;
   showAllFields?: boolean;
   showEmptyFields?: boolean;

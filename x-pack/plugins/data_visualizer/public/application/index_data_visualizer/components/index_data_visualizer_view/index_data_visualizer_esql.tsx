@@ -39,15 +39,11 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
 import { UI_SETTINGS } from '@kbn/data-service';
-import { useStorage } from '@kbn/ml-local-storage';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import {
-  DataVisualizerIndexBasedAppState,
-  DataVisualizerIndexBasedPageUrlState,
-} from '../../types/index_data_visualizer_state';
+import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { DocumentCountContent } from '../../../common/components/document_count_content';
@@ -65,16 +61,17 @@ import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
 import {
-  type Column,
-  useESQLOverallStatsData,
   useESQLFieldStatsData,
   type AggregatableField,
-} from '../../hooks/use_esql_data';
+} from '../../hooks/esql/use_esql_field_stats_data';
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
-import { ESQLDefaultLimitSizeSelect } from '../search_panel/esql/limit_size';
-import { DV_ESQL_LIMIT_SIZE } from '../../types/storage';
+import {
+  type ESQLDefaultLimitSizeOption,
+  ESQLDefaultLimitSizeSelect,
+} from '../search_panel/esql/limit_size';
+import { Column, useESQLOverallStatsData } from '../../hooks/esql/use_esql_overall_stats_data';
 
 const defaults = getDefaultPageState();
 
@@ -111,16 +108,26 @@ export function getDefaultPageState(): DataVisualizerPageState {
     documentCountStats: undefined,
   };
 }
+
+interface ESQLDataVisualizerIndexBasedAppState extends DataVisualizerIndexBasedAppState {
+  limitSize: ESQLDefaultLimitSizeOption;
+}
+
+export interface ESQLDataVisualizerIndexBasedPageUrlState {
+  pageKey: typeof DATA_VISUALIZER_INDEX_VIEWER;
+  pageUrlState: Required<ESQLDataVisualizerIndexBasedAppState>;
+}
+
 export const getDefaultDataVisualizerListState = (
-  overrides?: Partial<DataVisualizerIndexBasedAppState>
-): Required<DataVisualizerIndexBasedAppState> => ({
+  overrides?: Partial<ESQLDataVisualizerIndexBasedAppState>
+): Required<ESQLDataVisualizerIndexBasedAppState> => ({
   pageIndex: 0,
   pageSize: 25,
   sortField: 'fieldName',
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  limitSize: undefined,
+  limitSize: '10000',
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -173,20 +180,15 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     return indexPatternFromQuery;
   }, [query]);
 
-  const [savedLimitSize, saveLimitSizePreference] = useStorage<
-    DVKey,
-    DVStorageMapped<typeof DV_ESQL_LIMIT_SIZE>
-  >(DV_ESQL_LIMIT_SIZE, '10000');
-
   const restorableDefaults = useMemo(
-    () => getDefaultDataVisualizerListState({ limitSize: savedLimitSize }),
+    () => getDefaultDataVisualizerListState({}),
     // We just need to load the saved preference when the page is first loaded
 
     []
   );
 
   const [dataVisualizerListState, setDataVisualizerListState] =
-    usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
+    usePageUrlState<ESQLDataVisualizerIndexBasedPageUrlState>(
       DATA_VISUALIZER_INDEX_VIEWER,
       restorableDefaults
     );
@@ -203,8 +205,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
   const limitSize = dataVisualizerListState.limitSize ?? restorableDefaults.limitSize;
 
-  const updateLimitSize = (newLimitSize) => {
-    saveLimitSizePreference(newLimitSize);
+  const updateLimitSize = (newLimitSize: ESQLDefaultLimitSizeOption) => {
     setDataVisualizerListState({
       ...dataVisualizerListState,
       limitSize: newLimitSize,

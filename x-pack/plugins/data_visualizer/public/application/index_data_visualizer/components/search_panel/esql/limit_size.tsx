@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { type ChangeEvent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const options = [
@@ -53,17 +53,16 @@ export const ESQLDefaultLimitSizeSelect = ({
   onChangeLimitSize,
 }: {
   limitSize: string;
-  onChangeLimitSize: (newLimit) => void;
+  onChangeLimitSize: (newLimit: ESQLDefaultLimitSizeOption) => void;
 }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'dvESQLLimit' });
 
-  const onChange = (e) => {
-    onChangeLimitSize(e.target.value);
+  const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    onChangeLimitSize(e.target.value as ESQLDefaultLimitSizeOption);
   };
 
   return (
     <EuiSelect
-      size="s"
       id={basicSelectId}
       options={options}
       value={limitSize}
@@ -72,7 +71,7 @@ export const ESQLDefaultLimitSizeSelect = ({
         defaultMessage: 'Limit size',
       })}
       prepend={
-        <EuiText alignItems="center" size="s">
+        <EuiText textAlign="center" size="s">
           <FormattedMessage
             id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
             defaultMessage="Limit analysis to"

@@ -115,7 +115,6 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
