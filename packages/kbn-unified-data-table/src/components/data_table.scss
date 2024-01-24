@@ -36,6 +36,10 @@
     border-top: $euiBorderThin;
   }
 
+  .euiDataGridHeaderCell {
+    align-items: start;
+  }
+
   .euiDataGrid--headerUnderline .euiDataGridHeaderCell {
     border-bottom: $euiBorderThin;
   }
@@ -71,14 +75,6 @@
   flex-grow: 1;
   flex-shrink: 1;
   min-height: 0;
-}
-
-.unifiedDataTable__flyoutHeader {
-  white-space: nowrap;
-}
-
-.unifiedDataTable__flyoutDocumentNavigation {
-  justify-content: flex-end;
 }
 
 // We only truncate if the cell is not a control column.

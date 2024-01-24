@@ -22,6 +22,7 @@ import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } f
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
  *
  * @param router IRouter for registering routes
+ * @param getElser Function to get the default Elser ID
  */
 export const getKnowledgeBaseStatusRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,

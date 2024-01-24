@@ -26,7 +26,7 @@ export const TotalCountHeader = ({
 }: {
   id?: string;
   totalCount: number;
-  label?: string;
+  label?: React.ReactElement | string;
   loading?: boolean;
   approximate?: boolean;
 }) => {

@@ -75,7 +75,7 @@ describe('Policy Details', () => {
     });
 
     it('should NOT display timeline', async () => {
-      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
     });
 
     it('should show loader followed by error message', async () => {
@@ -136,7 +136,7 @@ describe('Policy Details', () => {
     it('should NOT display timeline', async () => {
       policyView = render();
       await asyncActions;
-      expect(policyView.find('flyoutOverlay')).toHaveLength(0);
+      expect(policyView.find('timeline-bottom-bar-title-button')).toHaveLength(0);
     });
 
     it('should display back to policy list button and policy title', async () => {

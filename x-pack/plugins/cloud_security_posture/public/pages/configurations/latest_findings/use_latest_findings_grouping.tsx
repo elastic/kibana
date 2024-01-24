@@ -15,10 +15,10 @@ import {
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
+import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import {
-  LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import {
@@ -35,6 +35,8 @@ import {
 } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { getFilters } from '../utils/get_filters';
+import { useGetCspBenchmarkRulesStatesApi } from './use_get_benchmark_rules_state_api';
+import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 
 const getTermAggregation = (key: keyof FindingsGroupingAggregation, field: string) => ({
   [key]: {
@@ -133,6 +135,7 @@ export const useLatestFindingsGrouping = ({
   selectedGroup,
   onGroupChange,
 }: {
+
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
   groupingLevel?: number;
@@ -144,8 +147,9 @@ export const useLatestFindingsGrouping = ({
     selectedGroups: string[];
   }) => void;
 }) => {
-  const dataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN).data!;
+  const { dataView } = useDataViewContext();
 
+  
   const {
     activePageIndex,
     grouping,
@@ -168,12 +172,18 @@ export const useLatestFindingsGrouping = ({
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
+    groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
     groupingLevel,
   });
 
-  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
 
+  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
+
+  const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
+  const mutedRulesFilterQuery = rulesStates ? buildMutedRulesFilter(rulesStates) : [];
+
+
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
@@ -205,8 +215,16 @@ export const useLatestFindingsGrouping = ({
     ],
   });
 
+  const filteredGroupingQuery = {
+    ...groupingQuery,
+    query: {
+      ...groupingQuery.query,
+      bool: { ...groupingQuery.query.bool, must_not: mutedRulesFilterQuery },
+    },
+  };
+
   const { data, isFetching } = useGroupedFindings({
-    query: groupingQuery,
+    query: filteredGroupingQuery,
     enabled: !isNoneSelected,
   });
 

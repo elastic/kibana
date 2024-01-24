@@ -7,12 +7,10 @@
 import React, { useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
-import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
+import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
 import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
-import { DEFAULT_TABLE_HEIGHT } from './constants';
 import { useLatestFindingsGrouping } from './use_latest_findings_grouping';
 import { LatestFindingsTable } from './latest_findings_table';
 import { groupPanelRenderer, groupStatsRenderer } from './latest_findings_group_renderer';
@@ -80,7 +78,7 @@ export const LatestFindingsContainer = () => {
   const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
-  const dataView = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN).data!;
+ 
 
   const renderChildComponent = ({
     level,
@@ -102,7 +100,7 @@ export const LatestFindingsContainer = () => {
         <LatestFindingsTable
           groupSelectorComponent={groupSelectorComponent}
           nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
-          height={DEFAULT_TABLE_HEIGHT}
+          height={DEFAULT_GROUPING_TABLE_HEIGHT}
           showDistributionBar={selectedGroupOptions.includes('none')}
         />
       );
@@ -130,7 +128,7 @@ export const LatestFindingsContainer = () => {
               ...currentGroupFilters,
               ...(parentGroupFilters ? JSON.parse(parentGroupFilters) : []),
             ]}
-            height={DEFAULT_TABLE_HEIGHT}
+            height={DEFAULT_GROUPING_TABLE_HEIGHT}
             showDistributionBar={selectedGroupOptions.includes('none')}
           />
         );
@@ -150,7 +148,7 @@ export const LatestFindingsContainer = () => {
   if (error || isEmptyResults) {
     return (
       <>
-        <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+        <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
         <EuiSpacer size="m" />
         {error && <ErrorCallout error={error} />}
         {isEmptyResults && <EmptyState onResetFilters={onResetFilters} />}
@@ -160,7 +158,7 @@ export const LatestFindingsContainer = () => {
 
   return (
     <>
-      <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
+      <FindingsSearchBar setQuery={setUrlQuery} loading={isFetching} />
       <div>
         {renderChildComponent({
           level: 0,

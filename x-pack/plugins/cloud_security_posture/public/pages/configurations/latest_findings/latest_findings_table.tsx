@@ -10,10 +10,6 @@ import { Filter } from '@kbn/es-query';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { UseGrouping } from '@kbn/securitysolution-grouping/src';
-import { useLatestFindingsDataView } from '../../../common/api/use_latest_findings_data_view';
-import { LATEST_FINDINGS_INDEX_PATTERN } from '../../../../common/constants';
-
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -27,14 +23,10 @@ import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
 interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
-  grouping?: UseGrouping<any>;
   height?: number;
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
-  dataViewRefetch?: () => void;
-  dataViewIsRefetching?: boolean;
 }
-
 /**
  * Type Guard for checking if the given source is a CspFinding
  */
@@ -89,15 +81,11 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 
 export const LatestFindingsTable = ({
   groupSelectorComponent,
-  grouping,
   height,
   showDistributionBar = true,
   nonPersistedFilters,
 }: LatestFindingsTableProps) => {
-  const dataViewQuery = useLatestFindingsDataView(LATEST_FINDINGS_INDEX_PATTERN);
-  const dataView = dataViewQuery.data!;
-  const dataViewRefetch = dataViewQuery.refetch;
-  const dataViewIsRefetching = dataViewQuery.isRefetching;
+ 
   const {
     cloudPostureDataTable,
     rows,
@@ -110,7 +98,6 @@ export const LatestFindingsTable = ({
     canShowDistributionBar,
     onDistributionBarClick,
   } = useLatestFindingsTable({
-    dataView,
     getDefaultQuery,
     nonPersistedFilters,
     showDistributionBar,
@@ -138,7 +125,6 @@ export const LatestFindingsTable = ({
           )}
           <CloudSecurityDataTable
             data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
-            dataView={dataView}
             isLoading={isFetching}
             defaultColumns={defaultColumns}
             rows={rows}
@@ -150,8 +136,6 @@ export const LatestFindingsTable = ({
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}
-            dataViewRefetch={dataViewRefetch}
-            dataViewIsRefetching={dataViewIsRefetching}
           />
         </>
       )}

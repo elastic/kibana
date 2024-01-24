@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { act } from '@testing-library/react';
 import type { History as HistoryPackageHistoryInterface } from 'history';
 import { createMemoryHistory } from 'history';
 import { Simulator } from '../../test_utilities/simulator';
@@ -71,8 +72,10 @@ describe('Resolver: panel loading and resolution states', () => {
           filters: {},
         });
 
-        memoryHistory.push({
-          search: queryStringWithEventDetailSelected,
+        act(() => {
+          memoryHistory.push({
+            search: queryStringWithEventDetailSelected,
+          });
         });
       });
 
@@ -118,8 +121,10 @@ describe('Resolver: panel loading and resolution states', () => {
           shouldUpdate: false,
           filters: {},
         });
-        memoryHistory.push({
-          search: queryStringWithEventDetailSelected,
+        act(() => {
+          memoryHistory.push({
+            search: queryStringWithEventDetailSelected,
+          });
         });
       });
 
@@ -160,8 +165,10 @@ describe('Resolver: panel loading and resolution states', () => {
           filters: {},
         });
 
-        memoryHistory.push({
-          search: queryStringWithEventsInCategorySelected,
+        act(() => {
+          memoryHistory.push({
+            search: queryStringWithEventsInCategorySelected,
+          });
         });
       });
 
@@ -219,8 +226,10 @@ describe('Resolver: panel loading and resolution states', () => {
           filters: {},
         });
 
-        memoryHistory.push({
-          search: queryStringWithNodeDetailSelected,
+        act(() => {
+          memoryHistory.push({
+            search: queryStringWithNodeDetailSelected,
+          });
         });
       });
 
