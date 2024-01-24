@@ -55,6 +55,7 @@ import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
+import { createMiddlewares } from './middlewares';
 
 let store: Store<State, Action> | null = null;
 
@@ -289,6 +290,7 @@ export const createStore = (
   );
 
   const middlewareEnhancer = applyMiddleware(
+    ...createMiddlewares(storage),
     epicMiddleware,
     telemetryMiddleware,
     ...(additionalMiddleware ?? [])
