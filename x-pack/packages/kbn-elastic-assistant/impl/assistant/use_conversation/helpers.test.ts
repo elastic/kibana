@@ -96,6 +96,7 @@ describe('useConversation helpers', () => {
       },
       id: '1',
       messages: [],
+      title: '1',
     };
 
     test('should return the conversation system prompt if it exists', () => {
@@ -109,6 +110,7 @@ describe('useConversation helpers', () => {
         apiConfig: {},
         id: '1',
         messages: [],
+        title: '1',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts,
@@ -123,6 +125,7 @@ describe('useConversation helpers', () => {
         apiConfig: {},
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],
+        title: '4',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts,
@@ -137,6 +140,7 @@ describe('useConversation helpers', () => {
         apiConfig: {},
         id: '1',
         messages: [],
+        title: '1',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts: allSystemPromptsNoDefault,
@@ -151,6 +155,7 @@ describe('useConversation helpers', () => {
         apiConfig: {},
         id: '1',
         messages: [],
+        title: '1',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts: [],
@@ -165,6 +170,7 @@ describe('useConversation helpers', () => {
         apiConfig: {},
         id: '4', // this id does not exist within allSystemPrompts
         messages: [],
+        title: '1',
       };
       const result = getDefaultSystemPrompt({
         allSystemPrompts: allSystemPromptsNoDefault,
