@@ -9,7 +9,6 @@ import type { Epic } from 'redux-observable';
 import { combineEpics } from 'redux-observable';
 import type { Action } from 'redux';
 import type { Observable } from 'rxjs';
-import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { createTimelineEpic } from '../../timelines/store/epic';
 import { createTimelineFavoriteEpic } from '../../timelines/store/epic_favorite';
@@ -20,7 +19,6 @@ import type { State } from './types';
 
 export interface RootEpicDependencies {
   kibana$: Observable<CoreStart>;
-  storage: Storage;
 }
 
 export const createRootEpic = <StateT extends State>(): Epic<

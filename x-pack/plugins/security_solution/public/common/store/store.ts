@@ -24,7 +24,6 @@ import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
-import { dataTableSelectors } from '@kbn/securitysolution-data-table';
 import { initialGroupingState } from './grouping/reducer';
 import type { GroupState } from './grouping/types';
 import {
@@ -279,8 +278,6 @@ export const createStore = (
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
-    tableByIdSelector: dataTableSelectors.tableByIdSelector,
-    storage,
   };
 
   const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
