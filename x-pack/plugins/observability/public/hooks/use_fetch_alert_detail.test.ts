@@ -103,7 +103,7 @@ describe('useFetchAlertDetail', () => {
         Array [
           false,
           Object {
-            "alert": Object {
+            "formatted": Object {
               "0": "a",
               "1": " ",
               "2": "r",
@@ -144,7 +144,7 @@ describe('useFetchAlertDetail', () => {
               "reason": "Document count reported no data in the last 1 hour for all hosts",
               "start": 1643639463649,
             },
-            "rawAlert": Object {
+            "raw": Object {
               "@timestamp": "2022-01-31T18:20:57.204Z",
               "event.action": "active",
               "event.kind": "signal",

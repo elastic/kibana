@@ -30,6 +30,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
+import { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import type { TopAlert } from '../../../typings/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];
@@ -67,11 +68,11 @@ export const alert: TopAlert = {
   lastUpdated: 1630588131750,
 };
 
-export const alertDetail = {
-  alert,
-  rawAlert: Object.fromEntries(
+export const alertDetail: AlertData = {
+  formatted: alert,
+  raw: Object.fromEntries(
     Object.entries(alert.fields).map(([k, v]) => [k, !Array.isArray(v) ? [v] : v])
-  ),
+  ) as unknown as AlertData['raw'],
 };
 
 export const alertWithTags: TopAlert = {
