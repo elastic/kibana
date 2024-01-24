@@ -71,6 +71,7 @@ export function getLensAttributeService(
         },
         metaInfo: {
           sharingSavedObjectProps,
+          managed: savedObject.managed,
         },
       };
     },
