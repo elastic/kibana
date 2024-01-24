@@ -8,7 +8,11 @@
 
 import uniqBy from 'lodash/uniqBy';
 import capitalize from 'lodash/capitalize';
-import { CommandOptionsDefinition, SignatureArgType } from '../definitions/types';
+import {
+  CommandModeDefinition,
+  CommandOptionsDefinition,
+  SignatureArgType,
+} from '../definitions/types';
 import {
   areFieldAndVariableTypesCompatible,
   extractSingleType,
@@ -33,6 +37,7 @@ import {
   columnExists,
   hasWildcard,
   hasCCSSource,
+  isSettingItem,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -40,6 +45,7 @@ import type {
   ESQLAstItem,
   ESQLColumn,
   ESQLCommand,
+  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
@@ -378,6 +384,54 @@ function validateFunction(
   return uniqBy(messages, ({ location }) => `${location.min}-${location.max}`);
 }
 
+function validateSetting(
+  setting: ESQLCommandMode,
+  settingDef: CommandModeDefinition | undefined,
+  command: ESQLCommand,
+  referenceMaps: ReferenceMaps
+): ESQLMessage[] {
+  const messages: ESQLMessage[] = [];
+  if (setting.incomplete || command.incomplete) {
+    return messages;
+  }
+  if (!settingDef) {
+    const commandDef = getCommandDefinition(command.name);
+    messages.push(
+      getMessageFromId({
+        messageId: 'unsupportedSetting',
+        values: {
+          setting: setting.name,
+          expected: commandDef.modes.map(({ name }) => name).join(', '),
+        },
+        locations: setting.location,
+      })
+    );
+    return messages;
+  }
+  setting.args.forEach((arg, index) => {
+    if (!Array.isArray(arg)) {
+      const argDef = settingDef.signature.params[index];
+      const value = 'value' in arg ? arg.value : arg.name;
+      if (argDef.values && !argDef.values?.includes(String(value).toLowerCase())) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unsupportedSettingCommandValue',
+            values: {
+              setting: setting.name,
+              command: command.name.toUpperCase(),
+              value: String(value),
+              // for some reason all this enums are uppercase in ES
+              expected: (argDef.values?.join(', ') || argDef.type).toUpperCase(),
+            },
+            locations: arg.location,
+          })
+        );
+      }
+    }
+  });
+  return messages;
+}
+
 function validateOption(
   option: ESQLCommandOption,
   optionDef: CommandOptionsDefinition | undefined,
@@ -624,6 +678,17 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     for (const arg of wrappedArg) {
       if (isFunctionItem(arg)) {
         messages.push(...validateFunction(arg, command.name, references));
+      }
+
+      if (isSettingItem(arg)) {
+        messages.push(
+          ...validateSetting(
+            arg,
+            commandDef.modes?.find(({ name }) => name === arg.name),
+            command,
+            references
+          )
+        );
       }
 
       if (isOptionItem(arg)) {
