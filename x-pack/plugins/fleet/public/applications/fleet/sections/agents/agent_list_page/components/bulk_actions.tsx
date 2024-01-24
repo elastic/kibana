@@ -95,6 +95,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
 
   const totalActiveAgents = shownAgents - inactiveShownAgents;
 
+  // exclude inactive agents from the count
   const agentCount =
     selectionMode === 'manual'
       ? selectedAgents.length
