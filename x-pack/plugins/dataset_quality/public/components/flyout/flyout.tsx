@@ -15,15 +15,15 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
+import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
 
 interface FlyoutProps {
-  dataset: DataStreamStat;
+  dataset: FlyoutDataset;
   closeFlyout: () => void;
 }
 

@@ -117,16 +117,20 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    const [type, datasetQuery] = dataStream.split('-');
+    const [type, ...datasetQuery] = dataStream.split('-');
 
     const [dataStreamsStats, dataStreamDetails] = await Promise.all([
-      getDataStreamsStats({ esClient, type: type as DataStreamType, datasetQuery }),
+      getDataStreamsStats({
+        esClient,
+        type: type as DataStreamType,
+        datasetQuery: datasetQuery.join('-'),
+      }),
       getDataStreamDetails({ esClient, dataStream }),
     ]);
 
     return {
       createdOn: dataStreamDetails?.createdOn,
-      lastActivity: dataStreamsStats.items[0].lastActivity,
+      lastActivity: dataStreamsStats.items?.[0]?.lastActivity,
     };
   },
 });
