@@ -19,6 +19,11 @@ import {
   EuiBadge,
   EuiToolTip,
   EuiSearchBarProps,
+  EuiFilterGroup,
+  EuiSelectable,
+  EuiPopoverTitle,
+  EuiFilterButton,
+  EuiSearchBar,
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
@@ -50,7 +55,7 @@ export const PipelineTable: FunctionComponent<Props> = ({
   onClonePipelineClick,
   onDeletePipelineClick,
 }) => {
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('is:isManaged -is:deprecated');
   const { history } = useKibana().services;
   const [selection, setSelection] = useState<Pipeline[]>([]);
   const [showPopover, setShowPopover] = useState(false);
@@ -87,16 +92,50 @@ export const PipelineTable: FunctionComponent<Props> = ({
   const filteredPipelines = useMemo(() => {
     let result = pipelines ?? [];
 
+    console.log(query);
+
+    const queryObject = EuiSearchBar.Query.parse(query);
+    console.log(queryObject);
+
+    console.log(pipelines);
+
     // When the query includes 'is:deprecated', we want to show deprecated pipelines.
     // Otherwise hide them all since they wont be supported in the future.
-    if (query.includes('is:deprecated')) {
-      result = result.filter((item) => item?.deprecated);
-    } else {
-      result = result.filter((item) => !item?.deprecated);
-    }
+    // if (query.includes('is:deprecated')) {
+      // result = result.filter((item) => item?.deprecated);
+    // } else {
+      // result = result.filter((item) => !item?.deprecated);
+    // }
 
     return result;
   }, [pipelines, query]);
+
+  const [filterOptions, setFilterOptions] = useState([
+    { label: 'Managed', checked: 'on' },
+    { label: 'Deprecated', checked: 'off' },
+  ]);
+
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onButtonClick = () => {
+    setIsPopoverOpen(!isPopoverOpen);
+  };
+  const closePopover = () => {
+    setIsPopoverOpen(false);
+  };
+
+  const button = (
+    <EuiFilterButton
+      iconType="arrowDown"
+      badgeColor="success"
+      onClick={onButtonClick}
+      isSelected={isPopoverOpen}
+      numFilters={filterOptions.filter((item) => item.checked !== 'off').length}
+      hasActiveFilters={!!filterOptions.find((item) => item.checked === 'on')}
+      numActiveFilters={filterOptions.filter((item) => item.checked === 'on').length}
+    >
+      Filters
+    </EuiFilterButton>
+  );
 
   const tableProps: EuiInMemoryTableProps<Pipeline> = {
     itemId: 'name',
@@ -182,19 +221,59 @@ export const PipelineTable: FunctionComponent<Props> = ({
       onChange: handleOnChange,
       filters: [
         {
-          type: 'is',
-          field: 'isManaged',
-          name: i18n.translate('xpack.ingestPipelines.list.table.isManagedFilterLabel', {
-            defaultMessage: 'Managed',
-          }),
-        },
-        {
-          type: 'is',
-          field: 'deprecated',
-          name: i18n.translate('xpack.ingestPipelines.list.table.isDeprecatedFilterLabel', {
-            defaultMessage: 'Deprecated',
-          }),
-        },
+          type: 'custom_component',
+          component: ({ query, onChange }) => {
+            return (
+              <EuiFilterGroup>
+                <EuiPopover
+                  id="popoverID"
+                  button={button}
+                  isOpen={isPopoverOpen}
+                  closePopover={closePopover}
+                  panelPaddingSize="none"
+                >
+                  <EuiSelectable
+                    allowExclusions
+                    searchable
+                    searchProps={{
+                      placeholder: 'Filter list',
+                        compressed: true,
+                    }}
+                    aria-label="Filters"
+                    options={filterOptions}
+                    onChange={(newOptions) => {
+                      // Set new options for current state
+                      setFilterOptions(newOptions);
+
+                      // Update current query
+                      const newQuery = newOptions.reduce((acc, option) => {
+                        if (option.checked === 'on') {
+                          acc = acc.addMustIsClause(option.label)
+                        } else if  (option.checked === 'off') {
+                          acc = acc.addMustNotIsClause(option.label);
+                        } else {
+                          acc = acc.removeIsClause(option.label);
+                        }
+
+                        return acc;
+                      }, query);
+
+                      onChange?.(newQuery);
+                    }}
+                    noMatchesMessage="No filters found"
+                  >
+                    {(list, search) => (
+                      <div style={{ width: 300 }}>
+                        <EuiPopoverTitle paddingSize="s">{search}</EuiPopoverTitle>
+                        {list}
+                      </div>
+                    )}
+                  </EuiSelectable>
+                </EuiPopover>
+              </EuiFilterGroup>
+            );
+          },
+        }
       ],
     },
     pagination: {
