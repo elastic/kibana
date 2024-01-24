@@ -334,7 +334,7 @@ export const next = (
       // instead of the union.
       const nextAction = map[state.controlState] as (
         state: State
-      ) => ReturnType<typeof map[AllActionStates]>;
+      ) => ReturnType<(typeof map)[AllActionStates]>;
       return delay(nextAction(state));
     }
   };

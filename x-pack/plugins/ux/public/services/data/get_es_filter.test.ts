@@ -23,7 +23,7 @@ describe('getEsFilters', function () {
   it('should not return environment in exclude filters', function () {
     const result = getEsFilter(
       { browserExcluded: ['Chrome'], environment: 'production' },
-      true
+      true,
     );
 
     expect(result).toEqual([{ terms: { 'user_agent.name': ['Chrome'] } }]);

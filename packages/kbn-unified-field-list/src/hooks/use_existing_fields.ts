@@ -385,8 +385,11 @@ async function buildSafeEsQuery(
 }
 
 function booleanMap(keys: string[]) {
-  return keys.reduce((acc, key) => {
-    acc[key] = true;
-    return acc;
-  }, {} as Record<string, boolean>);
+  return keys.reduce(
+    (acc, key) => {
+      acc[key] = true;
+      return acc;
+    },
+    {} as Record<string, boolean>
+  );
 }

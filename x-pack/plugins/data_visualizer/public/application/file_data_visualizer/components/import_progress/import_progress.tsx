@@ -233,8 +233,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       status: (parseJSONStatus === IMPORT_STATUS.FAILED // if JSON parsing failed, fail the first step
         ? parseJSONStatus
         : readStatus === IMPORT_STATUS.COMPLETE && parseJSONStatus === IMPORT_STATUS.COMPLETE
-        ? 'complete'
-        : 'selected') as EuiStepStatus,
+          ? 'complete'
+          : 'selected') as EuiStepStatus,
       onClick: () => {},
     },
     {
@@ -242,8 +242,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       status: (indexCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? indexCreatedStatus
         : completedStep === 1 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     },
     {
@@ -251,8 +251,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       status: (uploadStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? uploadStatus
         : completedStep === 3 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     },
   ];
@@ -263,8 +263,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       status: (ingestPipelineCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? ingestPipelineCreatedStatus
         : completedStep === 2 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     });
   }
@@ -275,8 +275,8 @@ export const ImportProgress: FC<{ statuses: Statuses }> = ({ statuses }) => {
       status: (dataViewCreatedStatus !== IMPORT_STATUS.INCOMPLETE // Show failure/completed states first
         ? dataViewCreatedStatus
         : completedStep === 4 // Then show selected/incomplete states
-        ? 'selected'
-        : 'incomplete') as EuiStepStatus,
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       onClick: () => {},
     });
   }

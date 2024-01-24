@@ -46,7 +46,7 @@ export interface Step {
 export function createWizardContext<
   T,
   StepKey extends string,
-  InitialStepKey extends StepKey
+  InitialStepKey extends StepKey,
 >({
   initialState,
   initialStep,

@@ -51,8 +51,8 @@ function removeNullsFromSecurityRules(
                 field: Array.isArray(params.threshold.field)
                   ? params.threshold.field
                   : params.threshold.field === '' || params.threshold.field == null
-                  ? []
-                  : [params.threshold.field],
+                    ? []
+                    : [params.threshold.field],
                 value: params.threshold.value,
                 cardinality:
                   params.threshold.cardinality != null ? params.threshold.cardinality : [],
@@ -63,17 +63,17 @@ function removeNullsFromSecurityRules(
           params.exceptionsList != null
             ? params.exceptionsList
             : params.exceptions_list != null
-            ? params.exceptions_list
-            : params.lists != null
-            ? params.lists
-            : [],
+              ? params.exceptions_list
+              : params.lists != null
+                ? params.lists
+                : [],
         threatFilters: convertNullToUndefined(params.threatFilters),
         machineLearningJobId:
           params.machineLearningJobId == null
             ? undefined
             : Array.isArray(params.machineLearningJobId)
-            ? params.machineLearningJobId
-            : [params.machineLearningJobId],
+              ? params.machineLearningJobId
+              : [params.machineLearningJobId],
       },
     },
   };

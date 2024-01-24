@@ -27,11 +27,11 @@ export function useLongTaskMetricsQuery() {
         callDateMath(end),
         percentile,
         searchTerm,
-        uxUiFilters
+        uxUiFilters,
       ),
     },
     [start, end, percentile, searchTerm, uxUiFilters, rangeId, dataViewTitle],
-    { name: 'UxLongTaskMetrics' }
+    { name: 'UxLongTaskMetrics' },
   );
 
   const data = useMemo(() => {

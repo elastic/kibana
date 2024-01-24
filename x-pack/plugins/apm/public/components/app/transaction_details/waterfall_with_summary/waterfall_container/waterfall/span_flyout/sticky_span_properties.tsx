@@ -38,7 +38,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
   const { environment, comparisonEnabled, offset } = query;
 
@@ -83,7 +83,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
             'xpack.apm.transactionDetails.transactionLabel',
             {
               defaultMessage: 'Transaction',
-            }
+            },
           ),
           fieldName: TRANSACTION_NAME,
           val: (
@@ -113,7 +113,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
             'xpack.apm.transactionDetails.spanFlyout.dependencyLabel',
             {
               defaultMessage: 'Dependency',
-            }
+            },
           ),
           fieldName: SPAN_DESTINATION_SERVICE_RESOURCE,
           val: (
@@ -144,7 +144,7 @@ export function StickySpanProperties({ span, transaction }: Props) {
         'xpack.apm.transactionDetails.spanFlyout.nameLabel',
         {
           defaultMessage: 'Name',
-        }
+        },
       ),
       fieldName: SPAN_NAME,
       val: spanName ?? NOT_AVAILABLE_LABEL,

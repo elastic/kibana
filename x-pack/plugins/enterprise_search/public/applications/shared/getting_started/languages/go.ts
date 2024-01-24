@@ -84,8 +84,8 @@ if err != nil {
 ingestResult, err := es.Bulk(
   bytes.NewReader(buf.Bytes()),
   es.Bulk.WithIndex("${indexName}"),${
-      ingestPipeline ? `\n  es.Bulk.WithPipeline("${ingestPipeline}"),` : ''
-    }
+    ingestPipeline ? `\n  es.Bulk.WithPipeline("${ingestPipeline}"),` : ''
+  }
 )
 
 fmt.Println(ingestResult, err)`;

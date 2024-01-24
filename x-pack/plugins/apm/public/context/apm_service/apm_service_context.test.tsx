@@ -20,7 +20,7 @@ describe('getOrRedirectToTransactionType', () => {
           transactionType: 'custom',
           agentName: 'nodejs',
           history,
-        })
+        }),
       ).toBe('custom');
       expect(history.replace).not.toHaveBeenCalled();
     });
@@ -32,12 +32,12 @@ describe('getOrRedirectToTransactionType', () => {
           transactionType: 'custom',
           agentName: 'nodejs',
           history,
-        })
+        }),
       ).toBe('request');
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'transactionType=request',
-        })
+        }),
       );
     });
   });
@@ -48,7 +48,7 @@ describe('getOrRedirectToTransactionType', () => {
         getOrRedirectToTransactionType({
           transactionTypes: [],
           history,
-        })
+        }),
       ).toBeUndefined();
     });
   });
@@ -61,12 +61,12 @@ describe('getOrRedirectToTransactionType', () => {
             transactionTypes: ['worker', 'request'],
             agentName: 'nodejs',
             history,
-          })
+          }),
         ).toEqual('request');
         expect(history.replace).toHaveBeenCalledWith(
           expect.objectContaining({
             search: 'transactionType=request',
-          })
+          }),
         );
       });
     });
@@ -78,12 +78,12 @@ describe('getOrRedirectToTransactionType', () => {
             transactionTypes: ['worker', 'custom'],
             agentName: 'nodejs',
             history,
-          })
+          }),
         ).toEqual('worker');
         expect(history.replace).toHaveBeenCalledWith(
           expect.objectContaining({
             search: 'transactionType=worker',
-          })
+          }),
         );
       });
     });
@@ -96,12 +96,12 @@ describe('getOrRedirectToTransactionType', () => {
           transactionTypes: ['http-request', 'page-load'],
           agentName: 'js-base',
           history,
-        })
+        }),
       ).toEqual('page-load');
       expect(history.replace).toHaveBeenCalledWith(
         expect.objectContaining({
           search: 'transactionType=page-load',
-        })
+        }),
       );
     });
   });

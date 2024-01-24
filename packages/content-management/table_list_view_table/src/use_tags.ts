@@ -24,20 +24,23 @@ export function useTags({
   // Return a map of tag.id to an array of saved object ids having that tag
   // { 'abc-123': ['saved_object_id_1', 'saved_object_id_2', ...] }
   const tagsToTableItemMap = useMemo(() => {
-    return items.reduce((acc, item) => {
-      const tagReferences = item.references.filter((ref) => ref.type === 'tag');
+    return items.reduce(
+      (acc, item) => {
+        const tagReferences = item.references.filter((ref) => ref.type === 'tag');
 
-      if (tagReferences.length > 0) {
-        tagReferences.forEach((ref) => {
-          if (!acc[ref.id]) {
-            acc[ref.id] = [];
-          }
-          acc[ref.id].push(item.id);
-        });
-      }
+        if (tagReferences.length > 0) {
+          tagReferences.forEach((ref) => {
+            if (!acc[ref.id]) {
+              acc[ref.id] = [];
+            }
+            acc[ref.id].push(item.id);
+          });
+        }
 
-      return acc;
-    }, {} as { [tagId: string]: string[] });
+        return acc;
+      },
+      {} as { [tagId: string]: string[] }
+    );
   }, [items]);
 
   const updateTagClauseGetter = useCallback(

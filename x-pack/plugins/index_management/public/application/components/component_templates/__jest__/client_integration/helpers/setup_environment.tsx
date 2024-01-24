@@ -45,16 +45,15 @@ export const setupEnvironment = () => {
 };
 
 export const WithAppDependencies =
-  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) =>
-    (
-      <AppContextProvider value={appDependencies}>
-        <MappingsEditorProvider>
-          <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
-            <GlobalFlyoutProvider>
-              <Comp {...props} />
-            </GlobalFlyoutProvider>
-          </ComponentTemplatesProvider>
-        </MappingsEditorProvider>
-        /
-      </AppContextProvider>
-    );
+  (Comp: any, httpSetup: HttpSetup, coreStart?: CoreStart) => (props: any) => (
+    <AppContextProvider value={appDependencies}>
+      <MappingsEditorProvider>
+        <ComponentTemplatesProvider value={componentTemplatesDependencies(httpSetup, coreStart)}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </ComponentTemplatesProvider>
+      </MappingsEditorProvider>
+      /
+    </AppContextProvider>
+  );

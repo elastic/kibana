@@ -49,7 +49,7 @@ export function ErrorDistribution({
 
   const previousPeriodLabel = usePreviousPeriodLabel();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.ERROR_OCCURRENCES
+    ChartType.ERROR_OCCURRENCES,
   );
   const timeseries = [
     {

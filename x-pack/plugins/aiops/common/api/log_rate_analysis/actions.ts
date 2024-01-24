@@ -39,14 +39,14 @@ export const API_ACTION_NAME = {
   SET_ZERO_DOCS_FALLBACK: 'set_zero_docs_fallback',
   UPDATE_LOADING_STATE: 'update_loading_state',
 } as const;
-export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
+export type ApiActionName = (typeof API_ACTION_NAME)[keyof typeof API_ACTION_NAME];
 
 interface ApiActionAddSignificantItems<T extends ApiVersion> {
   type: T extends '1'
     ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS
     : T extends '2'
-    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS
-    : never;
+      ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS
+      : never;
   payload: SignificantItem[];
 }
 
@@ -71,8 +71,8 @@ interface ApiActionAddSignificantItemsHistogram<T extends ApiVersion> {
   type: T extends '1'
     ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM
     : T extends '2'
-    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM
-    : never;
+      ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM
+      : never;
   payload: SignificantItemHistogram[];
 }
 
@@ -97,8 +97,8 @@ interface ApiActionAddSignificantItemsGroup<T extends ApiVersion> {
   type: T extends '1'
     ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP
     : T extends '2'
-    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP
-    : never;
+      ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP
+      : never;
   payload: SignificantItemGroup[];
 }
 
@@ -123,8 +123,8 @@ interface ApiActionAddSignificantItemsGroupHistogram<T extends ApiVersion> {
   type: T extends '1'
     ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM
     : T extends '2'
-    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM
-    : never;
+      ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM
+      : never;
   payload: SignificantItemGroupHistogram[];
 }
 

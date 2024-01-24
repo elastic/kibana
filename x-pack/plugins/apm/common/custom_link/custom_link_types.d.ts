@@ -24,7 +24,7 @@ export interface CustomLinkES {
   [TRANSACTION_TYPE]?: string[];
 }
 
-export type FilterKey = typeof FILTER_OPTIONS[number];
+export type FilterKey = (typeof FILTER_OPTIONS)[number];
 
 export interface Filter {
   key: FilterKey | '';

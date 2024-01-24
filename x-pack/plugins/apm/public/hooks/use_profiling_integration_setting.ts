@@ -12,10 +12,10 @@ import { useApmFeatureFlag } from './use_apm_feature_flag';
 
 export function useProfilingIntegrationSetting() {
   const isProfilingIntegrationFeatureFlagEnabled = useApmFeatureFlag(
-    ApmFeatureFlagName.ProfilingIntegrationAvailable
+    ApmFeatureFlagName.ProfilingIntegrationAvailable,
   );
   const isProfilingIntegrationUiSettingEnabled = useUiSetting<boolean>(
-    apmEnableProfilingIntegration
+    apmEnableProfilingIntegration,
   );
 
   return (

@@ -47,8 +47,8 @@ export async function getExitSpanFailureRate({
       filter: filter.concat(
         ...termQuery(
           SPAN_DESTINATION_SERVICE_RESOURCE,
-          spanDestinationServiceResource
-        )
+          spanDestinationServiceResource,
+        ),
       ),
       groupBy: SPAN_DESTINATION_SERVICE_RESOURCE,
       aggs: {

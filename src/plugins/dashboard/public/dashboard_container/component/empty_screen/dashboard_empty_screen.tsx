@@ -96,8 +96,8 @@ export function DashboardEmptyScreen() {
     const titleString = showEditPrompt
       ? emptyScreenStrings.getEditModeTitle()
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsTitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
+        ? emptyScreenStrings.getViewModeWithPermissionsTitle()
+        : emptyScreenStrings.getViewModeWithoutPermissionsTitle();
     return <h2>{titleString}</h2>;
   })();
 
@@ -105,8 +105,8 @@ export function DashboardEmptyScreen() {
     const bodyString = showEditPrompt
       ? emptyScreenStrings.getEditModeSubtitle()
       : showWriteControls
-      ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
-      : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
+        ? emptyScreenStrings.getViewModeWithPermissionsSubtitle()
+        : emptyScreenStrings.getViewModeWithoutPermissionsSubtitle();
     return (
       <EuiText size="s" color="subdued">
         <span>{bodyString}</span>

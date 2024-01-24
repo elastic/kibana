@@ -58,7 +58,7 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       expect(component.getByTestId('loading')).toBeInTheDocument();
     });
@@ -78,16 +78,16 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled={false}
           kibanaVersion="8.0.0"
-        />
+        />,
       );
 
       const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_onPrem'
+        'policySelector_onPrem',
       );
       expect(policySelectorWrapper).toBeInTheDocument();
 
       const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
+        'comboBoxSearchInput',
       );
       expect(input).toHaveValue('Default Standalone configuration');
 
@@ -134,16 +134,16 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled={false}
             kibanaVersion="8.0.0"
-          />
+          />,
         );
 
         const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
+          'policySelector_onPrem',
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
         const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
+          'comboBoxSearchInput',
         );
         expect(input).toHaveValue('Default Standalone configuration');
 
@@ -175,16 +175,16 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
 
         const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
+          'policySelector_onPrem',
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
         const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
+          'comboBoxSearchInput',
         );
         expect(input).toHaveValue('Default Standalone configuration');
 
@@ -222,16 +222,16 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
 
         const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_cloud'
+          'policySelector_cloud',
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
         const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
+          'comboBoxSearchInput',
         );
         expect(input).toHaveValue('Default Standalone configuration');
 
@@ -266,16 +266,16 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
 
         const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_policy-elastic-agent-on-cloud'
+          'policySelector_policy-elastic-agent-on-cloud',
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
         const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
+          'comboBoxSearchInput',
         );
         expect(input).toHaveValue('Elastic Cloud agent policy');
 
@@ -306,16 +306,16 @@ describe('TutorialConfigAgent', () => {
             basePath="http://localhost:5601"
             isCloudEnabled
             kibanaVersion="8.0.0"
-          />
+          />,
         );
 
         const policySelectorWrapper = await screen.findByTestId(
-          'policySelector_onPrem'
+          'policySelector_onPrem',
         );
         expect(policySelectorWrapper).toBeInTheDocument();
 
         const input = within(policySelectorWrapper).getByTestId(
-          'comboBoxSearchInput'
+          'comboBoxSearchInput',
         );
         expect(input).toHaveValue('Default Standalone configuration');
 
@@ -350,7 +350,7 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
 
       expectTextsNotInDocument(component, [
@@ -374,16 +374,16 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
 
       const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_onPrem'
+        'policySelector_onPrem',
       );
       expect(policySelectorWrapper).toBeInTheDocument();
 
       const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
+        'comboBoxSearchInput',
       );
       expect(input).toHaveValue('Default Standalone configuration');
 
@@ -418,15 +418,15 @@ describe('TutorialConfigAgent', () => {
           basePath="http://localhost:5601"
           isCloudEnabled
           kibanaVersion="8.0.0"
-        />
+        />,
       );
       const policySelectorWrapper = await screen.findByTestId(
-        'policySelector_cloud'
+        'policySelector_cloud',
       );
       expect(policySelectorWrapper).toBeInTheDocument();
 
       const input = within(policySelectorWrapper).getByTestId(
-        'comboBoxSearchInput'
+        'comboBoxSearchInput',
       );
       expect(input).toHaveValue('Default Standalone configuration');
 

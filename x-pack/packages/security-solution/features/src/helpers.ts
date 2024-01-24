@@ -12,7 +12,7 @@ import type { AppFeatureKeys, AppFeatureKeyType, AppFeatureKibanaConfig } from '
  */
 export const createEnabledAppFeaturesConfigMap = <
   K extends AppFeatureKeyType,
-  T extends string = string
+  T extends string = string,
 >(
   appFeatures: Record<K, AppFeatureKibanaConfig<T>>,
   enabledAppFeaturesKeys: AppFeatureKeys

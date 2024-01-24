@@ -126,7 +126,7 @@ async function getMobileDetailedStatisticsByField({
           },
         },
       },
-    }
+    },
   );
 
   const buckets = response.aggregations?.detailed_statistics.buckets ?? [];
@@ -208,7 +208,7 @@ export async function getMobileDetailedStatisticsByFieldPeriods({
           }),
         };
       }),
-      'fieldName'
+      'fieldName',
     ),
   };
 }

@@ -85,7 +85,7 @@ export const getApmTimeseriesRt = t.type({
         offset: t.string,
         'service.environment': t.string,
       }),
-    ])
+    ]),
   ),
   start: t.string,
   end: t.string,
@@ -199,12 +199,12 @@ export async function getApmTimeseries({
 
         const allFetchedSeries = await fetchSeriesForStat();
         return allFetchedSeries.map((series) => ({ ...series, stat }));
-      })
+      }),
     )
   ).flatMap((statResults) =>
     statResults.flatMap((statResult) => {
       const changePointType = Object.keys(
-        statResult.change_point?.type ?? {}
+        statResult.change_point?.type ?? {},
       )?.[0];
 
       return {
@@ -228,6 +228,6 @@ export async function getApmTimeseries({
             : []),
         ],
       };
-    })
+    }),
   );
 }

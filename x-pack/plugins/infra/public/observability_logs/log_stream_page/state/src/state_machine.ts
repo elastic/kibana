@@ -241,10 +241,10 @@ export const createPureLogStreamPageStateMachine = (initialContext: LogStreamPag
                 parsedQuery: event.validatedQuery,
               } as LogStreamPageContextWithQuery)
             : event.type === 'VALID_QUERY_CHANGED'
-            ? ({
-                parsedQuery: event.parsedQuery,
-              } as LogStreamPageContextWithQuery)
-            : {}
+              ? ({
+                  parsedQuery: event.parsedQuery,
+                } as LogStreamPageContextWithQuery)
+              : {}
         ),
         storeTime: actions.assign((_context, event) => {
           return 'timeRange' in event && 'refreshInterval' in event && 'timestamps' in event

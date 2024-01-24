@@ -11,7 +11,7 @@ export type EmbeddableComponent<ApiType extends unknown = unknown> =
 
 export interface EmbeddableComponentFactory<
   StateType extends unknown = unknown,
-  APIType extends unknown = unknown
+  APIType extends unknown = unknown,
 > {
   getComponent: (initialState: StateType) => Promise<EmbeddableComponent<APIType>>;
   deserializeState: (state: unknown) => StateType;

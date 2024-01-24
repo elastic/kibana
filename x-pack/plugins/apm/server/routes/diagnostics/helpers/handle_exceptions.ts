@@ -19,7 +19,7 @@ export async function handleExceptions<T>(promise: Promise<T>) {
     }
 
     console.error(
-      `Unhandled error: ${error.message} ${JSON.stringify(error)}}`
+      `Unhandled error: ${error.message} ${JSON.stringify(error)}}`,
     );
 
     return;

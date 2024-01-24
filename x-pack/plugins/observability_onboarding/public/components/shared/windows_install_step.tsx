@@ -27,7 +27,7 @@ export function WindowsInstallStep({
               {
                 defaultMessage:
                   'This onboarding is currently only available for Linux and MacOS systems. See our documentation for information on streaming log files to Elastic from a Windows system.',
-              }
+              },
             )}
           </p>
         </EuiText>
@@ -44,7 +44,7 @@ export function WindowsInstallStep({
         >
           {i18n.translate(
             'xpack.observability_onboarding.windows.installStep.link.label',
-            { defaultMessage: 'Read docs' }
+            { defaultMessage: 'Read docs' },
           )}
         </EuiButton>
       </EuiFlexItem>

@@ -78,10 +78,10 @@ type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
       TParams['apm'] extends { events: ProcessorEvent[] }
         ? ValuesType<TParams['apm']['events']>
         : TParams['apm'] extends { sources: ApmDataSource[] }
-        ? ProcessorEventOfDocumentType<
-            ValuesType<TParams['apm']['sources']>['documentType']
-          >
-        : never
+          ? ProcessorEventOfDocumentType<
+              ValuesType<TParams['apm']['sources']>['documentType']
+            >
+          : never
     >,
     TParams
   >;
@@ -150,7 +150,7 @@ export class APMEventClient {
           return cancelEsRequestOnAbort(
             cb({ signal: controller.signal, meta: true }),
             this.request,
-            controller
+            controller,
           );
         });
 
@@ -161,7 +161,7 @@ export class APMEventClient {
 
   async search<TParams extends APMEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
   ): Promise<TypedSearchResponse<TParams>> {
     const { events, index, filters } = getRequestBase({
       apm: params.apm,
@@ -205,7 +205,7 @@ export class APMEventClient {
 
   async logEventSearch<TParams extends APMLogEventESSearchRequest>(
     operationName: string,
-    params: TParams
+    params: TParams,
   ): Promise<TypedLogEventSearchResponse<TParams>> {
     // Reusing indices configured for errors since both events and errors are stored as logs.
     const index = processorEventsToIndex([ProcessorEvent.error], this.indices);
@@ -279,7 +279,7 @@ export class APMEventClient {
           {
             searches,
           },
-          opts
+          opts,
         ) as unknown as Promise<{
           body: TypedMSearchResponse<TParams>;
         }>,
@@ -307,7 +307,7 @@ export class APMEventClient {
 
   async fieldCaps(
     operationName: string,
-    params: APMEventFieldCapsRequest
+    params: APMEventFieldCapsRequest,
   ): Promise<FieldCapsResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 
@@ -326,7 +326,7 @@ export class APMEventClient {
 
   async termsEnum(
     operationName: string,
-    params: APMEventTermsEnumRequest
+    params: APMEventTermsEnumRequest,
   ): Promise<TermsEnumResponse> {
     const index = processorEventsToIndex(params.apm.events, this.indices);
 

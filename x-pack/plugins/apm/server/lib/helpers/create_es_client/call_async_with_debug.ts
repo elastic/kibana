@@ -62,7 +62,7 @@ export async function callAsyncWithDebug<T>({
     const { title, body } = getDebugMessage();
 
     console.log(
-      chalk.bold[highlightColor](`=== Debug: ${title} (${duration}ms) ===`)
+      chalk.bold[highlightColor](`=== Debug: ${title} (${duration}ms) ===`),
     );
 
     console.log(body);
@@ -80,7 +80,7 @@ export async function callAsyncWithDebug<T>({
             kibanaRequest: request,
             operationName,
             startTime,
-          })
+          }),
         );
       }
     }
@@ -106,12 +106,12 @@ export const getDebugBody = ({
 
   if (requestType === 'search') {
     return `${operationLine}GET ${params.index}/_search\n${formatObj(
-      params.body
+      params.body,
     )}`;
   }
 
   return `${chalk.bold('ES operation:')} ${requestType}\n${chalk.bold(
-    'ES query:'
+    'ES query:',
   )}\n${operationLine}${formatObj(params)}`;
 };
 

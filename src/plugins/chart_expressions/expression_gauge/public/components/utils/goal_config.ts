@@ -26,4 +26,4 @@ export const getGoalConfig = (type: GaugeShape): Partial<GoalProps> =>
     [GaugeShapes.VERTICAL_BULLET]: empty,
     [GaugeShapes.ARC]: getArcConfig,
     [GaugeShapes.CIRCLE]: getCicleConfig,
-  }[type]());
+  })[type]();

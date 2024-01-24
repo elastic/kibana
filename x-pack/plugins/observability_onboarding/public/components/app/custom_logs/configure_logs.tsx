@@ -65,7 +65,7 @@ export function ConfigureLogs() {
     getState();
 
   const onIntegrationCreation: Callbacks['onIntegrationCreation'] = (
-    integrationOptions
+    integrationOptions,
   ) => {
     const {
       integrationName: createdIntegrationName,
@@ -122,7 +122,7 @@ export function ConfigureLogsContent() {
   const [logFilePaths, setLogFilePaths] = useState(wizardState.logFilePaths);
   const [namespace, setNamespace] = useState(wizardState.namespace);
   const [customConfigurations, setCustomConfigurations] = useState(
-    wizardState.customConfigurations
+    wizardState.customConfigurations,
   );
   const logFilePathNotConfigured = logFilePaths.every((filepath) => !filepath);
 
@@ -146,11 +146,11 @@ export function ConfigureLogsContent() {
 
   function onLogFilePathChanges(
     index: number,
-    event: React.FormEvent<HTMLInputElement>
+    event: React.FormEvent<HTMLInputElement>,
   ) {
     const filepath = event.currentTarget?.value;
     setLogFilePaths((prev) =>
-      prev.map((path, i) => (i === index ? filepath : path))
+      prev.map((path, i) => (i === index ? filepath : path)),
     );
 
     if (index === 0) {
@@ -190,7 +190,7 @@ export function ConfigureLogsContent() {
               'xpack.observability_onboarding.configureLogs.description',
               {
                 defaultMessage: 'Configure inputs',
-              }
+              },
             )}
           </p>
         </EuiText>
@@ -201,13 +201,13 @@ export function ConfigureLogsContent() {
               'xpack.observability_onboarding.configureLogs.logFile.path',
               {
                 defaultMessage: 'Log file path',
-              }
+              },
             )}
             helpText={i18n.translate(
               'xpack.observability_onboarding.configureLogs.logFile.helper',
               {
                 defaultMessage: 'You can use a log file path or a log pattern.',
-              }
+              },
             )}
           >
             <>
@@ -225,7 +225,7 @@ export function ConfigureLogsContent() {
                           'xpack.observability_onboarding.configureLogs.logFile.placeholder',
                           {
                             defaultMessage: 'Example: /var/log/application.*',
-                          }
+                          },
                         )}
                         value={filepath}
                         onChange={(ev) => onLogFilePathChanges(index, ev)}
@@ -237,7 +237,7 @@ export function ConfigureLogsContent() {
                           iconType="trash"
                           aria-label={i18n.translate(
                             'xpack.observability_onboarding.configureLogsContent.euiButtonIcon.deleteLabel',
-                            { defaultMessage: 'Delete' }
+                            { defaultMessage: 'Delete' },
                           )}
                           onClick={() => removeLogFilePath(index)}
                           data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
@@ -265,7 +265,7 @@ export function ConfigureLogsContent() {
                   'xpack.observability_onboarding.configureLogs.logFile.addRow',
                   {
                     defaultMessage: 'Add row',
-                  }
+                  },
                 )}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -283,7 +283,7 @@ export function ConfigureLogsContent() {
                     'xpack.observability_onboarding.configureLogs.serviceName',
                     {
                       defaultMessage: 'Service name',
-                    }
+                    },
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -293,7 +293,7 @@ export function ConfigureLogsContent() {
                       {
                         defaultMessage:
                           'Provide a service name to allow for distributed services running on multiple hosts to correlate the related instances.',
-                      }
+                      },
                     )}
                     position="right"
                   />
@@ -312,7 +312,7 @@ export function ConfigureLogsContent() {
                 'xpack.observability_onboarding.configureLogs.serviceName.placeholder',
                 {
                   defaultMessage: 'Give your service a name',
-                }
+                },
               )}
               value={serviceName}
               onChange={(event) => setServiceName(event.target.value)}
@@ -343,7 +343,7 @@ export function ConfigureLogsContent() {
                   'xpack.observability_onboarding.configureLogs.advancedSettings',
                   {
                     defaultMessage: 'Advanced settings',
-                  }
+                  },
                 )}
                 data-test-subj="obltOnboardingCustomLogsAdvancedSettings"
               >
@@ -360,7 +360,7 @@ export function ConfigureLogsContent() {
                           'xpack.observability_onboarding.configureLogs.namespace',
                           {
                             defaultMessage: 'Namespace',
-                          }
+                          },
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
@@ -370,7 +370,7 @@ export function ConfigureLogsContent() {
                             {
                               defaultMessage:
                                 'Provide a namespace to customize the grouping of your logs. Defaults to the default namespace.',
-                            }
+                            },
                           )}
                           position="right"
                         />
@@ -395,7 +395,7 @@ export function ConfigureLogsContent() {
                               'xpack.observability_onboarding.configureLogs.learnMore',
                               {
                                 defaultMessage: 'Learn more',
-                              }
+                              },
                             )}
                           </EuiLink>
                         ),
@@ -408,7 +408,7 @@ export function ConfigureLogsContent() {
                       'xpack.observability_onboarding.configureLogs.namespace.placeholder',
                       {
                         defaultMessage: 'Namespace',
-                      }
+                      },
                     )}
                     value={namespace}
                     onChange={(event) => setNamespace(event.target.value)}
@@ -421,7 +421,7 @@ export function ConfigureLogsContent() {
                     'xpack.observability_onboarding.configureLogs.customConfig',
                     {
                       defaultMessage: 'Custom configurations',
-                    }
+                    },
                   )}
                   helpText={
                     <FormattedMessage
@@ -441,7 +441,7 @@ export function ConfigureLogsContent() {
                               'xpack.observability_onboarding.configureLogs.learnMore',
                               {
                                 defaultMessage: 'Learn more',
-                              }
+                              },
                             )}
                           </EuiLink>
                         ),

@@ -22,7 +22,7 @@ function TransactionDetailAggregatedCriticalPath({
     query: { rangeFrom, rangeTo, transactionName },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -30,7 +30,7 @@ function TransactionDetailAggregatedCriticalPath({
   const traceIds = useMemo(() => {
     return (
       traceSamplesFetchResult.data?.traceSamples.map(
-        (sample) => sample.traceId
+        (sample) => sample.traceId,
       ) ?? []
     );
   }, [traceSamplesFetchResult.data]);
@@ -57,7 +57,7 @@ export const aggregatedCriticalPathTab = {
           'xpack.apm.transactionDetails.tabs.aggregatedCriticalPathLabel',
           {
             defaultMessage: 'Aggregated critical path',
-          }
+          },
         )}
       </EuiFlexItem>
       <EuiFlexItem>

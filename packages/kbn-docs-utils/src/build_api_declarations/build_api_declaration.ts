@@ -74,8 +74,8 @@ export function buildApiDeclaration(node: Node, opts: BuildApiDecOpts): ApiDecla
       name: Node.isConstructSignatureDeclaration(node)
         ? 'new'
         : Node.isConstructorDeclaration(node)
-        ? 'Constructor'
-        : node.getName() || 'Unnamed',
+          ? 'Constructor'
+          : node.getName() || 'Unnamed',
     });
   } else if (
     Node.isPropertySignature(node) ||

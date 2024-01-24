@@ -20,7 +20,7 @@ const apmIndexSettingsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/apm-index-settings',
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     apmIndexSettings: ApmIndexSettingsResponse;
   }> => {

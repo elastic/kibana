@@ -39,7 +39,7 @@ export class ObservabilityOnboardingPlugin
   esLegacyConfigService = new EsLegacyConfigService();
 
   constructor(
-    private readonly initContext: PluginInitializerContext<ObservabilityOnboardingConfig>
+    private readonly initContext: PluginInitializerContext<ObservabilityOnboardingConfig>,
   ) {
     this.initContext = initContext;
     this.logger = this.initContext.logger.get();
@@ -50,7 +50,7 @@ export class ObservabilityOnboardingPlugin
       ObservabilityOnboardingPluginStartDependencies,
       ObservabilityOnboardingPluginStart
     >,
-    plugins: ObservabilityOnboardingPluginSetupDependencies
+    plugins: ObservabilityOnboardingPluginSetupDependencies,
   ) {
     this.logger.debug('observability_onboarding: Setup');
     this.esLegacyConfigService.setup(core.elasticsearch.legacy.config$);

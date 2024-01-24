@@ -21,7 +21,7 @@ describe('Timezone helper', () => {
     it('returns ticks when in Ameca/New_York timezone', () => {
       moment.tz.setDefault('America/New_York');
       expect(
-        getTimeTicksTZ({ domain: [min, max], totalTicks: 8, width: 1138 })
+        getTimeTicksTZ({ domain: [min, max], totalTicks: 8, width: 1138 }),
       ).toEqual([
         new Date('2020-01-28T11:00:00.000Z'),
         new Date('2020-01-28T14:00:00.000Z'),
@@ -37,7 +37,7 @@ describe('Timezone helper', () => {
     it('returns ticks when in Europe/Amsterdam timezone', () => {
       moment.tz.setDefault('Europe/Amsterdam');
       expect(
-        getTimeTicksTZ({ domain: [min, max], totalTicks: 8, width: 1138 })
+        getTimeTicksTZ({ domain: [min, max], totalTicks: 8, width: 1138 }),
       ).toEqual([
         new Date('2020-01-28T05:00:00.000Z'),
         new Date('2020-01-28T08:00:00.000Z'),
@@ -76,13 +76,13 @@ describe('Timezone helper', () => {
 
     it('returns local when uiSettings returns Browser', () => {
       expect(
-        getTimeZone({ get: () => 'Browser' } as unknown as IUiSettingsClient)
+        getTimeZone({ get: () => 'Browser' } as unknown as IUiSettingsClient),
       ).toEqual('local');
     });
     it('returns timezone defined on uiSettings', () => {
       const timezone = 'America/toronto';
       expect(
-        getTimeZone({ get: () => timezone } as unknown as IUiSettingsClient)
+        getTimeZone({ get: () => timezone } as unknown as IUiSettingsClient),
       ).toEqual(timezone);
     });
   });

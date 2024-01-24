@@ -29,7 +29,7 @@ export interface FetcherResult<Data> {
 }
 
 function getDetailsFromErrorResponse(
-  error: IHttpFetchError<ResponseErrorBody>
+  error: IHttpFetchError<ResponseErrorBody>,
 ) {
   const message = error.body?.message ?? error.response?.statusText;
   return (
@@ -46,7 +46,7 @@ function getDetailsFromErrorResponse(
 }
 
 const createAutoAbortedAPMClient = (
-  signal: AbortSignal
+  signal: AbortSignal,
 ): AutoAbortedAPMClient => {
   return ((endpoint, options) => {
     return callApmApi(endpoint, {
@@ -58,11 +58,10 @@ const createAutoAbortedAPMClient = (
 
 // fetcher functions can return undefined OR a promise. Previously we had a more simple type
 // but it led to issues when using object destructuring with default values
-type InferResponseType<TReturn> = Exclude<TReturn, undefined> extends Promise<
-  infer TResponseType
->
-  ? TResponseType
-  : unknown;
+type InferResponseType<TReturn> =
+  Exclude<TReturn, undefined> extends Promise<infer TResponseType>
+    ? TResponseType
+    : unknown;
 
 export function useFetcher<TReturn>(
   fn: (callApmApi: AutoAbortedAPMClient) => TReturn,
@@ -70,7 +69,7 @@ export function useFetcher<TReturn>(
   options: {
     preservePreviousData?: boolean;
     showToastOnError?: boolean;
-  } = {}
+  } = {},
 ): FetcherResult<InferResponseType<TReturn>> & { refetch: () => void } {
   const { notifications } = useKibana();
   const { preservePreviousData = true, showToastOnError = true } = options;

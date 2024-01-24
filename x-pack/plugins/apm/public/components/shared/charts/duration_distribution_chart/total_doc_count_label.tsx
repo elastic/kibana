@@ -40,7 +40,7 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
               values: {
                 totalDocCount,
               },
-            }
+            },
           )
         : i18n.translate(
             'xpack.apm.durationDistributionChart.totalSpansCount',
@@ -50,7 +50,7 @@ export function TotalDocCountLabel({ eventType, totalDocCount }: Props) {
               values: {
                 totalDocCount,
               },
-            }
+            },
           )}
     </EuiText>
   );

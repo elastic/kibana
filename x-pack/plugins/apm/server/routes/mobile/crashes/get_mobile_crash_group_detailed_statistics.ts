@@ -105,7 +105,7 @@ export async function getMobileCrashesGroupDetailedStatistics({
           },
         },
       },
-    }
+    },
   );
 
   if (!timeseriesResponse.aggregations) {
@@ -193,7 +193,7 @@ export async function getMobileCrashesGroupPeriods({
           previousPeriodTimeseries: crashRateGroup.timeseries,
         }),
       })),
-      'groupId'
+      'groupId',
     ),
   };
 }

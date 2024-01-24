@@ -93,15 +93,18 @@ describe('Overview Grid', () => {
           status: {
             downConfigs: {},
             upConfigs: {},
-            allConfigs: getMockData().reduce((acc, cur) => {
-              acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
-                configId: cur.configId,
-                monitorQueryId: cur.id,
-                location: locationIdToName[cur.location.id],
-                status: 'down',
-              };
-              return acc;
-            }, {} as Record<string, any>),
+            allConfigs: getMockData().reduce(
+              (acc, cur) => {
+                acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
+                  configId: cur.configId,
+                  monitorQueryId: cur.id,
+                  location: locationIdToName[cur.location.id],
+                  status: 'down',
+                };
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
           },
         },
         serviceLocations: {
@@ -158,15 +161,18 @@ describe('Overview Grid', () => {
           status: {
             downConfigs: {},
             upConfigs: {},
-            allConfigs: getMockData().reduce((acc, cur) => {
-              acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
-                configId: cur.configId,
-                monitorQueryId: cur.id,
-                location: locationIdToName[cur.location.id],
-                status: 'down',
-              };
-              return acc;
-            }, {} as Record<string, any>),
+            allConfigs: getMockData().reduce(
+              (acc, cur) => {
+                acc[`${cur.id}-${locationIdToName[cur.location.id]}`] = {
+                  configId: cur.configId,
+                  monitorQueryId: cur.id,
+                  location: locationIdToName[cur.location.id],
+                  status: 'down',
+                };
+                return acc;
+              },
+              {} as Record<string, any>
+            ),
           },
         },
         serviceLocations: {

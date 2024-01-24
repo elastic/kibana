@@ -86,7 +86,7 @@ export function EnvironmentSelect({
             },
           });
     },
-    [searchValue, start, end, serviceName]
+    [searchValue, start, end, serviceName],
   );
   const terms = data?.terms ?? [];
 

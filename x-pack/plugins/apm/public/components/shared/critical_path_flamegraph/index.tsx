@@ -34,7 +34,7 @@ export function CriticalPathFlamegraph(
     end: string;
     traceIds: string[];
     traceIdsFetchStatus: FETCH_STATUS;
-  } & ({ serviceName: string; transactionName: string } | {})
+  } & ({ serviceName: string; transactionName: string } | {}),
 ) {
   const { start, end, traceIds, traceIdsFetchStatus } = props;
 
@@ -70,7 +70,7 @@ export function CriticalPathFlamegraph(
         },
       });
     },
-    [timerange, traceIds, serviceName, transactionName]
+    [timerange, traceIds, serviceName, transactionName],
   );
 
   const chartThemes = useChartThemes();

@@ -25,8 +25,8 @@ jest.mock('./dashboard_grid_item', () => {
           props.expandedPanelId === undefined
             ? 'regularPanel'
             : props.expandedPanelId === props.id
-            ? 'expandedPanel'
-            : 'hiddenPanel'
+              ? 'expandedPanel'
+              : 'hiddenPanel'
         } ${
           props.focusedPanelId
             ? props.focusedPanelId === props.id

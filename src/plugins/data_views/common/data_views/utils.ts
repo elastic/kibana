@@ -13,10 +13,13 @@ import type { RuntimeField, RuntimeFieldSpec, RuntimePrimitiveTypes } from '../t
 export const removeFieldAttrs = (runtimeField: RuntimeField): RuntimeFieldSpec => {
   const { type, script, fields } = runtimeField;
   const fieldsTypeOnly = fields && {
-    fields: Object.entries(fields).reduce((col, [fieldName, field]) => {
-      col[fieldName] = { type: field.type };
-      return col;
-    }, {} as Record<string, { type: RuntimePrimitiveTypes }>),
+    fields: Object.entries(fields).reduce(
+      (col, [fieldName, field]) => {
+        col[fieldName] = { type: field.type };
+        return col;
+      },
+      {} as Record<string, { type: RuntimePrimitiveTypes }>
+    ),
   };
 
   return {

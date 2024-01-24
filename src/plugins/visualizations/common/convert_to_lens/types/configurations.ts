@@ -32,7 +32,7 @@ import { ExpressionValueVisDimension } from '../../expression_functions';
 
 export type ChartShapes = 'heatmap';
 
-export type CollapseFunction = typeof CollapseFunctions[number];
+export type CollapseFunction = (typeof CollapseFunctions)[number];
 
 export type FillType = $Values<typeof FillTypes>;
 export type SeriesType = $Values<typeof SeriesTypes>;

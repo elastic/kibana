@@ -92,8 +92,8 @@ export const fetchConnectors = async (
         },
       }
     : indexNames
-    ? { terms: { index_name: indexNames } }
-    : { match_all: {} };
+      ? { terms: { index_name: indexNames } }
+      : { match_all: {} };
 
   try {
     let hits: Array<SearchHit<Connector>> = [];

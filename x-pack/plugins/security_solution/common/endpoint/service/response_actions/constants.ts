@@ -7,13 +7,13 @@
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
-export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
+export type ResponseActionStatus = (typeof RESPONSE_ACTION_STATUS)[number];
 
 export const RESPONSE_ACTION_TYPE = ['automated', 'manual'] as const;
-export type ResponseActionType = typeof RESPONSE_ACTION_TYPE[number];
+export type ResponseActionType = (typeof RESPONSE_ACTION_TYPE)[number];
 
 export const RESPONSE_ACTION_AGENT_TYPE = ['endpoint', 'sentinel_one'] as const;
-export type ResponseActionAgentType = typeof RESPONSE_ACTION_AGENT_TYPE[number];
+export type ResponseActionAgentType = (typeof RESPONSE_ACTION_AGENT_TYPE)[number];
 
 /**
  * The Command names that are used in the API payload for the `{ command: '' }` attribute
@@ -29,12 +29,12 @@ export const RESPONSE_ACTION_API_COMMANDS_NAMES = [
   'upload',
 ] as const;
 
-export type ResponseActionsApiCommandNames = typeof RESPONSE_ACTION_API_COMMANDS_NAMES[number];
+export type ResponseActionsApiCommandNames = (typeof RESPONSE_ACTION_API_COMMANDS_NAMES)[number];
 
 export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS = ['isolate'] as const;
 
 export type EnabledAutomatedResponseActionsCommands =
-  typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];
+  (typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS)[number];
 
 /**
  * The list of possible capabilities, reported by the endpoint in the metadata document
@@ -49,7 +49,7 @@ export const ENDPOINT_CAPABILITIES = [
   'upload_file',
 ] as const;
 
-export type EndpointCapabilities = typeof ENDPOINT_CAPABILITIES[number];
+export type EndpointCapabilities = (typeof ENDPOINT_CAPABILITIES)[number];
 
 /**
  * The list of possible console command names that generate a Response Action to be dispatched
@@ -66,7 +66,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
   'upload',
 ] as const;
 
-export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
+export type ConsoleResponseActionCommands = (typeof CONSOLE_RESPONSE_ACTION_COMMANDS)[number];
 
 export type ResponseConsoleRbacControls =
   | 'writeHostIsolation'

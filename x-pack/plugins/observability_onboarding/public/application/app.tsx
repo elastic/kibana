@@ -40,7 +40,7 @@ export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
   {
     defaultMessage: 'Onboarding',
-  }
+  },
 );
 
 export const breadcrumbsApp = {
@@ -221,7 +221,7 @@ export const renderApp = ({
       corePlugins={corePlugins}
       config={config}
     />,
-    element
+    element,
   );
   return () => {
     corePlugins.data.search.session.clear();

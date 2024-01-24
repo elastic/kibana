@@ -48,7 +48,7 @@ export function ApiKeyBanner({
               'xpack.observability_onboarding.apiKeyBanner.loading',
               {
                 defaultMessage: 'Creating API Key',
-              }
+              },
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -64,7 +64,7 @@ export function ApiKeyBanner({
         'xpack.observability_onboarding.apiKeyBanner.created',
         {
           defaultMessage: 'API Key created.',
-        }
+        },
       )}
       color="success"
       iconType="check"
@@ -76,7 +76,7 @@ export function ApiKeyBanner({
           {
             defaultMessage:
               'Remember to store this information in a safe place. It won’t be displayed anymore after you continue.',
-          }
+          },
         )}
       </p>
       <EuiFieldText
@@ -87,7 +87,7 @@ export function ApiKeyBanner({
           'xpack.observability_onboarding.apiKeyBanner.field.label',
           {
             defaultMessage: 'Api Key',
-          }
+          },
         )}
         append={
           <EuiCopy textToCopy={payload?.apiKeyEncoded ?? ''}>
@@ -106,7 +106,7 @@ export function ApiKeyBanner({
                   'xpack.observability_onboarding.apiKeyBanner.field.copyButton',
                   {
                     defaultMessage: 'Copy to clipboard',
-                  }
+                  },
                 )}
               />
             )}
@@ -122,7 +122,7 @@ export function ApiKeyBanner({
         'xpack.observability_onboarding.apiKeyBanner.failed',
         {
           defaultMessage: 'Failed to create API key.',
-        }
+        },
       )}
       color="danger"
       iconType="error"
@@ -136,7 +136,7 @@ export function ApiKeyBanner({
             values: {
               message: error?.body?.message,
             },
-          }
+          },
         )}
       </p>
     </EuiCallOut>
@@ -148,7 +148,7 @@ export function ApiKeyBanner({
         'xpack.observability_onboarding.apiKeyBanner.noPermissions',
         {
           defaultMessage: 'User does not have permissions to create API key.',
-        }
+        },
       )}
       color="warning"
       iconType="warning"
@@ -165,7 +165,7 @@ export function ApiKeyBanner({
               requiredIndexPrivileges: "['auto_configure', 'create_doc']",
               indices: "['logs-*-*', 'metrics-*-*']",
             },
-          }
+          },
         )}
       </p>
     </EuiCallOut>

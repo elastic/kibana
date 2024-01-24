@@ -77,7 +77,7 @@ declare type HostsTableColumnsTest = [
   Columns<string>,
   Columns<string>,
   Columns<string>,
-  Columns<string>
+  Columns<string>,
 ];
 
 declare type BasicTableColumns =

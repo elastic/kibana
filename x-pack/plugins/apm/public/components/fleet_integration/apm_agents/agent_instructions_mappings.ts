@@ -36,7 +36,7 @@ export interface AgentRuntimeAttachmentProps {
 
 export type CreateAgentInstructions = (
   apmServerUrl?: string,
-  secretToken?: string
+  secretToken?: string,
 ) => Array<{
   title: string;
   textPre?: string;

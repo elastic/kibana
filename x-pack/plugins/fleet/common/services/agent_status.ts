@@ -25,8 +25,8 @@ export function getPreviousAgentStatusForOfflineAgents(
     'policy_revision' in agent
       ? agent.policy_revision
       : 'policy_revision_idx' in agent
-      ? agent.policy_revision_idx
-      : undefined;
+        ? agent.policy_revision_idx
+        : undefined;
 
   if (!policyRevision || (agent.upgrade_started_at && !agent.upgraded_at)) {
     return 'updating';

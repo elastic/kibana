@@ -25,7 +25,7 @@ export const SOURCE_MAP_PATH = `inputs[0].config['apm-server'].value.rum.source_
  */
 export function getPackagePolicyWithAgentConfigurations(
   packagePolicy: NewPackagePolicy,
-  agentConfigurations: AgentConfiguration[]
+  agentConfigurations: AgentConfiguration[],
 ) {
   const packagePolicyClone = cloneDeep(packagePolicy);
 

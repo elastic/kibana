@@ -118,9 +118,8 @@ export default ({ getPageObjects }: FtrProviderContext) => {
           shouldUseHashForSubUrl: false,
         });
 
-        let advancedSetting = await pageObjects.settings.getAdvancedSettingCheckbox(
-          'theme:darkMode'
-        );
+        let advancedSetting =
+          await pageObjects.settings.getAdvancedSettingCheckbox('theme:darkMode');
         expect(advancedSetting).to.be(null);
 
         await pageObjects.settings.toggleAdvancedSettingCheckbox('theme:darkMode', true);

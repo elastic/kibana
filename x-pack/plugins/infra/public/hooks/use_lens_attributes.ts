@@ -75,16 +75,16 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
 
   const openInLensAction = useCallback(
     ({
-        timeRange,
-        query,
-        filters,
-        searchSessionId,
-      }: {
-        timeRange: TimeRange;
-        filters: Filter[];
-        query: Query;
-        searchSessionId?: string;
-      }) =>
+      timeRange,
+      query,
+      filters,
+      searchSessionId,
+    }: {
+      timeRange: TimeRange;
+      filters: Filter[];
+      query: Query;
+      searchSessionId?: string;
+    }) =>
       () => {
         const injectedAttributes = injectFilters({ filters, query });
         if (injectedAttributes) {

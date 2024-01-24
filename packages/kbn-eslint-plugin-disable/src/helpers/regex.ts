@@ -40,8 +40,8 @@ export function parseEslintDisableComment(
   const disableValueType = commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE)
     ? ESLINT_DISABLE_VALUE.DISABLE_NEXT_LINE
     : commentVal.includes(ESLINT_DISABLE_VALUE.DISABLE_LINE)
-    ? ESLINT_DISABLE_VALUE.DISABLE_LINE
-    : ESLINT_DISABLE_VALUE.DISABLE;
+      ? ESLINT_DISABLE_VALUE.DISABLE_LINE
+      : ESLINT_DISABLE_VALUE.DISABLE;
 
   const rules = rulesBlock
     ? rulesBlock

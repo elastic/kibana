@@ -23,8 +23,8 @@ export async function hasStorageExplorerPrivileges({
 
   const names = uniq(
     [transaction, span, metric, error].flatMap((indexPatternString) =>
-      indexPatternString.split(',').map((indexPattern) => indexPattern.trim())
-    )
+      indexPatternString.split(',').map((indexPattern) => indexPattern.trim()),
+    ),
   );
 
   const esClient = (await context.core).elasticsearch.client;

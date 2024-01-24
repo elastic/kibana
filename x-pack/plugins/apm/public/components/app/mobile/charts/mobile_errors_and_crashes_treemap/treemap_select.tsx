@@ -27,14 +27,14 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       'xpack.apm.transactionOverview.treemap.dropdown.devices',
       {
         defaultMessage: 'Devices',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.errorOverview.treemap.dropdown.devices.subtitle',
       {
         defaultMessage:
           'This treemap view allows for easy and faster visual way the most affected devices',
-      }
+      },
     ),
   },
   {
@@ -43,14 +43,14 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       'xpack.apm.transactionOverview.treemap.versions.devices',
       {
         defaultMessage: 'Versions',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.errorOverview.treemap.dropdown.versions.subtitle',
       {
         defaultMessage:
           'This treemap view allows for easy and faster visual way the most affected versions.',
-      }
+      },
     ),
   },
 ].map(({ value, label, description }) => ({

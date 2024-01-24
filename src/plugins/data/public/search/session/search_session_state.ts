@@ -150,7 +150,7 @@ export interface SessionStateInternal<SearchDescriptor = unknown, SearchMeta ext
 
 const createSessionDefaultState: <
   SearchDescriptor = unknown,
-  SearchMeta extends {} = {}
+  SearchMeta extends {} = {},
 >() => SessionStateInternal<SearchDescriptor, SearchMeta> = () => ({
   sessionId: undefined,
   appName: undefined,
@@ -165,7 +165,7 @@ const createSessionDefaultState: <
 export interface SessionPureTransitions<
   SearchDescriptor = unknown,
   SearchMeta extends {} = {},
-  S = SessionStateInternal<SearchDescriptor, SearchMeta>
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>,
 > {
   start: (state: S) => ({ appName }: { appName: string }) => S;
   restore: (state: S) => (sessionId: string) => S;
@@ -331,7 +331,7 @@ export interface SessionMeta {
 export interface SessionPureSelectors<
   SearchDescriptor = unknown,
   SearchMeta extends {} = {},
-  S = SessionStateInternal<SearchDescriptor, SearchMeta>
+  S = SessionStateInternal<SearchDescriptor, SearchMeta>,
 > {
   getState: (state: S) => () => SearchSessionState;
   getMeta: (state: S) => () => SessionMeta;
@@ -389,7 +389,7 @@ export const sessionPureSelectors: SessionPureSelectors = {
 
 export type SessionStateContainer<
   SearchDescriptor = unknown,
-  SearchMeta extends {} = {}
+  SearchMeta extends {} = {},
 > = StateContainer<
   SessionStateInternal<SearchDescriptor, SearchMeta>,
   SessionPureTransitions<SearchDescriptor, SearchMeta>,

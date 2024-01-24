@@ -42,7 +42,7 @@ const EuiLoadingEmbeddable = styled(EuiFlexGroup)`
 
 const vistorBreakdownFilter = {
   filterNames: uxLocalUIFilterNames.filter((name) =>
-    ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name)
+    ['browser', 'browserExcluded', 'os', 'osExcluded'].includes(name),
   ),
 };
 
@@ -65,24 +65,24 @@ export function VisitorBreakdown() {
       const filterValues = event?.data?.map((fdata: any) => fdata.value);
       const invertedField = getInvertedFilterName(
         visitorBreakdownFieldMap[metric],
-        event?.negate ?? false
+        event?.negate ?? false,
       );
       const invertedFieldValues =
         filters?.find((filter) => filter.name === invertedField)?.value ?? [];
 
       setFilterValue(
         invertedField,
-        invertedFieldValues.filter((value) => !filterValues.includes(value))
+        invertedFieldValues.filter((value) => !filterValues.includes(value)),
       );
 
       setFilterValue(
         event?.negate
           ? getExcludedName(visitorBreakdownFieldMap[metric])
           : visitorBreakdownFieldMap[metric],
-        filterValues
+        filterValues,
       );
     },
-    [filters, setFilterValue]
+    [filters, setFilterValue],
   );
 
   return (

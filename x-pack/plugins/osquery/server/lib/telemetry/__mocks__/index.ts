@@ -25,7 +25,7 @@ export const createMockTelemetryEventsSender = (
     sendIfDue: jest.fn(),
     sendEvents: jest.fn(),
     sendOnDemand: jest.fn(),
-  } as unknown as jest.Mocked<TelemetryEventsSender>);
+  }) as unknown as jest.Mocked<TelemetryEventsSender>;
 
 export const createMockTelemetryReceiver = (
   diagnosticsAlert?: unknown
@@ -42,7 +42,7 @@ export const createMockTelemetryReceiver = (
     fetchTrustedApplications: jest.fn(),
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
-  } as unknown as jest.Mocked<TelemetryReceiver>);
+  }) as unknown as jest.Mocked<TelemetryReceiver>;
 
 export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> =>
   ({
@@ -54,7 +54,7 @@ export const createMockPackagePolicy = (): jest.Mocked<PackagePolicy> =>
     updated_by: jest.fn(),
     created_at: jest.fn(),
     created_by: jest.fn(),
-  } as unknown as jest.Mocked<PackagePolicy>);
+  }) as unknown as jest.Mocked<PackagePolicy>;
 
 export const createMockOsqueryTelemetryTask = (
   testType?: string,
@@ -68,7 +68,7 @@ export const createMockOsqueryTelemetryTask = (
     version: '0.0.0',
     getLastExecutionTime: jest.fn().mockReturnValue(testLastTimestamp ?? jest.fn()),
     runTask: jest.fn(),
-  } as unknown as jest.Mocked<OsqueryTelemetryTaskConfig>);
+  }) as unknown as jest.Mocked<OsqueryTelemetryTaskConfig>;
 
 export const createMockTaskInstance = (testId: string, testType: string): ConcreteTaskInstance =>
   ({
@@ -83,4 +83,4 @@ export const createMockTaskInstance = (testId: string, testType: string): Concre
     params: {},
     state: {},
     taskType: testType,
-  } as ConcreteTaskInstance);
+  }) as ConcreteTaskInstance;

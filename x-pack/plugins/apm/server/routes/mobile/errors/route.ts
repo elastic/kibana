@@ -124,7 +124,7 @@ const mobileErrorTermsByFieldRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     terms: MobileErrorTermsByFieldResponse;
   }> => {
@@ -166,7 +166,7 @@ const mobileErrorsMainStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ errorGroups: MobileErrorGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);

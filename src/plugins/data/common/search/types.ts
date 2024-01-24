@@ -16,7 +16,7 @@ import { IEsSearchRequest, IEsSearchResponse } from '..';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 >(
   request: SearchStrategyRequest,
   options?: ISearchOptions

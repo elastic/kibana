@@ -27,7 +27,10 @@ export type CheckFn<T extends LintTarget> = (
 ) => void | Violation[] | Violation | string | Promise<void | Violation[] | Violation | string>;
 
 export abstract class Rule<T extends LintTarget> {
-  protected constructor(public readonly name: string, private readonly fn: CheckFn<T>) {}
+  protected constructor(
+    public readonly name: string,
+    private readonly fn: CheckFn<T>
+  ) {}
 
   async check(
     target: T,

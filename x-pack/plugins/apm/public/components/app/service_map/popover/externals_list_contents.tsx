@@ -54,7 +54,7 @@ export function ExternalsListContents({ elementData }: ContentsProps) {
                   </EuiDescriptionListDescription>
                 </Fragment>
               );
-            }
+            },
           )}
         </EuiDescriptionList>
       </ExternalResourcesList>

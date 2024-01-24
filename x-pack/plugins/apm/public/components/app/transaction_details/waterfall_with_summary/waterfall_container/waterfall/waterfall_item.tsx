@@ -234,7 +234,7 @@ export function WaterfallItem({
   useEffect(() => {
     if (waterfallItemRef?.current && marginLeftLevel) {
       setWidthFactor(
-        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth
+        1 + marginLeftLevel / waterfallItemRef.current.offsetWidth,
       );
     }
   }, [marginLeftLevel]);
@@ -330,7 +330,7 @@ function RelatedErrors({
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
 
   let kuery = `${TRACE_ID} : "${item.doc.trace.id}"`;
@@ -347,7 +347,7 @@ function RelatedErrors({
         serviceGroup: '',
         kuery,
       },
-    }
+    },
   );
 
   const href = apmRouter.link(`/services/{serviceName}/errors`, {
@@ -385,7 +385,7 @@ function getItemBarStyle(
   item: IWaterfallSpanOrTransaction,
   color: string,
   width: number,
-  left: number
+  left: number,
 ): React.CSSProperties {
   let itemBarStyle = { left: `${left}%`, width: `${width}%` };
 

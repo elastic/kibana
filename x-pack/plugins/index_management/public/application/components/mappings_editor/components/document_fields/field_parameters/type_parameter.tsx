@@ -67,8 +67,8 @@ export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = fa
               isMultiField
                 ? filterTypesForMultiField(FIELD_TYPES_OPTIONS)
                 : isRootLevelField
-                ? FIELD_TYPES_OPTIONS
-                : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
+                  ? FIELD_TYPES_OPTIONS
+                  : filterTypesForNonRootFields(FIELD_TYPES_OPTIONS)
             }
             selectedOptions={typeField.value}
             onChange={(value) => {

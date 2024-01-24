@@ -56,7 +56,7 @@ const storageExplorerRoute = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     serviceStatistics: StorageExplorerServiceStatisticsResponse;
   }> => {
@@ -175,7 +175,7 @@ const storageChartRoute = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     storageTimeSeries: SizeTimeseriesResponse;
   }> => {
@@ -262,7 +262,7 @@ const storageExplorerSummaryStatsRoute = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<StorageExplorerSummaryStatisticsResponse> => {
     const {
       config,
@@ -331,7 +331,7 @@ const storageExplorerGetServices = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     services: Array<{
       serviceName: string;
@@ -381,5 +381,5 @@ export const storageExplorerRouteRepository = {
 
 const SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.storageExplorer.securityRequired',
-  { defaultMessage: 'Security plugin is required' }
+  { defaultMessage: 'Security plugin is required' },
 );

@@ -32,15 +32,15 @@ export function ErrorMetadata({ error }: Props) {
               end: error['@timestamp'],
             },
           },
-        }
+        },
       );
     },
-    [error]
+    [error],
   );
 
   const sections = useMemo(
     () => getSectionsFromFields(errorEvent?.metadata || {}),
-    [errorEvent?.metadata]
+    [errorEvent?.metadata],
   );
 
   return (

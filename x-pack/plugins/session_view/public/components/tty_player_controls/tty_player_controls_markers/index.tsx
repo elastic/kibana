@@ -56,7 +56,7 @@ export const TTYPlayerControlsMarkers = ({
             : TTYPlayerLineMarkerType.ProcessChanged,
           line,
           name: event.process?.name,
-        } as TTYPlayerLineMarker)
+        }) as TTYPlayerLineMarker
     );
   }, [processStartMarkers]);
 

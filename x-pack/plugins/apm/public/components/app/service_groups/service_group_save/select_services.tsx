@@ -89,7 +89,7 @@ export function SelectServices({
         rangeTo: 'now',
       }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [kuery]
+    [kuery],
   );
 
   const { data, status } = useFetcher(
@@ -101,7 +101,7 @@ export function SelectServices({
       }
     },
     [kuery, start, end],
-    { preservePreviousData: true }
+    { preservePreviousData: true },
   );
 
   const isServiceListPreviewLoading = status === FETCH_STATUS.LOADING;
@@ -127,7 +127,7 @@ export function SelectServices({
               'xpack.apm.serviceGroups.selectServicesForm.title',
               {
                 defaultMessage: 'Select services',
-              }
+              },
             )}
           </EuiModalHeaderTitle>
           <EuiSpacer size="s" />
@@ -137,7 +137,7 @@ export function SelectServices({
               {
                 defaultMessage:
                   'Use a query to select services for this group. The preview shows services that match this query within the last 24 hours.',
-              }
+              },
             )}
           </EuiText>
           <EuiSpacer size="s" />
@@ -146,7 +146,7 @@ export function SelectServices({
               <KueryBar
                 placeholder={i18n.translate(
                   'xpack.apm.serviceGroups.selectServicesForm.kql',
-                  { defaultMessage: 'E.g. labels.team: "web"' }
+                  { defaultMessage: 'E.g. labels.team: "web"' },
                 )}
                 onSubmit={handleOnSubmit}
                 onChange={(value) => {
@@ -177,11 +177,11 @@ export function SelectServices({
                 {!kuery
                   ? i18n.translate(
                       'xpack.apm.serviceGroups.selectServicesForm.preview',
-                      { defaultMessage: 'Preview' }
+                      { defaultMessage: 'Preview' },
                     )
                   : i18n.translate(
                       'xpack.apm.serviceGroups.selectServicesForm.refresh',
-                      { defaultMessage: 'Refresh' }
+                      { defaultMessage: 'Refresh' },
                     )}
               </EuiButton>
             </EuiFlexItem>
@@ -194,7 +194,7 @@ export function SelectServices({
                   defaultMessage:
                     '{servicesCount} {servicesCount, plural, =0 {services} one {service} other {services}} match the query',
                   values: { servicesCount: data?.items.length },
-                }
+                },
               )}
             </EuiText>
           )}
@@ -222,7 +222,7 @@ export function SelectServices({
                       'xpack.apm.serviceGroups.searchResults.error',
                       {
                         defaultMessage: 'Error retrieving search results',
-                      }
+                      },
                     )}
                     color="danger"
                     iconType="error"
@@ -248,7 +248,7 @@ export function SelectServices({
                   <EuiText size="s" color="subdued">
                     {i18n.translate(
                       'xpack.apm.serviceGroups.selectServicesForm.panelLabel',
-                      { defaultMessage: 'Enter a query to select services' }
+                      { defaultMessage: 'Enter a query to select services' },
                     )}
                   </EuiText>
                 </CentralizedContainer>
@@ -270,7 +270,7 @@ export function SelectServices({
               >
                 {i18n.translate(
                   'xpack.apm.serviceGroups.selectServicesForm.editGroupDetails',
-                  { defaultMessage: 'Edit group details' }
+                  { defaultMessage: 'Edit group details' },
                 )}
               </EuiButton>
             </div>
@@ -285,7 +285,7 @@ export function SelectServices({
                 'xpack.apm.serviceGroups.selectServicesForm.cancel',
                 {
                   defaultMessage: 'Cancel',
-                }
+                },
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -302,7 +302,7 @@ export function SelectServices({
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.saveGroup',
-                { defaultMessage: 'Save group' }
+                { defaultMessage: 'Save group' },
               )}
             </EuiButton>
           </EuiFlexItem>

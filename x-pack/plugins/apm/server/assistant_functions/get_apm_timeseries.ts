@@ -143,14 +143,14 @@ export function registerGetApmTimeseriesFunction({
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmTimeseries.descriptionForUser',
         {
           defaultMessage: `Display different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions`,
-        }
+        },
       ),
       description: `Visualise and analyse different APM metrics, like throughput, failure rate, or latency, for any service or all services, or any or all of its dependencies, both as a timeseries and as a single statistic. A visualisation will be displayed above your reply - DO NOT attempt to display or generate an image yourself, or any other placeholder. Additionally, the function will return any changes, such as spikes, step and trend changes, or dips. You can also use it to compare data by requesting two different time ranges, or for instance two different service versions.`,
       parameters,
     },
     async (
       { arguments: args },
-      signal
+      signal,
     ): Promise<GetApmTimeseriesFunctionResponse> => {
       const timeseries = await getApmTimeseries({
         apmEventClient,
@@ -159,11 +159,11 @@ export function registerGetApmTimeseriesFunction({
 
       return {
         content: timeseries.map(
-          (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
+          (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data'),
         ),
         data: timeseries,
       };
-    }
+    },
   );
 }
 

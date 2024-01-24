@@ -49,9 +49,8 @@ export const eqlSearchStrategyProvider = (
       const client = esClient.asCurrentUser.eql;
 
       const search = async () => {
-        const { track_total_hits: _, ...defaultParams } = await getDefaultSearchParams(
-          uiSettingsClient
-        );
+        const { track_total_hits: _, ...defaultParams } =
+          await getDefaultSearchParams(uiSettingsClient);
         const params = id
           ? getCommonDefaultAsyncGetParams(searchConfig, options, {
               /* disable until full eql support */ disableSearchSessions: true,

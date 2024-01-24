@@ -92,7 +92,7 @@ export const getStory = (
         </FieldRowProvider>
       ),
     ],
-  } as ComponentMeta<typeof Component>);
+  }) as ComponentMeta<typeof Component>;
 
 /**
  * Default argument values for a {@link FieldInput} Storybook story.

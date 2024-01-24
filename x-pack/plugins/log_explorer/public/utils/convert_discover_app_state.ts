@@ -97,7 +97,7 @@ const createDiscoverPhrasesFilter = ({
         minimum_should_match: 1,
       },
     },
-  } as PhrasesFilter);
+  }) as PhrasesFilter;
 
 const createDiscoverExistsFilter = ({
   key,

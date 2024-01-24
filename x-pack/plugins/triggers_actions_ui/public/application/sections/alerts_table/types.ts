@@ -84,7 +84,7 @@ export interface AlertsTableContextType {
   mutedAlerts: MutedAlerts;
   bulkActions: [
     ReducerState<typeof bulkActionsReducer>,
-    Dispatch<ReducerAction<typeof bulkActionsReducer>>
+    Dispatch<ReducerAction<typeof bulkActionsReducer>>,
   ];
   resolveRulePagePath?: (ruleId: string) => string;
   resolveAlertPagePath?: (alertId: string) => string;

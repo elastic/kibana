@@ -70,7 +70,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
   notifications: NotificationsStart,
-  dataView: DataView
+  dataView: DataView,
 ): Promise<DashboardCreationOptions> {
   try {
     const builder = controlGroupInputBuilder;
@@ -85,7 +85,7 @@ async function getCreationOptions(
     });
     const panels = await convertSavedDashboardToPanels(
       dashboardProps,
-      dataView
+      dataView,
     );
 
     if (!panels) {
@@ -102,7 +102,7 @@ async function getCreationOptions(
     };
   } catch (error) {
     notifications.toasts.addDanger(
-      getLoadFailureToastLabels(dashboardProps, error)
+      getLoadFailureToastLabels(dashboardProps, error),
     );
     return {};
   }
@@ -111,7 +111,7 @@ async function getCreationOptions(
 export function getFilters(
   serviceName: string,
   environment: string,
-  dataView: DataView
+  dataView: DataView,
 ): Filter[] {
   const filters: Filter[] = [];
 
@@ -120,7 +120,7 @@ export function getFilters(
     const serviceNameFilter = buildPhraseFilter(
       serviceNameField,
       serviceName,
-      dataView
+      dataView,
     );
     filters.push(serviceNameFilter);
   }
@@ -139,7 +139,7 @@ export function getFilters(
       const environmentFilter = buildPhraseFilter(
         environmentField,
         environment,
-        dataView
+        dataView,
       );
       filters.push(environmentFilter);
     }
@@ -159,7 +159,7 @@ function getLoadFailureToastLabels(props: MetricsDashboardProps, error: Error) {
           agentName: props.agentName ?? 'unknown',
           runtimeName: props.runtimeName ?? 'unknown',
         },
-      }
+      },
     ),
     text: error.message,
   };

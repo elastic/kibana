@@ -127,7 +127,7 @@ export async function getMobileErrorGroupMainStatistics({
           },
         },
       },
-    }
+    },
   );
 
   return (
@@ -135,7 +135,7 @@ export async function getMobileErrorGroupMainStatistics({
       groupId: bucket.key as string,
       name: getErrorName(bucket.sample.hits.hits[0]._source),
       lastSeen: new Date(
-        bucket.sample.hits.hits[0]?._source['@timestamp']
+        bucket.sample.hits.hits[0]?._source['@timestamp'],
       ).getTime(),
       occurrences: bucket.doc_count,
       culprit: bucket.sample.hits.hits[0]?._source.error.culprit,

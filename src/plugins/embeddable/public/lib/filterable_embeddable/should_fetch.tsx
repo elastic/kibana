@@ -19,7 +19,7 @@ export const shouldRefreshFilterCompareOptions = {
 };
 
 export function shouldFetch$<
-  TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput
+  TFilterableEmbeddableInput extends FilterableEmbeddableInput = FilterableEmbeddableInput,
 >(
   updated$: Observable<unknown>,
   getInput: () => TFilterableEmbeddableInput

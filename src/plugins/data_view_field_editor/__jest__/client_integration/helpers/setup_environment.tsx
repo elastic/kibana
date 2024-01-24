@@ -94,15 +94,15 @@ export const WithFieldEditorDependencies =
   (props: T) => {
     // Setup mocks
     (
-      fieldFormats.getByFieldType as jest.MockedFunction<typeof fieldFormats['getByFieldType']>
+      fieldFormats.getByFieldType as jest.MockedFunction<(typeof fieldFormats)['getByFieldType']>
     ).mockReturnValue(fieldFormatsOptions);
 
     (
-      fieldFormats.getDefaultType as jest.MockedFunction<typeof fieldFormats['getDefaultType']>
+      fieldFormats.getDefaultType as jest.MockedFunction<(typeof fieldFormats)['getDefaultType']>
     ).mockReturnValue(MockDefaultFieldFormat);
 
     (
-      fieldFormats.getInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation((id: string) => {
       if (id === MockCustomFieldFormat.id) {
         return new MockCustomFieldFormat();
@@ -112,7 +112,7 @@ export const WithFieldEditorDependencies =
     });
 
     (
-      fieldFormats.getDefaultInstance as jest.MockedFunction<typeof fieldFormats['getInstance']>
+      fieldFormats.getDefaultInstance as jest.MockedFunction<(typeof fieldFormats)['getInstance']>
     ).mockImplementation(() => {
       return new MockDefaultFieldFormat();
     });

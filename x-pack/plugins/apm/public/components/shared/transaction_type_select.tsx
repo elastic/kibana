@@ -32,7 +32,7 @@ export function TransactionTypeSelect() {
         query: { transactionType: selectedTransactionType },
       });
     },
-    [history]
+    [history],
   );
 
   const options = transactionTypes.map((t) => ({ text: t, value: t }));

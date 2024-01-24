@@ -18,20 +18,20 @@ export function get<
   B extends keyof CFG[A],
   C extends keyof CFG[A][B],
   D extends keyof CFG[A][B][C],
-  E extends keyof CFG[A][B][C][D]
+  E extends keyof CFG[A][B][C][D],
 >(obj: CFG, path: [A, B, C, D, E]): CFG[A][B][C][D][E];
 export function get<
   CFG extends { [k: string]: any },
   A extends keyof CFG,
   B extends keyof CFG[A],
   C extends keyof CFG[A][B],
-  D extends keyof CFG[A][B][C]
+  D extends keyof CFG[A][B][C],
 >(obj: CFG, path: [A, B, C, D]): CFG[A][B][C][D];
 export function get<
   CFG extends { [k: string]: any },
   A extends keyof CFG,
   B extends keyof CFG[A],
-  C extends keyof CFG[A][B]
+  C extends keyof CFG[A][B],
 >(obj: CFG, path: [A, B, C]): CFG[A][B][C];
 export function get<CFG extends { [k: string]: any }, A extends keyof CFG, B extends keyof CFG[A]>(
   obj: CFG,

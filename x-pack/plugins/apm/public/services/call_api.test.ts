@@ -47,7 +47,7 @@ describe('callApi', () => {
         '/internal/apm/status/server',
         {
           query: { _inspect: true },
-        }
+        },
       );
     });
 

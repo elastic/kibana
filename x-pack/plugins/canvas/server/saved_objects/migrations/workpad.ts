@@ -12,4 +12,4 @@ import { CanvasSavedObjectTypeMigrationsDeps } from './types';
 export const workpadMigrationsFactory = (deps: CanvasSavedObjectTypeMigrationsDeps) =>
   ({
     '7.0.0': removeAttributesId,
-  } as unknown as MigrateFunctionsObject);
+  }) as unknown as MigrateFunctionsObject;

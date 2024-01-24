@@ -40,7 +40,7 @@ export function SpanLinksBadge({
               {
                 defaultMessage: '{linkedChildren} incoming',
                 values: { linkedChildren },
-              }
+              },
             )}
           </EuiFlexItem>
           <EuiFlexItem>
@@ -49,7 +49,7 @@ export function SpanLinksBadge({
               {
                 defaultMessage: '{linkedParents} outgoing',
                 values: { linkedParents },
-              }
+              },
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -65,7 +65,7 @@ export function SpanLinksBadge({
           'xpack.apm.waterfall.spanLinks.badgeAriaLabel',
           {
             defaultMessage: 'Open span links details',
-          }
+          },
         )}
       >
         {i18n.translate('xpack.apm.waterfall.spanLinks.badge', {

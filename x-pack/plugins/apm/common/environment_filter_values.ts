@@ -17,7 +17,7 @@ export const allOptionText = i18n.translate(
   'xpack.apm.filter.environment.allLabel',
   {
     defaultMessage: 'All',
-  }
+  },
 );
 
 export function getEnvironmentLabel(environment: string): string {

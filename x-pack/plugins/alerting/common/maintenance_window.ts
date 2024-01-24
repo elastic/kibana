@@ -19,7 +19,7 @@ export const filterStateStore = {
   GLOBAL_STATE: 'globalState',
 } as const;
 
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+export type FilterStateStore = (typeof filterStateStore)[keyof typeof filterStateStore];
 
 export interface MaintenanceWindowModificationMetadata {
   createdBy: string | null;
@@ -113,6 +113,6 @@ export const MAINTENANCE_WINDOW_DEEP_LINK_IDS = {
 };
 
 export type MaintenanceWindowDeepLinkIds =
-  typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
+  (typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS)[keyof typeof MAINTENANCE_WINDOW_DEEP_LINK_IDS];
 
 export const MAINTENANCE_WINDOW_DATE_FORMAT = 'MM/DD/YY hh:mm A';

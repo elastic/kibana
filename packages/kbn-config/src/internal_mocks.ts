@@ -17,8 +17,8 @@ type DeepPartial<T> = {
   [P in keyof T]?: P extends 'repoPackages'
     ? T[P]
     : T[P] extends Array<infer R>
-    ? Array<DeepPartial<R>>
-    : DeepPartial<T[P]>;
+      ? Array<DeepPartial<R>>
+      : DeepPartial<T[P]>;
 };
 
 export function getEnvOptions(options: DeepPartial<EnvOptions> = {}): EnvOptions {

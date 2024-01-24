@@ -8,9 +8,10 @@
 import './apm_rum_react';
 
 // Allow unknown properties in an object
-export type AllowUnknownProperties<T> = T extends Array<infer X>
-  ? Array<AllowUnknownObjectProperties<X>>
-  : AllowUnknownObjectProperties<T>;
+export type AllowUnknownProperties<T> =
+  T extends Array<infer X>
+    ? Array<AllowUnknownObjectProperties<X>>
+    : AllowUnknownObjectProperties<T>;
 
 type AllowUnknownObjectProperties<T> = T extends object
   ? { [Prop in keyof T]: AllowUnknownProperties<T[Prop]> } & {
@@ -24,6 +25,6 @@ export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer U>
     ? Array<RecursivePartial<U>>
     : T[P] extends object
-    ? RecursivePartial<T[P]>
-    : T[P];
+      ? RecursivePartial<T[P]>
+      : T[P];
 };

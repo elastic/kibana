@@ -18,4 +18,4 @@ export const REQUEST_NAMES = {
   UPGRADE_RISK_SCORE: `${APP_UI_ID} fetch upgrade risk score`,
 } as const;
 
-export type RequestName = typeof REQUEST_NAMES[keyof typeof REQUEST_NAMES];
+export type RequestName = (typeof REQUEST_NAMES)[keyof typeof REQUEST_NAMES];

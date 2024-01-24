@@ -89,7 +89,7 @@ export default {
           JSON.stringify({
             value: 'loading',
             expiry: expiryDate.toISOString(),
-          })
+          }),
         );
       } else {
         window.localStorage.removeItem('apm.dataStreamsMigrationStatus');

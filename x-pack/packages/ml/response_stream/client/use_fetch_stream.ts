@@ -31,8 +31,8 @@ import { stringReducer, type StringReducer } from './string_reducer';
 type CustomReducer<T> = T extends StringReducer
   ? StringReducer
   : T extends Reducer<any, any>
-  ? T
-  : never;
+    ? T
+    : never;
 
 // Wrapped reducer options in the format they need to be passed in as arguments.
 interface FetchStreamCustomReducer<T> {

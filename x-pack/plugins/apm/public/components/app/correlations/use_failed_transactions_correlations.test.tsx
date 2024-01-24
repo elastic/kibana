@@ -115,7 +115,7 @@ describe('useFailedTransactionsCorrelations', () => {
         () => useFailedTransactionsCorrelations(),
         {
           wrapper,
-        }
+        },
       );
 
       try {
@@ -136,7 +136,7 @@ describe('useFailedTransactionsCorrelations', () => {
         () => useFailedTransactionsCorrelations(),
         {
           wrapper,
-        }
+        },
       );
 
       try {
@@ -157,7 +157,7 @@ describe('useFailedTransactionsCorrelations', () => {
         () => useFailedTransactionsCorrelations(),
         {
           wrapper,
-        }
+        },
       );
 
       try {
@@ -277,7 +277,7 @@ describe('useFailedTransactionsCorrelations', () => {
           initialProps: {
             error: true,
           },
-        }
+        },
       );
 
       try {
@@ -298,7 +298,7 @@ describe('useFailedTransactionsCorrelations', () => {
           initialProps: {
             error: true,
           },
-        }
+        },
       );
 
       try {
@@ -322,13 +322,13 @@ describe('useFailedTransactionsCorrelations', () => {
           initialProps: {
             error: true,
           },
-        }
+        },
       );
 
       try {
         jest.advanceTimersByTime(150);
         await waitFor(() =>
-          expect(result.current.progress.error).toBeDefined()
+          expect(result.current.progress.error).toBeDefined(),
         );
 
         expect(result.current.progress).toEqual({
@@ -348,7 +348,7 @@ describe('useFailedTransactionsCorrelations', () => {
         () => useFailedTransactionsCorrelations(),
         {
           wrapper,
-        }
+        },
       );
 
       try {
@@ -362,7 +362,7 @@ describe('useFailedTransactionsCorrelations', () => {
         });
 
         await waitFor(() =>
-          expect(result.current.progress.isRunning).toEqual(false)
+          expect(result.current.progress.isRunning).toEqual(false),
         );
       } finally {
         unmount();

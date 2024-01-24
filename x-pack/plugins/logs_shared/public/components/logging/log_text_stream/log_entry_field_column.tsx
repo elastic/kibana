@@ -61,8 +61,8 @@ const FieldColumnContent = euiStyled(LogEntryColumnContent)<LogEntryColumnConten
     props.wrapMode === 'long'
       ? longWrappedContentStyle
       : props.wrapMode === 'pre-wrapped'
-      ? preWrappedContentStyle
-      : unwrappedContentStyle};
+        ? preWrappedContentStyle
+        : unwrappedContentStyle};
 `;
 
 // eslint-disable-next-line import/no-default-export

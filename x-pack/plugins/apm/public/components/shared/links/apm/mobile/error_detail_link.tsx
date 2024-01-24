@@ -32,7 +32,7 @@ function ErrorDetailLink({ serviceName, groupId, query, ...rest }: Props) {
         groupId,
       },
       query,
-    }
+    },
   );
 
   return (

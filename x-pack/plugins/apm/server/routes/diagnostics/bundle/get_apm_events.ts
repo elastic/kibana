@@ -51,7 +51,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_destination"`,
-        kuery
+        kuery,
       ),
     }),
     getEventWithMetricsetInterval({
@@ -60,7 +60,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
-        kuery
+        kuery,
       ),
     }),
     getEventWithMetricsetInterval({
@@ -69,7 +69,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND ${TRANSACTION_DURATION_SUMMARY} :* `,
-        kuery
+        kuery,
       ),
     }),
     getEventWithMetricsetInterval({
@@ -79,7 +79,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
-        kuery
+        kuery,
       ),
     }),
     getEventWithMetricsetInterval({
@@ -89,7 +89,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "transaction" AND not ${TRANSACTION_DURATION_SUMMARY} :* `,
-        kuery
+        kuery,
       ),
     }),
     getEventWithMetricsetInterval({
@@ -98,7 +98,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "service_summary"`,
-        kuery
+        kuery,
       ),
     }),
     getEvent({
@@ -107,7 +107,7 @@ export async function getApmEvents({
       index: getApmIndexPatterns([apmIndices.metric]),
       kuery: mergeKueries(
         `${PROCESSOR_EVENT}: "metric" AND ${METRICSET_NAME}: "span_breakdown"`,
-        kuery
+        kuery,
       ),
     }),
     getEvent({

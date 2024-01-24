@@ -56,12 +56,12 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
 
   const formError = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.name.placeholder',
-    { defaultMessage: 'Enter a name' }
+    { defaultMessage: 'Enter a name' },
   );
 
   const createAgentKeyTitle = i18n.translate(
     'xpack.apm.settings.agentKeys.createKeyFlyout.createAgentKey',
-    { defaultMessage: 'Create APM agent key' }
+    { defaultMessage: 'Create APM agent key' },
   );
 
   const createAgentKey = async () => {
@@ -90,7 +90,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               privileges,
             },
           },
-        }
+        },
       );
 
       onSuccess(agentKey);
@@ -113,7 +113,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
             <EuiFormRow
               label={i18n.translate(
                 'xpack.apm.settings.agentKeys.createKeyFlyout.userTitle',
-                { defaultMessage: 'User' }
+                { defaultMessage: 'User' },
               )}
             >
               <EuiText>{currentUser?.username}</EuiText>
@@ -124,13 +124,13 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
               'xpack.apm.settings.agentKeys.createKeyFlyout.nameTitle',
               {
                 defaultMessage: 'Name',
-              }
+              },
             )}
             helpText={i18n.translate(
               'xpack.apm.settings.agentKeys.createKeyFlyout.nameHelpText',
               {
                 defaultMessage: 'What is this key used for?',
-              }
+              },
             )}
             isInvalid={isFormInvalid}
             error={formError}
@@ -142,7 +142,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 'xpack.apm.settings.agentKeys.createKeyFlyout.namePlaceholder',
                 {
                   defaultMessage: 'e.g. apm-key',
-                }
+                },
               )}
               onChange={(e) =>
                 setAgentKeyBody((state) => ({ ...state, name: e.target.value }))
@@ -158,7 +158,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 'xpack.apm.settings.agentKeys.createKeyFlyout.privilegesFieldset',
                 {
                   defaultMessage: 'Assign privileges',
-                }
+                },
               ),
             }}
           >
@@ -168,7 +168,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 {
                   defaultMessage:
                     'Required for agents to read agent configuration remotely.',
-                }
+                },
               )}
             >
               <EuiCheckbox
@@ -189,7 +189,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 'xpack.apm.settings.agentKeys.createKeyFlyout.ingestAgentEvents',
                 {
                   defaultMessage: 'Required for ingesting events.',
-                }
+                },
               )}
             >
               <EuiCheckbox
@@ -220,7 +220,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
                 'xpack.apm.settings.agentKeys.createKeyFlyout.cancelButton',
                 {
                   defaultMessage: 'Cancel',
-                }
+                },
               )}
             </EuiButtonEmpty>
           </EuiFlexItem>

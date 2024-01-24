@@ -31,7 +31,7 @@ describe('Mobile transactions page', () => {
         generateMobileData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
-        })
+        }),
       );
     });
 

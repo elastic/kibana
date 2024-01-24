@@ -37,7 +37,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
           t.type({
             fieldName: t.string,
             fieldValue: t.union([t.string, toNumberRt]),
-          })
+          }),
         ),
         durationMin: toNumberRt,
         durationMax: toNumberRt,
@@ -97,7 +97,7 @@ const latencyOverallTransactionDistributionRoute = createApmServerRoute({
             ...termQuery(TRANSACTION_NAME, transactionName),
             ...(termFilters?.flatMap(
               (fieldValuePair): QueryDslQueryContainer[] =>
-                termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue)
+                termQuery(fieldValuePair.fieldName, fieldValuePair.fieldValue),
             ) ?? []),
           ],
         },

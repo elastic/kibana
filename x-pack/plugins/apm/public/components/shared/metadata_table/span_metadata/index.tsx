@@ -32,15 +32,15 @@ export function SpanMetadata({ span }: Props) {
               end: span['@timestamp'],
             },
           },
-        }
+        },
       );
     },
-    [span]
+    [span],
   );
 
   const sections = useMemo(
     () => getSectionsFromFields(spanEvent?.metadata || {}),
-    [spanEvent?.metadata]
+    [spanEvent?.metadata],
   );
 
   return (

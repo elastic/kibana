@@ -61,7 +61,7 @@ export function DependencyOperationDistributionChart() {
         },
       });
     },
-    [dependencyName, spanName, environment, kuery, start, end]
+    [dependencyName, spanName, environment, kuery, start, end],
   );
 
   const hasData =
@@ -74,7 +74,7 @@ export function DependencyOperationDistributionChart() {
       histogram: data?.allSpansDistribution.overallHistogram ?? [],
       id: i18n.translate(
         'xpack.apm.dependencyOperationDistributionChart.allSpansLegendLabel',
-        { defaultMessage: 'All spans' }
+        { defaultMessage: 'All spans' },
       ),
     },
     {
@@ -82,7 +82,7 @@ export function DependencyOperationDistributionChart() {
       histogram: data?.failedSpansDistribution?.overallHistogram ?? [],
       id: i18n.translate(
         'xpack.apm.dependencyOperationDistributionChart.failedSpansLegendLabel',
-        { defaultMessage: 'Failed spans' }
+        { defaultMessage: 'Failed spans' },
       ),
     },
   ];

@@ -115,10 +115,13 @@ export const onboardingStorage = {
 
     storage.set(
       EXPANDED_CARDS_STORAGE_KEY,
-      Object.entries(activeCards).reduce((acc, [cardId, card]) => {
-        acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
-        return acc;
-      }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
+      Object.entries(activeCards).reduce(
+        (acc, [cardId, card]) => {
+          acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
+          return acc;
+        },
+        {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>
+      )
     );
   },
   addExpandedCardStepToStorage: (cardId: CardId, stepId: StepId) => {

@@ -43,10 +43,10 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     caseData.owner === SECURITY_SOLUTION_OWNER
       ? `${caseData.owner}-case`
       : !isLoadingAlertFeatureIds
-      ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
-          alertData?.ruleTypeIds ?? []
-        )
-      : '';
+        ? triggersActionsUi.alertsTableConfigurationRegistry.getAlertConfigIdPerRuleTypes(
+            alertData?.ruleTypeIds ?? []
+          )
+        : '';
 
   const alertStateProps = useMemo(
     () => ({

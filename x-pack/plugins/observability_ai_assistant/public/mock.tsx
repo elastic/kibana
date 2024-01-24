@@ -62,7 +62,7 @@ export const mockService: ObservabilityAIAssistantService = {
     ({
       url: {},
       navigate: () => {},
-    } as unknown as SharePluginStart),
+    }) as unknown as SharePluginStart,
   register: () => {},
 };
 

@@ -56,8 +56,8 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
                         file.status === 'READY'
                           ? 'success'
                           : file.status === 'AWAITING_UPLOAD' || file.status === 'UPLOADING'
-                          ? 'primary'
-                          : 'warning'
+                            ? 'primary'
+                            : 'warning'
                       }
                     >
                       {i18nTexts.filesStatus[file.status]}

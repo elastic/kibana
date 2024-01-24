@@ -189,15 +189,15 @@ export function RuleDetailsPage() {
     rule?.consumer === ALERTS_FEATURE_ID && ruleType?.producer
       ? [ruleType.producer as AlertConsumers]
       : rule
-      ? [rule.consumer as AlertConsumers]
-      : [];
+        ? [rule.consumer as AlertConsumers]
+        : [];
 
   const ruleStatusMessage =
     rule?.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License
       ? rulesStatusesTranslationsMapping.noLicense
       : rule
-      ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
-      : '';
+        ? rulesStatusesTranslationsMapping[rule.executionStatus.status]
+        : '';
 
   if (isLoading || isRuleDeleting) return <CenterJustifiedSpinner />;
 

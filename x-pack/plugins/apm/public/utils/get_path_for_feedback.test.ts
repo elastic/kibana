@@ -51,6 +51,6 @@ describe('getPathForFeedback ', () => {
     'Returns correct path for the feedback form $value -> $result',
     ({ value, result }) => {
       expect(getPathForFeedback(value)).toBe(result);
-    }
+    },
   );
 });

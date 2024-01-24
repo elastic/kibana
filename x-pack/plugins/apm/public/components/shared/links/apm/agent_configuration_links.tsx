@@ -12,7 +12,7 @@ import { getLegacyApmHref } from './apm_link';
 export function editAgentConfigurationHref(
   configService: AgentConfigurationIntake['service'],
   search: string,
-  basePath: IBasePath
+  basePath: IBasePath,
 ) {
   return getLegacyApmHref({
     basePath,

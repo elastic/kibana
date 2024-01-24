@@ -34,13 +34,13 @@ export const MetricsExplorerGroupBy = ({ options, onChange, fields, errorOptions
         color: errorOptions?.includes(field) ? 'danger' : undefined,
       }))
     : options.groupBy
-    ? [
-        {
-          label: options.groupBy,
-          color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
-        },
-      ]
-    : [];
+      ? [
+          {
+            label: options.groupBy,
+            color: errorOptions?.includes(options.groupBy) ? 'danger' : undefined,
+          },
+        ]
+      : [];
 
   return (
     <EuiComboBox

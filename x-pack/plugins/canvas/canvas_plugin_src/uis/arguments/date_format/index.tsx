@@ -19,8 +19,9 @@ const { DateFormat: strings } = ArgumentStrings;
 
 const getDateFormatArgInput =
   (defaultDateFormats: ComponentProps['dateFormats']) =>
-  (props: Assign<ComponentProps, { dateFormats?: ComponentProps['dateFormats'] }>) =>
-    <DateFormatArgInput dateFormats={defaultDateFormats} {...props} />;
+  (props: Assign<ComponentProps, { dateFormats?: ComponentProps['dateFormats'] }>) => (
+    <DateFormatArgInput dateFormats={defaultDateFormats} {...props} />
+  );
 
 export const dateFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,

@@ -31,7 +31,7 @@ export interface INullableBaseStateContainer<State extends BaseState>
  */
 export interface IStateSyncConfig<
   State extends BaseState,
-  StateStorage extends IStateStorage = IStateStorage
+  StateStorage extends IStateStorage = IStateStorage,
 > {
   /**
    * Storage key to use for syncing,

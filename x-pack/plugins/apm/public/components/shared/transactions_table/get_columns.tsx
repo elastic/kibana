@@ -85,7 +85,7 @@ export function getColumns({
             sortable: true,
             name: i18n.translate(
               'xpack.apm.transactionsTableColumnName.alertsColumnLabel',
-              { defaultMessage: 'Active alerts' }
+              { defaultMessage: 'Active alerts' },
             ),
             width: `${unit * 6}px`,
             render: (_, { alertsCount, name, transactionType }) => {
@@ -99,7 +99,7 @@ export function getColumns({
                     'xpack.apm.home.transactionsTableColumnName.tooltip.activeAlertsExplanation',
                     {
                       defaultMessage: 'Active alerts',
-                    }
+                    },
                   )}
                 >
                   <EuiBadge
@@ -114,7 +114,7 @@ export function getColumns({
                           ...fieldValuePairToKql(TRANSACTION_NAME, name),
                           ...fieldValuePairToKql(
                             TRANSACTION_TYPE,
-                            transactionType
+                            transactionType,
                           ),
                         ]
                           .filter(Boolean)
@@ -136,7 +136,7 @@ export function getColumns({
       sortable: true,
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnName',
-        { defaultMessage: 'Name' }
+        { defaultMessage: 'Name' },
       ),
       width: '30%',
       render: (_, { name, transactionType: type }) => {
@@ -167,7 +167,7 @@ export function getColumns({
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.latency;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
+          ChartType.LATENCY_AVG,
         );
 
         return (
@@ -193,7 +193,7 @@ export function getColumns({
       sortable: true,
       name: i18n.translate(
         'xpack.apm.serviceOverview.transactionsTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
+        { defaultMessage: 'Throughput' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, name }) => {
@@ -204,7 +204,7 @@ export function getColumns({
             ?.throughput;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
+          ChartType.THROUGHPUT,
         );
 
         return (
@@ -235,7 +235,7 @@ export function getColumns({
             {
               defaultMessage:
                 "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            }
+            },
           )}
         >
           <>
@@ -243,7 +243,7 @@ export function getColumns({
               'xpack.apm.serviceOverview.transactionsTableColumnErrorRate',
               {
                 defaultMessage: 'Failed transaction rate',
-              }
+              },
             )}
             &nbsp;
             <EuiIcon
@@ -263,7 +263,7 @@ export function getColumns({
           transactionGroupDetailedStatistics?.previousPeriod?.[name]?.errorRate;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.FAILED_TRANSACTION_RATE,
         );
 
         return (
@@ -294,7 +294,7 @@ export function getColumns({
             {
               defaultMessage:
                 'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            }
+            },
           )}
         >
           <>
@@ -302,7 +302,7 @@ export function getColumns({
               'xpack.apm.serviceOverview.transactionsTableColumnImpact',
               {
                 defaultMessage: 'Impact',
-              }
+              },
             )}
             &nbsp;
             <EuiIcon

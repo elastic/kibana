@@ -71,7 +71,7 @@ export async function createStaticDataView({
     }
 
     const apmDataViewIndexPattern = getApmDataViewIndexPattern(
-      apmEventClient.indices
+      apmEventClient.indices,
     );
     const shouldCreateOrUpdate = await getShouldCreateOrUpdate({
       apmDataViewIndexPattern,
@@ -87,7 +87,7 @@ export async function createStaticDataView({
           {
             defaultMessage:
               'Dataview already exists in the active space and does not need to be updated',
-          }
+          },
         ),
       };
     }
@@ -182,6 +182,6 @@ function createAndSaveStaticDataView({
         },
       },
     },
-    true
+    true,
   );
 }

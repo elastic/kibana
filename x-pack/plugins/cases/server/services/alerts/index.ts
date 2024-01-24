@@ -157,7 +157,7 @@ export class AlertService {
 
   private async updateByQuery([index, statusToAlertMap]: [
     string,
-    Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>
+    Map<STATUS_VALUES, TranslatedUpdateAlertRequest[]>,
   ]) {
     const statusBuckets = Array.from(statusToAlertMap);
     return Promise.all(

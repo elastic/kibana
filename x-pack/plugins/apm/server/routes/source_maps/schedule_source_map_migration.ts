@@ -112,9 +112,8 @@ export async function runFleetSourcemapArtifactsMigration({
   logger: Logger;
 }) {
   try {
-    const latestApmSourceMapTimestamp = await getLatestApmSourceMap(
-      internalESClient
-    );
+    const latestApmSourceMapTimestamp =
+      await getLatestApmSourceMap(internalESClient);
     const createdDateFilter = latestApmSourceMapTimestamp
       ? ` AND created:>${asLuceneEncoding(latestApmSourceMapTimestamp)}`
       : '';

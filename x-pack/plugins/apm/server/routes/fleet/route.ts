@@ -32,7 +32,7 @@ import {
 } from './run_migration_check';
 
 function throwNotFoundIfFleetMigrationNotAvailable(
-  featureFlags: ApmFeatureFlags
+  featureFlags: ApmFeatureFlags,
 ): void {
   if (!featureFlags.migrationToFleetAvailable) {
     throw Boom.notFound();
@@ -85,7 +85,7 @@ const saveApmServerSchemaRoute = createApmServerRoute({
     await savedObjectsClient.create(
       APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
       { schemaJson: JSON.stringify(schema) },
-      { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true }
+      { id: APM_SERVER_SCHEMA_SAVED_OBJECT_ID, overwrite: true },
     );
     logger.info(`Stored apm-server schema.`);
   },
@@ -95,7 +95,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/fleet/apm_server_schema/unsupported',
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ unsupported: UnsupportedApmServerSchema }> => {
     throwNotFoundIfFleetMigrationNotAvailable(resources.featureFlags);
     const { context } = resources;
@@ -137,7 +137,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/fleet/cloud_apm_package_policy',
   options: { tags: ['access:apm', 'access:apm_write'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     cloudApmPackagePolicy: PackagePolicy;
   }> => {
@@ -163,7 +163,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     ]);
 
     const esClient = coreStart.elasticsearch.client.asScoped(
-      resources.request
+      resources.request,
     ).asCurrentUser;
     const cloudPluginSetup = plugins.cloud?.setup;
 
@@ -172,9 +172,8 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
       throw Boom.forbidden(CLOUD_SUPERUSER_REQUIRED_MESSAGE);
     }
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
     const cloudApmPackagePolicy = await createCloudApmPackgePolicy({
       cloudPluginSetup,
       fleetPluginStart,
@@ -213,7 +212,7 @@ export const apmFleetRouteRepository = {
 
 const FLEET_SECURITY_REQUIRED_MESSAGE = i18n.translate(
   'xpack.apm.api.fleet.fleetSecurityRequired',
-  { defaultMessage: `Fleet and Security plugins are required` }
+  { defaultMessage: `Fleet and Security plugins are required` },
 );
 
 const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
@@ -221,5 +220,5 @@ const CLOUD_SUPERUSER_REQUIRED_MESSAGE = i18n.translate(
   {
     defaultMessage:
       'Operation only permitted by Elastic Cloud users with the superuser role.',
-  }
+  },
 );

@@ -11,7 +11,7 @@ import type { ActionVariables } from './action_variable_types';
 
 export interface RuleType<
   ActionGroupIds extends string = string,
-  RecoveryActionGroupId extends string = string
+  RecoveryActionGroupId extends string = string,
 > extends Pick<
     CommonRuleType<ActionGroupIds, RecoveryActionGroupId>,
     | 'id'

@@ -119,7 +119,7 @@ export function registerTransactionDurationRuleType({
     }) => {
       const allGroupByFields = getAllGroupByFields(
         ApmRuleType.TransactionDuration,
-        ruleParams.groupBy
+        ruleParams.groupBy,
       );
 
       const { getAlertUuid, savedObjectsClient, scopedClusterClient } =
@@ -139,7 +139,7 @@ export function registerTransactionDurationRuleType({
         : indices.transaction;
 
       const field = getDurationFieldForTransactions(
-        searchAggregatedTransactions
+        searchAggregatedTransactions,
       );
 
       const termFilterQuery = !ruleParams.searchConfiguration?.query?.query
@@ -158,7 +158,7 @@ export function registerTransactionDurationRuleType({
         : [];
 
       const { dateStart } = getTimeRange(
-        `${ruleParams.windowSize}${ruleParams.windowUnit}`
+        `${ruleParams.windowSize}${ruleParams.windowUnit}`,
       );
 
       const searchParams = {
@@ -177,11 +177,11 @@ export function registerTransactionDurationRuleType({
                   },
                 },
                 ...getBackwardCompatibleDocumentTypeFilter(
-                  searchAggregatedTransactions
+                  searchAggregatedTransactions,
                 ),
                 ...termFilterQuery,
                 ...getParsedFilterQuery(
-                  ruleParams.searchConfiguration?.query?.query as string
+                  ruleParams.searchConfiguration?.query?.query as string,
                 ),
               ] as QueryDslQueryContainer[],
             },
@@ -225,7 +225,7 @@ export function registerTransactionDurationRuleType({
             obj[allGroupByFields[bucketIndex]] = bucketKey;
             return obj;
           },
-          {} as Record<string, string>
+          {} as Record<string, string>,
         );
 
         const bucketKey = bucket.key;
@@ -286,7 +286,7 @@ export function registerTransactionDurationRuleType({
         const alertDetailsUrl = getAlertDetailsUrl(
           basePath,
           spaceId,
-          alertUuid
+          alertUuid,
         );
         const viewInAppUrl = addSpaceIdToPath(
           basePath.publicBaseUrl,
@@ -296,15 +296,15 @@ export function registerTransactionDurationRuleType({
             getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
               SERVICE_ENVIRONMENT
             ],
-            groupByFields[TRANSACTION_TYPE]
-          )
+            groupByFields[TRANSACTION_TYPE],
+          ),
         );
         const groupByActionVariables = getGroupByActionVariables(groupByFields);
         alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
           alertDetailsUrl,
           interval: formatDurationFromTimeUnitChar(
             ruleParams.windowSize,
-            ruleParams.windowUnit as TimeUnitChar
+            ruleParams.windowUnit as TimeUnitChar,
           ),
           reason,
           // When group by doesn't include transaction.name, the context.transaction.name action variable will contain value of the Transaction Name filter

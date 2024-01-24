@@ -12,11 +12,11 @@ import type {
 
 export const synthtrace = {
   index: (
-    events: SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>
+    events: SynthtraceGenerator<ApmFields> | Array<Serializable<ApmFields>>,
   ) =>
     cy.task(
       'synthtrace:index',
-      Array.from(events).flatMap((event) => event.serialize())
+      Array.from(events).flatMap((event) => event.serialize()),
     ),
   clean: () => cy.task('synthtrace:clean'),
 };

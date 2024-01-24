@@ -67,7 +67,7 @@ jest.mock('../../../hooks/use_profiling_integration_setting', () => ({
 
 const history = createMemoryHistory();
 history.replace(
-  '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi'
+  '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi',
 );
 
 function Wrapper({ children }: { children?: React.ReactNode }) {
@@ -102,7 +102,7 @@ const renderTransaction = async (transaction: Record<string, any>) => {
     />,
     {
       wrapper: Wrapper,
-    }
+    },
   );
 
   await act(async () => {
@@ -135,7 +135,7 @@ describe('TransactionActionMenu ', () => {
 
   useAdHocApmDataViewSpy = jest.spyOn(
     useAdHocApmDataView,
-    'useAdHocApmDataView'
+    'useAdHocApmDataView',
   );
 
   useAdHocApmDataViewSpy.mockImplementation(() => {
@@ -152,7 +152,7 @@ describe('TransactionActionMenu ', () => {
 
   it('should render the discover link when there is adhoc data view', async () => {
     const { findByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
+      Transactions.transactionWithMinimalData,
     );
 
     expect(findByText('View transaction in Discover')).not.toBeNull();
@@ -167,7 +167,7 @@ describe('TransactionActionMenu ', () => {
   describe('when there is no pod id', () => {
     it('does not render the Pod logs link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Pod logs')).toBeNull();
@@ -175,7 +175,7 @@ describe('TransactionActionMenu ', () => {
 
     it('does not render the Pod metrics link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Pod metrics')).toBeNull();
@@ -191,13 +191,13 @@ describe('TransactionActionMenu ', () => {
 
     it('renders the pod metrics link', async () => {
       const { getByText } = await renderTransaction(
-        Transactions.transactionWithKubernetesData
+        Transactions.transactionWithKubernetesData,
       );
 
       expect(
-        (getByText('Pod metrics').parentElement as HTMLAnchorElement).href
+        (getByText('Pod metrics').parentElement as HTMLAnchorElement).href,
       ).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952'
+        'http://localhost/basepath/app/metrics/link-to/pod-detail/pod123456abcdef?from=1545091770952&to=1545092370952',
       );
     });
   });
@@ -205,7 +205,7 @@ describe('TransactionActionMenu ', () => {
   describe('when there is no container id', () => {
     it('does not render the Container logs link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Container logs')).toBeNull();
@@ -213,7 +213,7 @@ describe('TransactionActionMenu ', () => {
 
     it('does not render the Container metrics link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Container metrics')).toBeNull();
@@ -229,13 +229,14 @@ describe('TransactionActionMenu ', () => {
 
     it('renders the Container metrics link', async () => {
       const { getByText } = await renderTransaction(
-        Transactions.transactionWithContainerData
+        Transactions.transactionWithContainerData,
       );
 
       expect(
-        (getByText('Container metrics').parentElement as HTMLAnchorElement).href
+        (getByText('Container metrics').parentElement as HTMLAnchorElement)
+          .href,
       ).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952'
+        'http://localhost/basepath/app/metrics/link-to/container-detail/container123456abcdef?from=1545091770952&to=1545092370952',
       );
     });
   });
@@ -243,7 +244,7 @@ describe('TransactionActionMenu ', () => {
   describe('when there is no hostname', () => {
     it('does not render the Host logs link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Host logs')).toBeNull();
@@ -251,7 +252,7 @@ describe('TransactionActionMenu ', () => {
 
     it('does not render the Host metrics link', async () => {
       const { queryByText } = await renderTransaction(
-        Transactions.transactionWithMinimalData
+        Transactions.transactionWithMinimalData,
       );
 
       expect(queryByText('Host metrics')).toBeNull();
@@ -267,20 +268,20 @@ describe('TransactionActionMenu ', () => {
 
     it('renders the Host metrics link', async () => {
       const { getByText } = await renderTransaction(
-        Transactions.transactionWithHostData
+        Transactions.transactionWithHostData,
       );
 
       expect(
-        (getByText('Host metrics').parentElement as HTMLAnchorElement).href
+        (getByText('Host metrics').parentElement as HTMLAnchorElement).href,
       ).toEqual(
-        'http://localhost/basepath/app/metrics/link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952'
+        'http://localhost/basepath/app/metrics/link-to/host-detail/227453131a17?from=1545091770952&to=1545092370952',
       );
     });
   });
 
   it('should not render the uptime link if there is no url available', async () => {
     const { queryByText } = await renderTransaction(
-      Transactions.transactionWithMinimalData
+      Transactions.transactionWithMinimalData,
     );
 
     expect(queryByText('Status')).toBeNull();
@@ -288,7 +289,7 @@ describe('TransactionActionMenu ', () => {
 
   it('should not render the uptime link if there is no domain available', async () => {
     const { queryByText } = await renderTransaction(
-      Transactions.transactionWithUrlWithoutDomain
+      Transactions.transactionWithUrlWithoutDomain,
     );
 
     expect(queryByText('Status')).toBeNull();
@@ -297,20 +298,20 @@ describe('TransactionActionMenu ', () => {
   describe('when there is a url with a domain', () => {
     it('renders the uptime link', async () => {
       const { getByText } = await renderTransaction(
-        Transactions.transactionWithUrlAndDomain
+        Transactions.transactionWithUrlAndDomain,
       );
 
       expect(
-        (getByText('Status').parentElement as HTMLAnchorElement).href
+        (getByText('Status').parentElement as HTMLAnchorElement).href,
       ).toEqual(
-        'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22'
+        'http://localhost/basepath/app/uptime?dateRangeStart=now-24h&dateRangeEnd=now&search=url.domain:%22example.com%22',
       );
     });
   });
 
   it('matches the snapshot', async () => {
     const { container } = await renderTransaction(
-      Transactions.transactionWithAllData
+      Transactions.transactionWithAllData,
     );
 
     expect(container).toMatchSnapshot();
@@ -323,19 +324,19 @@ describe('TransactionActionMenu ', () => {
 
     it('renders flamegraph item', async () => {
       const component = await renderTransaction(
-        Transactions.transactionWithHostData
+        Transactions.transactionWithHostData,
       );
       expectTextsInDocument(component, ['Host flamegraph']);
     });
     it('renders topN functions item', async () => {
       const component = await renderTransaction(
-        Transactions.transactionWithHostData
+        Transactions.transactionWithHostData,
       );
       expectTextsInDocument(component, ['Host topN functions']);
     });
     it('renders stacktraces item', async () => {
       const component = await renderTransaction(
-        Transactions.transactionWithHostData
+        Transactions.transactionWithHostData,
       );
       expectTextsInDocument(component, ['Host stacktraces']);
     });
@@ -353,7 +354,7 @@ describe('TransactionActionMenu ', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
     }
     it('doesnt show custom links when license is not valid', async () => {
@@ -391,7 +392,7 @@ describe('TransactionActionMenu ', () => {
             transaction={Transactions.transactionWithMinimalData as Transaction}
           />
         </LicenseContext.Provider>,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
       await act(async () => {
         fireEvent.click(component.getByText('Investigate'));
@@ -458,7 +459,7 @@ describe('TransactionActionMenu ', () => {
             component
               .getByTestId(`${key}.value`)
               .querySelector(
-                '[data-test-subj="comboBoxSearchInput"]'
+                '[data-test-subj="comboBoxSearchInput"]',
               ) as HTMLInputElement
           ).value,
         };
@@ -489,7 +490,7 @@ describe('Profiling not initialized', () => {
 
     useAdHocApmDataViewSpy = jest.spyOn(
       useAdHocApmDataView,
-      'useAdHocApmDataView'
+      'useAdHocApmDataView',
     );
 
     useAdHocApmDataViewSpy.mockImplementation(() => {
@@ -505,19 +506,19 @@ describe('Profiling not initialized', () => {
   });
   it('does not render flamegraph item', async () => {
     const component = await renderTransaction(
-      Transactions.transactionWithHostData
+      Transactions.transactionWithHostData,
     );
     expectTextsNotInDocument(component, ['Host flamegraph']);
   });
   it('does not render topN functions item', async () => {
     const component = await renderTransaction(
-      Transactions.transactionWithHostData
+      Transactions.transactionWithHostData,
     );
     expectTextsNotInDocument(component, ['Host topN functions']);
   });
   it('does not render stacktraces item', async () => {
     const component = await renderTransaction(
-      Transactions.transactionWithHostData
+      Transactions.transactionWithHostData,
     );
     expectTextsNotInDocument(component, ['Host stacktraces']);
   });

@@ -101,14 +101,14 @@ export async function getFailedTransactionRate({
 
   const resp = await apmEventClient.search(
     'get_transaction_group_error_rate',
-    params
+    params,
   );
   if (!resp.aggregations) {
     return { timeseries: [], average: null };
   }
 
   const timeseries = getFailedTransactionRateTimeSeries(
-    resp.aggregations.timeseries.buckets
+    resp.aggregations.timeseries.buckets,
   );
   const average = calculateFailedTransactionRate(resp.aggregations);
 

@@ -25,7 +25,7 @@ export type ReturnExceptionLists = [
   setPagination: React.Dispatch<React.SetStateAction<Pagination>>,
   fetchLists: Func | null,
   sort: Sort,
-  setSort: React.Dispatch<React.SetStateAction<Sort>>
+  setSort: React.Dispatch<React.SetStateAction<Sort>>,
 ];
 
 const DEFAULT_PAGINATION = {

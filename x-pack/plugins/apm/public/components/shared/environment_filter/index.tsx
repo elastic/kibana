@@ -15,7 +15,7 @@ import { useEnvironmentsContext } from '../../../context/environments_context/us
 function updateEnvironmentUrl(
   history: History,
   location: ReturnType<typeof useLocation>,
-  environment: string
+  environment: string,
 ) {
   const nextEnvironmentQueryParam = environment;
   history.push({

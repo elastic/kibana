@@ -193,9 +193,8 @@ export const groupAndBulkCreate = async ({
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
       };
-      const { searchResult, searchDuration, searchErrors } = await singleSearchAfter(
-        eventsSearchParams
-      );
+      const { searchResult, searchDuration, searchErrors } =
+        await singleSearchAfter(eventsSearchParams);
 
       toReturn.searchAfterTimes.push(searchDuration);
       toReturn.errors.push(...searchErrors);

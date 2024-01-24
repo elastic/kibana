@@ -25,15 +25,15 @@ export const createError = (err: string | ErrorLike): ExpressionValueError => ({
       process.env.NODE_ENV === 'production'
         ? undefined
         : typeof err === 'object'
-        ? err.stack
-        : undefined,
+          ? err.stack
+          : undefined,
     message: typeof err === 'string' ? err : String(err.message),
     name: typeof err === 'object' ? err.name || 'Error' : 'Error',
     original:
       err instanceof Error
         ? err
         : typeof err === 'object' && 'original' in err && err.original instanceof Error
-        ? err.original
-        : undefined,
+          ? err.original
+          : undefined,
   },
 });

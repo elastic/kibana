@@ -105,4 +105,4 @@ export const ServiceStatusLevels = deepFreeze({
  * A convenience type that represents the union of each value in {@link ServiceStatusLevels}.
  * @public
  */
-export type ServiceStatusLevel = typeof ServiceStatusLevels[keyof typeof ServiceStatusLevels];
+export type ServiceStatusLevel = (typeof ServiceStatusLevels)[keyof typeof ServiceStatusLevels];

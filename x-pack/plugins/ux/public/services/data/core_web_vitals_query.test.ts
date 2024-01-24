@@ -17,8 +17,8 @@ describe('core web vitals query', () => {
         {
           environment: 'ENVIRONMENT_ALL',
         },
-        50
-      )
+        50,
+      ),
     ).toMatchSnapshot();
   });
 });

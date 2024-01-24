@@ -91,11 +91,11 @@ function FailedTransactionChart({
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, serviceName, start, end, transactionType, preferred]
+    [environment, serviceName, start, end, transactionType, preferred],
   );
   const timeseriesErrorRate = [
     {

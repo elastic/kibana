@@ -10,7 +10,7 @@ import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ServiceGroup } from '../../common/service_groups';
 
 export function serviceGroupQuery(
-  serviceGroup?: ServiceGroup | null
+  serviceGroup?: ServiceGroup | null,
 ): QueryDslQueryContainer[] {
   return serviceGroup ? kqlQuery(serviceGroup?.kuery) : [];
 }

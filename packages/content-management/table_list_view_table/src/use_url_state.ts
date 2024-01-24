@@ -25,7 +25,7 @@ function useQuery<T extends Record<string, unknown> = {}>() {
 
 export function useUrlState<
   T extends Record<string, unknown> = {},
-  Q extends Record<string, unknown> = {}
+  Q extends Record<string, unknown> = {},
 >({
   queryParamsDeserializer,
   queryParamsSerializer,

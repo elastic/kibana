@@ -28,7 +28,7 @@ export const TIME_LABELS = {
 };
 
 export const getDomain = (
-  series: Array<{ name?: string; data: Coordinate[] }>
+  series: Array<{ name?: string; data: Coordinate[] }>,
 ) => {
   const xValues = series.flatMap((item) => item.data.map((d) => d.x));
   const yValues = series.flatMap((item) => item.data.map((d) => d.y || 0));

@@ -288,10 +288,10 @@ export const buildXYExpression = (
     legendSize: state.legend.isInside
       ? undefined
       : state.legend.position === Position.Top || state.legend.position === Position.Bottom
-      ? LegendSize.AUTO
-      : state.legend.legendSize
-      ? state.legend.legendSize
-      : undefined,
+        ? LegendSize.AUTO
+        : state.legend.legendSize
+          ? state.legend.legendSize
+          : undefined,
     horizontalAlignment:
       state.legend.horizontalAlignment && state.legend.isInside
         ? state.legend.horizontalAlignment

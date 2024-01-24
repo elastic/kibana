@@ -122,7 +122,7 @@ export function generateLargeTrace({
                           },
                         },
                         null,
-                        2
+                        2,
                       ),
                     }),
                 });

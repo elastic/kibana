@@ -26,14 +26,17 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       .expect(200)
       .then(({ body }) => {
         expect(body.total).to.above(1);
-        return (body.saved_objects as UsageCountersSavedObject[]).reduce((acc, savedObj) => {
-          const { count, counterName, domainId } = savedObj.attributes;
-          if (domainId === 'usageCollectionTestPlugin') {
-            acc[counterName] = count;
-          }
+        return (body.saved_objects as UsageCountersSavedObject[]).reduce(
+          (acc, savedObj) => {
+            const { count, counterName, domainId } = savedObj.attributes;
+            if (domainId === 'usageCollectionTestPlugin') {
+              acc[counterName] = count;
+            }
 
-          return acc;
-        }, {} as Record<string, number>);
+            return acc;
+          },
+          {} as Record<string, number>
+        );
       });
   }
 

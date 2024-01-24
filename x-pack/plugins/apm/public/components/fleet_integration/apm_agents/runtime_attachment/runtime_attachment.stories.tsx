@@ -54,7 +54,7 @@ const includeOptions = [{ value: 'all', label: 'All' }, ...excludeOptions];
 
 export const RuntimeAttachmentExample: Story = () => {
   const [runtimeAttachmentSettings, setRuntimeAttachmentSettings] = useState(
-    {}
+    {},
   );
   const [isEnabled, setIsEnabled] = useState(true);
   return (

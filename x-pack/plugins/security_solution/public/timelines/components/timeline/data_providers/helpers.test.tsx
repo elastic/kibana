@@ -161,13 +161,9 @@ describe('helpers', () => {
             })
           ).toEqual({
             updatedDestinationGroup: destinationGroup
-              .reduce<DataProvidersAnd[]>(
-                (acc, p, i) =>
-                  i !== moveProviderToDestinationIndex
-                    ? [...acc, p]
-                    : [...acc, sourceGroup[moveProviderFromSourceIndex], p],
-                []
-              )
+              .reduce<
+                DataProvidersAnd[]
+              >((acc, p, i) => (i !== moveProviderToDestinationIndex ? [...acc, p] : [...acc, sourceGroup[moveProviderFromSourceIndex], p]), [])
               .filter(
                 (p, i) =>
                   p.id !== sourceGroup[moveProviderFromSourceIndex].id ||
@@ -546,13 +542,9 @@ describe('helpers', () => {
               providers: unFlattenGroups([
                 dataProviderGroups[0].filter((_, i) => i !== moveProviderFromSourceIndex),
                 dataProviderGroups[1]
-                  .reduce<DataProvidersAnd[]>(
-                    (acc, p, i) =>
-                      i !== moveProviderToDestinationIndex
-                        ? [...acc, p]
-                        : [...acc, dataProviderGroups[0][moveProviderFromSourceIndex], p],
-                    []
-                  )
+                  .reduce<
+                    DataProvidersAnd[]
+                  >((acc, p, i) => (i !== moveProviderToDestinationIndex ? [...acc, p] : [...acc, dataProviderGroups[0][moveProviderFromSourceIndex], p]), [])
                   .filter(
                     (p, i) =>
                       p.id !== dataProviderGroups[0][moveProviderFromSourceIndex].id ||

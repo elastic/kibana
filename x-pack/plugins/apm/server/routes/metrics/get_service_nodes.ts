@@ -171,7 +171,7 @@ async function getElasticServiceNodes({
         item.cpu !== null ||
         item.heapMemory !== null ||
         item.nonHeapMemory !== null ||
-        item.threadCount != null
+        item.threadCount != null,
     );
 }
 
@@ -265,7 +265,7 @@ async function getOTelServiceNodes({
 
   const response = await apmEventClient.search(
     'get_otel_service_nodes',
-    params
+    params,
   );
 
   if (!response.aggregations) {
@@ -289,7 +289,7 @@ async function getOTelServiceNodes({
         item.cpu !== null ||
         item.heapMemory !== null ||
         item.nonHeapMemory !== null ||
-        item.threadCount != null
+        item.threadCount != null,
     );
 }
 

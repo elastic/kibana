@@ -13,7 +13,7 @@ import { METRICSET_NAME } from '../../../../common/es_fields/apm';
 
 export async function getAgentConfigEtagMetrics(
   apmEventClient: APMEventClient,
-  etag?: string
+  etag?: string,
 ) {
   const params = {
     apm: {
@@ -29,7 +29,7 @@ export async function getAgentConfigEtagMetrics(
             ...termQuery('labels.etag', etag),
             ...rangeQuery(
               datemath.parse('now-15m')!.valueOf(),
-              datemath.parse('now')!.valueOf()
+              datemath.parse('now')!.valueOf(),
             ),
           ],
         },
@@ -47,12 +47,12 @@ export async function getAgentConfigEtagMetrics(
 
   const response = await apmEventClient.search(
     'get_agent_config_etag_metrics',
-    params
+    params,
   );
 
   return (
     response.aggregations?.config_by_etag.buckets.map(
-      ({ key }) => key as string
+      ({ key }) => key as string,
     ) ?? []
   );
 }

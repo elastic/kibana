@@ -15,7 +15,7 @@ describe('profiling utils', () => {
 
     it('returns multiple hostnames', () => {
       expect(hostNamesToKuery(['foo', 'bar', 'baz'])).toEqual(
-        `${HOST_NAME} : "foo" OR ${HOST_NAME} : "bar" OR ${HOST_NAME} : "baz"`
+        `${HOST_NAME} : "foo" OR ${HOST_NAME} : "bar" OR ${HOST_NAME} : "baz"`,
       );
     });
 

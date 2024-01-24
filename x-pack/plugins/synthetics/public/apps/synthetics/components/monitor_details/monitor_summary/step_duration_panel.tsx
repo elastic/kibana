@@ -42,8 +42,8 @@ export const StepDurationPanel = ({
   const label = !doBreakdown
     ? MONITOR_DURATION
     : isBrowser
-    ? DURATION_BY_STEP_LABEL
-    : DURATION_BY_LOCATION;
+      ? DURATION_BY_STEP_LABEL
+      : DURATION_BY_LOCATION;
 
   return (
     <EuiPanel hasShadow={false} hasBorder>

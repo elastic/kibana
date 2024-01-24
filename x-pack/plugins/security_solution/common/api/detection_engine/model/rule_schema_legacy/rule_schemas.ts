@@ -72,7 +72,7 @@ import { Threshold } from './threshold_attributes';
 export const buildRuleSchemas = <
   Required extends t.Props,
   Optional extends t.Props,
-  Defaultable extends t.Props
+  Defaultable extends t.Props,
 >({
   required,
   optional,

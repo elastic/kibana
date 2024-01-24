@@ -98,7 +98,7 @@ export async function getThroughput({
 
   const response = await apmEventClient.search(
     'get_throughput_for_service',
-    params
+    params,
   );
 
   return (

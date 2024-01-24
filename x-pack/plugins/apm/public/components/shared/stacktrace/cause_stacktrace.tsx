@@ -41,7 +41,7 @@ function CausedBy({ message }: { message: string }) {
           'xpack.apm.stacktraceTab.causedByFramesToogleButtonLabel',
           {
             defaultMessage: 'Caused By',
-          }
+          },
         )}
       </CausedByHeading>
       <EuiTitle size="xxs">

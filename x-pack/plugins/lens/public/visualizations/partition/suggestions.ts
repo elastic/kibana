@@ -144,8 +144,8 @@ export function suggestions({
                 colorMapping: !mainPalette
                   ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
-                  ? mainPalette.value
-                  : state.layers[0].colorMapping,
+                    ? mainPalette.value
+                    : state.layers[0].colorMapping,
               }
             : {
                 layerId: table.layerId,
@@ -159,8 +159,8 @@ export function suggestions({
                 colorMapping: !mainPalette
                   ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
-                  ? mainPalette.value
-                  : undefined,
+                    ? mainPalette.value
+                    : undefined,
               },
         ],
       },

@@ -34,7 +34,7 @@ export const transactionsTab = {
     'xpack.apm.mobile.transactions.overview.tabs.transactions',
     {
       defaultMessage: 'Transactions',
-    }
+    },
   ),
   component: TransactionsTab,
 };

@@ -207,12 +207,12 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         const nextState = isError
           ? AlertStates.ERROR
           : isNoData
-          ? AlertStates.NO_DATA
-          : shouldAlertFire
-          ? AlertStates.ALERT
-          : shouldAlertWarn
-          ? AlertStates.WARNING
-          : AlertStates.OK;
+            ? AlertStates.NO_DATA
+            : shouldAlertFire
+              ? AlertStates.ALERT
+              : shouldAlertWarn
+                ? AlertStates.WARNING
+                : AlertStates.OK;
         let reason;
         if (nextState === AlertStates.ALERT || nextState === AlertStates.WARNING) {
           reason = results

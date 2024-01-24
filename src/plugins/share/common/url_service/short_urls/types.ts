@@ -22,7 +22,7 @@ export interface IShortUrlClientFactory<D, Client extends IShortUrlClient = ISho
 
 export type IShortUrlClientFactoryProvider<
   D,
-  ShortUrlClient extends IShortUrlClient = IShortUrlClient
+  ShortUrlClient extends IShortUrlClient = IShortUrlClient,
 > = (params: { locators: ILocatorClient }) => IShortUrlClientFactory<D, ShortUrlClient>;
 
 /**

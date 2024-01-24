@@ -60,7 +60,7 @@ export function getAgentsColumns({
               'xpack.apm.agentExplorerTable.viewAgentInstances',
               {
                 defaultMessage: 'Toggle agent instances view',
-              }
+              },
             )}
             delay="long"
           >
@@ -69,7 +69,7 @@ export function getAgentsColumns({
               iconSize="s"
               aria-label={i18n.translate(
                 'xpack.apm.getAgentsColumns.euiButtonIcon.toggleAgentInstancesViewLabel',
-                { defaultMessage: 'Toggle agent instances view' }
+                { defaultMessage: 'Toggle agent instances view' },
               )}
               data-test-subj="apmAgentExplorerListToggle"
               onClick={() => onAgentSelected(agent)}
@@ -87,7 +87,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.serviceNameColumnLabel',
         {
           defaultMessage: 'Service Name',
-        }
+        },
       ),
       sortable: true,
       width: '35%',
@@ -115,7 +115,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.environmentColumnLabel',
         {
           defaultMessage: 'Environment',
-        }
+        },
       ),
       width: '15%',
       truncateText: true,
@@ -130,7 +130,7 @@ export function getAgentsColumns({
         'xpack.apm.agentExplorerTable.instancesColumnLabel',
         {
           defaultMessage: 'Instances',
-        }
+        },
       ),
       width: '10%',
       sortable: true,
@@ -140,7 +140,7 @@ export function getAgentsColumns({
       width: '15%',
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentNameColumnLabel',
-        { defaultMessage: 'Agent Name' }
+        { defaultMessage: 'Agent Name' },
       ),
       sortable: true,
     },
@@ -148,7 +148,7 @@ export function getAgentsColumns({
       field: AgentExplorerFieldName.AgentVersion,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentVersionColumnLabel',
-        { defaultMessage: 'Agent Version' }
+        { defaultMessage: 'Agent Version' },
       ),
       width: '10%',
       truncateText: true,
@@ -161,7 +161,7 @@ export function getAgentsColumns({
               values: { versionsCount: agentVersion.length },
               defaultMessage:
                 '{versionsCount, plural, one {1 version} other {# versions}}',
-            }
+            },
           )}
         />
       ),
@@ -176,13 +176,13 @@ export function getAgentsColumns({
                   'xpack.apm.agentExplorerTable.agentLatestVersionColumnTooltip',
                   {
                     defaultMessage: 'The latest released version of the agent.',
-                  }
+                  },
                 )}
               >
                 <>
                   {i18n.translate(
                     'xpack.apm.agentExplorerTable.agentLatestVersionColumnLabel',
-                    { defaultMessage: 'Latest Agent Version' }
+                    { defaultMessage: 'Latest Agent Version' },
                   )}
                   &nbsp;
                   <EuiIcon
@@ -199,7 +199,7 @@ export function getAgentsColumns({
             truncateText: true,
             render: (
               _: any,
-              { agentName, latestVersion }: AgentExplorerItem
+              { agentName, latestVersion }: AgentExplorerItem,
             ) => (
               <AgentLatestVersion
                 agentName={agentName}
@@ -215,7 +215,7 @@ export function getAgentsColumns({
       field: AgentExplorerFieldName.AgentDocsPageUrl,
       name: i18n.translate(
         'xpack.apm.agentExplorerTable.agentDocsColumnLabel',
-        { defaultMessage: 'Agent Docs' }
+        { defaultMessage: 'Agent Docs' },
       ),
       width: '10%',
       truncateText: true,
@@ -273,7 +273,7 @@ export function AgentList({
       latestAgentVersionEnabled,
       isLatestVersionsLoading,
       latestVersionsFailed,
-    ]
+    ],
   );
 
   return (

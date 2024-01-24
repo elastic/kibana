@@ -169,7 +169,10 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
  * Role and user loader for Endpoint security dev/testing
  */
 export class EndpointSecurityTestRolesLoader extends RoleAndUserLoader<EndpointSecurityRoleDefinitions> {
-  constructor(protected readonly kbnClient: KbnClient, protected readonly logger: ToolingLog) {
+  constructor(
+    protected readonly kbnClient: KbnClient,
+    protected readonly logger: ToolingLog
+  ) {
     super(kbnClient, logger, getAllEndpointSecurityRoles());
   }
 }

@@ -134,20 +134,19 @@ export function FieldSelect({
   );
 
   const FieldSelectItemFactory = useMemo(
-    () => (props: { value?: string | null; index?: number }) =>
-      (
-        <FieldSelectItem
-          options={groupedOptions}
-          selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
-          disabled={disabled}
-          onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
-          onDeleteItem={onDeleteItem.bind(undefined, props.index)}
-          onChange={onFieldSelectItemChange.bind(undefined, props.index)}
-          placeholder={getPlaceholderValue(placeholder, groupedOptions)}
-          disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
-          disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
-        />
-      ),
+    () => (props: { value?: string | null; index?: number }) => (
+      <FieldSelectItem
+        options={groupedOptions}
+        selectedOptions={(props.value ? selectedOptionsMap.get(props.value) : undefined) ?? []}
+        disabled={disabled}
+        onNewItemAdd={onNewItemAdd.bind(undefined, props.index)}
+        onDeleteItem={onDeleteItem.bind(undefined, props.index)}
+        onChange={onFieldSelectItemChange.bind(undefined, props.index)}
+        placeholder={getPlaceholderValue(placeholder, groupedOptions)}
+        disableAdd={!allowMultiSelect || selectedIds?.length >= MAX_MULTI_FIELDS_ITEMS}
+        disableDelete={!allowMultiSelect || selectedIds?.length <= 1}
+      />
+    ),
     [
       groupedOptions,
       selectedOptionsMap,

@@ -47,7 +47,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
           rangeFrom,
           rangeTo,
         }),
-      [location, start, end, rangeFrom, rangeTo]
+      [location, start, end, rangeFrom, rangeTo],
     );
 
     refUrlParams.current = urlParams;
@@ -72,7 +72,7 @@ const UrlParamsProvider: React.ComponentClass<{}> = withRouter(
     return (
       <UrlParamsContext.Provider children={children} value={contextValue} />
     );
-  }
+  },
 );
 
 export { UrlParamsContext, UrlParamsProvider };

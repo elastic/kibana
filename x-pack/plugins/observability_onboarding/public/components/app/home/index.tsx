@@ -99,7 +99,7 @@ export function Home() {
                 {
                   defaultMessage:
                     'Select your method for collecting data into Observability.',
-                }
+                },
               )}
             </p>
           </EuiText>
@@ -115,12 +115,12 @@ export function Home() {
                   color: 'accent',
                   label: i18n.translate(
                     'xpack.observability_onboarding.card.systemLogs.quickstartBadge',
-                    { defaultMessage: 'Quick start' }
+                    { defaultMessage: 'Quick start' },
                   ),
                 }}
                 title={i18n.translate(
                   'xpack.observability_onboarding.card.systemLogs.title',
-                  { defaultMessage: 'Stream host system logs' }
+                  { defaultMessage: 'Stream host system logs' },
                 )}
                 footer={
                   <EuiButton
@@ -151,7 +151,7 @@ export function Home() {
                       {
                         defaultMessage:
                           'The quickest path to onboard log data from your own machine or server.',
-                      }
+                      },
                     )}
                   </p>
                 </EuiText>
@@ -163,7 +163,7 @@ export function Home() {
                 icon={<EuiIcon type={loggingIcon} size="l" />}
                 title={i18n.translate(
                   'xpack.observability_onboarding.card.customLogs.title',
-                  { defaultMessage: 'Stream log files' }
+                  { defaultMessage: 'Stream log files' },
                 )}
                 footer={
                   <EuiButton
@@ -190,7 +190,7 @@ export function Home() {
                       {
                         defaultMessage:
                           'Stream any logs into Elastic in a simple way and explore their data.',
-                      }
+                      },
                     )}
                   </p>
                 </EuiText>
@@ -213,7 +213,7 @@ export function Home() {
                   'xpack.observability_onboarding.card.apm.title',
                   {
                     defaultMessage: 'Collect application performance data',
-                  }
+                  },
                 )}
                 description={
                   <EuiText color="subdued" size="s" textAlign="center">
@@ -223,7 +223,7 @@ export function Home() {
                         {
                           defaultMessage:
                             'Collect traces, logs, and metrics from OpenTelemetry or APM custom agent.',
-                        }
+                        },
                       )}
                     </p>
                   </EuiText>
@@ -249,7 +249,7 @@ export function Home() {
                 icon={<EuiIcon type={kubernetesIcon} size="l" />}
                 title={i18n.translate(
                   'xpack.observability_onboarding.card.k8s.title',
-                  { defaultMessage: 'Collect Kubernetes clusters data' }
+                  { defaultMessage: 'Collect Kubernetes clusters data' },
                 )}
                 description={
                   <EuiText color="subdued" size="s" textAlign="center">
@@ -259,7 +259,7 @@ export function Home() {
                         {
                           defaultMessage:
                             'Collect logs and metrics from Kubernetes clusters with Elastic Agent.',
-                        }
+                        },
                       )}
                     </p>
                   </EuiText>
@@ -299,7 +299,7 @@ export function Home() {
               {
                 defaultMessage:
                   'Explore 300+ ways of ingesting data with our integrations',
-              }
+              },
             )}
             footer={
               <>
@@ -310,7 +310,7 @@ export function Home() {
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.card.integrations.start',
-                    { defaultMessage: 'Start exploring' }
+                    { defaultMessage: 'Start exploring' },
                   )}
                 </EuiButton>
                 <EuiHorizontalRule margin="m" />
@@ -318,7 +318,7 @@ export function Home() {
                   <EuiFlexItem grow={false}>
                     {i18n.translate(
                       'xpack.observability_onboarding.card.integrations.quickLinks',
-                      { defaultMessage: 'Quick links:' }
+                      { defaultMessage: 'Quick links:' },
                     )}
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -333,7 +333,7 @@ export function Home() {
                         >
                           {i18n.translate(
                             'xpack.observability_onboarding.card.integrations.sampleData',
-                            { defaultMessage: 'Use sample data' }
+                            { defaultMessage: 'Use sample data' },
                           )}
                         </EuiLink>
                       </EuiFlexItem>
@@ -345,7 +345,7 @@ export function Home() {
                           >
                             {i18n.translate(
                               'xpack.observability_onboarding.card.integrations.uploadFile',
-                              { defaultMessage: 'Upload a file' }
+                              { defaultMessage: 'Upload a file' },
                             )}
                           </EuiLink>
                         </StyledItem>
@@ -363,7 +363,7 @@ export function Home() {
                           >
                             {i18n.translate(
                               'xpack.observability_onboarding.card.integrations.awsFirehose',
-                              { defaultMessage: 'AWS Firehose' }
+                              { defaultMessage: 'AWS Firehose' },
                             )}
                           </EuiLink>
                         </StyledItem>
@@ -387,10 +387,10 @@ export function Home() {
 
 const getStartedLabel = i18n.translate(
   'xpack.observability_onboarding.card.getStarted',
-  { defaultMessage: 'Get started' }
+  { defaultMessage: 'Get started' },
 );
 
 const elasticAgentLabel = i18n.translate(
   'xpack.observability_onboarding.card.elasticAgent',
-  { defaultMessage: 'Elastic Agent' }
+  { defaultMessage: 'Elastic Agent' },
 );

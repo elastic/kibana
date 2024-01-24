@@ -26,11 +26,11 @@ describe('TransactionDetailLink', () => {
             Transaction
           </TransactionDetailLink>
         ),
-        {} as Location
+        {} as Location,
       );
 
       expect(href).toMatchInlineSnapshot(
-        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1w"'
+        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1w"',
       );
     });
   });
@@ -49,11 +49,11 @@ describe('TransactionDetailLink', () => {
             Transaction
           </TransactionDetailLink>
         ),
-        {} as Location
+        {} as Location,
       );
 
       expect(href).toMatchInlineSnapshot(
-        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1d"'
+        '"/basepath/app/apm/services/foo/transactions/view?traceId=baz&transactionId=123&transactionName=bar&transactionType=request&comparisonEnabled=true&offset=1d"',
       );
     });
   });

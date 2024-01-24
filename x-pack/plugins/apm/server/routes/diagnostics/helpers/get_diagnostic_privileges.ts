@@ -41,7 +41,7 @@ export async function getDiagnosticsPrivileges({
   });
 
   const hasAllIndexPrivileges = Object.values(index).every((indexPrivs) =>
-    Object.values(indexPrivs).every((priv) => priv)
+    Object.values(indexPrivs).every((priv) => priv),
   );
 
   const hasAllClusterPrivileges = Object.values(cluster).every((priv) => priv);

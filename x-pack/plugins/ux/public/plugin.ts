@@ -166,8 +166,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
           }
 
           return [];
-        })
-      )
+        }),
+      ),
     );
 
     const isDev = this.initContext.env.mode.dev;

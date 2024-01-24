@@ -111,11 +111,14 @@ export const CloudSecurityDataTable = ({
   const [settings, setSettings] = useLocalStorage<UnifiedDataTableSettings>(
     `${columnsLocalStorageKey}:settings`,
     {
-      columns: defaultColumns.reduce((prev, curr) => {
-        const columnDefaultSettings = curr.width ? { width: curr.width } : {};
-        const newColumn = { [curr.id]: columnDefaultSettings };
-        return { ...prev, ...newColumn };
-      }, {} as UnifiedDataTableSettings['columns']),
+      columns: defaultColumns.reduce(
+        (prev, curr) => {
+          const columnDefaultSettings = curr.width ? { width: curr.width } : {};
+          const newColumn = { [curr.id]: columnDefaultSettings };
+          return { ...prev, ...newColumn };
+        },
+        {} as UnifiedDataTableSettings['columns']
+      ),
     }
   );
 

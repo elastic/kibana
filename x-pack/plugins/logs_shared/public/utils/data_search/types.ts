@@ -22,7 +22,7 @@ export interface DataSearchRequestDescriptor<Request extends IKibanaSearchReques
 
 export interface ParsedDataSearchRequestDescriptor<
   Request extends IKibanaSearchRequest,
-  ResponseData
+  ResponseData,
 > {
   request: Request;
   options: ISearchOptions;
@@ -41,7 +41,7 @@ export interface ParsedKibanaSearchResponse<ResponseData> {
 
 export interface ParsedDataSearchResponseDescriptor<
   Request extends IKibanaSearchRequest,
-  Response
+  Response,
 > {
   request: Request;
   options: ISearchOptions;

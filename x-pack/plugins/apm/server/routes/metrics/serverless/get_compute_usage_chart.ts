@@ -93,7 +93,7 @@ export async function getComputeUsageChart({
 
   const { aggregations } = await apmEventClient.search(
     'get_compute_usage',
-    params
+    params,
   );
   const timeseriesData = aggregations?.timeseriesData;
 
@@ -108,7 +108,7 @@ export async function getComputeUsageChart({
       {
         defaultMessage:
           "Compute usage (in GB-seconds) is the execution time multiplied by the available memory size of your function's instances. The compute usage is a direct indicator for the costs of your serverless function.",
-      }
+      },
     ),
     series:
       !timeseriesData || timeseriesData.buckets.length === 0
@@ -117,7 +117,7 @@ export async function getComputeUsageChart({
             {
               title: i18n.translate(
                 'xpack.apm.agentMetrics.serverless.computeUsage',
-                { defaultMessage: 'Compute usage' }
+                { defaultMessage: 'Compute usage' },
               ),
               key: 'compute_usage',
               type: 'bar',

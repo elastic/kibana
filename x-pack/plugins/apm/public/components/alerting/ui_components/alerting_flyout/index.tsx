@@ -47,7 +47,7 @@ export function AlertingFlyout(props: Props) {
 
   const onCloseAddFlyout = useCallback(
     () => setAddFlyoutVisibility(false),
-    [setAddFlyoutVisibility]
+    [setAddFlyoutVisibility],
   );
 
   const addAlertFlyout = useMemo(
@@ -83,7 +83,7 @@ export function AlertingFlyout(props: Props) {
       environment,
       start,
       end,
-    ]
+    ],
   );
   return <>{addFlyoutVisible && addAlertFlyout}</>;
 }

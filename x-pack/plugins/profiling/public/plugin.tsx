@@ -95,7 +95,7 @@ export class ProfilingPlugin implements Plugin {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
-          unknown
+          unknown,
         ];
 
         const { renderApp } = await import('./app');
@@ -135,7 +135,7 @@ export class ProfilingPlugin implements Plugin {
         const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
           CoreStart,
           ProfilingPluginPublicStartDeps,
-          unknown
+          unknown,
         ];
         return {
           coreStart,

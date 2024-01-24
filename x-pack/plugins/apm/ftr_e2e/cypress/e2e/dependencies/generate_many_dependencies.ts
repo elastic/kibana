@@ -25,7 +25,7 @@ export function generateManyDependencies({
         environment: 'production',
         agentName: 'java',
       })
-      .instance(`java-instance-${index}`)
+      .instance(`java-instance-${index}`),
   );
 
   const instanceDependencies = (instance: Instance, startIndex: number) => {
@@ -52,18 +52,18 @@ export function generateManyDependencies({
                 .destination(`elasticsearch/${destination}`)
                 .timestamp(timestamp)
                 .duration(200)
-                .success()
+                .success(),
             );
 
           return span;
-        })
+        }),
     );
   };
 
   return instances.flatMap((instance, index) =>
     instanceDependencies(
       instance,
-      (index * MAX_DEPENDENCIES_PER_SERVICE) % MAX_DEPENDENCIES
-    )
+      (index * MAX_DEPENDENCIES_PER_SERVICE) % MAX_DEPENDENCIES,
+    ),
   );
 }

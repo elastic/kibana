@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
 
 export function getLatencyColumnLabel(
-  latencyAggregationType?: LatencyAggregationType
+  latencyAggregationType?: LatencyAggregationType,
 ) {
   switch (latencyAggregationType) {
     case LatencyAggregationType.avg:
@@ -32,7 +32,7 @@ export function getLatencyColumnLabel(
         'xpack.apm.serviceOverview.latencyColumnDefaultLabel',
         {
           defaultMessage: 'Latency',
-        }
+        },
       );
   }
 }

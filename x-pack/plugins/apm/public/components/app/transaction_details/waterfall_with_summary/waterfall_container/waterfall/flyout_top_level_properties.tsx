@@ -28,7 +28,7 @@ export function FlyoutTopLevelProperties({ transaction }: Props) {
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
 
   const latencyAggregationType =

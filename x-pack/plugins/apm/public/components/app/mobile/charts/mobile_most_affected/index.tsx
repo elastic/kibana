@@ -57,11 +57,11 @@ export function MobileTreemap({
                 size: 500,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end, selectedTreemap]
+    [environment, kuery, serviceName, start, end, selectedTreemap],
   );
   return (
     <>

@@ -31,12 +31,12 @@ describe('AgentConfigInstructions', () => {
         apmServerUrl="http://localhost:8200"
         secretToken="testSecretToken"
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     expect(getApmAgentCommandsSpy).not.toHaveBeenCalled();
     expect(
-      await component.queryByTestId('otel-instructions-table')
+      await component.queryByTestId('otel-instructions-table'),
     ).toBeInTheDocument();
     expect(await component.queryByTestId('commands')).not.toBeInTheDocument();
   });
@@ -47,13 +47,13 @@ describe('AgentConfigInstructions', () => {
         variantId="java"
         apmServerUrl="http://localhost:8200"
         secretToken="testSecretToken"
-      />
+      />,
     );
 
     expect(getApmAgentCommandsSpy).toHaveBeenCalled();
     expect(await component.queryByTestId('commands')).toBeInTheDocument();
     expect(
-      await component.queryByTestId('otel-instructions-table')
+      await component.queryByTestId('otel-instructions-table'),
     ).not.toBeInTheDocument();
   });
 });

@@ -39,7 +39,7 @@ export function generateData({ start, end }: { start: number; end: number }) {
         })
         .timestamp(timestamp)
         .duration(transaction.duration)
-        .success()
+        .success(),
     );
 
   return traceEvents;

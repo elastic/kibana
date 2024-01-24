@@ -10,7 +10,7 @@ import { isEmpty, isNil } from 'lodash';
 
 export function fieldValuePairToKql<T extends string>(
   field: T,
-  value: string | boolean | number | undefined | null
+  value: string | boolean | number | undefined | null,
 ) {
   if (isNil(value) || isEmpty(value)) {
     return [];

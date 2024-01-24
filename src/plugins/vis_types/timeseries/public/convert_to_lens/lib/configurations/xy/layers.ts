@@ -112,8 +112,8 @@ export const getLayers = async (
               ? 'right'
               : 'left'
             : isSingleAxis
-            ? 'left'
-            : getAxisMode(series, model),
+              ? 'left'
+              : getAxisMode(series, model),
           ...(isReferenceLine && {
             fill: chartType.includes('area') ? FillTypes.BELOW : FillTypes.NONE,
             lineWidth: series.line_width,

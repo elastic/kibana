@@ -26,7 +26,7 @@ export const createLifecycleRuleTypeFactory =
       TAlertInstanceState,
       TAlertInstanceContext,
       TActionGroupIds
-    >
+    >,
   >(
     type: AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, TServices>
   ): AlertTypeWithExecutor<TAlertInstanceState, TParams, TAlertInstanceContext, any> => {

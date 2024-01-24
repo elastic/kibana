@@ -8,14 +8,14 @@
 export type ElasticsearchMappingOf<Type> = Type extends string | string[]
   ? ElasticsearchStringFieldMapping
   : Type extends number
-  ? ElasticsearchNumberFieldMapping
-  : Type extends boolean
-  ? ElasticsearchBooleanFieldMapping
-  : Type extends Array<{}>
-  ? ElasticsearchArrayFieldMapping<Type>
-  : Type extends {}
-  ? ElasticsearchObjectFieldMapping<Type>
-  : never;
+    ? ElasticsearchNumberFieldMapping
+    : Type extends boolean
+      ? ElasticsearchBooleanFieldMapping
+      : Type extends Array<{}>
+        ? ElasticsearchArrayFieldMapping<Type>
+        : Type extends {}
+          ? ElasticsearchObjectFieldMapping<Type>
+          : never;
 
 export interface ElasticsearchStringFieldMapping {
   type: 'keyword' | 'text' | 'date';

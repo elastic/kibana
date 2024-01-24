@@ -13,14 +13,14 @@ import preGroupedData from './mock_responses/group_resource_nodes_pregrouped.jso
 describe('groupResourceNodes', () => {
   it('should group external nodes', () => {
     const responseWithGroups = groupResourceNodes(
-      preGroupedData as { elements: ConnectionElement[] }
+      preGroupedData as { elements: ConnectionElement[] },
     );
     expect(responseWithGroups.elements).toHaveLength(
-      expectedGroupedData.elements.length
+      expectedGroupedData.elements.length,
     );
     for (const element of responseWithGroups.elements) {
       const expectedElement = expectedGroupedData.elements.find(
-        ({ data: { id } }: { data: { id: string } }) => id === element.data.id
+        ({ data: { id } }: { data: { id: string } }) => id === element.data.id,
       )!;
       expect(element).toMatchObject(expectedElement);
     }

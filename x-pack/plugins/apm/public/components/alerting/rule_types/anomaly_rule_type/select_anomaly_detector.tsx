@@ -21,7 +21,7 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
       key: option.type,
       label: option.label,
       checked: values.includes(option.type) ? 'on' : undefined,
-    })
+    }),
   );
 
   const onOptionSelect = useCallback(
@@ -31,7 +31,7 @@ export function SelectAnomalyDetector({ values, onChange }: Props) {
         .map(({ key }) => key as AnomalyDetectorType);
       onChange(selectedTypes);
     },
-    [onChange]
+    [onChange],
   );
 
   return (

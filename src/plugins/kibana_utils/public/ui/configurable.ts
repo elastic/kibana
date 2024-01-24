@@ -14,7 +14,7 @@ import type { FC } from 'react';
  */
 export interface Configurable<
   Config extends SerializableRecord = SerializableRecord,
-  Context = object
+  Context = object,
 > {
   /**
    * Create default config for this item, used when item is created for the first time.
@@ -37,7 +37,7 @@ export interface Configurable<
  */
 export interface CollectConfigProps<
   Config extends SerializableRecord = SerializableRecord,
-  Context = object
+  Context = object,
 > {
   /**
    * Current (latest) config of the item.

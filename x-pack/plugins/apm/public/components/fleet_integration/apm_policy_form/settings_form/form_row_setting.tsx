@@ -33,11 +33,11 @@ interface Props {
 
 const ENABLED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.enabledLabel',
-  { defaultMessage: 'Enabled' }
+  { defaultMessage: 'Enabled' },
 );
 const DISABLED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.disabledLabel',
-  { defaultMessage: 'Disabled' }
+  { defaultMessage: 'Disabled' },
 );
 
 export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
@@ -105,14 +105,14 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
           noSuggestions
           placeholder={i18n.translate(
             'xpack.apm.fleet_integration.settings.selectOrCreateOptions',
-            { defaultMessage: 'Select or create options' }
+            { defaultMessage: 'Select or create options' },
           )}
           options={comboOptions}
           selectedOptions={comboOptions}
           onChange={(option) => {
             onChange(
               row.key,
-              option.map(({ label }) => label)
+              option.map(({ label }) => label),
             );
           }}
           onCreateOption={(newOption) => {
@@ -138,7 +138,7 @@ export function FormRowSetting({ row, value, onChange, isDisabled }: Props) {
                 'xpack.apm.fleet_integration.settings.yamlCodeEditor',
                 {
                   defaultMessage: 'YAML Code Editor',
-                }
+                },
               ),
               wordWrap: 'off',
               tabSize: 2,

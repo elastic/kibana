@@ -30,7 +30,7 @@ describe('agent configuration queries', () => {
           serviceName: 'foo',
           apmEventClient: mockApmEventClient,
           size: 50,
-        })
+        }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -44,7 +44,7 @@ describe('agent configuration queries', () => {
           serviceName: 'foo',
           internalESClient: mockInternalESClient,
           size: 50,
-        })
+        }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -58,7 +58,7 @@ describe('agent configuration queries', () => {
           listConfigurations({
             internalESClient: mockInternalESClient,
             apmIndices: mockIndices,
-          })
+          }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -73,7 +73,7 @@ describe('agent configuration queries', () => {
             name: 'foo',
           },
           internalESClient: mockInternalESClient,
-        })
+        }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -87,7 +87,7 @@ describe('agent configuration queries', () => {
             environment: 'bar',
           },
           internalESClient: mockInternalESClient,
-        })
+        }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -102,7 +102,7 @@ describe('agent configuration queries', () => {
             service: { name: 'foo' },
             internalESClient: mockInternalESClient,
             apmEventClient: mockApmEventClient,
-          })
+          }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -115,7 +115,7 @@ describe('agent configuration queries', () => {
             service: { environment: 'bar' },
             internalESClient: mockInternalESClient,
             apmEventClient: mockApmEventClient,
-          })
+          }),
       );
 
       expect(mock.params).toMatchSnapshot();
@@ -128,7 +128,7 @@ describe('agent configuration queries', () => {
             service: { name: 'foo', environment: 'bar' },
             internalESClient: mockInternalESClient,
             apmEventClient: mockApmEventClient,
-          })
+          }),
       );
 
       expect(mock.params).toMatchSnapshot();

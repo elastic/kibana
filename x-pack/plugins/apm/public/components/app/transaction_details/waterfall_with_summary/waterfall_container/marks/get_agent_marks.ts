@@ -27,6 +27,6 @@ export function getAgentMarks(transaction?: Transaction): AgentMark[] {
       offset: ms * 1000,
       verticalLine: true,
     })),
-    'offset'
+    'offset',
   );
 }

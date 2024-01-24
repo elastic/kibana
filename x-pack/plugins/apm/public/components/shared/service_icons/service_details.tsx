@@ -29,7 +29,7 @@ export function ServiceDetails({ service }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.service.versionLabel',
         {
           defaultMessage: 'Service version',
-        }
+        },
       ),
       description: (
         <ul>
@@ -47,7 +47,7 @@ export function ServiceDetails({ service }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.service.runtimeLabel',
         {
           defaultMessage: 'Runtime name & version',
-        }
+        },
       ),
       description: (
         <>
@@ -63,7 +63,7 @@ export function ServiceDetails({ service }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.service.frameworkLabel',
         {
           defaultMessage: 'Framework name',
-        }
+        },
       ),
       description: service.framework,
     });
@@ -75,7 +75,7 @@ export function ServiceDetails({ service }: Props) {
         'xpack.apm.serviceIcons.serviceDetails.service.agentLabel',
         {
           defaultMessage: 'Agent name & version',
-        }
+        },
       ),
       description: (
         <>

@@ -13,7 +13,7 @@ const UNIDENTIFIED_SERVICE_NODES_LABEL = i18n.translate(
   'xpack.apm.serviceNodeNameMissing',
   {
     defaultMessage: '(Empty)',
-  }
+  },
 );
 
 export function getServiceNodeName(serviceNodeName?: string) {

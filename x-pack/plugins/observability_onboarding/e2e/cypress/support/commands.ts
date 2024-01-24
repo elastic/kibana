@@ -73,7 +73,7 @@ Cypress.Commands.add(
       },
     });
     cy.visit('/');
-  }
+  },
 );
 
 Cypress.Commands.add('getByTestSubj', (selector: string) => {
@@ -93,7 +93,7 @@ Cypress.Commands.add(
     cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
       timeout: 50000,
     });
-  }
+  },
 );
 
 Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
@@ -157,7 +157,7 @@ Cypress.Commands.add(
   (
     onboardingId: string,
     step: InstallationStep,
-    status: InstallationStepStatus
+    status: InstallationStepStatus,
   ) => {
     const kibanaUrl = Cypress.env('KIBANA_URL');
 
@@ -175,5 +175,5 @@ Cypress.Commands.add(
         status,
       },
     });
-  }
+  },
 );

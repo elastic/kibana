@@ -39,7 +39,7 @@ export interface SingleSearchAfterParams {
 
 // utilize search_after for paging results into bulk.
 export const singleSearchAfter = async <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   aggregations,
   searchAfterSortIds,

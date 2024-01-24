@@ -93,16 +93,16 @@ export async function getDerivedServiceAnnotations({
               '@timestamp': 'asc',
             },
           },
-        }
+        },
       );
 
       const firstSeen = new Date(
-        response.hits.hits[0]._source['@timestamp']
+        response.hits.hits[0]._source['@timestamp'],
       ).getTime();
 
       if (!isFiniteNumber(firstSeen)) {
         throw new Error(
-          'First seen for version was unexpectedly undefined or null.'
+          'First seen for version was unexpectedly undefined or null.',
         );
       }
 
@@ -116,7 +116,7 @@ export async function getDerivedServiceAnnotations({
         '@timestamp': firstSeen,
         text: version,
       };
-    })
+    }),
   );
   return annotations.filter(Boolean) as Annotation[];
 }

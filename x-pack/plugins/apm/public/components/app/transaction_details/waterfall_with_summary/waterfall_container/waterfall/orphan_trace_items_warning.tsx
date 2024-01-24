@@ -23,7 +23,7 @@ export function OrphanTraceItemsWarning({
           defaultMessage:
             'This trace is incomplete and {itemsCount} items could not be displayed in the timeline. This could be a temporary problem caused by ingest delay, or a permanent problem caused by some events being dropped.',
           values: { itemsCount: orphanTraceItemsCount },
-        }
+        },
       )}
       anchorClassName="eui-fullWidth"
     >
@@ -36,7 +36,7 @@ export function OrphanTraceItemsWarning({
           'xpack.apm.transactionDetails.agentMissingTransactionLabel',
           {
             defaultMessage: 'Incomplete trace',
-          }
+          },
         )}
       </EuiBadge>
     </EuiToolTip>

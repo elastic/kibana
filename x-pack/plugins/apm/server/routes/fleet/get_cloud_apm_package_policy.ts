@@ -23,7 +23,7 @@ export async function getCloudAgentPolicy({
   try {
     return await fleetPluginStart.agentPolicyService.get(
       savedObjectsClient,
-      POLICY_ELASTIC_AGENT_ON_CLOUD
+      POLICY_ELASTIC_AGENT_ON_CLOUD,
     );
   } catch (error) {
     if (error?.output.statusCode === 404) {
@@ -39,6 +39,6 @@ export function getApmPackagePolicy(agentPolicy: Maybe<AgentPolicy>) {
   }
   const packagePolicies = agentPolicy.package_policies as PackagePolicy[];
   return packagePolicies.find(
-    (packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME
+    (packagePolicy) => packagePolicy?.package?.name === APM_PACKAGE_NAME,
   );
 }

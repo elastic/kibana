@@ -23,8 +23,8 @@ type RouteValidationResultType<T extends RouteValidationSpec<any> | undefined> =
   T extends RouteValidationFunction<any>
     ? ReturnType<T>['value']
     : T extends Type<any>
-    ? T['type']
-    : undefined
+      ? T['type']
+      : undefined
 >;
 
 /**

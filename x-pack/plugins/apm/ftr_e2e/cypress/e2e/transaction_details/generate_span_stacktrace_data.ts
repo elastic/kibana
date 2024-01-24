@@ -19,7 +19,7 @@ function getAPMGeneratedStacktrace() {
   return Array.from(
     timerange(
       new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:01:00.000Z')
+      new Date('2022-01-01T00:01:00.000Z'),
     )
       .interval('1m')
       .rate(1)
@@ -51,9 +51,9 @@ function getAPMGeneratedStacktrace() {
               })
               .timestamp(timestamp + 50)
               .duration(100)
-              .failure()
+              .failure(),
           );
-      })
+      }),
   );
 }
 
@@ -69,7 +69,7 @@ function getOtelGeneratedStacktrace() {
   return Array.from(
     timerange(
       new Date('2022-01-01T00:00:00.000Z'),
-      new Date('2022-01-01T00:01:00.000Z')
+      new Date('2022-01-01T00:01:00.000Z'),
     )
       .interval('1m')
       .rate(1)
@@ -92,9 +92,9 @@ function getOtelGeneratedStacktrace() {
               })
               .timestamp(timestamp + 50)
               .duration(100)
-              .failure()
+              .failure(),
           );
-      })
+      }),
   );
 }
 

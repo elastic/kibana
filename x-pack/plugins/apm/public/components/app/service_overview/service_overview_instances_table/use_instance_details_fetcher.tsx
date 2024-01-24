@@ -36,10 +36,10 @@ export function useInstanceDetailsFetcher({
             },
             query: { start, end },
           },
-        }
+        },
       );
     },
-    [serviceName, serviceNodeName, start, end]
+    [serviceName, serviceNodeName, start, end],
   );
 
   return { data, status };

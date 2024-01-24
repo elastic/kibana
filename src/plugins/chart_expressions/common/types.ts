@@ -20,12 +20,12 @@ export type MakeOverridesSerializable<T> = {
       // so use a specific keyword
       'ignore'
     : // be careful here to not filter out string/number types
-    NonNullable<T[KeyType]> extends React.ReactChildren | React.ReactElement
-    ? never
-    : // make it recursive
-    NonNullable<T[KeyType]> extends object
-    ? MakeOverridesSerializable<T[KeyType]>
-    : NonNullable<T[KeyType]>;
+      NonNullable<T[KeyType]> extends React.ReactChildren | React.ReactElement
+      ? never
+      : // make it recursive
+        NonNullable<T[KeyType]> extends object
+        ? MakeOverridesSerializable<T[KeyType]>
+        : NonNullable<T[KeyType]>;
 };
 
 export interface ChartSizeEvent extends ExpressionRendererEvent {

@@ -89,7 +89,7 @@ export const invalidLicenseMessage = i18n.translate(
   {
     defaultMessage:
       "In order to access Service Maps, you must be subscribed to an Elastic Platinum license. With it, you'll have the ability to visualize your entire application stack along with your APM data.",
-  }
+  },
 );
 
 const NONGROUPED_SPANS: Record<string, string[]> = {
@@ -107,7 +107,7 @@ export function isSpanGroupingSupported(type?: string, subtype?: string) {
   }
   return !NONGROUPED_SPANS[type].some(
     (nongroupedSubType) =>
-      nongroupedSubType === 'all' || nongroupedSubType === subtype
+      nongroupedSubType === 'all' || nongroupedSubType === subtype,
   );
 }
 

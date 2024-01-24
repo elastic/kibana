@@ -79,14 +79,14 @@ export const getActions = async ({
           },
         }
       : singleType === 'automated'
-      ? {
-          filter: {
-            exists: {
-              field: 'data.alert_id',
+        ? {
+            filter: {
+              exists: {
+                field: 'data.alert_id',
+              },
             },
-          },
-        }
-      : {};
+          }
+        : {};
   };
 
   if (userIds?.length) {

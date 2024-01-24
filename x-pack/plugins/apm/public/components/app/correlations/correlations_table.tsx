@@ -47,9 +47,9 @@ export function CorrelationsTable<T extends FieldValuePair>({
     () =>
       debounce(
         () => trackApmEvent({ metric: 'select_significant_term' }),
-        1000
+        1000,
       ),
-    [trackApmEvent]
+    [trackApmEvent],
   );
 
   const [pageIndex, setPageIndex] = useState(0);
@@ -79,7 +79,7 @@ export function CorrelationsTable<T extends FieldValuePair>({
 
       onTableChange(tableSettings);
     },
-    [onTableChange]
+    [onTableChange],
   );
 
   return (
@@ -122,15 +122,15 @@ export function CorrelationsTable<T extends FieldValuePair>({
 
 const loadingText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.loadingText',
-  { defaultMessage: 'Loading...' }
+  { defaultMessage: 'Loading...' },
 );
 
 const noDataText = i18n.translate(
   'xpack.apm.correlations.correlationsTable.noDataText',
-  { defaultMessage: 'No data' }
+  { defaultMessage: 'No data' },
 );
 
 const errorMessage = i18n.translate(
   'xpack.apm.correlations.correlationsTable.errorMessage',
-  { defaultMessage: 'Failed to fetch' }
+  { defaultMessage: 'Failed to fetch' },
 );

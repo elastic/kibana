@@ -54,7 +54,7 @@ export function SessionsChart({
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.SESSIONS
+    ChartType.SESSIONS,
   );
 
   const { data = INITIAL_STATE, status } = useFetcher(
@@ -76,7 +76,7 @@ export function SessionsChart({
               offset: comparisonEnabled ? offset : undefined,
             },
           },
-        }
+        },
       );
     },
     [
@@ -89,7 +89,7 @@ export function SessionsChart({
       transactionName,
       offset,
       comparisonEnabled,
-    ]
+    ],
   );
   const previousPeriodLabel = usePreviousPeriodLabel();
 
@@ -132,7 +132,7 @@ export function SessionsChart({
               'xpack.apm.transactions.sessionsCharTooltip',
               {
                 defaultMessage: 'Unique sessions id',
-              }
+              },
             )}
             position="right"
           />

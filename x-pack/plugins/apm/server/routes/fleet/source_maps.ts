@@ -81,7 +81,7 @@ export async function listSourceMapArtifacts({
     artifactsResponse.items.map(async (item) => {
       const body = await getUnzippedArtifactBody(item.body);
       return { ...item, body };
-    })
+    }),
   );
 
   return { artifacts, total: artifactsResponse.total };
@@ -151,9 +151,9 @@ export async function updateSourceMapsOnFleetPolicies({
         savedObjectsClient,
         internalESClient,
         id,
-        updatedPackagePolicy
+        updatedPackagePolicy,
       );
-    })
+    }),
   );
 }
 

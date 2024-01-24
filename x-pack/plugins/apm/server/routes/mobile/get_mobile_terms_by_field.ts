@@ -67,7 +67,7 @@ export async function getMobileTermsByField({
           },
         },
       },
-    }
+    },
   );
 
   return (

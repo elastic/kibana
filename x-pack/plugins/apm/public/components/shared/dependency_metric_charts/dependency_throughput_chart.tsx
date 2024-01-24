@@ -74,11 +74,11 @@ export function DependencyThroughputChart({
       spanName,
       isTimeRangeMetadataLoading,
       searchServiceDestinationMetrics,
-    ]
+    ],
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
+    ChartType.THROUGHPUT,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -93,7 +93,7 @@ export function DependencyThroughputChart({
         color: currentPeriodColor,
         title: i18n.translate(
           'xpack.apm.dependencyThroughputChart.chartTitle',
-          { defaultMessage: 'Throughput' }
+          { defaultMessage: 'Throughput' },
         ),
       });
     }

@@ -75,7 +75,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
     useLatencyCorrelations();
   const { overallHistogram, hasData, status } = getOverallHistogram(
     response,
-    progress.isRunning
+    progress.isRunning,
   );
 
   useEffect(() => {
@@ -85,7 +85,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           'xpack.apm.correlations.latencyCorrelations.errorTitle',
           {
             defaultMessage: 'An error occurred fetching correlations',
-          }
+          },
         ),
         text: progress.error,
       });
@@ -119,7 +119,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       }
       onFilter();
     },
-    [onFilter, history, trackApmEvent]
+    [onFilter, history, trackApmEvent],
   );
 
   const mlCorrelationColumns: Array<EuiBasicTableColumn<LatencyCorrelation>> =
@@ -135,7 +135,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 {
                   defaultMessage:
                     'The correlation score [0-1] of an attribute; the greater the score, the more an attribute increases latency.',
-                }
+                },
               )}
             >
               <>
@@ -143,7 +143,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                   'xpack.apm.correlations.latencyCorrelations.correlationsTable.correlationLabel',
                   {
                     defaultMessage: 'Correlation',
-                  }
+                  },
                 )}
                 <EuiIcon
                   size="s"
@@ -168,14 +168,14 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.failedTransactions.correlationsTable.impactLabel',
                 {
                   defaultMessage: 'Impact',
-                }
+                },
               )}
             </>
           ),
           render: (_, { correlation, isFallbackResult }) => {
             const label = getLatencyCorrelationImpactLabel(
               correlation,
-              isFallbackResult
+              isFallbackResult,
             );
             return label ? (
               <EuiBadge color={label.color}>{label.impact}</EuiBadge>
@@ -188,7 +188,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           field: 'fieldName',
           name: i18n.translate(
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldNameLabel',
-            { defaultMessage: 'Field name' }
+            { defaultMessage: 'Field name' },
           ),
           render: (_, { fieldName, fieldValue }) => (
             <>
@@ -206,7 +206,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           field: 'fieldValue',
           name: i18n.translate(
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.fieldValueLabel',
-            { defaultMessage: 'Field value' }
+            { defaultMessage: 'Field value' },
           ),
           render: (_, { fieldValue }) => String(fieldValue).slice(0, 50),
           sortable: true,
@@ -217,11 +217,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             {
               name: i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterLabel',
-                { defaultMessage: 'Filter' }
+                { defaultMessage: 'Filter' },
               ),
               description: i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.filterDescription',
-                { defaultMessage: 'Filter by value' }
+                { defaultMessage: 'Filter by value' },
               ),
               icon: 'plusInCircle',
               type: 'icon',
@@ -235,11 +235,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             {
               name: i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeLabel',
-                { defaultMessage: 'Exclude' }
+                { defaultMessage: 'Exclude' },
               ),
               description: i18n.translate(
                 'xpack.apm.correlations.latencyCorrelations.correlationsTable.excludeDescription',
-                { defaultMessage: 'Filter out value' }
+                { defaultMessage: 'Filter out value' },
               ),
               icon: 'minusInCircle',
               type: 'icon',
@@ -253,11 +253,11 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
           ],
           name: i18n.translate(
             'xpack.apm.correlations.latencyCorrelations.correlationsTable.actionsLabel',
-            { defaultMessage: 'Filter' }
+            { defaultMessage: 'Filter' },
           ),
         },
       ],
-      [onAddFilter]
+      [onAddFilter],
     );
 
   const [sortField, setSortField] =
@@ -277,7 +277,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   const histogramTerms = useMemo(
     () => orderBy(response.latencyCorrelations ?? [], sortField, sortDirection),
-    [response.latencyCorrelations, sortField, sortDirection]
+    [response.latencyCorrelations, sortField, sortDirection],
   );
 
   const selectedHistogram = useMemo(() => {
@@ -287,13 +287,13 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
       return histogramTerms?.find(
         (h) =>
           h.fieldName === selectedSignificantTerm.fieldName &&
-          h.fieldValue === selectedSignificantTerm.fieldValue
+          h.fieldValue === selectedSignificantTerm.fieldValue,
       );
     } else if (pinnedSignificantTerm) {
       return histogramTerms.find(
         (h) =>
           h.fieldName === pinnedSignificantTerm.fieldName &&
-          h.fieldValue === pinnedSignificantTerm.fieldValue
+          h.fieldValue === pinnedSignificantTerm.fieldValue,
       );
     }
     return histogramTerms[0];
@@ -323,7 +323,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
                 'xpack.apm.correlations.latencyCorrelations.panelTitle',
                 {
                   defaultMessage: 'Latency distribution',
-                }
+                },
               )}
             </h5>
           </EuiTitle>
@@ -363,7 +363,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             'xpack.apm.correlations.latencyCorrelations.tableTitle',
             {
               defaultMessage: 'Correlations',
-            }
+            },
           )}
         </h5>
       </EuiTitle>

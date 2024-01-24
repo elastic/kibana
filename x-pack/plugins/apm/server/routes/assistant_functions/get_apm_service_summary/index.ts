@@ -169,7 +169,7 @@ async function getAnomalies({
           },
         },
       },
-    }
+    },
   );
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);

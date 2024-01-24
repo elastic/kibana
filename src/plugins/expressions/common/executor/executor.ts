@@ -109,7 +109,10 @@ export class Executor<Context extends Record<string, unknown> = Record<string, u
    */
   public readonly types: TypesRegistry;
 
-  constructor(private readonly logger?: Logger, state?: ExecutorState<Context>) {
+  constructor(
+    private readonly logger?: Logger,
+    state?: ExecutorState<Context>
+  ) {
     this.functions = new FunctionsRegistry(this as Executor);
     this.types = new TypesRegistry(this as Executor);
     this.container = createExecutorContainer<Context>(state);

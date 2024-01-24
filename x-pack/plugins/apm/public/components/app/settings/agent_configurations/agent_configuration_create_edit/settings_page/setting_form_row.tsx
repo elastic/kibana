@@ -104,7 +104,7 @@ function FormRow({
                   amountAndUnitToString({
                     amount: e.target.value,
                     unit,
-                  })
+                  }),
                 )
               }
             />
@@ -119,7 +119,7 @@ function FormRow({
               onChange={(e) =>
                 onChange(
                   setting.key,
-                  amountAndUnitToString({ amount, unit: e.target.value })
+                  amountAndUnitToString({ amount, unit: e.target.value }),
                 )
               }
             />
@@ -159,7 +159,7 @@ export function SettingFormRow({
               color={'warning'}
               content={i18n.translate(
                 'xpack.apm.agentConfig.unsavedSetting.tooltip',
-                { defaultMessage: 'Unsaved' }
+                { defaultMessage: 'Unsaved' },
               )}
             />
           )}

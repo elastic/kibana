@@ -89,8 +89,8 @@ export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType
     projectType === 'security'
       ? MOCK_IDP_SECURITY_ROLE_NAMES
       : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
+        ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
+        : MOCK_IDP_SEARCH_ROLE_NAMES;
 
   return (
     <EuiPopover

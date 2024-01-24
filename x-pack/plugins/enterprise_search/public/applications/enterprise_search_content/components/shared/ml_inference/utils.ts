@@ -93,5 +93,5 @@ export const sortModels = (m1: TrainedModel, m2: TrainedModel) =>
   isTextExpansionModel(m1)
     ? -1
     : isTextExpansionModel(m2)
-    ? 1
-    : m1.model_id.localeCompare(m2.model_id);
+      ? 1
+      : m1.model_id.localeCompare(m2.model_id);

@@ -101,7 +101,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
             },
           },
         },
-      }
+      },
     );
 
     const count = response.aggregations?.count.value ?? 0;
@@ -134,7 +134,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
         value: avgFailedTransactionsRate,
         timeseries: response.aggregations?.timeseries
           ? getFailedTransactionRateTimeSeries(
-              response.aggregations.timeseries.buckets
+              response.aggregations.timeseries.buckets,
             ).map(({ x, y }) => ({ x: x + offsetInMs, y }))
           : undefined,
       },
@@ -151,7 +151,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
                   value: bucket.doc_count ?? 0,
                 }),
               };
-            }
+            },
           ),
         },
         latency: {
@@ -160,7 +160,7 @@ function getServiceMapDependencyNodeInfoForTimeRange({
             (bucket) => ({
               x: bucket.key + offsetInMs,
               y: bucket.latency_sum.value,
-            })
+            }),
           ),
         },
       },

@@ -292,9 +292,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 // so future versions of Kibana may read 8.7.0 version alerts and need to update them
                 const response = await ruleDataClient
                   .getReader({ namespace: options.spaceId })
-                  .search<typeof suppressionAlertSearchRequest, AlertWithSuppressionFields870<{}>>(
-                    suppressionAlertSearchRequest
-                  );
+                  .search<
+                    typeof suppressionAlertSearchRequest,
+                    AlertWithSuppressionFields870<{}>
+                  >(suppressionAlertSearchRequest);
 
                 const existingAlertsByInstanceId = response.hits.hits.reduce<
                   Record<string, estypes.SearchHit<AlertWithSuppressionFields870<{}>>>

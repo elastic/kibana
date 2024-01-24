@@ -30,7 +30,7 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
     tags: ['access:apm', 'access:ml:canGetJobs'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     jobs: ApmMlJob[];
     hasLegacyJobs: boolean;
@@ -115,9 +115,8 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
       config: resources.config,
       kuery: '',
     });
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size =
+      await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getAllEnvironments({
       includeMissing: true,
       searchAggregatedTransactions,
@@ -149,7 +148,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
         .start()
         .then(
           (start): ElasticsearchClient =>
-            start.elasticsearch.client.asInternalUser
+            start.elasticsearch.client.asInternalUser,
         ),
     ]);
 

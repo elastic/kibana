@@ -60,7 +60,7 @@ export async function getServiceTransactionTypes({
 
   const { aggregations } = await apmEventClient.search(
     'get_service_transaction_types',
-    params
+    params,
   );
   const transactionTypes =
     aggregations?.types.buckets

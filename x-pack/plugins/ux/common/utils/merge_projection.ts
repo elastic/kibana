@@ -24,7 +24,7 @@ type DeepMerge<T, U> = U extends PlainObject
 
 export function mergeProjection<T extends any, U extends SourceProjection>(
   target: T,
-  source: U
+  source: U,
 ): DeepMerge<T, U> {
   return mergeWith({}, cloneDeep(target), source, (a, b) => {
     if (isPlainObject(a) && isPlainObject(b)) {

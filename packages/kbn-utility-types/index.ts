@@ -43,9 +43,8 @@ export interface ObservableLike<T> {
 /**
  * Returns wrapped type of an observable.
  */
-export type UnwrapObservable<T extends ObservableLike<any>> = T extends ObservableLike<infer U>
-  ? U
-  : never;
+export type UnwrapObservable<T extends ObservableLike<any>> =
+  T extends ObservableLike<infer U> ? U : never;
 
 /**
  * Ensures T is of type X.
@@ -59,10 +58,10 @@ export interface RecursiveReadonlyArray<T> extends ReadonlyArray<RecursiveReadon
 export type RecursiveReadonly<T> = T extends (...args: any) => any
   ? T
   : T extends any[]
-  ? RecursiveReadonlyArray<T[number]>
-  : T extends object
-  ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
-  : T;
+    ? RecursiveReadonlyArray<T[number]>
+    : T extends object
+      ? Readonly<{ [K in keyof T]: RecursiveReadonly<T[K]> }>
+      : T;
 
 /**
  * Returns types or array or object values.
@@ -129,8 +128,8 @@ export type OneOf<T, K extends keyof T> = Omit<T, K> &
 export type DeepPartial<T> = T extends any[]
   ? DeepPartialArray<T[number]>
   : T extends object
-  ? DeepPartialObject<T>
-  : T;
+    ? DeepPartialObject<T>
+    : T;
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DeepPartialArray<T> extends Array<DeepPartial<T>> {}
@@ -157,17 +156,17 @@ export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends NonAny[]
     ? T[P]
     : T[P] extends readonly NonAny[]
-    ? T[P]
-    : T[P] extends Array<infer U>
-    ? Array<RecursivePartial<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<RecursivePartial<U>>
-    : T[P] extends Set<infer V>
-    ? Set<RecursivePartial<V>>
-    : T[P] extends Map<infer K, infer V>
-    ? Map<K, RecursivePartial<V>>
-    : T[P] extends NonAny
-    ? T[P]
-    : RecursivePartial<T[P]>;
+      ? T[P]
+      : T[P] extends Array<infer U>
+        ? Array<RecursivePartial<U>>
+        : T[P] extends ReadonlyArray<infer U>
+          ? ReadonlyArray<RecursivePartial<U>>
+          : T[P] extends Set<infer V>
+            ? Set<RecursivePartial<V>>
+            : T[P] extends Map<infer K, infer V>
+              ? Map<K, RecursivePartial<V>>
+              : T[P] extends NonAny
+                ? T[P]
+                : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;

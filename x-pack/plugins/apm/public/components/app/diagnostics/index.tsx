@@ -139,7 +139,7 @@ function DiagnosticsTemplate({ children }: { children: React.ReactChild }) {
         'xpack.apm.diagnostics.tab.index_pattern_settings',
         {
           defaultMessage: 'Index pattern settings',
-        }
+        },
       ),
       isSelected: routePath === '/diagnostics/index-pattern-settings',
       isHidden: isCrossCluster || !hasAllClusterPrivileges,

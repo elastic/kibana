@@ -96,7 +96,7 @@ export async function getDocumentSources({
   });
 
   const hasAnySourceDocBefore = documentTypesInfo.some(
-    (source) => source.hasDocBefore
+    (source) => source.hasDocBefore,
   );
 
   return [
@@ -142,7 +142,7 @@ const getDocumentTypesInfo = async ({
     ])
     .filter(
       (request): request is ReturnType<typeof getRequest> =>
-        request !== undefined
+        request !== undefined,
     );
 
   const allResponses = (
@@ -215,7 +215,7 @@ const getDocumentTypeRequestsFn =
 
 const mapToSources = (
   sources: DocumentTypeData[],
-  hasAnySourceDocBefore: boolean
+  hasAnySourceDocBefore: boolean,
 ) => {
   return sources.map((source) => {
     const {

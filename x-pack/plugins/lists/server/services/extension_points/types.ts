@@ -48,7 +48,7 @@ export type ServerExtensionCallback<A extends object | void = void, R = A> = (ar
 interface ServerExtensionPointDefinition<
   T extends string,
   Args extends object | void = void,
-  Response = Args
+  Response = Args,
 > {
   type: T;
   /**
@@ -186,7 +186,7 @@ export interface ExtensionPointStorageClientInterface {
     T extends ExtensionPoint['type'],
     D extends NarrowExtensionPointToType<T> = NarrowExtensionPointToType<T>,
     // @ts-expect-error ts upgrade v4.7.4
-    P extends Parameters<D['callback']> = Parameters<D['callback']>
+    P extends Parameters<D['callback']> = Parameters<D['callback']>,
   >(
     extensionType: T,
     initialCallbackInput: P[0]['data'],

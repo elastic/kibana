@@ -107,7 +107,7 @@ export function ErrorGroupDetails() {
       netConnectionType,
     },
   } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
   );
   const kueryWithMobileFilters = getKueryWithMobileFilters({
     device,
@@ -136,7 +136,7 @@ export function ErrorGroupDetails() {
             serviceGroup,
             comparisonEnabled,
           },
-        }
+        },
       ),
     }),
     [
@@ -149,7 +149,7 @@ export function ErrorGroupDetails() {
       rangeTo,
       serviceGroup,
       serviceName,
-    ]
+    ],
   );
 
   const {
@@ -173,11 +173,11 @@ export function ErrorGroupDetails() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
+    [environment, kueryWithMobileFilters, serviceName, start, end, groupId],
   );
 
   const { errorDistributionData, status: errorDistributionStatus } =
@@ -190,7 +190,7 @@ export function ErrorGroupDetails() {
 
   useEffect(() => {
     const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
+      (sample) => sample === errorId,
     );
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
@@ -232,14 +232,14 @@ export function ErrorGroupDetails() {
                 'xpack.apm.errorGroupDetails.occurrencesChartLabel',
                 {
                   defaultMessage: 'Error occurrences',
-                }
+                },
               )}
               height={300}
               tip={i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
                 {
                   defaultMessage: `Error rate is measured in transactions per minute.`,
-                }
+                },
               )}
             />
           </EuiFlexItem>

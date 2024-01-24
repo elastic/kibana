@@ -27,7 +27,10 @@ export interface SLORepository {
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
-  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
+  constructor(
+    private soClient: SavedObjectsClientContract,
+    private logger: Logger
+  ) {}
 
   async save(slo: SLO, options = { throwOnConflict: false }): Promise<SLO> {
     let existingSavedObjectId;

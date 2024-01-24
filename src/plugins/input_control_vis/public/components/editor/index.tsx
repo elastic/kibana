@@ -15,8 +15,9 @@ const ControlsTab = lazy(() => import('./controls_tab'));
 const OptionsTab = lazy(() => import('./options_tab'));
 
 export const getControlsTab =
-  (deps: InputControlVisDependencies) => (props: VisEditorOptionsProps<InputControlVisParams>) =>
-    <ControlsTab {...props} deps={deps} />;
+  (deps: InputControlVisDependencies) => (props: VisEditorOptionsProps<InputControlVisParams>) => (
+    <ControlsTab {...props} deps={deps} />
+  );
 
 export const OptionsTabLazy = (props: VisEditorOptionsProps<InputControlVisParams>) => (
   <OptionsTab {...props} />

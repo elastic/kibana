@@ -165,7 +165,7 @@ export const SourceFeatures: React.FC<SourceFeatureProps> = ({ features, objType
       [FeatureIds.Remote]: RemoteFeature,
       [FeatureIds.Private]: PrivateFeature,
       [FeatureIds.GlobalAccessPermissions]: GlobalAccessPermissionsFeature,
-    }[featureId]);
+    })[featureId];
 
   const IncludedFeatureIds = () => {
     let includedFeatures: FeatureIds[] | undefined;

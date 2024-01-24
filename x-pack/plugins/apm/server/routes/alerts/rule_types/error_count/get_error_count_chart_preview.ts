@@ -47,7 +47,7 @@ export async function getTransactionErrorCountChartPreview({
 
   const allGroupByFields = getAllGroupByFields(
     ApmRuleType.ErrorCount,
-    groupByFields
+    groupByFields,
   );
 
   const termFilterQuery = !searchConfiguration
@@ -102,7 +102,7 @@ export async function getTransactionErrorCountChartPreview({
 
   const resp = await apmEventClient.search(
     'get_error_count_chart_preview',
-    params
+    params,
   );
 
   if (!resp.aggregations) {
@@ -125,7 +125,7 @@ export async function getTransactionErrorCountChartPreview({
 
       return acc;
     },
-    {} as BarSeriesDataMap
+    {} as BarSeriesDataMap,
   );
 
   const series = Object.keys(seriesDataMap).map((key) => ({

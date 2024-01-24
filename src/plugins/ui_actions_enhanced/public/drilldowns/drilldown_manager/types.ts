@@ -22,7 +22,7 @@ import {
  * action factory methods
  */
 export type ActionFactoryPlaceContext<
-  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > = Omit<ActionFactoryContext, 'triggers'>;
 
 /**

@@ -80,8 +80,8 @@ export const PoliciesSelector = memo<PoliciesSelectorProps>(
         defaultIncludedPoliciesByKey[id]
           ? 'on'
           : defaultExcludedPoliciesByKey[id]
-          ? 'off'
-          : undefined;
+            ? 'off'
+            : undefined;
 
       setItemsList([
         ...policies.map((policy) => ({

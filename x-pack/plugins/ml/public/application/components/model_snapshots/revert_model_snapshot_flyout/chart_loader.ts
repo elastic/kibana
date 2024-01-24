@@ -83,7 +83,7 @@ export function chartLoaderProvider(mlResultsService: MlResultsService) {
     const anomalies: Record<number, Anomaly[]> = {};
     anomalies[0] = Object.entries(results).map(
       ([time, value]) =>
-        ({ time: +time, value, severity: getSeverityType(value as number) } as Anomaly)
+        ({ time: +time, value, severity: getSeverityType(value as number) }) as Anomaly
     );
     return anomalies;
   }

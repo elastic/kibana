@@ -70,7 +70,7 @@ async function getThroughputChartsForDependencyForTimeRange({
       apm: {
         events: [
           getProcessorEventForServiceDestinationStatistics(
-            searchServiceDestinationMetrics
+            searchServiceDestinationMetrics,
           ),
         ],
       },
@@ -85,7 +85,7 @@ async function getThroughputChartsForDependencyForTimeRange({
               ...rangeQuery(startWithOffset, endWithOffset),
               ...termQuery(SPAN_NAME, spanName || null),
               ...getDocumentTypeFilterForServiceDestinationStatistics(
-                searchServiceDestinationMetrics
+                searchServiceDestinationMetrics,
               ),
               { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
             ],
@@ -105,7 +105,7 @@ async function getThroughputChartsForDependencyForTimeRange({
                   ...(searchServiceDestinationMetrics
                     ? {
                         field: getDocCountFieldForServiceDestinationStatistics(
-                          searchServiceDestinationMetrics
+                          searchServiceDestinationMetrics,
                         ),
                       }
                     : {}),
@@ -116,7 +116,7 @@ async function getThroughputChartsForDependencyForTimeRange({
           },
         },
       },
-    }
+    },
   );
 
   return (

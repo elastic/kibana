@@ -97,7 +97,7 @@ function TutorialFleetInstructions({
           'xpack.apm.tutorial.apmServer.fleet.manageApmIntegration.button',
           {
             defaultMessage: 'Manage APM integration in Fleet',
-          }
+          },
         )}
       </EuiButton>
     );
@@ -118,7 +118,7 @@ function TutorialFleetInstructions({
               {
                 defaultMessage:
                   'The APM integration installs Elasticsearch templates and ingest pipelines for APM data.',
-              }
+              },
             )}
             footer={
               <>
@@ -132,7 +132,7 @@ function TutorialFleetInstructions({
                     'xpack.apm.tutorial.apmServer.fleet.apmIntegration.button',
                     {
                       defaultMessage: 'APM integration',
-                    }
+                    },
                   )}
                 </EuiButton>
                 <EuiSpacer size="m" />
@@ -143,7 +143,7 @@ function TutorialFleetInstructions({
                       {
                         defaultMessage:
                           'Fleet allows you to centrally manage Elastic Agents running the APM integration. The default option is to install a Fleet Server on a dedicated host. For setups without a dedicated host, we recommend following the instructions to install the standalone APM Server for your operating system by selecting the respective tab above.',
-                      }
+                      },
                     )}
                   </p>
                 </EuiText>

@@ -72,7 +72,7 @@ export function getSpanMetricColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { latency, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
+          ChartType.LATENCY_AVG,
         );
 
         return (
@@ -98,7 +98,7 @@ export function getSpanMetricColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { throughput, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
+          ChartType.THROUGHPUT,
         );
 
         return (
@@ -125,7 +125,7 @@ export function getSpanMetricColumns({
             {
               defaultMessage:
                 "The percentage of failed transactions for the selected service. HTTP server transactions with a 4xx status code (client error) aren't considered failures because the caller, not the server, caused the failure.",
-            }
+            },
           )}
         >
           <>
@@ -145,7 +145,7 @@ export function getSpanMetricColumns({
       align: RIGHT_ALIGNMENT,
       render: (_, { failureRate, currentStats, previousStats }) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.FAILED_TRANSACTION_RATE,
         );
 
         return (
@@ -172,7 +172,7 @@ export function getSpanMetricColumns({
             {
               defaultMessage:
                 'The most used and slowest endpoints in your service. Calculated by multiplying latency by throughput.',
-            }
+            },
           )}
         >
           <>

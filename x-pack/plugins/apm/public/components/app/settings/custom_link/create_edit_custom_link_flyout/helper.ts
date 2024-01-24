@@ -25,7 +25,7 @@ export const DEFAULT_OPTION: FilterSelectOption = {
   value: 'DEFAULT',
   text: i18n.translate(
     'xpack.apm.settings.customLink.flyOut.filters.defaultOption',
-    { defaultMessage: 'Select field...' }
+    { defaultMessage: 'Select field...' },
   ),
 };
 
@@ -45,17 +45,17 @@ export const FILTER_SELECT_OPTIONS: FilterSelectOption[] = [
  */
 export const getSelectOptions = (
   filters: Filter[],
-  selectedKey: Filter['key']
+  selectedKey: Filter['key'],
 ) => {
   return FILTER_SELECT_OPTIONS.filter(
     ({ value }) =>
-      !filters.some(({ key }) => key === value && key !== selectedKey)
+      !filters.some(({ key }) => key === value && key !== selectedKey),
   );
 };
 
 const getInvalidTemplateVariables = (
   template: string,
-  transaction: Transaction
+  transaction: Transaction,
 ) => {
   return (Mustache.parse(template) as Array<[string, string]>)
     .filter(([type]) => type === 'name')
@@ -70,7 +70,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
       {
         defaultMessage:
           "We couldn't find a matching transaction document based on the defined filters.",
-      }
+      },
     );
   }
   try {
@@ -86,7 +86,7 @@ const validateUrl = (url: string, transaction?: Transaction) => {
               .map((variable) => `{{${variable}}}`)
               .join(', '),
           },
-        }
+        },
       );
     }
   } catch (e) {
@@ -95,14 +95,14 @@ const validateUrl = (url: string, transaction?: Transaction) => {
       {
         defaultMessage:
           "We couldn't find an example transaction document due to invalid variable(s) defined.",
-      }
+      },
     );
   }
 };
 
 export const replaceTemplateVariables = (
   url: string,
-  transaction?: Transaction
+  transaction?: Transaction,
 ) => ({
   formattedUrl: getEncodedCustomLinkUrl(url, transaction),
   error: validateUrl(url, transaction),

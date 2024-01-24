@@ -161,7 +161,7 @@ export {
 export type ActionTypeIndex = Record<string, ActionType>;
 export type ActionTypeRegistryContract<
   ActionConnector = unknown,
-  ActionParams = unknown
+  ActionParams = unknown,
 > = PublicMethodsOf<TypeRegistry<ActionTypeModel<ActionConnector, ActionParams>>>;
 export type RuleTypeRegistryContract = PublicMethodsOf<TypeRegistry<RuleTypeModel>>;
 export type AlertsTableConfigurationRegistryContract = PublicMethodsOf<AlertTableConfigRegistry>;
@@ -328,7 +328,7 @@ export type ActionConnector<Config = Record<string, unknown>, Secrets = Record<s
 
 export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
-  Secrets = Record<string, unknown>
+  Secrets = Record<string, unknown>,
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
 
 export type ActionConnectorTableItem = ActionConnector & {
@@ -357,7 +357,7 @@ export interface RuleTableItem extends Rule {
 export interface RuleTypeParamsExpressionProps<
   Params extends RuleTypeParams = RuleTypeParams,
   MetaData = Record<string, unknown>,
-  ActionGroupIds extends string = string
+  ActionGroupIds extends string = string,
 > {
   id?: string;
   ruleParams: Params;

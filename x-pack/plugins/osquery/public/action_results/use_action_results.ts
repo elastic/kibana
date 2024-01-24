@@ -97,7 +97,7 @@ export const useActionResults = ({
         ? cachedData?.edges
         : agentIds?.map(
             (agentId) =>
-              ({ fields: { agent_id: [agentId] } } as unknown as estypes.SearchHit<object>)
+              ({ fields: { agent_id: [agentId] } }) as unknown as estypes.SearchHit<object>
           ) ?? [];
 
       return {

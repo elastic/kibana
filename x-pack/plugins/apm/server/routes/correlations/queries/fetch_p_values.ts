@@ -66,9 +66,9 @@ export const fetchPValues = async ({
           query,
           fieldName,
           rangeSteps,
-        })
-      )
-    )
+        }),
+      ),
+    ),
   );
 
   const flattenedResults = fulfilled.flat();

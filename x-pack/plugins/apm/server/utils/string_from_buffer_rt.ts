@@ -16,5 +16,5 @@ export const stringFromBufferRt = new t.Type<string, Buffer, unknown>(
   },
   (str) => {
     return Buffer.from(str);
-  }
+  },
 );

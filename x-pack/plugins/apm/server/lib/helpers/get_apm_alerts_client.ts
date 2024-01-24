@@ -17,9 +17,8 @@ export async function getApmAlertsClient({
   request,
 }: APMRouteHandlerResources) {
   const ruleRegistryPluginStart = await plugins.ruleRegistry.start();
-  const alertsClient = await ruleRegistryPluginStart.getRacClientWithRequest(
-    request
-  );
+  const alertsClient =
+    await ruleRegistryPluginStart.getRacClientWithRequest(request);
   const apmAlertsIndices = await alertsClient.getAuthorizedAlertsIndices([
     'apm',
   ]);
@@ -35,7 +34,7 @@ export async function getApmAlertsClient({
 
   return {
     search<TParams extends RequiredParams>(
-      searchParams: TParams
+      searchParams: TParams,
     ): Promise<InferSearchResponseOf<ParsedTechnicalFields, TParams>> {
       return alertsClient.find({
         ...searchParams,

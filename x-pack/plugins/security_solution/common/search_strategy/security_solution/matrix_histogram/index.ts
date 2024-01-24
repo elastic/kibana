@@ -70,16 +70,16 @@ export interface MatrixHistogramSchema<T> {
 export type MatrixHistogramParseData<T> = T extends MatrixHistogramType.alerts
   ? AlertsGroupData[]
   : T extends MatrixHistogramType.anomalies
-  ? AnomaliesActionGroupData[]
-  : T extends MatrixHistogramType.dns
-  ? DnsHistogramGroupData[]
-  : T extends MatrixHistogramType.authentications
-  ? AuthenticationsActionGroupData[]
-  : T extends MatrixHistogramType.events
-  ? EventsActionGroupData[]
-  : T extends MatrixHistogramType.preview
-  ? PreviewHistogramGroupData[]
-  : never;
+    ? AnomaliesActionGroupData[]
+    : T extends MatrixHistogramType.dns
+      ? DnsHistogramGroupData[]
+      : T extends MatrixHistogramType.authentications
+        ? AuthenticationsActionGroupData[]
+        : T extends MatrixHistogramType.events
+          ? EventsActionGroupData[]
+          : T extends MatrixHistogramType.preview
+            ? PreviewHistogramGroupData[]
+            : never;
 
 export type MatrixHistogramDataConfig = Record<
   MatrixHistogramType,

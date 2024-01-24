@@ -33,7 +33,7 @@ alerts and anomalies.`,
 deployments, the environments, and the infrastructure that it is running in, for instance on how 
 many pods, and a list of its downstream dependencies. It also returns active 
 alerts and anomalies.`,
-        }
+        },
       ),
       parameters: {
         type: 'object',
@@ -67,11 +67,11 @@ alerts and anomalies.`,
         await Promise.all([
           plugins.observability.setup.getScopedAnnotationsClient(
             context,
-            request
+            request,
           ),
           context.core.then(
             (coreContext): ElasticsearchClient =>
-              coreContext.elasticsearch.client.asCurrentUser
+              coreContext.elasticsearch.client.asCurrentUser,
           ),
           getApmAlertsClient(resources),
           getMlClient(resources),
@@ -88,6 +88,6 @@ alerts and anomalies.`,
           arguments: args,
         }),
       };
-    }
+    },
   );
 }

@@ -130,7 +130,7 @@ async function getTopErroneousTransactions({
             };
           }),
         };
-      }
+      },
     ) ?? []
   );
 }
@@ -194,7 +194,7 @@ export async function getTopErroneousTransactionsPeriods({
 
   const previousPeriodByTransactionName = keyBy(
     previousPeriod,
-    'transactionName'
+    'transactionName',
   );
 
   return {
@@ -207,7 +207,7 @@ export async function getTopErroneousTransactionsPeriods({
           previousPeriodTimeseries:
             previousPeriodByTransactionName[transactionName]?.timeseries ?? [],
         };
-      }
+      },
     ),
   };
 }

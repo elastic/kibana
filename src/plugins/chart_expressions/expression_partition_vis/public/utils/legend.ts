@@ -23,7 +23,7 @@ export const isLegendFlat = (
     [ChartTypes.TREEMAP]: () => isLegendFlatCommon(splitChartDimension),
     [ChartTypes.MOSAIC]: () => isLegendFlatCommon(splitChartDimension),
     [ChartTypes.WAFFLE]: () => true,
-  }[visType]());
+  })[visType]();
 
 const showIfBuckets = (bucketColumns: Array<Partial<BucketColumns>>) => bucketColumns.length > 1;
 
@@ -34,7 +34,7 @@ const showLegendDefault = (visType: ChartTypes, bucketColumns: Array<Partial<Buc
     [ChartTypes.TREEMAP]: () => false,
     [ChartTypes.MOSAIC]: () => false,
     [ChartTypes.WAFFLE]: () => true,
-  }[visType]());
+  })[visType]();
 
 export const shouldShowLegend = (
   visType: ChartTypes,

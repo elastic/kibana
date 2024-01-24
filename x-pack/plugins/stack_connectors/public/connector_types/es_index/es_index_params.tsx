@@ -56,11 +56,11 @@ export const IndexParamsFields = ({
         typeof docs[0] === 'string'
         ? docs[0]
         : // otherwise check that the array entry is non-empty as sometimes we
-        // use an empty object to trigger validation but we don't want to auto-populate with an empty object
-        !isEmpty(docs[0])
-        ? // if non-empty object, stringify it into format that JSON editor expects
-          JSON.stringify(docs[0], null, 2)
-        : null
+          // use an empty object to trigger validation but we don't want to auto-populate with an empty object
+          !isEmpty(docs[0])
+          ? // if non-empty object, stringify it into format that JSON editor expects
+            JSON.stringify(docs[0], null, 2)
+          : null
       : undefined;
   };
 

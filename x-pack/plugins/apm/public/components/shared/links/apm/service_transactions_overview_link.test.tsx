@@ -33,7 +33,7 @@ describe('Service or transactions overview link', () => {
     it('returns service link', () => {
       const { result } = renderHook(
         () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
-        { wrapper: wrapper({}) }
+        { wrapper: wrapper({}) },
       );
       expect(result.current).toEqual('/basepath/app/apm/services/foo');
     });
@@ -41,10 +41,12 @@ describe('Service or transactions overview link', () => {
     it('returns service link with persisted query items', () => {
       const { result } = renderHook(
         () => useServiceOrTransactionsOverviewHref({ serviceName: 'foo' }),
-        { wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }) }
+        {
+          wrapper: wrapper({ queryParams: { latencyAggregationType: 'avg' } }),
+        },
       );
       expect(result.current).toEqual(
-        '/basepath/app/apm/services/foo?latencyAggregationType=avg'
+        '/basepath/app/apm/services/foo?latencyAggregationType=avg',
       );
     });
   });
@@ -60,10 +62,10 @@ describe('Service or transactions overview link', () => {
           <ServiceOrTransactionsOverviewLink serviceName="foo">
             Service name
           </ServiceOrTransactionsOverviewLink>
-        </Component>
+        </Component>,
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo'
+        'http://localhost/basepath/app/apm/services/foo',
       );
     });
 
@@ -76,10 +78,10 @@ describe('Service or transactions overview link', () => {
           <ServiceOrTransactionsOverviewLink serviceName="foo">
             Service name
           </ServiceOrTransactionsOverviewLink>
-        </Component>
+        </Component>,
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo?latencyAggregationType=avg'
+        'http://localhost/basepath/app/apm/services/foo?latencyAggregationType=avg',
       );
     });
   });

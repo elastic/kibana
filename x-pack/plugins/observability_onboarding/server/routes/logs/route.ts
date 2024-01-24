@@ -25,7 +25,7 @@ const logMonitoringPrivilegesRoute = createObservabilityOnboardingServerRoute({
     } = await context.core;
 
     const hasPrivileges = await hasLogMonitoringPrivileges(
-      client.asCurrentUser
+      client.asCurrentUser,
     );
 
     return { hasPrivileges };
@@ -89,7 +89,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     ]),
   }),
   async handler(
-    resources
+    resources,
   ): Promise<{ apiKeyEncoded: string; onboardingId: string }> {
     const {
       context,
@@ -105,7 +105,7 @@ const createFlowRoute = createObservabilityOnboardingServerRoute({
     } = await context.core;
     const { encoded: apiKeyEncoded } = await createShipperApiKey(
       client.asCurrentUser,
-      name
+      name,
     );
 
     const generatedState =

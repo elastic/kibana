@@ -49,7 +49,7 @@ export const getFriendlyNameForPartitionId = (partitionId: string) => {
 };
 
 export const compareDatasetsByMaximumAnomalyScore = <
-  Dataset extends { maximumAnomalyScore: number }
+  Dataset extends { maximumAnomalyScore: number },
 >(
   firstDataset: Dataset,
   secondDataset: Dataset

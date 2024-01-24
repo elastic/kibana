@@ -37,11 +37,11 @@ const label = i18n.translate(
   'xpack.apm.serviceOverview.embeddedMap.session.metric.label',
   {
     defaultMessage: 'Sessions',
-  }
+  },
 );
 export async function getSessionMapLayerList(
   maps: MapsStartApi | undefined,
-  dataViewId: string
+  dataViewId: string,
 ) {
   const basemapLayerDescriptor =
     await maps?.createLayerDescriptors?.createBasemapLayerDescriptor();
@@ -79,7 +79,7 @@ export async function getSessionMapLayerList(
       'xpack.apm.serviceOverview.embeddedMap.sessionCountry.metric.label',
       {
         defaultMessage: 'Sessions per country',
-      }
+      },
     ),
     minZoom: 0,
     maxZoom: 2,
@@ -121,7 +121,7 @@ export async function getSessionMapLayerList(
       'xpack.apm.serviceOverview.embeddedMap.sessionRegion.metric.label',
       {
         defaultMessage: 'Sessions per region',
-      }
+      },
     ),
     minZoom: 1,
     maxZoom: 24,

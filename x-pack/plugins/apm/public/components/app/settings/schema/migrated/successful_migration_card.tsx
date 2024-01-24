@@ -22,7 +22,7 @@ export function SuccessfulMigrationCard() {
         {
           defaultMessage:
             'Your APM integration is now setup and ready to receive data from your currently instrumented agents. Feel free to review the policies applied to your integtration.',
-        }
+        },
       )}
       footer={<CardFooterContent />}
     />

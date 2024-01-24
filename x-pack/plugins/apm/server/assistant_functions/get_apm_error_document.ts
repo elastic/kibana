@@ -25,7 +25,7 @@ export function registerGetApmErrorDocumentFunction({
         {
           defaultMessage: `Get a sample error document based on its grouping name. This also includes the 
       stacktrace of the error, which might give you a hint as to what the cause is.`,
-        }
+        },
       ),
       parameters: {
         type: 'object',
@@ -60,6 +60,6 @@ export function registerGetApmErrorDocumentFunction({
           arguments: args,
         }),
       };
-    }
+    },
   );
 }

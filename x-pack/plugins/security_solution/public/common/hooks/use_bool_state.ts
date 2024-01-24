@@ -11,7 +11,7 @@ type UseBoolStateReturn = [
   state: boolean,
   setTrue: () => void,
   setFalse: () => void,
-  toggle: () => void
+  toggle: () => void,
 ];
 
 export const useBoolState = (initial = false): UseBoolStateReturn => {

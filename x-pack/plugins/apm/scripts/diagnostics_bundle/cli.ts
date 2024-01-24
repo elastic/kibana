@@ -77,12 +77,12 @@ async function init() {
 
   if ((!esHost || !kbHost) && !cloudId) {
     console.error(
-      'Please provide either: --esHost and --kbHost or --cloudId\n'
+      'Please provide either: --esHost and --kbHost or --cloudId\n',
     );
 
     console.log('Example 1:');
     console.log(
-      '--kbHost https://foo.kb.us-west2.gcp.elastic-cloud.com --esHost https://foo.es.us-west2.gcp.elastic-cloud.com\n'
+      '--kbHost https://foo.kb.us-west2.gcp.elastic-cloud.com --esHost https://foo.es.us-west2.gcp.elastic-cloud.com\n',
     );
 
     console.log('Example 2:');
@@ -95,7 +95,7 @@ async function init() {
 
   if ((!username || !password) && !apiKey) {
     console.error(
-      'Please provide either: --username and --password or --apiKey \n'
+      'Please provide either: --username and --password or --apiKey \n',
     );
 
     console.log('Example 1:');

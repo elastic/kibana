@@ -145,7 +145,7 @@ async function run() {
   const indicesWithDocs =
     response.body.aggregations?.index.buckets.map(
       // @ts-expect-error bucket has any type
-      (bucket) => bucket.key as string
+      (bucket) => bucket.key as string,
     ) ?? [];
 
   const indicesToArchive = indicesWithDocs.join(',');
@@ -155,14 +155,14 @@ async function run() {
   execSync(
     `node scripts/es_archiver save ${path.join(
       tmpDir,
-      archiveName
+      archiveName,
     )} ${indicesToArchive} --kibana-url=${kibanaUrl} --es-url=${esUrl} --query='${JSON.stringify(
-      query
+      query,
     )}'`,
     {
       cwd: root,
       stdio: 'inherit',
-    }
+    },
   );
 
   const currentConfig = {};
@@ -189,7 +189,7 @@ async function run() {
     `
     /* eslint-disable-next-line*/
     export default ${JSON.stringify(newConfig, null, 2)}`,
-    { encoding: 'utf-8' }
+    { encoding: 'utf-8' },
   );
 
   const esArchiverDir = 'fixtures/es_archiver/';
@@ -197,7 +197,7 @@ async function run() {
   const apiIntegrationDir = path.join(
     root,
     'x-pack/test/apm_api_integration/common',
-    esArchiverDir
+    esArchiverDir,
   );
   const e2eDir = path.join(__dirname, '../../ftr_e2e/cypress', esArchiverDir);
 

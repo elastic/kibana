@@ -46,7 +46,7 @@ export interface ISearchSetup {
    */
   registerSearchStrategy: <
     SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+    SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
   >(
     name: string,
     strategy: ISearchStrategy<SearchStrategyRequest, SearchStrategyResponse>
@@ -66,7 +66,7 @@ export interface ISearchSetup {
  */
 export interface ISearchStrategy<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 > {
   search: (
     request: SearchStrategyRequest,
@@ -95,7 +95,7 @@ export interface IScopedSearchClient extends ISearchClient {
 
 export interface ISearchStart<
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
-  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse
+  SearchStrategyResponse extends IKibanaSearchResponse = IEsSearchResponse,
 > {
   aggs: AggsStart;
   /**

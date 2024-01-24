@@ -147,11 +147,11 @@ export function useAlertDataView(props: UseAlertDataViewProps): UseAlertDataView
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
           : isOnlySecurity
-          ? isIndexNameInitialLoading || isIndexNameLoading
-          : isIndexNameInitialLoading ||
-            isIndexNameLoading ||
-            isAlertFieldsInitialLoading ||
-            isAlertFieldsLoading,
+            ? isIndexNameInitialLoading || isIndexNameLoading
+            : isIndexNameInitialLoading ||
+              isIndexNameLoading ||
+              isAlertFieldsInitialLoading ||
+              isAlertFieldsLoading,
     }),
     [
       dataViews,

@@ -76,7 +76,7 @@ export function getColumns({
       field: 'serviceNodeName',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnNodeName',
-        { defaultMessage: 'Node name' }
+        { defaultMessage: 'Node name' },
       ),
       width: '30%',
       render: (_, item) => {
@@ -114,7 +114,7 @@ export function getColumns({
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.latency;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.LATENCY_AVG
+          ChartType.LATENCY_AVG,
         );
 
         return (
@@ -139,7 +139,7 @@ export function getColumns({
       field: 'throughput',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnThroughput',
-        { defaultMessage: 'Throughput' }
+        { defaultMessage: 'Throughput' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, throughput }) => {
@@ -149,7 +149,7 @@ export function getColumns({
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.throughput;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.THROUGHPUT
+          ChartType.THROUGHPUT,
         );
 
         return (
@@ -175,7 +175,7 @@ export function getColumns({
       field: 'errorRate',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnErrorRate',
-        { defaultMessage: 'Failed transaction rate' }
+        { defaultMessage: 'Failed transaction rate' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, errorRate }) => {
@@ -185,7 +185,7 @@ export function getColumns({
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.errorRate;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.FAILED_TRANSACTION_RATE,
         );
 
         return (
@@ -211,7 +211,7 @@ export function getColumns({
       field: 'cpuUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnCpuUsage',
-        { defaultMessage: 'CPU usage (avg.)' }
+        { defaultMessage: 'CPU usage (avg.)' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, cpuUsage }) => {
@@ -221,7 +221,7 @@ export function getColumns({
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.cpuUsage;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.CPU_USAGE
+          ChartType.CPU_USAGE,
         );
 
         return (
@@ -247,7 +247,7 @@ export function getColumns({
       field: 'memoryUsage',
       name: i18n.translate(
         'xpack.apm.serviceOverview.instancesTableColumnMemoryUsage',
-        { defaultMessage: 'Memory usage (avg.)' }
+        { defaultMessage: 'Memory usage (avg.)' },
       ),
       align: RIGHT_ALIGNMENT,
       render: (_, { serviceNodeName, memoryUsage }) => {
@@ -257,7 +257,7 @@ export function getColumns({
           detailedStatsData?.previousPeriod?.[serviceNodeName]?.memoryUsage;
 
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.MEMORY_USAGE
+          ChartType.MEMORY_USAGE,
         );
 
         return (

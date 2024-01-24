@@ -25,7 +25,7 @@ export async function getExistingApmIndexTemplates({
     apmIndexTemplateNames.map(async (indexTemplateName) => {
       const res = await getIndexTemplate(esClient, { name: indexTemplateName });
       return res.index_templates[0];
-    })
+    }),
   );
 
   return values.filter((v) => v !== undefined);

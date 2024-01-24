@@ -94,7 +94,7 @@ export function TransactionTabs({
       transaction,
       waterfall,
       waterfallItemId,
-    ]
+    ],
   );
 
   const currentTab = tabs[detailTab];
@@ -183,7 +183,7 @@ function LogsTabContent({
           field: 'service.name',
           header: i18n.translate(
             'xpack.apm.propertiesTable.tabs.logs.serviceName',
-            { defaultMessage: 'Service Name' }
+            { defaultMessage: 'Service Name' },
           ),
           width: 200,
         },

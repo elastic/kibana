@@ -593,10 +593,13 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   }
 
   const resourceFileOverrides: Record<string, string> = resources
-    ? (Array.isArray(resources) ? resources : [resources]).reduce((acc, filePath) => {
-        acc[basename(filePath)] = resolve(process.cwd(), filePath);
-        return acc;
-      }, {} as Record<string, string>)
+    ? (Array.isArray(resources) ? resources : [resources]).reduce(
+        (acc, filePath) => {
+          acc[basename(filePath)] = resolve(process.cwd(), filePath);
+          return acc;
+        },
+        {} as Record<string, string>
+      )
     : {};
 
   // Check if projectType is valid

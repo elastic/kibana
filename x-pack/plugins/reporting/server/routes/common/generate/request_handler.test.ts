@@ -33,17 +33,17 @@ jest.mock('@kbn/reporting-server/crypto', () => ({
 const getMockContext = () =>
   ({
     core: coreMock.createRequestHandlerContext(),
-  } as unknown as ReportingRequestHandlerContext);
+  }) as unknown as ReportingRequestHandlerContext;
 
 const getMockRequest = () =>
   ({
     url: { port: '5601', search: '', pathname: '/foo' },
     route: { path: '/foo', options: {} },
-  } as KibanaRequest<
+  }) as KibanaRequest<
     { exportType: string },
     { jobParams: string } | null,
     { jobParams: string } | null
-  >);
+  >;
 
 const getMockResponseFactory = () =>
   ({
@@ -51,7 +51,7 @@ const getMockResponseFactory = () =>
     forbidden: (obj: unknown) => obj,
     unauthorized: (obj: unknown) => obj,
     customError: (err: unknown) => err,
-  } as unknown as KibanaResponseFactory);
+  }) as unknown as KibanaResponseFactory;
 
 const mockLogger = loggingSystemMock.createLogger();
 const mockJobParams: JobParamsPDFDeprecated = {

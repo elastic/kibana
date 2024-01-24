@@ -75,7 +75,7 @@ export async function getServiceTransactionGroups({
 }): Promise<ServiceTransactionGroupsResponse> {
   const field = getDurationFieldForTransactions(
     documentType,
-    useDurationSummary
+    useDurationSummary,
   );
 
   const response = await apmEventClient.search(
@@ -133,7 +133,7 @@ export async function getServiceTransactionGroups({
           },
         },
       },
-    }
+    },
   );
 
   const totalDuration = response.aggregations?.total_duration.value;

@@ -52,7 +52,7 @@ describe('Instances table', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -64,7 +64,7 @@ describe('Instances table', () => {
       cy.visitKibana(testServiveHref);
       cy.contains('test-service');
       cy.getByTestSubj('serviceInstancesTableContainer').contains(
-        'No instances found'
+        'No instances found',
       );
     });
   });

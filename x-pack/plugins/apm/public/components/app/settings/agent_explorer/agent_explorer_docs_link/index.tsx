@@ -48,7 +48,7 @@ export function AgentExplorerDocsLink({
             'xpack.apm.agentExplorer.docsLink.elastic.logo',
             {
               defaultMessage: 'Elastic logo',
-            }
+            },
           )}
         />
       )}{' '}

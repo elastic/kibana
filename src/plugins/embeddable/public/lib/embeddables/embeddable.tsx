@@ -40,7 +40,7 @@ function getPanelDescription(input: EmbeddableInput, output: EmbeddableOutput) {
 export abstract class Embeddable<
   TEmbeddableInput extends EmbeddableInput = EmbeddableInput,
   TEmbeddableOutput extends EmbeddableOutput = EmbeddableOutput,
-  TNode = any
+  TNode = any,
 > implements IEmbeddable<TEmbeddableInput, TEmbeddableOutput, TNode>
 {
   static runtimeId: number = 0;

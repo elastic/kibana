@@ -25,7 +25,7 @@ export async function getServiceGroup({
     attributes,
   } = await savedObjectsClient.get<ServiceGroup>(
     APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-    serviceGroupId
+    serviceGroupId,
   );
   return {
     id,

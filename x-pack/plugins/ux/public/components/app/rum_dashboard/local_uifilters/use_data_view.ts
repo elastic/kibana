@@ -14,7 +14,7 @@ export function useDataView() {
 
   const [dataViewTitle, setDataViewTitle] = useLocalStorage(
     'uxAppDataViewTitle',
-    ''
+    '',
   );
 
   const updatedDataViewTitle = dataView?.title;

@@ -37,7 +37,7 @@ export function useServiceAgentFetcher({
         });
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end],
   );
 
   return { ...data, status, error };

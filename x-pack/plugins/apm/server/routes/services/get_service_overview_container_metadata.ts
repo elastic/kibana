@@ -71,16 +71,16 @@ export const getServiceOverviewContainerMetadata = async ({
   return {
     kubernetes: {
       deployments: response.aggregations?.deployments?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key,
       ),
       replicasets: response.aggregations?.replicasets?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key,
       ),
       namespaces: response.aggregations?.namespaces?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key,
       ),
       containerImages: response.aggregations?.containerImages?.buckets.map(
-        (bucket) => bucket.key
+        (bucket) => bucket.key,
       ),
     },
   };

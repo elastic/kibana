@@ -32,7 +32,7 @@ const mockResponse = jest.fn(
       rawResponse: {},
       isPartial: false,
       isRunning: false,
-    } as unknown)
+    }) as unknown
 );
 const mockSearch = jest.fn(
   () =>

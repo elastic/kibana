@@ -31,10 +31,10 @@ describe('Transactions overview link', () => {
     it('returns transaction link', () => {
       const { result } = renderHook(
         () => useTransactionsOverviewHref({ serviceName: 'foo' }),
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
       expect(result.current).toEqual(
-        '/basepath/app/apm/services/foo/transactions'
+        '/basepath/app/apm/services/foo/transactions',
       );
     });
 
@@ -45,10 +45,10 @@ describe('Transactions overview link', () => {
             serviceName: 'foo',
             latencyAggregationType: 'avg',
           }),
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
       expect(result.current).toEqual(
-        '/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg'
+        '/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg',
       );
     });
   });
@@ -63,10 +63,10 @@ describe('Transactions overview link', () => {
           <TransactionOverviewLink serviceName="foo">
             Service name
           </TransactionOverviewLink>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo/transactions'
+        'http://localhost/basepath/app/apm/services/foo/transactions',
       );
     });
 
@@ -79,10 +79,10 @@ describe('Transactions overview link', () => {
           >
             Service name
           </TransactionOverviewLink>
-        </Wrapper>
+        </Wrapper>,
       );
       expect(getHref(container)).toEqual(
-        'http://localhost/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg'
+        'http://localhost/basepath/app/apm/services/foo/transactions?latencyAggregationType=avg',
       );
     });
   });

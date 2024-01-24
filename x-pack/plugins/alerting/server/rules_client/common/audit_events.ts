@@ -130,8 +130,8 @@ export function ruleAuditEvent({
   const message = error
     ? `Failed attempt to ${present} ${doc}`
     : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
+      ? `User is ${progressive} ${doc}`
+      : `User has ${past} ${doc}`;
   const type = eventTypes[action];
 
   return {

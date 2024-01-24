@@ -28,13 +28,13 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       'xpack.apm.mobile.errorOverview.treemap.dropdown.devices',
       {
         defaultMessage: 'Devices',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.devices.subtitle',
       {
         defaultMessage: 'Treemap displaying the most affected devices.',
-      }
+      },
     ),
   },
   {
@@ -43,14 +43,14 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       'xpack.apm.mobile.errorOverview.treemap.versions.devices',
       {
         defaultMessage: 'App versions',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.versions.subtitle',
       {
         defaultMessage:
           'Treemap displaying the most affected application versions.',
-      }
+      },
     ),
   },
   {
@@ -59,13 +59,13 @@ const options: Array<EuiSuperSelectOption<TreemapTypes>> = [
       'xpack.apm.mobile.errorOverview.treemap.dropdown.osVersions',
       {
         defaultMessage: 'OS versions',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.mobile.errorOverview.treemap.dropdown.osVersions.subtitle',
       {
         defaultMessage: 'Treemap displaying the most affected OS versions.',
-      }
+      },
     ),
   },
 ].map(({ value, label, description }) => ({

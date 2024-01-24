@@ -78,7 +78,7 @@ const mobileCrashMainStatisticsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ errorGroups: MobileCrashGroupMainStatisticsResponse }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);

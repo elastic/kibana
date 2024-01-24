@@ -24,7 +24,7 @@ import { TransactionTab } from '../../app/transaction_details/waterfall_with_sum
 
 export const DependenciesInventoryTitle = i18n.translate(
   'xpack.apm.views.dependenciesInventory.title',
-  { defaultMessage: 'Dependencies' }
+  { defaultMessage: 'Dependencies' },
 );
 
 function RedirectDependenciesToDependenciesOverview() {

@@ -17,7 +17,7 @@ describe('getApmDataViewIndexPattern', () => {
       metric: 'apm-*-metrics-*',
     } as APMIndices);
     expect(indexPattern).toBe(
-      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*'
+      'apm-*-transaction-*,apm-*-span-*,apm-*-error-*,apm-*-metrics-*',
     );
   });
 

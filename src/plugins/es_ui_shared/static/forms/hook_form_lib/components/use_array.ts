@@ -126,7 +126,7 @@ export const UseArray = ({
           ({
             ...row,
             path: `${path}[${index}]`,
-          } as ArrayItem)
+          }) as ArrayItem
       );
     },
     [path]

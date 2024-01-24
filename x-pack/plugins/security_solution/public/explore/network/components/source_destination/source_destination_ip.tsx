@@ -61,8 +61,8 @@ export const getPorts = ({
     type === 'source' && sourcePort != null
       ? sourcePort
       : type === 'destination' && destinationPort != null
-      ? destinationPort
-      : [];
+        ? destinationPort
+        : [];
 
   return ports
     .filter((p) => p != null)

@@ -46,8 +46,8 @@ export const useSelectedMonitor = (monId?: string) => {
   const availableMonitor: EncryptedSyntheticsSavedMonitor | null = isLoadedSyntheticsMonitorValid
     ? syntheticsMonitor
     : isMonitorFromListValid
-    ? monitorFromList
-    : null;
+      ? monitorFromList
+      : null;
 
   const isMonitorMissing =
     error?.body.statusCode === 404 &&

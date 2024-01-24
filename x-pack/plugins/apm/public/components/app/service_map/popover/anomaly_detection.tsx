@@ -131,7 +131,7 @@ function getDisplayedAnomalyScore(score: number) {
 
 const ANOMALY_DETECTION_TITLE = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverTitle',
-  { defaultMessage: 'Anomaly Detection' }
+  { defaultMessage: 'Anomaly Detection' },
 );
 
 const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
@@ -139,17 +139,17 @@ const ANOMALY_DETECTION_TOOLTIP = i18n.translate(
   {
     defaultMessage:
       'Service health indicators are powered by the anomaly detection feature in machine learning',
-  }
+  },
 );
 
 const ANOMALY_DETECTION_SCORE_METRIC = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverScoreMetric',
-  { defaultMessage: 'Score (max.)' }
+  { defaultMessage: 'Score (max.)' },
 );
 
 const ANOMALY_DETECTION_LINK = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverLink',
-  { defaultMessage: 'View anomalies' }
+  { defaultMessage: 'View anomalies' },
 );
 
 const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
@@ -157,12 +157,12 @@ const ANOMALY_DETECTION_DISABLED_TEXT = i18n.translate(
   {
     defaultMessage:
       'Display service health indicators by enabling anomaly detection in APM settings.',
-  }
+  },
 );
 
 const ANOMALY_DETECTION_NO_DATA_TEXT = i18n.translate(
   'xpack.apm.serviceMap.anomalyDetectionPopoverNoData',
   {
     defaultMessage: `We couldn't find an anomaly score within the selected time range. See details in the anomaly explorer.`,
-  }
+  },
 );

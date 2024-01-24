@@ -21,7 +21,7 @@ interface PersistReturnExceptionList {
 
 export type ReturnPersistExceptionList = [
   PersistReturnExceptionList,
-  Dispatch<AddExceptionList | null>
+  Dispatch<AddExceptionList | null>,
 ];
 
 /**

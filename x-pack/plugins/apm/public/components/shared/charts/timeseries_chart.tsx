@@ -96,13 +96,13 @@ export function TimeseriesChart({
     .sort(
       isComparingExpectedBounds
         ? (prev, curr) => prev.type.localeCompare(curr.type)
-        : undefined
+        : undefined,
     );
 
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
   const xValuesExpectedBounds =
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
-      data.map(({ x }) => x)
+      data.map(({ x }) => x),
     ) ?? [];
   const min = Math.min(...xValues);
   const max = Math.max(...xValues, ...xValuesExpectedBounds);

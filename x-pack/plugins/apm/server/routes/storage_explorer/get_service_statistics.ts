@@ -76,7 +76,7 @@ async function getMainServiceStatistics({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],
@@ -159,14 +159,14 @@ async function getMainServiceStatistics({
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ),
         sampledTransactionDocs:
           bucket.transactions.sampled_transactions.buckets[0]?.doc_count,
         size: estimatedSize,
         agentName: bucket.sample.top[0]?.metrics[AGENT_NAME] as AgentName,
       };
-    }
+    },
   );
 
   return serviceStats ?? [];
@@ -231,7 +231,7 @@ export async function getServiceStatistics({
         sampledTransactionDocs && totalTransactionsPerService[serviceName]
           ? Math.min(
               sampledTransactionDocs / totalTransactionsPerService[serviceName],
-              1
+              1,
             )
           : 0;
 
@@ -240,7 +240,7 @@ export async function getServiceStatistics({
         serviceName,
         sampling,
       };
-    }
+    },
   );
 
   return serviceStatistics;

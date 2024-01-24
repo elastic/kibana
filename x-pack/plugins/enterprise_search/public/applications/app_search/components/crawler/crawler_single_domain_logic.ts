@@ -62,11 +62,11 @@ export const CrawlerSingleDomainLogic = kea<
       {
         onReceiveDomainData: (_, { domain }) => domain,
         updateCrawlRules: (currentDomain, { crawlRules }) =>
-          ({ ...currentDomain, crawlRules } as CrawlerDomain),
+          ({ ...currentDomain, crawlRules }) as CrawlerDomain,
         updateEntryPoints: (currentDomain, { entryPoints }) =>
-          ({ ...currentDomain, entryPoints } as CrawlerDomain),
+          ({ ...currentDomain, entryPoints }) as CrawlerDomain,
         updateSitemaps: (currentDomain, { sitemaps }) =>
-          ({ ...currentDomain, sitemaps } as CrawlerDomain),
+          ({ ...currentDomain, sitemaps }) as CrawlerDomain,
       },
     ],
   },

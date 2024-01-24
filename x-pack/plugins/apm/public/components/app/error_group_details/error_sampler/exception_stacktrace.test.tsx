@@ -21,7 +21,7 @@ describe('ExceptionStacktrace', () => {
       });
       it('should have the title in a specific format', function () {
         const wrapper = mount(<JavaWithLongLines />).find(
-          'ExceptionStacktraceTitle'
+          'ExceptionStacktraceTitle',
         );
         expect(wrapper).toHaveLength(1);
         const { type, message } =
@@ -33,7 +33,7 @@ describe('ExceptionStacktrace', () => {
     describe('with more than one stack trace', () => {
       it('renders cause stacktraces', () => {
         expect(
-          mount(<JavaWithLongLines />).find('CauseStacktrace')
+          mount(<JavaWithLongLines />).find('CauseStacktrace'),
         ).toHaveLength(2);
       });
     });

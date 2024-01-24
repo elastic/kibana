@@ -36,7 +36,7 @@ const profilingFlamegraphRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<
     { flamegraph: BaseFlameGraph; hostNames: string[] } | undefined
   > => {
@@ -100,7 +100,7 @@ const profilingFunctionsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{ functions: TopNFunctions; hostNames: string[] } | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
@@ -170,9 +170,9 @@ const profilingStatusRoute = createApmServerRoute({
         const response = await profilingDataAccessStart?.services.getStatus({
           esClient,
           soClient: (await context.core).savedObjects.client,
-          spaceId: (
-            await plugins.spaces?.start()
-          )?.spacesService.getSpaceId(resources.request),
+          spaceId: (await plugins.spaces?.start())?.spacesService.getSpaceId(
+            resources.request,
+          ),
         });
 
         return { initialized: response.has_setup };

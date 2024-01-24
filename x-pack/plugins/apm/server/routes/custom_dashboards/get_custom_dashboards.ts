@@ -32,6 +32,6 @@ export async function getCustomDashboards({
       id,
       updatedAt: upatedAt ? Date.parse(upatedAt) : 0,
       ...attributes,
-    })
+    }),
   );
 }

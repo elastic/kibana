@@ -71,7 +71,7 @@ export function registerAssistantFunctions({
       getApmIndices: async () => {
         const coreContext = await resources.context.core;
         const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
-          coreContext.savedObjects.client
+          coreContext.savedObjects.client,
         );
         return apmIndices;
       },

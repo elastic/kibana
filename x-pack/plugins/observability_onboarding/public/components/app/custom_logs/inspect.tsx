@@ -29,7 +29,7 @@ export function Inspect() {
           <h3>
             {i18n.translate(
               'xpack.observability_onboarding.inspect.h3.stateLabel',
-              { defaultMessage: 'State' }
+              { defaultMessage: 'State' },
             )}
           </h3>
         </EuiTitle>
@@ -49,7 +49,7 @@ export function Inspect() {
           <h3>
             {i18n.translate(
               'xpack.observability_onboarding.inspect.h3.usageLabel',
-              { defaultMessage: 'Usage' }
+              { defaultMessage: 'Usage' },
             )}
           </h3>
         </EuiTitle>

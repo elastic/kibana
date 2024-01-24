@@ -66,10 +66,13 @@ export const MetaEnginesTableLogic = kea<
     expandedSourceEngines: [
       (selectors) => [selectors.sourceEngines, selectors.expandedRows],
       (sourceEngines: MetaEnginesTableValues['sourceEngines'], expandedRows: string[]) => {
-        return Object.keys(expandedRows).reduce((expandedRowMap, engineName) => {
-          expandedRowMap[engineName] = sourceEngines[engineName];
-          return expandedRowMap;
-        }, {} as MetaEnginesTableValues['sourceEngines']);
+        return Object.keys(expandedRows).reduce(
+          (expandedRowMap, engineName) => {
+            expandedRowMap[engineName] = sourceEngines[engineName];
+            return expandedRowMap;
+          },
+          {} as MetaEnginesTableValues['sourceEngines']
+        );
       },
     ],
   },

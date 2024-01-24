@@ -14,7 +14,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 // the `status` of the data for the latency chart separately.
 export function getOverallHistogram(
   data: LatencyCorrelationsResponse,
-  isRunning: boolean
+  isRunning: boolean,
 ) {
   const overallHistogram =
     data.overallHistogram === undefined && !isRunning

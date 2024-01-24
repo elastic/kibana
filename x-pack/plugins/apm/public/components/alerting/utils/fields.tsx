@@ -47,7 +47,7 @@ export function ServiceField({
           'xpack.apm.serviceNamesSelectCustomOptionText',
           {
             defaultMessage: 'Add \\{searchValue\\} as a new service name',
-          }
+          },
         )}
         defaultValue={currentValue}
         fieldName={SERVICE_NAME}
@@ -84,7 +84,7 @@ export function EnvironmentField({
           'xpack.apm.environmentsSelectCustomOptionText',
           {
             defaultMessage: 'Add \\{searchValue\\} as a new environment',
-          }
+          },
         )}
         defaultValue={getEnvironmentLabel(currentValue)}
         fieldName={SERVICE_ENVIRONMENT}
@@ -121,7 +121,7 @@ export function TransactionNameField({
           'xpack.apm.alerting.transaction.name.custom.text',
           {
             defaultMessage: 'Add \\{searchValue\\} as a new transaction name',
-          }
+          },
         )}
         defaultValue={currentValue}
         fieldName={TRANSACTION_NAME}
@@ -130,7 +130,7 @@ export function TransactionNameField({
           'xpack.apm.transactionNamesSelectPlaceholder',
           {
             defaultMessage: 'Select transaction name',
-          }
+          },
         )}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
@@ -160,7 +160,7 @@ export function TransactionTypeField({
           'xpack.apm.transactionTypesSelectCustomOptionText',
           {
             defaultMessage: 'Add \\{searchValue\\} as a new transaction type',
-          }
+          },
         )}
         defaultValue={currentValue}
         fieldName={TRANSACTION_TYPE}
@@ -169,7 +169,7 @@ export function TransactionTypeField({
           'xpack.apm.transactionTypesSelectPlaceholder',
           {
             defaultMessage: 'Select transaction type',
-          }
+          },
         )}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}
@@ -199,7 +199,7 @@ export function ErrorGroupingKeyField({
           'xpack.apm.errorKeySelectCustomOptionText',
           {
             defaultMessage: 'Add \\{searchValue\\} as a new error grouping key',
-          }
+          },
         )}
         defaultValue={currentValue}
         fieldName={ERROR_GROUP_ID}
@@ -208,7 +208,7 @@ export function ErrorGroupingKeyField({
           'xpack.apm.errorGroupingKeySelectPlaceholder',
           {
             defaultMessage: 'Select error grouping key',
-          }
+          },
         )}
         start={moment().subtract(24, 'h').toISOString()}
         end={moment().toISOString()}

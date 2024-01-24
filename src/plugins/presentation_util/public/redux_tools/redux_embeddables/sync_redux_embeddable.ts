@@ -17,7 +17,7 @@ import { ReduxEmbeddableState, ReduxEmbeddableSyncSettings } from './types';
 type Writeable<T> = { -readonly [P in keyof T]: T[P] };
 
 export const syncReduxEmbeddable = <
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
 >({
   store,
   settings,

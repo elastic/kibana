@@ -20,7 +20,7 @@ import {
 import { SavedApmCustomDashboard } from '../../../common/custom_dashboards';
 
 function getSearchRequest(
-  filters: estypes.QueryDslQueryContainer[]
+  filters: estypes.QueryDslQueryContainer[],
 ): APMEventESSearchRequest {
   return {
     apm: {
@@ -59,7 +59,7 @@ export async function getServicesWithDashboards({
       ...kqlQuery(dashboard.kuery),
       ...termQuery(SERVICE_NAME, serviceName),
       ...rangeQuery(start, end),
-    ])
+    ]),
   );
 
   const filteredDashboards = [];
@@ -68,7 +68,7 @@ export async function getServicesWithDashboards({
     const allResponses = (
       await apmEventClient.msearch(
         'get_services_with_dashboards',
-        ...allSearches
+        ...allSearches,
       )
     ).responses;
 

@@ -19,7 +19,7 @@ const UNAUTHORIZED_ERROR = i18n.translate(
     values: {
       requiredKibanaPrivileges: "['Fleet', 'Integrations']",
     },
-  }
+  },
 );
 
 type ErrorType = 'AuthorizationError' | 'UnknownError';
@@ -81,7 +81,7 @@ export const useInstallSystemIntegration = ({
         }
       },
     },
-    [onIntegrationCreationSuccess, onIntegrationCreationFailure]
+    [onIntegrationCreationSuccess, onIntegrationCreationFailure],
   );
 
   const performRequest = useCallback(() => {

@@ -51,7 +51,7 @@ export function HttpErrorRateChart({
 }) {
   const comparisonChartTheme = getComparisonChartTheme();
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.HTTP_REQUESTS
+    ChartType.HTTP_REQUESTS,
   );
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -70,10 +70,10 @@ export function HttpErrorRateChart({
               offset: comparisonEnabled ? offset : undefined,
             },
           },
-        }
+        },
       );
     },
-    [environment, kuery, serviceName, start, end, offset, comparisonEnabled]
+    [environment, kuery, serviceName, start, end, offset, comparisonEnabled],
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -120,7 +120,7 @@ export function HttpErrorRateChart({
               'xpack.apm.mobile.errors.httpErrorRateTooltip',
               {
                 defaultMessage: 'Http error rate consisting of 4xx & 5xx.',
-              }
+              },
             )}
             position="right"
           />

@@ -44,7 +44,11 @@ const ProviderContainerComponent = styled.div<ProviderContainerProps>`
               transparent 75%,
               ${({ theme }) => theme.eui.euiColorMediumShade} 75%
             );
-          background-position: 0 0, 1px 0, 1px -1px, 0px 1px;
+          background-position:
+            0 0,
+            1px 0,
+            1px -1px,
+            0px 1px;
           background-size: 2px 2px;
           bottom: 2px;
           content: '';

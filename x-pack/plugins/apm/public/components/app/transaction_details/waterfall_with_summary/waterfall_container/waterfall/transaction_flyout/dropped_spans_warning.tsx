@@ -31,7 +31,7 @@ export function DroppedSpansWarning({
             defaultMessage:
               'The APM agent that reported this transaction dropped {dropped} spans or more based on its configuration.',
             values: { dropped },
-          }
+          },
         )}{' '}
         <EuiLink
           data-test-subj="apmDroppedSpansWarningLearnMoreAboutDroppedSpansLink"
@@ -41,7 +41,7 @@ export function DroppedSpansWarning({
             'xpack.apm.transactionDetails.transFlyout.callout.learnMoreAboutDroppedSpansLinkText',
             {
               defaultMessage: 'Learn more about dropped spans.',
-            }
+            },
           )}
         </EuiLink>
       </EuiCallOut>

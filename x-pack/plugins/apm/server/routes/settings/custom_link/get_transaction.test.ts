@@ -23,7 +23,7 @@ describe('custom link get transaction', () => {
     mock = await inspectSearchParams(({ mockApmEventClient }) =>
       getTransaction({
         apmEventClient: mockApmEventClient,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -38,7 +38,7 @@ describe('custom link get transaction', () => {
           [TRANSACTION_NAME]: 'baz',
           [TRANSACTION_TYPE]: 'qux',
         },
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

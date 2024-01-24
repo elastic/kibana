@@ -387,7 +387,7 @@ export interface InventoryMetrics {
 
 export interface InventoryMetricsWithDashboards<
   TFormula extends Record<string, FormulaValueConfig>,
-  TDashboard extends Record<string, DashboardFn>
+  TDashboard extends Record<string, DashboardFn>,
 > extends InventoryMetrics {
   getFormulas: () => Promise<TFormula>;
   getDashboards: () => Promise<TDashboard>;

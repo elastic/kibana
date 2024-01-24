@@ -38,7 +38,7 @@ export function ServiceGroupsList() {
     refetch,
   } = useFetcher(
     (callApmApi) => callApmApi('GET /internal/apm/service-groups'),
-    []
+    [],
   );
 
   const { serviceGroups } = data;
@@ -49,7 +49,7 @@ export function ServiceGroupsList() {
         return callApmApi('GET /internal/apm/service-group/counts');
       }
     },
-    [serviceGroups.length]
+    [serviceGroups.length],
   );
 
   const isLoading = isPending(status);
@@ -58,13 +58,13 @@ export function ServiceGroupsList() {
   const filteredItems = isEmpty(filter)
     ? serviceGroups
     : serviceGroups.filter((item) =>
-        item.groupName.toLowerCase().includes(filter.toLowerCase())
+        item.groupName.toLowerCase().includes(filter.toLowerCase()),
       );
 
   const sortedItems = sortBy(filteredItems, (item) =>
     apmServiceGroupsSortType === 'alphabetical'
       ? item.groupName.toLowerCase()
-      : item.updatedAt
+      : item.updatedAt,
   );
 
   const items =
@@ -113,7 +113,7 @@ export function ServiceGroupsList() {
                   onChange={(e) => setFilter(e.target.value)}
                   placeholder={i18n.translate(
                     'xpack.apm.servicesGroups.filter',
-                    { defaultMessage: 'Filter groups' }
+                    { defaultMessage: 'Filter groups' },
                   )}
                 />
               </EuiFormControlLayout>
@@ -142,7 +142,7 @@ export function ServiceGroupsList() {
                                 defaultMessage:
                                   '{servicesCount} {servicesCount, plural, =0 {groups} one {group} other {groups}}',
                                 values: { servicesCount: filteredItems.length },
-                              }
+                              },
                             )}
                           </EuiText>
                         </EuiFlexItem>
@@ -153,7 +153,7 @@ export function ServiceGroupsList() {
                           {
                             defaultMessage:
                               'Displayed service counts reflect the last 24 hours.',
-                          }
+                          },
                         )}
                       </EuiText>
                     </EuiFlexItem>
@@ -183,7 +183,7 @@ export function ServiceGroupsList() {
                   >
                     {i18n.translate(
                       'xpack.apm.serviceGroups.beta.feedback.link',
-                      { defaultMessage: 'Give feedback' }
+                      { defaultMessage: 'Give feedback' },
                     )}
                   </EuiLink>
                 </EuiFlexItem>
@@ -205,7 +205,7 @@ export function ServiceGroupsList() {
                       <h2>
                         {i18n.translate(
                           'xpack.apm.serviceGroups.filtered.emptyPrompt.serviceGroups',
-                          { defaultMessage: 'Service groups' }
+                          { defaultMessage: 'Service groups' },
                         )}
                       </h2>
                     }
@@ -213,7 +213,7 @@ export function ServiceGroupsList() {
                       <p>
                         {i18n.translate(
                           'xpack.apm.serviceGroups.filtered.emptyPrompt.message',
-                          { defaultMessage: 'No groups found for this filter' }
+                          { defaultMessage: 'No groups found for this filter' },
                         )}
                       </p>
                     }
@@ -226,7 +226,7 @@ export function ServiceGroupsList() {
                     <h2>
                       {i18n.translate(
                         'xpack.apm.serviceGroups.data.emptyPrompt.noServiceGroups',
-                        { defaultMessage: 'No service groups' }
+                        { defaultMessage: 'No service groups' },
                       )}
                     </h2>
                   }
@@ -237,7 +237,7 @@ export function ServiceGroupsList() {
                         {
                           defaultMessage:
                             'Start grouping and organising your services and your application. Learn more about Service groups or create a group.',
-                        }
+                        },
                       )}
                     </p>
                   }

@@ -37,9 +37,8 @@ export const getActionFileInfoRouteHandler = (
 
     try {
       await validateActionId(esClient, requestActionId);
-      const { actionId, mimeType, status, size, name, id, agents, created } = await fleetFiles.get(
-        fileId
-      );
+      const { actionId, mimeType, status, size, name, id, agents, created } =
+        await fleetFiles.get(fileId);
 
       if (id !== fileId) {
         throw new CustomHttpRequestError(

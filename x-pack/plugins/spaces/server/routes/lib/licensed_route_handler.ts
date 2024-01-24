@@ -12,7 +12,7 @@ export const createLicensedRouteHandler = <
   P,
   Q,
   B,
-  Context extends CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>
+  Context extends CustomRequestHandlerContext<{ licensing: LicensingApiRequestHandlerContext }>,
 >(
   handler: RequestHandler<P, Q, B, Context>
 ) => {

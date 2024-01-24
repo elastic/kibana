@@ -35,7 +35,7 @@ describe('getExploratoryViewFilter', function () {
         browser: ['Chrome'],
         environment: 'production',
       },
-      {}
+      {},
     );
 
     expect(result).toEqual([

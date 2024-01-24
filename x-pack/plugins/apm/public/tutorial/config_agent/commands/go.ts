@@ -26,7 +26,7 @@ const goServiceNameHint = i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
   {
     defaultMessage: 'If not specified, the executable name will be used.',
-  }
+  },
 );
 
 export const goLineNumbers = {
@@ -44,7 +44,7 @@ export const go = `# ${i18n.translate(
   'xpack.apm.tutorial.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
   {
     defaultMessage: 'Initialize using environment variables:',
-  }
+  },
 )}
 export ${goVariables.apmServiceName}={{{apmServiceName}}}
 

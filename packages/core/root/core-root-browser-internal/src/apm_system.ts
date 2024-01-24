@@ -42,7 +42,10 @@ export class ApmSystem {
    * `apmConfig` would be populated with relevant APM RUM agent
    * configuration if server is started with elastic.apm.* config.
    */
-  constructor(private readonly apmConfig?: ApmConfig, private readonly basePath = '') {
+  constructor(
+    private readonly apmConfig?: ApmConfig,
+    private readonly basePath = ''
+  ) {
     this.enabled = apmConfig != null && !!apmConfig.active;
     this.resourceObserver = new CachedResourceObserver();
   }

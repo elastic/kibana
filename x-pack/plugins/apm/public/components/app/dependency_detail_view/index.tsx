@@ -73,7 +73,7 @@ export function DependencyDetailView({
       rangeTo,
       refreshInterval,
       refreshPaused,
-    ]
+    ],
   );
   return <DependencyDetailTemplate>{children}</DependencyDetailTemplate>;
 }

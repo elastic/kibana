@@ -90,7 +90,10 @@ export class KbnClientRequester {
   private readonly url: string;
   private readonly httpsAgent: Https.Agent | null;
 
-  constructor(private readonly log: ToolingLog, options: Options) {
+  constructor(
+    private readonly log: ToolingLog,
+    options: Options
+  ) {
     this.url = options.url;
     this.httpsAgent =
       Url.parse(options.url).protocol === 'https:'

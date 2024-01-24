@@ -41,8 +41,8 @@ export interface SetupDeps {
 type ClientType<T> = T extends 'global'
   ? UiSettingsGlobalClient
   : T extends 'namespace'
-  ? UiSettingsClient
-  : never;
+    ? UiSettingsClient
+    : never;
 
 /** @internal */
 export class UiSettingsService

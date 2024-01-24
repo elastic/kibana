@@ -51,8 +51,8 @@ export const waitForCommandToBeExecuted = (command: ConsoleResponseActionCommand
     command === 'execute'
       ? 'Command execution was successful'
       : command === 'get-file'
-      ? 'File retrieved from the host.'
-      : 'Action completed.';
+        ? 'File retrieved from the host.'
+        : 'Action completed.';
   const actionPendingMessage =
     command === 'get-file' ? 'Retrieving the file from host.' : 'Action pending.';
   cy.contains(actionPendingMessage).should('exist');

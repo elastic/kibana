@@ -32,7 +32,7 @@ export const setStubKibanaServices = () => {
 // export const defaultApi:
 
 export const getMockPresentationPanelCompatibleComponent = <
-  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi
+  ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
 >(
   api?: ApiType
 ): Promise<PanelCompatibleComponent> =>

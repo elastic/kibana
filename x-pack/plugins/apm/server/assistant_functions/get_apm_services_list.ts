@@ -41,7 +41,7 @@ export function registerGetApmServicesListFunction({
         'xpack.apm.observabilityAiAssistant.functions.registerGetApmServicesList.descriptionForUser',
         {
           defaultMessage: `Gets the list of monitored services, their health status, and alerts.`,
-        }
+        },
       ),
       parameters: {
         type: 'object',
@@ -125,13 +125,13 @@ export function registerGetApmServicesListFunction({
 
       if (healthStatus && healthStatus.length) {
         mappedItems = mappedItems.filter((item): boolean =>
-          healthStatus.includes(item.healthStatus)
+          healthStatus.includes(item.healthStatus),
         );
       }
 
       return {
         content: mappedItems,
       };
-    }
+    },
   );
 }

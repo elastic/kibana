@@ -51,7 +51,7 @@ export interface AnomalySwimlaneServices {
 export type AnomalySwimlaneEmbeddableServices = [
   CoreStart,
   MlDependencies,
-  AnomalySwimlaneServices
+  AnomalySwimlaneServices,
 ];
 
 export interface AnomalySwimlaneEmbeddableCustomOutput {
@@ -136,5 +136,5 @@ export type MappedEmbeddableTypeOf<TEmbeddableType extends MlEmbeddableTypes> =
   TEmbeddableType extends AnomalySwimLaneEmbeddableType
     ? AnomalySwimlaneEmbeddableInput
     : TEmbeddableType extends AnomalyExplorerChartsEmbeddableType
-    ? AnomalyChartsEmbeddableInput
-    : unknown;
+      ? AnomalyChartsEmbeddableInput
+      : unknown;

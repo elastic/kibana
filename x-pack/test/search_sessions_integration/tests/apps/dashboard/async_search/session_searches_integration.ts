@@ -67,9 +67,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       let asyncExpirationTimeAfterSessionWasSaved: number;
       await retry.waitFor('async search keepAlive is extended', async () => {
-        asyncExpirationTimeAfterSessionWasSaved = await searchSessions.getAsyncSearchExpirationTime(
-          asyncSearchId
-        );
+        asyncExpirationTimeAfterSessionWasSaved =
+          await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
 
         return (
           asyncExpirationTimeAfterSessionWasSaved > asyncExpirationTimeBeforeSessionWasSaved &&
@@ -164,9 +163,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.save();
         await searchSessions.expectState('backgroundLoading');
 
-        const savedSessionId = await dashboardPanelActions.getSearchSessionIdByTitle(
-          'Lens with other bucket'
-        );
+        const savedSessionId =
+          await dashboardPanelActions.getSearchSessionIdByTitle('Lens with other bucket');
 
         await searchSessions.openPopover();
         await searchSessions.viewSearchSessions();

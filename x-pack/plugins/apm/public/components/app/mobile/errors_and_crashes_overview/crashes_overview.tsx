@@ -117,12 +117,12 @@ export function MobileCrashesOverview() {
                 sortDirection: normalizedSortDirection,
               },
             },
-          }
+          },
         ).then((response) => {
           const currentPageGroupIds = orderBy(
             response.errorGroups,
             sortField,
-            sortDirection
+            sortDirection,
           )
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(({ groupId }) => groupId)
@@ -147,7 +147,7 @@ export function MobileCrashesOverview() {
       sortDirection,
       page,
       pageSize,
-    ]
+    ],
   );
 
   const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } =
@@ -178,14 +178,14 @@ export function MobileCrashesOverview() {
                 groupIds: JSON.stringify(currentPageGroupIds),
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const kueryForTreemap = getKueryWithMobileCrashFilter({
@@ -207,13 +207,13 @@ export function MobileCrashesOverview() {
                     height={375}
                     title={i18n.translate(
                       'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                      { defaultMessage: 'Crash occurrences' }
+                      { defaultMessage: 'Crash occurrences' },
                     )}
                     tip={i18n.translate(
                       'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
                       {
                         defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                      }
+                      },
                     )}
                   />
                 </EuiFlexItem>
@@ -238,7 +238,7 @@ export function MobileCrashesOverview() {
             <h3>
               {i18n.translate(
                 'xpack.apm.serviceDetails.metrics.crashes.title',
-                { defaultMessage: 'Crashes' }
+                { defaultMessage: 'Crashes' },
               )}
             </h3>
           </EuiTitle>
@@ -248,7 +248,7 @@ export function MobileCrashesOverview() {
             mainStatistics={mobileCrashGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={isPending(
-              mobileCrashGroupDetailedStatisticsStatus
+              mobileCrashGroupDetailedStatisticsStatus,
             )}
             detailedStatistics={mobileCrashGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}

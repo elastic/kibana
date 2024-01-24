@@ -312,8 +312,8 @@ export function PreviewChart({
                   Object.keys(error?.metrics || {}).length !== 0
                     ? 'aggregation fields'
                     : error?.equation
-                    ? 'equation'
-                    : 'conditions',
+                      ? 'equation'
+                      : 'conditions',
               }}
             />
           }

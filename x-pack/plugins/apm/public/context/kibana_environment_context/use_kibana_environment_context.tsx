@@ -22,7 +22,7 @@ export const useKibanaEnvironmentContextProvider = ({
       isCloudEnv,
       isServerlessEnv,
     }),
-    [kibanaVersion, isCloudEnv, isServerlessEnv]
+    [kibanaVersion, isCloudEnv, isServerlessEnv],
   );
 
   const Provider: React.FC<{ kibanaEnvironment?: KibanaEnvContext }> = ({

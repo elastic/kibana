@@ -29,7 +29,7 @@ export function getAggregatedCriticalPathRootNodes(params: {
   let numNodes = 0;
 
   function mergeNodesWithSameOperationId(
-    nodes: CriticalPathTreeNode[]
+    nodes: CriticalPathTreeNode[],
   ): CriticalPathTreeNode[] {
     const nodesByOperationId: Record<string, CriticalPathTreeNode> = {};
     const mergedNodes = nodes.reduce<CriticalPathTreeNode[]>(
@@ -49,7 +49,7 @@ export function getAggregatedCriticalPathRootNodes(params: {
         prev.push(node);
         return prev;
       },
-      []
+      [],
     );
 
     numNodes += mergedNodes.length;
@@ -65,7 +65,7 @@ export function getAggregatedCriticalPathRootNodes(params: {
     maxDepth = Math.max(maxDepth, depth);
 
     const children = criticalPath.nodes[nodeId].map((childNodeId) =>
-      getNode(childNodeId, depth + 1)
+      getNode(childNodeId, depth + 1),
     );
 
     const nodeCountExclusive = criticalPath.timeByNodeId[nodeId] || 0;
@@ -81,7 +81,7 @@ export function getAggregatedCriticalPathRootNodes(params: {
   }
 
   const rootNodes = mergeNodesWithSameOperationId(
-    criticalPath.rootNodes.map((nodeId) => getNode(nodeId, 1))
+    criticalPath.rootNodes.map((nodeId) => getNode(nodeId, 1)),
   );
 
   return {

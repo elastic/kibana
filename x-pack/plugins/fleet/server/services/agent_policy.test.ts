@@ -447,7 +447,7 @@ describe('agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest
@@ -522,7 +522,7 @@ describe('agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: jest.SpyInstance<
-      ReturnType<typeof agentPolicyService['update']>
+      ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = jest

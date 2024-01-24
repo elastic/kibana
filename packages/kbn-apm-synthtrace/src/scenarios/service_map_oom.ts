@@ -32,30 +32,33 @@ const scenario: Scenario<ApmFields> = async () => {
       return withClient(
         apmEsClient,
         range.ratePerMinute(tracesPerMinute).generator((timestamp) => {
-          const rootTransaction = services.reduce((prev, currentService) => {
-            const tx = currentService
-              .transaction(`GET /my/function`, 'request')
-              .timestamp(timestamp)
-              .duration(1000)
-              .children(
-                ...(prev
-                  ? [
-                      currentService
-                        .span(
-                          httpExitSpan({
-                            spanName: `exit-span-${currentService.fields['service.name']}`,
-                            destinationUrl: `http://address-to-exit-span-${currentService.fields['service.name']}`,
-                          })
-                        )
-                        .timestamp(timestamp)
-                        .duration(1000)
-                        .children(prev),
-                    ]
-                  : [])
-              );
+          const rootTransaction = services.reduce(
+            (prev, currentService) => {
+              const tx = currentService
+                .transaction(`GET /my/function`, 'request')
+                .timestamp(timestamp)
+                .duration(1000)
+                .children(
+                  ...(prev
+                    ? [
+                        currentService
+                          .span(
+                            httpExitSpan({
+                              spanName: `exit-span-${currentService.fields['service.name']}`,
+                              destinationUrl: `http://address-to-exit-span-${currentService.fields['service.name']}`,
+                            })
+                          )
+                          .timestamp(timestamp)
+                          .duration(1000)
+                          .children(prev),
+                      ]
+                    : [])
+                );
 
-            return tx;
-          }, undefined as Transaction | undefined);
+              return tx;
+            },
+            undefined as Transaction | undefined
+          );
 
           return rootTransaction!;
         })

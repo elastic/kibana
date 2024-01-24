@@ -159,15 +159,18 @@ export async function findPackagePoliciesUsingSecrets(opts: {
   }
 
   // create a map of secret_references.id to package policy id
-  const packagePoliciesBySecretId = packagePolicies.items.reduce((acc, packagePolicy) => {
-    packagePolicy?.secret_references?.forEach((secretReference) => {
-      if (!acc[secretReference.id]) {
-        acc[secretReference.id] = [];
-      }
-      acc[secretReference.id].push(packagePolicy.id);
-    });
-    return acc;
-  }, {} as Record<string, string[]>);
+  const packagePoliciesBySecretId = packagePolicies.items.reduce(
+    (acc, packagePolicy) => {
+      packagePolicy?.secret_references?.forEach((secretReference) => {
+        if (!acc[secretReference.id]) {
+          acc[secretReference.id] = [];
+        }
+        acc[secretReference.id].push(packagePolicy.id);
+      });
+      return acc;
+    },
+    {} as Record<string, string[]>
+  );
 
   const res = [];
 

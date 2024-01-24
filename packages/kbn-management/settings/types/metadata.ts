@@ -23,7 +23,7 @@ export type UiSetting<T> = PublicUiSettingsParams & UserProvidedValues<T>;
  */
 export interface UiSettingMetadata<
   T extends SettingType = SettingType,
-  V = KnownTypeToValue<T> | null
+  V = KnownTypeToValue<T> | null,
 > extends UiSetting<V> {
   /**
    * The type of setting being represented.

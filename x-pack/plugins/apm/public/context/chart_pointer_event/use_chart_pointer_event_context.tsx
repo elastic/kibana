@@ -35,19 +35,19 @@ export function useChartPointerEventContext() {
         }
       });
     },
-    [chartRef]
+    [chartRef],
   );
 
   useEffect(() => {
     const pointerEventTarget = pointerEventTargetRef.current;
     pointerEventTarget.addEventListener(
       UPDATE_POINTER_EVENT,
-      updatePointerEventHandler
+      updatePointerEventHandler,
     );
     return () => {
       pointerEventTarget.removeEventListener(
         UPDATE_POINTER_EVENT,
-        updatePointerEventHandler
+        updatePointerEventHandler,
       );
     };
   }, [updatePointerEventHandler, pointerEventTargetRef]);

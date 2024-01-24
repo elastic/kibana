@@ -25,14 +25,14 @@ function getAllowedOriginsRt() {
                 context,
                 i18n.translate(
                   'xpack.apm.fleet_integration.settings.rum.allowedHeadersValidation',
-                  { defaultMessage: 'Square brackets not allowed' }
-                )
+                  { defaultMessage: 'Square brackets not allowed' },
+                ),
               )
             : t.success(inputAsString);
-        }
+        },
       );
     },
-    t.identity
+    t.identity,
   );
 }
 
@@ -44,11 +44,11 @@ export function getRUMSettings(): SettingsRow[] {
       type: 'boolean',
       rowTitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.rum.enableRumTitle',
-        { defaultMessage: 'Enable RUM' }
+        { defaultMessage: 'Enable RUM' },
       ),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.rum.enableRumDescription',
-        { defaultMessage: 'Enable Real User Monitoring (RUM)' }
+        { defaultMessage: 'Enable Real User Monitoring (RUM)' },
       ),
       settings: [
         {
@@ -56,7 +56,7 @@ export function getRUMSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowOriginsLabel',
-            { defaultMessage: 'Allowed Origins' }
+            { defaultMessage: 'Allowed Origins' },
           ),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
@@ -64,7 +64,7 @@ export function getRUMSettings(): SettingsRow[] {
             {
               defaultMessage:
                 'Allowed Origin headers to be sent by User Agents.',
-            }
+            },
           ),
           validation: getAllowedOriginsRt(),
         },
@@ -73,7 +73,7 @@ export function getRUMSettings(): SettingsRow[] {
           type: 'combo',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderLabel',
-            { defaultMessage: 'Access-Control-Allow-Headers' }
+            { defaultMessage: 'Access-Control-Allow-Headers' },
           ),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
@@ -81,15 +81,15 @@ export function getRUMSettings(): SettingsRow[] {
             {
               defaultMessage:
                 'Supported Access-Control-Allow-Headers in addition to "Content-Type", "Content-Encoding" and "Accept".',
-            }
+            },
           ),
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderTitle',
-            { defaultMessage: 'Custom headers' }
+            { defaultMessage: 'Custom headers' },
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumAllowHeaderDescription',
-            { defaultMessage: 'Configure authentication for the agent' }
+            { defaultMessage: 'Configure authentication for the agent' },
           ),
         },
         {
@@ -97,7 +97,7 @@ export function getRUMSettings(): SettingsRow[] {
           type: 'area',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.rum.rumResponseHeadersLabel',
-            { defaultMessage: 'Custom HTTP response headers' }
+            { defaultMessage: 'Custom HTTP response headers' },
           ),
           labelAppend: OPTIONAL_LABEL,
           helpText: i18n.translate(
@@ -105,7 +105,7 @@ export function getRUMSettings(): SettingsRow[] {
             {
               defaultMessage:
                 'Added to RUM responses, e.g. for security policy compliance.',
-            }
+            },
           ),
         },
         {
@@ -116,7 +116,7 @@ export function getRUMSettings(): SettingsRow[] {
               type: 'text',
               label: i18n.translate(
                 'xpack.apm.fleet_integration.settings.rum.rumLibraryPatternLabel',
-                { defaultMessage: 'Library Frame Pattern' }
+                { defaultMessage: 'Library Frame Pattern' },
               ),
               labelAppend: OPTIONAL_LABEL,
               helpText: i18n.translate(
@@ -124,7 +124,7 @@ export function getRUMSettings(): SettingsRow[] {
                 {
                   defaultMessage:
                     "Identify library frames by matching a stacktrace frame's file_name and abs_path against this regexp.",
-                }
+                },
               ),
             },
             {
@@ -132,7 +132,7 @@ export function getRUMSettings(): SettingsRow[] {
               type: 'text',
               label: i18n.translate(
                 'xpack.apm.fleet_integration.settings.rum.rumExcludeFromGroupingLabel',
-                { defaultMessage: 'Exclude from grouping' }
+                { defaultMessage: 'Exclude from grouping' },
               ),
               labelAppend: OPTIONAL_LABEL,
               helpText: i18n.translate(
@@ -140,7 +140,7 @@ export function getRUMSettings(): SettingsRow[] {
                 {
                   defaultMessage:
                     "Exclude stacktrace frames from error group calculations by matching a stacktrace frame's `file_name` against this regexp.",
-                }
+                },
               ),
             },
           ],
@@ -152,7 +152,7 @@ export function getRUMSettings(): SettingsRow[] {
 
 export function isRUMFormValid(
   newVars: PackagePolicyVars,
-  rumSettings: SettingsRow[]
+  rumSettings: SettingsRow[],
 ) {
   // only validates RUM when its flag is enabled
   return (

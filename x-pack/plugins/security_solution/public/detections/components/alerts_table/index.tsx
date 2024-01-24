@@ -198,7 +198,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         fontSize: 's',
         header: 'underline',
         stripes: isEventRenderedView,
-      } as EuiDataGridStyle),
+      }) as EuiDataGridStyle,
     [isEventRenderedView]
   );
 

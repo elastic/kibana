@@ -70,7 +70,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         environments: {
           services_with_multiple_environments: 1,
@@ -96,7 +96,7 @@ describe('data telemetry collection tasks', () => {
         });
 
         expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
+          await task?.executor({ indices, telemetryClient: { search } } as any),
         ).toEqual({});
       });
     });
@@ -141,7 +141,7 @@ describe('data telemetry collection tasks', () => {
         });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         aggregated_transactions: {
           current_implementation: {
@@ -196,7 +196,10 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+        await task?.executor({
+          indices,
+          telemetryClient: { fieldCaps },
+        } as any),
       ).toEqual({
         counts: {
           global_labels: {
@@ -213,7 +216,10 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+        await task?.executor({
+          indices,
+          telemetryClient: { fieldCaps },
+        } as any),
       ).toEqual({
         counts: {
           global_labels: {
@@ -252,7 +258,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         cloud: {
           availability_zone: ['us-west-1', 'europe-west1-c'],
@@ -267,7 +273,7 @@ describe('data telemetry collection tasks', () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
         expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
+          await task?.executor({ indices, telemetryClient: { search } } as any),
         ).toEqual({
           cloud: {
             availability_zone: [],
@@ -296,7 +302,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         host: {
           os: { platform: ['linux', 'windows', 'macos'] },
@@ -309,7 +315,7 @@ describe('data telemetry collection tasks', () => {
         const search = jest.fn().mockResolvedValueOnce({});
 
         expect(
-          await task?.executor({ indices, telemetryClient: { search } } as any)
+          await task?.executor({ indices, telemetryClient: { search } } as any),
         ).toEqual({
           host: {
             os: {
@@ -339,12 +345,12 @@ describe('data telemetry collection tasks', () => {
                 hits: {
                   hits: [{ _source: { '@timestamp': 1 } }],
                 },
-              }
+              },
         );
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         counts: {
           error: {
@@ -403,7 +409,7 @@ describe('data telemetry collection tasks', () => {
         await task?.executor({
           indices,
           telemetryClient: { transportRequest },
-        } as any)
+        } as any),
       ).toEqual({
         integrations: {
           ml: {
@@ -421,7 +427,7 @@ describe('data telemetry collection tasks', () => {
           await task?.executor({
             indices,
             telemetryClient: { transportRequest },
-          } as any)
+          } as any),
         ).toEqual({
           integrations: {
             ml: {
@@ -611,7 +617,7 @@ describe('data telemetry collection tasks', () => {
             indicesStats,
             search,
           },
-        } as any)
+        } as any),
       ).toMatchSnapshot();
     });
     it('with no results', async () => {
@@ -652,7 +658,7 @@ describe('data telemetry collection tasks', () => {
             indicesStats,
             search,
           },
-        } as any)
+        } as any),
       ).toMatchSnapshot();
     });
   });
@@ -682,7 +688,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         cardinality: {
           client: { geo: { country_iso_code: { rum: { '1d': 5 } } } },
@@ -735,7 +741,7 @@ describe('data telemetry collection tasks', () => {
       expect(
         await task?.executor({
           savedObjectsClient,
-        } as any)
+        } as any),
       ).toEqual({
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
@@ -791,7 +797,7 @@ describe('data telemetry collection tasks', () => {
       expect(
         await task?.executor({
           savedObjectsClient,
-        } as any)
+        } as any),
       ).toEqual({
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
@@ -843,7 +849,7 @@ describe('data telemetry collection tasks', () => {
       expect(
         await task?.executor({
           savedObjectsClient,
-        } as any)
+        } as any),
       ).toEqual({
         custom_dashboards: {
           kuery_fields: ['service.name', 'service.environment'],
@@ -895,7 +901,7 @@ describe('data telemetry collection tasks', () => {
       });
 
       expect(
-        await task?.executor({ indices, telemetryClient: { search } } as any)
+        await task?.executor({ indices, telemetryClient: { search } } as any),
       ).toEqual({
         top_traces: {
           max: 1026,

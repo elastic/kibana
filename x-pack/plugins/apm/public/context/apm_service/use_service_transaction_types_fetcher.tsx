@@ -34,11 +34,11 @@ export function useServiceTransactionTypesFetcher({
               path: { serviceName },
               query: { start, end, documentType, rollupInterval },
             },
-          }
+          },
         );
       }
     },
-    [serviceName, start, end, documentType, rollupInterval]
+    [serviceName, start, end, documentType, rollupInterval],
   );
 
   return { transactionTypes: data.transactionTypes, status };

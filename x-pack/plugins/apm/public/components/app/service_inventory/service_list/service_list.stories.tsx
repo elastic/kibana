@@ -33,7 +33,7 @@ const stories: Meta<Args> = {
     (StoryComponent) => {
       mockApmApiCallResponse(
         'GET /internal/apm/fallback_to_transactions',
-        () => ({ fallbackToTransactions: false })
+        () => ({ fallbackToTransactions: false }),
       );
       return (
         <MockApmPluginStorybook

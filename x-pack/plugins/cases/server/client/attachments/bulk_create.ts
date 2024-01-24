@@ -56,7 +56,7 @@ export const bulkCreate = async (
 
     const [attachmentsWithIds, entities]: [
       Array<{ id: string } & AttachmentRequest>,
-      OwnerEntity[]
+      OwnerEntity[],
     ] = attachments.reduce<[Array<{ id: string } & AttachmentRequest>, OwnerEntity[]]>(
       ([a, e], attachment) => {
         const savedObjectID = SavedObjectsUtils.generateId();

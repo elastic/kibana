@@ -24,7 +24,7 @@ export function ServiceDependenciesBreakdownChart({
     query: { kuery, environment, rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/dependencies',
-    '/mobile-services/{serviceName}/dependencies'
+    '/mobile-services/{serviceName}/dependencies',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -45,10 +45,10 @@ export function ServiceDependenciesBreakdownChart({
               environment,
             },
           },
-        }
+        },
       );
     },
-    [serviceName, start, end, kuery, environment]
+    [serviceName, start, end, kuery, environment],
   );
 
   const timeseries: Array<TimeSeries<Coordinate>> =

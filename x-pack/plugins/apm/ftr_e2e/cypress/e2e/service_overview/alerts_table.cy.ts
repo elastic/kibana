@@ -23,7 +23,7 @@ describe('Errors table', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -39,7 +39,7 @@ describe('Errors table', () => {
     cy.visitKibana(serviceOverviewHref);
     cy.contains('opbeans-java');
     cy.get(
-      '[data-test-subj="environmentFilter"] [data-test-subj="comboBoxSearchInput"]'
+      '[data-test-subj="environmentFilter"] [data-test-subj="comboBoxSearchInput"]',
     ).should('have.value', 'All');
     cy.contains('Active');
     cy.contains('Recovered');

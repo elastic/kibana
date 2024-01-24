@@ -27,7 +27,7 @@ jest.mock('../utils/find_shared_origin_objects', () => {
 });
 
 export const mockRawDocExistsInNamespace = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['rawDocExistsInNamespace']
+  (typeof InternalUtils)['rawDocExistsInNamespace']
 >;
 
 jest.mock('../utils/internal_utils', () => {

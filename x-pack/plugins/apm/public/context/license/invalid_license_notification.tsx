@@ -16,7 +16,7 @@ export function InvalidLicenseNotification() {
     plugins: { licenseManagement },
   } = useApmPluginContext();
   const licensePageUrl = useKibanaUrl(
-    '/app/management/stack/license_management'
+    '/app/management/stack/license_management',
   );
   const manageLicenseURL = licenseManagement?.locator
     ? licenseManagement?.locator?.useUrl({

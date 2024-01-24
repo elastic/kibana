@@ -47,7 +47,7 @@ describe('When using the ExtensionPointStorageClient', () => {
     // flowing to the next.
     const callbackFn = async <
       T extends ExtensionPoint = ExtensionPoint,
-      A extends Parameters<T['callback']>[0] = Parameters<T['callback']>[0]
+      A extends Parameters<T['callback']>[0] = Parameters<T['callback']>[0],
     >(
       id: number,
       { data }: A

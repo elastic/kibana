@@ -17,7 +17,7 @@ it('correctly determines attribute properties', () => {
         shouldBeEncrypted: boolean[];
         shouldBeExcludedFromAAD: boolean[];
         shouldBeStripped: boolean[];
-      }
+      },
     ]
   > = [
     [

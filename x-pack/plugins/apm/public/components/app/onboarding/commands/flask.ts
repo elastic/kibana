@@ -24,7 +24,7 @@ export const flask = `# ${i18n.translate(
   'xpack.apm.onboarding.flaskClient.configure.commands.initializeUsingEnvironmentVariablesComment',
   {
     defaultMessage: 'Initialize using environment variables',
-  }
+  },
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app = Flask(__name__)
@@ -34,7 +34,7 @@ apm = ElasticAPM(app)
   'xpack.apm.onboarding.flaskClient.configure.commands.configureElasticApmComment',
   {
     defaultMessage: "Or use ELASTIC_APM in your application's settings",
-  }
+  },
 )}
 from elasticapm.contrib.flask import ElasticAPM
 app.config['ELASTIC_APM'] = {

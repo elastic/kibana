@@ -51,7 +51,7 @@ export function ServiceDashboards() {
     query: { environment, kuery, rangeFrom, rangeTo, dashboardId },
   } = useAnyOfApmParams(
     '/services/{serviceName}/dashboards',
-    '/mobile-services/{serviceName}/dashboards'
+    '/mobile-services/{serviceName}/dashboards',
   );
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
   const [serviceDashboards, setServiceDashboards] = useState<
@@ -75,21 +75,21 @@ export function ServiceDashboards() {
               path: { serviceName },
               query: { start, end },
             },
-          }
+          },
         );
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end],
   );
 
   useEffect(() => {
     const filteredServiceDashbords = (data?.serviceDashboards ?? []).reduce(
       (
         result: MergedServiceDashboard[],
-        serviceDashboard: SavedApmCustomDashboard
+        serviceDashboard: SavedApmCustomDashboard,
       ) => {
         const matchedDashboard = allAvailableDashboards.find(
-          ({ id }) => id === serviceDashboard.dashboardSavedObjectId
+          ({ id }) => id === serviceDashboard.dashboardSavedObjectId,
         );
         if (matchedDashboard) {
           result.push({
@@ -99,7 +99,7 @@ export function ServiceDashboards() {
         }
         return result;
       },
-      []
+      [],
     );
 
     setServiceDashboards(filteredServiceDashbords);
@@ -151,7 +151,7 @@ export function ServiceDashboards() {
         },
       };
     },
-    [serviceName, environment, kuery, rangeFrom, rangeTo]
+    [serviceName, environment, kuery, rangeFrom, rangeTo],
   );
 
   const locator = useMemo(() => {
@@ -178,7 +178,7 @@ export function ServiceDashboards() {
                 'xpack.apm.serviceDashboards.loadingServiceDashboards',
                 {
                   defaultMessage: 'Loading service dashboard',
-                }
+                },
               )}
             </h4>
           }

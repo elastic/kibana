@@ -27,13 +27,13 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.all.label',
         {
           defaultMessage: 'All',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.indexLifecyclePhase.all.description',
         {
           defaultMessage: 'Search data in all lifecycle phases.',
-        }
+        },
       ),
     },
     {
@@ -42,14 +42,14 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.hot.label',
         {
           defaultMessage: 'Hot',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.indexLifecyclePhase.hot.description',
         {
           defaultMessage:
             'Holds your most-recent, most-frequently-searched data.',
-        }
+        },
       ),
     },
     {
@@ -58,14 +58,14 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.warm.label',
         {
           defaultMessage: 'Warm',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.indexLifecyclePhase.warm.description',
         {
           defaultMessage:
             'Holds data from recent weeks. Updates are still allowed, but likely infrequent.',
-        }
+        },
       ),
     },
     {
@@ -74,14 +74,14 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.cold.label',
         {
           defaultMessage: 'Cold',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.indexLifecyclePhase.cold.description',
         {
           defaultMessage:
             'While still searchable, this tier is typically optimized for lower storage costs rather than search speed.',
-        }
+        },
       ),
     },
     {
@@ -90,14 +90,14 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.frozen.label',
         {
           defaultMessage: 'Frozen',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.indexLifecyclePhase.frozen.description',
         {
           defaultMessage:
             'Holds data that are no longer being queried, or being queried rarely.',
-        }
+        },
       ),
     },
   ].map(({ value, label, description }) => ({
@@ -119,7 +119,7 @@ export function IndexLifecyclePhaseSelect() {
         'xpack.apm.storageExplorer.indexLifecyclePhase.label',
         {
           defaultMessage: 'Index lifecycle phase',
-        }
+        },
       )}
       options={options}
       valueOfSelected={indexLifecyclePhase}

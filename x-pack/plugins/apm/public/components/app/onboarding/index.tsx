@@ -53,7 +53,7 @@ export function Onboarding() {
               privileges,
             },
           },
-        }
+        },
       );
 
       setAgentApiKey({
@@ -79,7 +79,7 @@ export function Onboarding() {
         'GET /internal/apm/observability_overview/has_data',
         {
           signal: null,
-        }
+        },
       );
       setAgentStatus(agentStatusCheck.hasData);
     } catch (error) {
@@ -105,7 +105,7 @@ export function Onboarding() {
         },
         apiKeyLoading,
         agentApiKey,
-        createAgentKey
+        createAgentKey,
       ),
     ]);
   }, [

@@ -24,7 +24,7 @@ export function ServiceDependencies() {
                 'xpack.apm.serviceDependencies.breakdownChartTitle',
                 {
                   defaultMessage: 'Time spent by dependency',
-                }
+                },
               )}
             </h2>
           </EuiTitle>

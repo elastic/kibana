@@ -18,7 +18,7 @@ export interface Plugin<
   TSetup = void,
   TStart = void,
   TPluginsSetup extends object = object,
-  TPluginsStart extends object = object
+  TPluginsStart extends object = object,
 > {
   setup(core: CoreSetup<TPluginsStart, TStart>, plugins: TPluginsSetup): TSetup;
 

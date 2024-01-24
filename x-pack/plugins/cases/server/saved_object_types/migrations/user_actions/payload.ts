@@ -180,8 +180,8 @@ const getSingleFieldPayload = (
         tags: isString(value)
           ? value.split(',').map((item) => item.trim())
           : Array.isArray(value)
-          ? value
-          : [],
+            ? value
+            : [],
       };
     case 'comment':
       /**

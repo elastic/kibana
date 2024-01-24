@@ -17,9 +17,8 @@ export async function getLatestApmPackage({
   request: KibanaRequest;
 }) {
   const packageClient = fleetPluginStart.packageService.asScoped(request);
-  const latestPackage = await packageClient.fetchFindLatestPackage(
-    APM_PACKAGE_NAME
-  );
+  const latestPackage =
+    await packageClient.fetchFindLatestPackage(APM_PACKAGE_NAME);
   const packageInfo =
     'getBuffer' in latestPackage
       ? (await packageClient.readBundledPackage(latestPackage)).packageInfo

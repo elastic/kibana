@@ -31,7 +31,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         'xpack.apm.settings.agentKeys.table.nameColumnName',
         {
           defaultMessage: 'Name',
-        }
+        },
       ),
       sortable: true,
     },
@@ -41,7 +41,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         'xpack.apm.settings.agentKeys.table.userNameColumnName',
         {
           defaultMessage: 'User',
-        }
+        },
       ),
       sortable: true,
     },
@@ -51,7 +51,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         'xpack.apm.settings.agentKeys.table.realmColumnName',
         {
           defaultMessage: 'Realm',
-        }
+        },
       ),
       sortable: true,
     },
@@ -61,7 +61,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
         'xpack.apm.settings.agentKeys.table.creationColumnName',
         {
           defaultMessage: 'Created',
-        }
+        },
       ),
       dataType: 'date',
       sortable: true,
@@ -77,13 +77,13 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
             'xpack.apm.settings.agentKeys.table.deleteActionTitle',
             {
               defaultMessage: 'Delete',
-            }
+            },
           ),
           description: i18n.translate(
             'xpack.apm.settings.agentKeys.table.deleteActionDescription',
             {
               defaultMessage: 'Delete this APM agent key',
-            }
+            },
           ),
           icon: 'trash',
           color: 'danger',
@@ -106,7 +106,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           'xpack.apm.settings.agentKeys.table.userFilterLabel',
           {
             defaultMessage: 'User',
-          }
+          },
         ),
         multiSelect: 'or',
         operator: 'exact',
@@ -114,7 +114,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           agentKeys.reduce((acc: Record<string, boolean>, { username }) => {
             acc[username] = true;
             return acc;
-          }, {})
+          }, {}),
         ).map((value) => ({ value })),
       },
       {
@@ -124,7 +124,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           'xpack.apm.settings.agentKeys.table.realmFilterLabel',
           {
             defaultMessage: 'Realm',
-          }
+          },
         ),
         multiSelect: 'or',
         operator: 'exact',
@@ -132,7 +132,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           agentKeys.reduce((acc: Record<string, boolean>, { realm }) => {
             acc[realm] = true;
             return acc;
-          }, {})
+          }, {}),
         ).map((value) => ({ value })),
       },
     ],
@@ -145,7 +145,7 @@ export function AgentKeysTable({ agentKeys, onKeyDelete }: Props) {
           'xpack.apm.settings.agentKeys.tableCaption',
           {
             defaultMessage: 'APM agent keys',
-          }
+          },
         )}
         items={agentKeys ?? []}
         columns={columns}

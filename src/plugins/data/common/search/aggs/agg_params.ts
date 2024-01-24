@@ -58,7 +58,7 @@ export const initParams = <TAggParam extends AggParamType = AggParamType>(
  */
 export const writeParams = <
   TAggConfig extends AggConfig = AggConfig,
-  TAggParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>
+  TAggParam extends AggParamType<TAggConfig> = AggParamType<TAggConfig>,
 >(
   params: Array<Partial<TAggParam>> = [],
   aggConfig: TAggConfig,

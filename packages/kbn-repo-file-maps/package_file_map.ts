@@ -18,7 +18,10 @@ export class PackageFileMap {
   private readonly packagesByFile = new Map<string, Package>();
   private readonly unassignedFiles: RepoPath[] = [];
 
-  constructor(packages: Package[], private readonly allFiles: Iterable<RepoPath>) {
+  constructor(
+    packages: Package[],
+    private readonly allFiles: Iterable<RepoPath>
+  ) {
     const repoRelCache = new Map<string, Package | null>(
       packages.map((p) => [p.normalizedRepoRelativeDir, p])
     );

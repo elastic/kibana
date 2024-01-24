@@ -56,8 +56,8 @@ journey('UX Visitor Breakdown', async ({ page, params }) => {
       chartIds.map(
         async (dataTestId) =>
           // lens embeddable injects its own test attribute
-          await page.waitForSelector(byLensTestId(dataTestId))
-      )
+          await page.waitForSelector(byLensTestId(dataTestId)),
+      ),
     );
   });
 });

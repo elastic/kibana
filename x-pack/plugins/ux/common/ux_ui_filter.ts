@@ -104,7 +104,7 @@ type UxLocalUIFilterMap = {
 };
 
 export const uxLocalUIFilterNames = Object.keys(
-  uxFiltersByName
+  uxFiltersByName,
 ) as UxLocalUIFilterName[];
 
 export const uxLocalUIFilters = uxLocalUIFilterNames.reduce((acc, key) => {

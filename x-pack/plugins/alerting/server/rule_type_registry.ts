@@ -106,7 +106,7 @@ export type NormalizedRuleType<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > = {
   validLegacyConsumers: string[];
   actionGroups: Array<ActionGroup<ActionGroupIds | RecoveryActionGroupId>>;
@@ -203,7 +203,7 @@ export class RuleTypeRegistry {
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string,
-    AlertData extends RuleAlertData
+    AlertData extends RuleAlertData,
   >(
     ruleType: RuleType<
       Params,
@@ -340,7 +340,7 @@ export class RuleTypeRegistry {
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
     ActionGroupIds extends string = string,
     RecoveryActionGroupId extends string = string,
-    AlertData extends RuleAlertData = RuleAlertData
+    AlertData extends RuleAlertData = RuleAlertData,
   >(
     id: string
   ): NormalizedRuleType<
@@ -460,7 +460,7 @@ function augmentActionGroupsWithReserved<
   InstanceContext extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 >(
   ruleType: RuleType<
     Params,

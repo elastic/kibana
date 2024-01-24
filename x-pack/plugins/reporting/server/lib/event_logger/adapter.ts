@@ -23,7 +23,10 @@ export class EcsLogAdapter implements IReportingEventLogger {
    * @param {Logger} logger - Reporting's wrapper of the core logger
    * @param {Partial<LogMeta>} properties - initial ECS data with template for Reporting metrics
    */
-  constructor(logger: Logger, private properties: Partial<LogMeta>) {
+  constructor(
+    logger: Logger,
+    private properties: Partial<LogMeta>
+  ) {
     this.logger = logger.get('events');
   }
 

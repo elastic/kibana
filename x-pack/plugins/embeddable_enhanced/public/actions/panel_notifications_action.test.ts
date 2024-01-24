@@ -15,19 +15,19 @@ const createContext = (events: unknown[] = [], isEditMode = false): EnhancedEmbe
       getInput: () =>
         ({
           viewMode: isEditMode ? ViewMode.EDIT : ViewMode.VIEW,
-        } as unknown),
+        }) as unknown,
       enhancements: {
         dynamicActions: {
           state: {
             get: () =>
               ({
                 events,
-              } as unknown),
+              }) as unknown,
           },
         },
       },
     },
-  } as EnhancedEmbeddableContext);
+  }) as EnhancedEmbeddableContext;
 
 describe('PanelNotificationsAction', () => {
   describe('getDisplayName', () => {

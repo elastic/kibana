@@ -237,43 +237,44 @@ export const useActionsLogFilter = ({
           'data-test-subj': `${filterName}-filter-option`,
         }))
       : isStatusesFilter
-      ? RESPONSE_ACTION_STATUS.map((statusName) => ({
-          key: statusName,
-          label: (
-            <ResponseActionStatusBadge
-              color={
-                statusName === 'successful'
-                  ? 'success'
-                  : statusName === 'failed'
-                  ? 'danger'
-                  : 'warning'
+        ? RESPONSE_ACTION_STATUS.map((statusName) => ({
+            key: statusName,
+            label: (
+              <ResponseActionStatusBadge
+                color={
+                  statusName === 'successful'
+                    ? 'success'
+                    : statusName === 'failed'
+                      ? 'danger'
+                      : 'warning'
+                }
+                status={getActionStatus(statusName)}
+              />
+            ) as unknown as string,
+            checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
+            'data-test-subj': `${filterName}-filter-option`,
+          }))
+        : isHostsFilter
+          ? []
+          : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
+              const featureFlags = ExperimentalFeaturesService.get();
+
+              // upload - v8.9
+              if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
+                return false;
               }
-              status={getActionStatus(statusName)}
-            />
-          ) as unknown as string,
-          checked: !isFlyout && statuses?.includes(statusName) ? 'on' : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
-      : isHostsFilter
-      ? []
-      : RESPONSE_ACTION_API_COMMANDS_NAMES.filter((commandName) => {
-          const featureFlags = ExperimentalFeaturesService.get();
 
-          // upload - v8.9
-          if (commandName === 'upload' && !featureFlags.responseActionUploadEnabled) {
-            return false;
-          }
-
-          return true;
-        }).map((commandName) => ({
-          key: commandName,
-          label: getUiCommand(commandName),
-          checked:
-            !isFlyout && commands?.map((command) => getCommandKey(command)).includes(commandName)
-              ? 'on'
-              : undefined,
-          'data-test-subj': `${filterName}-filter-option`,
-        }))
+              return true;
+            }).map((commandName) => ({
+              key: commandName,
+              label: getUiCommand(commandName),
+              checked:
+                !isFlyout &&
+                commands?.map((command) => getCommandKey(command)).includes(commandName)
+                  ? 'on'
+                  : undefined,
+              'data-test-subj': `${filterName}-filter-option`,
+            }))
   );
 
   useEffect(() => {

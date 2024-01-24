@@ -38,8 +38,8 @@ export class FunctionalTestRunner {
       esVersion === undefined
         ? EsVersion.getDefault()
         : esVersion instanceof EsVersion
-        ? esVersion
-        : new EsVersion(esVersion);
+          ? esVersion
+          : new EsVersion(esVersion);
   }
 
   async run(abortSignal?: AbortSignal) {

@@ -18,8 +18,9 @@ const { NumberFormat: strings } = ArgumentStrings;
 
 const getNumberFormatArgInput =
   (defaultNumberFormats: ComponentProps['numberFormats']) =>
-  (props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>) =>
-    <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />;
+  (props: Assign<ComponentProps, { numberFormats?: ComponentProps['numberFormats'] }>) => (
+    <NumberFormatArgInput numberFormats={defaultNumberFormats} {...props} />
+  );
 
 export const numberFormatInitializer: SetupInitializer<ArgumentFactory<ComponentProps>> = (
   core,

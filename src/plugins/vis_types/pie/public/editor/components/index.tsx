@@ -15,11 +15,10 @@ const PieOptionsLazy = lazy(() => import('./pie'));
 
 export const getPieOptions =
   ({ showElasticChartsOptions, palettes }: PieTypeProps) =>
-  (props: VisEditorOptionsProps<PartitionVisParams>) =>
-    (
-      <PieOptionsLazy
-        {...props}
-        palettes={palettes}
-        showElasticChartsOptions={showElasticChartsOptions}
-      />
-    );
+  (props: VisEditorOptionsProps<PartitionVisParams>) => (
+    <PieOptionsLazy
+      {...props}
+      palettes={palettes}
+      showElasticChartsOptions={showElasticChartsOptions}
+    />
+  );

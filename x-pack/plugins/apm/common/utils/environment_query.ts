@@ -14,7 +14,7 @@ import {
 import { SERVICE_NODE_NAME_MISSING } from '../service_nodes';
 
 export function environmentQuery(
-  environment: string | undefined
+  environment: string | undefined,
 ): QueryDslQueryContainer[] {
   if (!environment || environment === ENVIRONMENT_ALL.value) {
     return [];
@@ -28,7 +28,7 @@ export function environmentQuery(
 }
 
 export function serviceNodeNameQuery(
-  serviceNodeName?: string
+  serviceNodeName?: string,
 ): QueryDslQueryContainer[] {
   if (!serviceNodeName) {
     return [];

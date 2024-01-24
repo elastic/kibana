@@ -15,13 +15,13 @@ const API_BASE_PATH = '/api/index_management';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const indexManagementService = getService('indexManagement');
-  let helpers: typeof indexManagementService['datastreams']['helpers'];
-  let createDataStream: typeof helpers['createDataStream'];
-  let deleteDataStream: typeof helpers['deleteDataStream'];
-  let deleteComposableIndexTemplate: typeof helpers['deleteComposableIndexTemplate'];
-  let updateIndexTemplateMappings: typeof helpers['updateIndexTemplateMappings'];
-  let getMapping: typeof helpers['getMapping'];
-  let getDatastream: typeof helpers['getDatastream'];
+  let helpers: (typeof indexManagementService)['datastreams']['helpers'];
+  let createDataStream: (typeof helpers)['createDataStream'];
+  let deleteDataStream: (typeof helpers)['deleteDataStream'];
+  let deleteComposableIndexTemplate: (typeof helpers)['deleteComposableIndexTemplate'];
+  let updateIndexTemplateMappings: (typeof helpers)['updateIndexTemplateMappings'];
+  let getMapping: (typeof helpers)['getMapping'];
+  let getDatastream: (typeof helpers)['getDatastream'];
 
   describe('Data streams', function () {
     before(async () => {

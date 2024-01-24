@@ -338,12 +338,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
   public async getHashedTokensForPolicyIds(policyIds: string[]): Promise<Record<string, string>> {
     const tokens = await this.getDecryptedTokensForPolicyIds(policyIds);
-    return tokens.reduce((acc, { policy_id: policyId, token }) => {
-      if (policyId && token) {
-        acc[policyId] = this.hashToken(token);
-      }
-      return acc;
-    }, {} as Record<string, string>);
+    return tokens.reduce(
+      (acc, { policy_id: policyId, token }) => {
+        if (policyId && token) {
+          acc[policyId] = this.hashToken(token);
+        }
+        return acc;
+      },
+      {} as Record<string, string>
+    );
   }
 
   public async getAllHashedTokens(): Promise<Record<string, string>> {
@@ -376,13 +379,16 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
       ? policyIds
       : policyIds.filter((policyId) => !existingTokens.has(policyId));
 
-    const newTokensMap = missingTokenPolicyIds.reduce((acc, policyId) => {
-      const token = this.generateToken();
-      return {
-        ...acc,
-        [policyId]: token,
-      };
-    }, {} as Record<string, string>);
+    const newTokensMap = missingTokenPolicyIds.reduce(
+      (acc, policyId) => {
+        const token = this.generateToken();
+        return {
+          ...acc,
+          [policyId]: token,
+        };
+      },
+      {} as Record<string, string>
+    );
     await this.persistTokens(missingTokenPolicyIds, newTokensMap);
     if (force) {
       const config = appContextService.getConfig();

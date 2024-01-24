@@ -15,7 +15,7 @@ import { LifecycleAlertServices } from './create_lifecycle_executor';
  **/
 class AlertsMockWrapper<
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
 > {
   createAlertServices() {
     return alertsMock.createRuleExecutorServices<InstanceState, InstanceContext>();
@@ -24,13 +24,13 @@ class AlertsMockWrapper<
 
 type AlertServices<
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
 > = ReturnType<AlertsMockWrapper<InstanceState, InstanceContext>['createAlertServices']>;
 
 export const createLifecycleAlertServicesMock = <
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 >(
   alertServices: AlertServices<InstanceState, InstanceContext>
 ): LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds> => ({

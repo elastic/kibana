@@ -33,7 +33,7 @@ const mainApiRequestsToIntercept = [
 ];
 
 const mainAliasNames = mainApiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
+  ({ aliasName }) => `@${aliasName}`,
 );
 
 describe('Service inventory', () => {
@@ -43,7 +43,7 @@ describe('Service inventory', () => {
       opbeans({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
-      })
+      }),
     );
   });
   after(() => {
@@ -83,7 +83,7 @@ describe('Service inventory', () => {
     beforeEach(() => {
       cy.intercept('GET', '/internal/apm/services?*').as('servicesRequest');
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
-        'detailedStatisticsRequest'
+        'detailedStatisticsRequest',
       );
 
       cy.loginAsViewerUser();
@@ -108,7 +108,7 @@ describe('Service inventory', () => {
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
-        moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
+        moment(timeRange.rangeTo).subtract(5, 'm').toISOString(),
       );
       cy.contains('Update').click();
       cy.wait(mainAliasNames);
@@ -124,7 +124,7 @@ describe('Service inventory', () => {
         generateMultipleServicesData({
           from: new Date(rangeFrom).getTime(),
           to: new Date(rangeTo).getTime(),
-        })
+        }),
       );
     });
 
@@ -138,14 +138,14 @@ describe('Service inventory', () => {
 
     it('calls detailed API with visible items only', () => {
       cy.intercept('POST', '/internal/apm/services/detailed_statistics?*').as(
-        'detailedStatisticsRequest'
+        'detailedStatisticsRequest',
       );
       cy.intercept('GET', '/internal/apm/services?*').as(
-        'mainStatisticsRequest'
+        'mainStatisticsRequest',
       );
 
       cy.visitKibana(
-        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`
+        `${serviceInventoryHref}&pageSize=10&sortField=serviceName&sortDirection=asc`,
       );
       cy.wait('@mainStatisticsRequest');
       cy.contains('Services');
@@ -163,7 +163,7 @@ describe('Service inventory', () => {
             '15',
             '16',
             '17',
-          ])
+          ]),
         );
       });
       cy.getByTestSubj('pagination-button-1').click();
@@ -180,7 +180,7 @@ describe('Service inventory', () => {
             '24',
             '25',
             '26',
-          ])
+          ]),
         );
       });
     });

@@ -98,7 +98,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<UpstreamServicesForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const {
@@ -135,7 +135,7 @@ const dependencyMetadataRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     metadata: MetadataForDependencyResponse;
   }> => {
@@ -220,7 +220,7 @@ const dependencyThroughputChartsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<ThroughputChartsForDependencyResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
@@ -268,7 +268,7 @@ const dependencyFailedTransactionRateChartsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     currentTimeseries: Array<{ x: number; y: number }>;
     comparisonTimeseries: Array<{ x: number; y: number }> | null;
@@ -318,7 +318,7 @@ const dependencyOperationsRoute = createApmServerRoute({
     ]),
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{ operations: DependencyOperation[] }> => {
     const apmEventClient = await getApmEventClient(resources);
 
@@ -367,7 +367,7 @@ const dependencyLatencyDistributionChartsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<DependencyLatencyDistributionResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;

@@ -56,10 +56,10 @@ export function ServerlessFunctions() {
               end,
             },
           },
-        }
+        },
       );
     },
-    [kuery, environment, serviceName, start, end]
+    [kuery, environment, serviceName, start, end],
   );
 
   const columns: Array<EuiBasicTableColumn<ServerlessFunctionOverview>> = [
@@ -67,7 +67,7 @@ export function ServerlessFunctions() {
       field: 'serverlessFunctionName',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.functionName',
-        { defaultMessage: 'Function name' }
+        { defaultMessage: 'Function name' },
       ),
       sortable: true,
       truncateText: true,
@@ -84,7 +84,7 @@ export function ServerlessFunctions() {
       field: 'serverlessDurationAvg',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration',
-        { defaultMessage: 'Function duration' }
+        { defaultMessage: 'Function duration' },
       ),
       sortable: true,
       render: (_, { serverlessDurationAvg }) => {
@@ -95,7 +95,7 @@ export function ServerlessFunctions() {
       field: 'billedDurationAvg',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.billedDuration',
-        { defaultMessage: 'Billed duration' }
+        { defaultMessage: 'Billed duration' },
       ),
       sortable: true,
       render: (_, { billedDurationAvg }) => {
@@ -106,7 +106,7 @@ export function ServerlessFunctions() {
       field: 'avgMemoryUsed',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.memoryUsageAvg',
-        { defaultMessage: 'Memory usage avg.' }
+        { defaultMessage: 'Memory usage avg.' },
       ),
       sortable: true,
       render: (_, { avgMemoryUsed }) => {
@@ -117,7 +117,7 @@ export function ServerlessFunctions() {
       field: 'memorySize',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.memorySize',
-        { defaultMessage: 'Memory size' }
+        { defaultMessage: 'Memory size' },
       ),
       sortable: true,
       render: (_, { memorySize }) => {
@@ -128,7 +128,7 @@ export function ServerlessFunctions() {
       field: 'coldStartCount',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.coldStart',
-        { defaultMessage: 'Cold start' }
+        { defaultMessage: 'Cold start' },
       ),
       sortable: true,
     },
@@ -143,7 +143,7 @@ export function ServerlessFunctions() {
         direction: 'desc',
       } as PropertySort,
     }),
-    []
+    [],
   );
 
   return (
@@ -156,7 +156,7 @@ export function ServerlessFunctions() {
                 <h2>
                   {i18n.translate(
                     'xpack.apm.serverlessMetrics.serverlessFunctions.title',
-                    { defaultMessage: 'Lambda functions' }
+                    { defaultMessage: 'Lambda functions' },
                   )}
                 </h2>
               </EuiTitle>

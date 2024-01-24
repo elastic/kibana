@@ -20,7 +20,7 @@ describe('convertComputeUsageToGbSec', () => {
       { computeUsageBytesMs: 1, countInvocations: null },
     ].forEach(({ computeUsageBytesMs, countInvocations }) => {
       expect(
-        convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations })
+        convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations }),
       ).toBeUndefined();
     });
   });
@@ -30,7 +30,7 @@ describe('convertComputeUsageToGbSec', () => {
     const billedDuration = 4000;
     const computeUsageBytesMs = totalMemory * billedDuration;
     expect(
-      convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations: 1 })
+      convertComputeUsageToGbSec({ computeUsageBytesMs, countInvocations: 1 }),
     ).toBe(computeUsageBytesMs / 1024 ** 3 / 1000);
   });
 });
@@ -87,7 +87,7 @@ describe('calcEstimatedCost', () => {
         transactionThroughput: 1,
         architecture: 'arm',
         computeUsageGbSec,
-      })
+      }),
     ).toBeUndefined();
   });
 
@@ -97,7 +97,7 @@ describe('calcEstimatedCost', () => {
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         computeUsageGbSec,
-      })
+      }),
     ).toBeUndefined();
   });
 
@@ -107,7 +107,7 @@ describe('calcEstimatedCost', () => {
         transactionThroughput: 1,
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         architecture: 'arm',
-      })
+      }),
     ).toBeUndefined();
   });
 
@@ -118,7 +118,7 @@ describe('calcEstimatedCost', () => {
         awsLambdaPriceFactor: AWS_LAMBDA_PRICE_FACTOR,
         architecture: 'arm',
         computeUsageGbSec,
-      })
+      }),
     ).toBeUndefined();
   });
 
@@ -132,7 +132,7 @@ describe('calcEstimatedCost', () => {
           transactionThroughput: 100000,
           awsLambdaRequestCostPerMillion: 0.2,
           computeUsageGbSec,
-        })
+        }),
       ).toEqual(0.03);
     });
   });
@@ -153,7 +153,7 @@ describe('calcEstimatedCost', () => {
           transactionThroughput: 200000,
           awsLambdaRequestCostPerMillion: 0.2,
           computeUsageGbSec: _computeUsageGbSec,
-        })
+        }),
       ).toEqual(0.05);
     });
   });

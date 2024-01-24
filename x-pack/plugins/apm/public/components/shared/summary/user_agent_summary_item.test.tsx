@@ -15,7 +15,7 @@ describe('UserAgentSummaryItem', () => {
 
     it('renders', () => {
       expect(() =>
-        mountWithTheme(<UserAgentSummaryItem {...props} />)
+        mountWithTheme(<UserAgentSummaryItem {...props} />),
       ).not.toThrowError();
     });
 

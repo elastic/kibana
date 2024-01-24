@@ -13,7 +13,7 @@ import { FrameHeading } from './frame_heading';
 function getRenderedStackframeText(
   stackframe: Stackframe,
   codeLanguage: string,
-  idx: string
+  idx: string,
 ) {
   const result = renderWithTheme(
     <FrameHeading
@@ -21,7 +21,7 @@ function getRenderedStackframeText(
       isLibraryFrame={false}
       stackframe={stackframe}
       idx={idx}
-    />
+    />,
   );
 
   return result.getByTestId('FrameHeading').textContent;
@@ -41,8 +41,8 @@ describe('FrameHeading', () => {
             module: 'main',
           },
           'go',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual('main.go in Main.func2 at line 196');
     });
   });
@@ -61,10 +61,10 @@ describe('FrameHeading', () => {
             function: 'flushByteBuffer',
           },
           'Java',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual(
-        'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)'
+        'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)',
       );
     });
   });
@@ -87,10 +87,10 @@ describe('FrameHeading', () => {
               function: 'Get',
             },
             'C#',
-            '0'
-          )
+            '0',
+          ),
         ).toEqual(
-          'OpbeansDotnet.Controllers.CustomersController in Get in /src/opbeans-dotnet/Controllers/CustomersController.cs at line 23'
+          'OpbeansDotnet.Controllers.CustomersController in Get in /src/opbeans-dotnet/Controllers/CustomersController.cs at line 23',
         );
       });
     });
@@ -109,10 +109,10 @@ describe('FrameHeading', () => {
                 'Microsoft.EntityFrameworkCore, Version=2.2.6.0, Culture=neutral, PublicKeyToken=adb9793829ddae60',
             },
             'C#',
-            '0'
-          )
+            '0',
+          ),
         ).toEqual(
-          'Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider+ResultEnumerable`1 in GetEnumerator'
+          'Microsoft.EntityFrameworkCore.Query.Internal.LinqOperatorProvider+ResultEnumerable`1 in GetEnumerator',
         );
       });
     });
@@ -131,8 +131,8 @@ describe('FrameHeading', () => {
             function: 'callbackTrampoline',
           },
           'javascript',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual('at callbackTrampoline (internal/async_hooks.js:120)');
     });
 
@@ -150,10 +150,10 @@ describe('FrameHeading', () => {
               function: 'onStreamRead',
             },
             'javascript',
-            '0'
-          )
+            '0',
+          ),
         ).toEqual(
-          'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)'
+          'at TCPConnectWrap.onStreamRead (internal/stream_base_commons.js:205)',
         );
       });
     });
@@ -170,8 +170,8 @@ describe('FrameHeading', () => {
               line: { number: 205 },
             },
             'javascript',
-            '0'
-          )
+            '0',
+          ),
         ).toEqual('at  (internal/stream_base_commons.js:205)');
       });
     });
@@ -205,8 +205,8 @@ describe('FrameHeading', () => {
             vars: { request: "<WSGIRequest: POST '/api/orders'>" },
           },
           'python',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual('opbeans/views.py in orders at line 190');
     });
   });
@@ -231,8 +231,8 @@ describe('FrameHeading', () => {
             },
           },
           'ruby',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual("api/customers_controller.rb:15 in `show'");
     });
   });
@@ -255,10 +255,10 @@ describe('FrameHeading', () => {
             function: 'unstable_runWithPriority',
           },
           'javascript',
-          '0'
-        )
+          '0',
+        ),
       ).toEqual(
-        'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)'
+        'at unstable_runWithPriority (static/js/main.616809fb.js:319:3842)',
       );
     });
   });
@@ -276,10 +276,10 @@ describe('FrameHeading', () => {
             function: 'PDOStatement->execute()',
           },
           'php',
-          '1'
-        )
+          '1',
+        ),
       ).toEqual(
-        '#1   PDOStatement->execute() called at [/app/vendor/laravel/framework/src/Illuminate/Database/Connectors/PostgresConnector.php:87]'
+        '#1   PDOStatement->execute() called at [/app/vendor/laravel/framework/src/Illuminate/Database/Connectors/PostgresConnector.php:87]',
       );
     });
   });

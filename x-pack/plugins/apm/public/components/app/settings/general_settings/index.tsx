@@ -68,7 +68,7 @@ export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
   const isProfilingIntegrationEnabled = useApmFeatureFlag(
-    ApmFeatureFlagName.ProfilingIntegrationAvailable
+    ApmFeatureFlagName.ProfilingIntegrationAvailable,
   );
   const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {

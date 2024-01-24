@@ -32,15 +32,15 @@ export function TransactionMetadata({ transaction }: Props) {
               end: transaction['@timestamp'],
             },
           },
-        }
+        },
       );
     },
-    [transaction]
+    [transaction],
   );
 
   const sections = useMemo(
     () => getSectionsFromFields(transactionEvent?.metadata || {}),
-    [transactionEvent?.metadata]
+    [transactionEvent?.metadata],
   );
   return (
     <MetadataTable

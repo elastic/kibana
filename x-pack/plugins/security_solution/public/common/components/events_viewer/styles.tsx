@@ -43,8 +43,8 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
     position === 'relative'
       ? `margin-right: ${theme.eui.euiSizeXS}; margin-left: `
       : $hasRightOffset && position === 'absolute'
-      ? `margin-right: ${theme.eui.euiSizeXL};`
-      : `margin-right: ${theme.eui.euiSizeXS};`}
+        ? `margin-right: ${theme.eui.euiSizeXL};`
+        : `margin-right: ${theme.eui.euiSizeXS};`}
   ${({ position }) => {
     return position === 'absolute'
       ? `position: absolute`
@@ -56,8 +56,8 @@ export const UpdatedFlexGroup = styled(EuiFlexGroup)<{
     position === 'relative'
       ? `right: 0;`
       : $hasRightOffset && position === 'absolute'
-      ? `right: ${theme.eui.euiSizeXL};`
-      : `right: ${theme.eui.euiSizeL};`}
+        ? `right: ${theme.eui.euiSizeXL};`
+        : `right: ${theme.eui.euiSizeL};`}
 `;
 
 export const UpdatedFlexItem = styled(EuiFlexItem)<{ $show: boolean }>`

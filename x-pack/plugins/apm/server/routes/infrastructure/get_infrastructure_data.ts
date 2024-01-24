@@ -74,15 +74,15 @@ export const getInfrastructureData = async ({
   return {
     containerIds:
       response.aggregations?.containerIds?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key as string,
       ) ?? [],
     hostNames:
       response.aggregations?.hostNames?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key as string,
       ) ?? [],
     podNames:
       response.aggregations?.podNames?.buckets.map(
-        (bucket) => bucket.key as string
+        (bucket) => bucket.key as string,
       ) ?? [],
   };
 };

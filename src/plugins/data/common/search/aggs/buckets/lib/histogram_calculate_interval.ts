@@ -116,8 +116,8 @@ export const calculateHistogramInterval = ({
   let calculatedInterval = isAuto
     ? 0
     : typeof interval !== 'number'
-    ? parseFloat(interval)
-    : interval;
+      ? parseFloat(interval)
+      : interval;
 
   // should return NaN on non-numeric or invalid values
   if (Number.isNaN(calculatedInterval)) {

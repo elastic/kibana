@@ -55,7 +55,7 @@ export const fetchDurationHistogramRangeSteps = async ({
       rangeSteps: getHistogramRangeSteps(
         durationMinOverride,
         durationMaxOverride,
-        steps
+        steps,
       ),
     };
   }
@@ -92,7 +92,7 @@ export const fetchDurationHistogramRangeSteps = async ({
           duration_max: { max: { field: durationField } },
         },
       },
-    }
+    },
   );
 
   if (resp.hits.total.value === 0) {

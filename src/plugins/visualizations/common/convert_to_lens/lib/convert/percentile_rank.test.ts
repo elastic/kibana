@@ -69,7 +69,7 @@ describe('convertToPercentileRankColumn', () => {
     [
       string,
       Parameters<typeof convertToPercentileRankColumn>,
-      Partial<PercentileRanksColumn> | null
+      Partial<PercentileRanksColumn> | null,
     ]
   >([
     ['null if no percents', [{ agg: { ...agg, aggId: 'pr' }, dataView, visType }], null],

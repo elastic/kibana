@@ -18,7 +18,10 @@ export class BufferedTaskStore implements Updatable {
   private bufferedUpdate: Operation<ConcreteTaskInstance>;
   private bufferedRemove: Operation<Entity>;
 
-  constructor(private readonly taskStore: TaskStore, options: BufferOptions) {
+  constructor(
+    private readonly taskStore: TaskStore,
+    options: BufferOptions
+  ) {
     this.bufferedUpdate = createBuffer<ConcreteTaskInstance>(
       // Setting validate: false because we'll validate per update call
       //

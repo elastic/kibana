@@ -26,7 +26,7 @@ const environmentsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     environments: Environment[];
   }> => {
@@ -41,9 +41,8 @@ const environmentsRoute = createApmServerRoute({
       kuery: '',
     });
     const coreContext = await context.core;
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size =
+      await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getEnvironments({
       apmEventClient,
       serviceName,

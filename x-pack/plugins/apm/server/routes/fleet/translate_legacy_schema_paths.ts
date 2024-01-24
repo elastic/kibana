@@ -8,7 +8,7 @@
 import { LEGACY_TO_CURRENT_SCHEMA_PATHS } from '../../../common/fleet';
 
 export function translateLegacySchemaPaths(
-  apmServerSchema: Record<string, any>
+  apmServerSchema: Record<string, any>,
 ) {
   return Object.keys(apmServerSchema).reduce<Record<string, any>>(
     (acc, apmServerSchemaKey) => {
@@ -18,6 +18,6 @@ export function translateLegacySchemaPaths(
       acc[currentSchemaPath] = apmServerSchema[apmServerSchemaKey];
       return acc;
     },
-    {}
+    {},
   );
 }

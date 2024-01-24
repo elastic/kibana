@@ -10,9 +10,8 @@ import * as Rx from 'rxjs';
 
 const shuffle = <T>(arr: T[]) => arr.slice().sort(() => (Math.random() > 0.5 ? 1 : -1));
 
-export type GetArgsType<T extends LifecyclePhase<any>> = T extends LifecyclePhase<infer X>
-  ? X
-  : never;
+export type GetArgsType<T extends LifecyclePhase<any>> =
+  T extends LifecyclePhase<infer X> ? X : never;
 
 export class LifecyclePhase<Args extends readonly any[]> {
   private readonly handlers: Array<(...args: Args) => Promise<void> | void> = [];

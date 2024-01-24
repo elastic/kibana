@@ -195,9 +195,9 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={data}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        getType={jest.fn(() => ({ type: 'buckets' }) as IAggType)}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         theme={setUpMockTheme}
@@ -236,9 +236,9 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={data}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        getType={jest.fn(() => ({ type: 'buckets' }) as IAggType)}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         theme={setUpMockTheme}
@@ -312,9 +312,9 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={data}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        getType={jest.fn(() => ({ type: 'buckets' }) as IAggType)}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         theme={setUpMockTheme}
@@ -353,9 +353,9 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={data}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
-        getType={jest.fn(() => ({ type: 'buckets' } as IAggType))}
+        getType={jest.fn(() => ({ type: 'buckets' }) as IAggType)}
         renderMode="edit"
         paletteService={chartPluginMock.createPaletteRegistry()}
         theme={setUpMockTheme}
@@ -383,7 +383,7 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={emptyData}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn((type) =>
           type === 'count' ? ({ type: 'metrics' } as IAggType) : ({ type: 'buckets' } as IAggType)
@@ -410,7 +410,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="edit"
@@ -462,7 +462,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -494,7 +494,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -524,7 +524,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -552,7 +552,7 @@ describe('DatatableComponent', () => {
       <DatatableComponent
         data={data}
         args={args}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="edit"
@@ -591,7 +591,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -628,7 +628,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -665,7 +665,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"
@@ -701,7 +701,7 @@ describe('DatatableComponent', () => {
           sortingColumnId: 'b',
           sortingDirection: 'desc',
         }}
-        formatFactory={() => ({ convert: (x) => x } as IFieldFormat)}
+        formatFactory={() => ({ convert: (x) => x }) as IFieldFormat}
         dispatchEvent={onDispatchEvent}
         getType={jest.fn()}
         renderMode="view"

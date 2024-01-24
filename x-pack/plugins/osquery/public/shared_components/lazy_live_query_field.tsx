@@ -26,13 +26,12 @@ export const getLazyLiveQueryField =
       query: string;
       ecs_mapping: Record<string, unknown>;
     }>;
-  }) =>
-    (
-      <Suspense fallback={null}>
-        <ServicesWrapper services={services}>
-          <FormProvider {...formMethods}>
-            <LiveQueryField {...props} />
-          </FormProvider>
-        </ServicesWrapper>
-      </Suspense>
-    );
+  }) => (
+    <Suspense fallback={null}>
+      <ServicesWrapper services={services}>
+        <FormProvider {...formMethods}>
+          <LiveQueryField {...props} />
+        </FormProvider>
+      </ServicesWrapper>
+    </Suspense>
+  );

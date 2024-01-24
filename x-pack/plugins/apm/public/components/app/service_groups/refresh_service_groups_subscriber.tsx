@@ -25,7 +25,7 @@ export function RefreshServiceGroupsSubscriber({
   useEffect(() => {
     if (!subscription.current) {
       subscription.current = refreshServiceGroupsSubject.subscribe(() =>
-        onRefresh()
+        onRefresh(),
       );
     }
     return () => {

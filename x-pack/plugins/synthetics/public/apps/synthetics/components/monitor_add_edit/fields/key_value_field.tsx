@@ -43,7 +43,7 @@ const StyledField = styled(EuiFieldText)`
 
 export type Pair = [
   string, // key
-  string // value
+  string, // value
 ];
 
 export interface KeyValuePairsFieldProps {

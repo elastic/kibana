@@ -29,7 +29,7 @@ function DatePickerWrapper() {
     {
       parseNumbers: true,
       parseBooleans: true,
-    }
+    },
   ) as {
     rangeFrom?: string;
     rangeTo?: string;
@@ -82,7 +82,7 @@ function mountDatePicker(initialParams: {
       history={history}
     >
       <DatePickerWrapper />
-    </MockApmPluginContextWrapper>
+    </MockApmPluginContextWrapper>,
   );
 
   return { wrapper, setTimeSpy, getTimeSpy };
@@ -119,7 +119,7 @@ describe('DatePicker', () => {
     expect(mockHistoryPush).toHaveBeenLastCalledWith(
       expect.objectContaining({
         search: 'rangeFrom=now-90m&rangeTo=now-60m',
-      })
+      }),
     );
   });
 

@@ -27,7 +27,7 @@ const createUsageStatsClientMock = () =>
     incrementSavedObjectsExport: jest.fn().mockResolvedValue(null),
     incrementLegacyDashboardsImport: jest.fn().mockResolvedValue(null),
     incrementLegacyDashboardsExport: jest.fn().mockResolvedValue(null),
-  } as unknown as jest.Mocked<ICoreUsageStatsClient>);
+  }) as unknown as jest.Mocked<ICoreUsageStatsClient>;
 
 export const coreUsageStatsClientMock = {
   create: createUsageStatsClientMock,

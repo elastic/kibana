@@ -40,7 +40,7 @@ export type UncommonProcessTableColumns = [
   Columns<HostsUncommonProcessesEdges>,
   Columns<HostsUncommonProcessesEdges>,
   Columns<HostsUncommonProcessesEdges>,
-  Columns<HostsUncommonProcessesEdges>
+  Columns<HostsUncommonProcessesEdges>,
 ];
 
 const rowItems: ItemsPerRow[] = [

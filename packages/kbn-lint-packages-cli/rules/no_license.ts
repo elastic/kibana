@@ -25,8 +25,8 @@ export const noLicenseRule = PackageRule.create('noLicense', {
     const expected = exception
       ? exception[0]
       : pkg.normalizedRepoRelativeDir.startsWith('x-pack')
-      ? XPACK_LICENSE
-      : DEFAULT_LICENSE;
+        ? XPACK_LICENSE
+        : DEFAULT_LICENSE;
 
     if (pkg.pkg.license !== expected) {
       this.err(`The "license" in the package.json file must be ${expected}`, {

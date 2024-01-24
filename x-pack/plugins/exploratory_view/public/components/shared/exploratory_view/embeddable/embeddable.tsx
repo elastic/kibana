@@ -244,8 +244,8 @@ const Wrapper = styled.div<{
           props.align === 'left'
             ? `flex-start;`
             : props.align === 'right'
-            ? `flex-end;`
-            : 'center;'};
+              ? `flex-end;`
+              : 'center;'};
       }
       justify-content: flex-end;
       .legacyMtrVis__container {

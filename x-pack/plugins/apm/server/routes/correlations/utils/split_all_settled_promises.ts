@@ -11,7 +11,7 @@ interface HandledPromises<T> {
 }
 
 export const splitAllSettledPromises = <T = unknown>(
-  promises: Array<PromiseSettledResult<T>>
+  promises: Array<PromiseSettledResult<T>>,
 ): HandledPromises<T> =>
   promises.reduce(
     (result, current) => {
@@ -25,5 +25,5 @@ export const splitAllSettledPromises = <T = unknown>(
     {
       fulfilled: [],
       rejected: [],
-    } as HandledPromises<T>
+    } as HandledPromises<T>,
   );

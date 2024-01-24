@@ -30,11 +30,11 @@ export async function saveServiceGroup({
     ? savedObjectsClient.update(
         APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
         serviceGroupId,
-        serviceGroup
+        serviceGroup,
       )
     : savedObjectsClient.create(
         APM_SERVICE_GROUP_SAVED_OBJECT_TYPE,
-        serviceGroup
+        serviceGroup,
       ));
   return {
     id,

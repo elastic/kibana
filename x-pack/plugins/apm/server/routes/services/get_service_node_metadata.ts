@@ -90,7 +90,7 @@ export async function getServiceNodeMetadata({
 
   const { aggregations } = await apmEventClient.search(
     'get_service_node_metadata',
-    params
+    params,
   );
 
   return {

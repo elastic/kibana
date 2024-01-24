@@ -25,7 +25,7 @@ export const rack = `# config/elastic_apm.yml:
   'xpack.apm.onboarding.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
   {
     defaultMessage: "Defaults to the name of your Rack app's class.",
-  }
+  },
 )}
 service_name: '<your-service-name>'
 

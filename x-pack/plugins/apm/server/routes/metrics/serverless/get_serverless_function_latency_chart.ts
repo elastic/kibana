@@ -47,7 +47,7 @@ const chartBase: ChartBase = {
     {
       defaultMessage:
         'Transaction duration is the time spent processing and responding to a request. If the request is queued it will not be contribute to the transaction duration but will contribute the overall billed duration',
-    }
+    },
   ),
 };
 
@@ -92,7 +92,7 @@ async function getServerlessLatencySeries({
     {
       title: i18n.translate(
         'xpack.apm.agentMetrics.serverless.transactionDuration',
-        { defaultMessage: 'Transaction Duration' }
+        { defaultMessage: 'Transaction Duration' },
       ),
       key: 'transaction_duration',
       type: 'linemark',

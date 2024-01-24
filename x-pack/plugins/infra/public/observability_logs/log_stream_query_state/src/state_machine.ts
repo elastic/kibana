@@ -264,7 +264,7 @@ export const createPureLogStreamQueryStateMachine = (
         ),
         storeDefaultParsedQuery: actions.assign(
           (_context, _event) =>
-            ({ parsedQuery: safeDefaultParsedQuery } as LogStreamQueryContextWithParsedQuery)
+            ({ parsedQuery: safeDefaultParsedQuery }) as LogStreamQueryContextWithParsedQuery
         ),
         storeParsedQuery: actions.assign((_context, event) =>
           'parsedQuery' in event
@@ -273,10 +273,10 @@ export const createPureLogStreamQueryStateMachine = (
         ),
         clearValidationError: actions.assign(
           (_context, _event) =>
-            ({ validationError: undefined } as Omit<
+            ({ validationError: undefined }) as Omit<
               LogStreamQueryContextWithValidationError,
               'validationError'
-            >)
+            >
         ),
         updateTimeContextFromTimeFilterService,
         updateTimeContextFromTimeRangeUpdate,

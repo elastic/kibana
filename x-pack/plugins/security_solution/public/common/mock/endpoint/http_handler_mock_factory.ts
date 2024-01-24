@@ -29,7 +29,7 @@ export type ResponseProviderCallback<F extends (...args: any) => any = (...args:
  *  }>;
  */
 export type ResponseProvidersInterface<
-  I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>
+  I extends Record<string, ResponseProviderCallback> = Record<string, ResponseProviderCallback>,
 > = I;
 
 type SingleResponseProvider<F extends ResponseProviderCallback = ResponseProviderCallback> =
@@ -108,7 +108,7 @@ interface RouteMock<R extends ResponseProvidersInterface = ResponseProvidersInte
 }
 
 export type ApiHandlerMockFactoryProps<
-  R extends ResponseProvidersInterface = ResponseProvidersInterface
+  R extends ResponseProvidersInterface = ResponseProvidersInterface,
 > = Array<RouteMock<R>>;
 /**
  * Returns a function that can be used to apply mocked responses to calls made via `core.http`
@@ -299,7 +299,7 @@ const isHttpFetchOptionsWithPath = (
  * >([fleetSetupApiMock, agentsSetupApiMock]);
  */
 export const composeHttpHandlerMocks = <
-  R extends ResponseProvidersInterface = ResponseProvidersInterface
+  R extends ResponseProvidersInterface = ResponseProvidersInterface,
 >(
   handlerMocks: ApiHandlerMock[]
 ): ApiHandlerMock<R> => {

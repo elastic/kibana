@@ -107,7 +107,10 @@ export class ReportingStore {
   private client?: ElasticsearchClient;
   config: ReportingCore['config'];
 
-  constructor(private reportingCore: ReportingCore, private logger: Logger) {
+  constructor(
+    private reportingCore: ReportingCore,
+    private logger: Logger
+  ) {
     this.config = reportingCore.getConfig();
 
     this.indexPrefix = REPORTING_SYSTEM_INDEX;

@@ -19,8 +19,8 @@ export function QualityPercentageIndicator({ percentage = 0 }: { percentage?: nu
     percentage > POOR_QUALITY_MINIMUM_PERCENTAGE
       ? 'poor'
       : percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE
-      ? 'degraded'
-      : 'good';
+        ? 'degraded'
+        : 'good';
 
   const description = (
     <EuiText size="s">

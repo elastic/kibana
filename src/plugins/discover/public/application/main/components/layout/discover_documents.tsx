@@ -390,8 +390,8 @@ function DiscoverDocumentsComponent({
                     isDataLoading
                       ? DataLoadingState.loading
                       : isMoreDataLoading
-                      ? DataLoadingState.loadingMore
-                      : DataLoadingState.loaded
+                        ? DataLoadingState.loadingMore
+                        : DataLoadingState.loaded
                   }
                   rows={rows}
                   sort={(sort as SortOrder[]) || []}

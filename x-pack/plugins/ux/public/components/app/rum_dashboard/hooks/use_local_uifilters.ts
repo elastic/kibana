@@ -39,11 +39,11 @@ export function useLocalUIFilters({
           removeUndefinedProps({
             ...search,
             [name]: value.length ? value.join(',') : undefined,
-          })
+          }),
         ),
       });
     },
-    [history]
+    [history],
   );
 
   const invertFilter = useCallback(
@@ -51,7 +51,7 @@ export function useLocalUIFilters({
       if (!negate) {
         setFilterValue(
           name,
-          (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value)
+          (uxUiFilters?.[name] as string[]).filter((valT) => valT !== value),
         );
 
         const excludedName = getExcludedName(name);
@@ -66,8 +66,8 @@ export function useLocalUIFilters({
         setFilterValue(
           excludedName,
           (uxUiFilters?.[excludedName] as string[]).filter(
-            (valT) => valT !== value
-          )
+            (valT) => valT !== value,
+          ),
         );
 
         setFilterValue(includeName, [
@@ -76,7 +76,7 @@ export function useLocalUIFilters({
         ]);
       }
     },
-    [setFilterValue, uxUiFilters]
+    [setFilterValue, uxUiFilters],
   );
 
   const clearValues = useCallback(() => {
@@ -99,7 +99,7 @@ export function useLocalUIFilters({
         ...uxFiltersByName[name],
         name,
       })),
-    [filterNames, uxUiFilters]
+    [filterNames, uxUiFilters],
   );
 
   return {

@@ -75,8 +75,8 @@ export const ShowTopNButton: React.FC<Props> = React.memo(
     const activeScope: SourcererScopeName = isActiveTimeline(scopeId ?? '')
       ? SourcererScopeName.timeline
       : scopeId != null && isDetectionsAlertsTable(scopeId)
-      ? SourcererScopeName.detections
-      : SourcererScopeName.default;
+        ? SourcererScopeName.detections
+        : SourcererScopeName.default;
     const { browserFields, indexPattern } = useSourcererDataView(activeScope);
 
     const icon = iconType ?? 'visBarVertical';

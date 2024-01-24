@@ -85,7 +85,10 @@ export const mapFormFields = (
   formFields: Record<string, FieldHook>,
   fn: (field: FieldHook) => any
 ) =>
-  Object.entries(formFields).reduce((acc, [key, field]) => {
-    acc[key] = fn(field);
-    return acc;
-  }, {} as Record<string, unknown>);
+  Object.entries(formFields).reduce(
+    (acc, [key, field]) => {
+      acc[key] = fn(field);
+      return acc;
+    },
+    {} as Record<string, unknown>
+  );

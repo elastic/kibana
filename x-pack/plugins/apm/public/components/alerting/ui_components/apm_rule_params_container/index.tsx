@@ -93,7 +93,7 @@ function MinimumWindowSizeWarning({
         sizeValue: minimumWindowSize.value,
         sizeUnit: getTimeUnitLabel(minimumWindowSize.unit),
       },
-    }
+    },
   );
 
   return (

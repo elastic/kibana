@@ -52,7 +52,7 @@ export type FieldFormatParamsRestRespons<P = {}> = SerializableRecord & P;
 
 export type SerializedFieldFormatRestResponse<
   P = {},
-  TParams extends FieldFormatParamsRestRespons<P> = FieldFormatParamsRestRespons<P>
+  TParams extends FieldFormatParamsRestRespons<P> = FieldFormatParamsRestRespons<P>,
 > = {
   id?: string;
   params?: TParams;

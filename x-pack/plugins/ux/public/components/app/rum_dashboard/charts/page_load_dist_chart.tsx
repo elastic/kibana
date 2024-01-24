@@ -36,7 +36,7 @@ export function PageLoadDistChart({ onPercentileChange, breakdown }: Props) {
       const [minX, maxX] = range;
       onPercentileChange(minX, maxX);
     },
-    [onPercentileChange]
+    [onPercentileChange],
   );
 
   const { reportDefinitions, time } = useExpViewAttributes();

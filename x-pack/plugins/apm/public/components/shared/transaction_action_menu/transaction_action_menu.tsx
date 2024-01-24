@@ -103,7 +103,7 @@ export function TransactionActionMenu({ transaction, isLoading }: Props) {
             isLoading={isLoading || isProfilingPluginInitialized === undefined}
             onClick={() =>
               setIsActionPopoverOpen(
-                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen
+                (prevIsActionPopoverOpen) => !prevIsActionPopoverOpen,
               )
             }
           />
@@ -137,12 +137,12 @@ function ActionMenuSections({
   const { dataView } = useAdHocApmDataView();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
+    ALL_DATASETS_LOCATOR_ID,
   )!;
   const logsLocators = getLogsLocatorsFromUrlService(share.url);
 
   const infraLinksAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfraUiAvailable
+    ApmFeatureFlagName.InfraUiAvailable,
   );
 
   const {
@@ -151,7 +151,7 @@ function ActionMenuSections({
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer/waterfall',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
 
   const sections = getSections({

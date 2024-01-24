@@ -29,7 +29,7 @@ describe('When navigating between pages', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -44,7 +44,7 @@ describe('When navigating between pages', () => {
   it('should only load certain resources once', () => {
     cy.intercept('**/internal/apm/has_data').as('hasDataRequest');
     cy.intercept('**/internal/apm/services/opbeans-java/metadata/icons**').as(
-      'serviceIconsRequest'
+      'serviceIconsRequest',
     );
     cy.intercept('**/apm/fleet/has_apm_policies').as('apmPoliciesRequest');
 

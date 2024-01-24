@@ -30,7 +30,7 @@ export function CustomLinkFlyout({
         { key: 'transaction.name', value: transaction?.transaction.name },
         { key: 'transaction.type', value: transaction?.transaction.type },
       ].filter((filter): filter is Filter => typeof filter.value === 'string'),
-    [transaction]
+    [transaction],
   );
 
   const { refetch } = useFetcher(
@@ -39,7 +39,7 @@ export function CustomLinkFlyout({
         isCachable: false,
         params: { query: convertFiltersToQuery(filters) },
       }),
-    [filters]
+    [filters],
   );
 
   return (

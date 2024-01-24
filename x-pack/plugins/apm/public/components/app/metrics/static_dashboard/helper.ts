@@ -42,7 +42,7 @@ const getAdhocDataView = (dataView: DataView) => {
 
 export async function convertSavedDashboardToPanels(
   props: MetricsDashboardProps,
-  dataView: DataView
+  dataView: DataView,
 ): Promise<DashboardPanelMap | undefined> {
   const dashboardFilename = getDashboardFileName(props);
   const dashboardJSON = !!dashboardFilename
@@ -54,7 +54,7 @@ export async function convertSavedDashboardToPanels(
   }
 
   const panelsRawObjects = JSON.parse(
-    dashboardJSON.attributes.panelsJSON
+    dashboardJSON.attributes.panelsJSON,
   ) as any[];
 
   const panels = panelsRawObjects.reduce((acc, panel) => {

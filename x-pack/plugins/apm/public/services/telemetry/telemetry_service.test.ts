@@ -17,7 +17,7 @@ describe('TelemetryService', () => {
 
   it('should register all events', () => {
     expect(mockCoreStart.analytics.registerEventType).toHaveBeenCalledTimes(
-      apmTelemetryEventBasedTypes.length
+      apmTelemetryEventBasedTypes.length,
     );
   });
 
@@ -37,7 +37,7 @@ describe('TelemetryService', () => {
         kueryFields: ['service.name', 'span.id'],
         action: SearchQueryActions.Submit,
         timerange: 'now-15h-now',
-      }
+      },
     );
   });
 });

@@ -415,7 +415,7 @@ export type Matrix3 = readonly [
   number,
   number,
   number,
-  number
+  number,
 ];
 
 type EventSubtypeFull =

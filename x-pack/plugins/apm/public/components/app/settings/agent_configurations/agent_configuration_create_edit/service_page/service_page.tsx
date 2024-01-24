@@ -46,12 +46,12 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             params: {
               query: { serviceName: omitAllOption(newConfig.service.name) },
             },
-          }
+          },
         );
       }
     },
     [newConfig.service.name],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const environments = environmentsData?.environments ?? [];
@@ -68,17 +68,17 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         'GET /api/apm/settings/agent-configuration/agent_name 2023-10-31',
         {
           params: { query: { serviceName } },
-        }
+        },
       );
 
       setNewConfig((prev) => ({ ...prev, agent_name: agentName }));
     },
-    [newConfig.service.name, setNewConfig]
+    [newConfig.service.name, setNewConfig],
   );
 
   const ALREADY_CONFIGURED_TRANSLATED = i18n.translate(
     'xpack.apm.agentConfig.servicePage.alreadyConfiguredOption',
-    { defaultMessage: 'already configured' }
+    { defaultMessage: 'already configured' },
   );
 
   const environmentOptions = environments.map(
@@ -88,7 +88,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         alreadyConfigured ? `(${ALREADY_CONFIGURED_TRANSLATED})` : ''
       }`,
       value: name,
-    })
+    }),
   );
 
   const isAgentConfigurationSupported =
@@ -101,7 +101,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
     {
       defaultMessage:
         'Selected service uses an OpenTelemetry agent, which is not supported',
-    }
+    },
   );
 
   const isAllOptionSelected = newConfig.service.name === ALL_OPTION_VALUE;
@@ -117,15 +117,15 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <FormRowSuggestionsSelect
         title={i18n.translate(
           'xpack.apm.agentConfig.servicePage.service.title',
-          { defaultMessage: 'Service' }
+          { defaultMessage: 'Service' },
         )}
         description={i18n.translate(
           'xpack.apm.agentConfig.servicePage.service.description',
-          { defaultMessage: 'Choose the service you want to configure.' }
+          { defaultMessage: 'Choose the service you want to configure.' },
         )}
         fieldLabel={i18n.translate(
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
-          { defaultMessage: 'Service name' }
+          { defaultMessage: 'Service name' },
         )}
         fieldName={SERVICE_NAME}
         value={newConfig.service.name}
@@ -148,7 +148,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             {
               defaultMessage:
                 'This configuration change will impact all services, except those that use an OpenTelemetry agent. ',
-            }
+            },
           )}
         />
       )}
@@ -156,18 +156,18 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
       <FormRowSelect
         title={i18n.translate(
           'xpack.apm.agentConfig.servicePage.environment.title',
-          { defaultMessage: 'Environment' }
+          { defaultMessage: 'Environment' },
         )}
         description={i18n.translate(
           'xpack.apm.agentConfig.servicePage.environment.description',
           {
             defaultMessage:
               'Only a single environment per configuration is supported.',
-          }
+          },
         )}
         fieldLabel={i18n.translate(
           'xpack.apm.agentConfig.servicePage.environment.fieldLabel',
-          { defaultMessage: 'Service environment' }
+          { defaultMessage: 'Service environment' },
         )}
         isLoading={environmentsStatus === FETCH_STATUS.LOADING}
         options={environmentOptions}
@@ -194,7 +194,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             >
               {i18n.translate(
                 'xpack.apm.agentConfig.servicePage.cancelButton',
-                { defaultMessage: 'Cancel' }
+                { defaultMessage: 'Cancel' },
               )}
             </EuiButtonEmpty>
           </LegacyAPMLink>
@@ -212,7 +212,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           >
             {i18n.translate(
               'xpack.apm.agentConfig.saveConfigurationButtonLabel',
-              { defaultMessage: 'Next step' }
+              { defaultMessage: 'Next step' },
             )}
           </EuiButton>
         </EuiFlexItem>

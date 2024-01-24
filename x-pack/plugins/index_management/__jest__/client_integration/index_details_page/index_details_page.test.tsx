@@ -244,9 +244,7 @@ describe('<IndexDetailsPage />', () => {
     it('renders status details', () => {
       const statusDetails = testBed.actions.overview.getStatusDetailsContent();
       expect(statusDetails).toBe(
-        `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${
-          testIndexMock.documents_deleted
-        } Deleted`
+        `Status${'Open'}${'Healthy'}${testIndexMock.documents} Document / ${testIndexMock.documents_deleted} Deleted`
       );
     });
 

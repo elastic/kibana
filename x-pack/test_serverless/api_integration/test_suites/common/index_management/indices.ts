@@ -19,12 +19,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Indices', function () {
     let indexName: string;
-    let reload: typeof indexManagementService['indices']['api']['reload'];
-    let list: typeof indexManagementService['indices']['api']['list'];
-    let deleteIndex: typeof indexManagementService['indices']['api']['deleteIndex'];
-    let createIndex: typeof indexManagementService['indices']['helpers']['createIndex'];
-    let deleteAllIndices: typeof indexManagementService['indices']['helpers']['deleteAllIndices'];
-    let catIndex: typeof indexManagementService['indices']['helpers']['catIndex'];
+    let reload: (typeof indexManagementService)['indices']['api']['reload'];
+    let list: (typeof indexManagementService)['indices']['api']['list'];
+    let deleteIndex: (typeof indexManagementService)['indices']['api']['deleteIndex'];
+    let createIndex: (typeof indexManagementService)['indices']['helpers']['createIndex'];
+    let deleteAllIndices: (typeof indexManagementService)['indices']['helpers']['deleteAllIndices'];
+    let catIndex: (typeof indexManagementService)['indices']['helpers']['catIndex'];
 
     before(async () => {
       ({

@@ -29,7 +29,7 @@ export function useUpgradeApmPackagePolicyHref(packagePolicyId = '') {
     },
   } = useApmPluginContext();
   return basePath.prepend(
-    `/app/fleet/policies/policy-elastic-agent-on-cloud/upgrade-package-policy/${packagePolicyId}?from=integrations-policy-list`
+    `/app/fleet/policies/policy-elastic-agent-on-cloud/upgrade-package-policy/${packagePolicyId}?from=integrations-policy-list`,
   );
 }
 
@@ -40,6 +40,6 @@ export function useObservabilityActiveAlertsHref(kuery: string) {
     },
   } = useApmPluginContext();
   return basePath.prepend(
-    `/app/observability/alerts?_a=${rison.encode({ kuery, status: 'active' })}`
+    `/app/observability/alerts?_a=${rison.encode({ kuery, status: 'active' })}`,
   );
 }

@@ -30,11 +30,11 @@ export function CustomLogs({ children }: Props) {
       {
         text: i18n.translate(
           'xpack.observability_onboarding.breadcrumbs.customLogs',
-          { defaultMessage: 'Stream log files' }
+          { defaultMessage: 'Stream log files' },
         ),
       },
     ],
-    breadcrumbsApp
+    breadcrumbsApp,
   );
   return <AnimatedTransitionsWizard>{children}</AnimatedTransitionsWizard>;
 }
@@ -90,7 +90,7 @@ function AnimatedTransitionsWizard({ children }: Props) {
                         'xpack.observability_onboarding.title.collectCustomLogs',
                         {
                           defaultMessage: 'Stream log files to Elastic',
-                        }
+                        },
                       )}
                 </h1>
               </EuiTitle>
@@ -115,8 +115,8 @@ function AnimatedTransitionsWizard({ children }: Props) {
                 transition === 'ready'
                   ? 'center'
                   : transition === 'back'
-                  ? 'left'
-                  : 'right'
+                    ? 'left'
+                    : 'right'
               }
             >
               {children}

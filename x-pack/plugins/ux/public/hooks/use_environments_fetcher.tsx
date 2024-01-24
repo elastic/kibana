@@ -55,17 +55,17 @@ export function useEnvironmentsFetcher({
       }),
     },
     [dataViewTitle, serviceName, start, end, size],
-    { name: 'UxEnvironments' }
+    { name: 'UxEnvironments' },
   );
 
   const environments = useMemo(
     () => transformEnvironmentsResponse(esQueryResponse) ?? [],
-    [esQueryResponse]
+    [esQueryResponse],
   );
 
   const environmentOptions = useMemo(
     () => getEnvironmentOptions(environments),
-    [environments]
+    [environments],
   );
 
   return { environments, loading, environmentOptions };

@@ -60,8 +60,8 @@ describe('AggTypesRegistry', () => {
       setup.registerBucket('terms', () => bucketType);
     }).toThrow(/already been registered with name: terms/);
 
-    const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
-    const fooMetric = () => ({ name: 'foo', type: 'metrics' } as MetricAggType<any>);
+    const fooBucket = () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>;
+    const fooMetric = () => ({ name: 'foo', type: 'metrics' }) as MetricAggType<any>;
     expect(() => {
       setup.registerBucket('foo', fooBucket);
       setup.registerMetric('foo', fooMetric);
@@ -79,8 +79,8 @@ describe('AggTypesRegistry', () => {
       setup.registerMetric('count', () => metricType);
     }).toThrow(/already been registered with name: count/);
 
-    const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
-    const fooMetric = () => ({ name: 'foo', type: 'metrics' } as MetricAggType<any>);
+    const fooBucket = () => ({ name: 'foo', type: 'buckets' }) as BucketAggType<any>;
+    const fooMetric = () => ({ name: 'foo', type: 'metrics' }) as MetricAggType<any>;
     expect(() => {
       setup.registerMetric('foo', fooMetric);
       setup.registerBucket('foo', fooBucket);

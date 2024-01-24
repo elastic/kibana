@@ -24,7 +24,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
           type: 'yaml',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(true);
   });
@@ -40,7 +40,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
           type: 'yaml',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(false);
   });
@@ -59,7 +59,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
           type: 'text',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(true);
   });
@@ -78,7 +78,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
           type: 'text',
         },
       },
-      settings
+      settings,
     );
     expect(isValid).toBe(false);
   });
@@ -87,7 +87,7 @@ describe('tail_sampling_settings - isTailBasedSamplingFormValid', () => {
     const settings = getTailSamplingSettings(DOCS_LINK);
     const isValid = isTailBasedSamplingValid(
       { tail_sampling_enabled: { value: false, type: 'bool' } },
-      settings
+      settings,
     );
     expect(isValid).toBe(true);
   });

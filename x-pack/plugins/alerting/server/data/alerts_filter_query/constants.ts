@@ -10,4 +10,4 @@ export const filterStateStore = {
   GLOBAL_STATE: 'globalState',
 } as const;
 
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+export type FilterStateStore = (typeof filterStateStore)[keyof typeof filterStateStore];

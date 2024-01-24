@@ -104,7 +104,7 @@ function useServicesMainStatisticsFetcher() {
       pageSize,
       sortField,
       sortDirection,
-    ]
+    ],
   );
 
   return {
@@ -188,7 +188,7 @@ function useServicesDetailedStatisticsFetcher({
                 currentPageItems
                   .map(({ serviceName }) => serviceName)
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
-                  .sort()
+                  .sort(),
               ),
             },
           },
@@ -198,7 +198,7 @@ function useServicesDetailedStatisticsFetcher({
     // only fetches detailed statistics when requestId is invalidated by main statistics api call or offset is changed
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatisticsData.requestId, offset, comparisonEnabled],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   return { comparisonFetch };
@@ -210,7 +210,7 @@ export function ServiceInventory() {
   const mainStatisticsItems = mainStatisticsFetch.data?.items ?? [];
 
   const displayHealthStatus = mainStatisticsItems.some(
-    (item) => 'healthStatus' in item
+    (item) => 'healthStatus' in item,
   );
 
   const hasKibanaUiLimitRestrictedData =
@@ -220,7 +220,7 @@ export function ServiceInventory() {
     mainStatisticsFetch.data?.serviceOverflowCount ?? 0;
 
   const displayAlerts = mainStatisticsItems.some(
-    (item) => ServiceInventoryFieldName.AlertsCount in item
+    (item) => ServiceInventoryFieldName.AlertsCount in item,
   );
 
   const tiebreakerField = ServiceInventoryFieldName.Throughput;
@@ -242,7 +242,7 @@ export function ServiceInventory() {
 
   const [userHasDismissedCallout, setUserHasDismissedCallout] = useLocalStorage(
     `apm.userHasDismissedServiceInventoryMlCallout.${anomalyDetectionSetupState}`,
-    false
+    false,
   );
 
   const displayMlCallout =
@@ -285,7 +285,7 @@ export function ServiceInventory() {
           {
             defaultMessage:
               'Number of services exceed the allowed maximum that are displayed (1,000)',
-          }
+          },
         )}
         color="warning"
         iconType="warning"

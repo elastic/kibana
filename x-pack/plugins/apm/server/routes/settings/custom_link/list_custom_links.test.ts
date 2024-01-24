@@ -20,7 +20,7 @@ describe('List Custom Links', () => {
 
   it('fetches all custom links', async () => {
     mock = await inspectSearchParams(({ mockInternalESClient }) =>
-      listCustomLinks({ internalESClient: mockInternalESClient })
+      listCustomLinks({ internalESClient: mockInternalESClient }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -35,7 +35,7 @@ describe('List Custom Links', () => {
       listCustomLinks({
         filters,
         internalESClient: mockInternalESClient,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

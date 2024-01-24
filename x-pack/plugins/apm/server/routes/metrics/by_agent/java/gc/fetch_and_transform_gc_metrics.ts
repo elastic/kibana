@@ -69,8 +69,8 @@ export async function fetchAndTransformGcMetrics({
   const targetField = isOpenTelemetry
     ? METRIC_OTEL_JVM_GC_DURATION
     : rateOrTime === RATE
-    ? METRIC_JAVA_GC_COUNT
-    : METRIC_JAVA_GC_TIME;
+      ? METRIC_JAVA_GC_COUNT
+      : METRIC_JAVA_GC_TIME;
 
   const fieldAggregation = isOpenTelemetry
     ? rateOrTime === RATE

@@ -37,9 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
       let superUserInfo: User;
 
       before(async () => {
-        ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-          getService
-        ));
+        ({ headers, superUserInfo, superUserWithProfile } =
+          await setupSuperUserProfile(getService));
       });
 
       afterEach(async () => {

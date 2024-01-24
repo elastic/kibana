@@ -44,7 +44,10 @@ export interface ResourceInstaller {
 type IngestPipelineWithMetadata = IngestPipeline & { _meta?: Metadata };
 
 export class DefaultResourceInstaller implements ResourceInstaller {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger
+  ) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
     try {

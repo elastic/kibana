@@ -18,7 +18,7 @@ import { Readable } from 'stream';
 
 export function setupNodeEvents(
   on: Cypress.PluginEvents,
-  config: Cypress.PluginConfigOptions
+  config: Cypress.PluginConfigOptions,
 ) {
   const logger = createLogger(LogLevel.info);
 

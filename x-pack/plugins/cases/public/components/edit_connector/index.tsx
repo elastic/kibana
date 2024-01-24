@@ -148,21 +148,25 @@ export const EditConnector = React.memo(
                 onSubmit={onSubmitConnector}
               />
             )}
-            {!hasErrorMessages && !isLoading && !isEdit && hasPushPermissions && canUseConnectors && (
-              <EuiFlexItem grow={false}>
-                <span>
-                  <PushButton
-                    hasBeenPushed={hasBeenPushed}
-                    disabled={disablePushButton}
-                    isLoading={isLoadingPushToService}
-                    pushToService={handlePushToService}
-                    errorsMsg={errorsMsg}
-                    showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
-                    connectorName={connectorWithName.name}
-                  />
-                </span>
-              </EuiFlexItem>
-            )}
+            {!hasErrorMessages &&
+              !isLoading &&
+              !isEdit &&
+              hasPushPermissions &&
+              canUseConnectors && (
+                <EuiFlexItem grow={false}>
+                  <span>
+                    <PushButton
+                      hasBeenPushed={hasBeenPushed}
+                      disabled={disablePushButton}
+                      isLoading={isLoadingPushToService}
+                      pushToService={handlePushToService}
+                      errorsMsg={errorsMsg}
+                      showTooltip={errorsMsg.length > 0 || !needsToBePushed || !hasPushPermissions}
+                      connectorName={connectorWithName.name}
+                    />
+                  </span>
+                </EuiFlexItem>
+              )}
           </EuiFlexGroup>
         </EuiText>
       </EuiFlexItem>

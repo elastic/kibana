@@ -29,14 +29,14 @@ describe('CustomLinkList', () => {
   } as unknown as Transaction;
   it('shows links', () => {
     const component = render(
-      <CustomLinkList customLinks={customLinks} transaction={transaction} />
+      <CustomLinkList customLinks={customLinks} transaction={transaction} />,
     );
     expectTextsInDocument(component, ['foo', 'bar']);
   });
 
   it('doesnt show any links', () => {
     const component = render(
-      <CustomLinkList customLinks={[]} transaction={transaction} />
+      <CustomLinkList customLinks={[]} transaction={transaction} />,
     );
     expectTextsNotInDocument(component, ['foo', 'bar']);
   });

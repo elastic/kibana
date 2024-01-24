@@ -13,28 +13,28 @@ import { PackagePolicyVars, SettingsRow, BasicSettingRow } from '../typings';
 
 export const REQUIRED_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredLabel',
-  { defaultMessage: 'Required' }
+  { defaultMessage: 'Required' },
 );
 export const OPTIONAL_LABEL = i18n.translate(
   'xpack.apm.fleet_integration.settings.optionalLabel',
-  { defaultMessage: 'Optional' }
+  { defaultMessage: 'Optional' },
 );
 const REQUIRED_FIELD = i18n.translate(
   'xpack.apm.fleet_integration.settings.requiredFieldLabel',
-  { defaultMessage: 'Required field' }
+  { defaultMessage: 'Required field' },
 );
 
 export function mergeNewVars(
   oldVars: PackagePolicyVars,
   key: string,
-  value?: any
+  value?: any,
 ): PackagePolicyVars {
   return { ...oldVars, [key]: { ...oldVars[key], value } };
 }
 
 export function isSettingsFormValid(
   parentSettings: SettingsRow[],
-  vars: PackagePolicyVars
+  vars: PackagePolicyVars,
 ) {
   function isSettingsValid(settings: SettingsRow[]): boolean {
     return !settings
@@ -48,7 +48,7 @@ export function isSettingsFormValid(
         }
         const { isValid } = validateSettingValue(
           setting,
-          vars[setting.key]?.value
+          vars[setting.key]?.value,
         );
         return isValid;
       })

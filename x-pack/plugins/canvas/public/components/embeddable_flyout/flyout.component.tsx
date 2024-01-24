@@ -67,11 +67,11 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         (isByValueEnabled || availableEmbeddables.includes(factory.type))
     )
     .map((factory) => factory.savedObjectMetaData)
-    .filter<SavedObjectMetaData<{}>>(function (
-      maybeSavedObjectMetaData
-    ): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
-      return maybeSavedObjectMetaData !== undefined;
-    });
+    .filter<SavedObjectMetaData<{}>>(
+      function (maybeSavedObjectMetaData): maybeSavedObjectMetaData is SavedObjectMetaData<{}> {
+        return maybeSavedObjectMetaData !== undefined;
+      }
+    );
 
   return (
     <EuiFlyout ownFocus onClose={onClose} data-test-subj="dashboardAddPanel">

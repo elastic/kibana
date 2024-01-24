@@ -19,5 +19,5 @@ export const MetricsDataClientMock = {
         references: [],
       })),
       setDefaultMetricIndicesHandler: jest.fn(),
-    } as unknown as MetricsDataClient),
+    }) as unknown as MetricsDataClient,
 };

@@ -68,7 +68,7 @@ export function ProfilingTopNFunctions({
                 kuery,
               },
             },
-          }
+          },
         );
       }
     },
@@ -81,12 +81,12 @@ export function ProfilingTopNFunctions({
       startIndex,
       endIndex,
       kuery,
-    ]
+    ],
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
     HOST_NAME,
-    data?.hostNames || []
+    data?.hostNames || [],
   );
 
   return (

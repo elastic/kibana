@@ -44,7 +44,7 @@ journey('UX URL Query', async ({ page, params }) => {
   step('Confirm query params', async () => {
     const value = await page.$eval(
       byTestId('uxPercentileSelect'),
-      (sel: HTMLInputElement) => sel.value
+      (sel: HTMLInputElement) => sel.value,
     );
 
     expect(value).toBe(queryParams.percentile);

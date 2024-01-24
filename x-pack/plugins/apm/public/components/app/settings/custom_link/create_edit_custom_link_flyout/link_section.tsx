@@ -45,13 +45,13 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
         {
           defaultMessage:
             'This is the label shown in the actions context menu. Keep it as short as possible.',
-        }
+        },
       ),
       placeholder: i18n.translate(
         'xpack.apm.settings.customLink.flyout.link.label.placeholder',
         {
           defaultMessage: 'e.g. Support tickets',
-        }
+        },
       ),
       value: label,
       onChange: onChangeLabel,
@@ -69,14 +69,14 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
               defaultMessage:
                 'Add field name variables to your URL to apply values e.g. {sample}.',
               values: { sample: '{{trace.id}}' },
-            }
+            },
           )}{' '}
           <Documentation
             label={i18n.translate(
               'xpack.apm.settings.customLink.flyout.link.url.doc',
               {
                 defaultMessage: 'Learn more in the docs.',
-              }
+              },
             )}
           />
         </>
@@ -85,7 +85,7 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
         'xpack.apm.settings.customLink.flyout.link.url.placeholder',
         {
           defaultMessage: 'e.g. https://www.elastic.co/',
-        }
+        },
       ),
       value: url,
       onChange: onChangeUrl,
@@ -115,7 +115,7 @@ export function LinkSection({ label, onChangeLabel, url, onChangeUrl }: Props) {
                   'xpack.apm.settings.customLink.flyout.required',
                   {
                     defaultMessage: 'Required',
-                  }
+                  },
                 )}
               </EuiText>
             }

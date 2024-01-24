@@ -80,11 +80,11 @@ export function DependencyFailedTransactionRateChart({
       spanName,
       isTimeRangeMetadataLoading,
       searchServiceDestinationMetrics,
-    ]
+    ],
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.FAILED_TRANSACTION_RATE
+    ChartType.FAILED_TRANSACTION_RATE,
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();

@@ -109,7 +109,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterField: (field: typeof indexPattern['fields'][0]) =>
+        filterField: (field: (typeof indexPattern)['fields'][0]) =>
           field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
       });
 
@@ -123,7 +123,7 @@ describe('Field', () => {
       const aggParam = new FieldParamType({
         name: 'field',
         type: 'field',
-        filterField: (field: typeof indexPattern['fields'][0]) =>
+        filterField: (field: (typeof indexPattern)['fields'][0]) =>
           field.esTypes?.includes(ES_FIELD_TYPES.TEXT),
         filterFieldTypes: KBN_FIELD_TYPES.NUMBER,
       });

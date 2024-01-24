@@ -21,7 +21,7 @@ function getRangeType(min?: number, max?: number) {
 
 export function getRangeTypeMessage(
   min?: number | string,
-  max?: number | string
+  max?: number | string,
 ) {
   return i18n.translate('xpack.apm.agentConfig.range.errorText', {
     defaultMessage: `{rangeType, select,
@@ -35,7 +35,7 @@ export function getRangeTypeMessage(
       max,
       rangeType: getRangeType(
         typeof min === 'string' ? amountAndUnitToObject(min).amount : min,
-        typeof max === 'string' ? amountAndUnitToObject(max).amount : max
+        typeof max === 'string' ? amountAndUnitToObject(max).amount : max,
       ),
     },
   });

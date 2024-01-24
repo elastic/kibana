@@ -61,13 +61,13 @@ export type PutPackagePolicyUpdateCallback = (
 export type ExternalCallbackCreate = ['packagePolicyCreate', PostPackagePolicyCreateCallback];
 export type ExternalCallbackPostCreate = [
   'packagePolicyPostCreate',
-  PostPackagePolicyPostCreateCallback
+  PostPackagePolicyPostCreateCallback,
 ];
 
 export type ExternalCallbackDelete = ['packagePolicyDelete', PostPackagePolicyDeleteCallback];
 export type ExternalCallbackPostDelete = [
   'packagePolicyPostDelete',
-  PostPackagePolicyPostDeleteCallback
+  PostPackagePolicyPostDeleteCallback,
 ];
 export type ExternalCallbackUpdate = ['packagePolicyUpdate', PutPackagePolicyUpdateCallback];
 

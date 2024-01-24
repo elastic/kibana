@@ -15,7 +15,7 @@ export interface KeyValuePair {
 
 export const flattenObject = (
   item: Maybe<Record<string, any | any[]>>,
-  parentKey?: string
+  parentKey?: string,
 ): KeyValuePair[] => {
   if (item) {
     const isArrayWithSingleValue = Array.isArray(item) && item.length === 1;

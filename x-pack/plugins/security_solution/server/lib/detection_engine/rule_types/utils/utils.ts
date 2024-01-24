@@ -289,7 +289,10 @@ export const generateId = (
   docId: string,
   version: string,
   ruleId: string
-): string => createHash('sha256').update(docIndex.concat(docId, version, ruleId)).digest('hex');
+): string =>
+  createHash('sha256')
+    .update(docIndex.concat(docId, version, ruleId))
+    .digest('hex');
 
 // TODO: do we need to include version in the id? If it does matter then we should include it in signal.parents as well
 export const generateSignalId = (signal: Signal) =>
@@ -564,7 +567,7 @@ export const createErrorsFromShard = ({ errors }: { errors: ShardError[] }): str
  * @param primaryTimestamp The primary timestamp to use.
  */
 export const lastValidDate = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -599,8 +602,8 @@ export const getValidDateFromDoc = ({
     doc.fields != null && doc.fields[primaryTimestamp] != null
       ? doc.fields[primaryTimestamp][0]
       : doc._source != null
-      ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
-      : undefined;
+        ? (doc._source as { [key: string]: unknown })[primaryTimestamp]
+        : undefined;
   const lastTimestamp =
     typeof timestampValue === 'string' || typeof timestampValue === 'number'
       ? timestampValue
@@ -625,7 +628,7 @@ export const getValidDateFromDoc = ({
 };
 
 export const createSearchAfterReturnTypeFromResponse = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >({
   searchResult,
   primaryTimestamp,
@@ -695,7 +698,7 @@ export const createSearchAfterReturnType = ({
 };
 
 export const createSearchResultReturnType = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(): SignalSearchResponse<TAggregations> => {
   const hits: SignalSourceHit[] = [];
   return {
@@ -780,7 +783,7 @@ export const mergeReturns = (
 };
 
 export const mergeSearchResults = <
-  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>
+  TAggregations = Record<estypes.AggregateName, estypes.AggregationsAggregate>,
 >(
   searchResults: Array<SignalSearchResponse<TAggregations>>
 ) => {
@@ -831,8 +834,8 @@ export const getTotalHitsValue = (totalHits: number | { value: number } | undefi
   typeof totalHits === 'undefined'
     ? -1
     : typeof totalHits === 'number'
-    ? totalHits
-    : totalHits.value;
+      ? totalHits
+      : totalHits.value;
 
 export const calculateTotal = (
   prevTotal: number | { value: number } | undefined,

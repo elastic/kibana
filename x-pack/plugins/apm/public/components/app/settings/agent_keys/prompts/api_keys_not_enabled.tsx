@@ -23,7 +23,7 @@ export function ApiKeysNotEnabled() {
             'xpack.apm.settings.agentKeys.apiKeysDisabledErrorTitle',
             {
               defaultMessage: 'API keys not enabled in Elasticsearch',
-            }
+            },
           )}
         </h2>
       }
@@ -44,7 +44,7 @@ export function ApiKeysNotEnabled() {
                     'xpack.apm.settings.agentKeys.apiKeysDisabledErrorLinkText',
                     {
                       defaultMessage: 'docs',
-                    }
+                    },
                   )}
                 </EuiLink>
               ),

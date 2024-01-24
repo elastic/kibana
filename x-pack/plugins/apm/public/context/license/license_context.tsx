@@ -12,7 +12,7 @@ import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { InvalidLicenseNotification } from './invalid_license_notification';
 
 export const LicenseContext = React.createContext<ILicense | undefined>(
-  undefined
+  undefined,
 );
 
 export function LicenseProvider({ children }: { children: React.ReactChild }) {

@@ -70,13 +70,13 @@ const createStartMock = () => {
 
 export type AlertInstanceMock<
   State extends AlertInstanceState = AlertInstanceState,
-  Context extends AlertInstanceContext = AlertInstanceContext
+  Context extends AlertInstanceContext = AlertInstanceContext,
 > = jest.Mocked<Alert<State, Context>>;
 
 export const createAlertFactoryMock = {
   create: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
-    InstanceContext extends AlertInstanceContext = AlertInstanceContext
+    InstanceContext extends AlertInstanceContext = AlertInstanceContext,
   >() => {
     const mock = {
       hasScheduledActions: jest.fn(),
@@ -102,7 +102,7 @@ export const createAlertFactoryMock = {
   done: <
     InstanceState extends AlertInstanceState = AlertInstanceState,
     InstanceContext extends AlertInstanceContext = AlertInstanceContext,
-    ActionGroupIds extends string = string
+    ActionGroupIds extends string = string,
   >() => {
     const mock: jest.Mocked<AlertFactoryDoneUtils<InstanceState, InstanceContext, ActionGroupIds>> =
       {
@@ -153,7 +153,7 @@ const createRuleLastRunServiceMock = () => {
 
 const createRuleExecutorServicesMock = <
   InstanceState extends AlertInstanceState = AlertInstanceState,
-  InstanceContext extends AlertInstanceContext = AlertInstanceContext
+  InstanceContext extends AlertInstanceContext = AlertInstanceContext,
 >() => {
   const alertFactoryMockCreate = createAlertFactoryMock.create<InstanceState, InstanceContext>();
   const alertFactoryMockDone = createAlertFactoryMock.done<InstanceState, InstanceContext, never>();

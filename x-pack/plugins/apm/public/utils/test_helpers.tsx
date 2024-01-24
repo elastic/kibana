@@ -46,18 +46,18 @@ export function toJson(wrapper: ReactWrapper) {
 
 export function mockMoment() {
   // avoid timezone issues
-  jest
-    .spyOn(moment.prototype, 'format')
-    .mockImplementation(function (this: Moment) {
-      return `1st of January (mocking ${this.unix()})`;
-    });
+  jest.spyOn(moment.prototype, 'format').mockImplementation(function (
+    this: Moment,
+  ) {
+    return `1st of January (mocking ${this.unix()})`;
+  });
 
   // convert relative time to absolute time to avoid timing issues
-  jest
-    .spyOn(moment.prototype, 'fromNow')
-    .mockImplementation(function (this: Moment) {
-      return `1337 minutes ago (mocking ${this.unix()})`;
-    });
+  jest.spyOn(moment.prototype, 'fromNow').mockImplementation(function (
+    this: Moment,
+  ) {
+    return `1337 minutes ago (mocking ${this.unix()})`;
+  });
 }
 
 // Useful for getting the rendered href from any kind of link component
@@ -75,7 +75,7 @@ export async function getRenderedHref(Component: React.FC, location: Location) {
           </UrlParamsProvider>
         </KibanaContextProvider>
       </MockApmPluginContextWrapper>
-    </MemoryRouter>
+    </MemoryRouter>,
   );
 
   await waitFor(() => el.container.querySelector('a') !== null, {
@@ -119,17 +119,17 @@ export function expectTextsInDocument(output: any, texts: string[]) {
 export function renderWithTheme(
   component: React.ReactNode,
   params?: any,
-  { darkMode = false } = {}
+  { darkMode = false } = {},
 ) {
   return render(
     <EuiThemeProvider darkMode={darkMode}>{component}</EuiThemeProvider>,
-    params
+    params,
   );
 }
 
 export function mountWithTheme(
   tree: React.ReactElement<any>,
-  { darkMode = false } = {}
+  { darkMode = false } = {},
 ) {
   function WrappingThemeProvider(props: any) {
     return (

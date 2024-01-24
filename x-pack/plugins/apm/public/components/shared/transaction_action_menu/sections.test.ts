@@ -43,7 +43,7 @@ describe('Transaction action menu', () => {
 
   const history = createMemoryHistory();
   history.replace(
-    '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi'
+    '/services/testbeans-go/transactions/view?rangeFrom=now-24h&rangeTo=now&transactionName=GET+%2Ftestbeans-go%2Fapi',
   );
   const location = history.location;
 
@@ -71,7 +71,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
-      })
+      }),
     ).toEqual([
       [
         {
@@ -138,7 +138,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
-      })
+      }),
     ).toEqual([
       [
         {
@@ -224,7 +224,7 @@ describe('Transaction action menu', () => {
         rangeTo: 'now',
         environment: 'ENVIRONMENT_ALL',
         dataViewId: 'apm_static_data_view_id_default',
-      })
+      }),
     ).toEqual([
       [
         {

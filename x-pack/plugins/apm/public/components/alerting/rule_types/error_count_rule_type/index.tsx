@@ -84,7 +84,7 @@ export function ErrorCountRuleType(props: Props) {
       windowSize: 5,
       windowUnit: TIME_UNITS.MINUTE,
       environment: ENVIRONMENT_ALL.value,
-    }
+    },
   );
 
   const { data, status } = useFetcher(
@@ -111,7 +111,7 @@ export function ErrorCountRuleType(props: Props) {
                   : undefined,
               },
             },
-          }
+          },
         );
       }
     },
@@ -123,14 +123,14 @@ export function ErrorCountRuleType(props: Props) {
       params.errorGroupingKey,
       params.groupBy,
       params.searchConfiguration,
-    ]
+    ],
   );
 
   const onGroupByChange = useCallback(
     (group: string[] | null) => {
       setRuleParams('groupBy', group ?? []);
     },
-    [setRuleParams]
+    [setRuleParams],
   );
 
   const filterFields = [
@@ -149,7 +149,7 @@ export function ErrorCountRuleType(props: Props) {
       onChange={(value) =>
         setRuleParams(
           'environment',
-          value !== '' ? value : ENVIRONMENT_ALL.value
+          value !== '' ? value : ENVIRONMENT_ALL.value,
         )
       }
       serviceName={params.serviceName}
@@ -220,14 +220,14 @@ export function ErrorCountRuleType(props: Props) {
           'xpack.apm.ruleFlyout.errorCount.createAlertPerText',
           {
             defaultMessage: 'Group alerts by',
-          }
+          },
         )}
         helpText={i18n.translate(
           'xpack.apm.ruleFlyout.errorCount.createAlertPerHelpText',
           {
             defaultMessage:
               'Create an alert for every unique value. For example: "transaction.name". By default, alert is created for every unique service.name and service.environment.',
-          }
+          },
         )}
         fullWidth
         display="rowCompressed"

@@ -28,8 +28,8 @@ export function isFieldDefaultValue<S extends SettingType>(field: F<S>, change?:
   const value = isUnsavedChange
     ? change?.unsavedValue
     : field.savedValue !== undefined && field.savedValue !== null
-    ? field.savedValue
-    : field.defaultValue;
+      ? field.savedValue
+      : field.defaultValue;
 
   return isEqual(value, defaultValue);
 }

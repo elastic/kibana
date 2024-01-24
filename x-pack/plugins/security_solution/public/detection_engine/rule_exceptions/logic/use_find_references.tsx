@@ -25,7 +25,7 @@ export type ReturnUseFindExceptionListReferences = [
   boolean,
   boolean,
   RuleReferences | null,
-  FetchReferencesFunc | null
+  FetchReferencesFunc | null,
 ];
 
 /**

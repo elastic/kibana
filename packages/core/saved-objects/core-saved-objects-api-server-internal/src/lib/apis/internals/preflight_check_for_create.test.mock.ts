@@ -18,7 +18,7 @@ jest.mock('./find_legacy_url_aliases', () => {
 });
 
 export const mockRawDocExistsInNamespaces = jest.fn() as jest.MockedFunction<
-  typeof InternalUtils['rawDocExistsInNamespaces']
+  (typeof InternalUtils)['rawDocExistsInNamespaces']
 >;
 
 jest.mock('../utils/internal_utils', () => {

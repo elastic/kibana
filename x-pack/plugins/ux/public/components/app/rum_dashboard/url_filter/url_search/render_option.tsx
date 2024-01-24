@@ -31,7 +31,7 @@ export type UrlOption<T = { [key: string]: any }> = {
 
 export function selectableRenderOptions(
   option: UrlOption,
-  searchValue: string
+  searchValue: string,
 ) {
   return (
     <>

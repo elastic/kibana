@@ -48,7 +48,7 @@ export function PercentOfParent({
                 parentType,
                 childType,
               },
-            }
+            },
           )}
         >
           <>{percentOfParentText}</>

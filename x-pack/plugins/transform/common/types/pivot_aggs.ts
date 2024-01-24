@@ -21,7 +21,7 @@ export const PIVOT_SUPPORTED_AGGS = {
   TERMS: 'terms',
 } as const;
 
-export type PivotSupportedAggs = typeof PIVOT_SUPPORTED_AGGS[keyof typeof PIVOT_SUPPORTED_AGGS];
+export type PivotSupportedAggs = (typeof PIVOT_SUPPORTED_AGGS)[keyof typeof PIVOT_SUPPORTED_AGGS];
 
 export type PivotAgg = estypes.AggregationsAggregationContainer;
 

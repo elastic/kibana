@@ -18,7 +18,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createPhpAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,
@@ -71,7 +71,7 @@ export const createPhpAgentInstructions = (
                 values: {
                   documentationLink: `${baseUrl}guide/en/apm/agent/php/current/setup.html`,
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>
@@ -89,7 +89,7 @@ export const createPhpAgentInstructions = (
               {
                 defaultMessage:
                   'APM is automatically started when your app boots. Configure the agent either via `php.ini` file:',
-              }
+              },
             )}
           </EuiMarkdownFormat>
 
@@ -121,7 +121,7 @@ export const createPhpAgentInstructions = (
                 values: {
                   documentationLink: `${baseUrl}guide/en/apm/agent/php/current/configuration.html`,
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>

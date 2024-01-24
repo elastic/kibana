@@ -235,7 +235,7 @@ export const SUPPORTED_METRICS: SupportedMetrics = {
 
 type SupportedMetricsKeys = keyof LocalSupportedMetrics;
 
-export type SupportedMetric = typeof SUPPORTED_METRICS[SupportedMetricsKeys];
+export type SupportedMetric = (typeof SUPPORTED_METRICS)[SupportedMetricsKeys];
 
 export const getFormulaFromMetric = (metric: SupportedMetric) => {
   if (metric.isFormula) {

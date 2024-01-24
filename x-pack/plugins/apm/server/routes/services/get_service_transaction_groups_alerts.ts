@@ -79,7 +79,7 @@ export async function getServiceTransactionGroupsAlerts({
               should: [
                 ...termQuery(
                   ALERT_RULE_PARAMETERS_AGGREGATION_TYPE,
-                  RuleAggregationType[latencyAggregationType]
+                  RuleAggregationType[latencyAggregationType],
                 ),
                 {
                   bool: {

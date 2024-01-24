@@ -63,7 +63,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const allGroupByFields = getAllGroupByFields(
     ApmRuleType.TransactionErrorRate,
-    groupByFields
+    groupByFields,
   );
 
   const termFilterQuery = !searchConfiguration
@@ -93,11 +93,11 @@ export async function getTransactionErrorRateChartPreview({
           filter: [
             ...termFilterQuery,
             ...getParsedFilterQuery(
-              searchConfiguration?.query?.query as string
+              searchConfiguration?.query?.query as string,
             ),
             ...rangeQuery(start, end),
             ...getBackwardCompatibleDocumentTypeFilter(
-              searchAggregatedTransactions
+              searchAggregatedTransactions,
             ),
             {
               terms: {
@@ -140,7 +140,7 @@ export async function getTransactionErrorRateChartPreview({
 
   const resp = await apmEventClient.search(
     'get_transaction_error_rate_chart_preview',
-    params
+    params,
   );
 
   if (!resp.aggregations) {
@@ -163,7 +163,7 @@ export async function getTransactionErrorRateChartPreview({
 
       return acc;
     },
-    {} as BarSeriesDataMap
+    {} as BarSeriesDataMap,
   );
 
   const series = Object.keys(seriesDataMap).map((key) => ({
@@ -183,7 +183,7 @@ const calculateErrorRate = (
   buckets: Array<{
     doc_count: number;
     key: string | number;
-  }>
+  }>,
 ) => {
   const failed =
     buckets.find((outcomeBucket) => outcomeBucket.key === EventOutcome.failure)

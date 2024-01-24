@@ -158,9 +158,8 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
       try {
         const { objectsToResolve, responseIndices } = getObjectsToResolve(queue);
-        const { resolved_objects: resolvedObjects } = await this.performBulkResolve(
-          objectsToResolve
-        );
+        const { resolved_objects: resolvedObjects } =
+          await this.performBulkResolve(objectsToResolve);
 
         queue.forEach((queueItem, i) => {
           // This differs from the older processBatchGetQueue approach because the resolved object IDs are *not* guaranteed to be the same.

@@ -147,7 +147,7 @@ export function NoResultsFound() {
     'xpack.apm.mobile.charts.noResultsFound',
     {
       defaultMessage: 'No results found',
-    }
+    },
   );
   return (
     <div css={noResultsFoundStyle}>

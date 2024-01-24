@@ -124,9 +124,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
+        const logStreamEntryColumns =
+          await logsUi.logStreamPage.getLogColumnsOfStreamEntry(firstLogStreamEntry);
 
         expect(logStreamEntryColumns).to.have.length(3);
       });
@@ -182,9 +181,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(logStreamEntries.length).to.be.greaterThan(0);
 
         const firstLogStreamEntry = logStreamEntries[0];
-        const logStreamEntryColumns = await logsUi.logStreamPage.getLogColumnsOfStreamEntry(
-          firstLogStreamEntry
-        );
+        const logStreamEntryColumns =
+          await logsUi.logStreamPage.getLogColumnsOfStreamEntry(firstLogStreamEntry);
 
         expect(logStreamEntryColumns).to.have.length(2);
       });

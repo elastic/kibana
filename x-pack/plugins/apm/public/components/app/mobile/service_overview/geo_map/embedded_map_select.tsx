@@ -23,14 +23,14 @@ const options: Array<EuiSuperSelectOption<MapTypes>> = [
       'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests',
       {
         defaultMessage: 'HTTP requests',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.serviceOverview.embeddedMap.dropdown.http.requests.subtitle',
       {
         defaultMessage:
           'HTTP defines a set of request methods to indicate the desired action to be performed for a given resource',
-      }
+      },
     ),
   },
   {
@@ -39,14 +39,14 @@ const options: Array<EuiSuperSelectOption<MapTypes>> = [
       'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions',
       {
         defaultMessage: 'Sessions',
-      }
+      },
     ),
     description: i18n.translate(
       'xpack.apm.serviceOverview.embeddedMap.dropdown.sessions.subtitle',
       {
         defaultMessage:
           'An application session begins when a user starts an application and ends when the application exits.',
-      }
+      },
     ),
   },
 ].map(({ value, label, description }) => ({

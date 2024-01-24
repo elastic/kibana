@@ -73,16 +73,16 @@ export function ProfilingFlamegraph({
                 kuery,
               },
             },
-          }
+          },
         );
       }
     },
-    [dataSource, serviceName, start, end, environment, kuery]
+    [dataSource, serviceName, start, end, environment, kuery],
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
     HOST_NAME,
-    data?.hostNames || []
+    data?.hostNames || [],
   );
 
   return (

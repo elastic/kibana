@@ -14,7 +14,7 @@ export const RUM_AGENT_NAMES: AgentName[] = [
 ];
 
 export function isRumAgentName(
-  agentName?: string
+  agentName?: string,
 ): agentName is 'js-base' | 'rum-js' | 'opentelemetry/webjs' {
   return RUM_AGENT_NAMES.includes(agentName! as AgentName);
 }

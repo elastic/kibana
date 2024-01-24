@@ -25,12 +25,14 @@ const processorEventIndexMap = {
 
 export function processorEventsToIndex(
   events: ProcessorEvent[],
-  indices: APMIndices
+  indices: APMIndices,
 ) {
   return uniq(
     events.flatMap((event) =>
-      indices[processorEventIndexMap[event]].split(',').map((str) => str.trim())
-    )
+      indices[processorEventIndexMap[event]]
+        .split(',')
+        .map((str) => str.trim()),
+    ),
   );
 }
 
@@ -42,7 +44,7 @@ export function getRequestBase(options: {
     'events' in options.apm
       ? options.apm.events
       : options.apm.sources.map((source) =>
-          getProcessorEventForDocumentType(source.documentType)
+          getProcessorEventForDocumentType(source.documentType),
         );
 
   const index = processorEventsToIndex(events, options.indices);

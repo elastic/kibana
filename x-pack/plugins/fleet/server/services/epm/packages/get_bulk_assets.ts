@@ -22,9 +22,8 @@ export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   assetIds: AssetSOObject[]
 ) {
-  const { resolved_objects: resolvedObjects } = await soClient.bulkResolve<SimpleSOAssetAttributes>(
-    assetIds
-  );
+  const { resolved_objects: resolvedObjects } =
+    await soClient.bulkResolve<SimpleSOAssetAttributes>(assetIds);
   const res: SimpleSOAssetType[] = resolvedObjects
     .map(({ saved_object: savedObject }) => savedObject)
     .filter(

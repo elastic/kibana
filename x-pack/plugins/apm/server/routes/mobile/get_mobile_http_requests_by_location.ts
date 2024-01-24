@@ -99,7 +99,7 @@ export async function getHttpRequestsByLocation({
           ...aggs,
         },
       },
-    }
+    },
   );
 
   return {

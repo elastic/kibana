@@ -33,7 +33,7 @@ const steps: Record<SystemLogsSteps, Step> = {
     component: InstallElasticAgent,
     title: i18n.translate(
       'xpack.observability_onboarding.systemLogs.installShipper.title',
-      { defaultMessage: 'Install shipper to collect system logs' }
+      { defaultMessage: 'Install shipper to collect system logs' },
     ),
   },
 };

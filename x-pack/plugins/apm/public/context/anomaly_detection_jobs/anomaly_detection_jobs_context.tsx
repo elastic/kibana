@@ -25,7 +25,7 @@ export interface AnomalyDetectionJobsContextValue {
 }
 
 export const AnomalyDetectionJobsContext = createContext(
-  {} as AnomalyDetectionJobsContextValue
+  {} as AnomalyDetectionJobsContextValue,
 );
 
 export function AnomalyDetectionJobsContextProvider({
@@ -48,7 +48,7 @@ export function AnomalyDetectionJobsContextProvider({
       return callApmApi(`GET /internal/apm/settings/anomaly-detection/jobs`);
     },
     [isAuthorized],
-    { showToastOnError: false }
+    { showToastOnError: false },
   );
 
   const { query } = useApmParams('/*');

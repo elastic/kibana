@@ -26,7 +26,7 @@ import {
 
 export function formatToSec(
   value?: number | string,
-  fromUnit = 'MicroSec'
+  fromUnit = 'MicroSec',
 ): string {
   const valueInMs = Number(value ?? 0) / (fromUnit === 'MicroSec' ? 1000 : 1);
 

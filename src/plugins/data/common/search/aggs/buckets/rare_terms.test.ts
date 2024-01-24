@@ -52,7 +52,7 @@ describe('rare terms Agg', () => {
       ],
     } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
+    indexPattern.fields.getByName = (name) => ({ name }) as unknown as DataViewField;
     indexPattern.fields.filter = () => indexPattern.fields;
 
     return new AggConfigs(

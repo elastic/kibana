@@ -99,8 +99,8 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
     const result = isExistingRule
       ? ruleData
       : alertsData == null
-      ? undefined
-      : transformRuleFromAlertHit(alertsData);
+        ? undefined
+        : transformRuleFromAlertHit(alertsData);
     if (result) {
       return transformInput(result);
     }

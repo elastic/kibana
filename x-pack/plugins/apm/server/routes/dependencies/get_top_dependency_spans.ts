@@ -144,7 +144,7 @@ export async function getTopDependencySpans({
 
   const transactionsById = keyBy(
     transactions,
-    (transaction) => transaction.transaction.id
+    (transaction) => transaction.transaction.id,
   );
 
   return spans.map((span): DependencySpan => {

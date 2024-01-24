@@ -93,7 +93,7 @@ export const useColumns = (
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
     EuiTableComputedColumnType<TransformListRow>,
-    EuiTableActionsColumnType<TransformListRow>
+    EuiTableActionsColumnType<TransformListRow>,
   ] = [
     {
       name: (

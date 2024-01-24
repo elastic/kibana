@@ -61,7 +61,7 @@ const stories: Meta<Args> = {
         'GET /internal/apm/services/{serviceName}/transactions/charts/latency',
         () => {
           return latencyChartResponse;
-        }
+        },
       );
 
       const transactionType = `${Math.random()}`; // So we don't memoize

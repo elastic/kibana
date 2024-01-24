@@ -39,7 +39,7 @@ export function SystemIntegrationBanner({
       setIntegrationVersion(version);
       onStatusChange('resolved');
     },
-    [onStatusChange]
+    [onStatusChange],
   );
 
   const onIntegrationCreationFailure = useCallback(
@@ -47,7 +47,7 @@ export function SystemIntegrationBanner({
       setError(e);
       onStatusChange('rejected');
     },
-    [onStatusChange]
+    [onStatusChange],
   );
 
   const { performRequest, requestState } = useInstallSystemIntegration({
@@ -76,7 +76,7 @@ export function SystemIntegrationBanner({
                 'xpack.observability_onboarding.systemIntegration.installing',
                 {
                   defaultMessage: 'Installing system integration',
-                }
+                },
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -94,7 +94,7 @@ export function SystemIntegrationBanner({
             'xpack.observability_onboarding.systemIntegration.status.failed',
             {
               defaultMessage: 'System integration installation failed',
-            }
+            },
           )}
           color="warning"
           iconType="warning"
@@ -121,7 +121,7 @@ export function SystemIntegrationBanner({
                       'xpack.observability_onboarding.systemIntegration.installed.tooltip.label',
                       {
                         defaultMessage: 'Integration details',
-                      }
+                      },
                     )}
                   >
                     <EuiFlexGroup direction="column" gutterSize="xs">
@@ -131,7 +131,7 @@ export function SystemIntegrationBanner({
                           {
                             defaultMessage:
                               'Integrations streamline connecting your data to the Elastic Stack.',
-                          }
+                          },
                         )}
                       </EuiFlexItem>
                       <EuiFlexItem
@@ -149,7 +149,7 @@ export function SystemIntegrationBanner({
                                 onClick={(event: MouseEvent) => {
                                   event.preventDefault();
                                   navigateToAppUrl(
-                                    `/integrations/detail/system-${integrationVersion}`
+                                    `/integrations/detail/system-${integrationVersion}`,
                                   );
                                 }}
                               >
@@ -157,7 +157,7 @@ export function SystemIntegrationBanner({
                                   'xpack.observability_onboarding.systemIntegration.installed.tooltip.link.label',
                                   {
                                     defaultMessage: 'Learn more',
-                                  }
+                                  },
                                 )}
                               </EuiLink>
                             ),

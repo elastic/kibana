@@ -18,19 +18,18 @@ const StyledDiv = styled.div<{ targetClassNames: string[] }>`
     max-width: 100%;
   }
 
-  ${({ targetClassNames }) =>
-    css`
-      ${targetClassNames.map((cn) => `.${cn}`).join(', ')} {
-        pointer-events: none;
-        opacity: 0;
-        transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
-      }
+  ${({ targetClassNames }) => css`
+    ${targetClassNames.map((cn) => `.${cn}`).join(', ')} {
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity ${(props) => getOr(250, 'theme.eui.euiAnimSpeedNormal', props)} ease;
+    }
 
-      ${targetClassNames.map((cn) => `&:hover .${cn}`).join(', ')} {
-        pointer-events: auto;
-        opacity: 1;
-      }
-    `}
+    ${targetClassNames.map((cn) => `&:hover .${cn}`).join(', ')} {
+      pointer-events: auto;
+      opacity: 1;
+    }
+  `}
 `;
 
 interface HoverVisibilityContainerProps {

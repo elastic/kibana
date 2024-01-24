@@ -105,8 +105,8 @@ export async function createSAMLResponse(options: {
         <saml:NameID Format="urn:oasis:names:tc:SAML:1.1:nameid-format:transient">_643ec1b3f5673583b9f9a1e9e73a36daa2a3748f</saml:NameID>
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
-    options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${options.kibanaUrl}" />
+            options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
+          } Recipient="${options.kibanaUrl}" />
         </saml:SubjectConfirmation>
       </saml:Subject>
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">

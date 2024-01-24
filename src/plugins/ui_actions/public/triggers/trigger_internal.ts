@@ -17,7 +17,10 @@ import { UiActionsService } from '../service';
 export class TriggerInternal<Context extends object = object> {
   public readonly contract: TriggerContract<Context>;
 
-  constructor(public readonly service: UiActionsService, public readonly trigger: Trigger) {
+  constructor(
+    public readonly service: UiActionsService,
+    public readonly trigger: Trigger
+  ) {
     this.contract = new TriggerContract<Context>(this);
   }
 

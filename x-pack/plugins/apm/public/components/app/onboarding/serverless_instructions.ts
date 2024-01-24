@@ -41,7 +41,7 @@ export function serverlessInstructions(
   },
   apiKeyLoading: boolean,
   apiKeyDetails: AgentApiKey,
-  createAgentKey: () => void
+  createAgentKey: () => void,
 ) {
   const { apiKey, error, errorMessage } = apiKeyDetails;
   const displayApiKeySuccessCallout = Boolean(apiKey) && !error;

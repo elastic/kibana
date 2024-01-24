@@ -95,8 +95,8 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
                   {title
                     ? title
                     : showAs === 'success'
-                    ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
-                    : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
+                      ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
+                      : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
                 </ConsoleText>
 
                 <EuiSpacer size="s" />

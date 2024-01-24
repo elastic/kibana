@@ -138,7 +138,7 @@ PowerShell.\n5. From the PowerShell prompt, run the following commands to instal
             zipFileExtractFolder: '`C:\\Program Files`',
             apmServerDirectory: '`apm-server-{config.kibana.version}-windows`',
           },
-        }
+        },
       ),
       commands: [
         `cd 'C:\\Program Files\\APM-Server'`,
@@ -155,7 +155,7 @@ to allow the script to run. For example: {command}.',
             command:
               '`PowerShell.exe -ExecutionPolicy UnRestricted -File .\\install-service-apm-server.ps1`',
           },
-        }
+        },
       ),
     },
     createEditConfig(),

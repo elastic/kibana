@@ -22,7 +22,7 @@ describe('getIntegerRt', () => {
           it(`${JSON.stringify(input)}`, () => {
             expect(isRight(integerRt.decode(input))).toBe(false);
           });
-        }
+        },
       );
     });
 

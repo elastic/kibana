@@ -30,7 +30,7 @@ export async function listConfigurations({
   const [agentConfigs, appliedEtags = []] = await Promise.all([
     internalESClient.search<AgentConfiguration>(
       'list_agent_configuration',
-      params
+      params,
     ),
     apmEventClient ? getAgentConfigEtagMetrics(apmEventClient) : undefined,
   ]);

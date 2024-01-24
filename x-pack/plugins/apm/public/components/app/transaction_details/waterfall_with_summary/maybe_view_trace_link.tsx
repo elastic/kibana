@@ -56,7 +56,7 @@ export function MaybeViewTraceLink({
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
     '/traces/explorer',
-    '/dependencies/operation'
+    '/dependencies/operation',
   );
 
   const latencyAggregationType =
@@ -76,7 +76,7 @@ export function MaybeViewTraceLink({
           'xpack.apm.transactionDetails.noTraceParentButtonTooltip',
           {
             defaultMessage: 'The trace parent cannot be found',
-          }
+          },
         )}
       >
         <FullTraceButton isDisabled />
@@ -95,7 +95,7 @@ export function MaybeViewTraceLink({
           'xpack.apm.transactionDetails.viewingFullTraceButtonTooltip',
           {
             defaultMessage: 'Currently viewing the full trace',
-          }
+          },
         )}
       >
         <FullTraceButton isDisabled />

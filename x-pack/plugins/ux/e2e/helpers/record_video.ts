@@ -25,7 +25,7 @@ export const recordVideo = (page: Page, postfix = '') => {
         pathToVideo!,
         postfix
           ? runner.currentJourney!.name + `-${postfix}`
-          : runner.currentJourney!.name
+          : runner.currentJourney!.name,
       );
       fs.renameSync(videoFilePath!, newVideoPath!);
     } catch (e) {

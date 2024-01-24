@@ -70,13 +70,13 @@ function PrivilegesCallout({
   diagnosticsBundle: DiagnosticsBundle;
 }) {
   const missingClusterPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.cluster
+    diagnosticsBundle.diagnosticsPrivileges.cluster,
   )
     .filter(([privilegeName, hasPrivilege]) => !hasPrivilege)
     .map(([privilegeName]) => privilegeName);
 
   const missingIndexPrivileges = Object.entries(
-    diagnosticsBundle.diagnosticsPrivileges.index
+    diagnosticsBundle.diagnosticsPrivileges.index,
   )
     .filter(([indexName, privObject]) => !privObject.read)
     .map(([indexName, privObject]) => indexName);
@@ -115,6 +115,6 @@ function PrivilegesCallout({
 
 export function getIsCrossCluster(diagnosticsBundle?: DiagnosticsBundle) {
   return Object.values(diagnosticsBundle?.apmIndices ?? {}).some((indicies) =>
-    indicies.includes(':')
+    indicies.includes(':'),
   );
 }

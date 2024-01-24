@@ -26,7 +26,7 @@ export type NetworkHttpColumns = [
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
   Columns<NetworkHttpEdges>,
-  Columns<NetworkHttpItem['requestCount']>
+  Columns<NetworkHttpItem['requestCount']>,
 ];
 
 export const getNetworkHttpColumns = (tableId: string): NetworkHttpColumns => [

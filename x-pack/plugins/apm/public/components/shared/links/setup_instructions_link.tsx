@@ -14,7 +14,7 @@ const SETUP_INSTRUCTIONS_LABEL = i18n.translate(
   'xpack.apm.setupInstructionsButtonLabel',
   {
     defaultMessage: 'Setup instructions',
-  }
+  },
 );
 
 const ADD_DATA_LABEL = i18n.translate('xpack.apm.addDataButtonLabel', {

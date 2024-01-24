@@ -13,13 +13,13 @@ import { ApmRoutes } from '../components/routing/apm_route_config';
 // union type that is created.
 
 export function useMaybeApmParams<TPath extends PathsOf<ApmRoutes>>(
-  path: TPath
+  path: TPath,
 ): TypeOf<ApmRoutes, TPath> | undefined {
   return useParams(path, true) as TypeOf<ApmRoutes, TPath> | undefined;
 }
 
 export function useApmParams<TPath extends PathsOf<ApmRoutes>>(
-  path: TPath
+  path: TPath,
 ): TypeOf<ApmRoutes, TPath> {
   return useParams(path)! as TypeOf<ApmRoutes, TPath>;
 }

@@ -46,7 +46,7 @@ describe('convertToStandartDeviationColumn', () => {
         | MinColumn
         | SumColumn
         | StandardDeviationColumn
-      > | null> | null
+      > | null> | null,
     ]
   >([
     ['null if field is not provided', [{ series, metrics: [metric], dataView }], null],

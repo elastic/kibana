@@ -32,7 +32,7 @@ export interface ConfigSchema {
 }
 
 export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
-  pluginInitializerContext: PluginInitializerContext<ConfigSchema>
+  pluginInitializerContext: PluginInitializerContext<ConfigSchema>,
 ) => new ApmPlugin(pluginInitializerContext);
 
 export type { ApmPluginSetup, ApmPluginStart };

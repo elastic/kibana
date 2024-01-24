@@ -67,10 +67,10 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
               serverlessId,
             },
           },
-        }
+        },
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessId]
+    [kuery, environment, serviceName, start, end, serverlessId],
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
@@ -82,7 +82,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       field: 'serverlessFunctionName',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.activeInstances.functionName',
-        { defaultMessage: 'Function name' }
+        { defaultMessage: 'Function name' },
       ),
       sortable: true,
       truncateText: true,
@@ -106,7 +106,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       field: 'serverlessDurationAvg',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.serverlessFunctions.functionDuration',
-        { defaultMessage: 'Function duration' }
+        { defaultMessage: 'Function duration' },
       ),
       sortable: true,
       render: (_, { serverlessDurationAvg, timeseries }) => {
@@ -124,7 +124,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       field: 'billedDurationAvg',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.activeInstances.billedDuration',
-        { defaultMessage: 'Billed duration' }
+        { defaultMessage: 'Billed duration' },
       ),
       sortable: true,
       render: (_, { billedDurationAvg, timeseries }) => {
@@ -142,7 +142,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       field: 'avgMemoryUsed',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.activeInstances.memoryUsageAvg',
-        { defaultMessage: 'Memory usage avg.' }
+        { defaultMessage: 'Memory usage avg.' },
       ),
       sortable: true,
       render: (_, { avgMemoryUsed }) => {
@@ -153,7 +153,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       field: 'memorySize',
       name: i18n.translate(
         'xpack.apm.serverlessMetrics.activeInstances.memorySize',
-        { defaultMessage: 'Memory size' }
+        { defaultMessage: 'Memory size' },
       ),
       sortable: true,
       render: (_, { memorySize }) => {
@@ -169,7 +169,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
         direction: 'desc',
       } as PropertySort,
     }),
-    []
+    [],
   );
 
   const charts: Array<TimeSeries<Coordinate>> = useMemo(
@@ -177,14 +177,14 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
       {
         title: i18n.translate(
           'xpack.apm.serverlessMetrics.activeInstances.title',
-          { defaultMessage: 'Active instances' }
+          { defaultMessage: 'Active instances' },
         ),
         data: data.timeseries,
         type: 'bar',
         color: palette[2],
       },
     ],
-    [data.timeseries]
+    [data.timeseries],
   );
 
   return (
@@ -195,7 +195,7 @@ export function ServerlessActiveInstances({ serverlessId }: Props) {
             <h2>
               {i18n.translate(
                 'xpack.apm.serverlessMetrics.activeInstances.title',
-                { defaultMessage: 'Active instances' }
+                { defaultMessage: 'Active instances' },
               )}
             </h2>
           </EuiTitle>

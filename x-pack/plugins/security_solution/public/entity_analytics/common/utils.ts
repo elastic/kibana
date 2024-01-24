@@ -30,18 +30,18 @@ type SnakeToCamelCaseString<S extends string> = S extends `${infer T}_${infer U}
   ? `${T}${Capitalize<SnakeToCamelCaseString<U>>}`
   : S;
 
-type SnakeToCamelCaseArray<T> = T extends Array<infer ArrayItem>
-  ? Array<SnakeToCamelCase<ArrayItem>>
-  : T;
+type SnakeToCamelCaseArray<T> =
+  T extends Array<infer ArrayItem> ? Array<SnakeToCamelCase<ArrayItem>> : T;
 
 // TODO #173073 @tiansivive Add to utilities in `packages/kbn-utility-types`
-export type SnakeToCamelCase<T> = T extends Record<string, unknown>
-  ? {
-      [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
-    }
-  : T extends unknown[]
-  ? SnakeToCamelCaseArray<T>
-  : T;
+export type SnakeToCamelCase<T> =
+  T extends Record<string, unknown>
+    ? {
+        [K in keyof T as SnakeToCamelCaseString<K & string>]: SnakeToCamelCase<T[K]>;
+      }
+    : T extends unknown[]
+      ? SnakeToCamelCaseArray<T>
+      : T;
 
 export enum UserRiskScoreQueryId {
   USERS_BY_RISK = 'UsersByRisk',

@@ -63,28 +63,28 @@ describe('hasNumericHistogramDimension', () => {
   };
   it('should return true if a numeric histogram is present', () => {
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true, scale: 'interval', dataType: 'number' } as OperationDescriptor)
+      () => ({ isBucketed: true, scale: 'interval', dataType: 'number' }) as OperationDescriptor
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeTruthy();
   });
 
   it('should return false if a date histogram is present', () => {
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true, scale: 'interval', dataType: 'date' } as OperationDescriptor)
+      () => ({ isBucketed: true, scale: 'interval', dataType: 'date' }) as OperationDescriptor
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeFalsy();
   });
 
   it('should return false for ordinal types', () => {
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' } as OperationDescriptor)
+      () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' }) as OperationDescriptor
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first, 'columnId')).toBeFalsy();
   });
 
   it('should return false for no dimension', () => {
     datasourceLayers.first.getOperationForColumnId = jest.fn(
-      () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' } as OperationDescriptor)
+      () => ({ isBucketed: true, scale: 'ordinal', dataType: 'number' }) as OperationDescriptor
     );
     expect(hasNumericHistogramDimension(datasourceLayers.first)).toBeFalsy();
   });

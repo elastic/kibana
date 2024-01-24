@@ -69,14 +69,14 @@ export function VisitorBreakdownChart({
         dataView,
         localDataViewId,
       }),
-    [uiFilters, urlQuery, metric, dataView, localDataViewId]
+    [uiFilters, urlQuery, metric, dataView, localDataViewId],
   );
 
   const filterHandler = useCallback(
     (event) => {
       onFilter(metric, event);
     },
-    [onFilter, metric]
+    [onFilter, metric],
   );
 
   if (!LensEmbeddableComponent) {

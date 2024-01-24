@@ -33,7 +33,7 @@ export function getEsClient({
 
   async function search<
     TDocument = unknown,
-    TSearchRequest extends ESSearchRequest = ESSearchRequest
+    TSearchRequest extends ESSearchRequest = ESSearchRequest,
   >(request: TSearchRequest) {
     const response = await originalSearch(request);
 

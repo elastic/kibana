@@ -54,7 +54,7 @@ export type ExecutorContainer<Context extends Record<string, unknown> = Record<s
   StateContainer<ExecutorState<Context>, ExecutorPureTransitions, ExecutorPureSelectors>;
 
 export const createExecutorContainer = <
-  Context extends Record<string, unknown> = Record<string, unknown>
+  Context extends Record<string, unknown> = Record<string, unknown>,
 >(
   state = defaultState as ExecutorState<Context>
 ): ExecutorContainer<Context> => {

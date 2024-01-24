@@ -26,8 +26,8 @@ describe('ApmRuleParamsContainer', () => {
         />,
         {
           wrapper: Wrapper,
-        }
-      )
+        },
+      ),
     ).not.toThrowError();
   });
 });

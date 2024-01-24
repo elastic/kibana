@@ -19,7 +19,7 @@ import {
 
 storiesOf(
   'app/settings/AgentConfigurations/agent_configuration_create_edit',
-  module
+  module,
 )
   .addDecorator((storyFn) => {
     const coreMock = {} as unknown as CoreStart;
@@ -67,5 +67,5 @@ storiesOf(
         ],
         source: false,
       },
-    }
+    },
   );

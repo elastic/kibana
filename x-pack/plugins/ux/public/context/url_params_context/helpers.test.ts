@@ -22,7 +22,7 @@ describe('url_params_context helpers', () => {
               state: {},
               rangeFrom: '2021-01-28T05:47:52.134Z',
               rangeTo: '2021-01-28T05:48:55.304Z',
-            })
+            }),
           ).toEqual({
             start: '2021-01-28T05:47:00.000Z',
             end: '2021-01-28T05:48:55.304Z',
@@ -38,7 +38,7 @@ describe('url_params_context helpers', () => {
               state: {},
               rangeFrom: '2021-01-27T05:46:07.377Z',
               rangeTo: '2021-01-28T05:46:13.367Z',
-            })
+            }),
           ).toEqual({
             start: '2021-01-27T05:46:00.000Z',
             end: '2021-01-28T05:46:13.367Z',
@@ -55,7 +55,7 @@ describe('url_params_context helpers', () => {
               state: {},
               rangeFrom: '2020-01-28T05:52:36.290Z',
               rangeTo: '2021-01-28T05:52:39.741Z',
-            })
+            }),
           ).toEqual({
             start: '2020-01-28T05:52:00.000Z',
             end: '2021-01-28T05:52:39.741Z',
@@ -80,7 +80,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'now-1m',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
           end: '1971-01-01T00:00:00.000Z',
@@ -103,7 +103,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: '',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
           end: '1973-01-01T00:00:00.000Z',
@@ -132,7 +132,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'nope',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1972-01-01T00:00:00.000Z',
           exactStart: '1972-01-01T00:00:00.000Z',
@@ -156,7 +156,7 @@ describe('url_params_context helpers', () => {
             },
             rangeFrom: 'now-2m',
             rangeTo: 'now',
-          })
+          }),
         ).toEqual({
           start: '1970-01-01T00:00:00.000Z',
           end: '1970-01-01T00:00:00.000Z',
@@ -170,7 +170,7 @@ describe('url_params_context helpers', () => {
   describe('getExactDate', () => {
     it('returns date when it is not not relative', () => {
       expect(helpers.getExactDate('2021-01-28T05:47:52.134Z')).toEqual(
-        new Date('2021-01-28T05:47:52.134Z')
+        new Date('2021-01-28T05:47:52.134Z'),
       );
     });
 
@@ -179,7 +179,7 @@ describe('url_params_context helpers', () => {
         const spy = jest.spyOn(datemath, 'parse');
         helpers.getExactDate(`now/${roundingOption}`);
         expect(spy).toHaveBeenCalledWith('now', {});
-      })
+      }),
     );
 
     it('removes rounding option but keeps subtracting time', () => {

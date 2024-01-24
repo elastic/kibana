@@ -45,14 +45,14 @@ export async function getDiagnosticsBundle({
       getIndexTemplatesByIndexPattern({
         esClient,
         apmIndices,
-      })
+      }),
     )) ?? [];
 
   const existingIndexTemplates =
     (await handleExceptions(
       getExistingApmIndexTemplates({
         esClient,
-      })
+      }),
     )) ?? [];
 
   const dataStreams =
@@ -63,7 +63,7 @@ export async function getDiagnosticsBundle({
       getNonDataStreamIndices({
         esClient,
         apmIndices,
-      })
+      }),
     )) ?? [];
 
   const { invalidIndices, validIndices, indices, ingestPipelines, fieldCaps } =
@@ -71,7 +71,7 @@ export async function getDiagnosticsBundle({
       getIndicesStates({
         esClient,
         apmIndices,
-      })
+      }),
     )) ?? {};
 
   const apmEvents =
@@ -82,7 +82,7 @@ export async function getDiagnosticsBundle({
         start,
         end,
         kuery,
-      })
+      }),
     )) ?? [];
 
   const elasticsearchVersion =

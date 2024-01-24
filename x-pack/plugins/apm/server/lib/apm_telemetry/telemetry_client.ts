@@ -33,11 +33,11 @@ export interface IndicesStatsResponse {
 
 export interface TelemetryClient {
   search<TSearchRequest extends ESSearchRequest & RequiredSearchParams>(
-    params: TSearchRequest
+    params: TSearchRequest,
   ): Promise<ESSearchResponse<unknown, TSearchRequest>>;
 
   indicesStats(
-    params: estypes.IndicesStatsRequest
+    params: estypes.IndicesStatsRequest,
     // promise returned by client has an abort property
     // so we cannot use its ReturnType
   ): Promise<IndicesStatsResponse>;
@@ -48,7 +48,7 @@ export interface TelemetryClient {
   }) => Promise<unknown>;
 
   fieldCaps(
-    params: estypes.FieldCapsRequest
+    params: estypes.FieldCapsRequest,
   ): Promise<estypes.FieldCapsResponse>;
 }
 
@@ -63,19 +63,19 @@ export async function getTelemetryClient({
   return {
     search: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.search(params, { meta: true })
+        esClient.asInternalUser.search(params, { meta: true }),
       ) as any,
     indicesStats: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.indices.stats(params, { meta: true })
+        esClient.asInternalUser.indices.stats(params, { meta: true }),
       ),
     transportRequest: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.transport.request(params, { meta: true })
+        esClient.asInternalUser.transport.request(params, { meta: true }),
       ),
     fieldCaps: (params) =>
       unwrapEsResponse(
-        esClient.asInternalUser.fieldCaps(params, { meta: true })
+        esClient.asInternalUser.fieldCaps(params, { meta: true }),
       ),
   };
 }

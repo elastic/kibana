@@ -61,7 +61,7 @@ Cypress.Commands.add(
       // });
     });
     cy.visit('/');
-  }
+  },
 );
 
 Cypress.Commands.add('getByTestSubj', (selector: string) => {
@@ -104,7 +104,7 @@ Cypress.Commands.add(
       .clear({ force: true })
       .type(moment(end).format(format), { force: true })
       .type('{enter}');
-  }
+  },
 );
 
 Cypress.Commands.add(
@@ -125,7 +125,7 @@ Cypress.Commands.add(
         expect((interceptions as Interception).request.url).include(value);
       }
     });
-  }
+  },
 );
 
 Cypress.Commands.add(
@@ -142,7 +142,7 @@ Cypress.Commands.add(
       },
       auth: { user: 'editor', pass: 'changeme' },
     });
-  }
+  },
 );
 
 Cypress.Commands.add('dismissServiceGroupsTour', () => {
@@ -151,7 +151,7 @@ Cypress.Commands.add('dismissServiceGroupsTour', () => {
     JSON.stringify({
       createGroup: false,
       editGroup: false,
-    })
+    }),
   );
 });
 

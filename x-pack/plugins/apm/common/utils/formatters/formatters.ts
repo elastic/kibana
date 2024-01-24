@@ -37,7 +37,7 @@ export function asInteger(value?: number | null) {
 export function asPercent(
   numerator: Maybe<number>,
   denominator: number | undefined,
-  fallbackResult = NOT_AVAILABLE_LABEL
+  fallbackResult = NOT_AVAILABLE_LABEL,
 ) {
   if (!denominator || !isFiniteNumber(numerator)) {
     return fallbackResult;

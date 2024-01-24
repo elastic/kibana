@@ -40,7 +40,7 @@ export function getServiceHealthStatus({
 
 export function getServiceHealthStatusColor(
   theme: EuiTheme,
-  status: ServiceHealthStatus
+  status: ServiceHealthStatus,
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:
@@ -56,7 +56,7 @@ export function getServiceHealthStatusColor(
 
 export function getServiceHealthStatusBadgeColor(
   theme: EuiTheme,
-  status: ServiceHealthStatus
+  status: ServiceHealthStatus,
 ) {
   switch (status) {
     case ServiceHealthStatus.healthy:

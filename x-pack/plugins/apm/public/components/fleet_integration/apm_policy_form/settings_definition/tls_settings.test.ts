@@ -16,8 +16,8 @@ describe('tls_settings', () => {
           expect(
             isTLSFormValid(
               { tls_enabled: { value: true, type: 'bool' } },
-              settings
-            )
+              settings,
+            ),
           ).toBeFalsy();
         });
       });
@@ -28,8 +28,8 @@ describe('tls_settings', () => {
       expect(
         isTLSFormValid(
           { tls_enabled: { value: false, type: 'bool' } },
-          settings
-        )
+          settings,
+        ),
       ).toBeTruthy();
     });
   });

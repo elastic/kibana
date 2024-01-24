@@ -45,7 +45,7 @@ export interface ServiceInstancesDetailedStatisticsResponse {
 }
 
 async function getServiceInstancesDetailedStatistics(
-  params: ServiceInstanceDetailedStatisticsParams
+  params: ServiceInstanceDetailedStatisticsParams,
 ): Promise<ServiceInstancesDetailedStat[]> {
   return withApmSpan('get_service_instances_detailed_statistics', async () => {
     const [transactionStats, systemMetricStats = []] = await Promise.all([
@@ -61,7 +61,7 @@ async function getServiceInstancesDetailedStatistics(
 
     const stats = joinByKey(
       [...transactionStats, ...systemMetricStats],
-      'serviceNodeName'
+      'serviceNodeName',
     );
 
     return stats;
@@ -159,9 +159,9 @@ export async function getServiceInstancesDetailedStatisticsPeriods({
               }),
             };
           }),
-          'serviceNodeName'
+          'serviceNodeName',
         ),
       };
-    }
+    },
   );
 }

@@ -13,7 +13,8 @@ const EXCLUDED_FIELDS = ['error.exception.stacktrace', 'span.stacktrace'];
 export const getSectionsFromFields = (fields: Record<string, any>) => {
   const rows = Object.keys(fields)
     .filter(
-      (field) => !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded))
+      (field) =>
+        !EXCLUDED_FIELDS.some((excluded) => field.startsWith(excluded)),
     )
     .sort()
     .map((field) => {
@@ -38,12 +39,12 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
       };
 
       return section;
-    }
+    },
   );
 
   const [labelSections, otherSections] = partition(
     sections,
-    (section) => section.key === 'labels' || section.key === 'numeric_labels'
+    (section) => section.key === 'labels' || section.key === 'numeric_labels',
   );
 
   return [...labelSections, ...otherSections];
@@ -51,7 +52,7 @@ export const getSectionsFromFields = (fields: Record<string, any>) => {
 
 export const filterSectionsByTerm = (
   sections: SectionDescriptor[],
-  searchTerm: string
+  searchTerm: string,
 ) => {
   if (!searchTerm) {
     return sections;
@@ -63,7 +64,7 @@ export const filterSectionsByTerm = (
         return (
           field.toLowerCase().includes(searchTerm) ||
           value.some((val: string | number) =>
-            String(val).toLowerCase().includes(searchTerm)
+            String(val).toLowerCase().includes(searchTerm),
           )
         );
       });

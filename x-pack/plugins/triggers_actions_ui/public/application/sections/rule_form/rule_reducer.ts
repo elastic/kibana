@@ -29,7 +29,7 @@ interface CommandType<
     | 'setRuleActionParams'
     | 'setRuleActionProperty'
     | 'setRuleActionFrequency'
-    | 'setRuleActionAlertsFilter'
+    | 'setRuleActionAlertsFilter',
 > {
   type: T;
 }

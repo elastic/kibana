@@ -28,7 +28,7 @@ export function createSearchSessionsClientMock(): jest.Mocked<IScopedSearchSessi
         ({
           defaultExpiration: moment.duration('1', 'w'),
           enabled: true,
-        } as unknown as SearchSessionsConfigSchema)
+        }) as unknown as SearchSessionsConfigSchema
     ),
   };
 }

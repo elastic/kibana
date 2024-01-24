@@ -20,5 +20,5 @@ export const privilegesTypeRt = t.array(
   t.union([
     t.literal(PrivilegeType.EVENT),
     t.literal(PrivilegeType.AGENT_CONFIG),
-  ])
+  ]),
 );

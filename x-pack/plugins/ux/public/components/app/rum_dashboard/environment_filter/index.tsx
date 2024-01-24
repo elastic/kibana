@@ -21,7 +21,7 @@ import { useUxUrlParams } from '../../../../context/url_params_context/use_ux_ur
 function updateEnvironmentUrl(
   history: History,
   location: ReturnType<typeof useLocation>,
-  environment: string
+  environment: string,
 ) {
   history.push({
     ...location,
@@ -35,7 +35,7 @@ function updateEnvironmentUrl(
 const SEPARATOR_OPTION = {
   text: `- ${i18n.translate(
     'xpack.ux.filter.environment.selectEnvironmentLabel',
-    { defaultMessage: 'Select environment' }
+    { defaultMessage: 'Select environment' },
   )} -`,
   disabled: true,
 };

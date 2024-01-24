@@ -78,7 +78,7 @@ export function MobileFilters() {
     '/mobile-services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
     '/mobile-services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/errors-and-crashes'
+    '/mobile-services/{serviceName}/errors-and-crashes',
   );
 
   const filters = { netConnectionType, device, osVersion, appVersion };
@@ -93,10 +93,10 @@ export function MobileFilters() {
             path: { serviceName },
             query: { start, end, environment, kuery, transactionType },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType]
+    [start, end, environment, kuery, serviceName, transactionType],
   );
 
   function toSelectOptions(items?: string[]) {

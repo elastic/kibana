@@ -66,7 +66,7 @@ const getFieldNameLabel = (field: string): string => {
 
 export const getFieldValueLabel = (
   field: string,
-  fieldValue: string
+  fieldValue: string,
 ): string => {
   return field === SERVICE_ENVIRONMENT
     ? getEnvironmentLabel(fieldValue)
@@ -78,8 +78,8 @@ const formatGroupByFields = (groupByFields: Record<string, string>): string => {
     (field) =>
       `${getFieldNameLabel(field)}: ${getFieldValueLabel(
         field,
-        groupByFields[field]
-      )}`
+        groupByFields[field],
+      )}`,
   );
   return groupByFieldLabels.join(', ');
 };
@@ -104,7 +104,7 @@ export function formatErrorCountReason({
       measured,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
-        windowUnit as TimeUnitChar
+        windowUnit as TimeUnitChar,
       ),
       group: formatGroupByFields(groupByFields),
     },
@@ -141,7 +141,7 @@ export function formatTransactionDurationReason({
       aggregationType: aggregationTypeFormatted,
       interval: formatDurationFromTimeUnitChar(
         windowSize,
-        windowUnit as TimeUnitChar
+        windowUnit as TimeUnitChar,
       ),
       group: formatGroupByFields(groupByFields),
     },
@@ -170,7 +170,7 @@ export function formatTransactionErrorRateReason({
       measured: asPercent(measured, 100),
       interval: formatDurationFromTimeUnitChar(
         windowSize,
-        windowUnit as TimeUnitChar
+        windowUnit as TimeUnitChar,
       ),
       group: formatGroupByFields(groupByFields),
     },
@@ -203,10 +203,10 @@ export function formatAnomalyReason({
         anomalyScore,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
-          windowUnit as TimeUnitChar
+          windowUnit as TimeUnitChar,
         ),
       },
-    }
+    },
   );
 }
 
@@ -309,14 +309,14 @@ export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
         'xpack.apm.alerts.anomalyDetector.throughputLabel',
         {
           defaultMessage: 'throughput',
-        }
+        },
       );
     case AnomalyDetectorType.txFailureRate:
       return i18n.translate(
         'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
         {
           defaultMessage: 'failed transaction rate',
-        }
+        },
       );
   }
 }

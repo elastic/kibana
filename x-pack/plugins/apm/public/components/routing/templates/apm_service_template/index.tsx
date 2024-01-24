@@ -114,7 +114,7 @@ function TemplateWithContext({
         query,
       }),
     }),
-    [query, router, selectedTab, serviceName, title]
+    [query, router, selectedTab, serviceName, title],
   );
 
   if (isMobileAgentName(agentName)) {
@@ -217,19 +217,19 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { capabilities } = core.application;
   const { isAlertingAvailable, canReadAlerts } = getAlertingCapabilities(
     plugins,
-    capabilities
+    capabilities,
   );
 
   const router = useApmRouter();
   const isInfraTabAvailable = useApmFeatureFlag(
-    ApmFeatureFlagName.InfrastructureTabAvailable
+    ApmFeatureFlagName.InfrastructureTabAvailable,
   );
 
   const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
 
   const isAwsLambdaEnabled = core.uiSettings.get<boolean>(
     enableAwsLambdaMetrics,
-    true
+    true,
   );
 
   const {
@@ -255,10 +255,10 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
               environment,
             },
           },
-        }
+        },
       );
     },
-    [serviceName, start, end, environment]
+    [serviceName, start, end, environment],
   );
 
   const query = omit(
@@ -266,7 +266,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
     'page',
     'pageSize',
     'sortField',
-    'sortDirection'
+    'sortDirection',
   );
 
   const tabs: Tab[] = [
@@ -386,7 +386,7 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
               'xpack.apm.home.serviceAlertsTable.tooltip.activeAlertsExplanation',
               {
                 defaultMessage: 'Active alerts',
-              }
+              },
             )}
           >
             <EuiBadge color="danger">{serviceAlertsCount.alertsCount}</EuiBadge>

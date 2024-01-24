@@ -16,7 +16,7 @@ export const INVALID_LICENSE = i18n.translate(
   {
     defaultMessage:
       "To create custom links, you must be subscribed to an Elastic Gold license or above. With it, you'll have the ability to create custom links to improve your workflow when analyzing your services.",
-  }
+  },
 );
 
 export const NO_PERMISSION_LABEL = i18n.translate(
@@ -24,7 +24,7 @@ export const NO_PERMISSION_LABEL = i18n.translate(
   {
     defaultMessage:
       "Your user role doesn't have permissions to create custom links",
-  }
+  },
 );
 
 export const extractTemplateVariableNames = (url: string): string[] => {
@@ -37,7 +37,7 @@ export const extractTemplateVariableNames = (url: string): string[] => {
 
 export function getEncodedCustomLinkUrl(
   url: string,
-  transaction?: Transaction
+  transaction?: Transaction,
 ) {
   try {
     const templateVariables = extractTemplateVariableNames(url);

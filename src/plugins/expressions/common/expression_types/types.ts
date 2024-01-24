@@ -29,7 +29,7 @@ export type ExpressionValueConverter<I extends ExpressionValue, O extends Expres
 export interface ExpressionTypeDefinition<
   Name extends string,
   Value extends ExpressionValueUnboxed | ExpressionValueBoxed,
-  SerializedType = undefined
+  SerializedType = undefined,
 > {
   name: Name;
   namespace?: string;

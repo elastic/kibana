@@ -123,9 +123,8 @@ export class ElasticChartService extends FtrService {
    */
   public async getChartDebugDataFromChart(chart: WebElementWrapper): Promise<DebugState> {
     const visContainer = await chart.findByCssSelector('.echChartStatus');
-    const debugDataString: string | undefined = await visContainer.getAttribute(
-      'data-ech-debug-state'
-    );
+    const debugDataString: string | undefined =
+      await visContainer.getAttribute('data-ech-debug-state');
     this.log.debug('data-ech-debug-state: ', debugDataString);
 
     if (debugDataString === undefined) {

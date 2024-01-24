@@ -44,12 +44,12 @@ const label = i18n.translate(
   'xpack.apm.serviceOverview.embeddedMap.httpRequests.metric.label',
   {
     defaultMessage: 'HTTP requests',
-  }
+  },
 );
 
 export async function getHttpRequestsLayerList(
   maps: MapsStartApi | undefined,
-  dataViewId: string
+  dataViewId: string,
 ) {
   const whereQuery = {
     language: 'kuery',
@@ -92,7 +92,7 @@ export async function getHttpRequestsLayerList(
       'xpack.apm.serviceOverview.embeddedMap.httpRequests.country.label',
       {
         defaultMessage: 'HTTP requests per country',
-      }
+      },
     ),
     minZoom: 0,
     maxZoom: 2,
@@ -134,7 +134,7 @@ export async function getHttpRequestsLayerList(
       'xpack.apm.serviceOverview.embeddedMap.httpRequests.region.label',
       {
         defaultMessage: 'HTTP requests per region',
-      }
+      },
     ),
     minZoom: 1,
     maxZoom: 24,

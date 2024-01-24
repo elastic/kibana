@@ -76,19 +76,10 @@ export function useCategorizeRequest() {
 
       return new Promise((resolve, reject) => {
         data.search
-          .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(
-              index,
-              field,
-              timeField,
-              timeRange,
-              query,
-              wrap,
-              intervalMs,
-              additionalFilter
-            ),
-            { abortSignal: abortController.current.signal }
-          )
+          .search<
+            ReturnType<typeof createCategoryRequest>,
+            CatResponse
+          >(createCategoryRequest(index, field, timeField, timeRange, query, wrap, intervalMs, additionalFilter), { abortSignal: abortController.current.signal })
           .subscribe({
             next: (result) => {
               if (!isRunningResponse(result)) {

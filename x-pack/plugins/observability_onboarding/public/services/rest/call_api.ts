@@ -24,7 +24,7 @@ export type CallApi = typeof callApi;
 
 export async function callApi<T = void>(
   { http }: CoreStart | CoreSetup,
-  fetchOptions: FetchOptions
+  fetchOptions: FetchOptions,
 ): Promise<T> {
   const {
     pathname,

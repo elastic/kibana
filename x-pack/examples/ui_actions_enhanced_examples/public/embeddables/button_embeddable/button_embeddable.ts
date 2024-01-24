@@ -20,7 +20,10 @@ export interface ButtonEmbeddableParams {
 export class ButtonEmbeddable extends Embeddable {
   type = BUTTON_EMBEDDABLE;
 
-  constructor(input: EmbeddableInput, private readonly params: ButtonEmbeddableParams) {
+  constructor(
+    input: EmbeddableInput,
+    private readonly params: ButtonEmbeddableParams
+  ) {
     super(input, {});
   }
 

@@ -16,7 +16,7 @@ describe('getErrorName', () => {
           log: { message: 'bar' },
           exception: [{ message: 'foo' }],
         },
-      } as APMError)
+      } as APMError),
     ).toEqual('bar');
   });
   it('returns exception message', () => {
@@ -25,7 +25,7 @@ describe('getErrorName', () => {
         error: {
           exception: [{ message: 'foo' }],
         },
-      } as APMError)
+      } as APMError),
     ).toEqual('foo');
   });
   it('returns default message', () => {

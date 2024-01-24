@@ -91,7 +91,7 @@ async function getMobileHttpErrorsTimeseries({
     (bucket) => ({
       x: bucket.key,
       y: bucket.doc_count,
-    })
+    }),
   );
   return { timeseries };
 }

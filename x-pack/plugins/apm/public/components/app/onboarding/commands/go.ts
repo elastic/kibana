@@ -24,14 +24,14 @@ export const go = `# ${i18n.translate(
   'xpack.apm.onboarding.goClient.configure.commands.initializeUsingEnvironmentVariablesComment',
   {
     defaultMessage: 'Initialize using environment variables:',
-  }
+  },
 )}
 
 # {{serviceNameHint}} ${i18n.translate(
   'xpack.apm.onboarding.goClient.configure.commands.usedExecutableNameComment',
   {
     defaultMessage: 'If not specified, the executable name will be used.',
-  }
+  },
 )}
 export ELASTIC_APM_SERVICE_NAME=<your-service-name>
 

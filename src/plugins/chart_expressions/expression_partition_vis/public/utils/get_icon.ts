@@ -22,4 +22,4 @@ export const getIcon = (chart: ChartTypes) =>
     [ChartTypes.TREEMAP]: IconChartTreemap,
     [ChartTypes.MOSAIC]: IconChartMosaic,
     [ChartTypes.WAFFLE]: IconChartWaffle,
-  }[chart]);
+  })[chart];

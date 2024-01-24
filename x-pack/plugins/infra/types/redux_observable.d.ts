@@ -16,7 +16,7 @@ declare module 'redux-observable' {
     O2 extends T2,
     S,
     D1,
-    D2
+    D2,
   >(epic1: Epic<T1, O1, S, D1>, epic2: Epic<T2, O2, S, D2>): Epic<T1 | T2, O1 | O2, S, D1 & D2>;
   function combineEpics<
     T1 extends Action,
@@ -28,7 +28,7 @@ declare module 'redux-observable' {
     S,
     D1,
     D2,
-    D3
+    D3,
   >(
     epic1: Epic<T1, O1, S, D1>,
     epic2: Epic<T2, O2, S, D2>,
@@ -47,7 +47,7 @@ declare module 'redux-observable' {
     D1,
     D2,
     D3,
-    D4
+    D4,
   >(
     epic1: Epic<T1, O1, S, D1>,
     epic2: Epic<T2, O2, S, D2>,
@@ -70,7 +70,7 @@ declare module 'redux-observable' {
     D2,
     D3,
     D4,
-    D5
+    D5,
   >(
     epic1: Epic<T1, O1, S, D1>,
     epic2: Epic<T2, O2, S, D2>,
@@ -79,7 +79,6 @@ declare module 'redux-observable' {
     epic5: Epic<T5, O5, S, D5>
   ): Epic<T1 | T2 | T3 | T4 | T5, O1 | O2 | O3 | O4 | O5, S, D1 & D2 & D3 & D4 & D5>;
 
-  type EpicWithState<E, S> = E extends Epic<infer In, infer Out, null, infer Deps>
-    ? Epic<In, Out, S, Deps>
-    : E;
+  type EpicWithState<E, S> =
+    E extends Epic<infer In, infer Out, null, infer Deps> ? Epic<In, Out, S, Deps> : E;
 }

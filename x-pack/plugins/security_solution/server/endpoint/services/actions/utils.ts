@@ -127,7 +127,7 @@ type ActionCompletionInfo = Pick<
 >;
 
 export const getActionCompletionInfo = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 >(
   /** The normalized action request */
   action: NormalizedActionRequest,
@@ -243,16 +243,16 @@ export const getActionStatus = ({
   const status = isExpired
     ? 'failed'
     : isCompleted
-    ? wasSuccessful
-      ? 'successful'
-      : 'failed'
-    : 'pending';
+      ? wasSuccessful
+        ? 'successful'
+        : 'failed'
+      : 'pending';
 
   return { isExpired, status };
 };
 
 interface NormalizedAgentActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   isCompleted: boolean;
   completedAt: undefined | string;
@@ -270,7 +270,7 @@ type ActionResponseByAgentId = Record<string, NormalizedAgentActionResponse>;
  * @param actionResponses
  */
 const mapActionResponsesByAgentId = <
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 >(
   actionResponses: Array<
     ActivityLogActionResponse | EndpointActivityLogActionResponse<TOutputContent>

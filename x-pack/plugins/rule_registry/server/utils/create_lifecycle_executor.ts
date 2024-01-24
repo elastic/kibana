@@ -67,7 +67,7 @@ type ExplicitAlertFields = Record<string, unknown> & // every field can have val
 export type LifecycleAlertService<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > = (alert: {
   id: string;
   fields: ExplicitAlertFields;
@@ -76,7 +76,7 @@ export type LifecycleAlertService<
 export interface LifecycleAlertServices<
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > {
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
@@ -91,7 +91,7 @@ export type LifecycleRuleExecutor<
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = never,
   InstanceContext extends AlertInstanceContext = never,
-  ActionGroupIds extends string = never
+  ActionGroupIds extends string = never,
 > = (
   options: AlertExecutorOptionsWithExtraServices<
     Params,
@@ -110,7 +110,7 @@ export const createLifecycleExecutor =
     State extends RuleTypeState = never,
     InstanceState extends AlertInstanceState = never,
     InstanceContext extends AlertInstanceContext = never,
-    ActionGroupIds extends string = never
+    ActionGroupIds extends string = never,
   >(
     wrappedExecutor: LifecycleRuleExecutor<
       Params,

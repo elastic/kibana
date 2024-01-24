@@ -53,7 +53,7 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(
           alert?.fields[ALERT_RULE_TYPE_ID],
-          alert?.fields[ALERT_EVALUATION_VALUE]
+          alert?.fields[ALERT_EVALUATION_VALUE],
         ),
       },
       {
@@ -65,7 +65,7 @@ export function AlertDetailsAppSection({
         ),
         value: formatAlertEvaluationValue(
           alert?.fields[ALERT_RULE_TYPE_ID],
-          alert?.fields[ALERT_EVALUATION_THRESHOLD]
+          alert?.fields[ALERT_EVALUATION_THRESHOLD],
         ),
       },
       {
@@ -100,7 +100,7 @@ export function AlertDetailsAppSection({
   const serviceName = String(alert.fields[SERVICE_NAME]);
   const timeRange = getPaddedAlertTimeRange(
     alert.fields[ALERT_START]!,
-    alert.fields[ALERT_END]
+    alert.fields[ALERT_END],
   );
   const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();

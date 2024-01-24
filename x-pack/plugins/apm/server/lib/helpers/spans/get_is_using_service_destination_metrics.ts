@@ -23,7 +23,7 @@ import {
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 
 export function getProcessorEventForServiceDestinationStatistics(
-  searchServiceDestinationMetrics: boolean
+  searchServiceDestinationMetrics: boolean,
 ) {
   return searchServiceDestinationMetrics
     ? ProcessorEvent.metric
@@ -31,7 +31,7 @@ export function getProcessorEventForServiceDestinationStatistics(
 }
 
 export function getDocumentTypeFilterForServiceDestinationStatistics(
-  searchServiceDestinationMetrics: boolean
+  searchServiceDestinationMetrics: boolean,
 ) {
   return searchServiceDestinationMetrics
     ? [
@@ -50,7 +50,7 @@ export function getDocumentTypeFilterForServiceDestinationStatistics(
 }
 
 export function getLatencyFieldForServiceDestinationStatistics(
-  searchServiceDestinationMetrics: boolean
+  searchServiceDestinationMetrics: boolean,
 ) {
   return searchServiceDestinationMetrics
     ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM
@@ -58,7 +58,7 @@ export function getLatencyFieldForServiceDestinationStatistics(
 }
 
 export function getDocCountFieldForServiceDestinationStatistics(
-  searchServiceDestinationMetrics: boolean
+  searchServiceDestinationMetrics: boolean,
 ) {
   return searchServiceDestinationMetrics
     ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT
@@ -79,7 +79,7 @@ export async function getIsUsingServiceDestinationMetrics({
   end: number;
 }) {
   async function getServiceDestinationMetricsCount(
-    query?: QueryDslQueryContainer
+    query?: QueryDslQueryContainer,
   ) {
     const response = await apmEventClient.search(
       'get_service_destination_metrics_count',
@@ -102,7 +102,7 @@ export async function getIsUsingServiceDestinationMetrics({
             },
           },
         },
-      }
+      },
     );
 
     return response.hits.total.value;

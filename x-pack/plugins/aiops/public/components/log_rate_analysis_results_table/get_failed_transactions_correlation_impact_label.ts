@@ -24,7 +24,7 @@ const CORRELATIONS_IMPACT_THRESHOLD = {
 } as const;
 
 type FailedTransactionsCorrelationsImpactThreshold =
-  typeof CORRELATIONS_IMPACT_THRESHOLD[keyof typeof CORRELATIONS_IMPACT_THRESHOLD];
+  (typeof CORRELATIONS_IMPACT_THRESHOLD)[keyof typeof CORRELATIONS_IMPACT_THRESHOLD];
 
 export function getFailedTransactionsCorrelationImpactLabel(
   pValue: number | null,

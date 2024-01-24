@@ -22,7 +22,7 @@ declare namespace Cypress {
     updateInstallationStepStatus(
       onboardingId: string,
       step: InstallationStep,
-      status: InstallationStepStatus
+      status: InstallationStepStatus,
     ): void;
   }
 }

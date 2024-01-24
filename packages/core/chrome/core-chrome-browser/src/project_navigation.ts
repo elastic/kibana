@@ -71,7 +71,10 @@ export type SideNavNodeStatus = 'hidden' | 'visible';
 
 export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
 
-export type EuiThemeSize = Exclude<typeof EuiThemeSizes[number], 'base' | 'xxs' | 'xxxl' | 'xxxxl'>;
+export type EuiThemeSize = Exclude<
+  (typeof EuiThemeSizes)[number],
+  'base' | 'xxs' | 'xxxl' | 'xxxxl'
+>;
 
 export type GetIsActiveFn = (params: {
   /** The current path name including the basePath + hash value but **without** any query params */
@@ -233,7 +236,7 @@ export interface ChromeSetProjectBreadcrumbsParams {
 export interface NodeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends NodeDefinitionBase {
   /** Optional id, if not passed a "link" must be provided. */
   id?: Id;
@@ -256,7 +259,7 @@ export interface NodeDefinition<
 export type NodeDefinitionWithChildren<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenID extends string = Id
+  ChildrenID extends string = Id,
 > = NodeDefinition<LinkId, Id, ChildrenID> & {
   children: Required<NodeDefinition<LinkId, Id, ChildrenID>>['children'];
 };
@@ -291,7 +294,7 @@ export interface RecentlyAccessedDefinition {
 export interface GroupDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navGroup';
   children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
@@ -305,7 +308,7 @@ export interface GroupDefinition<
 export interface PresetDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<GroupDefinition<LinkId, Id, ChildrenId>, 'children' | 'type'> {
   type: 'preset';
   preset: NavigationGroupPreset;
@@ -319,7 +322,7 @@ export interface PresetDefinition<
 export interface ItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navItem';
 }
@@ -332,7 +335,7 @@ export interface ItemDefinition<
 export type RootNavigationItemDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > =
   | RecentlyAccessedDefinition
   | GroupDefinition<LinkId, Id, ChildrenId>
@@ -347,7 +350,7 @@ export type RootNavigationItemDefinition<
 export interface NavigationTreeDefinition<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
-  ChildrenId extends string = Id
+  ChildrenId extends string = Id,
 > {
   /**
    * Main content of the navigation. Can contain any number of "cloudLink", "recentlyAccessed"

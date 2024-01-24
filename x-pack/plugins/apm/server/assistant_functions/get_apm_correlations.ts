@@ -36,7 +36,7 @@ export function registerGetApmCorrelationsFunction({
       error.message, service.node.name or transaction.name) are contributing to for 
       instance a higher latency. Another option is a time-based comparison, where you 
       compare before and after a change point.`,
-        }
+        },
       ),
       parameters: {
         type: 'object',
@@ -118,6 +118,6 @@ export function registerGetApmCorrelationsFunction({
           apmEventClient,
         }),
       };
-    }
+    },
   );
 }

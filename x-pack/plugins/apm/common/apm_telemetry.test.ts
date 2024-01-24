@@ -81,7 +81,7 @@ describe('APM telemetry helpers', () => {
 
         expect(
           mergeApmTelemetryMapping(validTelemetryMapping)?.mappings.properties
-            .stack_stats.properties.kibana.properties.plugins.properties.apm
+            .stack_stats.properties.kibana.properties.plugins.properties.apm,
         ).toEqual(getApmTelemetryMapping());
       });
     });

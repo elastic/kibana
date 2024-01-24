@@ -681,7 +681,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         isLoading,
         dataTestSubj: 'detectionEngineStepDefineRuleQueryBar',
         onValidityChange: setIsQueryBarValid,
-      } as QueryBarDefineRuleProps),
+      }) as QueryBarDefineRuleProps,
     [indexPattern, isLoading, setIsQueryBarValid]
   );
 

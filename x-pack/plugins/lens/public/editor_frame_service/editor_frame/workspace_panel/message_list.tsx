@@ -53,18 +53,18 @@ export const MessageList = ({
           },
         })
       : errorCount > 0
-      ? i18n.translate('xpack.lens.messagesButton.label.errors', {
-          defaultMessage: '{errorCount} {errorCount, plural, one {error} other {errors}}',
-          values: {
-            errorCount,
-          },
-        })
-      : i18n.translate('xpack.lens.messagesButton.label.warnings', {
-          defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
-          values: {
-            warningCount,
-          },
-        });
+        ? i18n.translate('xpack.lens.messagesButton.label.errors', {
+            defaultMessage: '{errorCount} {errorCount, plural, one {error} other {errors}}',
+            values: {
+              errorCount,
+            },
+          })
+        : i18n.translate('xpack.lens.messagesButton.label.warnings', {
+            defaultMessage: '{warningCount} {warningCount, plural, one {warning} other {warnings}}',
+            values: {
+              warningCount,
+            },
+          });
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);

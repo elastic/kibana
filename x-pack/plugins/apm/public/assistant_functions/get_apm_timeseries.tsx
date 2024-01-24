@@ -139,7 +139,7 @@ export function registerGetApmTimeseriesFunction({
                     color: getTimeSeriesColor(chartType!).currentPeriodColor,
                     data,
                   };
-                }
+                },
               );
 
               return (

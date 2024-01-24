@@ -37,15 +37,15 @@ export async function getMlClient({
   return {
     mlSystem: mlplugin.setup.mlSystemProvider(
       request,
-      coreContext.savedObjects.client
+      coreContext.savedObjects.client,
     ),
     anomalyDetectors: mlplugin.setup.anomalyDetectorsProvider(
       request,
-      coreContext.savedObjects.client
+      coreContext.savedObjects.client,
     ),
     modules: mlplugin.setup.modulesProvider(
       request,
-      coreContext.savedObjects.client
+      coreContext.savedObjects.client,
     ),
   };
 }

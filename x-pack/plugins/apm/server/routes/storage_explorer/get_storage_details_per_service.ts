@@ -77,7 +77,7 @@ export async function getStorageDetailsPerProcessorEvent({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],
@@ -128,7 +128,7 @@ export async function getStorageDetailsPerProcessorEvent({
   ].map((processorEvent) => {
     const bucketForProcessorEvent =
       response.aggregations?.sample.processor_event.buckets?.find(
-        (x) => x.key === processorEvent
+        (x) => x.key === processorEvent,
       );
 
     return {
@@ -205,7 +205,7 @@ export async function getStorageDetailsPerIndex({
               ...(indexLifecyclePhase !== IndexLifecyclePhaseSelectOption.All
                 ? termQuery(
                     TIER,
-                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase]
+                    indexLifeCyclePhaseToDataTier[indexLifecyclePhase],
                   )
                 : []),
             ],

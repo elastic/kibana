@@ -33,7 +33,7 @@ export function ApmServiceWrapper() {
         }),
       },
     ],
-    [query, router, serviceName]
+    [query, router, serviceName],
   );
 
   return <Outlet />;

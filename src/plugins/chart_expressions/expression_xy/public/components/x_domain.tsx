@@ -62,8 +62,8 @@ export const getXDomain = (
         minInterval,
       }
     : isHistogram
-    ? { minInterval, min: NaN, max: NaN }
-    : undefined;
+      ? { minInterval, min: NaN, max: NaN }
+      : undefined;
 
   if ((isHistogram || isTimeViz) && isFullyQualified(baseDomain)) {
     if (xExtent && !isTimeViz) {

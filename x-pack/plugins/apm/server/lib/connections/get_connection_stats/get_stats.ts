@@ -88,21 +88,21 @@ export const getStats = async ({
         value: {
           count: sum(
             bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.count.value ?? 0
-            )
+              (dateBucket) => dateBucket.count.value ?? 0,
+            ),
           ),
           latency_sum: sum(
             bucket.timeseries.buckets.map(
-              (dateBucket) => dateBucket.latency_sum.value ?? 0
-            )
+              (dateBucket) => dateBucket.latency_sum.value ?? 0,
+            ),
           ),
           error_count: sum(
             bucket.timeseries.buckets.flatMap(
               (dateBucket) =>
                 dateBucket[EVENT_OUTCOME].buckets.find(
-                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
-                )?.count.value ?? 0
-            )
+                  (outcomeBucket) => outcomeBucket.key === EventOutcome.failure,
+                )?.count.value ?? 0,
+            ),
           ),
         },
         timeseries: bucket.timeseries.buckets.map((dateBucket) => ({
@@ -111,7 +111,7 @@ export const getStats = async ({
           latency_sum: dateBucket.latency_sum.value ?? 0,
           error_count:
             dateBucket[EVENT_OUTCOME].buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.failure,
             )?.count.value ?? 0,
         })),
       };

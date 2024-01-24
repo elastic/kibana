@@ -39,7 +39,7 @@ export function useJsErrorsQuery(pagination: {
         pagination.pageSize,
         pagination.pageIndex,
         searchTerm,
-        uxUiFilters
+        uxUiFilters,
       ),
     },
     [
@@ -52,7 +52,7 @@ export function useJsErrorsQuery(pagination: {
       pagination.pageIndex,
       rangeId,
     ],
-    { name: 'UxJsErrors' }
+    { name: 'UxJsErrors' },
   );
 
   const data = useMemo(() => {

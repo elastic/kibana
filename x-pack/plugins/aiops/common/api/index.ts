@@ -11,4 +11,4 @@ export const AIOPS_API_ENDPOINT = {
 } as const;
 
 type AiopsApiEndpointKeys = keyof typeof AIOPS_API_ENDPOINT;
-export type AiopsApiEndpoint = typeof AIOPS_API_ENDPOINT[AiopsApiEndpointKeys];
+export type AiopsApiEndpoint = (typeof AIOPS_API_ENDPOINT)[AiopsApiEndpointKeys];

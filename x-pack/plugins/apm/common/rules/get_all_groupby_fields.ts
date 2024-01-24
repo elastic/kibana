@@ -15,7 +15,7 @@ import {
 
 export const getAllGroupByFields = (
   ruleType: string,
-  ruleParamsGroupByFields: string[] | undefined = []
+  ruleParamsGroupByFields: string[] | undefined = [],
 ) => {
   let predefinedGroupByFields: string[] = [];
 

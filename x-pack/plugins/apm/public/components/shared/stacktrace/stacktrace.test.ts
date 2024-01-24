@@ -14,8 +14,8 @@ describe('Stacktrace', () => {
     it('collapses the library frames into a set of grouped stackframes', () => {
       expect(
         getGroupedStackframes(stacktracesMock as Stackframe[]).every(
-          (group) => group.stackframes.length > 0
-        )
+          (group) => group.stackframes.length > 0,
+        ),
       ).toEqual(true);
     });
 

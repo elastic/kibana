@@ -71,7 +71,7 @@ function searchLatency({
 
   const transactionDurationField = getDurationFieldForTransactions(
     documentType,
-    useDurationSummary
+    useDurationSummary,
   );
 
   const params = {
@@ -104,7 +104,7 @@ function searchLatency({
           },
           aggs: getLatencyAggregation(
             latencyAggregationType,
-            transactionDurationField
+            transactionDurationField,
           ),
         },
         overall_avg_duration: { avg: { field: transactionDurationField } },
@@ -182,7 +182,7 @@ export async function getLatencyTimeseries({
             aggregation: bucket.latency,
           }),
         };
-      }
+      },
     ),
   };
 }

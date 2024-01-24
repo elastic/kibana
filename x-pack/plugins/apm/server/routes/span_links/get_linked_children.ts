@@ -59,7 +59,7 @@ async function fetchLinkedChildrenOfSpan({
           },
         },
       },
-    }
+    },
   );
   // Filter out documents that don't have any span.links that match the combination of traceId and spanId
   return response.hits.hits.filter(({ _source: source }) => {
@@ -106,7 +106,7 @@ export async function getSpanLinksCountById({
       });
       return acc;
     },
-    {}
+    {},
   );
 }
 

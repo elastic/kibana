@@ -64,7 +64,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.tutorial.config_otel.column.configSettings',
         {
           defaultMessage: 'Configuration setting (1)',
-        }
+        },
       ),
     },
     {
@@ -74,7 +74,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.tutorial.config_otel.column.configValue',
         {
           defaultMessage: 'Configuration value',
-        }
+        },
       ),
       render: (_, { value }) => (
         <>
@@ -88,7 +88,7 @@ export function OpenTelemetryInstructions({
                 'xpack.apm.tutorial.config_otel.column.value.copyIconText',
                 {
                   defaultMessage: 'Copy to clipboard',
-                }
+                },
               )}
               color="text"
               iconType="copy"
@@ -168,7 +168,7 @@ export function OpenTelemetryInstructions({
                   'xpack.apm.tutorial.config_otel.instrumentationGuide',
                   {
                     defaultMessage: 'OpenTelemetry Instrumentation guide',
-                  }
+                  },
                 )}
               </EuiLink>
             ),

@@ -36,7 +36,7 @@ describe('Transaction duration anomaly alert', () => {
       await executor({ params });
 
       expect(
-        services.scopedClusterClient.asCurrentUser.search
+        services.scopedClusterClient.asCurrentUser.search,
       ).not.toHaveBeenCalled();
 
       expect(services.alertFactory.create).not.toHaveBeenCalled();
@@ -66,7 +66,7 @@ describe('Transaction duration anomaly alert', () => {
 
       await executor({ params });
       expect(
-        services.scopedClusterClient.asCurrentUser.search
+        services.scopedClusterClient.asCurrentUser.search,
       ).not.toHaveBeenCalled();
 
       expect(services.alertFactory.create).not.toHaveBeenCalled();
@@ -83,7 +83,7 @@ describe('Transaction duration anomaly alert', () => {
             jobId: '2',
             environment: 'production',
           },
-        ] as unknown as ApmMlJob[])
+        ] as unknown as ApmMlJob[]),
       );
 
       const { services, dependencies, executor } = createRuleTypeMocks();
@@ -103,7 +103,7 @@ describe('Transaction duration anomaly alert', () => {
                             record_score: 0,
                             job_id: '1',
                             detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
+                              AnomalyDetectorType.txLatency,
                             ),
                           },
                         },
@@ -133,7 +133,7 @@ describe('Transaction duration anomaly alert', () => {
       await executor({ params });
 
       expect(
-        services.scopedClusterClient.asCurrentUser.search
+        services.scopedClusterClient.asCurrentUser.search,
       ).not.toHaveBeenCalled();
       expect(services.alertFactory.create).not.toHaveBeenCalled();
     });
@@ -151,7 +151,7 @@ describe('Transaction duration anomaly alert', () => {
             jobId: '2',
             environment: 'production',
           },
-        ] as unknown as ApmMlJob[])
+        ] as unknown as ApmMlJob[]),
       );
 
       const { services, dependencies, executor, scheduleActions } =
@@ -174,7 +174,7 @@ describe('Transaction duration anomaly alert', () => {
                             partition_field_value: 'foo',
                             by_field_value: 'type-foo',
                             detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
+                              AnomalyDetectorType.txLatency,
                             ),
                           },
                         },
@@ -192,7 +192,7 @@ describe('Transaction duration anomaly alert', () => {
                             parttition_field_value: 'bar',
                             by_field_value: 'type-bar',
                             detector_index: getAnomalyDetectorIndex(
-                              AnomalyDetectorType.txLatency
+                              AnomalyDetectorType.txLatency,
                             ),
                           },
                         },
@@ -224,7 +224,7 @@ describe('Transaction duration anomaly alert', () => {
       expect(services.alertFactory.create).toHaveBeenCalledTimes(1);
 
       expect(services.alertFactory.create).toHaveBeenCalledWith(
-        'apm.anomaly_foo_development_type-foo'
+        'apm.anomaly_foo_development_type-foo',
       );
 
       expect(scheduleActions).toHaveBeenCalledWith('threshold_met', {

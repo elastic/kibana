@@ -59,7 +59,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
-      })
+      }),
     ).toEqual([
       {
         agentName: 'java',
@@ -112,7 +112,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java',
           },
         ],
-      })
+      }),
     ).toEqual([
       {
         agentName: 'java',
@@ -155,7 +155,7 @@ describe('mergeServiceStats', () => {
             serviceName: 'opbeans-java-2',
           },
         ],
-      })
+      }),
     ).toEqual([
       {
         agentName: 'java',
@@ -188,7 +188,7 @@ describe('mergeServiceStats', () => {
         ],
         healthStatuses: [],
         alertCounts: [],
-      })
+      }),
     ).toEqual([
       {
         agentName: 'java',

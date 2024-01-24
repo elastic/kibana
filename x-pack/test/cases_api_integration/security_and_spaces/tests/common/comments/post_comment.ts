@@ -178,8 +178,8 @@ export default ({ getService }: FtrProviderContext): void => {
             params: getFilesAttachmentReq(),
           });
 
-          const fileAttachment =
-            caseWithAttachments.comments![0] as ExternalReferenceSOAttachmentPayload;
+          const fileAttachment = caseWithAttachments
+            .comments![0] as ExternalReferenceSOAttachmentPayload;
 
           expect(caseWithAttachments.totalComment).to.be(1);
           expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);

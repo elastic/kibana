@@ -16,7 +16,7 @@ describe('ImpactBar component', () => {
 
   it('should render with overridden values', () => {
     expect(
-      shallow(<ImpactBar value={2} max={5} color="danger" size="s" />)
+      shallow(<ImpactBar value={2} max={5} color="danger" size="s" />),
     ).toMatchSnapshot();
   });
 });

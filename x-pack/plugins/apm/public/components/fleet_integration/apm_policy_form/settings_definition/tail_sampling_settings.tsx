@@ -21,11 +21,11 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
       key: TAIL_SAMPLING_ENABLED_KEY,
       rowTitle: i18n.translate(
         'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingEnabledTitle',
-        { defaultMessage: 'Enable tail-based sampling' }
+        { defaultMessage: 'Enable tail-based sampling' },
       ),
       rowDescription: i18n.translate(
         'xpack.apm.fleet_integration.settings.tailSampling.enableTailSamplingDescription',
-        { defaultMessage: 'Enable tail-based sampling.' }
+        { defaultMessage: 'Enable tail-based sampling.' },
       ),
       type: 'boolean',
       settings: [
@@ -36,18 +36,18 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingInterval',
             {
               defaultMessage: 'Tail sampling interval',
-            }
+            },
           ),
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingIntervalTitle',
-            { defaultMessage: 'Interval' }
+            { defaultMessage: 'Interval' },
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingIntervalDescription',
             {
               defaultMessage:
                 'Interval for synchronization between multiple APM Servers. Should be in the order of tens of seconds or low minutes.',
-            }
+            },
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
@@ -58,18 +58,18 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
           type: 'yaml',
           label: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingPolicies',
-            { defaultMessage: 'Tail sampling policies' }
+            { defaultMessage: 'Tail sampling policies' },
           ),
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingPoliciesTitle',
-            { defaultMessage: 'Policies' }
+            { defaultMessage: 'Policies' },
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingPoliciesDescription',
             {
               defaultMessage:
                 'Policies map trace events to a sample rate. Each policy must specify a sample rate. Trace events are matched to policies in the order specified. All policy conditions must be true for a trace event to match. Each policy list should conclude with a policy that only specifies a sample rate. This final policy is used to catch remaining trace events that don’t match a stricter policy.',
-            }
+            },
           ),
           helpText: docsLinks && (
             <FormattedMessage
@@ -86,7 +86,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
                       'xpack.apm.fleet_integration.settings.tailSamplingDocsHelpTextLink',
                       {
                         defaultMessage: 'docs',
-                      }
+                      },
                     )}
                   </EuiLink>
                 ),
@@ -102,18 +102,18 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimit',
             {
               defaultMessage: 'Tail sampling storage limit',
-            }
+            },
           ),
           rowTitle: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimitTitle',
-            { defaultMessage: 'Storage limit' }
+            { defaultMessage: 'Storage limit' },
           ),
           rowDescription: i18n.translate(
             'xpack.apm.fleet_integration.settings.tailSampling.tailSamplingStorageLimitDescription',
             {
               defaultMessage:
                 'The amount of storage space allocated for trace events matching tail sampling policies. Caution: Setting this limit higher than the allowed space may cause APM Server to become unhealthy.',
-            }
+            },
           ),
           labelAppend: OPTIONAL_LABEL,
           required: false,
@@ -126,7 +126,7 @@ export function getTailSamplingSettings(docsLinks?: string): SettingsRow[] {
 
 export function isTailBasedSamplingValid(
   newVars: PackagePolicyVars,
-  tailSamplingSettings: SettingsRow[]
+  tailSamplingSettings: SettingsRow[],
 ) {
   // only validates TBS when its flag is enabled
   return (

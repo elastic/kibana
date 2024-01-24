@@ -37,8 +37,8 @@ export const ComboBoxField = ({ field, euiFieldProps = {}, idAria, ...rest }: Pr
     errorMessageField && errorMessageArrayItem
       ? `${errorMessageField}, ${errorMessageArrayItem}`
       : errorMessageField
-      ? errorMessageField
-      : errorMessageArrayItem;
+        ? errorMessageField
+        : errorMessageArrayItem;
 
   const onCreateComboOption = (value: string) => {
     // Note: for now, all validations for a comboBox array item have to be synchronous

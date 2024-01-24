@@ -185,7 +185,7 @@ async function getTraceDocsPaginated({
   const mergedHits = [...hits, ...response.hits];
 
   logger.debug(
-    `Paginating traces: retrieved: ${response.hits.length}, (total: ${mergedHits.length} of ${response.total}), maxTraceItems: ${maxTraceItems}`
+    `Paginating traces: retrieved: ${response.hits.length}, (total: ${mergedHits.length} of ${response.total}), maxTraceItems: ${maxTraceItems}`,
   );
 
   if (

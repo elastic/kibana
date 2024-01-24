@@ -21,7 +21,7 @@ describe('ApmFetchAgentslatestsVersion', () => {
 
   it('when url is empty should not fetch latest versions', async () => {
     const boom = Boom.notImplemented(
-      'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.'
+      'To use latest agent versions you must set xpack.apm.latestAgentVersionsUrl.',
     );
 
     await expect(fetchAgentsLatestVersion(logger, '')).rejects.toThrow(boom);

@@ -47,18 +47,21 @@ export async function gatherInfo(): Promise<Result> {
     };
   }
 
-  const data = lines.reduce((acc, line) => {
-    const matches = line.match(CONTROL_GROUP_RE);
+  const data = lines.reduce(
+    (acc, line) => {
+      const matches = line.match(CONTROL_GROUP_RE);
 
-    if (matches !== null) {
-      const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
-      controllers.forEach((controller) => {
-        acc[controller] = matches[2];
-      });
-    }
+      if (matches !== null) {
+        const controllers = matches[1].split(CONTROLLER_SEPARATOR_RE);
+        controllers.forEach((controller) => {
+          acc[controller] = matches[2];
+        });
+      }
 
-    return acc;
-  }, {} as Record<string, string>);
+      return acc;
+    },
+    {} as Record<string, string>
+  );
 
   return { data, v2: false };
 }

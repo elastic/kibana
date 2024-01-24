@@ -122,25 +122,25 @@ export function registerAnomalyRuleType({
         const request = {} as KibanaRequest;
         const { mlAnomalySearch } = ml.mlSystemProvider(
           request,
-          savedObjectsClient
+          savedObjectsClient,
         );
         const anomalyDetectors = ml.anomalyDetectorsProvider(
           request,
-          savedObjectsClient
+          savedObjectsClient,
         );
 
         const mlJobs = await getMLJobs(
           anomalyDetectors,
-          ruleParams.environment
+          ruleParams.environment,
         );
 
         const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-          (option) => option.type === ruleParams.anomalySeverityType
+          (option) => option.type === ruleParams.anomalySeverityType,
         );
 
         if (!selectedOption) {
           throw new Error(
-            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`
+            `Anomaly alert severity type ${ruleParams.anomalySeverityType} is not supported.`,
           );
         }
 
@@ -183,7 +183,7 @@ export function registerAnomalyRuleType({
                   ...termQuery(
                     'partition_field_value',
                     ruleParams.serviceName,
-                    { queryEmptyString: false }
+                    { queryEmptyString: false },
                   ),
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
@@ -191,8 +191,8 @@ export function registerAnomalyRuleType({
                   ...termsQuery(
                     'detector_index',
                     ...(ruleParams.anomalyDetectorTypes?.map((type) =>
-                      getAnomalyDetectorIndex(type)
-                    ) ?? [])
+                      getAnomalyDetectorIndex(type),
+                    ) ?? []),
                   ),
                 ] as QueryDslQueryContainer[],
               },
@@ -244,7 +244,7 @@ export function registerAnomalyRuleType({
 
               if (!job) {
                 logger.warn(
-                  `Could not find matching job for job id ${latest.job_id}`
+                  `Could not find matching job for job id ${latest.job_id}`,
                 );
                 return undefined;
               }
@@ -255,7 +255,7 @@ export function registerAnomalyRuleType({
                 environment: job.environment,
                 score: latest.record_score as number,
                 detectorType: getAnomalyDetectorType(
-                  latest.detector_index as number
+                  latest.detector_index as number,
                 ),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
@@ -263,7 +263,7 @@ export function registerAnomalyRuleType({
               };
             })
             .filter((anomaly) =>
-              anomaly ? anomaly.score >= threshold : false
+              anomaly ? anomaly.score >= threshold : false,
             ) ?? [];
 
         await asyncForEach(compact(anomalies), async (anomaly) => {
@@ -319,12 +319,12 @@ export function registerAnomalyRuleType({
           const relativeViewInAppUrl = getAlertUrlTransaction(
             serviceName,
             getEnvironmentEsField(environment)?.[SERVICE_ENVIRONMENT],
-            transactionType
+            transactionType,
           );
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
-            relativeViewInAppUrl
+            relativeViewInAppUrl,
           );
           const indexedStartedAt =
             getAlertStartedDate(alertId) ?? startedAt.toISOString();
@@ -334,7 +334,7 @@ export function registerAnomalyRuleType({
             spaceId,
             indexedStartedAt,
             alertsLocator,
-            basePath.publicBaseUrl
+            basePath.publicBaseUrl,
           );
 
           alert.scheduleActions(ruleTypeConfig.defaultActionGroupId, {
@@ -354,6 +354,6 @@ export function registerAnomalyRuleType({
       alerts: ApmRuleTypeAlertDefinition,
       getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
         observabilityPaths.ruleDetails(rule.id),
-    })
+    }),
   );
 }

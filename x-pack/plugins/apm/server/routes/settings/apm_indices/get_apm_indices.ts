@@ -21,7 +21,7 @@ export type ApmIndexSettingsResponse = Array<{
 }>;
 
 export async function getApmIndexSettings(
-  resources: APMRouteHandlerResources
+  resources: APMRouteHandlerResources,
 ): Promise<ApmIndexSettingsResponse> {
   const { apmIndicesFromConfigFile } = resources.plugins.apmDataAccess.setup;
 

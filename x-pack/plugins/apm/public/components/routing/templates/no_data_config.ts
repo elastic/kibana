@@ -22,14 +22,14 @@ function getNoDataConfigDetails({
     {
       defaultMessage:
         'Use APM agents to collect APM data. We make it easy with agents for many popular languages.',
-    }
+    },
   );
 
   const addDataTitle = i18n.translate(
     'xpack.apm.noDataConfig.addDataButtonLabel',
     {
       defaultMessage: 'Add data',
-    }
+    },
   );
 
   if (isServerless) {
@@ -51,7 +51,7 @@ function getNoDataConfigDetails({
   return {
     title: i18n.translate(
       'xpack.apm.noDataConfig.addApmIntegrationButtonLabel',
-      { defaultMessage: 'Add the APM integration' }
+      { defaultMessage: 'Add the APM integration' },
     ),
     href: `${basePath}/app/integrations/detail/apm/overview`,
     description,

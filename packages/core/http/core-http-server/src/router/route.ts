@@ -86,7 +86,7 @@ export interface RouteConfigOptionsBody {
    *
    * Default value: 'data', unless no validation.body is provided in the route definition. In that case the default is 'stream' to alleviate memory pressure.
    */
-  output?: typeof validBodyOutput[number];
+  output?: (typeof validBodyOutput)[number];
 
   /**
    * Determines if the incoming payload is processed or presented raw. Available values:

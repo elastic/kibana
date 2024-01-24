@@ -32,7 +32,7 @@ describe('[Logs onboarding] System logs', () => {
 
       it('installation fails', () => {
         cy.getByTestSubj(
-          'obltOnboardingSystemLogsIntegrationInstallationFailed'
+          'obltOnboardingSystemLogsIntegrationInstallationFailed',
         ).should('exist');
       });
     });
@@ -49,19 +49,19 @@ describe('[Logs onboarding] System logs', () => {
 
       it('installation succeed', () => {
         cy.getByTestSubj('obltOnboardingSystemLogsIntegrationInstalled').should(
-          'exist'
+          'exist',
         );
       });
 
       it('show link to navigate to system integration when clicking info icon', () => {
         cy.getByTestSubj('obltOnboardingSystemLogsIntegrationInstalled').should(
-          'exist'
+          'exist',
         );
         cy.getByTestSubj('obltOnboardingSystemLogsIntegrationInfo')
           .should('exist')
           .click();
         cy.getByTestSubj(
-          'observabilityOnboardingSystemIntegrationLearnMore'
+          'observabilityOnboardingSystemIntegrationLearnMore',
         ).should('exist');
       });
     });
@@ -74,7 +74,7 @@ describe('[Logs onboarding] System logs', () => {
         cy.visitKibana('/app/observabilityOnboarding/systemLogs');
 
         cy.getByTestSubj('obltOnboardingLogsApiKeyCreationNoPrivileges').should(
-          'exist'
+          'exist',
         );
       });
     });
@@ -105,7 +105,7 @@ describe('[Logs onboarding] System logs', () => {
 
       it('apiKey is not generated', () => {
         cy.getByTestSubj('obltOnboardingLogsApiKeyCreationFailed').should(
-          'exist'
+          'exist',
         );
       });
     });
@@ -114,7 +114,7 @@ describe('[Logs onboarding] System logs', () => {
   describe('Install the Elastic Agent step', () => {
     beforeEach(() => {
       cy.intercept('POST', '/internal/observability_onboarding/logs/flow').as(
-        'createOnboardingFlow'
+        'createOnboardingFlow',
       );
       cy.loginAsLogMonitoringUser();
       cy.visitKibana('/app/observabilityOnboarding/systemLogs');
@@ -166,7 +166,7 @@ describe('[Logs onboarding] System logs', () => {
 
       it('A link to the documentation is shown instead of installation script', () => {
         cy.getByTestSubj(
-          'obltOnboardingInstallElasticAgentWindowsDocsLink'
+          'obltOnboardingInstallElasticAgentWindowsDocsLink',
         ).should('exist');
 
         cy.getByTestSubj('obltOnboardingInstallElasticAgentStep')
@@ -179,10 +179,10 @@ describe('[Logs onboarding] System logs', () => {
       describe('is selected', () => {
         it('autoDownloadConfig flag is added to installation script', () => {
           cy.getByTestSubj(
-            'obltOnboardingInstallElasticAgentAutoDownloadConfig'
+            'obltOnboardingInstallElasticAgentAutoDownloadConfig',
           ).click();
           cy.getByTestSubj(
-            'obltOnboardingInstallElasticAgentAutoDownloadConfigCallout'
+            'obltOnboardingInstallElasticAgentAutoDownloadConfigCallout',
           ).should('exist');
           cy.getByTestSubj('obltOnboardingInstallElasticAgentStep')
             .get('.euiCodeBlock')
@@ -191,10 +191,10 @@ describe('[Logs onboarding] System logs', () => {
 
         it('Download config button is disabled', () => {
           cy.getByTestSubj(
-            'obltOnboardingInstallElasticAgentAutoDownloadConfig'
+            'obltOnboardingInstallElasticAgentAutoDownloadConfig',
           ).click();
           cy.getByTestSubj(
-            'obltOnboardingConfigureElasticAgentStepDownloadConfig'
+            'obltOnboardingConfigureElasticAgentStepDownloadConfig',
           ).should('be.disabled');
         });
       });
@@ -223,7 +223,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'loading'
+              'loading',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-loading')
               .contains('Downloading Elastic Agent')
@@ -234,7 +234,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'complete'
+              'complete',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-complete')
               .contains('Elastic Agent downloaded')
@@ -245,7 +245,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'danger'
+              'danger',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-danger')
               .contains('Download Elastic Agent')
@@ -258,7 +258,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'complete'
+              'complete',
             );
           });
 
@@ -266,7 +266,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-extract',
-              'loading'
+              'loading',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-loading')
               .contains('Extracting Elastic Agent')
@@ -277,7 +277,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-extract',
-              'complete'
+              'complete',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-complete')
               .contains('Elastic Agent extracted')
@@ -288,7 +288,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-extract',
-              'danger'
+              'danger',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-danger')
               .contains('Extract Elastic Agent')
@@ -301,12 +301,12 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'complete'
+              'complete',
             );
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-extract',
-              'complete'
+              'complete',
             );
           });
 
@@ -314,7 +314,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-install',
-              'loading'
+              'loading',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-loading')
               .contains('Installing Elastic Agent')
@@ -325,7 +325,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-install',
-              'complete'
+              'complete',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-complete')
               .contains('Elastic Agent installed')
@@ -336,7 +336,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-install',
-              'danger'
+              'danger',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-danger')
               .contains('Install Elastic Agent')
@@ -349,17 +349,17 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-download',
-              'complete'
+              'complete',
             );
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-extract',
-              'complete'
+              'complete',
             );
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-install',
-              'complete'
+              'complete',
             );
           });
 
@@ -367,7 +367,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-status',
-              'loading'
+              'loading',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-loading')
               .contains('Connecting to the Elastic Agent')
@@ -378,7 +378,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-status',
-              'complete'
+              'complete',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-complete')
               .contains('Connected to the Elastic Agent')
@@ -389,7 +389,7 @@ describe('[Logs onboarding] System logs', () => {
             cy.updateInstallationStepStatus(
               onboardingId,
               'ea-status',
-              'warning'
+              'warning',
             );
             cy.getByTestSubj('obltOnboardingStepStatus-warning')
               .contains('Connect to the Elastic Agent')
@@ -405,7 +405,7 @@ describe('[Logs onboarding] System logs', () => {
 
     beforeEach(() => {
       cy.intercept('POST', '/internal/observability_onboarding/logs/flow').as(
-        'createOnboardingFlow'
+        'createOnboardingFlow',
       );
       cy.loginAsLogMonitoringUser();
       cy.visitKibana('/app/observabilityOnboarding/systemLogs');
@@ -419,12 +419,12 @@ describe('[Logs onboarding] System logs', () => {
     describe('When user select Linux OS', () => {
       beforeEach(() => {
         cy.getByTestSubj(
-          'obltOnboardingInstallElasticAgentAutoDownloadConfig'
+          'obltOnboardingInstallElasticAgentAutoDownloadConfig',
         ).click();
         cy.updateInstallationStepStatus(
           onboardingId,
           'ea-download',
-          'complete'
+          'complete',
         );
         cy.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
@@ -434,7 +434,7 @@ describe('[Logs onboarding] System logs', () => {
       it('shows loading callout when config is being downloaded to the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'loading');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-loading')
           .contains('Downloading Elastic Agent config')
@@ -444,11 +444,11 @@ describe('[Logs onboarding] System logs', () => {
       it('shows success callout when the configuration has been written to the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'complete');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-complete')
           .contains(
-            'Elastic Agent config written to /opt/Elastic/Agent/elastic-agent.yml'
+            'Elastic Agent config written to /opt/Elastic/Agent/elastic-agent.yml',
           )
           .should('exist');
       });
@@ -456,7 +456,7 @@ describe('[Logs onboarding] System logs', () => {
       it('shows warning callout when the configuration was not written in the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'warning');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-warning"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-warning"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-warning')
           .contains('Configure the agent')
@@ -468,12 +468,12 @@ describe('[Logs onboarding] System logs', () => {
       beforeEach(() => {
         cy.get('.euiButtonGroup').contains('MacOS').click();
         cy.getByTestSubj(
-          'obltOnboardingInstallElasticAgentAutoDownloadConfig'
+          'obltOnboardingInstallElasticAgentAutoDownloadConfig',
         ).click();
         cy.updateInstallationStepStatus(
           onboardingId,
           'ea-download',
-          'complete'
+          'complete',
         );
         cy.updateInstallationStepStatus(onboardingId, 'ea-extract', 'complete');
         cy.updateInstallationStepStatus(onboardingId, 'ea-install', 'complete');
@@ -483,7 +483,7 @@ describe('[Logs onboarding] System logs', () => {
       it('shows loading callout when config is being downloaded to the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'loading');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-loading')
           .contains('Downloading Elastic Agent config')
@@ -493,11 +493,11 @@ describe('[Logs onboarding] System logs', () => {
       it('shows success callout when the configuration has been written to the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'complete');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-complete')
           .contains(
-            'Elastic Agent config written to /Library/Elastic/Agent/elastic-agent.yml'
+            'Elastic Agent config written to /Library/Elastic/Agent/elastic-agent.yml',
           )
           .should('exist');
       });
@@ -505,7 +505,7 @@ describe('[Logs onboarding] System logs', () => {
       it('shows warning callout when the configuration was not written in the host', () => {
         cy.updateInstallationStepStatus(onboardingId, 'ea-config', 'warning');
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-warning"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-warning"]',
         ).should('exist');
         cy.getByTestSubj('obltOnboardingStepStatus-warning')
           .contains('Configure the agent')
@@ -520,7 +520,7 @@ describe('[Logs onboarding] System logs', () => {
 
       it('step is disabled', () => {
         cy.get(
-          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-disabled"]'
+          '[data-test-subj="obltOnboardingConfigureElasticAgentStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-disabled"]',
         ).should('exist');
       });
     });
@@ -531,7 +531,7 @@ describe('[Logs onboarding] System logs', () => {
 
     beforeEach(() => {
       cy.intercept('POST', '/internal/observability_onboarding/logs/flow').as(
-        'createOnboardingFlow'
+        'createOnboardingFlow',
       );
       cy.loginAsLogMonitoringUser();
       cy.visitKibana('/app/observabilityOnboarding/systemLogs');
@@ -548,24 +548,24 @@ describe('[Logs onboarding] System logs', () => {
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-download',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-extract',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-install',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(onboardingId, 'ea-status', 'loading');
         });
 
         it('check logs is not triggered', () => {
           cy.get(
-            '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-incomplete"]'
+            '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-incomplete"]',
           ).should('exist');
           cy.get('.euiStep__title')
             .contains('Ship logs to Elastic Observability')
@@ -578,33 +578,33 @@ describe('[Logs onboarding] System logs', () => {
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-download',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-extract',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-install',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-status',
-            'complete'
+            'complete',
           );
           cy.updateInstallationStepStatus(
             onboardingId,
             'ea-config',
-            'complete'
+            'complete',
           );
         });
 
         it('shows loading callout when logs are being checked', () => {
           cy.get(
-            '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]'
+            '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-loading"]',
           ).should('exist');
           cy.get('.euiStep__title')
             .contains('Waiting for logs to be shipped...')
@@ -620,7 +620,7 @@ describe('[Logs onboarding] System logs', () => {
 
       it('step is disabled', () => {
         cy.get(
-          '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-disabled"]'
+          '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-disabled"]',
         ).should('exist');
       });
     });
@@ -642,7 +642,7 @@ describe('[Logs onboarding] System logs', () => {
         },
       }).as('checkOnboardingProgress');
       cy.intercept('GET', '/api/fleet/epm/packages/system').as(
-        'systemIntegrationInstall'
+        'systemIntegrationInstall',
       );
       cy.loginAsLogMonitoringUser();
       cy.visitKibana('/app/observabilityOnboarding/systemLogs');
@@ -651,7 +651,7 @@ describe('[Logs onboarding] System logs', () => {
     it('shows success callout when logs has arrived to elastic', () => {
       cy.wait('@checkOnboardingProgress');
       cy.get(
-        '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]'
+        '[data-test-subj="obltOnboardingCheckLogsStep"] .euiStep__titleWrapper [class$="euiStepNumber-s-complete"]',
       ).should('exist');
       cy.get('.euiStep__title')
         .contains('Logs are being shipped!')
@@ -686,7 +686,7 @@ describe('[Logs onboarding] System logs', () => {
       beforeEach(() => {
         cy.deleteIntegration('system');
         cy.intercept('GET', '/api/fleet/epm/packages/system').as(
-          'systemIntegrationInstall'
+          'systemIntegrationInstall',
         );
         cy.loginAsLogMonitoringUser();
         cy.visitKibana('/app/observabilityOnboarding/systemLogs');

@@ -113,7 +113,7 @@ export async function getServicesWithoutTransactions({
           },
         },
       },
-    }
+    },
   );
 
   return {
@@ -122,7 +122,7 @@ export async function getServicesWithoutTransactions({
         return {
           serviceName: bucket.key as string,
           environments: bucket.environments.buckets.map(
-            (envBucket) => envBucket.key as string
+            (envBucket) => envBucket.key as string,
           ),
           agentName: bucket.latest.top[0].metrics[AGENT_NAME] as AgentName,
         };

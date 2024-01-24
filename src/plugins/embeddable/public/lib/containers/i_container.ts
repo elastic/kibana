@@ -42,7 +42,7 @@ export interface EmbeddableContainerSettings {
 export interface IContainer<
   Inherited extends {} = {},
   I extends ContainerInput<Inherited> = ContainerInput<Inherited>,
-  O extends ContainerOutput = ContainerOutput
+  O extends ContainerOutput = ContainerOutput,
 > extends IEmbeddable<I, O> {
   /**
    * Call if you want to wait until an embeddable with that id has finished loading.
@@ -93,7 +93,7 @@ export interface IContainer<
   addNewEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
+    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>,
   >(
     type: string,
     explicitInput: Partial<EEI>,
@@ -103,7 +103,7 @@ export interface IContainer<
   replaceEmbeddable<
     EEI extends EmbeddableInput = EmbeddableInput,
     EEO extends EmbeddableOutput = EmbeddableOutput,
-    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>
+    E extends Embeddable<EEI, EEO> = Embeddable<EEI, EEO>,
   >(
     id: string,
     newExplicitInput: Partial<EEI>,

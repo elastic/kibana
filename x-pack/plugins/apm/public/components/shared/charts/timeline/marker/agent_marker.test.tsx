@@ -23,7 +23,7 @@ describe('AgentMarker', () => {
     const component = shallow(
       <EuiThemeProvider>
         <AgentMarker mark={mark} />
-      </EuiThemeProvider>
+      </EuiThemeProvider>,
     );
 
     expect(component).toMatchSnapshot();

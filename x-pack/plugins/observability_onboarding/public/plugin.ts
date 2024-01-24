@@ -66,7 +66,7 @@ export class ObservabilityOnboardingPlugin
 
   public setup(
     core: CoreSetup,
-    plugins: ObservabilityOnboardingPluginSetupDeps
+    plugins: ObservabilityOnboardingPluginSetupDeps,
   ) {
     const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
@@ -115,7 +115,7 @@ export class ObservabilityOnboardingPlugin
 
     this.locators = {
       onboarding: plugins.share.url.locators.create(
-        new ObservabilityOnboardingLocatorDefinition()
+        new ObservabilityOnboardingLocatorDefinition(),
       ),
     };
 
@@ -125,7 +125,7 @@ export class ObservabilityOnboardingPlugin
   }
   public start(
     core: CoreStart,
-    plugins: ObservabilityOnboardingPluginStartDeps
+    plugins: ObservabilityOnboardingPluginStartDeps,
   ) {
     return {
       locators: this.locators,

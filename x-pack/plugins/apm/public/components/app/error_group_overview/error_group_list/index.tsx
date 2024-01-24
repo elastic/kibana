@@ -100,7 +100,7 @@ function ErrorGroupList({
                 {
                   defaultMessage:
                     'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-                }
+                },
               )}
             />
           </>
@@ -146,7 +146,7 @@ function ErrorGroupList({
           'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
           {
             defaultMessage: 'Error message and culprit',
-          }
+          },
         ),
         field: 'message',
         sortable: false,
@@ -233,7 +233,7 @@ function ErrorGroupList({
                   values: {
                     occurrences: asInteger(occurrences),
                   },
-                }
+                },
               )}
               comparisonSeries={
                 comparisonEnabled && isTimeComparison(offset)

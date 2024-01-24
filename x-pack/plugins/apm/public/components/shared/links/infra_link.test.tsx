@@ -17,10 +17,10 @@ test('InfraLink produces the correct URL', async () => {
     ),
     {
       search: '?rangeFrom=now-5h&rangeTo=now-2h',
-    } as Location
+    } as Location,
   );
 
   expect(href).toMatchInlineSnapshot(
-    `"/basepath/app/metrics/some/path?time=1554687198"`
+    `"/basepath/app/metrics/some/path?time=1554687198"`,
   );
 });

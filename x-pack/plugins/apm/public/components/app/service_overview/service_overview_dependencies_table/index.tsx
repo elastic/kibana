@@ -72,10 +72,10 @@ export function ServiceOverviewDependenciesTable({
                   : undefined,
             },
           },
-        }
+        },
       );
     },
-    [start, end, serviceName, environment, offset, comparisonEnabled]
+    [start, end, serviceName, environment, offset, comparisonEnabled],
   );
 
   const dependencies =
@@ -141,7 +141,7 @@ export function ServiceOverviewDependenciesTable({
             {
               defaultMessage:
                 'Downstream services and external connections to uninstrumented services',
-            }
+            },
           )}
         >
           <>
@@ -149,7 +149,7 @@ export function ServiceOverviewDependenciesTable({
               'xpack.apm.serviceOverview.dependenciesTableTitle',
               {
                 defaultMessage: 'Dependencies',
-              }
+              },
             )}
             &nbsp;
             <EuiIcon
@@ -165,7 +165,7 @@ export function ServiceOverviewDependenciesTable({
         'xpack.apm.serviceOverview.dependenciesTableColumn',
         {
           defaultMessage: 'Dependency',
-        }
+        },
       )}
       status={status}
       link={link}

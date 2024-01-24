@@ -46,7 +46,7 @@ const listCustomLinksRoute = createApmServerRoute({
     query: filterOptionsRt,
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     customLinks: CustomLink[];
   }> => {
@@ -58,9 +58,8 @@ const listCustomLinksRoute = createApmServerRoute({
     }
 
     const { query } = params;
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
 
     // picks only the items listed in FILTER_OPTIONS
     const filters = pick(query, FILTER_OPTIONS);
@@ -86,9 +85,8 @@ const createCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
     const customLink = params.body;
 
     notifyFeatureUsage({
@@ -119,9 +117,8 @@ const updateCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
 
     const { id } = params.path;
     const customLink = params.body;
@@ -152,9 +149,8 @@ const deleteCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
     const { id } = params.path;
     return deleteCustomLink({ customLinkId: id, internalESClient });
   },

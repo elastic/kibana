@@ -136,15 +136,15 @@ export async function getServiceTransactionDetailedStats({
           },
         },
       },
-    }
+    },
   );
 
   return keyBy(
     response.aggregations?.sample.services.buckets.map((bucket) => {
       const topTransactionTypeBucket = maybe(
         bucket.transactionType.buckets.find(({ key }) =>
-          isDefaultTransactionType(key as string)
-        ) ?? bucket.transactionType.buckets[0]
+          isDefaultTransactionType(key as string),
+        ) ?? bucket.transactionType.buckets[0],
       );
 
       return {
@@ -166,11 +166,11 @@ export async function getServiceTransactionDetailedStats({
               bucketSize: bucketSizeInSeconds,
               value: dateBucket.doc_count,
             }),
-          })
+          }),
         ),
       };
     }) ?? [],
-    'serviceName'
+    'serviceName',
   );
 }
 

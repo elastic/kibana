@@ -71,7 +71,7 @@ export interface EmbeddableSetup {
   registerEmbeddableFactory: <
     I extends EmbeddableInput,
     O extends EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   >(
     id: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -84,7 +84,7 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
   getEmbeddableFactory: <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   >(
     embeddableFactoryId: string
   ) => EmbeddableFactory<I, O, E> | undefined;
@@ -98,7 +98,7 @@ export interface EmbeddableStart extends PersistableStateService<EmbeddableState
       [ATTRIBUTE_SERVICE_KEY]: A;
     },
     R extends SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
-    M extends unknown = unknown
+    M extends unknown = unknown,
   >(
     type: string,
     options: AttributeServiceOptions<A, M>
@@ -240,7 +240,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private registerEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   >(
     embeddableFactoryId: string,
     factory: EmbeddableFactoryDefinition<I, O, E>
@@ -260,7 +260,7 @@ export class EmbeddablePublicPlugin implements Plugin<EmbeddableSetup, Embeddabl
   private getEmbeddableFactory = <
     I extends EmbeddableInput = EmbeddableInput,
     O extends EmbeddableOutput = EmbeddableOutput,
-    E extends IEmbeddable<I, O> = IEmbeddable<I, O>
+    E extends IEmbeddable<I, O> = IEmbeddable<I, O>,
   >(
     embeddableFactoryId: string
   ): EmbeddableFactory<I, O, E> => {

@@ -72,7 +72,7 @@ export const getDateDifference = ({
 
 function getFormatsAccordingToDateDifference(
   start: moment.Moment,
-  end: moment.Moment
+  end: moment.Moment,
 ) {
   if (getDateDifference({ start, end, unitOfTime: 'years' }) >= 5) {
     return { dateFormat: getDateFormat('years') };
@@ -112,13 +112,13 @@ export function asAbsoluteDateTime(
    * timestamp in milliseconds or ISO timestamp
    */
   time: number | string,
-  timeUnit: TimeUnit = 'milliseconds'
+  timeUnit: TimeUnit = 'milliseconds',
 ) {
   const momentTime = moment(time);
   const formattedTz = formatTimezone(momentTime);
 
   return momentTime.format(
-    `${getDateFormat('days')}, ${getTimeFormat(timeUnit)} ${formattedTz}`
+    `${getDateFormat('days')}, ${getTimeFormat(timeUnit)} ${formattedTz}`,
   );
 }
 
@@ -144,12 +144,12 @@ export function asRelativeDateTimeRange(start: number, end: number) {
 
   const { dateFormat, timeFormat } = getFormatsAccordingToDateDifference(
     momentStartTime,
-    momentEndTime
+    momentEndTime,
   );
 
   if (timeFormat) {
     const startFormatted = momentStartTime.format(
-      `${dateFormat}, ${timeFormat}`
+      `${dateFormat}, ${timeFormat}`,
     );
     const endFormatted = momentEndTime.format(timeFormat);
     const formattedTz = formatTimezone(momentStartTime);

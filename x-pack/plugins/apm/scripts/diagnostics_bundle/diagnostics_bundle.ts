@@ -95,7 +95,7 @@ async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
 
   const res = await axios.get<Response>(
     '/internal/apm/settings/apm-index-settings',
-    kbnClientOpts
+    kbnClientOpts,
   );
 
   return Object.fromEntries(
@@ -103,8 +103,8 @@ async function getApmIndices(kbnClientOpts: AxiosRequestConfig) {
       ({ configurationName, defaultValue, savedValue }) => [
         configurationName,
         savedValue ?? defaultValue,
-      ]
-    )
+      ],
+    ),
   ) as APMIndices;
 }
 

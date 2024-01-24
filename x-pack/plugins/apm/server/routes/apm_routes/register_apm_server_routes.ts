@@ -41,7 +41,7 @@ import {
 const inspectRt = t.exact(
   t.partial({
     query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
-  })
+  }),
 );
 
 const CLIENT_CLOSED_REQUEST = {
@@ -89,7 +89,7 @@ export function registerRoutes({
     const wrappedHandler = async (
       context: ApmPluginRequestHandlerContext,
       request: KibanaRequest,
-      response: KibanaResponseFactory
+      response: KibanaResponseFactory,
     ) => {
       if (agent.isStarted()) {
         agent.addLabels({
@@ -105,13 +105,13 @@ export function registerRoutes({
 
         const validatedParams = decodeRequestParams(
           pickKeys(request, 'params', 'body', 'query'),
-          runtimeType
+          runtimeType,
         );
 
         const getApmIndices = async () => {
           const coreContext = await context.core;
           const apmIndices = await plugins.apmDataAccess.setup.getApmIndices(
-            coreContext.savedObjects.client
+            coreContext.savedObjects.client,
           );
           return apmIndices;
         };
@@ -133,7 +133,7 @@ export function registerRoutes({
                   _inspect: false,
                 },
               },
-              validatedParams
+              validatedParams,
             ),
             ruleDataClient,
             kibanaVersion,
@@ -224,7 +224,7 @@ export function registerRoutes({
           options,
           validate: routeValidationObject,
         },
-        wrappedHandler
+        wrappedHandler,
       );
     } else {
       (
@@ -243,7 +243,7 @@ export function registerRoutes({
             request: routeValidationObject,
           },
         },
-        wrappedHandler
+        wrappedHandler,
       );
     }
   });

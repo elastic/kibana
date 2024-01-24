@@ -33,14 +33,14 @@ export class APMServiceDetailLocator
     const { getPathForServiceDetail } = await helpersModule;
 
     const defaultTimeRange = this.uiSettings.get<TimePickerTimeDefaults>(
-      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS,
     );
     const isComparisonEnabledByDefault = this.uiSettings.get<boolean>(
-      enableComparisonByDefault
+      enableComparisonByDefault,
     );
     const defaultEnvironment = this.uiSettings.get<string>(
       defaultApmServiceEnvironment,
-      ENVIRONMENT_ALL.value
+      ENVIRONMENT_ALL.value,
     );
 
     const path = getPathForServiceDetail(payload, {

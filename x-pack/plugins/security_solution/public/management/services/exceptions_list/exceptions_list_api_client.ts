@@ -40,7 +40,7 @@ export class ExceptionsListApiClient {
     private readonly listDefinition: CreateExceptionListSchema,
     private readonly readTransform?: (item: ExceptionListItemSchema) => ExceptionListItemSchema,
     private readonly writeTransform?: <
-      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema
+      T extends CreateExceptionListItemSchema | UpdateExceptionListItemSchema,
     >(
       item: T
     ) => T,

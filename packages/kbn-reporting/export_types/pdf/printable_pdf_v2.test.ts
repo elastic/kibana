@@ -40,7 +40,7 @@ const getBasePayload = (baseObj: any) =>
   ({
     params: { forceNow: 'test' },
     ...baseObj,
-  } as TaskPayloadPDFV2);
+  }) as TaskPayloadPDFV2;
 
 beforeEach(async () => {
   content = '';

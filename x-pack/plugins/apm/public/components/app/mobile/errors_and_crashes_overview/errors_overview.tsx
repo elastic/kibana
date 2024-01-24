@@ -115,12 +115,12 @@ export function MobileErrorsOverview() {
                 sortDirection: normalizedSortDirection,
               },
             },
-          }
+          },
         ).then((response) => {
           const currentPageGroupIds = orderBy(
             response.errorGroups,
             sortField,
-            sortDirection
+            sortDirection,
           )
             .slice(page * pageSize, (page + 1) * pageSize)
             .map(({ groupId }) => groupId)
@@ -145,7 +145,7 @@ export function MobileErrorsOverview() {
       sortDirection,
       page,
       pageSize,
-    ]
+    ],
   );
   const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } =
     errorGroupListData;
@@ -175,14 +175,14 @@ export function MobileErrorsOverview() {
                 groupIds: JSON.stringify(currentPageGroupIds),
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
   const kueryForTreemap = getKueryWithMobileErrorFilter({
     kuery: kueryWithMobileFilters,
@@ -203,13 +203,13 @@ export function MobileErrorsOverview() {
                     height={150}
                     title={i18n.translate(
                       'xpack.apm.serviceDetails.metrics.errorRateChart.title',
-                      { defaultMessage: 'Error rate' }
+                      { defaultMessage: 'Error rate' },
                     )}
                     tip={i18n.translate(
                       'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
                       {
                         defaultMessage: `Error rate is measured in transactions per minute.`,
-                      }
+                      },
                     )}
                   />
                 </EuiFlexItem>
@@ -246,7 +246,7 @@ export function MobileErrorsOverview() {
             <h3>
               {i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
+                { defaultMessage: 'Errors' },
               )}
             </h3>
           </EuiTitle>
@@ -256,7 +256,7 @@ export function MobileErrorsOverview() {
             mainStatistics={mobileErrorGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={isPending(
-              mobileErrorGroupDetailedStatisticsStatus
+              mobileErrorGroupDetailedStatisticsStatus,
             )}
             detailedStatistics={mobileErrorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}

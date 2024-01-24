@@ -48,15 +48,15 @@ type ProvidedTypeMap<T extends {}> = {
   [K in keyof T]: T[K] extends new (...args: any[]) => infer X
     ? X
     : T[K] extends (...args: any[]) => any
-    ? ProvidedType<T[K]>
-    : unknown;
+      ? ProvidedType<T[K]>
+      : unknown;
 };
 
 export interface GenericFtrProviderContext<
   ServiceProviders extends {},
   PageObjectProviders extends {},
   ServiceMap = ProvidedTypeMap<ServiceProviders>,
-  PageObjectMap = ProvidedTypeMap<PageObjectProviders>
+  PageObjectMap = ProvidedTypeMap<PageObjectProviders>,
 > {
   /**
    * Determine if a service is avaliable

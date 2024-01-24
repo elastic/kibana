@@ -57,7 +57,7 @@ export async function getServiceAnomalies({
               ...rangeQuery(
                 Math.min(end - 30 * 60 * 1000, start),
                 end,
-                'timestamp'
+                'timestamp',
               ),
               {
                 terms: {
@@ -103,7 +103,7 @@ export async function getServiceAnomalies({
       // pass an empty array of job ids to anomaly search
       // so any validation is skipped
       withApmSpan('ml_anomaly_search', () =>
-        mlClient.mlSystem.mlAnomalySearch(params, [])
+        mlClient.mlSystem.mlAnomalySearch(params, []),
       ),
       getMLJobIds(mlClient.anomalyDetectors, environment),
     ]);
@@ -114,14 +114,14 @@ export async function getServiceAnomalies({
       sortBy(
         // make sure we only return data for jobs that are available in this space
         typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
-          jobIds.includes(bucket.key.jobId as string)
+          jobIds.includes(bucket.key.jobId as string),
         ) ?? [],
         // sort by job ID in case there are multiple jobs for one service to
         // ensure consistent results
-        (bucket) => bucket.key.jobId
+        (bucket) => bucket.key.jobId,
       ),
       // return one bucket per service
-      (bucket) => bucket.key.serviceName
+      (bucket) => bucket.key.serviceName,
     );
 
     return {
@@ -152,7 +152,7 @@ export async function getServiceAnomalies({
 
 export async function getMLJobs(
   anomalyDetectors: MlAnomalyDetectors,
-  environment?: string
+  environment?: string,
 ) {
   const jobs = await getMlJobsWithAPMGroup(anomalyDetectors);
 
@@ -171,7 +171,7 @@ export async function getMLJobs(
 
 export async function getMLJobIds(
   anomalyDetectors: MlAnomalyDetectors,
-  environment?: string
+  environment?: string,
 ) {
   const mlJobs = await getMLJobs(anomalyDetectors, environment);
   return mlJobs.map((job) => job.jobId);

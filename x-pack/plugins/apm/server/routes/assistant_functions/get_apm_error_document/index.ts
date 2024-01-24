@@ -87,7 +87,7 @@ export async function getApmErrorDocument({
         'transaction.type',
         'span.name',
         'span.type',
-        'span.subtype'
+        'span.subtype',
       );
 
       return formattedResponse;

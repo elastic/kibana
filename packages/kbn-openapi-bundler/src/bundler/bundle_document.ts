@@ -21,7 +21,10 @@ import { RemoveUnusedComponentsProcessor } from './document_processors/remove_un
 import { isPlainObjectType } from '../utils/is_plain_object_type';
 
 export class SkipException extends Error {
-  constructor(public documentPath: string, message: string) {
+  constructor(
+    public documentPath: string,
+    message: string
+  ) {
     super(message);
   }
 }

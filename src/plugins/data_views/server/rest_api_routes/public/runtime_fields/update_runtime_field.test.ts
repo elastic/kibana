@@ -26,7 +26,7 @@ describe('update runtime field', () => {
               runtimeField: {},
             }),
           },
-        } as unknown as DataView)
+        }) as unknown as DataView
     );
 
     updateRuntimeField({

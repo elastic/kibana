@@ -19,11 +19,11 @@ describe('LegacyAPMLink', () => {
       {
         search:
           '?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-      } as Location
+      } as Location,
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/apm/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+      `"/basepath/app/apm/some/path?rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`,
     );
   });
 
@@ -35,11 +35,11 @@ describe('LegacyAPMLink', () => {
       {
         search:
           '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-      } as Location
+      } as Location,
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/apm/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`
+      `"/basepath/app/apm/some/path?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0&transactionId=blah"`,
     );
   });
 
@@ -54,11 +54,11 @@ describe('LegacyAPMLink', () => {
       {
         search:
           '?kuery=host.hostname~20~3A~20~22fakehostname~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0',
-      } as Location
+      } as Location,
     );
 
     expect(href).toMatchInlineSnapshot(
-      `"/basepath/app/apm/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`
+      `"/basepath/app/apm/some/path?kuery=host.os~20~3A~20~22linux~22&rangeFrom=now-5h&rangeTo=now-2h&refreshPaused=true&refreshInterval=0"`,
     );
   });
 });

@@ -208,7 +208,7 @@ describe('autocomplete', () => {
     string,
     string[],
     (string | number)?,
-    Parameters<typeof createCustomCallbackMocks>?
+    Parameters<typeof createCustomCallbackMocks>?,
   ];
 
   const testSuggestionsFn = (

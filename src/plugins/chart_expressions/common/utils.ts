@@ -70,7 +70,7 @@ export function getOverridesFor<
   // Overrides
   O extends Record<string, P>,
   // Overrides Component names
-  K extends keyof O
+  K extends keyof O,
 >(overrides: O | undefined, componentName: K) {
   if (!overrides || !overrides[componentName]) {
     return {};

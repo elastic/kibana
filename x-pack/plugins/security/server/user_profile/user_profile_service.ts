@@ -138,9 +138,8 @@ export class UserProfileService {
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile(
-          activateRequest
-        );
+        const response =
+          await clusterClient.asInternalUser.security.activateUserProfile(activateRequest);
 
         this.logger.debug(`Successfully activated profile for "${response.user.username}".`);
 

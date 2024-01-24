@@ -90,7 +90,7 @@ const stepProgressUpdateRoute = createObservabilityOnboardingServerRoute({
 
     if (!savedObservabilityOnboardingState) {
       throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
+        'Unable to report setup progress - onboarding session not found.',
       );
     }
 
@@ -148,7 +148,7 @@ const getProgressRoute = createObservabilityOnboardingServerRoute({
 
     if (!savedObservabilityOnboardingState) {
       throw Boom.notFound(
-        'Unable to report setup progress - onboarding session not found.'
+        'Unable to report setup progress - onboarding session not found.',
       );
     }
 

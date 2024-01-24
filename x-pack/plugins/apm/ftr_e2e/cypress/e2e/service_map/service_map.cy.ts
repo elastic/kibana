@@ -35,7 +35,7 @@ describe('service map', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -65,7 +65,7 @@ describe('service map', () => {
           title: 'global_service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
           maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
-        })
+        }),
       );
     });
 
@@ -83,7 +83,7 @@ describe('service map', () => {
           matchAgainstPath:
             'cypress/e2e/service_map/snapshots/detailed_service_map.png',
           maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
-        })
+        }),
       );
     });
 
@@ -105,7 +105,7 @@ function prepareCanvasForScreenshot() {
   cy.get('html, body').invoke(
     'attr',
     'style',
-    'height: auto; scroll-behavior: auto;'
+    'height: auto; scroll-behavior: auto;',
   );
 
   cy.wait(300);

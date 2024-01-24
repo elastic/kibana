@@ -27,7 +27,7 @@ describe('environmentQuery', () => {
   it('creates a query for missing service environments', () => {
     expect(environmentQuery(ENVIRONMENT_NOT_DEFINED.value)[0]).toHaveProperty(
       ['bool', 'must_not', 'exists', 'field'],
-      SERVICE_ENVIRONMENT
+      SERVICE_ENVIRONMENT,
     );
   });
 });

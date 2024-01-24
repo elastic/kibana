@@ -84,7 +84,7 @@ export function ServiceOverview() {
 
   const [sloCalloutDismissed, setSloCalloutDismissed] = useLocalStorage(
     'apm.sloCalloutDismissed',
-    false
+    false,
   );
 
   return (
@@ -204,7 +204,7 @@ export function ServiceOverview() {
                         >
                           {i18n.translate(
                             'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                            { defaultMessage: 'View dependencies' }
+                            { defaultMessage: 'View dependencies' },
                           )}
                         </EuiLink>
                       }

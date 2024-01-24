@@ -21,7 +21,7 @@ describe('useTimeRange', () => {
         const { rangeFrom, rangeTo } = props;
         return useTimeRange({ rangeFrom, rangeTo });
       },
-      { initialProps: { rangeFrom: 'now-15m', rangeTo: 'now' } }
+      { initialProps: { rangeFrom: 'now-15m', rangeTo: 'now' } },
     );
   });
 

@@ -78,12 +78,15 @@ export function savedVisualization(): ExpressionFunctionDefinition<
       const visOptions: VisualizeInput['vis'] = {};
 
       if (colors) {
-        visOptions.colors = colors.reduce((reduction, color) => {
-          if (color.label && color.color) {
-            reduction[color.label] = color.color;
-          }
-          return reduction;
-        }, {} as Record<string, string>);
+        visOptions.colors = colors.reduce(
+          (reduction, color) => {
+            if (color.label && color.color) {
+              reduction[color.label] = color.color;
+            }
+            return reduction;
+          },
+          {} as Record<string, string>
+        );
       }
 
       if (hideLegend === true) {

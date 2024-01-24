@@ -66,7 +66,7 @@ describe('annotation list view', () => {
           ({
             [SAVED_OBJECTS_LIMIT_SETTING]: 30,
             [SAVED_OBJECTS_PER_PAGE_SETTING]: 10,
-          }[key])
+          })[key]
       ),
     } as Partial<IUiSettingsClient> as IUiSettingsClient;
 

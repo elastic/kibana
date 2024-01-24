@@ -22,7 +22,7 @@ export function EnvironmentBadge({ environments = [] }: Props) {
           values: { environmentCount: environments.length },
           defaultMessage:
             '{environmentCount, plural, one {1 environment} other {# environments}}',
-        }
+        },
       )}
     />
   );

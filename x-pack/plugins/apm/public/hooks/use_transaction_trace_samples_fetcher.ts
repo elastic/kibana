@@ -31,7 +31,7 @@ export function useTransactionTraceSamplesFetcher({
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -63,7 +63,7 @@ export function useTransactionTraceSamplesFetcher({
                 sampleRangeTo,
               },
             },
-          }
+          },
         );
       }
     },
@@ -79,7 +79,7 @@ export function useTransactionTraceSamplesFetcher({
       transactionName,
       sampleRangeFrom,
       sampleRangeTo,
-    ]
+    ],
   );
 
   return useMemo(
@@ -88,6 +88,6 @@ export function useTransactionTraceSamplesFetcher({
       status,
       error,
     }),
-    [data, status, error]
+    [data, status, error],
   );
 }

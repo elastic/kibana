@@ -197,11 +197,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       return {};
     }
 
-    const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error incorrect search response type
-      obj[field] = (aggregations[field] || { value: 0 }).value;
-      return obj;
-    }, {} as { [field: string]: number });
+    const aggResult = fieldsToAgg.reduce(
+      (obj, field) => {
+        // @ts-expect-error incorrect search response type
+        obj[field] = (aggregations[field] || { value: 0 }).value;
+        return obj;
+      },
+      {} as { [field: string]: number }
+    );
 
     fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       overallCardinality: aggResult,
@@ -379,19 +382,25 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
     const getSafeAggName = (field: string) => field.replace(/\W/g, '');
     const getMaxBucketAggKey = (field: string) => `max_bucket_${field}`;
 
-    const fieldsCardinalityAggs = fieldsToAgg.reduce((obj, field) => {
-      obj[getSafeAggName(field)] = { cardinality: { field } };
-      return obj;
-    }, {} as { [field: string]: { cardinality: { field: string } } });
+    const fieldsCardinalityAggs = fieldsToAgg.reduce(
+      (obj, field) => {
+        obj[getSafeAggName(field)] = { cardinality: { field } };
+        return obj;
+      },
+      {} as { [field: string]: { cardinality: { field: string } } }
+    );
 
-    const maxBucketCardinalitiesAggs = Object.keys(fieldsCardinalityAggs).reduce((acc, field) => {
-      acc[getMaxBucketAggKey(field)] = {
-        max_bucket: {
-          buckets_path: `${dateHistogramAggKey}>${field}`,
-        },
-      };
-      return acc;
-    }, {} as { [key: string]: { max_bucket: { buckets_path: string } } });
+    const maxBucketCardinalitiesAggs = Object.keys(fieldsCardinalityAggs).reduce(
+      (acc, field) => {
+        acc[getMaxBucketAggKey(field)] = {
+          max_bucket: {
+            buckets_path: `${dateHistogramAggKey}>${field}`,
+          },
+        };
+        return acc;
+      },
+      {} as { [key: string]: { max_bucket: { buckets_path: string } } }
+    );
 
     const body = {
       query: {
@@ -425,11 +434,14 @@ export function fieldsServiceProvider({ asCurrentUser }: IScopedClusterClient) {
       return cachedValues;
     }
 
-    const aggResult = fieldsToAgg.reduce((obj, field) => {
-      // @ts-expect-error incorrect search response type
-      obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
-      return obj;
-    }, {} as { [field: string]: number });
+    const aggResult = fieldsToAgg.reduce(
+      (obj, field) => {
+        // @ts-expect-error incorrect search response type
+        obj[field] = (aggregations[getMaxBucketAggKey(field)] || { value: 0 }).value ?? 0;
+        return obj;
+      },
+      {} as { [field: string]: number }
+    );
 
     fieldsAggsCache.updateValues(index, timeFieldName, start, end, {
       maxBucketCardinality: aggResult,

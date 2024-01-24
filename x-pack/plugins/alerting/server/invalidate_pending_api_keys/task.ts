@@ -37,9 +37,8 @@ const invalidateAPIKeys = async (
   if (!securityPluginStart) {
     return { apiKeysEnabled: false };
   }
-  const invalidateAPIKeyResult = await securityPluginStart.authc.apiKeys.invalidateAsInternalUser(
-    params
-  );
+  const invalidateAPIKeyResult =
+    await securityPluginStart.authc.apiKeys.invalidateAsInternalUser(params);
   // Null when Elasticsearch security is disabled
   if (!invalidateAPIKeyResult) {
     return { apiKeysEnabled: false };

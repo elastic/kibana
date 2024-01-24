@@ -40,17 +40,17 @@ export function mergeServiceStats({
   const foundServiceNames = serviceStats.map(({ serviceName }) => serviceName);
 
   const servicesWithOnlyMetricDocuments = servicesWithoutTransactions.filter(
-    ({ serviceName }) => !foundServiceNames.includes(serviceName)
+    ({ serviceName }) => !foundServiceNames.includes(serviceName),
   );
 
   const allServiceNames = foundServiceNames.concat(
-    servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName)
+    servicesWithOnlyMetricDocuments.map(({ serviceName }) => serviceName),
   );
 
   // make sure to exclude health statuses from services
   // that are not found in APM data
   const matchedHealthStatuses = healthStatuses.filter(({ serviceName }) =>
-    allServiceNames.includes(serviceName)
+    allServiceNames.includes(serviceName),
   );
 
   return joinByKey(
@@ -70,6 +70,6 @@ export function mergeServiceStats({
         ...b,
         environments: uniq(aEnvs.concat(bEnvs)),
       };
-    }
+    },
   );
 }

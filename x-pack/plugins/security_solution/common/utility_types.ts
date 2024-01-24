@@ -19,18 +19,18 @@ export type RecursivePartial<T> = {
   [P in keyof T]?: T[P] extends NonAny[]
     ? T[P]
     : T[P] extends readonly NonAny[]
-    ? T[P]
-    : T[P] extends Array<infer U>
-    ? Array<RecursivePartial<U>>
-    : T[P] extends ReadonlyArray<infer U>
-    ? ReadonlyArray<RecursivePartial<U>>
-    : T[P] extends Set<infer V>
-    ? Set<RecursivePartial<V>>
-    : T[P] extends Map<infer K, infer V>
-    ? Map<K, RecursivePartial<V>>
-    : T[P] extends NonAny
-    ? T[P]
-    : RecursivePartial<T[P]>;
+      ? T[P]
+      : T[P] extends Array<infer U>
+        ? Array<RecursivePartial<U>>
+        : T[P] extends ReadonlyArray<infer U>
+          ? ReadonlyArray<RecursivePartial<U>>
+          : T[P] extends Set<infer V>
+            ? Set<RecursivePartial<V>>
+            : T[P] extends Map<infer K, infer V>
+              ? Map<K, RecursivePartial<V>>
+              : T[P] extends NonAny
+                ? T[P]
+                : RecursivePartial<T[P]>;
 };
 type NonAny = number | boolean | string | symbol | null;
 

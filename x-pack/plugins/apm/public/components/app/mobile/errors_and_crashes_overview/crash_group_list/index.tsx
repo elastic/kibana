@@ -74,7 +74,7 @@ function MobileCrashGroupList({
   isLoading,
 }: Props) {
   const { query } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes'
+    '/mobile-services/{serviceName}/errors-and-crashes',
   );
   const { offset } = query;
   const columns = useMemo(() => {
@@ -97,7 +97,7 @@ function MobileCrashGroupList({
                 {
                   defaultMessage:
                     'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
-                }
+                },
               )}
             />
           </>
@@ -143,7 +143,7 @@ function MobileCrashGroupList({
           'xpack.apm.crashTable.crashMessageAndCulpritColumnLabel',
           {
             defaultMessage: 'Crash message',
-          }
+          },
         ),
         field: 'message',
         sortable: false,
@@ -210,7 +210,7 @@ function MobileCrashGroupList({
                   values: {
                     occurrences: asInteger(occurrences),
                   },
-                }
+                },
               )}
               comparisonSeries={
                 comparisonEnabled && isTimeComparison(offset)

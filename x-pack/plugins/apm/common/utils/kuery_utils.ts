@@ -12,7 +12,7 @@ type Separator = 'OR' | 'AND';
 export const toKueryFilterFormat = (
   key: string,
   values: string[],
-  separator: Separator = 'OR'
+  separator: Separator = 'OR',
 ) => values.map((value) => `${key} : "${value}"`).join(` ${separator} `);
 
 export const mergeKueries = (filters: string[], separator: Separator = 'AND') =>

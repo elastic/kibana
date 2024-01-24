@@ -22,7 +22,7 @@ describe('TransactionSummary', () => {
 
     it('renders', () => {
       expect(() =>
-        shallow(<TransactionSummary {...props} />)
+        shallow(<TransactionSummary {...props} />),
       ).not.toThrowError();
     });
   });
@@ -37,7 +37,7 @@ describe('TransactionSummary', () => {
 
     it('renders', () => {
       expect(() =>
-        shallow(<TransactionSummary {...props} />)
+        shallow(<TransactionSummary {...props} />),
       ).not.toThrowError();
     });
   });

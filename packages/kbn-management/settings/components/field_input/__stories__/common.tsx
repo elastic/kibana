@@ -91,7 +91,7 @@ export const getStory = (title: string, description: string) =>
         </FieldInputProvider>
       ),
     ],
-  } as ComponentMeta<typeof Component>);
+  }) as ComponentMeta<typeof Component>;
 
 /**
  * Utility function for returning a {@link FieldInput} Storybook story.

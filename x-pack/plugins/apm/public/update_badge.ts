@@ -22,6 +22,6 @@ export function setReadonlyBadge({ application, chrome }: CoreStart) {
           }),
           iconType: 'glasses',
         }
-      : undefined
+      : undefined,
   );
 }

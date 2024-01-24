@@ -28,7 +28,7 @@ export function EditButton({ onClick }: Props) {
         {
           defaultMessage:
             'Use the edit option to change the name, query, or details of this service group.',
-        }
+        },
       )}
     >
       <EuiButton

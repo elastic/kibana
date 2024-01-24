@@ -34,48 +34,51 @@ export const migrateLegacyTimelinesToSecurityDataTable = (legacyTimelineTables: 
     return EMPTY_TABLE;
   }
 
-  return Object.keys(legacyTimelineTables).reduce((acc, timelineTableId) => {
-    const timelineModel = legacyTimelineTables[timelineTableId];
-    return {
-      ...acc,
-      [timelineTableId]: {
-        defaultColumns: timelineModel.defaultColumns,
-        dataViewId: timelineModel.dataViewId,
-        excludedRowRendererIds: timelineModel.excludedRowRendererIds,
-        filters: timelineModel.filters,
-        indexNames: timelineModel.indexNames,
-        loadingEventIds: timelineModel.loadingEventIds,
-        isSelectAllChecked: timelineModel.isSelectAllChecked,
-        itemsPerPage: timelineModel.itemsPerPage,
-        itemsPerPageOptions: timelineModel.itemsPerPageOptions,
-        showCheckboxes: timelineModel.showCheckboxes,
-        graphEventId: timelineModel.graphEventId,
-        sessionViewConfig: timelineModel.sessionViewConfig,
-        selectAll: timelineModel.selectAll,
-        id: timelineModel.id,
-        title: timelineModel.title,
-        initialized: timelineModel.initialized,
-        updated: timelineModel.updated,
-        sort: timelineModel.sort,
-        selectedEventIds: timelineModel.selectedEventIds,
-        deletedEventIds: timelineModel.deletedEventIds,
-        expandedDetail: timelineModel.expandedDetail,
-        totalCount: timelineModel.totalCount || 0,
-        viewMode: VIEW_SELECTION.gridView,
-        additionalFilters: {
-          showBuildingBlockAlerts: false,
-          showOnlyThreatIndicatorAlerts: false,
+  return Object.keys(legacyTimelineTables).reduce(
+    (acc, timelineTableId) => {
+      const timelineModel = legacyTimelineTables[timelineTableId];
+      return {
+        ...acc,
+        [timelineTableId]: {
+          defaultColumns: timelineModel.defaultColumns,
+          dataViewId: timelineModel.dataViewId,
+          excludedRowRendererIds: timelineModel.excludedRowRendererIds,
+          filters: timelineModel.filters,
+          indexNames: timelineModel.indexNames,
+          loadingEventIds: timelineModel.loadingEventIds,
+          isSelectAllChecked: timelineModel.isSelectAllChecked,
+          itemsPerPage: timelineModel.itemsPerPage,
+          itemsPerPageOptions: timelineModel.itemsPerPageOptions,
+          showCheckboxes: timelineModel.showCheckboxes,
+          graphEventId: timelineModel.graphEventId,
+          sessionViewConfig: timelineModel.sessionViewConfig,
+          selectAll: timelineModel.selectAll,
+          id: timelineModel.id,
+          title: timelineModel.title,
+          initialized: timelineModel.initialized,
+          updated: timelineModel.updated,
+          sort: timelineModel.sort,
+          selectedEventIds: timelineModel.selectedEventIds,
+          deletedEventIds: timelineModel.deletedEventIds,
+          expandedDetail: timelineModel.expandedDetail,
+          totalCount: timelineModel.totalCount || 0,
+          viewMode: VIEW_SELECTION.gridView,
+          additionalFilters: {
+            showBuildingBlockAlerts: false,
+            showOnlyThreatIndicatorAlerts: false,
+          },
+          ...(Array.isArray(timelineModel.columns)
+            ? {
+                columns: timelineModel.columns
+                  .map(migrateColumnWidthToInitialWidth)
+                  .map(migrateColumnLabelToDisplayAsText),
+              }
+            : {}),
         },
-        ...(Array.isArray(timelineModel.columns)
-          ? {
-              columns: timelineModel.columns
-                .map(migrateColumnWidthToInitialWidth)
-                .map(migrateColumnLabelToDisplayAsText),
-            }
-          : {}),
-      },
-    };
-  }, {} as { [K in TableIdLiteral]: DataTableModel });
+      };
+    },
+    {} as { [K in TableIdLiteral]: DataTableModel }
+  );
 };
 
 /*
@@ -177,8 +180,8 @@ export const migrateColumnWidthToInitialWidth = (
   ...(Number.isInteger(column.width) && !Number.isInteger(column.initialWidth)
     ? { initialWidth: column.width }
     : column.initialWidth
-    ? { initialWidth: column.initialWidth }
-    : {}),
+      ? { initialWidth: column.initialWidth }
+      : {}),
 });
 
 /**
@@ -192,8 +195,8 @@ export const migrateColumnLabelToDisplayAsText = (
   ...(!isEmpty(column.label) && column.displayAsText == null
     ? { displayAsText: column.label }
     : column.displayAsText
-    ? { displayAsText: column.displayAsText }
-    : {}),
+      ? { displayAsText: column.displayAsText }
+      : {}),
 });
 
 /**
@@ -296,24 +299,27 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
   addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
 
-  return tableIds.reduce((acc, tableId) => {
-    const tableModel = allDataTables[tableId];
-    if (!tableModel) {
+  return tableIds.reduce(
+    (acc, tableId) => {
+      const tableModel = allDataTables[tableId];
+      if (!tableModel) {
+        return {
+          ...acc,
+        };
+      }
+
       return {
         ...acc,
+        [tableId]: {
+          ...tableModel,
+          ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
+            ? { sort: [tableModel.sort] }
+            : {}),
+        },
       };
-    }
-
-    return {
-      ...acc,
-      [tableId]: {
-        ...tableModel,
-        ...(tableModel.sort != null && !Array.isArray(tableModel.sort)
-          ? { sort: [tableModel.sort] }
-          : {}),
-      },
-    };
-  }, {} as { [K in TableIdLiteral]: DataTableModel });
+    },
+    {} as { [K in TableIdLiteral]: DataTableModel }
+  );
 };
 
 export const getAllDataTablesInStorage = (storage: Storage) => {

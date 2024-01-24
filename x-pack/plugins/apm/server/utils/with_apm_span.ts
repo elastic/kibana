@@ -8,7 +8,7 @@ import { withSpan, SpanOptions, parseSpanOptions } from '@kbn/apm-utils';
 
 export function withApmSpan<T>(
   optionsOrName: SpanOptions | string,
-  cb: () => Promise<T>
+  cb: () => Promise<T>,
 ): Promise<T> {
   const options = parseSpanOptions(optionsOrName);
 

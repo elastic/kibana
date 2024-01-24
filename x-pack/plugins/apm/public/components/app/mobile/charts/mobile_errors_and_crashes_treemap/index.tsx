@@ -55,11 +55,11 @@ export function MobileErrorsAndCrashesTreemap({
                 size: 500,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end, selectedTreemap]
+    [environment, kuery, serviceName, start, end, selectedTreemap],
   );
   return (
     <EuiPanel hasBorder={true} style={{ position: 'relative' }}>

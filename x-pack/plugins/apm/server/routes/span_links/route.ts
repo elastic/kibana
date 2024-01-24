@@ -29,7 +29,7 @@ const linkedParentsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     spanLinksDetails: SpanLinkDetails[];
   }> => {
@@ -69,7 +69,7 @@ const linkedChildrenRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     spanLinksDetails: SpanLinkDetails[];
   }> => {

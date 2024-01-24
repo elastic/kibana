@@ -21,7 +21,7 @@ export function TroubleshootingLink() {
       >
         {i18n.translate(
           'xpack.observability_onboarding.installElasticAgent.troubleshooting',
-          { defaultMessage: 'Troubleshooting' }
+          { defaultMessage: 'Troubleshooting' },
         )}
       </EuiButtonEmpty>
     </EuiFlexGroup>

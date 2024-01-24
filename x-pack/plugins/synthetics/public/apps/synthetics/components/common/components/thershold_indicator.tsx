@@ -58,14 +58,14 @@ export const ThresholdIndicator = ({
                 defaultMessage: 'same',
               })
             : delta > 0
-            ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
-                defaultMessage: '{delta}% higher',
-                values: { delta },
-              })
-            : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
-                defaultMessage: '{delta}% lower',
-                values: { delta: Math.abs(delta) },
-              }),
+              ? i18n.translate('xpack.synthetics.stepDetails.palette.increased', {
+                  defaultMessage: '{delta}% higher',
+                  values: { delta },
+                })
+              : i18n.translate('xpack.synthetics.stepDetails.palette.decreased', {
+                  defaultMessage: '{delta}% lower',
+                  values: { delta: Math.abs(delta) },
+                }),
       },
     });
   };

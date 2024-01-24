@@ -90,10 +90,10 @@ export function AxisBoundsControl({
                   defaultMessage: 'Lower bound has to be larger than upper bound',
                 })
               : shouldIncludeZero && inclusiveZeroError
-              ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
-                  defaultMessage: 'Bounds must include zero.',
-                })
-              : undefined
+                ? i18n.translate('xpack.lens.axisExtent.inclusiveZero', {
+                    defaultMessage: 'Bounds must include zero.',
+                  })
+                : undefined
           }
           testSubjLayout={`${testSubjPrefix}_axisExtent_customBounds`}
           testSubjLower={`${testSubjPrefix}_axisExtent_lowerBound`}

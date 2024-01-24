@@ -12,7 +12,7 @@ export async function hasFleetApmIntegrations() {
       'GET /internal/apm/fleet/has_apm_policies',
       {
         signal: null,
-      }
+      },
     );
     return hasApmPolicies;
   } catch (e) {

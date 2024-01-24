@@ -74,7 +74,7 @@ export type EmbeddableInput = {
 };
 
 export interface PanelState<
-  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
+  E extends EmbeddableInput & { id: string } = { id: string; version?: string },
 > {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
@@ -88,7 +88,7 @@ export interface PanelState<
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
 
 export interface EmbeddableRegistryDefinition<
-  P extends EmbeddableStateWithType = EmbeddableStateWithType
+  P extends EmbeddableStateWithType = EmbeddableStateWithType,
 > extends PersistableStateDefinition<P> {
   id: string;
 }

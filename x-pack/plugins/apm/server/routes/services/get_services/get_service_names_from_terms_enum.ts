@@ -49,7 +49,7 @@ export async function getServiceNamesFromTermsEnum({
           },
         },
       },
-    }
+    },
   );
 
   return response.terms;

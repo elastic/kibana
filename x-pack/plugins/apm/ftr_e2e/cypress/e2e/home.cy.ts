@@ -29,7 +29,7 @@ describe('Home page', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
 
     cy.updateAdvancedSettings({
@@ -50,13 +50,13 @@ describe('Home page', () => {
 
     cy.url().should(
       'include',
-      'app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now&offset=1d'
+      'app/apm/services?comparisonEnabled=true&environment=ENVIRONMENT_ALL&rangeFrom=now-15m&rangeTo=now&offset=1d',
     );
   });
 
   it('includes services with only metric documents', () => {
     cy.visitKibana(
-      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`
+      `${serviceInventoryHref}&kuery=not%20(processor.event%3A%22transaction%22)`,
     );
     cy.contains('opbeans-java');
     cy.contains('opbeans-node');
@@ -71,7 +71,7 @@ describe('Home page', () => {
 
       cy.getByTestSubj('headerFilterTransactionType').should(
         'have.value',
-        'page-load'
+        'page-load',
       );
     });
   });

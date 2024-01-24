@@ -54,7 +54,7 @@ function formatType(type: string) {
         'xpack.apm.transactionDetails.spanFlyout.spanType.navigationTimingLabel',
         {
           defaultMessage: 'Navigation timing',
-        }
+        },
       );
     default:
       return type;
@@ -124,7 +124,7 @@ export function SpanFlyout({
         },
       });
     },
-    [traceId, spanId, parentTransactionId, start, end]
+    [traceId, spanId, parentTransactionId, start, end],
   );
 
   const { span, parentTransaction } = data;
@@ -141,7 +141,7 @@ export function SpanFlyout({
                 <h2>
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle',
-                    { defaultMessage: 'Span details' }
+                    { defaultMessage: 'Span details' },
                   )}
                 </h2>
               </EuiTitle>
@@ -151,7 +151,7 @@ export function SpanFlyout({
                 <DiscoverSpanLink spanId={span.span.id}>
                   {i18n.translate(
                     'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
+                    { defaultMessage: 'View span in Discover' },
                   )}
                 </DiscoverSpanLink>
               </EuiFlexItem>
@@ -166,7 +166,7 @@ export function SpanFlyout({
                     {
                       defaultMessage:
                         'This is a sample document for a group of consecutive, similar spans',
-                    }
+                    },
                   )}
                 </EuiCallOut>
               </EuiFlexItem>
@@ -243,7 +243,7 @@ function SpanFlyoutBody({
               'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
               {
                 defaultMessage: 'Stack Trace',
-              }
+              },
             ),
             content: (
               <Fragment>
@@ -299,7 +299,7 @@ function SpanFlyoutBody({
             <EuiToolTip
               content={i18n.translate(
                 'xpack.apm.transactionDetails.spanFlyout.spanType',
-                { defaultMessage: 'Type' }
+                { defaultMessage: 'Type' },
               )}
             >
               <EuiBadge color="hollow">{spanTypes.spanType}</EuiBadge>
@@ -308,7 +308,7 @@ function SpanFlyoutBody({
               <EuiToolTip
                 content={i18n.translate(
                   'xpack.apm.transactionDetails.spanFlyout.spanSubtype',
-                  { defaultMessage: 'Subtype' }
+                  { defaultMessage: 'Subtype' },
                 )}
               >
                 <EuiBadge color="hollow">{spanTypes.spanSubtype}</EuiBadge>
@@ -318,7 +318,7 @@ function SpanFlyoutBody({
               <EuiToolTip
                 content={i18n.translate(
                   'xpack.apm.transactionDetails.spanFlyout.spanAction',
-                  { defaultMessage: 'Action' }
+                  { defaultMessage: 'Action' },
                 )}
               >
                 <EuiBadge color="hollow">{spanTypes.spanAction}</EuiBadge>

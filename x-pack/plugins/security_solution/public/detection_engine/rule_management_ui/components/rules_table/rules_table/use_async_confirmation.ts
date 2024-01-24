@@ -10,7 +10,7 @@ import { useCallback, useRef } from 'react';
 type UseAsyncConfirmationReturn = [
   initConfirmation: () => Promise<boolean>,
   confirm: () => void,
-  cancel: () => void
+  cancel: () => void,
 ];
 
 interface UseAsyncConfirmationArgs {

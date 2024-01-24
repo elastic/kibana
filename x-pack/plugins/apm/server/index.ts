@@ -44,7 +44,7 @@ const configSchema = schema.object({
       schema.literal(SearchAggregatedTransactionSetting.always),
       schema.literal(SearchAggregatedTransactionSetting.never),
     ],
-    { defaultValue: SearchAggregatedTransactionSetting.auto }
+    { defaultValue: SearchAggregatedTransactionSetting.auto },
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
@@ -108,12 +108,12 @@ export const config: PluginConfigDescriptor<APMConfig> = {
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
       `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
+      { level: 'warning' },
     ),
     renameFromRoot(
       'xpack.apm.maxServiceSelection',
       `uiSettings.overrides[${maxSuggestions}]`,
-      { level: 'warning' }
+      { level: 'warning' },
     ),
   ],
   exposeToBrowser: {

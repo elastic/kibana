@@ -46,11 +46,11 @@ export function InfraTabs() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kuery, serviceName, start, end]
+    [environment, kuery, serviceName, start, end],
   );
 
   const { containerIds, podNames, hostNames } = data;

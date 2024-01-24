@@ -57,7 +57,10 @@ class TakeInArray<T> implements Operator<T[], T[]> {
 class TakeInArraySubscriber<T> extends Subscriber<T[]> {
   private current: number = 0;
 
-  constructor(destination: Subscriber<T>, private total: number) {
+  constructor(
+    destination: Subscriber<T>,
+    private total: number
+  ) {
     super(destination);
   }
 

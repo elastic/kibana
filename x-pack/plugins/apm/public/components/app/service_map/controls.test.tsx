@@ -47,7 +47,7 @@ describe('Controls', () => {
       const button = await findByTestId('viewFullMapButton');
 
       expect(button.getAttribute('href')).toEqual(
-        '/basepath/app/apm/service-map'
+        '/basepath/app/apm/service-map',
       );
     });
   });

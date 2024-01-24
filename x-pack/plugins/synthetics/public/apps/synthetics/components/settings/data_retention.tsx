@@ -52,7 +52,7 @@ export const DataRetentionTab = () => {
     {
       field: 'policy.name',
       name: <PolicyNameLabel />,
-      render: (name: string, _item: typeof data[0]) => <PolicyLink name={name} />,
+      render: (name: string, _item: (typeof data)[0]) => <PolicyLink name={name} />,
     },
   ];
 

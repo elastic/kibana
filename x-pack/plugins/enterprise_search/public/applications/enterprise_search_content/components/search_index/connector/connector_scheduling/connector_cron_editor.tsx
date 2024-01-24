@@ -55,8 +55,8 @@ export const ConnectorCronEditor: React.FC<ConnectorCronEditorProps> = ({
     type === SyncJobType.FULL
       ? hasFullSyncChanges
       : type === SyncJobType.INCREMENTAL
-      ? hasIncrementalSyncChanges
-      : hasAccessSyncChanges;
+        ? hasIncrementalSyncChanges
+        : hasAccessSyncChanges;
 
   return (
     <EuiFlexGroup direction="column">

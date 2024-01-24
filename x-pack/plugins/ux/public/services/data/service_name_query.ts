@@ -13,7 +13,7 @@ import { getRumPageLoadTransactionsProjection } from './projections';
 export function serviceNameQuery(
   start: number,
   end: number,
-  uiFilters?: UxUIFilters
+  uiFilters?: UxUIFilters,
 ) {
   const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({

@@ -91,15 +91,21 @@ interface ReorderControlsArgs {
  * */
 export const reorderControlsWithDefaultControls = (args: ReorderControlsArgs) => {
   const { controls, defaultControls } = args;
-  const controlsObject = controls.reduce((prev, current) => {
-    prev[current.fieldName] = current;
-    return prev;
-  }, {} as Record<string, FilterItemObj>);
+  const controlsObject = controls.reduce(
+    (prev, current) => {
+      prev[current.fieldName] = current;
+      return prev;
+    },
+    {} as Record<string, FilterItemObj>
+  );
 
-  const defaultControlsObj = defaultControls.reduce((prev, current) => {
-    prev[current.fieldName] = current;
-    return prev;
-  }, {} as Record<string, FilterItemObj>);
+  const defaultControlsObj = defaultControls.reduce(
+    (prev, current) => {
+      prev[current.fieldName] = current;
+      return prev;
+    },
+    {} as Record<string, FilterItemObj>
+  );
 
   const resultDefaultControls: FilterItemObj[] = defaultControls
     .filter((defaultControl) => defaultControl.persist)

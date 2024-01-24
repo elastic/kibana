@@ -62,10 +62,10 @@ export function MobileStats({
               offset,
             },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, transactionType, offset]
+    [start, end, environment, kuery, serviceName, transactionType, offset],
   );
 
   const getComparisonValueFormatter = useCallback(
@@ -78,7 +78,7 @@ export function MobileStats({
         </span>
       );
     },
-    [comparisonEnabled, previousPeriodLabel]
+    [comparisonEnabled, previousPeriodLabel],
   );
 
   const getIcon = useCallback(
@@ -98,7 +98,7 @@ export function MobileStats({
           <EuiIcon type={type} width={width} height={height} fill={color} />
         );
       },
-    [status]
+    [status],
   );
 
   const loadingStats = isPending(status);
@@ -132,7 +132,7 @@ export function MobileStats({
           : valueFormatter(Number(value.toFixed(1)), 'ms'),
       trend: data?.currentPeriod?.launchTimes?.timeseries ?? [],
       extra: getComparisonValueFormatter(
-        data?.previousPeriod.launchTimes?.value?.toFixed(1)
+        data?.previousPeriod.launchTimes?.value?.toFixed(1),
       ),
       trendShape: MetricTrendShape.Area,
     },

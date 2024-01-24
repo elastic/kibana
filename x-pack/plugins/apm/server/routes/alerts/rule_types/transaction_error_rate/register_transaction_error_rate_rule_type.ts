@@ -117,7 +117,7 @@ export function registerTransactionErrorRateRuleType({
       }) => {
         const allGroupByFields = getAllGroupByFields(
           ApmRuleType.TransactionErrorRate,
-          ruleParams.groupBy
+          ruleParams.groupBy,
         );
 
         const {
@@ -156,7 +156,7 @@ export function registerTransactionErrorRateRuleType({
           : [];
 
         const { dateStart } = getTimeRange(
-          `${ruleParams.windowSize}${ruleParams.windowUnit}`
+          `${ruleParams.windowSize}${ruleParams.windowUnit}`,
         );
 
         const searchParams = {
@@ -175,7 +175,7 @@ export function registerTransactionErrorRateRuleType({
                     },
                   },
                   ...getBackwardCompatibleDocumentTypeFilter(
-                    searchAggregatedTransactions
+                    searchAggregatedTransactions,
                   ),
                   {
                     terms: {
@@ -187,7 +187,7 @@ export function registerTransactionErrorRateRuleType({
                   },
                   ...termFilterQuery,
                   ...getParsedFilterQuery(
-                    ruleParams.searchConfiguration?.query?.query as string
+                    ruleParams.searchConfiguration?.query?.query as string,
                   ),
                 ],
               },
@@ -229,18 +229,18 @@ export function registerTransactionErrorRateRuleType({
               obj[allGroupByFields[bucketIndex]] = bucketKey;
               return obj;
             },
-            {} as Record<string, string>
+            {} as Record<string, string>,
           );
 
           const bucketKey = bucket.key;
 
           const failedOutcomeBucket = bucket.outcomes.buckets.find(
-            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure
+            (outcomeBucket) => outcomeBucket.key === EventOutcome.failure,
           );
           const failed = failedOutcomeBucket?.doc_count ?? 0;
           const succesful =
             bucket.outcomes.buckets.find(
-              (outcomeBucket) => outcomeBucket.key === EventOutcome.success
+              (outcomeBucket) => outcomeBucket.key === EventOutcome.success,
             )?.doc_count ?? 0;
           const errorRate = (failed / (failed + succesful)) * 100;
 
@@ -284,12 +284,12 @@ export function registerTransactionErrorRateRuleType({
             getEnvironmentEsField(groupByFields[SERVICE_ENVIRONMENT])?.[
               SERVICE_ENVIRONMENT
             ],
-            groupByFields[TRANSACTION_TYPE]
+            groupByFields[TRANSACTION_TYPE],
           );
           const viewInAppUrl = addSpaceIdToPath(
             basePath.publicBaseUrl,
             spaceId,
-            relativeViewInAppUrl
+            relativeViewInAppUrl,
           );
           const indexedStartedAt =
             getAlertStartedDate(alertId) ?? startedAt.toISOString();
@@ -299,7 +299,7 @@ export function registerTransactionErrorRateRuleType({
             spaceId,
             indexedStartedAt,
             alertsLocator,
-            basePath.publicBaseUrl
+            basePath.publicBaseUrl,
           );
           const groupByActionVariables =
             getGroupByActionVariables(groupByFields);
@@ -308,7 +308,7 @@ export function registerTransactionErrorRateRuleType({
             alertDetailsUrl,
             interval: formatDurationFromTimeUnitChar(
               ruleParams.windowSize,
-              ruleParams.windowUnit as TimeUnitChar
+              ruleParams.windowUnit as TimeUnitChar,
             ),
             reason: reasonMessage,
             threshold: ruleParams.threshold,
@@ -324,6 +324,6 @@ export function registerTransactionErrorRateRuleType({
       alerts: ApmRuleTypeAlertDefinition,
       getViewInAppRelativeUrl: ({ rule }: GetViewInAppRelativeUrlFnOpts<{}>) =>
         observabilityPaths.ruleDetails(rule.id),
-    })
+    }),
   );
 }

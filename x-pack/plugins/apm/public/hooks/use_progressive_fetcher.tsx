@@ -50,7 +50,7 @@ type WithoutProbabilityParameter<T extends Record<string, any>> = {
 >;
 
 type APMProgressiveAPIClient = <
-  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>
+  TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>,
 >(
   endpoint: TEndpoint,
   options: Omit<APMClientOptions, 'signal'> &
@@ -59,15 +59,15 @@ type APMProgressiveAPIClient = <
         APMProgressivelyLoadingServerRouteRepository,
         TEndpoint
       >
-    >
+    >,
 ) => Promise<ReturnOf<APMProgressivelyLoadingServerRouteRepository, TEndpoint>>;
 
 function clientWithProbability(
   regularCallApmApi: APMClient,
-  probability: number
+  probability: number,
 ) {
   return <
-    TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>
+    TEndpoint extends EndpointOf<APMProgressivelyLoadingServerRouteRepository>,
   >(
     endpoint: TEndpoint,
     options: Omit<APMClientOptions, 'signal'> &
@@ -76,7 +76,7 @@ function clientWithProbability(
           APMProgressivelyLoadingServerRouteRepository,
           TEndpoint
         >
-      >
+      >,
   ) => {
     return regularCallApmApi(endpoint, {
       ...options,
@@ -93,10 +93,10 @@ function clientWithProbability(
 
 export function useProgressiveFetcher<TReturn>(
   callback: (
-    callApmApi: APMProgressiveAPIClient
+    callApmApi: APMProgressiveAPIClient,
   ) => Promise<TReturn> | undefined,
   dependencies: any[],
-  options?: Parameters<typeof useFetcher>[2]
+  options?: Parameters<typeof useFetcher>[2],
 ): FetcherResult<TReturn> {
   const {
     services: { uiSettings },
@@ -107,7 +107,7 @@ export function useProgressiveFetcher<TReturn>(
     ProgressiveLoadingQuality.off;
 
   const sampledProbability = getProbabilityFromProgressiveLoadingQuality(
-    progressiveLoadingQuality
+    progressiveLoadingQuality,
   );
 
   const sampledFetch = useFetcher(
@@ -116,12 +116,12 @@ export function useProgressiveFetcher<TReturn>(
         return;
       }
       return callback(
-        clientWithProbability(regularCallApmApi, sampledProbability)
+        clientWithProbability(regularCallApmApi, sampledProbability),
       );
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     dependencies,
-    options
+    options,
   );
 
   const unsampledFetch = useFetcher(
@@ -129,7 +129,7 @@ export function useProgressiveFetcher<TReturn>(
       return callback(clientWithProbability(regularCallApmApi, 1));
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    dependencies
+    dependencies,
   );
 
   const fetches = [unsampledFetch, sampledFetch];

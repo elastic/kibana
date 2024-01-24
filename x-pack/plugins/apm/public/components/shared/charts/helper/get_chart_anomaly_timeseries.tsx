@@ -19,7 +19,7 @@ export const expectedBoundsTitle = i18n.translate(
   'xpack.apm.comparison.expectedBoundsTitle',
   {
     defaultMessage: 'Expected bounds',
-  }
+  },
 );
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,

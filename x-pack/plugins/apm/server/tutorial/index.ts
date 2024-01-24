@@ -44,7 +44,7 @@ export const tutorialProvider =
             'xpack.apm.tutorial.specProvider.artifacts.dashboards.linkLabel',
             {
               defaultMessage: 'APM dashboard',
-            }
+            },
           ),
           isOverview: true,
         },
@@ -59,7 +59,7 @@ export const tutorialProvider =
           'xpack.apm.tutorial.specProvider.artifacts.application.label',
           {
             defaultMessage: 'Launch APM',
-          }
+          },
         ),
       };
     }
@@ -84,7 +84,7 @@ It allows you to monitor the performance of thousands of applications in real ti
             learnMoreLink:
               '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/index.html',
           },
-        }
+        },
       ),
       euiIconType: 'apmApp',
       integrationBrowserCategories: ['observability', 'apm'],

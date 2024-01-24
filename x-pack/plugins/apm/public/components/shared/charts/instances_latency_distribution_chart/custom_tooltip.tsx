@@ -26,19 +26,19 @@ const latencyLabel = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipLatencyLabel',
   {
     defaultMessage: 'Latency',
-  }
+  },
 );
 
 const throughputLabel = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipThroughputLabel',
   {
     defaultMessage: 'Throughput',
-  }
+  },
 );
 
 const clickToFilterDescription = i18n.translate(
   'xpack.apm.instancesLatencyDistributionChartTooltipClickToFilterDescription',
-  { defaultMessage: 'Click to filter by instance' }
+  { defaultMessage: 'Click to filter by instance' },
 );
 
 /**
@@ -119,7 +119,7 @@ function MultipleInstanceCustomTooltip({
             defaultMessage:
               '{instancesCount} {instancesCount, plural, one {instance} other {instances}}',
             values: { instancesCount: values.length },
-          }
+          },
         )}
       </div>
       {values.map((value) => {
@@ -199,7 +199,7 @@ function MultipleInstanceCustomTooltip({
  * We probably won't need to do all of this once https://github.com/elastic/elastic-charts/issues/615 is completed.
  */
 export function CustomTooltip(
-  props: TooltipInfo & { latencyFormatter: TimeFormatter }
+  props: TooltipInfo & { latencyFormatter: TimeFormatter },
 ) {
   const { values } = props;
   const theme = useTheme();

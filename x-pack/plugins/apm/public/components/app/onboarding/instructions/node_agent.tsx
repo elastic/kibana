@@ -18,7 +18,7 @@ import {
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createNodeAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,

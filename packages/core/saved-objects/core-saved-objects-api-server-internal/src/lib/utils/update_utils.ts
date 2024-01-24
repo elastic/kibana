@@ -23,11 +23,11 @@ export const isValidRequest = ({
         error: SavedObjectsErrorHelpers.createBadRequestError('id cannot be empty'),
       }
     : !allowedTypes.includes(type)
-    ? {
-        validRequest: false,
-        error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
-      }
-    : {
-        validRequest: true,
-      };
+      ? {
+          validRequest: false,
+          error: SavedObjectsErrorHelpers.createGenericNotFoundError(type, id),
+        }
+      : {
+          validRequest: true,
+        };
 };

@@ -17,14 +17,10 @@ const superuserRole = 'superuser';
 
 type ReportingRequestUser = AuthenticatedUser | false;
 
-export type RequestHandlerUser<P, Q, B> = RequestHandler<
-  P,
-  Q,
-  B,
-  ReportingRequestHandlerContext
-> extends (...a: infer U) => infer R
-  ? (user: ReportingRequestUser, ...a: U) => R
-  : never;
+export type RequestHandlerUser<P, Q, B> =
+  RequestHandler<P, Q, B, ReportingRequestHandlerContext> extends (...a: infer U) => infer R
+    ? (user: ReportingRequestUser, ...a: U) => R
+    : never;
 
 export const authorizedUserPreRouting = <P, Q, B>(
   reporting: ReportingCore,

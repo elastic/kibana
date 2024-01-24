@@ -43,7 +43,7 @@ import { AgentList } from './agent_list';
 
 const getOtelLatestAgentVersion = (
   agentTelemetryAutoVersion: string[],
-  otelLatestVersion?: OtelAgentLatestVersion
+  otelLatestVersion?: OtelAgentLatestVersion,
 ) => {
   return agentTelemetryAutoVersion.length > 0
     ? otelLatestVersion?.auto_latest_version
@@ -76,7 +76,7 @@ function useAgentExplorerFetcher({
         },
       });
     },
-    [environment, serviceName, agentLanguage, kuery, start, end]
+    [environment, serviceName, agentLanguage, kuery, start, end],
   );
 }
 
@@ -87,7 +87,7 @@ function useLatestAgentVersionsFetcher(latestAgentVersionEnabled: boolean) {
         return callApmApi('GET /internal/apm/get_latest_agent_versions');
       }
     },
-    [latestAgentVersionEnabled]
+    [latestAgentVersionEnabled],
   );
 }
 
@@ -118,7 +118,9 @@ export function AgentExplorer() {
     latestVersion: isOpenTelemetryAgentName(agent.agentName)
       ? getOtelLatestAgentVersion(
           agent.agentTelemetryAutoVersion,
-          latestAgentVersions?.data?.[agent.agentName] as OtelAgentLatestVersion
+          latestAgentVersions?.data?.[
+            agent.agentName
+          ] as OtelAgentLatestVersion,
         )
       : (
           latestAgentVersions?.data?.[
@@ -191,7 +193,7 @@ export function AgentExplorer() {
                 'xpack.apm.agentExplorer.serviceNameSelect.label',
                 {
                   defaultMessage: 'Service name',
-                }
+                },
               )}
               defaultValue={serviceName}
               fieldName={SERVICE_NAME}
@@ -204,7 +206,7 @@ export function AgentExplorer() {
                 'xpack.apm.agentExplorer.serviceNameSelect.placeholder',
                 {
                   defaultMessage: 'All',
-                }
+                },
               )}
               start={start}
               end={end}
@@ -217,7 +219,7 @@ export function AgentExplorer() {
                 'xpack.apm.agentExplorer.agentLanguageSelect.label',
                 {
                   defaultMessage: 'Agent language',
-                }
+                },
               )}
               defaultValue={agentLanguage}
               fieldName={SERVICE_LANGUAGE_NAME}
@@ -230,7 +232,7 @@ export function AgentExplorer() {
                 'xpack.apm.agentExplorer.agentLanguageSelect.placeholder',
                 {
                   defaultMessage: 'All',
-                }
+                },
               )}
               start={start}
               end={end}

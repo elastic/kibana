@@ -60,7 +60,7 @@ export interface UpstreamServicesForDependencyResponse {
 }
 
 export async function getUpstreamServicesForDependency(
-  options: Options
+  options: Options,
 ): Promise<UpstreamServicesForDependencyResponse> {
   const { offset, ...otherOptions } = options;
 
@@ -78,7 +78,7 @@ export async function getUpstreamServicesForDependency(
     services: currentServices.map((service) => {
       const { stats, ...rest } = service;
       const prev = previousServices.find(
-        (item) => item.location.id === service.location.id
+        (item) => item.location.id === service.location.id,
       );
       return {
         ...rest,

@@ -32,7 +32,7 @@ describe('transaction queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -50,7 +50,7 @@ describe('transaction queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -69,7 +69,7 @@ describe('transaction queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -83,7 +83,7 @@ describe('transaction queries', () => {
         apmEventClient: mockApmEventClient,
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

@@ -76,10 +76,10 @@ export function ServerlessSummary({ serverlessId }: Props) {
               serverlessId,
             },
           },
-        }
+        },
       );
     },
-    [kuery, environment, serviceName, start, end, serverlessId]
+    [kuery, environment, serviceName, start, end, serverlessId],
   );
 
   const showVerticalRule = !breakpoints.isSmall;
@@ -124,7 +124,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
                 values: {
                   serverlessFunctionsTotal: data?.serverlessFunctionsTotal,
                 },
-              }
+              },
             )}
             reverse
           />
@@ -137,7 +137,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
             titleSize="s"
             description={i18n.translate(
               'xpack.apm.serverlessMetrics.summary.functionDurationAvg',
-              { defaultMessage: 'Function duration avg.' }
+              { defaultMessage: 'Function duration avg.' },
             )}
             reverse
           />
@@ -149,7 +149,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
             titleSize="s"
             description={i18n.translate(
               'xpack.apm.serverlessMetrics.summary.billedDurationAvg',
-              { defaultMessage: 'Billed duration avg.' }
+              { defaultMessage: 'Billed duration avg.' },
             )}
             reverse
           />
@@ -161,7 +161,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
             titleSize="s"
             description={i18n.translate(
               'xpack.apm.serverlessMetrics.summary.memoryUsageAvg',
-              { defaultMessage: 'Memory usage avg.' }
+              { defaultMessage: 'Memory usage avg.' },
             )}
             reverse
           />
@@ -175,7 +175,7 @@ export function ServerlessSummary({ serverlessId }: Props) {
               titleSize="s"
               description={i18n.translate(
                 'xpack.apm.serverlessMetrics.summary.estimatedCost',
-                { defaultMessage: 'Estimated costs avg.' }
+                { defaultMessage: 'Estimated costs avg.' },
               )}
               reverse
             />

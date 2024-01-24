@@ -35,7 +35,7 @@ import type {
 export interface DrilldownDefinition<
   Config extends BaseActionConfig = BaseActionConfig,
   ExecutionContext extends object = object,
-  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext
+  FactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext,
 > extends PersistableStateDefinition<SerializedEvent> {
   /**
    * Globally unique identifier for this drilldown.

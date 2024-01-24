@@ -23,14 +23,14 @@ export class TelemetryService {
     this.analytics = analytics;
 
     apmTelemetryEventBasedTypes.forEach((eventConfig) =>
-      analytics.registerEventType<TelemetryEventParams>(eventConfig)
+      analytics.registerEventType<TelemetryEventParams>(eventConfig),
     );
   }
 
   public start(): ITelemetryClient {
     if (!this.analytics) {
       throw new Error(
-        'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.'
+        'The TelemetryService.setup() method has not been invoked, be sure to call it during the plugin setup.',
       );
     }
 

@@ -53,7 +53,7 @@ export const Example: Story<any> = () => {
     .errors(
       instanceJava
         .error({ message: '[ResponseError] index_not_found_exception' })
-        .timestamp(50)
+        .timestamp(50),
     )
     .children(
       instanceJava
@@ -64,7 +64,7 @@ export const Example: Story<any> = () => {
         })
         .timestamp(50)
         .duration(900)
-        .success()
+        .success(),
     )
     .serialize();
 

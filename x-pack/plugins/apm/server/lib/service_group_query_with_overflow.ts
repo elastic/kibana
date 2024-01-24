@@ -11,7 +11,7 @@ import { SERVICE_NAME } from '../../common/es_fields/apm';
 import { ServiceGroup } from '../../common/service_groups';
 
 export function serviceGroupWithOverflowQuery(
-  serviceGroup?: ServiceGroup | null
+  serviceGroup?: ServiceGroup | null,
 ): QueryDslQueryContainer[] {
   if (serviceGroup) {
     const serviceGroupQuery = kqlQuery(serviceGroup?.kuery);

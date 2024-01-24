@@ -132,9 +132,7 @@ export default ({ getService }: FtrProviderContext) => {
       );
       expect(sampleModel.indices.length).to.eql(
         1,
-        `Expected number of indices for dfa_regression_model_n_1 to be ${1} (got ${
-          sampleModel.indices.length
-        })`
+        `Expected number of indices for dfa_regression_model_n_1 to be ${1} (got ${sampleModel.indices.length})`
       );
     });
 

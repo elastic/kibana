@@ -49,8 +49,8 @@ export const AxisTitleSettings: React.FunctionComponent<AxisTitleSettingsProps> 
         !axisTitle && isAxisTitleVisible
           ? 'auto'
           : isAxisTitleVisible
-          ? 'custom'
-          : ('none' as LabelMode),
+            ? 'custom'
+            : ('none' as LabelMode),
     }),
     [axisTitle, isAxisTitleVisible]
   );

@@ -47,7 +47,7 @@ export const payloadRt = t.intersection([
       t.type({
         key: t.union([t.literal(''), t.keyof(filterOptionsRt.props)]),
         value: t.string,
-      })
+      }),
     ),
   }),
 ]);

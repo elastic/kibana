@@ -40,9 +40,9 @@ export function JobsListStatus({
       <EuiBadge color="success">
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.okStatusLabel',
-          { defaultMessage: 'OK' }
+          { defaultMessage: 'OK' },
         )}
-      </EuiBadge>
+      </EuiBadge>,
     );
   } else if (!isClosed) {
     statuses.push(
@@ -52,18 +52,18 @@ export function JobsListStatus({
           {
             defaultMessage:
               'Job might be experiencing problems. Click the Manage Jobs link to learn more.',
-          }
+          },
         )}
       >
         <MLManageJobsLink jobId={jobId}>
           <EuiBadge color="warning">
             {i18n.translate(
               'xpack.apm.settings.anomalyDetection.jobList.warningStatusBadgeLabel',
-              { defaultMessage: 'Warning' }
+              { defaultMessage: 'Warning' },
             )}
           </EuiBadge>
         </MLManageJobsLink>
-      </EuiToolTip>
+      </EuiToolTip>,
     );
   }
 
@@ -72,9 +72,9 @@ export function JobsListStatus({
       <EuiBadge color="hollow">
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.closedStatusLabel',
-          { defaultMessage: 'Closed' }
+          { defaultMessage: 'Closed' },
         )}
-      </EuiBadge>
+      </EuiBadge>,
     );
   }
 
@@ -84,9 +84,9 @@ export function JobsListStatus({
         {' '}
         {i18n.translate(
           'xpack.apm.settings.anomalyDetection.jobList.legacyStatusLabel',
-          { defaultMessage: 'Legacy' }
+          { defaultMessage: 'Legacy' },
         )}
-      </EuiBadge>
+      </EuiBadge>,
     );
   }
 

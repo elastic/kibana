@@ -12,11 +12,11 @@ import {
 } from '../../../../common/connections';
 
 export function getConnectionStatsItemsWithRelativeImpact(
-  items: ConnectionStatsItem[]
+  items: ConnectionStatsItem[],
 ): ConnectionStatsItemWithImpact[] {
   const latencySums = items
     .map(
-      ({ stats }) => (stats.latency.value ?? 0) * (stats.throughput.value ?? 0)
+      ({ stats }) => (stats.latency.value ?? 0) * (stats.throughput.value ?? 0),
     )
     .filter(isFiniteNumber);
 

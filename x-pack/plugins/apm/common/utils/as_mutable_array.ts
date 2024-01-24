@@ -35,7 +35,7 @@
 // with Array<any>. This function returns a mutable version of a type.
 
 export function asMutableArray<T extends Readonly<any>>(
-  arr: T
+  arr: T,
 ): T extends Readonly<[...infer U]> ? U : unknown[] {
   return arr as any;
 }

@@ -322,13 +322,13 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     const operatorOptions = augmentedOperatorsList
       ? augmentedOperatorsList
       : onlyShowListOperators
-      ? EXCEPTION_OPERATORS_ONLY_LISTS
-      : getOperatorOptions(
-          entry,
-          listType,
-          entry.field != null && entry.field.type === 'boolean',
-          isFirst
-        );
+        ? EXCEPTION_OPERATORS_ONLY_LISTS
+        : getOperatorOptions(
+            entry,
+            listType,
+            entry.field != null && entry.field.type === 'boolean',
+            isFirst
+          );
 
     const comboBox = (
       <OperatorComponent

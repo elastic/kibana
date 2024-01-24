@@ -19,7 +19,7 @@ const format = ({
 
 export const getAlertUrlErrorCount = (
   serviceName: string,
-  serviceEnv: string | undefined
+  serviceEnv: string | undefined,
 ) =>
   format({
     pathname: `/app/apm/services/${serviceName}/errors`,
@@ -31,7 +31,7 @@ export const getAlertUrlErrorCount = (
 export const getAlertUrlTransaction = (
   serviceName: string,
   serviceEnv: string | undefined,
-  transactionType: string
+  transactionType: string,
 ) =>
   format({
     pathname: `/app/apm/services/${serviceName}`,

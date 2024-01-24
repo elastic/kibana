@@ -21,7 +21,7 @@ const mockCard = (name: string) =>
     release: 'ga',
     categories: [],
     isUnverified: false,
-  } as IntegrationCardItem);
+  }) as IntegrationCardItem;
 
 const intA = mockCard('A');
 const intB = mockCard('B');

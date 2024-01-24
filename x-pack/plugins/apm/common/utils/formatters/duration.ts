@@ -28,20 +28,20 @@ interface ConvertedDuration {
 
 export type TimeFormatter = (
   value: Maybe<number>,
-  options?: FormatterOptions
+  options?: FormatterOptions,
 ) => ConvertedDuration;
 
 type TimeFormatterBuilder = (
   max: number,
   threshold?: number,
-  scalingFactor?: number
+  scalingFactor?: number,
 ) => TimeFormatter;
 
 // threshold defines the value from which upwards there should be no decimal places.
 function getUnitLabelAndConvertedValue(
   unitKey: DurationTimeUnit,
   value: number,
-  threshold: number = 10
+  threshold: number = 10,
 ) {
   const ms = value / 1000;
 
@@ -53,7 +53,7 @@ function getUnitLabelAndConvertedValue(
         }),
         convertedValue: asDecimalOrInteger(
           moment.duration(ms).asHours(),
-          threshold
+          threshold,
         ),
       };
     }
@@ -64,7 +64,7 @@ function getUnitLabelAndConvertedValue(
         }),
         convertedValue: asDecimalOrInteger(
           moment.duration(ms).asMinutes(),
-          threshold
+          threshold,
         ),
       };
     }
@@ -75,7 +75,7 @@ function getUnitLabelAndConvertedValue(
         }),
         convertedValue: asDecimalOrInteger(
           moment.duration(ms).asSeconds(),
-          threshold
+          threshold,
         ),
       };
     }
@@ -86,7 +86,7 @@ function getUnitLabelAndConvertedValue(
         }),
         convertedValue: asDecimalOrInteger(
           moment.duration(ms).asMilliseconds(),
-          threshold
+          threshold,
         ),
       };
     }
@@ -122,7 +122,7 @@ function convertTo({
   const { convertedValue, unitLabel } = getUnitLabelAndConvertedValue(
     unit,
     microseconds,
-    threshold
+    threshold,
   );
 
   return {
@@ -165,7 +165,7 @@ export const getDurationFormatter: TimeFormatterBuilder = memoize(
       });
     };
   },
-  (max, threshold) => `${max}_${threshold}`
+  (max, threshold) => `${max}_${threshold}`,
 );
 
 export function asTransactionRate(value: Maybe<number>) {
@@ -200,7 +200,7 @@ export function asExactTransactionRate(value: number) {
  */
 export function asDuration(
   value: Maybe<number>,
-  { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {}
+  { defaultValue = NOT_AVAILABLE_LABEL }: FormatterOptions = {},
 ) {
   if (!isFiniteNumber(value)) {
     return defaultValue;

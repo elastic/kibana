@@ -186,7 +186,7 @@ export async function getServiceMetadataDetails({
 
   const response = await apmEventClient.search(
     'get_service_metadata_details',
-    params
+    params,
   );
 
   if (response.hits.total.value === 0) {
@@ -202,7 +202,7 @@ export async function getServiceMetadataDetails({
 
   const serviceMetadataDetails = {
     versions: response.aggregations?.serviceVersions.buckets.map(
-      (bucket) => bucket.key as string
+      (bucket) => bucket.key as string,
     ),
     runtime: service.runtime,
     framework: service.framework?.name,
@@ -230,7 +230,7 @@ export async function getServiceMetadataDetails({
           os: host?.os?.platform,
           totalNumberInstances,
           ids: response.aggregations?.containerIds.buckets.map(
-            (bucket) => bucket.key as string
+            (bucket) => bucket.key as string,
           ),
         }
       : undefined;
@@ -243,7 +243,7 @@ export async function getServiceMetadataDetails({
             .map((bucket) => getLambdaFunctionNameFromARN(bucket.key as string))
             .filter((name) => name),
           faasTriggerTypes: response.aggregations?.faasTriggerTypes.buckets.map(
-            (bucket) => bucket.key as string
+            (bucket) => bucket.key as string,
           ),
           hostArchitecture: host?.architecture,
         }
@@ -255,13 +255,13 @@ export async function getServiceMetadataDetails({
         projectName: cloud.project?.name,
         serviceName: cloud.service?.name,
         availabilityZones: response.aggregations?.availabilityZones.buckets.map(
-          (bucket) => bucket.key as string
+          (bucket) => bucket.key as string,
         ),
         regions: response.aggregations?.regions.buckets.map(
-          (bucket) => bucket.key as string
+          (bucket) => bucket.key as string,
         ),
         machineTypes: response.aggregations?.machineTypes.buckets.map(
-          (bucket) => bucket.key as string
+          (bucket) => bucket.key as string,
         ),
       }
     : undefined;

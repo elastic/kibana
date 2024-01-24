@@ -15,11 +15,11 @@ describe('LibraryStacktrace', () => {
       it('renders null', () => {
         const props = { id: 'testId', stackframes: [] };
         const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
+          <LibraryStacktrace {...props} />,
         );
 
         expect(
-          queryByTestId('LibraryStacktraceAccordion')
+          queryByTestId('LibraryStacktraceAccordion'),
         ).not.toBeInTheDocument();
       });
     });
@@ -31,7 +31,7 @@ describe('LibraryStacktrace', () => {
           stackframes: [{ filename: 'testFilename', line: { number: 1 } }],
         };
         const { queryByTestId } = renderWithTheme(
-          <LibraryStacktrace {...props} />
+          <LibraryStacktrace {...props} />,
         );
 
         expect(queryByTestId('LibraryStacktraceAccordion')).toBeInTheDocument();

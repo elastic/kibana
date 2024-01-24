@@ -53,7 +53,7 @@ export async function getRootTransactionByTraceId({
 
   const resp = await apmEventClient.search(
     'get_root_transaction_by_trace_id',
-    params
+    params,
   );
   return {
     transaction: resp.hits.hits[0]?._source,

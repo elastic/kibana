@@ -36,7 +36,7 @@ const mainApiRequestsToIntercept = [
 ];
 
 const mainAliasNames = mainApiRequestsToIntercept.map(
-  ({ aliasName }) => `@${aliasName}`
+  ({ aliasName }) => `@${aliasName}`,
 );
 
 describe('Storage Explorer', () => {
@@ -46,7 +46,7 @@ describe('Storage Explorer', () => {
       opbeans({
         from: new Date(rangeFrom).getTime(),
         to: new Date(rangeTo).getTime(),
-      })
+      }),
     );
   });
 
@@ -93,15 +93,15 @@ describe('Storage Explorer', () => {
     it('has a list of services and environments', () => {
       cy.contains(
         '[data-test-subj="apmStorageExplorerServiceLink"]',
-        'opbeans-node'
+        'opbeans-node',
       );
       cy.contains(
         '[data-test-subj="apmStorageExplorerServiceLink"]',
-        'opbeans-java'
+        'opbeans-java',
       );
       cy.contains(
         '[data-test-subj="apmStorageExplorerServiceLink"]',
-        'opbeans-rum'
+        'opbeans-rum',
       );
       cy.get('td:contains(production)').should('have.length', 3);
     });
@@ -109,7 +109,7 @@ describe('Storage Explorer', () => {
     it('when clicking on a service it loads the service overview for that service', () => {
       cy.contains(
         '[data-test-subj="apmStorageExplorerServiceLink"]',
-        'opbeans-node'
+        'opbeans-node',
       ).click();
 
       cy.url().should('include', '/apm/services/opbeans-node/overview');
@@ -145,7 +145,7 @@ describe('Storage Explorer', () => {
 
       cy.selectAbsoluteTimeRange(
         moment(timeRange.rangeFrom).subtract(5, 'm').toISOString(),
-        moment(timeRange.rangeTo).subtract(5, 'm').toISOString()
+        moment(timeRange.rangeTo).subtract(5, 'm').toISOString(),
       );
       cy.contains('Update').click();
       cy.wait(mainAliasNames);

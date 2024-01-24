@@ -44,7 +44,7 @@ export const useStateFromPublishingSubject = <
   ValueType extends unknown = unknown,
   SubjectType extends PublishingSubject<ValueType> | undefined =
     | PublishingSubject<ValueType>
-    | undefined
+    | undefined,
 >(
   subject?: SubjectType
 ): OptionalIfOptional<SubjectType, ValueType> => {

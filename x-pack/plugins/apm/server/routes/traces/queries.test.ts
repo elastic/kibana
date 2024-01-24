@@ -28,7 +28,7 @@ describe('trace queries', () => {
         start: 0,
         end: 50000,
         logger: loggerMock.create(),
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

@@ -26,7 +26,7 @@ const buttonGroupOptions = {
       id: 'serviceGroups',
       label: i18n.translate(
         'xpack.apm.serviceGroups.buttonGroup.serviceGroups',
-        { defaultMessage: 'Service groups' }
+        { defaultMessage: 'Service groups' },
       ),
     },
     pathname: '/service-groups',
@@ -55,7 +55,7 @@ export function ServiceGroupsButtonGroup({
         {
           defaultMessage:
             'Group services together to build curated inventory views that remove noise and simplify investigations across services. Groups are Kibana space-specific and available for any users with appropriate access.',
-        }
+        },
       )}
     >
       <EuiButtonGroup

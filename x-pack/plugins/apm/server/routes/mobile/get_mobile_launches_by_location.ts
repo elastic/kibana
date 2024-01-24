@@ -95,7 +95,7 @@ export async function getLaunchesByLocation({
           ...aggs,
         },
       },
-    }
+    },
   );
 
   return {

@@ -105,10 +105,10 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
                       defaultMessage: 'Other',
                     })
                   : formattedFieldValue === ''
-                  ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
-                      defaultMessage: '(empty)',
-                    })
-                  : '-'}
+                    ? i18n.translate('unifiedFieldList.fieldStats.emptyStringValueLabel', {
+                        defaultMessage: '(empty)',
+                      })
+                    : '-'}
               </EuiText>
             )}
           </EuiFlexItem>

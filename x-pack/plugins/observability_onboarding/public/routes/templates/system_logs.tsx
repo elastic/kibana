@@ -25,11 +25,11 @@ export function SystemLogs({ children }: Props) {
       {
         text: i18n.translate(
           'xpack.observability_onboarding.breadcrumbs.systemLogs',
-          { defaultMessage: 'System logs' }
+          { defaultMessage: 'System logs' },
         ),
       },
     ],
-    breadcrumbsApp
+    breadcrumbsApp,
   );
 
   const {
@@ -51,7 +51,9 @@ export function SystemLogs({ children }: Props) {
                 <h1>
                   {i18n.translate(
                     'xpack.observability_onboarding.title.collectSystemLogs',
-                    { defaultMessage: 'Install shipper to collect system logs' }
+                    {
+                      defaultMessage: 'Install shipper to collect system logs',
+                    },
                   )}
                 </h1>
               </EuiTitle>

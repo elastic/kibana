@@ -27,7 +27,7 @@ export function useHasRumData() {
     [dataViewTitle],
     {
       name: 'UXHasRumData',
-    }
+    },
   );
 
   useEffect(() => {

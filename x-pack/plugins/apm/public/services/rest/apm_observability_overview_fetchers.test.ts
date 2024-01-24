@@ -16,7 +16,7 @@ import type { CallApmApiSpy } from './call_apm_api_spy';
 describe('Observability dashboard data', () => {
   const callApmApiMock = jest.spyOn(
     createCallApmApi,
-    'callApmApi'
+    'callApmApi',
   ) as unknown as CallApmApiSpy;
   const params = {
     absoluteTime: {
@@ -59,7 +59,7 @@ describe('Observability dashboard data', () => {
               { x: 3, y: 3 },
             ],
           },
-        })
+        }),
       );
       const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({
@@ -90,7 +90,7 @@ describe('Observability dashboard data', () => {
         Promise.resolve({
           serviceCount: 0,
           transactionPerMinute: { value: null, timeseries: [] as any },
-        })
+        }),
       );
       const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({
@@ -120,7 +120,7 @@ describe('Observability dashboard data', () => {
             value: 0,
             timeseries: [{ x: 1 }, { x: 2 }, { x: 3 }],
           },
-        })
+        }),
       );
       const response = await fetchObservabilityOverviewPageData(params);
       expect(response).toEqual({

@@ -229,7 +229,7 @@ export function MobileServiceOverview() {
                       >
                         {i18n.translate(
                           'xpack.apm.serviceOverview.dependenciesTableTabLink',
-                          { defaultMessage: 'View dependencies' }
+                          { defaultMessage: 'View dependencies' },
                         )}
                       </EuiLink>
                     }

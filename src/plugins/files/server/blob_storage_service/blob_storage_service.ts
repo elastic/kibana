@@ -27,7 +27,10 @@ export class BlobStorageService {
    */
   private readonly concurrentDownloadsFromES = 5;
 
-  constructor(private readonly esClient: ElasticsearchClient, private readonly logger: Logger) {
+  constructor(
+    private readonly esClient: ElasticsearchClient,
+    private readonly logger: Logger
+  ) {
     ElasticsearchBlobStorageClient.configureConcurrentTransfers([
       this.concurrentUploadsToES,
       this.concurrentDownloadsFromES,

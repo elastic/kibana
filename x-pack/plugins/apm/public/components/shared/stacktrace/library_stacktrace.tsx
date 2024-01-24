@@ -35,7 +35,7 @@ export function LibraryStacktrace({ codeLanguage, id, stackframes }: Props) {
           defaultMessage:
             '{count, plural, one {# library frame} other {# library frames}}',
           values: { count: stackframes.length },
-        }
+        },
       )}
       data-test-subj="LibraryStacktraceAccordion"
       id={id}

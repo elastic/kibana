@@ -18,14 +18,14 @@ type AnyApmDocumentType =
   | ApmDocumentType.SpanEvent;
 
 export interface ApmDataSource<
-  TDocumentType extends AnyApmDocumentType = AnyApmDocumentType
+  TDocumentType extends AnyApmDocumentType = AnyApmDocumentType,
 > {
   rollupInterval: RollupInterval;
   documentType: TDocumentType;
 }
 
 export type ApmDataSourceWithSummary<
-  T extends AnyApmDocumentType = AnyApmDocumentType
+  T extends AnyApmDocumentType = AnyApmDocumentType,
 > = ApmDataSource<T> & {
   hasDurationSummaryField: boolean;
   hasDocs: boolean;

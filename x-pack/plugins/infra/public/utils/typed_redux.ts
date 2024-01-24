@@ -34,7 +34,7 @@ export const globalizeSelector =
 export const globalizeSelectors = <
   GlobalState,
   LocalSelectors extends Selectors<LocalState>,
-  LocalState = any
+  LocalState = any,
 >(
   globalizer: (globalState: GlobalState) => LocalState,
   selectors: LocalSelectors
@@ -58,8 +58,8 @@ interface ActionCreators {
 type PlainActionCreator<WrappedActionCreator> = WrappedActionCreator extends () => infer R
   ? () => R
   : WrappedActionCreator extends (payload: infer A) => infer R
-  ? (payload: A) => R
-  : never;
+    ? (payload: A) => R
+    : never;
 
 export const bindPlainActionCreators =
   <WrappedActionCreators extends ActionCreators>(actionCreators: WrappedActionCreators) =>

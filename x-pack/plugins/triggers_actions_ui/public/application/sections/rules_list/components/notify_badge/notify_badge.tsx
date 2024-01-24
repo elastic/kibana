@@ -278,8 +278,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       typeof disabled === 'string'
         ? disabled
         : isPopoverOpen || showTooltipInline
-        ? undefined
-        : snoozeTimeLeft;
+          ? undefined
+          : snoozeTimeLeft;
     return (
       <EuiToolTip
         title={

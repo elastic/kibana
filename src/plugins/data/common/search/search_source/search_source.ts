@@ -258,8 +258,8 @@ export class SearchSource {
     const queryString = Array.isArray(query)
       ? query.map((q) => q.query)
       : isOfQueryType(query)
-      ? query?.query
-      : undefined;
+        ? query?.query
+        : undefined;
 
     const indexPatternFromQuery =
       typeof queryString === 'string'

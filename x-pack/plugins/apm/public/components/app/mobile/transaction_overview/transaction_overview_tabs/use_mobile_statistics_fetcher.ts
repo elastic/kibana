@@ -59,7 +59,7 @@ export function useMobileStatisticsFetcher({
                   field,
                 },
               },
-            }
+            },
           ).then((response) => {
             return {
               // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
@@ -70,7 +70,7 @@ export function useMobileStatisticsFetcher({
           });
         }
       },
-      [environment, start, end, kuery, serviceName, field]
+      [environment, start, end, kuery, serviceName, field],
     );
 
   const { mainStatistics, requestId, totalItems } = data;
@@ -93,7 +93,7 @@ export function useMobileStatisticsFetcher({
                 end,
                 field,
                 fieldValues: JSON.stringify(
-                  data?.mainStatistics.map(({ name }) => name).sort()
+                  data?.mainStatistics.map(({ name }) => name).sort(),
                 ),
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
@@ -101,14 +101,14 @@ export function useMobileStatisticsFetcher({
                     : undefined,
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches agg results when requestId changes
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   return {

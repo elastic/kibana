@@ -27,7 +27,7 @@ export const getCallApmApiSpy = () =>
 
 type MockApmApiCall = <TEndpoint extends APIEndpoint>(
   endpoint: TEndpoint,
-  fn: (params: APIClientRequestParamsOf<TEndpoint>) => APIReturnType<TEndpoint>
+  fn: (params: APIClientRequestParamsOf<TEndpoint>) => APIReturnType<TEndpoint>,
 ) => void;
 
 const getSpy = once(() => {

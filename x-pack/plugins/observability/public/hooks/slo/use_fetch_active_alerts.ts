@@ -101,9 +101,12 @@ export function useFetchActiveAlerts({
           signal,
         });
 
-        const activeAlertsData = response.aggregations.perSloId.buckets.reduce((acc, bucket) => {
-          return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
-        }, {} as Record<string, number>);
+        const activeAlertsData = response.aggregations.perSloId.buckets.reduce(
+          (acc, bucket) => {
+            return { ...acc, [bucket.key_as_string]: bucket.doc_count ?? 0 };
+          },
+          {} as Record<string, number>
+        );
         return new ActiveAlerts(activeAlertsData);
       } catch (error) {
         // ignore error

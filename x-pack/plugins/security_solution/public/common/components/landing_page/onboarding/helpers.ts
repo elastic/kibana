@@ -130,29 +130,32 @@ export const setupActiveSections = (
     ? getSections().reduce(
         (acc, section) => {
           const activeCards =
-            section.cards?.reduce((accCards, card) => {
-              const activeSteps = getActiveSteps(card.steps, activeProducts, onboardingSteps);
-              const activeStepIds = activeSteps?.map(({ id }) => id);
-              const stepsDone: Set<StepId> = getfinishedActiveSteps(
-                finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
-                activeStepIds
-              );
-              const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
-              const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
-              acc.totalStepsLeft += stepsLeft;
-              acc.totalActiveSteps += activeStepIds?.length ?? 0;
+            section.cards?.reduce(
+              (accCards, card) => {
+                const activeSteps = getActiveSteps(card.steps, activeProducts, onboardingSteps);
+                const activeStepIds = activeSteps?.map(({ id }) => id);
+                const stepsDone: Set<StepId> = getfinishedActiveSteps(
+                  finishedSteps[card.id] ? [...finishedSteps[card.id]] : undefined,
+                  activeStepIds
+                );
+                const timeInMins = getCardTimeInMinutes(activeSteps, stepsDone);
+                const stepsLeft = getCardStepsLeft(activeSteps, stepsDone);
+                acc.totalStepsLeft += stepsLeft;
+                acc.totalActiveSteps += activeStepIds?.length ?? 0;
 
-              if (activeSteps && activeSteps.length > 0) {
-                accCards[card.id] = {
-                  id: card.id,
-                  timeInMins,
-                  stepsLeft,
-                  activeStepIds,
-                };
-              }
+                if (activeSteps && activeSteps.length > 0) {
+                  accCards[card.id] = {
+                    id: card.id,
+                    timeInMins,
+                    stepsLeft,
+                    activeStepIds,
+                  };
+                }
 
-              return accCards;
-            }, {} as Record<CardId, ActiveCard>) ?? {};
+                return accCards;
+              },
+              {} as Record<CardId, ActiveCard>
+            ) ?? {};
 
           if (Object.keys(activeCards).length > 0) {
             acc.activeSections[section.id] = activeCards;

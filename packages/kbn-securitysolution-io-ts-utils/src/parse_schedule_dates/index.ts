@@ -15,8 +15,8 @@ export const parseScheduleDates = (time: string): moment.Moment | null => {
   const formattedDate = isValidDateString
     ? moment(time)
     : isValidInput
-    ? dateMath.parse(time)
-    : null;
+      ? dateMath.parse(time)
+      : null;
 
   return formattedDate != null ? formattedDate : null;
 };

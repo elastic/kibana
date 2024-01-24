@@ -72,7 +72,7 @@ function getApmPackageInputVars({
   const overrideValues: Record<string, any> = {
     url: cloudPluginSetup?.apm?.url, // overrides 'apm-server.url' to be the cloud APM host
     rum_allow_origins: ensureValidMultiText(
-      apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH.rum_allow_origins]
+      apmServerSchema[INPUT_VAR_NAME_TO_SCHEMA_PATH.rum_allow_origins],
     ), // fixes issue where "*" needs to be wrapped in quotes to be parsed as a YAML string
   };
 

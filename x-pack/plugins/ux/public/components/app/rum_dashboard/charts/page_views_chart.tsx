@@ -66,7 +66,7 @@ export function PageViewsChart({ breakdown }: Props) {
         }),
       });
     },
-    [history]
+    [history],
   );
 
   if (!dataViewTitle) {

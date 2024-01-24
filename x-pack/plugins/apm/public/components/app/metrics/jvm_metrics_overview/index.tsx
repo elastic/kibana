@@ -60,14 +60,14 @@ export function JvmMetricsOverview() {
               end,
             },
           },
-        }
+        },
       );
     },
-    [kuery, environment, serviceName, start, end]
+    [kuery, environment, serviceName, start, end],
   );
 
   const items = data?.serviceNodes ?? [];
-  const columns: Array<ITableColumn<typeof items[0]>> = [
+  const columns: Array<ITableColumn<(typeof items)[0]>> = [
     {
       name: (
         <EuiToolTip
@@ -100,7 +100,7 @@ export function JvmMetricsOverview() {
                   {
                     defaultMessage:
                       'We could not identify which JVMs these metrics belong to. This is likely caused by running a version of APM Server that is older than 7.5. Upgrading to APM Server 7.5 or higher should resolve this issue.',
-                  }
+                  },
                 ),
               }
             : { displayedName: name, tooltip: name };

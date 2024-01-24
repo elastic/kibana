@@ -13,7 +13,7 @@ const { headless, grep, bail: pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaConfig = await readConfigFile(
-    require.resolve('@kbn/synthetics-plugin/e2e/config')
+    require.resolve('@kbn/synthetics-plugin/e2e/config'),
   );
 
   return {

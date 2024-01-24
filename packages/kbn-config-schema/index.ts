@@ -152,7 +152,7 @@ function oneOf<A, B, C, D, E, F, G, H, I, J, K>(
     Type<H>,
     Type<I>,
     Type<J>,
-    Type<K>
+    Type<K>,
   ],
   options?: TypeOptions<A | B | C | D | E | F | G | H | I | J | K>
 ): Type<A | B | C | D | E | F | G | H | I | J | K>;

@@ -26,7 +26,7 @@ const cssHistogramLegend = ({ euiTheme }: UseEuiTheme) =>
     marginTop: euiTheme.size.xs,
     fontStyle: 'italic',
     fontWeight: 'normal',
-  } as const);
+  }) as const;
 
 interface Props {
   chartData: ChartData;

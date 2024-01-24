@@ -53,7 +53,7 @@ export type HostsTableColumns = [
   Columns<HostItem['lastSeen']>,
   Columns<OsEcs['name']>,
   Columns<OsEcs['version']>,
-  Columns<RiskSeverity>?
+  Columns<RiskSeverity>?,
 ];
 
 const rowItems: ItemsPerRow[] = [

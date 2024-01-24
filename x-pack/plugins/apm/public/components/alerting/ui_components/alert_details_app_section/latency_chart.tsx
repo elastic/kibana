@@ -106,7 +106,7 @@ function LatencyChart({
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },
-          }
+          },
         );
       }
     },
@@ -118,7 +118,7 @@ function LatencyChart({
       start,
       transactionType,
       preferred,
-    ]
+    ],
   );
   const alertEvalThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
 
@@ -170,7 +170,7 @@ function LatencyChart({
         latencyAggregationType,
         previousPeriodLabel: '',
       }),
-    [data, latencyAggregationType]
+    [data, latencyAggregationType],
   );
   const { currentPeriod, previousPeriod } = memoizedData;
 

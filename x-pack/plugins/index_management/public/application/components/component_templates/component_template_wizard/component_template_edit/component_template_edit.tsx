@@ -96,9 +96,8 @@ export const ComponentTemplateEdit: React.FunctionComponent<RouteComponentProps<
       const dataStreamsToRollover: string[] = [];
       for (const dataStream of dataStreams) {
         try {
-          const { error: applyMappingError } = await api.postDataStreamMappingsFromTemplate(
-            dataStream
-          );
+          const { error: applyMappingError } =
+            await api.postDataStreamMappingsFromTemplate(dataStream);
           if (applyMappingError) {
             throw applyMappingError;
           }

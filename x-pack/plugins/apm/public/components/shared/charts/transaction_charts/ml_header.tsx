@@ -38,7 +38,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
     query: { kuery },
   } = useAnyOfApmParams(
     '/services/{serviceName}',
-    '/mobile-services/{serviceName}'
+    '/mobile-services/{serviceName}',
   );
 
   if (!hasValidMlLicense || !mlJobId) {
@@ -56,7 +56,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
         {
           defaultMessage:
             'The Machine learning results are hidden when the search bar is used for filtering',
-        }
+        },
       )}
     />
   ) : (
@@ -66,7 +66,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
         {
           defaultMessage:
             'The stream displays the expected bounds of the average latency. A red vertical annotation indicates anomalies with an anomaly score of 75 or above.',
-        }
+        },
       )}
     />
   );
@@ -80,7 +80,7 @@ export function MLHeader({ hasValidMlLicense, mlJobId }: Props) {
             'xpack.apm.metrics.transactionChart.machineLearningLabel',
             {
               defaultMessage: 'Machine learning:',
-            }
+            },
           )}{' '}
         </span>
         <MLSingleMetricLink

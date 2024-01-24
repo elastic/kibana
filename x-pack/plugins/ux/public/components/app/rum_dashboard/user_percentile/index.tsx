@@ -37,7 +37,7 @@ export function UserPercentile() {
         history.push(newLocation);
       }
     },
-    [history]
+    [history],
   );
 
   useEffect(() => {

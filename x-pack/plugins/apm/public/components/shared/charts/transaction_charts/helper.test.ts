@@ -19,7 +19,7 @@ describe('transaction chart helper', () => {
       const formatter = getDurationFormatter(toMicroseconds(11, 'minutes'));
       const timeTickFormatter = getResponseTimeTickFormatter(formatter);
       expect(timeTickFormatter(toMicroseconds(60, 'seconds'))).toEqual(
-        '1.0 min'
+        '1.0 min',
       );
     });
 

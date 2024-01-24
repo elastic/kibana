@@ -43,7 +43,7 @@ function ServiceNameFilter({ loading, serviceNames }: Props) {
         history.push(newLocation);
       }
     },
-    [history]
+    [history],
   );
 
   useEffect(() => {

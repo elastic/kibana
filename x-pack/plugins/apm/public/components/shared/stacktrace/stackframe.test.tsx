@@ -18,15 +18,15 @@ describe('Stackframe', () => {
     beforeEach(() => {
       const stackframe = stacktracesMock[0];
       wrapper = mountWithTheme(
-        <StackframeComponent id="test" stackframe={stackframe} />
+        <StackframeComponent id="test" stackframe={stackframe} />,
       );
     });
 
     it('renders', () => {
       expect(() =>
         mountWithTheme(
-          <StackframeComponent id="test" stackframe={stacktracesMock[0]} />
-        )
+          <StackframeComponent id="test" stackframe={stacktracesMock[0]} />,
+        ),
       ).not.toThrowError();
     });
 
@@ -46,7 +46,7 @@ describe('Stackframe', () => {
     beforeEach(() => {
       const stackframe = { line: {} } as Stackframe;
       wrapper = mountWithTheme(
-        <StackframeComponent id="test" stackframe={stackframe} />
+        <StackframeComponent id="test" stackframe={stackframe} />,
       );
     });
 
@@ -64,7 +64,7 @@ describe('Stackframe', () => {
   it('should respect isLibraryFrame', () => {
     const stackframe = { line: {} } as Stackframe;
     const wrapper = shallow(
-      <StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />
+      <StackframeComponent id="test" stackframe={stackframe} isLibraryFrame />,
     );
     expect(wrapper.find('FrameHeading').prop('isLibraryFrame')).toBe(true);
   });

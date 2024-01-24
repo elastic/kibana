@@ -48,26 +48,26 @@ export async function createAgentKey({
         application: [application],
         cluster: CLUSTER_PRIVILEGES,
       },
-    }
+    },
   );
 
   if (!hasRequiredPrivileges) {
     const missingPrivileges = Object.entries(
-      userApplicationPrivileges.apm[resource]
+      userApplicationPrivileges.apm[resource],
     )
       .filter((x) => !x[1])
       .map((x) => x[0]);
 
     const missingClusterPrivileges = Object.keys(clusterPrivileges).filter(
-      (key) => !clusterPrivileges[key]
+      (key) => !clusterPrivileges[key],
     );
 
     const error = `${username} is missing the following requested privilege(s): ${missingPrivileges.join(
-      ', '
+      ', ',
     )}${
       missingClusterPrivileges && missingClusterPrivileges.length > 0
         ? ` and following cluster privileges - ${missingClusterPrivileges.join(
-            ', '
+            ', ',
           )} privilege(s)`
         : ''
     }.\

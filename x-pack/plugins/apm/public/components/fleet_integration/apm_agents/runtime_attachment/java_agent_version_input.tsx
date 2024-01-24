@@ -54,12 +54,12 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
       <EuiFormRow
         label={i18n.translate(
           'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version',
-          { defaultMessage: 'Version' }
+          { defaultMessage: 'Version' },
         )}
         isInvalid={!isValid}
         error={i18n.translate(
           'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.invalid',
-          { defaultMessage: 'Invalid version' }
+          { defaultMessage: 'Invalid version' },
         )}
         helpText={
           <FormattedMessage
@@ -74,7 +74,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
                 >
                   {i18n.translate(
                     'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.version.helpText.version',
-                    { defaultMessage: 'version' }
+                    { defaultMessage: 'version' },
                   )}
                 </EuiLink>
               ),
@@ -85,7 +85,7 @@ export function JavaAgentVersionInput({ isValid, version, onChange }: Props) {
         <EuiComboBox
           placeholder={i18n.translate(
             'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.versionSelect.placeHolder',
-            { defaultMessage: 'Select a version' }
+            { defaultMessage: 'Select a version' },
           )}
           singleSelection={{ asPlainText: true }}
           isLoading={isLoading}

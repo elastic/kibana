@@ -44,7 +44,7 @@ export interface GroupResourceNodesResponse {
 export function groupResourceNodes(responseData: {
   elements: ConnectionElement[];
 }): GroupResourceNodesResponse {
-  type ElementDefinition = ValuesType<typeof responseData['elements']>;
+  type ElementDefinition = ValuesType<(typeof responseData)['elements']>;
   const isEdge = (el: ElementDefinition) =>
     Boolean(el.data.source && el.data.target);
   const isNode = (el: ElementDefinition) => !isEdge(el);
@@ -77,7 +77,7 @@ export function groupResourceNodes(responseData: {
       target,
       sources,
       groupId: `resourceGroup{${sources.sort().join(';')}}`,
-    })
+    }),
   );
 
   // group by members
@@ -95,13 +95,13 @@ export function groupResourceNodes(responseData: {
     targets.forEach((target) => {
       // removes grouped nodes from original node set:
       const groupedNodeIndex = ungroupedNodes.findIndex(
-        ({ data }) => data.id === target
+        ({ data }) => data.id === target,
       );
       ungroupedNodes.splice(groupedNodeIndex, 1);
       sources.forEach((source) => {
         // removes edges of grouped nodes from original edge set:
         const groupedEdgeIndex = ungroupedEdges.findIndex(
-          ({ data }) => data.source === source && data.target === target
+          ({ data }) => data.source === source && data.target === target,
         );
         ungroupedEdges.splice(groupedEdgeIndex, 1);
       });
@@ -121,17 +121,17 @@ export function groupResourceNodes(responseData: {
         groupedConnections: compact(
           targets.map((targetId) => {
             const targetElement = nodes.find(
-              (element) => element.data.id === targetId
+              (element) => element.data.id === targetId,
             );
             if (!targetElement) {
               return undefined;
             }
             const { data } = targetElement;
             return { label: data.label || data.id, ...data };
-          })
+          }),
         ),
       },
-    })
+    }),
   );
 
   // add new edges from source to new groups

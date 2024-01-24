@@ -12,12 +12,10 @@ import { SecuritySolutionPluginContext } from '..';
 export const getSecuritySolutionContextMock = (): SecuritySolutionPluginContext => ({
   getFiltersGlobalComponent:
     () =>
-    ({ children }) =>
-      <div>{children}</div>,
+    ({ children }) => <div>{children}</div>,
   getPageWrapper:
     () =>
-    ({ children }) =>
-      <div>{children}</div>,
+    ({ children }) => <div>{children}</div>,
   licenseService: {
     isEnterprise(): boolean {
       return true;

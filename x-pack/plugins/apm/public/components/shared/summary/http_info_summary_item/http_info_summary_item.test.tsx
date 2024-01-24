@@ -22,7 +22,7 @@ describe('HttpInfoSummaryItem', () => {
       expect(() =>
         shallow(<HttpInfoSummaryItem {...props} />, {
           wrappingComponent: EuiThemeProvider,
-        })
+        }),
       ).not.toThrowError();
     });
 

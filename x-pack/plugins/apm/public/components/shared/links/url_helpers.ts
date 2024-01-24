@@ -15,7 +15,7 @@ export function toQuery(search?: string): APMQueryParamsRaw {
 
 export function fromQuery(query: Record<string, any>) {
   const encodedQuery = url.encodeQuery(query, (value) =>
-    encodeURIComponent(value).replace(/%3A/g, ':')
+    encodeURIComponent(value).replace(/%3A/g, ':'),
   );
 
   return stringify(encodedQuery, { sort: false, encode: false });
@@ -29,7 +29,7 @@ type LocationWithQuery = Partial<
 
 function getNextLocation(
   history: History,
-  locationWithQuery: LocationWithQuery
+  locationWithQuery: LocationWithQuery,
 ) {
   const { query, ...rest } = locationWithQuery;
   return {
@@ -44,7 +44,7 @@ function getNextLocation(
 
 export function replace(
   history: History,
-  locationWithQuery: LocationWithQuery
+  locationWithQuery: LocationWithQuery,
 ) {
   const location = getNextLocation(history, locationWithQuery);
   return history.replace(location);
@@ -57,7 +57,7 @@ export function push(history: History, locationWithQuery: LocationWithQuery) {
 
 export function createHref(
   history: History,
-  locationWithQuery: LocationWithQuery
+  locationWithQuery: LocationWithQuery,
 ) {
   const location = getNextLocation(history, locationWithQuery);
   return history.createHref(location);

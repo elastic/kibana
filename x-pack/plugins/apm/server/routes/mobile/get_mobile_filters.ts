@@ -57,28 +57,28 @@ export async function getMobileFilters({
       key: MobileProperty.Device,
       options:
         mobileTransactionEventsFiltersResponse.aggregations?.devices?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: MobileProperty.OsVersion,
       options:
         mobileTransactionEventsFiltersResponse.aggregations?.osVersions?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: MobileProperty.AppVersion,
       options:
         mobileTransactionEventsFiltersResponse.aggregations?.appVersions?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
     {
       key: MobileProperty.NetworkConnectionType,
       options:
         mobileNetworkConnectionTypeFiltersResponse.aggregations?.netConnectionTypes?.buckets?.map(
-          ({ key }) => key as string
+          ({ key }) => key as string,
         ) || [],
     },
   ];

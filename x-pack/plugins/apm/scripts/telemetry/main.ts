@@ -12,7 +12,7 @@ const markdownFilePath = 'x-pack/plugins/apm/dev_docs/apm_telemetry_fields.md';
 
 function extractFieldDescriptions(
   schema: any,
-  parentKeys: string[] = []
+  parentKeys: string[] = [],
 ): string[] {
   const fieldDescriptions = [];
   let currentKey: string;
@@ -30,7 +30,7 @@ function extractFieldDescriptions(
         ...extractFieldDescriptions(schema[currentKey], [
           ...parentKeys,
           currentKey,
-        ])
+        ]),
       );
     }
   }

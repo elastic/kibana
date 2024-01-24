@@ -52,8 +52,9 @@ export const createIsEmptyValidation = (message: string) => (field: unknown) =>
 export const createIsLowerCaseValidation = (message: string) => (field: string) =>
   field.toLowerCase() !== field ? new FormattingError(message) : null;
 
-export const createCharacterLimitValidation = (message: string, limit: number) => (field: string) =>
-  field.length > limit ? new FormattingError(message) : null;
+export const createCharacterLimitValidation =
+  (message: string, limit: number) => (field: string) =>
+    field.length > limit ? new FormattingError(message) : null;
 
 export const createArrayValidator = (validatorsConfig: ValidatorsConfig) => {
   return (arrayField: any[]) => {

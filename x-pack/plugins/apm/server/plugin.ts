@@ -69,7 +69,7 @@ export class APMPlugin
 
   public setup(
     core: CoreSetup<APMPluginStartDependencies>,
-    plugins: APMPluginSetupDependencies
+    plugins: APMPluginSetupDependencies,
   ) {
     this.logger = this.initContext.logger.get();
     const config$ = this.initContext.config.create<APMConfig>();
@@ -148,7 +148,7 @@ export class APMPlugin
     // care of rendering
     if (currentConfig.serverlessOnboarding && plugins.customIntegrations) {
       plugins.customIntegrations?.registerCustomIntegration(
-        apmTutorialCustomIntegration
+        apmTutorialCustomIntegration,
       );
     } else {
       apmIndicesPromise.then((apmIndices) => {
@@ -158,14 +158,14 @@ export class APMPlugin
             apmIndices,
             cloud: plugins.cloud,
             isFleetPluginEnabled: !isEmpty(resourcePlugins.fleet),
-          })
+          }),
         );
       });
     }
 
     const telemetryUsageCounter =
       resourcePlugins.usageCollection?.setup.createUsageCounter(
-        APM_SERVER_FEATURE_ID
+        APM_SERVER_FEATURE_ID,
       );
 
     const kibanaVersion = this.initContext.env.packageInfo.version;
@@ -242,7 +242,7 @@ export class APMPlugin
         logger: this.logger.get('assistant'),
         plugins: resourcePlugins,
         ruleDataClient,
-      })
+      }),
     );
 
     return { config$ };

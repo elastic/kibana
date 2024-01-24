@@ -104,7 +104,7 @@ interface TaskRunnerConstructorParams<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   ruleType: NormalizedRuleType<
     Params,
@@ -129,7 +129,7 @@ export class TaskRunner<
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string,
-  AlertData extends RuleAlertData
+  AlertData extends RuleAlertData,
 > {
   private context: TaskRunnerContext;
   private logger: Logger;

@@ -23,8 +23,8 @@ export async function getApmEventClient({
       getApmIndices(),
       withApmSpan('get_ui_settings', () =>
         coreContext.uiSettings.client.get<boolean>(
-          UI_SETTINGS.SEARCH_INCLUDE_FROZEN
-        )
+          UI_SETTINGS.SEARCH_INCLUDE_FROZEN,
+        ),
       ),
     ]);
 

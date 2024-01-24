@@ -58,7 +58,7 @@ function ConfigurationValueColumn({
             'xpack.apm.onboarding.column.value.copyIconText',
             {
               defaultMessage: 'Copy to clipboard',
-            }
+            },
           )}
           color="text"
           iconType="copy"

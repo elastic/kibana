@@ -103,7 +103,7 @@ describe('getDurationRt', () => {
           it(`${JSON.stringify(input)}`, () => {
             expect(isRight(customDurationRt.decode(input))).toBeFalsy();
           });
-        }
+        },
       );
     });
     describe('it should return correct error message', () => {

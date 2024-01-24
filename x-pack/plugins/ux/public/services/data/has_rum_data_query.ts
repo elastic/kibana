@@ -21,7 +21,7 @@ export function formatHasRumResult<T>(
     ReturnType<typeof hasRumDataQuery>,
     { restTotalHitsAsInt: false }
   >,
-  indices?: string
+  indices?: string,
 ) {
   if (!esResult) return esResult;
   return {

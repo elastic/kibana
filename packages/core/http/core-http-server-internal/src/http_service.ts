@@ -123,7 +123,7 @@ export class HttpService
       registerRouteHandlerContext: (pluginOpaqueId, contextName, provider) =>
         prebootServerRequestHandlerContext.registerContext(pluginOpaqueId, contextName, provider),
       registerRoutes: <
-        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase
+        DefaultRequestHandlerType extends RequestHandlerContextBase = RequestHandlerContextBase,
       >(
         path: string,
         registerCallback: (router: IRouter<DefaultRequestHandlerType>) => void
@@ -189,7 +189,7 @@ export class HttpService
 
       registerRouteHandlerContext: <
         Context extends RequestHandlerContextBase,
-        ContextName extends keyof Context
+        ContextName extends keyof Context,
       >(
         pluginOpaqueId: PluginOpaqueId,
         contextName: ContextName,

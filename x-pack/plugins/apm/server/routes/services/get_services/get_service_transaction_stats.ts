@@ -80,7 +80,7 @@ export async function getServiceTransactionStats({
       avg: {
         field: getDurationFieldForTransactions(
           documentType,
-          useDurationSummary
+          useDurationSummary,
         ),
       },
     },
@@ -153,7 +153,7 @@ export async function getServiceTransactionStats({
           },
         },
       },
-    }
+    },
   );
 
   return {
@@ -161,8 +161,8 @@ export async function getServiceTransactionStats({
       response.aggregations?.sample.services.buckets.map((bucket) => {
         const topTransactionTypeBucket = maybe(
           bucket.transactionType.buckets.find(({ key }) =>
-            isDefaultTransactionType(key as string)
-          ) ?? bucket.transactionType.buckets[0]
+            isDefaultTransactionType(key as string),
+          ) ?? bucket.transactionType.buckets[0],
         );
 
         return {
@@ -170,7 +170,7 @@ export async function getServiceTransactionStats({
           transactionType: topTransactionTypeBucket?.key as string | undefined,
           environments:
             topTransactionTypeBucket?.environments.buckets.map(
-              (environmentBucket) => environmentBucket.key as string
+              (environmentBucket) => environmentBucket.key as string,
             ) ?? [],
           agentName: topTransactionTypeBucket?.sample.top[0].metrics[
             AGENT_NAME

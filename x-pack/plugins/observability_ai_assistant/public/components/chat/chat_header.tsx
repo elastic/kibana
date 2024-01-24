@@ -61,8 +61,8 @@ export function ChatHeader({
   const displayedTitle = !connectors.selectedConnector
     ? ASSISTANT_SETUP_TITLE
     : licenseInvalid
-    ? UPGRADE_LICENSE_TITLE
-    : title || EMPTY_CONVERSATION_TITLE;
+      ? UPGRADE_LICENSE_TITLE
+      : title || EMPTY_CONVERSATION_TITLE;
 
   const theme = useEuiTheme();
 

@@ -26,7 +26,7 @@ const dotnetServiceNameHint = i18n.translate(
   'xpack.apm.tutorial.dotnetClient.createConfig.commands.defaultServiceName',
   {
     defaultMessage: 'Default is the entry assembly of the application.',
-  }
+  },
 );
 
 export const dotnetLineNumbers = {

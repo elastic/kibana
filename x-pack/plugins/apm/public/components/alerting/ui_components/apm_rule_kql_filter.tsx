@@ -37,7 +37,7 @@ export function ApmRuleKqlFilter({
           'xpack.apm.rules.transactionDuration.kqlFilterToggle',
           {
             defaultMessage: 'Use KQL Filter',
-          }
+          },
         )}
         checked={ruleParams.useKqlFilter ?? false}
         onChange={onToggleKqlFilter}

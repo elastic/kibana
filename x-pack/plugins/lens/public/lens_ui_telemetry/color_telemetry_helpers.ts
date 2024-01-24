@@ -95,8 +95,8 @@ const getUnassignedTermsType = (
         isCustomColor(specialAssignments?.[0].color)
           ? 'custom'
           : specialAssignments?.[0].color.paletteId === NeutralPalette.id
-          ? NeutralPalette.id
-          : 'palette'
+            ? NeutralPalette.id
+            : 'palette'
       }`
     : undefined;
 };

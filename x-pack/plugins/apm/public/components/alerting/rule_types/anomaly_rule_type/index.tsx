@@ -74,14 +74,14 @@ export function AnomalyRuleType(props: Props) {
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
       anomalyDetectorTypes: ANOMALY_DETECTOR_SELECTOR_OPTIONS.map(
-        (detector) => detector.type
+        (detector) => detector.type,
       ),
       environment: ENVIRONMENT_ALL.value,
-    }
+    },
   );
 
   const anomalyDetectorsSelectedLabels = params.anomalyDetectorTypes.map(
-    (type) => getApmMlDetectorLabel(type)
+    (type) => getApmMlDetectorLabel(type),
   );
 
   const fields = [
@@ -134,7 +134,7 @@ export function AnomalyRuleType(props: Props) {
         'xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity',
         {
           defaultMessage: 'Has anomaly with severity',
-        }
+        },
       )}
     >
       <SelectAnomalySeverity

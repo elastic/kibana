@@ -103,8 +103,8 @@ export type RuleEventLogListTableProps<T extends RuleEventLogListOptions = 'defa
   T extends 'default'
     ? RuleEventLogListCommonProps
     : T extends 'stackManagement'
-    ? RuleEventLogListCommonProps
-    : never;
+      ? RuleEventLogListCommonProps
+      : never;
 
 export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
   props: RuleEventLogListTableProps<T>

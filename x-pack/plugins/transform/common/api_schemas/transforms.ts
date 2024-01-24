@@ -90,7 +90,7 @@ export const syncSchema = schema.object({
 });
 
 function transformConfigPayloadValidator<
-  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig }
+  T extends { pivot?: PivotConfig; latest?: LatestFunctionConfig },
 >(value: T) {
   if (!value.pivot && !value.latest) {
     return 'pivot or latest is required for transform configuration';

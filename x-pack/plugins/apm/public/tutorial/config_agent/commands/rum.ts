@@ -25,7 +25,7 @@ const rumServiceVersionHint = i18n.translate(
   'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
   {
     defaultMessage: 'Set the service version (required for source map feature)',
-  }
+  },
 );
 
 export const rumLineNumbers = {

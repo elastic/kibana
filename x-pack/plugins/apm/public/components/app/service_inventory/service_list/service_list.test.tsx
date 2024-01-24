@@ -84,7 +84,7 @@ describe('ServiceList', () => {
           link: apmRouter.link,
           serviceOverflowCount: 0,
         }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          c.render ? c.render!(service[c.field!], service) : service[c.field!],
         );
         expect(renderedColumns.length).toEqual(8);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
@@ -125,7 +125,7 @@ describe('ServiceList', () => {
           link: apmRouter.link,
           serviceOverflowCount: 0,
         }).map((c) =>
-          c.render ? c.render!(service[c.field!], service) : service[c.field!]
+          c.render ? c.render!(service[c.field!], service) : service[c.field!],
         );
         expect(renderedColumns.length).toEqual(6);
         expect(renderedColumns[3]).toMatchInlineSnapshot(`
@@ -155,7 +155,9 @@ describe('ServiceList', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+            c.render
+              ? c.render!(service[c.field!], service)
+              : service[c.field!],
           );
           expect(renderedColumns.length).toEqual(7);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`
@@ -195,7 +197,9 @@ describe('ServiceList', () => {
             link: apmRouter.link,
             serviceOverflowCount: 0,
           }).map((c) =>
-            c.render ? c.render!(service[c.field!], service) : service[c.field!]
+            c.render
+              ? c.render!(service[c.field!], service)
+              : service[c.field!],
           );
           expect(renderedColumns.length).toEqual(8);
           expect(renderedColumns[3]).toMatchInlineSnapshot(`

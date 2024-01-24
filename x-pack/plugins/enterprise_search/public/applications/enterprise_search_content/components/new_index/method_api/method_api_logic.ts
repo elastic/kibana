@@ -25,7 +25,7 @@ type MethodApiActions = Pick<
 >;
 
 interface MethodApiValues {
-  status: typeof CreateApiIndexApiLogic.values['status'];
+  status: (typeof CreateApiIndexApiLogic.values)['status'];
 }
 
 export const MethodApiLogic = kea<MakeLogicType<MethodApiValues, MethodApiActions>>({

@@ -63,7 +63,7 @@ export const fetchFieldValuePairs = async ({
                 },
               },
             },
-          }
+          },
         );
 
         return (
@@ -74,8 +74,8 @@ export const fetchFieldValuePairs = async ({
             fieldValue: d.key_as_string ?? d.key,
           })) ?? []
         );
-      })
-    )
+      }),
+    ),
   );
 
   return { fieldValuePairs: responses.flat(), errors };

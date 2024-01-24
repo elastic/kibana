@@ -24,7 +24,7 @@ export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
 
 /** The output provided by some of the Endpoint responses */
 export interface ActionResponseOutput<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   type: 'json' | 'text';
   content: TOutputContent;
@@ -99,7 +99,7 @@ export const ActivityLogItemTypes = {
 
 interface EndpointActionFields<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   action_id: string;
   data: EndpointActionData<TParameters, TOutputContent>;
@@ -150,7 +150,7 @@ export interface LogsEndpointActionWithHosts extends LogsEndpointAction {
  * @since v7.16
  */
 export interface LogsEndpointActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   '@timestamp': string;
   agent: {
@@ -207,7 +207,7 @@ export type EndpointActionResponseDataOutput =
 
 export interface EndpointActionData<
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   command: ResponseActionsApiCommandNames;
   comment?: string;
@@ -271,7 +271,7 @@ export interface EndpointActivityLogAction {
 }
 
 export interface EndpointActivityLogActionResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   type: typeof ActivityLogItemTypes.RESPONSE;
   item: {
@@ -329,7 +329,7 @@ export interface HostIsolationResponse {
 
 export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
 export interface ResponseActionApiResponse<
-  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
 > {
   action?: string;
   data: ActionDetails<TOutputContent>;
@@ -359,7 +359,7 @@ export interface ActionDetailsAgentState {
 
 export interface ActionDetails<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   /**
    * The action ID. This is a legacy property action and should no longer be used. Only here for
@@ -425,7 +425,7 @@ export interface ActionDetails<
 
 export interface ActionDetailsApiResponse<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
-  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
+  TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes,
 > {
   data: ActionDetails<TOutputContent, TParameters>;
 }

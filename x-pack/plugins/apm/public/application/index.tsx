@@ -88,7 +88,7 @@ export const renderApp = ({
         apmServices={apmServices}
       />
     </KibanaThemeProvider>,
-    element
+    element,
   );
   return () => {
     ReactDOM.unmountComponentAtNode(element);

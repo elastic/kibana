@@ -16,7 +16,7 @@ describe('Comparison feature flag', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 
@@ -76,7 +76,7 @@ describe('Comparison feature flag', () => {
 
     it('shows the comparison feature disabled in dependencies overview page', () => {
       cy.intercept('GET', '/internal/apm/dependencies/top_dependencies?*').as(
-        'topDependenciesRequest'
+        'topDependenciesRequest',
       );
       cy.visitKibana('/app/apm/dependencies');
       cy.wait('@topDependenciesRequest');

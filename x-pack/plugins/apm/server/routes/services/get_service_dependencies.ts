@@ -55,7 +55,7 @@ export type ServiceDependenciesResponse = Array<
 >;
 
 export async function getServiceDependencies(
-  opts: Options
+  opts: Options,
 ): Promise<ServiceDependenciesResponse> {
   const { offset, ...sharedOptions } = opts;
 
@@ -69,7 +69,7 @@ export async function getServiceDependencies(
   return currentPeriod.map((item) => {
     const { stats, ...rest } = item;
     const previousPeriodItem = previousPeriod.find(
-      (prevItem): boolean => item.location.id === prevItem.location.id
+      (prevItem): boolean => item.location.id === prevItem.location.id,
     );
 
     return {

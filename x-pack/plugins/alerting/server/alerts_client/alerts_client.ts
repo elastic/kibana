@@ -77,7 +77,7 @@ export class AlertsClient<
   LegacyState extends AlertInstanceState,
   LegacyContext extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > implements
     IAlertsClient<AlertData, LegacyState, LegacyContext, ActionGroupIds, RecoveryActionGroupId>
 {

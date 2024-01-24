@@ -50,7 +50,7 @@ export async function getContainerHostNames({
   });
 
   const hostNames = response.aggregations?.hostNames?.buckets.map(
-    (bucket) => bucket.key as string
+    (bucket) => bucket.key as string,
   );
 
   return hostNames ?? [];

@@ -126,7 +126,7 @@ export const checkIfIndicesExist = ({
   scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
-    ? isDefaultDataViewSelected
-      ? patternList.filter((i) => i !== signalIndexName).length > 0
-      : patternList.length > 0
-    : patternList.length > 0;
+      ? isDefaultDataViewSelected
+        ? patternList.filter((i) => i !== signalIndexName).length > 0
+        : patternList.length > 0
+      : patternList.length > 0;

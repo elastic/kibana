@@ -41,7 +41,7 @@ const getApmTimeSeriesRoute = createApmServerRoute({
     body: getApmTimeseriesRt,
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     content: Array<Omit<ApmTimeseries, 'data'>>;
     data: ApmTimeseries[];
@@ -57,7 +57,7 @@ const getApmTimeSeriesRoute = createApmServerRoute({
 
     return {
       content: timeseries.map(
-        (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data')
+        (series): Omit<ApmTimeseries, 'data'> => omit(series, 'data'),
       ),
       data: timeseries,
     };
@@ -73,7 +73,7 @@ const getApmServiceSummaryRoute = createApmServerRoute({
     query: serviceSummaryRouteRt,
   }),
   handler: async (
-    resources
+    resources,
   ): Promise<{
     content: ServiceSummary;
   }> => {
@@ -92,7 +92,7 @@ const getApmServiceSummaryRoute = createApmServerRoute({
       plugins.observability.setup.getScopedAnnotationsClient(context, request),
       context.core.then(
         (coreContext): ElasticsearchClient =>
-          coreContext.elasticsearch.client.asCurrentUser
+          coreContext.elasticsearch.client.asCurrentUser,
       ),
       getApmAlertsClient(resources),
       getMlClient(resources),
@@ -121,7 +121,7 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{ content: APMDownstreamDependency[] }> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);

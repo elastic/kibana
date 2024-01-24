@@ -46,7 +46,7 @@ export function TransactionLink() {
         });
       }
     },
-    [transactionId, start, end]
+    [transactionId, start, end],
   );
   if (transactionId && status === FETCH_STATUS.SUCCESS) {
     if (data.transaction) {

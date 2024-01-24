@@ -30,8 +30,8 @@ export const RunTestManually = () => {
   const content = !canUsePublicLocations
     ? CANNOT_PERFORM_ACTION_PUBLIC_LOCATIONS
     : testInProgress
-    ? TEST_SCHEDULED_LABEL
-    : TEST_NOW_ARIA_LABEL;
+      ? TEST_SCHEDULED_LABEL
+      : TEST_NOW_ARIA_LABEL;
 
   return (
     <EuiToolTip content={content} key={content}>

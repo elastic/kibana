@@ -80,7 +80,7 @@ async function getServerlessTransactionThroughput({
 
   const response = await apmEventClient.search(
     'get_serverless_transaction_throughout',
-    params
+    params,
   );
 
   return response.hits.total.value;

@@ -72,7 +72,7 @@ function EmbeddedMapComponent({
             'xpack.apm.serviceOverview.embeddedMap.error.toastTitle',
             {
               defaultMessage: 'An error occurred when adding map embeddable',
-            }
+            },
           ),
           text: i18n.translate(
             'xpack.apm.serviceOverview.embeddedMap.error.toastDescription',
@@ -81,7 +81,7 @@ function EmbeddedMapComponent({
               values: {
                 embeddableFactoryId: MAP_SAVED_OBJECT_TYPE,
               },
-            }
+            },
           ),
         });
         return;
@@ -94,7 +94,7 @@ function EmbeddedMapComponent({
           'xpack.apm.serviceOverview.embeddedMap.input.title',
           {
             defaultMessage: 'Latency by country',
-          }
+          },
         ),
         filters,
         viewMode: ViewMode.VIEW,

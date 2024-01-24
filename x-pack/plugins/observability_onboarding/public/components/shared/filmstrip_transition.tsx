@@ -30,8 +30,8 @@ export function FilmstripTransition({
           transition === 'ready'
             ? 'translateX(0)'
             : transition === 'back'
-            ? 'translateX(200%)'
-            : 'translateX(-200%)',
+              ? 'translateX(200%)'
+              : 'translateX(-200%)',
       }}
     >
       {children}

@@ -67,12 +67,12 @@ export const RoleComboBox = (props: Props) => {
     const type = option.value?.isDeprecated
       ? 'deprecated'
       : option.value?.isSystem
-      ? 'system'
-      : option.value?.isAdmin
-      ? 'admin'
-      : option.value?.isReserved
-      ? 'user'
-      : 'custom';
+        ? 'system'
+        : option.value?.isAdmin
+          ? 'admin'
+          : option.value?.isReserved
+            ? 'user'
+            : 'custom';
     if (!acc[type]) {
       acc[type] = [];
     }

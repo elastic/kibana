@@ -18,7 +18,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createDjangoAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,

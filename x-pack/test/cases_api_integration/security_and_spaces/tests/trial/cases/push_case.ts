@@ -522,9 +522,8 @@ export default ({ getService }: FtrProviderContext): void => {
         let superUserInfo: User;
 
         before(async () => {
-          ({ headers, superUserInfo, superUserWithProfile } = await setupSuperUserProfile(
-            getService
-          ));
+          ({ headers, superUserInfo, superUserWithProfile } =
+            await setupSuperUserProfile(getService));
         });
 
         it('sets the closed by profile uid in the case and comment', async () => {

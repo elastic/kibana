@@ -52,10 +52,13 @@ export interface CrawlCustomSettingsFlyoutLogicActions {
 }
 
 const filterSeedUrlsByDomainUrls = (seedUrls: string[], domainUrls: string[]): string[] => {
-  const domainUrlMap = domainUrls.reduce((acc, domainUrl) => {
-    acc[domainUrl] = true;
-    return acc;
-  }, {} as { [key: string]: boolean });
+  const domainUrlMap = domainUrls.reduce(
+    (acc, domainUrl) => {
+      acc[domainUrl] = true;
+      return acc;
+    },
+    {} as { [key: string]: boolean }
+  );
 
   return seedUrls.filter((seedUrl) => {
     const { domain } = extractDomainAndEntryPointFromUrl(seedUrl);
@@ -173,10 +176,13 @@ export const CrawlCustomSettingsFlyoutLogic = kea<
     domainConfigMap: [
       (selectors) => [selectors.domainConfigs],
       (domainConfigs: DomainConfig[]) =>
-        domainConfigs.reduce((acc, domainConfig) => {
-          acc[domainConfig.name] = domainConfig;
-          return acc;
-        }, {} as { [key: string]: DomainConfig }),
+        domainConfigs.reduce(
+          (acc, domainConfig) => {
+            acc[domainConfig.name] = domainConfig;
+            return acc;
+          },
+          {} as { [key: string]: DomainConfig }
+        ),
     ],
     entryPointUrls: [
       (selectors) => [selectors.domainConfigMap, selectors.selectedDomainUrls],

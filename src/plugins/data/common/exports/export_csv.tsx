@@ -37,10 +37,13 @@ export function datatableToCSV(
   const sortedIds = columnsSorting || columns.map((col) => col.id);
 
   // Build an index lookup table
-  const columnIndexLookup = sortedIds.reduce((memo, id, index) => {
-    memo[id] = index;
-    return memo;
-  }, {} as Record<string, number>);
+  const columnIndexLookup = sortedIds.reduce(
+    (memo, id, index) => {
+      memo[id] = index;
+      return memo;
+    },
+    {} as Record<string, number>
+  );
 
   // Build the header row by its names
   const header: string[] = [];

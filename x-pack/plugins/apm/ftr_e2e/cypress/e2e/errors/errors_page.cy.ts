@@ -36,7 +36,7 @@ describe('Errors page', () => {
         generateData({
           from: new Date(start).getTime(),
           to: new Date(end).getTime(),
-        })
+        }),
       );
     });
 
@@ -120,7 +120,7 @@ describe('Check detailed statistics API with multiple errors', () => {
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
         errorCount: 50,
-      })
+      }),
     );
   });
 
@@ -135,11 +135,11 @@ describe('Check detailed statistics API with multiple errors', () => {
   it('calls detailed API with visible items only', () => {
     cy.intercept(
       'GET',
-      '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*'
+      '/internal/apm/services/opbeans-java/errors/groups/main_statistics?*',
     ).as('errorsMainStatistics');
     cy.intercept(
       'POST',
-      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*'
+      '/internal/apm/services/opbeans-java/errors/groups/detailed_statistics?*',
     ).as('errorsDetailedStatistics');
     cy.visitKibana(`${javaServiceErrorsPageHref}&pageSize=10`);
     cy.wait('@errorsMainStatistics');

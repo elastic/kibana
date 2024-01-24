@@ -80,20 +80,20 @@ export const ServiceInventoryTitle = i18n.translate(
   'xpack.apm.views.serviceInventory.title',
   {
     defaultMessage: 'Services',
-  }
+  },
 );
 export const ServiceMapTitle = i18n.translate(
   'xpack.apm.views.serviceMap.title',
   {
     defaultMessage: 'Service Map',
-  }
+  },
 );
 
 export const DependenciesOperationsTitle = i18n.translate(
   'xpack.apm.views.dependenciesOperations.title',
   {
     defaultMessage: 'Operations',
-  }
+  },
 );
 
 export const homeRoute = {

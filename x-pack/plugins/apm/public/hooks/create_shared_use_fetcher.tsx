@@ -25,7 +25,7 @@ interface SharedUseFetcher<TEndpoint extends APIEndpoint> {
 }
 
 export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
-  endpoint: TEndpoint
+  endpoint: TEndpoint,
 ): SharedUseFetcher<TEndpoint> {
   const Context = createContext<
     APIClientRequestParamsOf<APIEndpoint> | undefined
@@ -44,10 +44,10 @@ export function createSharedUseFetcher<TEndpoint extends APIEndpoint>(
       const result = useFetcher(
         (callApmApi) => {
           return callApmApi(
-            ...([endpoint, { params }] as Parameters<typeof callApmApi>)
+            ...([endpoint, { params }] as Parameters<typeof callApmApi>),
           );
         },
-        [params]
+        [params],
       );
 
       return result as ReturnType<

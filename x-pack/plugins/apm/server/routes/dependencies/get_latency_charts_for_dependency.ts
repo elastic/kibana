@@ -58,7 +58,7 @@ async function getLatencyChartsForDependencyForTimeRange({
     apm: {
       events: [
         getProcessorEventForServiceDestinationStatistics(
-          searchServiceDestinationMetrics
+          searchServiceDestinationMetrics,
         ),
       ],
     },
@@ -73,7 +73,7 @@ async function getLatencyChartsForDependencyForTimeRange({
             ...rangeQuery(startWithOffset, endWithOffset),
             ...termQuery(SPAN_NAME, spanName || null),
             ...getDocumentTypeFilterForServiceDestinationStatistics(
-              searchServiceDestinationMetrics
+              searchServiceDestinationMetrics,
             ),
             { term: { [SPAN_DESTINATION_SERVICE_RESOURCE]: dependencyName } },
           ],
@@ -90,7 +90,7 @@ async function getLatencyChartsForDependencyForTimeRange({
             latency_sum: {
               sum: {
                 field: getLatencyFieldForServiceDestinationStatistics(
-                  searchServiceDestinationMetrics
+                  searchServiceDestinationMetrics,
                 ),
               },
             },
@@ -99,7 +99,7 @@ async function getLatencyChartsForDependencyForTimeRange({
                   latency_count: {
                     sum: {
                       field: getDocCountFieldForServiceDestinationStatistics(
-                        searchServiceDestinationMetrics
+                        searchServiceDestinationMetrics,
                       ),
                     },
                   },

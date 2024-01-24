@@ -23,7 +23,7 @@ export type ProcessorFunction<TParams = unknown, TInput = unknown, TOutput = TIn
 export const buildProcessorFunction = <
   TFunction extends Function = Function,
   TArgs = unknown,
-  TResult = unknown
+  TResult = unknown,
 >(
   chain: TFunction[],
   args: TArgs

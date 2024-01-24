@@ -16,13 +16,13 @@ export default function ({ getService }: FtrProviderContext) {
     const INDEX_NAME = `index-${Math.random()}`;
     const POLICY_NAME = `policy-${Math.random()}`;
 
-    let createIndex: typeof indexManagementService['enrichPolicies']['helpers']['createIndex'];
-    let deleteIndex: typeof indexManagementService['enrichPolicies']['helpers']['deleteIndex'];
-    let createEnrichPolicy: typeof indexManagementService['enrichPolicies']['helpers']['createEnrichPolicy'];
+    let createIndex: (typeof indexManagementService)['enrichPolicies']['helpers']['createIndex'];
+    let deleteIndex: (typeof indexManagementService)['enrichPolicies']['helpers']['deleteIndex'];
+    let createEnrichPolicy: (typeof indexManagementService)['enrichPolicies']['helpers']['createEnrichPolicy'];
 
-    let getAllEnrichPolicies: typeof indexManagementService['enrichPolicies']['api']['getAllEnrichPolicies'];
-    let removeEnrichPolicy: typeof indexManagementService['enrichPolicies']['api']['removeEnrichPolicy'];
-    let executeEnrichPolicy: typeof indexManagementService['enrichPolicies']['api']['executeEnrichPolicy'];
+    let getAllEnrichPolicies: (typeof indexManagementService)['enrichPolicies']['api']['getAllEnrichPolicies'];
+    let removeEnrichPolicy: (typeof indexManagementService)['enrichPolicies']['api']['removeEnrichPolicy'];
+    let executeEnrichPolicy: (typeof indexManagementService)['enrichPolicies']['api']['executeEnrichPolicy'];
 
     before(async () => {
       ({

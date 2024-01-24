@@ -61,7 +61,7 @@ export const generateSystemLogsYml = ({
  * Utils
  */
 export const getSystemLogsDataStreams = (
-  uuid: string = ''
+  uuid: string = '',
 ): SystemLogsStream[] => [
   {
     id: `logfile-system.auth-${uuid}`,

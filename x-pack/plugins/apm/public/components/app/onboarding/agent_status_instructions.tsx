@@ -22,7 +22,7 @@ function AgentStatusWarningCallout() {
         'xpack.apm.onboarding.agentStatus.warning.calloutMessage',
         {
           defaultMessage: 'No data has been received from agents yet',
-        }
+        },
       )}
     </EuiCallOut>
   );
@@ -35,7 +35,7 @@ function AgentStatusSuccessCallout() {
         'xpack.apm.onboarding.agentStatus.success.calloutMessage',
         {
           defaultMessage: 'Data successfully received from one or more agents',
-        }
+        },
       )}
     </EuiCallOut>
   );

@@ -58,7 +58,7 @@ export function InstanceActionsMenu({
   const history = useHistory();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
+    ALL_DATASETS_LOCATOR_ID,
   )!;
   const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
 

@@ -29,10 +29,10 @@ export interface ESIndexPatternService {
  */
 
 export interface AgentPolicyServiceInterface {
-  get: typeof agentPolicyService['get'];
-  list: typeof agentPolicyService['list'];
-  getFullAgentPolicy: typeof agentPolicyService['getFullAgentPolicy'];
-  getByIds: typeof agentPolicyService['getByIDs'];
+  get: (typeof agentPolicyService)['get'];
+  list: (typeof agentPolicyService)['list'];
+  getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
+  getByIds: (typeof agentPolicyService)['getByIDs'];
 }
 
 // Agent services

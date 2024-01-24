@@ -10,8 +10,8 @@ export const stringifyJson = (json: any, renderAsArray: boolean = true): string 
   (!renderAsArray && json && typeof json === 'object' && !Array.isArray(json))
     ? JSON.stringify(json, null, 2)
     : renderAsArray
-    ? '[\n\n]'
-    : '{\n\n}';
+      ? '[\n\n]'
+      : '{\n\n}';
 
 export const parseJson = (jsonString: string, renderAsArray: boolean = true): object[] => {
   let parsedJSON: any;

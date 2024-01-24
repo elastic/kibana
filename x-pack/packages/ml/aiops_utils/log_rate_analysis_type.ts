@@ -18,4 +18,4 @@ export const LOG_RATE_ANALYSIS_TYPE = {
  * Union type of log rate analysis types.
  */
 export type LogRateAnalysisType =
-  typeof LOG_RATE_ANALYSIS_TYPE[keyof typeof LOG_RATE_ANALYSIS_TYPE];
+  (typeof LOG_RATE_ANALYSIS_TYPE)[keyof typeof LOG_RATE_ANALYSIS_TYPE];

@@ -85,14 +85,14 @@ function ThroughputChart({
                   bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 },
               },
-            }
+            },
           );
         }
       },
-      [environment, serviceName, start, end, transactionType, preferred]
+      [environment, serviceName, start, end, transactionType, preferred],
     );
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
+    ChartType.THROUGHPUT,
   );
   const timeseriesThroughput = [
     {
@@ -124,7 +124,7 @@ function ThroughputChart({
               <h2>
                 {i18n.translate(
                   'xpack.apm.serviceOverview.throughtputChartTitle',
-                  { defaultMessage: 'Throughput' }
+                  { defaultMessage: 'Throughput' },
                 )}
               </h2>
             </EuiTitle>

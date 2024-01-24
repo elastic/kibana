@@ -30,7 +30,7 @@ export function ErrorOverviewLink({ serviceName, query, ...rest }: Props) {
         serviceName,
       },
       query,
-    }
+    },
   );
 
   return (

@@ -22,10 +22,10 @@ export async function getUnsupportedApmServerSchema({
 }): Promise<UnsupportedApmServerSchema> {
   const { attributes } = await savedObjectsClient.get(
     APM_SERVER_SCHEMA_SAVED_OBJECT_TYPE,
-    APM_SERVER_SCHEMA_SAVED_OBJECT_ID
+    APM_SERVER_SCHEMA_SAVED_OBJECT_ID,
   );
   const apmServerSchema: Record<string, any> = JSON.parse(
-    (attributes as { schemaJson: string }).schemaJson
+    (attributes as { schemaJson: string }).schemaJson,
   );
   const translatedApmServerSchema = translateLegacySchemaPaths(apmServerSchema);
   const supportedSchemaPaths = Object.values(INPUT_VAR_NAME_TO_SCHEMA_PATH);

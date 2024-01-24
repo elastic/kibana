@@ -19,7 +19,7 @@ describe('KeyValueFilterList', () => {
         title="foo"
         keyValueList={[]}
         onClickFilter={jest.fn}
-      />
+      />,
     );
     expect(container).toBeEmptyDOMElement();
   });
@@ -32,7 +32,7 @@ describe('KeyValueFilterList', () => {
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
-      />
+      />,
     );
     expectTextsInDocument(component, [
       'title',
@@ -52,7 +52,7 @@ describe('KeyValueFilterList', () => {
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
-      />
+      />,
     );
     expect(component.getByTestId('accordion_title_icon')).toBeInTheDocument();
     expectTextsInDocument(component, ['title']);
@@ -66,7 +66,7 @@ describe('KeyValueFilterList', () => {
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
-      />
+      />,
     );
     expect(component.queryAllByTestId('accordion_title_icon')).toEqual([]);
     expectTextsInDocument(component, ['title']);
@@ -81,7 +81,7 @@ describe('KeyValueFilterList', () => {
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={jest.fn}
-      />
+      />,
     );
     expect(component.queryAllByTestId('filter_by_foo')).toEqual([]);
     expect(component.queryAllByTestId('filter_by_bar')).toHaveLength(1);
@@ -96,7 +96,7 @@ describe('KeyValueFilterList', () => {
           { key: 'bar', value: 'bar value', isFilterable: true },
         ]}
         onClickFilter={mockFilter}
-      />
+      />,
     );
 
     fireEvent.click(component.getByTestId('filter_by_foo'));

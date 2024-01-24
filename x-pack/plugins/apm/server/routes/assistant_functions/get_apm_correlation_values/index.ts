@@ -48,7 +48,7 @@ export const correlationValuesRouteRt = t.type({
         t.literal(CorrelationsEventType.ExitSpan),
         t.literal(CorrelationsEventType.Error),
       ]),
-    })
+    }),
   ),
 });
 
@@ -169,7 +169,7 @@ export async function getApmCorrelationValues({
       }
 
       return { correlations };
-    })
+    }),
   );
 
   return allCorrelations.flatMap((_) => _.correlations);

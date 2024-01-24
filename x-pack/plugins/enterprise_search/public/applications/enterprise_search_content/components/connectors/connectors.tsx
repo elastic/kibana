@@ -87,63 +87,66 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
         rightSideItems: isLoading
           ? []
           : !isCrawler
-          ? [
-              <EuiButton
-                key="newConnector"
-                color="primary"
-                iconType="plusInCircle"
-                fill
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
-                  defaultMessage="New Connector"
-                />
-              </EuiButton>,
-              <EuiButton
-                key="newConnectorNative"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
-                }}
-              >
-                {i18n.translate('xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel', {
-                  defaultMessage: 'New Native Connector',
-                })}
-              </EuiButton>,
-              <EuiButton
-                key="newConnectorClient"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
-                }}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                  { defaultMessage: 'New Connector Client' }
-                )}
-              </EuiButton>,
-            ]
-          : [
-              <EuiButton
-                disabled={Boolean(errorConnectingMessage)}
-                key="newCrawler"
-                color="primary"
-                iconType="plusInCircle"
-                fill
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(
-                    generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                      type: INGESTION_METHOD_IDS.CRAWLER,
-                    })
-                  );
-                }}
-              >
-                {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
-                  defaultMessage: 'New web crawler',
-                })}
-              </EuiButton>,
-            ],
+            ? [
+                <EuiButton
+                  key="newConnector"
+                  color="primary"
+                  iconType="plusInCircle"
+                  fill
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                    defaultMessage="New Connector"
+                  />
+                </EuiButton>,
+                <EuiButton
+                  key="newConnectorNative"
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
+                    {
+                      defaultMessage: 'New Native Connector',
+                    }
+                  )}
+                </EuiButton>,
+                <EuiButton
+                  key="newConnectorClient"
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
+                    { defaultMessage: 'New Connector Client' }
+                  )}
+                </EuiButton>,
+              ]
+            : [
+                <EuiButton
+                  disabled={Boolean(errorConnectingMessage)}
+                  key="newCrawler"
+                  color="primary"
+                  iconType="plusInCircle"
+                  fill
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(
+                      generateEncodedPath(NEW_INDEX_METHOD_PATH, {
+                        type: INGESTION_METHOD_IDS.CRAWLER,
+                      })
+                    );
+                  }}
+                >
+                  {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
+                    defaultMessage: 'New web crawler',
+                  })}
+                </EuiButton>,
+              ],
       }}
     >
       {Boolean(errorConnectingMessage) && (

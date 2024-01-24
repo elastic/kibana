@@ -88,10 +88,13 @@ export function StorageContextProvider<K extends TStorageKey, T extends TStorage
   storageKeys,
 }: PropsWithChildren<StorageContextProviderProps<K>>) {
   const initialValue = useMemo(() => {
-    return storageKeys.reduce((acc, curr) => {
-      acc[curr as K] = storage.get(curr as string);
-      return acc;
-    }, {} as Exclude<T, null>);
+    return storageKeys.reduce(
+      (acc, curr) => {
+        acc[curr as K] = storage.get(curr as string);
+        return acc;
+      },
+      {} as Exclude<T, null>
+    );
   }, [storage, storageKeys]);
 
   const [state, setState] = useState<T>(initialValue);
@@ -168,7 +171,7 @@ export function useStorage<K extends TStorageKey, T extends TStorageMapped<K>>(
   initValue?: T
 ): [
   typeof initValue extends undefined ? T | undefined : Exclude<T, undefined>,
-  (value: T) => void
+  (value: T) => void,
 ] {
   const { value, setValue, removeValue } = useContext(MlStorageContext);
 

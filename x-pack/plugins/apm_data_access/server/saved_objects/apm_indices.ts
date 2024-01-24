@@ -91,10 +91,13 @@ function removeEmpty(apmIndices: Partial<APMIndices>) {
   return Object.entries(apmIndices)
     .map(([key, value]) => [key, value?.trim()])
     .filter(([_, value]) => !!value)
-    .reduce((obj, [key, value]) => {
-      obj[key] = value;
-      return obj;
-    }, {} as Record<string, unknown>);
+    .reduce(
+      (obj, [key, value]) => {
+        obj[key] = value;
+        return obj;
+      },
+      {} as Record<string, unknown>
+    );
 }
 
 export async function getApmIndicesSavedObject(savedObjectsClient: SavedObjectsClientContract) {

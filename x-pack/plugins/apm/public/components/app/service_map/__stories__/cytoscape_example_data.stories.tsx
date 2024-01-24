@@ -60,7 +60,7 @@ export const GenerateMap: Story<{}> = () => {
   const [size, setSize] = useState<number>(10);
   const [json, setJson] = useState<string>('');
   const [elements, setElements] = useState<any[]>(
-    generateServiceMapElements({ size, hasAnomalies: true })
+    generateServiceMapElements({ size, hasAnomalies: true }),
   );
   return (
     <div>
@@ -70,7 +70,7 @@ export const GenerateMap: Story<{}> = () => {
             data-test-subj="apmGenerateMapGenerateServiceMapButton"
             onClick={() => {
               setElements(
-                generateServiceMapElements({ size, hasAnomalies: true })
+                generateServiceMapElements({ size, hasAnomalies: true }),
               );
               setJson('');
             }}
@@ -118,7 +118,7 @@ export const GenerateMap: Story<{}> = () => {
 
 export const MapFromJSON: Story<{}> = () => {
   const [json, setJson] = useState<string>(
-    getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2)
+    getSessionJson() || JSON.stringify(exampleResponseTodo, null, 2),
   );
   const [error, setError] = useState<string | undefined>();
 

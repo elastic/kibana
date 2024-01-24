@@ -40,7 +40,7 @@ export type ControlFactory<T extends ControlInput = ControlInput> = EmbeddableFa
 
 export type ControlEmbeddable<
   TControlEmbeddableInput extends ControlInput = ControlInput,
-  TControlEmbeddableOutput extends ControlOutput = ControlOutput
+  TControlEmbeddableOutput extends ControlOutput = ControlOutput,
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;

@@ -1103,4 +1103,4 @@ export const getBrowserPolicy = (
     updated_at: '2023-04-19T18:55:35.250Z',
     created_at: '2023-04-19T18:55:35.250Z',
     typeMigrationVersion: '8.7.0',
-  } as unknown as SavedObjectUnsanitizedDoc<PackagePolicy>);
+  }) as unknown as SavedObjectUnsanitizedDoc<PackagePolicy>;

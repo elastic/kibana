@@ -84,8 +84,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
           currentStep === index
             ? 'current'
             : currentStep > index
-            ? 'complete'
-            : ('incomplete' as EuiStepStatus),
+              ? 'complete'
+              : ('incomplete' as EuiStepStatus),
       };
     });
     setStatus(statuses.reduce((acc: Record<string, EuiStepStatus>, i) => ({ ...acc, ...i }), {}));
@@ -102,16 +102,16 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
         selectedStep != null
           ? selectedStep
           : currentStep === 4
-          ? currentStep
-          : ((currentStep + 1) as PossibleStepNumbers);
+            ? currentStep
+            : ((currentStep + 1) as PossibleStepNumbers);
       const fieldsToValidate: string[] =
         nextStep === 2
           ? fields.step1
           : nextStep === 3
-          ? [...fields.step1, ...fields.step2]
-          : nextStep === 4
-          ? [...fields.step1, ...fields.step2, ...fields.step3]
-          : [];
+            ? [...fields.step1, ...fields.step2]
+            : nextStep === 4
+              ? [...fields.step1, ...fields.step2, ...fields.step3]
+              : [];
       // step validation needs async call in order to run each field through validator
       const { areFieldsValid } = await validateFields(fieldsToValidate);
 

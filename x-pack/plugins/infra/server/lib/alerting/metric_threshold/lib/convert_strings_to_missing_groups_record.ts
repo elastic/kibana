@@ -16,10 +16,13 @@ export const convertStringsToMissingGroupsRecord = (
       const parts = subject.split(',');
       return {
         key: subject,
-        bucketKey: parts.reduce((acc, part, index) => {
-          acc[`groupBy${index}`] = part;
-          return acc;
-        }, {} as Record<string, string>),
+        bucketKey: parts.reduce(
+          (acc, part, index) => {
+            acc[`groupBy${index}`] = part;
+            return acc;
+          },
+          {} as Record<string, string>
+        ),
       };
     }
     return subject;

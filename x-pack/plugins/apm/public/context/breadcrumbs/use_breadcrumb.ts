@@ -12,7 +12,7 @@ import { Breadcrumb, BreadcrumbsContext } from './context';
 
 export function useBreadcrumb(
   callback: () => Breadcrumb | Breadcrumb[],
-  fnDeps: any[]
+  fnDeps: any[],
 ) {
   const api = useContext(BreadcrumbsContext);
 

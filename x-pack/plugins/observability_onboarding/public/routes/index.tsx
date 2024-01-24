@@ -13,7 +13,7 @@ import { systemLogsRoutes } from '../components/app/system_logs';
 import { Home } from '../components/app/home';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<
-  typeof routes[T]['params']
+  (typeof routes)[T]['params']
 >;
 
 type DecodeParams<TParams extends Params | undefined> = {

@@ -30,7 +30,7 @@ const formatDifference = (value: number) => {
 
 const calculateDiffPercentageAndFormat = (
   currentValue?: number,
-  previousValue?: number
+  previousValue?: number,
 ) => {
   if (currentValue && previousValue) {
     const diffPercentageValue =
@@ -80,10 +80,10 @@ export function MobileLocationStats({
               offset,
             },
           },
-        }
+        },
       );
     },
-    [start, end, environment, kuery, serviceName, locationField, offset]
+    [start, end, environment, kuery, serviceName, locationField, offset],
   );
 
   const getIcon = useCallback(
@@ -103,7 +103,7 @@ export function MobileLocationStats({
           <EuiIcon type={type} width={width} height={height} fill={color} />
         );
       },
-    [locationStatsStatus]
+    [locationStatsStatus],
   );
 
   const loadingLocationStats = isPending(locationStatsStatus);
@@ -115,7 +115,7 @@ export function MobileLocationStats({
     ({ currentPeriodValue, previousPeriodValue }) => {
       const comparisonDiffValue = calculateDiffPercentageAndFormat(
         currentPeriodValue,
-        previousPeriodValue
+        previousPeriodValue,
       );
       if (comparisonDiffValue && comparisonEnabled) {
         return (
@@ -126,7 +126,7 @@ export function MobileLocationStats({
       }
       return <span>{currentPeriodValue ? `${currentPeriodValue}` : null}</span>;
     },
-    [comparisonEnabled, previousPeriodLabel]
+    [comparisonEnabled, previousPeriodLabel],
   );
 
   const metrics: MetricDatum[] = [
@@ -136,7 +136,7 @@ export function MobileLocationStats({
         'xpack.apm.mobile.location.metrics.http.requests.title',
         {
           defaultMessage: 'Most used in',
-        }
+        },
       ),
       extra: getComparisonValueFormatter({
         currentPeriodValue: currentPeriod?.mostRequests.value,

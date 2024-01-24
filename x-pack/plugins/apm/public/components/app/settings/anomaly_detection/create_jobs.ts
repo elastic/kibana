@@ -11,12 +11,12 @@ import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 const errorToastTitle = i18n.translate(
   'xpack.apm.anomalyDetection.createJobs.failed.title',
-  { defaultMessage: 'Anomaly detection jobs could not be created' }
+  { defaultMessage: 'Anomaly detection jobs could not be created' },
 );
 
 const successToastTitle = i18n.translate(
   'xpack.apm.anomalyDetection.createJobs.succeeded.title',
-  { defaultMessage: 'Anomaly detection jobs created' }
+  { defaultMessage: 'Anomaly detection jobs created' },
 );
 
 export async function createJobs({
@@ -55,7 +55,7 @@ function getSuccessToastMessage(environments: string[]) {
       defaultMessage:
         'Anomaly detection jobs successfully created for APM service environments [{environments}]. It will take some time for machine learning to start analyzing traffic for anomalies.',
       values: { environments: environments.join(', ') },
-    }
+    },
   );
 }
 

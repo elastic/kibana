@@ -51,7 +51,7 @@ export async function getTransactionLatency({
       aggs: {
         ...getLatencyAggregation(
           latencyAggregationType,
-          TRANSACTION_DURATION_HISTOGRAM
+          TRANSACTION_DURATION_HISTOGRAM,
         ),
         value: {
           bucket_script: {

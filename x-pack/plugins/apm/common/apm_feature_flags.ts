@@ -61,7 +61,7 @@ export type ApmFeatureFlags = {
 };
 
 export type ValueOfApmFeatureFlag<
-  TApmFeatureFlagName extends ApmFeatureFlagName
+  TApmFeatureFlagName extends ApmFeatureFlagName,
 > = t.OutputOf<ApmFeatureFlagMap[TApmFeatureFlagName]['type']>;
 
 export function getApmFeatureFlags(): ApmFeatureFlags {

@@ -50,9 +50,8 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
         })
       );
       registerTelemetryUsageCollector(usageCollectionMock);
-      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
-        fetchContextMock
-      );
+      const telemetryMetrics =
+        await makeUsageCollectorStub.mock.calls[0][0].fetch(fetchContextMock);
 
       expect(telemetryMetrics).toEqual({
         native: {
@@ -69,9 +68,8 @@ describe('Connectors Serverless Telemetry Usage Collector', () => {
         .fn()
         .mockImplementation(() => Promise.reject(indexNotFoundError));
       registerTelemetryUsageCollector(usageCollectionMock);
-      const telemetryMetrics = await makeUsageCollectorStub.mock.calls[0][0].fetch(
-        fetchContextMock
-      );
+      const telemetryMetrics =
+        await makeUsageCollectorStub.mock.calls[0][0].fetch(fetchContextMock);
       expect(telemetryMetrics).toEqual({
         native: {
           total: 0,

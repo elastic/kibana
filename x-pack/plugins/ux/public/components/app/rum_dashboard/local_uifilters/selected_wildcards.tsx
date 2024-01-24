@@ -39,7 +39,7 @@ export function SelectedWildcards({ indexPattern }: Props) {
       };
       history.push(newLocation);
     },
-    [history]
+    [history],
   );
 
   return searchTerm ? (

@@ -89,7 +89,7 @@ export function getConnectionStats({
                 count: a.count + b.count,
                 latency_sum: a.latency_sum + b.latency_sum,
                 error_count: a.error_count + b.error_count,
-              })
+              }),
             ),
           };
         },
@@ -100,7 +100,7 @@ export function getConnectionStats({
             error_count: 0,
           },
           timeseries: [],
-        }
+        },
       );
 
       const destStats = {

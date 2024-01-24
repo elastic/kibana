@@ -170,10 +170,10 @@ export const DocViewerTable = ({
       const fieldType = columnTypes
         ? columnTypes[field] // for text-based results types come separately
         : isNestedFieldParent(field, dataView)
-        ? 'nested'
-        : fieldMapping
-        ? getFieldIconType(fieldMapping)
-        : undefined;
+          ? 'nested'
+          : fieldMapping
+            ? getFieldIconType(fieldMapping)
+            : undefined;
 
       const ignored = getIgnoredReason(fieldMapping ?? field, hit.raw._ignored);
 

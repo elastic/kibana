@@ -71,7 +71,7 @@ export class EncryptionHelper {
     T,
     R extends { saved_objects: Array<SavedObject<T>> },
     A extends string,
-    O extends Array<{ attributes: T }>
+    O extends Array<{ attributes: T }>,
   >(response: R, typeMap: AuthorizationTypeMap<A> | undefined, originalObjects?: O) {
     const modifiedObjects = await Promise.all(
       response.saved_objects.map(async (object, index) => {

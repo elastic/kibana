@@ -61,7 +61,7 @@ function ExportCard() {
                 [JSON.stringify(diagnosticsBundle, null, 2)],
                 {
                   type: 'text/plain',
-                }
+                },
               );
               const fileURL = URL.createObjectURL(blob);
 
@@ -132,7 +132,7 @@ function ImportCard() {
                       try {
                         const diagnosticsBundle = JSON.parse(
                           // @ts-expect-error
-                          evt?.target?.result
+                          evt?.target?.result,
                         ) as DiagnosticsBundle;
 
                         validateBundle(diagnosticsBundle);
@@ -144,7 +144,7 @@ function ImportCard() {
                         });
 
                         console.error(
-                          `Could not parse file ${file.name}. ${e.message}`
+                          `Could not parse file ${file.name}. ${e.message}`,
                         );
                       }
                     };

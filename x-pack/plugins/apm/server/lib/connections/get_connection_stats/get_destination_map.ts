@@ -155,7 +155,7 @@ export const getDestinationMap = ({
                 // add a 5m buffer at the end of the time range for long running spans
                 ...rangeQuery(
                   startWithOffset,
-                  endWithOffset + 1000 * 1000 * 60 * 5
+                  endWithOffset + 1000 * 1000 * 60 * 5,
                 ),
               ],
             },
@@ -169,7 +169,7 @@ export const getDestinationMap = ({
           ] as const),
           _source: false,
         },
-      }
+      },
     );
 
     transactionResponse.hits.hits.forEach((hit) => {
@@ -182,7 +182,7 @@ export const getDestinationMap = ({
           serviceName: String(hit.fields[SERVICE_NAME]![0]),
           environment: String(
             hit.fields[SERVICE_ENVIRONMENT]?.[0] ??
-              ENVIRONMENT_NOT_DEFINED.value
+              ENVIRONMENT_NOT_DEFINED.value,
           ),
           agentName: hit.fields[AGENT_NAME]![0] as AgentName,
         });

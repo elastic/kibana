@@ -49,11 +49,14 @@ export async function getAnnotations({
       trackedEsSearches
     );
 
-    return annotations.reduce((acc, annotation, index) => {
-      acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
+    return annotations.reduce(
+      (acc, annotation, index) => {
+        acc[annotation.id] = handleAnnotationResponseBy(data[index].rawResponse, annotation);
 
-      return acc;
-    }, {} as { [key: string]: any });
+        return acc;
+      },
+      {} as { [key: string]: any }
+    );
   } catch (error) {
     if (error.message === 'missing-indices') return { responses: [] };
     throw error;

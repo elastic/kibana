@@ -42,14 +42,14 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.errorMessages.title',
         {
           defaultMessage: 'Reduce transactions',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.errorMessages.description',
         {
           defaultMessage:
             'Configure a more aggressive transaction sampling policy. Transaction sampling lowers the amount of data ingested without negatively impacting the usefulness of that data.',
-        }
+        },
       ),
       href: docLinks.links.apm.transactionSampling,
     },
@@ -59,14 +59,14 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.compressedSpans.title',
         {
           defaultMessage: 'Reduce spans',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.compressedSpans.description',
         {
           defaultMessage:
             'Enable span compression. Span compression saves on data and transfer costs by compressing multiple similar spans into a single span.',
-        }
+        },
       ),
       href: docLinks.links.apm.spanCompression,
     },
@@ -76,14 +76,14 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.samplingRate.title',
         {
           defaultMessage: 'Manage the index lifecycle',
-        }
+        },
       ),
       description: i18n.translate(
         'xpack.apm.storageExplorer.resources.samplingRate.description',
         {
           defaultMessage:
             'Customize your index lifecycle policies. Index lifecycle policies allow you to manage indices according to your performance, resiliency, and retention requirements.',
-        }
+        },
       ),
       href: docLinks.links.apm.indexLifecycleManagement,
     },
@@ -95,7 +95,7 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.indexManagement',
         {
           defaultMessage: 'Index management',
-        }
+        },
       ),
       href: getIndexManagementHref(core),
       iconType: 'indexEdit',
@@ -105,7 +105,7 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.serviceInventory',
         {
           defaultMessage: 'Service inventory',
-        }
+        },
       ),
       href: router.link('/services', {
         query: {
@@ -124,7 +124,7 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.documentation',
         {
           defaultMessage: 'Documentation',
-        }
+        },
       ),
       href: docLinks.links.apm.storageExplorer,
       target: '_blank',
@@ -135,7 +135,7 @@ export function TipsAndResources() {
         'xpack.apm.storageExplorer.resources.sendFeedback',
         {
           defaultMessage: 'Give feedback',
-        }
+        },
       ),
       href: getStorageExplorerFeedbackHref(),
       target: '_blank',
@@ -154,7 +154,7 @@ export function TipsAndResources() {
                 'xpack.apm.storageExplorer.resources.accordionTitle',
                 {
                   defaultMessage: 'Tips and tricks',
-                }
+                },
               )}
             </h2>
           </EuiTitle>
@@ -179,7 +179,7 @@ export function TipsAndResources() {
                       'xpack.apm.storageExplorer.resources.learnMoreButton',
                       {
                         defaultMessage: 'Learn more',
-                      }
+                      },
                     )}
                   </EuiButton>
                 }

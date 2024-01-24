@@ -37,7 +37,7 @@ describe('Large Trace in waterfall', () => {
         `/app/apm/services/synth-rum/transactions/view?${new URLSearchParams({
           ...timeRange,
           transactionName: rootTransactionName,
-        })}`
+        })}`,
       );
     });
 
@@ -48,7 +48,7 @@ describe('Large Trace in waterfall', () => {
     it('shows warning about trace size', () => {
       cy.getByTestSubj('apmWaterfallSizeWarning').should(
         'have.text',
-        'The number of items in this trace is 15551 which is higher than the current limit of 5000. Please increase the limit via `xpack.apm.ui.maxTraceItems` to see the full trace'
+        'The number of items in this trace is 15551 which is higher than the current limit of 5000. Please increase the limit via `xpack.apm.ui.maxTraceItems` to see the full trace',
       );
     });
   });
@@ -65,7 +65,7 @@ describe('Large Trace in waterfall', () => {
         `/app/apm/services/synth-rum/transactions/view?${new URLSearchParams({
           ...timeRange,
           transactionName: rootTransactionName,
-        })}`
+        })}`,
       );
     });
 

@@ -12,7 +12,7 @@ import {
 import { setAlertsToUntracked } from './set_alerts_to_untracked';
 
 let clusterClient: ElasticsearchClientMock;
-let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
+let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 
 describe('setAlertsToUntracked()', () => {
   beforeEach(() => {

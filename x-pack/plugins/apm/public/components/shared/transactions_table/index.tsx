@@ -115,11 +115,11 @@ export function TransactionsTable({
     '/services/{serviceName}/transactions',
     '/services/{serviceName}/overview',
     '/mobile-services/{serviceName}/transactions',
-    '/mobile-services/{serviceName}/overview'
+    '/mobile-services/{serviceName}/overview',
   );
 
   const latencyAggregationType = getLatencyAggregationType(
-    latencyAggregationTypeFromQuery
+    latencyAggregationTypeFromQuery,
   );
 
   const [tableOptions, setTableOptions] = useState<{
@@ -178,12 +178,12 @@ export function TransactionsTable({
               rollupInterval: preferred.source.rollupInterval,
             },
           },
-        }
+        },
       ).then((response) => {
         const currentPageTransactionGroups = orderBy(
           response.transactionGroups,
           [field],
-          [direction]
+          [direction],
         ).slice(index * size, (index + 1) * size);
 
         return {
@@ -215,7 +215,7 @@ export function TransactionsTable({
       // not used, but needed to trigger an update when comparison feature is disabled/enabled by user
       comparisonEnabled,
       preferred,
-    ]
+    ],
   );
 
   const {
@@ -260,7 +260,7 @@ export function TransactionsTable({
                 latencyAggregationType:
                   latencyAggregationType as LatencyAggregationType,
                 transactionNames: JSON.stringify(
-                  transactionGroups.map(({ name }) => name).sort()
+                  transactionGroups.map(({ name }) => name).sort(),
                 ),
                 offset:
                   comparisonEnabled && isTimeComparison(offset)
@@ -268,21 +268,21 @@ export function TransactionsTable({
                     : undefined,
               },
             },
-          }
+          },
         );
       }
     },
     // only fetches detailed statistics when requestId is invalidated by main statistics api call
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [requestId],
-    { preservePreviousData: false }
+    { preservePreviousData: false },
   );
 
   const columns = getColumns({
     serviceName,
     latencyAggregationType: latencyAggregationType as LatencyAggregationType,
     transactionGroupDetailedStatisticsLoading: isPending(
-      transactionGroupDetailedStatisticsStatus
+      transactionGroupDetailedStatisticsStatus,
     ),
     transactionGroupDetailedStatistics,
     comparisonEnabled,
@@ -301,12 +301,12 @@ export function TransactionsTable({
       totalItemCount: transactionGroupsTotalItems,
       showPerPageOptions,
     }),
-    [index, size, transactionGroupsTotalItems, showPerPageOptions]
+    [index, size, transactionGroupsTotalItems, showPerPageOptions],
   );
 
   const sorting = useMemo(
     () => ({ sort: { field, direction } }),
-    [field, direction]
+    [field, direction],
   );
 
   return (
@@ -344,28 +344,29 @@ export function TransactionsTable({
         </EuiFlexItem>
       )}
 
-      {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
-        <EuiFlexItem>
-          <EuiCallOut
-            title={i18n.translate(
-              'xpack.apm.transactionsCallout.cardinalityWarning.title',
-              {
-                defaultMessage:
-                  'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
-              }
-            )}
-            color="warning"
-            iconType="warning"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
-                defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
-              />
-            </p>
-          </EuiCallOut>
-        </EuiFlexItem>
-      )}
+      {showMaxTransactionGroupsExceededWarning &&
+        maxTransactionGroupsExceeded && (
+          <EuiFlexItem>
+            <EuiCallOut
+              title={i18n.translate(
+                'xpack.apm.transactionsCallout.cardinalityWarning.title',
+                {
+                  defaultMessage:
+                    'Number of transaction groups exceed the allowed maximum(1,000) that are displayed.',
+                },
+              )}
+              color="warning"
+              iconType="warning"
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.apm.transactionsCallout.transactionGroupLimit.exceeded"
+                  defaultMessage="The maximum number of transaction groups displayed in Kibana has been reached. Try narrowing down results by using the query bar."
+                />
+              </p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        )}
       <EuiFlexItem>
         <EuiFlexItem>
           <OverviewTableContainer

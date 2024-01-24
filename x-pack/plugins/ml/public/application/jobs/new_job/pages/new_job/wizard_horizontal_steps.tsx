@@ -82,8 +82,8 @@ export const WizardHorizontalSteps: FC<Props> = ({
       status: (currentStep === step
         ? 'selected'
         : currentStep > step
-        ? 'complete'
-        : 'incomplete') as EuiStepStatus,
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
       disabled: disableSteps || highestStep < step,
     };
   }

@@ -61,7 +61,7 @@ function AccordionButtonContent({
                     defaultMessage:
                       'Configure instrumentation for {title} applications.',
                     values: { title },
-                  }
+                  },
                 )}
               </p>
             </EuiText>
@@ -120,7 +120,7 @@ export function AgentInstructionsAccordion({
   const stepsElements = steps.map(
     (
       { title: stepTitle, textPre, textPost, customComponentName, commands },
-      index
+      index,
     ) => {
       const commandBlock = commands
         ? renderMustache({
@@ -175,7 +175,7 @@ export function AgentInstructionsAccordion({
           <EuiSpacer />
         </section>
       );
-    }
+    },
   );
 
   const manualInstrumentationContent = (
@@ -201,7 +201,7 @@ export function AgentInstructionsAccordion({
                 id: 'manual-instrumentation',
                 name: i18n.translate(
                   'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.manualInstrumentation',
-                  { defaultMessage: 'Manual instrumentation' }
+                  { defaultMessage: 'Manual instrumentation' },
                 ),
                 content: manualInstrumentationContent,
               },
@@ -216,7 +216,7 @@ export function AgentInstructionsAccordion({
                     <EuiFlexItem grow={false}>
                       {i18n.translate(
                         'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.autoAttachment',
-                        { defaultMessage: 'Auto-Attachment' }
+                        { defaultMessage: 'Auto-Attachment' },
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

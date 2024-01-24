@@ -143,12 +143,15 @@ export const getFinishedStepsInitialStates = ({
 }: {
   finishedSteps: Record<CardId, StepId[]>;
 }): Record<CardId, Set<StepId>> => {
-  const initialStates = Object.entries(finishedSteps).reduce((acc, [cardId, stepIdsByCard]) => {
-    if (stepIdsByCard) {
-      acc[cardId] = new Set(stepIdsByCard);
-    }
-    return acc;
-  }, {} as Record<string, Set<StepId>>);
+  const initialStates = Object.entries(finishedSteps).reduce(
+    (acc, [cardId, stepIdsByCard]) => {
+      if (stepIdsByCard) {
+        acc[cardId] = new Set(stepIdsByCard);
+      }
+      return acc;
+    },
+    {} as Record<string, Set<StepId>>
+  );
 
   return initialStates;
 };

@@ -42,12 +42,12 @@ export function SpanLinks({
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const [selectedLinkType, setSelectedLinkType] = useState<LinkType>(
-    spanLinksCount.linkedChildren ? 'children' : 'parents'
+    spanLinksCount.linkedChildren ? 'children' : 'parents',
   );
 
   const [spanLinksCalloutDismissed, setSpanLinksCalloutDismissed] =
@@ -65,7 +65,7 @@ export function SpanLinks({
               path: { traceId, spanId },
               query: { kuery, start, end },
             },
-          }
+          },
         );
       }
       return callApmApi(
@@ -75,10 +75,10 @@ export function SpanLinks({
             path: { traceId, spanId },
             query: { kuery, start, end, processorEvent },
           },
-        }
+        },
       );
     },
-    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
+    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent],
   );
 
   const selectOptions: EuiSelectOption[] = useMemo(
@@ -100,7 +100,7 @@ export function SpanLinks({
         disabled: !spanLinksCount.linkedParents,
       },
     ],
-    [spanLinksCount]
+    [spanLinksCount],
   );
 
   if (!data || isPending(status)) {

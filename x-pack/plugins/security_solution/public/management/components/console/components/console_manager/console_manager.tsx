@@ -149,7 +149,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   );
 
   const getList = useCallback<ConsoleManagerClient['getList']>(<
-    Meta extends object = Record<string, unknown>
+    Meta extends object = Record<string, unknown>,
   >() => {
     return Object.values(consoleStorage).map(
       (managedConsole) => managedConsole.client
@@ -336,7 +336,7 @@ export const useWithManagedConsole = (
 type WithManagedConsoleState = Readonly<
   [
     getState: undefined | (() => ConsoleDataState | undefined),
-    storeState: undefined | ((state: ConsoleDataState) => void)
+    storeState: undefined | ((state: ConsoleDataState) => void),
   ]
 >;
 /**

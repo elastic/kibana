@@ -174,12 +174,15 @@ export const PrivilegeSummaryTable = (props: PrivilegeSummaryTableProps) => {
   }
   columns.push(featureColumn, ...privilegeColumns);
 
-  const privileges = rawKibanaPrivileges.reduce((acc, entry) => {
-    return {
-      ...acc,
-      [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
-    };
-  }, {} as Record<string, EffectiveFeaturePrivileges>);
+  const privileges = rawKibanaPrivileges.reduce(
+    (acc, entry) => {
+      return {
+        ...acc,
+        [getColumnKey(entry)]: calculator.getEffectiveFeaturePrivileges(entry),
+      };
+    },
+    {} as Record<string, EffectiveFeaturePrivileges>
+  );
 
   const accordions: any[] = [];
 

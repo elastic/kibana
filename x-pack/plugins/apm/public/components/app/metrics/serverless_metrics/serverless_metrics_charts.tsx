@@ -62,7 +62,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
               bucketSizeInSeconds: preferred.bucketSizeInSeconds,
             },
           },
-        }
+        },
       ).then((resp) => {
         const chartsByKey = keyBy(resp.charts, 'key');
         if (isEmpty(chartsByKey)) {
@@ -82,7 +82,7 @@ export function ServerlessMetricsCharts({ serverlessId }: Props) {
         };
       });
     },
-    [kuery, environment, serviceName, start, end, serverlessId, preferred]
+    [kuery, environment, serviceName, start, end, serverlessId, preferred],
   );
 
   return (

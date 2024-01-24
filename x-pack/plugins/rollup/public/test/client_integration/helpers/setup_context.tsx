@@ -15,11 +15,10 @@ const services = {
   setBreadcrumbs: startMock.chrome.setBreadcrumbs,
 };
 
-const wrapComponent = (Component: FunctionComponent) => (props: any) =>
-  (
-    <KibanaContextProvider services={services}>
-      <Component {...props} />
-    </KibanaContextProvider>
-  );
+const wrapComponent = (Component: FunctionComponent) => (props: any) => (
+  <KibanaContextProvider services={services}>
+    <Component {...props} />
+  </KibanaContextProvider>
+);
 
 export { wrapComponent };

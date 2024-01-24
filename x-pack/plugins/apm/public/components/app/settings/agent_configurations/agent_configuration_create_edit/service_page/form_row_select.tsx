@@ -42,7 +42,7 @@ export function FormRowSelect({
   }, [options, value]);
 
   const handleOnChange = (
-    nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>
+    nextSelectedOptions: Array<EuiComboBoxOptionOption<string>>,
   ) => {
     const [selectedOption] = nextSelectedOptions;
     onChange(selectedOption.value);
@@ -65,7 +65,7 @@ export function FormRowSelect({
           onChange={handleOnChange}
           placeholder={i18n.translate(
             'xpack.apm.agentConfig.servicePage.environment.placeholder',
-            { defaultMessage: 'Select Option' }
+            { defaultMessage: 'Select Option' },
           )}
           data-test-subj={dataTestSubj}
         />

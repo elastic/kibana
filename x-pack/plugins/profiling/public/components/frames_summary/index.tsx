@@ -91,8 +91,8 @@ export function FramesSummary({
             totalSamplesDiff.label === undefined
               ? 'Gained/Lost'
               : totalSamplesDiff?.percentDiffDelta > 0
-              ? 'Lost'
-              : 'Gained',
+                ? 'Lost'
+                : 'Gained',
         },
       }) as string,
       baseValue: totalSamplesDiff.label || '0%',

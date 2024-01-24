@@ -54,7 +54,7 @@ describe('useFetchAlertDetail', () => {
       () =>
         ({
           observabilityRuleTypeRegistry: ruleType,
-        } as unknown as PluginContextValue)
+        }) as unknown as PluginContextValue
     );
   });
 

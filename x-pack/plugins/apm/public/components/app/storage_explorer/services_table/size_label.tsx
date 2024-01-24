@@ -16,7 +16,7 @@ export function SizeLabel() {
         'xpack.apm.storageExplorer.sizeLabel.description',
         {
           defaultMessage: `The estimated storage size per service. This estimate includes primary and replica shards and is calculated by prorating the total size of your indices by the service's document count divided by the total number of documents.`,
-        }
+        },
       )}
     >
       <>

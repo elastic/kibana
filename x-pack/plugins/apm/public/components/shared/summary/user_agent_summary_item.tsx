@@ -27,7 +27,7 @@ export function UserAgentSummaryItem({
         'xpack.apm.transactionDetails.userAgentAndVersionLabel',
         {
           defaultMessage: 'User agent & version',
-        }
+        },
       )}
     >
       <>

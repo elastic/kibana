@@ -50,7 +50,7 @@ describe('Custom links', () => {
         transaction={transaction}
         openCreateCustomLinkFlyout={noop}
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     expectTextsInDocument(component, [
@@ -71,7 +71,7 @@ describe('Custom links', () => {
         transaction={transaction}
         openCreateCustomLinkFlyout={noop}
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expect(getByTestId('loading-spinner')).toBeInTheDocument();
   });
@@ -97,7 +97,7 @@ describe('Custom links', () => {
         transaction={transaction}
         openCreateCustomLinkFlyout={noop}
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
     expectTextsInDocument(component, ['foo', 'bar', 'baz']);
     expectTextsNotInDocument(component, ['qux']);
@@ -124,7 +124,7 @@ describe('Custom links', () => {
         transaction={transaction}
         openCreateCustomLinkFlyout={noop}
       />,
-      { wrapper: Wrapper }
+      { wrapper: Wrapper },
     );
 
     expect(component.getAllByRole('listitem').length).toEqual(3);
@@ -151,7 +151,7 @@ describe('Custom links', () => {
           transaction={transaction}
           openCreateCustomLinkFlyout={noop}
         />,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
 
       expectTextsInDocument(component, ['Create custom link']);
@@ -179,7 +179,7 @@ describe('Custom links', () => {
           transaction={transaction}
           openCreateCustomLinkFlyout={noop}
         />,
-        { wrapper: Wrapper }
+        { wrapper: Wrapper },
       );
       expectTextsInDocument(component, ['Create']);
       expectTextsNotInDocument(component, ['Create custom link']);

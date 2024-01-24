@@ -14,7 +14,7 @@ export function useDefaultTimeRange() {
 
   const { from: rangeFrom, to: rangeTo } =
     core.uiSettings.get<TimePickerTimeDefaults>(
-      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS
+      UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS,
     );
 
   return { rangeFrom, rangeTo };

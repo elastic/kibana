@@ -50,7 +50,7 @@ export function UnlinkDashboard({
             {
               defaultMessage: 'Unlinked "{dashboardName}" dashboard',
               values: { dashboardName: currentDashboard?.title },
-            }
+            },
           ),
         });
         onRefresh();
@@ -63,7 +63,7 @@ export function UnlinkDashboard({
               defaultMessage:
                 'Error while unlinking "{dashboardName}" dashboard',
               values: { dashboardName: currentDashboard?.title },
-            }
+            },
           ),
           text: error.body.message,
         });
@@ -78,7 +78,7 @@ export function UnlinkDashboard({
       isModalVisible,
       history,
       defaultDashboard,
-    ]
+    ],
   );
   return (
     <>
@@ -99,7 +99,7 @@ export function UnlinkDashboard({
             'xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.title',
             {
               defaultMessage: 'Unlink Dashboard',
-            }
+            },
           )}
           onCancel={() => setIsModalVisible(false)}
           onConfirm={onConfirm}
@@ -107,7 +107,7 @@ export function UnlinkDashboard({
             'xpack.apm.serviceDashboards.unlinkEmptyButtonLabel.confirm.button',
             {
               defaultMessage: 'Unlink dashboard',
-            }
+            },
           )}
           buttonColor="danger"
           defaultFocusedButton="confirm"
@@ -118,7 +118,7 @@ export function UnlinkDashboard({
               {
                 defaultMessage:
                   'You are about to unlink the dashboard from the service context',
-              }
+              },
             )}
           </p>
         </EuiConfirmModal>

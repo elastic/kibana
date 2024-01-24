@@ -29,7 +29,7 @@ describe('Dependency operation', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
   });
 

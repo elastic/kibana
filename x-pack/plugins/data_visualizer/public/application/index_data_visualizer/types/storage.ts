@@ -27,12 +27,12 @@ export type DVKey = keyof Exclude<DV, null>;
 export type DVStorageMapped<T extends DVKey> = T extends typeof DV_FROZEN_TIER_PREFERENCE
   ? FrozenTierPreference | undefined
   : T extends typeof DV_RANDOM_SAMPLER_PREFERENCE
-  ? RandomSamplerOption | undefined
-  : T extends typeof DV_RANDOM_SAMPLER_P_VALUE
-  ? number | null
-  : T extends typeof DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE
-  ? DATA_DRIFT_COMPARISON_CHART_TYPE
-  : null;
+    ? RandomSamplerOption | undefined
+    : T extends typeof DV_RANDOM_SAMPLER_P_VALUE
+      ? number | null
+      : T extends typeof DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE
+        ? DATA_DRIFT_COMPARISON_CHART_TYPE
+        : null;
 
 export const DV_STORAGE_KEYS = [
   DV_FROZEN_TIER_PREFERENCE,

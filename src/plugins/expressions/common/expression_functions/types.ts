@@ -33,7 +33,7 @@ export interface ExpressionFunctionDefinition<
   Input,
   Arguments extends Record<keyof unknown, unknown>,
   Output,
-  Context extends ExecutionContext = ExecutionContext
+  Context extends ExecutionContext = ExecutionContext,
 > extends PersistableStateDefinition<ExpressionAstFunction['arguments']> {
   /**
    * The name of the function, as will be used in expression.

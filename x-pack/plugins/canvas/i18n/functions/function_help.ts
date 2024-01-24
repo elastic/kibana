@@ -102,17 +102,13 @@ import { help as urlparam } from './dict/urlparam';
  * This allows one to ensure each argument is present, and no extraneous arguments
  * remain.
  */
-export type FunctionHelp<T> = T extends ExpressionFunctionDefinition<
-  infer Name,
-  infer Input,
-  infer Arguments,
-  infer Output
->
-  ? {
-      help: string;
-      args: { [key in keyof Arguments]: string };
-    }
-  : never;
+export type FunctionHelp<T> =
+  T extends ExpressionFunctionDefinition<infer Name, infer Input, infer Arguments, infer Output>
+    ? {
+        help: string;
+        args: { [key in keyof Arguments]: string };
+      }
+    : never;
 
 /**
  * Helper type to use `FunctionHelp` for function definitions wrapped into factory functions.
@@ -139,14 +135,10 @@ export type FunctionFactoryHelp<T extends (...args: any) => any> = FunctionHelp<
 //
 // Given a collection of functions, the map would contain each entry.
 //
-type FunctionHelpMap<T> = T extends ExpressionFunctionDefinition<
-  infer Name,
-  infer Input,
-  infer Arguments,
-  infer Output
->
-  ? { [key in Name]: FunctionHelp<T> }
-  : never;
+type FunctionHelpMap<T> =
+  T extends ExpressionFunctionDefinition<infer Name, infer Input, infer Arguments, infer Output>
+    ? { [key in Name]: FunctionHelp<T> }
+    : never;
 
 // This internal type represents an exhaustive dictionary of `FunctionHelp` types,
 // organized by Function Name and then Function Argument.

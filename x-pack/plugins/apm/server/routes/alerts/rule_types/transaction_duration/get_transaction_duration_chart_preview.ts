@@ -88,19 +88,19 @@ export async function getTransactionDurationChartPreview({
         ...getParsedFilterQuery(searchConfiguration?.query?.query as string),
         ...rangeQuery(start, end),
         ...getBackwardCompatibleDocumentTypeFilter(
-          searchAggregatedTransactions
+          searchAggregatedTransactions,
         ),
       ] as QueryDslQueryContainer[],
     },
   };
 
   const transactionDurationField = getDurationFieldForTransactions(
-    searchAggregatedTransactions
+    searchAggregatedTransactions,
   );
 
   const allGroupByFields = getAllGroupByFields(
     ApmRuleType.TransactionDuration,
-    groupByFields
+    groupByFields,
   );
 
   const aggs = {
@@ -140,7 +140,7 @@ export async function getTransactionDurationChartPreview({
 
   const resp = await apmEventClient.search(
     'get_transaction_duration_chart_preview',
-    params
+    params,
   );
 
   if (!resp.aggregations) {
@@ -165,7 +165,7 @@ export async function getTransactionDurationChartPreview({
 
       return acc;
     },
-    {} as BarSeriesDataMap
+    {} as BarSeriesDataMap,
   );
 
   const series = Object.keys(seriesDataMap).map((key) => ({

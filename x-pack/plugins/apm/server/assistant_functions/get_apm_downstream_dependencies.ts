@@ -28,7 +28,7 @@ export function registerGetApmDownstreamDependenciesFunction({
       service. This allows you to map the dowstream dependency name to a service, by 
       returning both span.destination.service.resource and service.name. Use this to 
       drilldown further if needed.`,
-        }
+        },
       ),
       parameters: {
         type: 'object',
@@ -62,6 +62,6 @@ export function registerGetApmDownstreamDependenciesFunction({
           apmEventClient,
         }),
       };
-    }
+    },
   );
 }

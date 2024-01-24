@@ -24,12 +24,12 @@ const CentralizedContainer = styled.div`
 
 const MANAGE_FLEET_POLICIES_LABEL = i18n.translate(
   'xpack.apm.tutorial.agent_config.manageFleetPolicies',
-  { defaultMessage: 'Manage fleet policies' }
+  { defaultMessage: 'Manage fleet policies' },
 );
 
 const GET_STARTED_WITH_FLEET_LABEL = i18n.translate(
   'xpack.apm.tutorial.agent_config.getStartedWithFleet',
-  { defaultMessage: 'Get started with fleet' }
+  { defaultMessage: 'Get started with fleet' },
 );
 
 interface Props {
@@ -106,7 +106,7 @@ function TutorialConfigAgent({
       data,
     });
     const defaultSelectedOption = availableOptions.find(
-      ({ isSelected }) => isSelected
+      ({ isSelected }) => isSelected,
     );
     setSelectedOption(defaultSelectedOption);
     setIsLoading(false);

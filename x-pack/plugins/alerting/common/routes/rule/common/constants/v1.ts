@@ -48,13 +48,13 @@ export const filterStateStore = {
   GLOBAL_STATE: 'globalState',
 } as const;
 
-export type RuleNotifyWhen = typeof ruleNotifyWhen[keyof typeof ruleNotifyWhen];
+export type RuleNotifyWhen = (typeof ruleNotifyWhen)[keyof typeof ruleNotifyWhen];
 export type RuleLastRunOutcomeValues =
-  typeof ruleLastRunOutcomeValues[keyof typeof ruleLastRunOutcomeValues];
+  (typeof ruleLastRunOutcomeValues)[keyof typeof ruleLastRunOutcomeValues];
 export type RuleExecutionStatusValues =
-  typeof ruleExecutionStatusValues[keyof typeof ruleExecutionStatusValues];
+  (typeof ruleExecutionStatusValues)[keyof typeof ruleExecutionStatusValues];
 export type RuleExecutionStatusErrorReason =
-  typeof ruleExecutionStatusErrorReason[keyof typeof ruleExecutionStatusErrorReason];
+  (typeof ruleExecutionStatusErrorReason)[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
-  typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
+  (typeof ruleExecutionStatusWarningReason)[keyof typeof ruleExecutionStatusWarningReason];
+export type FilterStateStore = (typeof filterStateStore)[keyof typeof filterStateStore];

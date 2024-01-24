@@ -28,7 +28,7 @@ export const createDefaultAlertExecutorOptions = <
   State extends RuleTypeState = never,
   InstanceState extends AlertInstanceState = {},
   InstanceContext extends AlertInstanceContext = {},
-  ActionGroupIds extends string = ''
+  ActionGroupIds extends string = '',
 >({
   alertId = 'ALERT_INSTANCE_ID',
   ruleName = 'ALERT_RULE_NAME',

@@ -24,7 +24,8 @@ const Field = styled.div.attrs<WidthProp>(({ width }) => {
 })<WidthProp>`
   background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
   border: ${({ theme }) => theme.eui.euiBorderThin};
-  box-shadow: 0 2px 2px -1px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)},
+  box-shadow:
+    0 2px 2px -1px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)},
     0 1px 5px -2px ${({ theme }) => rgba(theme.eui.euiColorMediumShade, 0.3)};
   font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
   font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};

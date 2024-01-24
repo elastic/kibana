@@ -76,9 +76,12 @@ export function initRoutes(
 
       return res.ok({
         body: await new Promise<PerfResult>((resolve) => {
-          setTimeout(() => {
-            performanceApi.endCapture().then((perf) => resolve(perf));
-          }, durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */);
+          setTimeout(
+            () => {
+              performanceApi.endCapture().then((perf) => resolve(perf));
+            },
+            durationInSeconds * 1000 + 10000 /* wait extra 10s to drain queue */
+          );
         }),
       });
     }

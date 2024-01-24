@@ -53,7 +53,7 @@ async function renderTooltipAnchor({
       <EuiThemeProvider>
         <AnomalyDetectionSetupLink />
       </EuiThemeProvider>
-    </MockApmPluginContextWrapper>
+    </MockApmPluginContextWrapper>,
   );
 
   // hover tooltip anchor if it exists
@@ -84,7 +84,7 @@ describe('MissingJobsAlert', () => {
 
       expect(toolTipAnchor).toBeInTheDocument();
       expect(toolTipText).toBe(
-        'Anomaly detection is not yet enabled. Click to continue setup.'
+        'Anomaly detection is not yet enabled. Click to continue setup.',
       );
     });
   });
@@ -104,7 +104,7 @@ describe('MissingJobsAlert', () => {
 
       expect(toolTipAnchor).toBeInTheDocument();
       expect(toolTipText).toBe(
-        'Anomaly detection is not yet enabled for the environment "staging". Click to continue setup.'
+        'Anomaly detection is not yet enabled for the environment "staging". Click to continue setup.',
       );
     });
   });
@@ -175,7 +175,7 @@ describe('MissingJobsAlert', () => {
 
       expect(toolTipAnchor).toBeInTheDocument();
       expect(toolTipText).toBe(
-        'Updates available for existing anomaly detection jobs.'
+        'Updates available for existing anomaly detection jobs.',
       );
     });
   });

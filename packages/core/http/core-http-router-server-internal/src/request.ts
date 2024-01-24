@@ -54,7 +54,7 @@ export class CoreKibanaRequest<
   Params = unknown,
   Query = unknown,
   Body = unknown,
-  Method extends RouteMethod = any
+  Method extends RouteMethod = any,
 > implements KibanaRequest<Params, Query, Body, Method>
 {
   /**
@@ -257,7 +257,7 @@ export class CoreKibanaRequest<
             parse,
             maxBytes,
             accepts: allow,
-            output: output as typeof validBodyOutput[number], // We do not support all the HAPI-supported outputs and TS complains
+            output: output as (typeof validBodyOutput)[number], // We do not support all the HAPI-supported outputs and TS complains
           },
     } as unknown as KibanaRequestRouteOptions<Method>; // TS does not understand this is OK so I'm enforced to do this enforced casting
 

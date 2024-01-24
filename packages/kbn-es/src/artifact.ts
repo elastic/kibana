@@ -208,7 +208,10 @@ export class Artifact {
     });
   }
 
-  constructor(private readonly log: ToolingLog, public readonly spec: ArtifactSpec) {}
+  constructor(
+    private readonly log: ToolingLog,
+    public readonly spec: ArtifactSpec
+  ) {}
 
   /**
    * Download the artifact to disk, skips the download if the cache is

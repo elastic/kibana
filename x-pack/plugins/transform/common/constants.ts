@@ -100,7 +100,7 @@ export const TRANSFORM_STATE = {
   WAITING: 'waiting',
 } as const;
 
-export type TransformState = typeof TRANSFORM_STATE[keyof typeof TRANSFORM_STATE];
+export type TransformState = (typeof TRANSFORM_STATE)[keyof typeof TRANSFORM_STATE];
 
 export const TRANSFORM_HEALTH = {
   green: 'green',
@@ -109,7 +109,7 @@ export const TRANSFORM_HEALTH = {
   red: 'red',
 } as const;
 
-export type TransformHealth = typeof TRANSFORM_HEALTH[keyof typeof TRANSFORM_HEALTH];
+export type TransformHealth = (typeof TRANSFORM_HEALTH)[keyof typeof TRANSFORM_HEALTH];
 
 export const TRANSFORM_HEALTH_COLOR = {
   green: 'success',
@@ -154,14 +154,14 @@ export const TRANSFORM_MODE = {
   CONTINUOUS: 'continuous',
 } as const;
 
-export type TransformMode = typeof TRANSFORM_MODE[keyof typeof TRANSFORM_MODE];
+export type TransformMode = (typeof TRANSFORM_MODE)[keyof typeof TRANSFORM_MODE];
 
 export const TRANSFORM_FUNCTION = {
   PIVOT: 'pivot',
   LATEST: 'latest',
 } as const;
 
-export type TransformFunction = typeof TRANSFORM_FUNCTION[keyof typeof TRANSFORM_FUNCTION];
+export type TransformFunction = (typeof TRANSFORM_FUNCTION)[keyof typeof TRANSFORM_FUNCTION];
 
 export const TRANSFORM_RULE_TYPE = {
   TRANSFORM_HEALTH: 'transform_health',

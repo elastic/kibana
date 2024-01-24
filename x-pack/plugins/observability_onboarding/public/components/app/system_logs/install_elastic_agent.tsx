@@ -55,10 +55,10 @@ export function InstallElasticAgent() {
 
   const singleDatasetLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(
-      SINGLE_DATASET_LOCATOR_ID
+      SINGLE_DATASET_LOCATOR_ID,
     );
   const allDataSetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
-    ALL_DATASETS_LOCATOR_ID
+    ALL_DATASETS_LOCATOR_ID,
   );
 
   const { goBack, getState, setState } = useWizard();
@@ -72,7 +72,7 @@ export function InstallElasticAgent() {
     (status: SystemIntegrationBannerState) => {
       setSystemIntegrationStatus(status);
     },
-    []
+    [],
   );
 
   const datasetName = 'system-logs';
@@ -102,15 +102,15 @@ export function InstallElasticAgent() {
   const { data: monitoringRole, status: monitoringRoleStatus } = useFetcher(
     (callApi) => {
       return callApi(
-        'GET /internal/observability_onboarding/logs/setup/privileges'
+        'GET /internal/observability_onboarding/logs/setup/privileges',
       );
     },
-    []
+    [],
   );
 
   const { data: setup } = useFetcher((callApi) => {
     return callApi(
-      'GET /internal/observability_onboarding/logs/setup/environment'
+      'GET /internal/observability_onboarding/logs/setup/environment',
     );
   }, []);
 
@@ -131,7 +131,7 @@ export function InstallElasticAgent() {
         });
       }
     },
-    [monitoringRole?.hasPrivileges]
+    [monitoringRole?.hasPrivileges],
   );
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
@@ -144,7 +144,7 @@ export function InstallElasticAgent() {
           {
             headers: { authorization: `ApiKey ${apiKeyEncoded}` },
             params: { query: { onboardingId } },
-          }
+          },
         );
       }
     },
@@ -152,7 +152,7 @@ export function InstallElasticAgent() {
       apiKeyEncoded,
       onboardingId,
       installShipperSetupStatus === FETCH_STATUS.SUCCESS,
-    ]
+    ],
   );
 
   useEffect(() => {
@@ -169,11 +169,11 @@ export function InstallElasticAgent() {
       if (onboardingId) {
         return callApi(
           'GET /internal/observability_onboarding/flow/{onboardingId}/progress',
-          { params: { path: { onboardingId } } }
+          { params: { path: { onboardingId } } },
         );
       }
     },
-    [onboardingId]
+    [onboardingId],
   );
 
   const progressSucceded = progressStatus === FETCH_STATUS.SUCCESS;
@@ -194,8 +194,8 @@ export function InstallElasticAgent() {
         stepStatus === 'loading'
           ? CHECK_LOGS_LABELS.loading
           : stepStatus === 'complete'
-          ? CHECK_LOGS_LABELS.completed
-          : CHECK_LOGS_LABELS.incomplete;
+            ? CHECK_LOGS_LABELS.completed
+            : CHECK_LOGS_LABELS.incomplete;
       return {
         title,
         status: stepStatus,
@@ -232,7 +232,7 @@ export function InstallElasticAgent() {
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.exploreLogs',
-                    { defaultMessage: 'Explore logs' }
+                    { defaultMessage: 'Explore logs' },
                   )}
                 </EuiButton>
               </EuiFlexItem>
@@ -249,7 +249,7 @@ export function InstallElasticAgent() {
               {
                 defaultMessage:
                   'To collect the data from your system and stream it to Elastic, you first need to install a shipping tool on the machine generating the logs. In this case, the shipping tool is an agent developed by Elastic.',
-              }
+              },
             )}
           </p>
         </EuiText>
@@ -279,21 +279,21 @@ export function InstallElasticAgent() {
             {
               label: i18n.translate(
                 'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.linux',
-                { defaultMessage: 'Linux' }
+                { defaultMessage: 'Linux' },
               ),
               id: 'linux-tar',
             },
             {
               label: i18n.translate(
                 'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.macOS',
-                { defaultMessage: 'MacOS' }
+                { defaultMessage: 'MacOS' },
               ),
               id: 'macos',
             },
             {
               label: i18n.translate(
                 'xpack.observability_onboarding.installElasticAgent.installStep.choosePlatform.windows',
-                { defaultMessage: 'Windows' }
+                { defaultMessage: 'Windows' },
               ),
               id: 'windows',
               disableSteps: true,
@@ -319,8 +319,8 @@ export function InstallElasticAgent() {
             installShipperSetupStatus === FETCH_STATUS.LOADING
               ? 'loading'
               : isInstallCompleted
-              ? 'complete'
-              : 'current'
+                ? 'complete'
+                : 'current'
           }
           showInstallProgressSteps={isInstallStarted}
           installProgressSteps={
@@ -349,14 +349,14 @@ export function InstallElasticAgent() {
 const CHECK_LOGS_LABELS = {
   incomplete: i18n.translate(
     'xpack.observability_onboarding.systemLogs.installElasticAgent.progress.logsIngest.incompleteTitle',
-    { defaultMessage: 'Ship logs to Elastic Observability' }
+    { defaultMessage: 'Ship logs to Elastic Observability' },
   ),
   loading: i18n.translate(
     'xpack.observability_onboarding.systemLogs.installElasticAgent.progress.logsIngest.loadingTitle',
-    { defaultMessage: 'Waiting for logs to be shipped...' }
+    { defaultMessage: 'Waiting for logs to be shipped...' },
   ),
   completed: i18n.translate(
     'xpack.observability_onboarding.systemLogs.installElasticAgent.progress.logsIngest.completedTitle',
-    { defaultMessage: 'Logs are being shipped!' }
+    { defaultMessage: 'Logs are being shipped!' },
   ),
 };

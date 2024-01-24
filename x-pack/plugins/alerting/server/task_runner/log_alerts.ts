@@ -17,7 +17,7 @@ export interface LogAlertsParams<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 > {
   logger: Logger;
   alertingEventLogger: AlertingEventLogger;
@@ -34,7 +34,7 @@ export function logAlerts<
   State extends AlertInstanceState,
   Context extends AlertInstanceContext,
   ActionGroupIds extends string,
-  RecoveryActionGroupId extends string
+  RecoveryActionGroupId extends string,
 >({
   logger,
   alertingEventLogger,

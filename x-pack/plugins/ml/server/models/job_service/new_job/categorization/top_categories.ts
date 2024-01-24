@@ -138,10 +138,13 @@ export function topCategoriesProvider(mlClient: MlClient) {
       catCounts.length || numberOfCategories
     );
 
-    const catsById = categories.reduce((p, c) => {
-      p[c.category_id] = c;
-      return p;
-    }, {} as { [id: number]: Category });
+    const catsById = categories.reduce(
+      (p, c) => {
+        p[c.category_id] = c;
+        return p;
+      },
+      {} as { [id: number]: Category }
+    );
 
     const total = await getTotalCategories(jobId);
 

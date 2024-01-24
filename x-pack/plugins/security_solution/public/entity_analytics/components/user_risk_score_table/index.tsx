@@ -62,7 +62,7 @@ export type UserRiskScoreColumns = [
   Columns<UserRiskScoreItem[RiskScoreFields.userName]>,
   Columns<UserRiskScoreItem[RiskScoreFields.timestamp]>,
   Columns<UserRiskScoreItem[RiskScoreFields.userRiskScore]>,
-  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>
+  Columns<UserRiskScoreItem[RiskScoreFields.userRisk]>,
 ];
 
 const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({

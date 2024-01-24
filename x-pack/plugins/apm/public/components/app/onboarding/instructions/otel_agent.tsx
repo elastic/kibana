@@ -26,7 +26,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createOpenTelemetryAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,
@@ -71,7 +71,7 @@ export const createOpenTelemetryAgentInstructions = (
                   openTelemetryInstrumentationLink:
                     'https://opentelemetry.io/docs/instrumentation',
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -100,7 +100,7 @@ export const createOpenTelemetryAgentInstructions = (
                 values: {
                   documentationLink: `${baseUrl}guide/en/apm/guide/current/open-telemetry.html`,
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>
@@ -157,7 +157,7 @@ function ConfigurationValueColumn({
             'xpack.apm.onboarding.otel.column.value.copyIconText',
             {
               defaultMessage: 'Copy to clipboard',
-            }
+            },
           )}
           color="text"
           iconType="copy"
@@ -219,7 +219,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.onboarding.config_otel.column.configSettings',
         {
           defaultMessage: 'Configuration setting (1)',
-        }
+        },
       ),
     },
     {
@@ -229,7 +229,7 @@ export function OpenTelemetryInstructions({
         'xpack.apm.onboarding.config_otel.column.configValue',
         {
           defaultMessage: 'Configuration value',
-        }
+        },
       ),
       render: (_, { value, setting, apiKey }) => (
         <ConfigurationValueColumn
@@ -311,7 +311,7 @@ export function OpenTelemetryInstructions({
                   'xpack.apm.onboarding.config_otel.instrumentationGuide',
                   {
                     defaultMessage: 'OpenTelemetry Instrumentation guide',
-                  }
+                  },
                 )}
               </EuiLink>
             ),

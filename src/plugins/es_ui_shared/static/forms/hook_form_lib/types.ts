@@ -98,7 +98,7 @@ export interface FormHook<T extends FormData = FormData, I extends FormData = T>
   __readFieldConfigFromSchema: <
     FieldType = unknown,
     FormType = FormData,
-    InternalFieldType = FieldType
+    InternalFieldType = FieldType,
   >(
     fieldPath: string
   ) => FieldConfig<FieldType, FormType, InternalFieldType> | undefined;
@@ -262,7 +262,7 @@ export interface ValidationFuncArg<I extends FormData, V = unknown> {
 export type ValidationFunc<
   I extends FormData = FormData,
   E extends string = string,
-  V = unknown
+  V = unknown,
 > = (
   data: ValidationFuncArg<I, V>
 ) => ValidationError<E> | void | undefined | ValidationCancelablePromise<E>;
@@ -294,7 +294,7 @@ type FieldValue = unknown;
 export interface ValidationConfig<
   I extends FormData = FormData,
   E extends string = string,
-  V = unknown
+  V = unknown,
 > {
   validator: ValidationFunc<I, E, V>;
   type?: string;

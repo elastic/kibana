@@ -79,20 +79,20 @@ export type MlStorageKey = keyof Exclude<MlStorage, null>;
 export type TMlStorageMapped<T extends MlStorageKey> = T extends typeof ML_ENTITY_FIELDS_CONFIG
   ? PartitionFieldsConfig
   : T extends typeof ML_APPLY_TIME_RANGE_CONFIG
-  ? ApplyTimeRangeConfig
-  : T extends typeof ML_GETTING_STARTED_CALLOUT_DISMISSED
-  ? boolean | undefined
-  : T extends typeof ML_FROZEN_TIER_PREFERENCE
-  ? FrozenTierPreference | undefined
-  : T extends typeof ML_ANOMALY_EXPLORER_PANELS
-  ? AnomalyExplorerPanelsState | undefined
-  : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT
-  ? number | undefined
-  : T extends typeof ML_OVERVIEW_PANELS
-  ? OverviewPanelsState | undefined
-  : T extends typeof ML_ELSER_CALLOUT_DISMISSED
-  ? boolean | undefined
-  : null;
+    ? ApplyTimeRangeConfig
+    : T extends typeof ML_GETTING_STARTED_CALLOUT_DISMISSED
+      ? boolean | undefined
+      : T extends typeof ML_FROZEN_TIER_PREFERENCE
+        ? FrozenTierPreference | undefined
+        : T extends typeof ML_ANOMALY_EXPLORER_PANELS
+          ? AnomalyExplorerPanelsState | undefined
+          : T extends typeof ML_NOTIFICATIONS_LAST_CHECKED_AT
+            ? number | undefined
+            : T extends typeof ML_OVERVIEW_PANELS
+              ? OverviewPanelsState | undefined
+              : T extends typeof ML_ELSER_CALLOUT_DISMISSED
+                ? boolean | undefined
+                : null;
 
 export const ML_STORAGE_KEYS = [
   ML_ENTITY_FIELDS_CONFIG,

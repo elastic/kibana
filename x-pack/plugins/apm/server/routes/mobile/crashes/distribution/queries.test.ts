@@ -28,7 +28,7 @@ describe('error distribution queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();
@@ -44,7 +44,7 @@ describe('error distribution queries', () => {
         kuery: '',
         start: 0,
         end: 50000,
-      })
+      }),
     );
 
     expect(mock.params).toMatchSnapshot();

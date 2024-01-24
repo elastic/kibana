@@ -26,7 +26,7 @@ const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   ARTIFICIAL_LOGS_WITH_DIP_TEXTFIELD: 'artificial_logs_with_dip_textfield',
 } as const;
 export type LogRateAnalysisDataGenerator =
-  typeof LOG_RATE_ANALYSYS_DATA_GENERATOR[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
+  (typeof LOG_RATE_ANALYSYS_DATA_GENERATOR)[keyof typeof LOG_RATE_ANALYSYS_DATA_GENERATOR];
 
 export interface GeneratedDoc {
   user: string;

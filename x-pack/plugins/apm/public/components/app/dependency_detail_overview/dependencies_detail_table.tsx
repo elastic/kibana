@@ -58,7 +58,7 @@ export function DependenciesDetailTable() {
         },
       });
     },
-    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled]
+    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled],
   );
 
   const dependencies =
@@ -99,11 +99,11 @@ export function DependenciesDetailTable() {
       dependencies={dependencies}
       title={i18n.translate(
         'xpack.apm.dependencyDetail.dependenciesTableTitle',
-        { defaultMessage: 'Upstream services' }
+        { defaultMessage: 'Upstream services' },
       )}
       nameColumnTitle={i18n.translate(
         'xpack.apm.dependencyDetail.dependenciesTableColumn',
-        { defaultMessage: 'Service' }
+        { defaultMessage: 'Service' },
       )}
       status={status}
       compact={false}

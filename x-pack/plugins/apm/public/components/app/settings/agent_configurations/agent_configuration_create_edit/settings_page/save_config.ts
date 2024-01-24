@@ -42,7 +42,7 @@ export async function saveConfig({
     toasts.addSuccess({
       title: i18n.translate(
         'xpack.apm.agentConfig.saveConfig.succeeded.title',
-        { defaultMessage: 'Configuration saved' }
+        { defaultMessage: 'Configuration saved' },
       ),
       text: i18n.translate('xpack.apm.agentConfig.saveConfig.succeeded.text', {
         defaultMessage:

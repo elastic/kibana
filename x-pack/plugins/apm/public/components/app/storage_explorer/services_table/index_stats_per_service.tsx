@@ -70,7 +70,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
         'xpack.apm.storageExplorer.indicesStats.numberOfDocs',
         {
           defaultMessage: 'Docs count',
-        }
+        },
       ),
       render: (_, { numberOfDocs }) => asInteger(numberOfDocs),
       sortable: true,
@@ -87,7 +87,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
         'xpack.apm.storageExplorer.indicesStats.dataStream',
         {
           defaultMessage: 'Data stream',
-        }
+        },
       ),
       render: (_, { dataStream }) =>
         (
@@ -106,7 +106,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
         'xpack.apm.storageExplorer.indicesStats.lifecyclePhase',
         {
           defaultMessage: 'Lifecycle phase',
-        }
+        },
       ),
       render: (_, { lifecyclePhase }) => lifecyclePhase ?? NOT_AVAILABLE_LABEL,
       sortable: true,
@@ -131,7 +131,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
             'xpack.apm.storageExplorer.indicesStats.table.caption',
             {
               defaultMessage: 'Storage Explorer indices breakdown',
-            }
+            },
           )}
           items={indicesStats}
           columns={columns}
@@ -145,7 +145,7 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
                   'xpack.apm.storageExplorer.indicesStats.table.errorMessage',
                   {
                     defaultMessage: 'Failed to fetch',
-                  }
+                  },
                 )
               : ''
           }
@@ -155,13 +155,13 @@ export function IndexStatsPerService({ indicesStats, status }: Props) {
                   'xpack.apm.storageExplorer.indicesStats.table.loading',
                   {
                     defaultMessage: 'Loading...',
-                  }
+                  },
                 )
               : i18n.translate(
                   'xpack.apm.storageExplorer.indicesStats.table.noResults',
                   {
                     defaultMessage: 'No data found',
-                  }
+                  },
                 )
           }
         />

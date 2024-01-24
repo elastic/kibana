@@ -36,12 +36,15 @@ export const parseSearchParams = (term: string): ParsedSearchParams => {
 
   const unknownFilters = [...filterValues.entries()]
     .filter(([key]) => !knownFilters.includes(key))
-    .reduce((unknowns, [key, value]) => {
-      return {
-        ...unknowns,
-        [key]: value,
-      };
-    }, {} as Record<string, FilterValues>);
+    .reduce(
+      (unknowns, [key, value]) => {
+        return {
+          ...unknowns,
+          [key]: value,
+        };
+      },
+      {} as Record<string, FilterValues>
+    );
 
   const tags = filterValues.get('tag');
   const types = filterValues.get('type');

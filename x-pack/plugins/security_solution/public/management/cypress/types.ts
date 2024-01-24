@@ -34,15 +34,14 @@ type PossibleChainable =
  * const value: () => Promise<Cypress.Chainable<SomeType>>;
  * const t: ReturnTypeFromChainable<value>; // SomeType
  */
-export type ReturnTypeFromChainable<C extends PossibleChainable> = C extends Cypress.Chainable<
-  infer Value
->
-  ? Value
-  : C extends (args?: any) => Cypress.Chainable<infer ValueFromFnResponse>
-  ? ValueFromFnResponse
-  : C extends (args?: any) => Promise<Cypress.Chainable<infer ValueFromPromiseChainable>>
-  ? ValueFromPromiseChainable
-  : never;
+export type ReturnTypeFromChainable<C extends PossibleChainable> =
+  C extends Cypress.Chainable<infer Value>
+    ? Value
+    : C extends (args?: any) => Cypress.Chainable<infer ValueFromFnResponse>
+      ? ValueFromFnResponse
+      : C extends (args?: any) => Promise<Cypress.Chainable<infer ValueFromPromiseChainable>>
+        ? ValueFromPromiseChainable
+        : never;
 
 export type IndexEndpointHostsCyTaskOptions = Partial<
   {

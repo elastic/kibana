@@ -59,7 +59,7 @@ export async function getMobileMostUsedCharts({
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.devices?.buckets,
           mobileTransactionEventsResponse.aggregations?.devices
-            ?.sum_other_doc_count
+            ?.sum_other_doc_count,
         ) || [],
     },
     {
@@ -68,7 +68,7 @@ export async function getMobileMostUsedCharts({
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.osVersions?.buckets,
           mobileTransactionEventsResponse.aggregations?.osVersions
-            ?.sum_other_doc_count
+            ?.sum_other_doc_count,
         ) || [],
     },
     {
@@ -77,7 +77,7 @@ export async function getMobileMostUsedCharts({
         mergeCountWithOther(
           mobileTransactionEventsResponse.aggregations?.appVersions?.buckets,
           mobileTransactionEventsResponse.aggregations?.appVersions
-            ?.sum_other_doc_count
+            ?.sum_other_doc_count,
         ) || [],
     },
     {
@@ -87,7 +87,7 @@ export async function getMobileMostUsedCharts({
           mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes
             ?.buckets,
           mobileNetworkConnectionTypeResponse.aggregations?.netConnectionTypes
-            ?.sum_other_doc_count
+            ?.sum_other_doc_count,
         ) || [],
     },
   ];

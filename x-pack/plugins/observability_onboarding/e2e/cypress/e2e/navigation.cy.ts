@@ -35,7 +35,7 @@ describe('[Observability onboarding] Navigation', () => {
 
       cy.url().should(
         'include',
-        '/app/integrations/detail/kubernetes/overview'
+        '/app/integrations/detail/kubernetes/overview',
       );
     });
 

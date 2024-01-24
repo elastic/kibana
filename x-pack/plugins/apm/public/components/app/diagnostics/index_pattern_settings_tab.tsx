@@ -59,8 +59,8 @@ export function DiagnosticsIndexPatternSettings() {
               const text = priority
                 ? `(Priority: ${priority})`
                 : isNonStandard
-                ? `(legacy template)`
-                : '';
+                  ? `(legacy template)`
+                  : '';
               return (
                 <EuiToolTip
                   key={templateName}
@@ -74,13 +74,13 @@ export function DiagnosticsIndexPatternSettings() {
                   </EuiBadge>
                 </EuiToolTip>
               );
-            }
+            },
           )}
 
           <EuiSpacer />
         </div>
       );
-    }
+    },
   );
 
   return (
@@ -109,7 +109,7 @@ export function getIsIndexPatternTabOk(diagnosticsBundle?: DiagnosticsBundle) {
 
   const hasError = diagnosticsBundle.indexTemplatesByIndexPattern.some(
     ({ indexTemplates }) =>
-      indexTemplates.some(({ isNonStandard }) => isNonStandard)
+      indexTemplates.some(({ isNonStandard }) => isNonStandard),
   );
 
   return !hasError;

@@ -77,9 +77,12 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
           return;
         }
 
-        timeoutId = setTimeout(() => {
-          setIsLongRunningCommand(true);
-        }, (15 - elapsedSeconds) * 1000);
+        timeoutId = setTimeout(
+          () => {
+            setIsLongRunningCommand(true);
+          },
+          (15 - elapsedSeconds) * 1000
+        );
       }
 
       return () => {

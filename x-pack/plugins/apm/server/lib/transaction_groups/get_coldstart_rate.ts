@@ -105,7 +105,7 @@ export async function getColdstartRate({
 
   const resp = await apmEventClient.search(
     'get_transaction_group_coldstart_rate',
-    params
+    params,
   );
 
   if (!resp.aggregations) {
@@ -113,11 +113,11 @@ export async function getColdstartRate({
   }
 
   const transactionColdstartRate = getTransactionColdstartRateTimeSeries(
-    resp.aggregations.timeseries.buckets
+    resp.aggregations.timeseries.buckets,
   );
 
   const average = calculateTransactionColdstartRate(
-    resp.aggregations.coldstartStates
+    resp.aggregations.coldstartStates,
   );
 
   return { transactionColdstartRate, average };

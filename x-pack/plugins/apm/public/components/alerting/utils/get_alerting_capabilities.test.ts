@@ -15,8 +15,8 @@ describe('getAlertingCapabilities', () => {
       expect(
         getAlertingCapabilities(
           {} as ApmPluginSetupDeps,
-          { apm: {} } as unknown as Capabilities
-        ).isAlertingAvailable
+          { apm: {} } as unknown as Capabilities,
+        ).isAlertingAvailable,
       ).toEqual(false);
     });
   });

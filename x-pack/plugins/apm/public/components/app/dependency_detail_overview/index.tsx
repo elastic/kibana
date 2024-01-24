@@ -35,7 +35,7 @@ export function DependencyDetailOverview() {
       {
         title: i18n.translate(
           'xpack.apm.dependencyDetailOverview.breadcrumbTitle',
-          { defaultMessage: 'Overview' }
+          { defaultMessage: 'Overview' },
         ),
         href: apmRouter.link('/dependencies/overview', {
           query: {
@@ -61,7 +61,7 @@ export function DependencyDetailOverview() {
       rangeTo,
       refreshInterval,
       refreshPaused,
-    ]
+    ],
   );
 
   return (

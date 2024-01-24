@@ -167,22 +167,25 @@ function compareSnapshotFiles(
 
   const restOfPluginNames = pluginNames.filter((e) => !pluginNamesWithChangedHash.includes(e));
 
-  const changes = pluginNamesWithChangedHash.reduce((changesObj, pluginName) => {
-    const fromMigrationInfo = fromSnapshot.typeDefinitions[pluginName];
-    const toMigrationInfo = toSnapshot.typeDefinitions[pluginName];
-    const fromVersion = Number(fromMigrationInfo.modelVersions.at(-1)?.version || '0');
-    const toVersion = Number(toMigrationInfo.modelVersions.at(-1)?.version || '0');
-    changesObj[pluginName] = {
-      from: fromMigrationInfo,
-      to: toMigrationInfo,
-      versionChange: {
-        from: fromVersion,
-        to: toVersion,
-        emoji: Math.abs(fromVersion - toVersion) >= 2 ? '🚨' : '✅',
-      },
-    };
-    return changesObj;
-  }, {} as SnapshotComparisonResult['changes']);
+  const changes = pluginNamesWithChangedHash.reduce(
+    (changesObj, pluginName) => {
+      const fromMigrationInfo = fromSnapshot.typeDefinitions[pluginName];
+      const toMigrationInfo = toSnapshot.typeDefinitions[pluginName];
+      const fromVersion = Number(fromMigrationInfo.modelVersions.at(-1)?.version || '0');
+      const toVersion = Number(toMigrationInfo.modelVersions.at(-1)?.version || '0');
+      changesObj[pluginName] = {
+        from: fromMigrationInfo,
+        to: toMigrationInfo,
+        versionChange: {
+          from: fromVersion,
+          to: toVersion,
+          emoji: Math.abs(fromVersion - toVersion) >= 2 ? '🚨' : '✅',
+        },
+      };
+      return changesObj;
+    },
+    {} as SnapshotComparisonResult['changes']
+  );
 
   return {
     hasChanges: pluginNamesWithChangedHash.length > 0,

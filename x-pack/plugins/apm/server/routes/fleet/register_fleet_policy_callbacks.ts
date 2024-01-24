@@ -52,7 +52,7 @@ export async function registerFleetPolicyCallbacks({
       fleetPluginStart,
       getApmIndices,
       coreStart,
-    })
+    }),
   );
 
   fleetPluginStart.registerExternalCallback(
@@ -61,12 +61,12 @@ export async function registerFleetPolicyCallbacks({
       fleetPluginStart,
       getApmIndices,
       coreStart,
-    })
+    }),
   );
 
   fleetPluginStart.registerExternalCallback(
     'packagePolicyDelete',
-    onPackagePolicyDelete({ coreStart, logger })
+    onPackagePolicyDelete({ coreStart, logger }),
   );
 
   fleetPluginStart.registerExternalCallback(
@@ -75,7 +75,7 @@ export async function registerFleetPolicyCallbacks({
       fleet: fleetPluginStart,
       coreStart,
       logger,
-    })
+    }),
   );
 }
 
@@ -96,16 +96,16 @@ function onPackagePolicyDelete({
 
       const [agentConfigApiKeyId] = get(
         packagePolicy,
-        AGENT_CONFIG_API_KEY_PATH
+        AGENT_CONFIG_API_KEY_PATH,
       ).split(':');
 
       const [sourceMapApiKeyId] = get(
         packagePolicy,
-        SOURCE_MAP_API_KEY_PATH
+        SOURCE_MAP_API_KEY_PATH,
       ).split(':');
 
       logger.debug(
-        `Deleting API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`
+        `Deleting API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`,
       );
 
       try {
@@ -114,7 +114,7 @@ function onPackagePolicyDelete({
         });
       } catch (e) {
         logger.error(
-          `Failed to delete API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`
+          `Failed to delete API keys: ${agentConfigApiKeyId}, ${sourceMapApiKeyId} (package policy: ${packagePolicy.id})`,
         );
       }
     });

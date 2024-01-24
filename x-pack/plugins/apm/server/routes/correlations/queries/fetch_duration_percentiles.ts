@@ -68,7 +68,7 @@ export const fetchDurationPercentiles = async ({
   };
   const response = await apmEventClient.search(
     'get_duration_percentiles',
-    params
+    params,
   );
 
   // return early with no results if the search didn't return any documents

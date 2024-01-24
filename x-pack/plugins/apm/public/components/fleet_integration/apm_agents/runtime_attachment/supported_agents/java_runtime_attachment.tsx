@@ -34,42 +34,42 @@ const excludeOptions = [
     value: 'main',
     label: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.main',
-      { defaultMessage: 'main' }
+      { defaultMessage: 'main' },
     ),
     description: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.mainDescription',
       {
         defaultMessage:
           'A regular expression of fully qualified main class names or paths to JARs of applications the java agent should be attached to. Performs a partial match so that foo matches /bin/foo.jar.',
-      }
+      },
     ),
   },
   {
     value: 'vmarg',
     label: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmarg',
-      { defaultMessage: 'vmarg' }
+      { defaultMessage: 'vmarg' },
     ),
     description: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.vmargDescription',
       {
         defaultMessage:
           'A regular expression matched against the arguments passed to the JVM, such as system properties. Performs a partial match so that attach=true matches the system property -Dattach=true.',
-      }
+      },
     ),
   },
   {
     value: 'user',
     label: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.user',
-      { defaultMessage: 'user' }
+      { defaultMessage: 'user' },
     ),
     description: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude.options.userDescription',
       {
         defaultMessage:
           'A username that is matched against the operating system user that runs the JVM.',
-      }
+      },
     ),
   },
 ];
@@ -78,11 +78,11 @@ const includeOptions = [
     value: 'all',
     label: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.include.options.all',
-      { defaultMessage: 'All' }
+      { defaultMessage: 'All' },
     ),
     description: i18n.translate(
       'xpack.apm.fleetIntegration.javaRuntime.operationType.include.options.allDescription',
-      { defaultMessage: 'Includes all JVMs for attachment.' }
+      { defaultMessage: 'Includes all JVMs for attachment.' },
     ),
   },
   ...excludeOptions,
@@ -97,7 +97,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
   const onChangePolicy = useCallback(
     (runtimeAttachmentSettings: RuntimeAttachmentSettings) => {
       const apmInputIdx = newPolicy.inputs.findIndex(
-        ({ type }) => type === 'apm'
+        ({ type }) => type === 'apm',
       );
       onChange({
         isValid:
@@ -118,7 +118,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
                 java_attacher_discovery_rules: {
                   type: 'yaml',
                   value: encodeDiscoveryRulesYaml(
-                    runtimeAttachmentSettings.discoveryRules
+                    runtimeAttachmentSettings.discoveryRules,
                   ),
                 },
                 java_attacher_agent_version: {
@@ -133,7 +133,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       });
       setIsDirty(true);
     },
-    [newPolicy, onChange]
+    [newPolicy, onChange],
   );
 
   function invalidatePackagePolicy() {
@@ -150,7 +150,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
             value: 'include',
             label: i18n.translate(
               'xpack.apm.fleetIntegration.javaRuntime.operationType.include',
-              { defaultMessage: 'Include' }
+              { defaultMessage: 'Include' },
             ),
           },
           types: includeOptions,
@@ -160,7 +160,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
             value: 'exclude',
             label: i18n.translate(
               'xpack.apm.fleetIntegration.javaRuntime.operationType.exclude',
-              { defaultMessage: 'Exclude' }
+              { defaultMessage: 'Exclude' },
             ),
           },
           types: excludeOptions,
@@ -172,7 +172,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         {
           defaultMessage:
             'Attach the Java agent to running and starting Java applications.',
-        }
+        },
       )}
       discoveryRulesDescription={
         <FormattedMessage
@@ -186,7 +186,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
               >
                 {i18n.translate(
                   'xpack.apm.fleetIntegration.javaRuntime.discoveryRulesDescription.docLink',
-                  { defaultMessage: 'docs' }
+                  { defaultMessage: 'docs' },
                 )}
               </a>
             ),
@@ -197,7 +197,7 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
       initialIsEnabled={apmVars?.java_attacher_enabled?.value}
       initialDiscoveryRules={decodeDiscoveryRulesYaml(
         apmVars?.java_attacher_discovery_rules?.value ?? '[]\n',
-        [initialDiscoveryRule]
+        [initialDiscoveryRule],
       )}
       version={
         apmVars?.java_attacher_agent_version?.value || DEFAULT_AGENT_VERSION
@@ -217,7 +217,7 @@ type DiscoveryRulesParsedYaml = Array<{ [operationType: string]: string }>;
 
 function decodeDiscoveryRulesYaml(
   discoveryRulesYaml: string,
-  defaultDiscoveryRules: IDiscoveryRule[] = []
+  defaultDiscoveryRules: IDiscoveryRule[] = [],
 ): IDiscoveryRule[] {
   try {
     const parsedYaml: DiscoveryRulesParsedYaml =
@@ -246,7 +246,7 @@ function encodeDiscoveryRulesYaml(discoveryRules: IDiscoveryRule[]): string {
   const mappedDiscoveryRules: DiscoveryRulesParsedYaml = discoveryRules.map(
     ({ operation, type, probe }) => ({
       [`${operation}-${type}`]: probe,
-    })
+    }),
   );
   return yaml.dump(mappedDiscoveryRules);
 }

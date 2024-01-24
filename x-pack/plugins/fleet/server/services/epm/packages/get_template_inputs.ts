@@ -45,10 +45,13 @@ export const templatePackagePolicyToFullInputs = (
                 type: input.type,
                 data_stream: stream.data_stream,
                 ...stream.compiled_stream,
-                ...Object.entries(stream.config || {}).reduce((acc, [key, { value }]) => {
-                  acc[key] = value;
-                  return acc;
-                }, {} as { [k: string]: any }),
+                ...Object.entries(stream.config || {}).reduce(
+                  (acc, [key, { value }]) => {
+                    acc[key] = value;
+                    return acc;
+                  },
+                  {} as { [k: string]: any }
+                ),
               };
               return fullStream;
             }),
@@ -59,10 +62,13 @@ export const templatePackagePolicyToFullInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
-        acc[key] = value;
-        return acc;
-      }, {} as Record<string, unknown>)
+      Object.entries(input.config || {}).reduce(
+        (acc, [key, { value }]) => {
+          acc[key] = value;
+          return acc;
+        },
+        {} as Record<string, unknown>
+      )
     );
     fullInputs.push(fullInput);
   });

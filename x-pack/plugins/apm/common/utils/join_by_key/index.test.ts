@@ -28,7 +28,7 @@ describe('joinByKey', () => {
           p95: 18,
         },
       ],
-      'serviceName'
+      'serviceName',
     );
 
     expect(joined.length).toBe(2);
@@ -79,7 +79,7 @@ describe('joinByKey', () => {
           p95: 18,
         },
       ],
-      'key'
+      'key',
     );
 
     expect(joined.length).toBe(2);
@@ -129,11 +129,11 @@ describe('joinByKey', () => {
         ...a,
         ...b,
         values: a.values.concat(b.values),
-      })
+      }),
     );
 
     expect(
-      joined.find((item) => item.serviceName === 'opbeans-node')?.values
+      joined.find((item) => item.serviceName === 'opbeans-node')?.values,
     ).toEqual(['a', 'b', 'c']);
   });
 
@@ -153,7 +153,7 @@ describe('joinByKey', () => {
           },
         },
       ],
-      'serviceName'
+      'serviceName',
     );
 
     expect(joined[0]).toEqual({

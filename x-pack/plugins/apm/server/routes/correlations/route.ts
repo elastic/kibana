@@ -253,7 +253,7 @@ const significantCorrelationsTransactionsRoute = createApmServerRoute({
           t.type({
             fieldName: t.string,
             fieldValue: t.union([t.string, toNumberRt]),
-          })
+          }),
         ),
       }),
     ]),

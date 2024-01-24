@@ -27,7 +27,7 @@ export function ApmCustomAssetsExtension() {
       url: `${basePath}/app/apm`,
       description: i18n.translate(
         'xpack.apm.fleetIntegration.assets.description',
-        { defaultMessage: 'View application traces and service maps in APM' }
+        { defaultMessage: 'View application traces and service maps in APM' },
       ),
     },
   ];

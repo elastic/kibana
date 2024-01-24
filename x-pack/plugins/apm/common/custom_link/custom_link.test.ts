@@ -58,7 +58,7 @@ describe('Custom link', () => {
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe(
-        'https://kibana.com/app/apm/opbeans%20java/overview?transactionName=%23myhandler%2Ffoo'
+        'https://kibana.com/app/apm/opbeans%20java/overview?transactionName=%23myhandler%2Ffoo',
       );
     });
 
@@ -100,7 +100,7 @@ describe('Custom link', () => {
       } as Transaction;
       const result = getEncodedCustomLinkUrl(url, transaction);
       expect(result).toBe(
-        'https://kibana.com/app/apm/foo%20%26%20bar/overview'
+        'https://kibana.com/app/apm/foo%20%26%20bar/overview',
       );
     });
   });

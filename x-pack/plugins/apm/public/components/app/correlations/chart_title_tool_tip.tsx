@@ -17,7 +17,7 @@ export function ChartTitleToolTip() {
         {
           defaultMessage:
             'This chart uses logarithmic scales on both axes to avoid distortion from outliers.',
-        }
+        },
       )}
       position="right"
     />

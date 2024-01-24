@@ -30,12 +30,15 @@ export interface SearchCapabilitiesOptions {
 }
 
 const convertAggsToRestriction = (allAvailableAggs: string[]) =>
-  allAvailableAggs.reduce((availableAggs, aggType) => {
-    availableAggs[aggType] = {
-      '*': true,
-    };
-    return availableAggs;
-  }, {} as Record<string, unknown>);
+  allAvailableAggs.reduce(
+    (availableAggs, aggType) => {
+      availableAggs[aggType] = {
+        '*': true,
+      };
+      return availableAggs;
+    },
+    {} as Record<string, unknown>
+  );
 
 export class DefaultSearchCapabilities {
   public timezone: SearchCapabilitiesOptions['timezone'];

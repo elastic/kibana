@@ -474,9 +474,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: createdObjects } = await soClient.bulkCreate<PackagePolicySOAttributes>(
-      policiesToCreate
-    );
+    const { saved_objects: createdObjects } =
+      await soClient.bulkCreate<PackagePolicySOAttributes>(policiesToCreate);
 
     // Filter out invalid SOs
     const newSos = createdObjects.filter((so) => !so.error && so.attributes);
@@ -1063,9 +1062,8 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       }
     });
 
-    const { saved_objects: updatedPolicies } = await soClient.bulkUpdate<PackagePolicySOAttributes>(
-      policiesToUpdate
-    );
+    const { saved_objects: updatedPolicies } =
+      await soClient.bulkUpdate<PackagePolicySOAttributes>(policiesToUpdate);
 
     const agentPolicyIds = new Set(packagePolicyUpdates.map((p) => p.policy_id));
 
@@ -1125,7 +1123,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             id: soPolicy.id,
             version: soPolicy.version,
             ...soPolicy.attributes,
-          } as PackagePolicy)
+          }) as PackagePolicy
       );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
@@ -1719,12 +1717,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicy: A extends 'packagePolicyDelete'
       ? DeletePackagePoliciesResponse
       : A extends 'packagePolicyPostDelete'
-      ? PostDeletePackagePoliciesResponse
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never,
+        ? PostDeletePackagePoliciesResponse
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyCreate'
+            ? NewPackagePolicy
+            : never,
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     context?: RequestHandlerContext,
@@ -1733,12 +1731,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     A extends 'packagePolicyDelete'
       ? void
       : A extends 'packagePolicyPostDelete'
-      ? void
-      : A extends 'packagePolicyPostCreate'
-      ? PackagePolicy
-      : A extends 'packagePolicyCreate'
-      ? NewPackagePolicy
-      : never
+        ? void
+        : A extends 'packagePolicyPostCreate'
+          ? PackagePolicy
+          : A extends 'packagePolicyCreate'
+            ? NewPackagePolicy
+            : never
   >;
   public async runExternalCallbacks(
     externalCallbackType: ExternalCallback[0],

@@ -49,7 +49,7 @@ type ServiceInstanceTransactionStatistics<T> = T extends true
   : ServiceInstanceTransactionPrimaryStatistics;
 
 export async function getServiceInstancesTransactionStatistics<
-  T extends true | false
+  T extends true | false,
 >({
   environment,
   kuery,
@@ -93,7 +93,7 @@ export async function getServiceInstancesTransactionStatistics<
       end: endWithOffset,
       numBuckets,
       searchAggregatedTransactions,
-    }
+    },
   );
 
   const field = getDurationFieldForTransactions(searchAggregatedTransactions);
@@ -115,13 +115,13 @@ export async function getServiceInstancesTransactionStatistics<
         { term: { [SERVICE_NAME]: serviceName } },
         { term: { [TRANSACTION_TYPE]: transactionType } },
         ...getBackwardCompatibleDocumentTypeFilter(
-          searchAggregatedTransactions
+          searchAggregatedTransactions,
         ),
         ...rangeQuery(startWithOffset, endWithOffset),
         ...environmentQuery(environment),
         ...kqlQuery(kuery),
         ...getBackwardCompatibleDocumentTypeFilter(
-          searchAggregatedTransactions
+          searchAggregatedTransactions,
         ),
         ...(isComparisonSearch && serviceNodeIds
           ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
@@ -163,7 +163,7 @@ export async function getServiceInstancesTransactionStatistics<
         ],
       },
       body: { size: 0, track_total_hits: false, query, aggs },
-    }
+    },
   );
 
   const bucketSizeInMinutes = bucketSize / 60;
@@ -211,7 +211,7 @@ export async function getServiceInstancesTransactionStatistics<
             }),
           };
         }
-      }
+      },
     ) as Array<ServiceInstanceTransactionStatistics<T>>) || []
   );
 }

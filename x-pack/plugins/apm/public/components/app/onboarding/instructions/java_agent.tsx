@@ -18,7 +18,7 @@ import { ApiKeyCallout } from './api_key_callout';
 import { agentStatusCheckInstruction } from '../agent_status_instructions';
 
 export const createJavaAgentInstructions = (
-  commonOptions: AgentInstructions
+  commonOptions: AgentInstructions,
 ): EuiStepProps[] => {
   const {
     baseUrl,
@@ -52,7 +52,7 @@ export const createJavaAgentInstructions = (
         'xpack.apm.onboarding.java.startApplication.title',
         {
           defaultMessage: 'Start your application with the javaagent flag',
-        }
+        },
       ),
       children: (
         <>
@@ -68,7 +68,7 @@ export const createJavaAgentInstructions = (
 * Set the service environment\n \
 * Set the base package of your application',
                 values: { customApmServerUrl: 'http://localhost:8200' },
-              }
+              },
             )}
           </EuiMarkdownFormat>
           <EuiSpacer />
@@ -102,7 +102,7 @@ export const createJavaAgentInstructions = (
                 values: {
                   documentationLink: `${baseUrl}guide/en/apm/agent/java/current/index.html`,
                 },
-              }
+              },
             )}
           </EuiMarkdownFormat>
         </>

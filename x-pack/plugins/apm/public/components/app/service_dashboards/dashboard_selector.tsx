@@ -44,7 +44,7 @@ export function DashboardSelector({
   useEffect(() => {
     const preselectedDashboard = serviceDashboards.find(
       ({ dashboardSavedObjectId }) =>
-        dashboardSavedObjectId === currentDashboardId
+        dashboardSavedObjectId === currentDashboardId,
     );
     // preselect dashboard
     if (preselectedDashboard) {
@@ -71,13 +71,13 @@ export function DashboardSelector({
         'xpack.apm.serviceDashboards.selectDashboard.placeholder',
         {
           defaultMessage: 'Select dashboard',
-        }
+        },
       )}
       prepend={i18n.translate(
         'xpack.apm.serviceDashboards.selectDashboard.prepend',
         {
           defaultMessage: 'Dashboard',
-        }
+        },
       )}
       singleSelection={{ asPlainText: true }}
       options={serviceDashboards.map(({ dashboardSavedObjectId, title }) => {

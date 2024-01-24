@@ -72,7 +72,7 @@ export async function getAllEnvironments({
 
   const environments =
     resp.aggregations?.environments.buckets.map(
-      (bucket) => bucket.key as string
+      (bucket) => bucket.key as string,
     ) || [];
   return environments;
 }

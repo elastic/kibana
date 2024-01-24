@@ -21,12 +21,12 @@ export function getPreferredServiceAnomalyTimeseries({
   fallbackToTransactions: boolean;
 }) {
   const seriesForType = allAnomalyTimeseries.filter(
-    (serie) => serie.type === detectorType
+    (serie) => serie.type === detectorType,
   );
 
   return seriesForType.find(
     (serie) =>
       serie.environment === preferredEnvironment &&
-      (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
+      (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3),
   );
 }

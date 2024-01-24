@@ -32,7 +32,7 @@ const serviceGroupsRoute = createApmServerRoute({
     tags: ['access:apm'],
   },
   handler: async (
-    resources
+    resources,
   ): Promise<{ serviceGroups: SavedServiceGroup[] }> => {
     const { context } = resources;
     const {
@@ -92,7 +92,7 @@ const serviceGroupSaveRoute = createApmServerRoute({
       savedObjects: { client: savedObjectsClient },
     } = await context.core;
     const { isValidFields, isValidSyntax, message } = validateServiceGroupKuery(
-      params.body.kuery
+      params.body.kuery,
     );
     if (!(isValidFields && isValidSyntax)) {
       throw Boom.badRequest(message);
@@ -198,7 +198,7 @@ const serviceGroupCountsRoute = createApmServerRoute({
         };
         return acc;
       },
-      {}
+      {},
     );
     return serviceGroupCounts;
   },

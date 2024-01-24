@@ -86,7 +86,7 @@ export async function getServerlessFunctionsOverview({
 
   const response = await apmEventClient.search(
     'ger_serverless_functions_overview',
-    params
+    params,
   );
 
   const serverlessFunctionsOverview =

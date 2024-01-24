@@ -79,7 +79,7 @@ function setup({
       <MockApmPluginContextWrapper history={history}>
         <UnifiedSearchBar />
       </MockApmPluginContextWrapper>
-    </KibanaReactContext.Provider>
+    </KibanaReactContext.Provider>,
   );
 
   return {

@@ -224,7 +224,7 @@ export async function fetchServicePathsFromTraceIds({
 
   const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
     'get_service_paths_from_trace_ids',
-    serviceMapParams
+    serviceMapParams,
   );
 
   return serviceMapFromTraceIdsScriptResponse as {

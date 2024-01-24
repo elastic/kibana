@@ -100,11 +100,11 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
               path: { serviceName },
               query: { start, end },
             },
-          }
+          },
         );
       }
     },
-    [serviceName, start, end]
+    [serviceName, start, end],
   );
 
   const { data: details, status: detailsFetchStatus } = useFetcher(
@@ -118,11 +118,11 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
               path: { serviceName },
               query: { start, end, environment },
             },
-          }
+          },
         );
       }
     },
-    [selectedIconPopover, serviceName, start, end, environment]
+    [selectedIconPopover, serviceName, start, end, environment],
   );
 
   const isLoading = !icons && iconsFetchStatus === FETCH_STATUS.LOADING;
@@ -216,7 +216,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
                 title={item.title}
                 onClick={() => {
                   setSelectedIconPopover((prevSelectedIconPopover) =>
-                    item.key === prevSelectedIconPopover ? null : item.key
+                    item.key === prevSelectedIconPopover ? null : item.key,
                   );
                 }}
                 onClose={() => {

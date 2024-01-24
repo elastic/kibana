@@ -14,7 +14,9 @@ import { DashboardPanelMap, DashboardPanelState } from '..';
 import { SavedDashboardPanel } from '../content_management';
 
 export function convertSavedDashboardPanelToPanelState<
-  TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
+  TEmbeddableInput extends
+    | EmbeddableInput
+    | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput,
 >(savedDashboardPanel: SavedDashboardPanel): DashboardPanelState<TEmbeddableInput> {
   return {
     type: savedDashboardPanel.type,

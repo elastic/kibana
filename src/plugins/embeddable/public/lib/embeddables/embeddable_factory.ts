@@ -45,7 +45,7 @@ export interface EmbeddableFactory<
     TEmbeddableInput,
     TEmbeddableOutput
   >,
-  TSavedObjectAttributes = unknown
+  TSavedObjectAttributes = unknown,
 > extends PersistableState<EmbeddableStateWithType> {
   /**
    * The version of this Embeddable factory. This will be used in the client side migration system

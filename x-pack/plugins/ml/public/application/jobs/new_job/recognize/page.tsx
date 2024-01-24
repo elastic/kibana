@@ -229,8 +229,8 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           failedJobsCount === 0
             ? SAVE_STATE.SAVED
             : failedJobsCount === jobs.length
-            ? SAVE_STATE.FAILED
-            : SAVE_STATE.PARTIAL_FAILURE
+              ? SAVE_STATE.FAILED
+              : SAVE_STATE.PARTIAL_FAILURE
         );
       } catch (e) {
         setSaveState(SAVE_STATE.FAILED);

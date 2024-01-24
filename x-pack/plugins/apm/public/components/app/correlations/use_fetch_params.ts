@@ -26,7 +26,7 @@ export const useFetchParams = () => {
     },
   } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
-    '/mobile-services/{serviceName}/transactions/view'
+    '/mobile-services/{serviceName}/transactions/view',
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
@@ -49,6 +49,6 @@ export const useFetchParams = () => {
       environment,
       start,
       end,
-    ]
+    ],
   );
 };

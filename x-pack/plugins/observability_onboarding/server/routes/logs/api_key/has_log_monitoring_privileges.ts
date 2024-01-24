@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { cluster, indices } from './monitoring_config';
 
 export async function hasLogMonitoringPrivileges(
-  esClient: ElasticsearchClient
+  esClient: ElasticsearchClient,
 ) {
   const res = await esClient.security.hasPrivileges({
     body: {

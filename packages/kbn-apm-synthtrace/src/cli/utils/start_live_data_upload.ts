@@ -86,10 +86,13 @@ export async function startLiveDataUpload({
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)
           .reverse()
-          .reduce<Writable>((prev, current) => {
-            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-            return currentStream.pipe(prev);
-          }, new PassThrough({ objectMode: true }));
+          .reduce<Writable>(
+            (prev, current) => {
+              const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+              return currentStream.pipe(prev);
+            },
+            new PassThrough({ objectMode: true })
+          );
 
         concatenatedStream.pipe(streams[i], { end: false });
 

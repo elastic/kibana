@@ -27,7 +27,7 @@ export async function getTransaction({
         if (value) {
           return { terms: { [key]: splitFilterValueByComma(value) } };
         }
-      })
+      }),
   );
 
   const resp = await apmEventClient.search('get_transaction_for_custom_link', {

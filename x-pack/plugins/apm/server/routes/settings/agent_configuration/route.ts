@@ -31,7 +31,7 @@ import { AgentConfiguration } from '../../../../common/agent_configuration/confi
 import { ApmFeatureFlags } from '../../../../common/apm_feature_flags';
 
 function throwNotFoundIfAgentConfigNotAvailable(
-  featureFlags: ApmFeatureFlags
+  featureFlags: ApmFeatureFlags,
 ): void {
   if (!featureFlags.agentConfigurationAvailable) {
     throw Boom.notFound();
@@ -43,7 +43,7 @@ const agentConfigurationRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/settings/agent-configuration 2023-10-31',
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     configurations: AgentConfiguration[];
   }> => {
@@ -89,7 +89,7 @@ const getSingleAgentConfigurationRoute = createApmServerRoute({
 
     if (!exactConfig) {
       logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
+        `Config was not found for ${service.name}/${service.environment}`,
       );
 
       throw Boom.notFound();
@@ -127,14 +127,14 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
     });
     if (!exactConfig) {
       logger.info(
-        `Config was not found for ${service.name}/${service.environment}`
+        `Config was not found for ${service.name}/${service.environment}`,
       );
 
       throw Boom.notFound();
     }
 
     logger.info(
-      `Deleting config ${service.name}/${service.environment} (${exactConfig.id})`
+      `Deleting config ${service.name}/${service.environment} (${exactConfig.id})`,
     );
 
     const deleteConfigurationResult = await deleteConfiguration({
@@ -151,7 +151,7 @@ const deleteAgentConfigurationRoute = createApmServerRoute({
         telemetryUsageCounter,
       });
       logger.info(
-        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`
+        `Updated Fleet integration policy for APM to remove the deleted agent configuration.`,
       );
     }
 
@@ -190,14 +190,14 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
     // if the config exists ?overwrite=true is required
     if (exactConfig && !query.overwrite) {
       throw Boom.badRequest(
-        `A configuration already exists for "${body.service.name}/${body.service.environment}. Use ?overwrite=true to overwrite the existing configuration.`
+        `A configuration already exists for "${body.service.name}/${body.service.environment}. Use ?overwrite=true to overwrite the existing configuration.`,
       );
     }
 
     logger.info(
       `${exactConfig ? 'Updating' : 'Creating'} config ${body.service.name}/${
         body.service.environment
-      }`
+      }`,
     );
 
     await createOrUpdateConfiguration({
@@ -215,7 +215,7 @@ const createOrUpdateAgentConfigurationRoute = createApmServerRoute({
         telemetryUsageCounter,
       });
       logger.info(
-        `Saved latest agent settings to Fleet integration policy for APM.`
+        `Saved latest agent settings to Fleet integration policy for APM.`,
       );
     }
   },
@@ -236,7 +236,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'], disableTelemetry: true },
   handler: async (
-    resources
+    resources,
   ): Promise<SearchHit<AgentConfiguration, undefined, undefined> | null> => {
     throwNotFoundIfAgentConfigNotAvailable(resources.featureFlags);
 
@@ -248,9 +248,8 @@ const agentConfigurationSearchRoute = createApmServerRoute({
       mark_as_applied_by_agent: markAsAppliedByAgent,
     } = params.body;
 
-    const internalESClient = await createInternalESClientWithResources(
-      resources
-    );
+    const internalESClient =
+      await createInternalESClientWithResources(resources);
     const configuration = await searchConfigurations({
       service,
       internalESClient,
@@ -258,7 +257,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
 
     if (!configuration) {
       logger.debug(
-        `[Central configuration] Config was not found for ${service.name}/${service.environment}`
+        `[Central configuration] Config was not found for ${service.name}/${service.environment}`,
       );
       return null;
     }
@@ -277,7 +276,7 @@ const agentConfigurationSearchRoute = createApmServerRoute({
         etag (requested) = ${etag},
         etag (existing) = ${configuration._source.etag},
         markAsAppliedByAgent = ${markAsAppliedByAgent},
-        willMarkAsApplied = ${willMarkAsApplied}`
+        willMarkAsApplied = ${willMarkAsApplied}`,
     );
 
     if (willMarkAsApplied) {
@@ -304,7 +303,7 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
   }),
   options: { tags: ['access:apm'] },
   handler: async (
-    resources
+    resources,
   ): Promise<{
     environments: EnvironmentsResponse;
   }> => {
@@ -324,9 +323,8 @@ const listAgentConfigurationEnvironmentsRoute = createApmServerRoute({
       kuery: '',
     });
 
-    const size = await coreContext.uiSettings.client.get<number>(
-      maxSuggestions
-    );
+    const size =
+      await coreContext.uiSettings.client.get<number>(maxSuggestions);
     const environments = await getEnvironments({
       serviceName,
       internalESClient,

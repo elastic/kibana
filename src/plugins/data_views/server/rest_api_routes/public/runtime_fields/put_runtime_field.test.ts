@@ -25,7 +25,7 @@ describe('put runtime field', () => {
               runtimeField: {},
             }),
           },
-        } as unknown as DataView)
+        }) as unknown as DataView
     );
 
     putRuntimeField({

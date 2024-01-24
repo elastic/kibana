@@ -41,12 +41,12 @@ describe('useCytoscapeEventHandlers', () => {
         jest.spyOn(cy, 'elements').mockReturnValueOnce({
           difference: () =>
             ({
-              layout: () => ({ run: () => {} } as unknown as cytoscape.Layouts),
-            } as unknown as cytoscape.CollectionReturnValue),
+              layout: () => ({ run: () => {} }) as unknown as cytoscape.Layouts,
+            }) as unknown as cytoscape.CollectionReturnValue,
         } as unknown as cytoscape.CollectionReturnValue);
 
         renderHook(() =>
-          useCytoscapeEventHandlers({ serviceName: 'test', cy, theme })
+          useCytoscapeEventHandlers({ serviceName: 'test', cy, theme }),
         );
         cy.trigger('custom:data');
 
@@ -64,8 +64,8 @@ describe('useCytoscapeEventHandlers', () => {
       jest.spyOn(cy, 'elements').mockReturnValueOnce({
         difference: () =>
           ({
-            layout: () => ({ run } as unknown as cytoscape.Layouts),
-          } as unknown as cytoscape.CollectionReturnValue),
+            layout: () => ({ run }) as unknown as cytoscape.Layouts,
+          }) as unknown as cytoscape.CollectionReturnValue,
       } as unknown as cytoscape.CollectionReturnValue);
 
       renderHook(() => useCytoscapeEventHandlers({ cy, theme }));
@@ -261,7 +261,7 @@ describe('useCytoscapeEventHandlers', () => {
           serviceName: 'test',
           cy,
           theme,
-        })
+        }),
       );
       cy.getElementById('test').trigger('unselect');
 

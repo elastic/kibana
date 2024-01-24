@@ -55,12 +55,12 @@ export type ActionParamsType = TypeOf<typeof ExecutorParamsSchemaSIR>;
 
 export type ServiceNowConnectorType<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams
+  T extends Record<string, unknown> = ExecutorParams,
 > = ConnectorType<C, ServiceNowSecretConfigurationType, T, PushToServiceResponse | {}>;
 
 export type ServiceNowConnectorTypeExecutorOptions<
   C extends Record<string, unknown> = ServiceNowPublicConfigurationBaseType,
-  T extends Record<string, unknown> = ExecutorParams
+  T extends Record<string, unknown> = ExecutorParams,
 > = ConnectorTypeExecutorOptions<C, ServiceNowSecretConfigurationType, T>;
 
 // connector type definition

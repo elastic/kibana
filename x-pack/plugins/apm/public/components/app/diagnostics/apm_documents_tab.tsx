@@ -44,7 +44,7 @@ export function DiagnosticsApmDocuments() {
           docCount === 0 &&
           intervals &&
           Object.values(intervals).every(
-            (interval) => interval.eventDocCount === 0
+            (interval) => interval.eventDocCount === 0,
           );
 
         return !isLegacyAndUnused;
@@ -135,7 +135,7 @@ export function DiagnosticsApmDocuments() {
                 values: {
                   date: new Date(diagnosticsBundle.params.start).toISOString(),
                 },
-              }
+              },
             )}
           </EuiBadge>
           <EuiBadge>
@@ -149,13 +149,13 @@ export function DiagnosticsApmDocuments() {
           <EuiBadge>
             {i18n.translate(
               'xpack.apm.diagnosticsApmDocuments.filter:BadgeLabel',
-              { defaultMessage: 'Filter:' }
+              { defaultMessage: 'Filter:' },
             )}
             {diagnosticsBundle?.params.kuery ?? (
               <em>
                 {i18n.translate(
                   'xpack.apm.diagnosticsApmDocuments.em.emptyLabel',
-                  { defaultMessage: 'Empty' }
+                  { defaultMessage: 'Empty' },
                 )}
               </em>
             )}
@@ -204,7 +204,7 @@ function IntervalDocCount({
   return (
     <EuiToolTip
       content={`${asInteger(interval.metricDocCount)} docs / ${asInteger(
-        interval.eventDocCount
+        interval.eventDocCount,
       )} events`}
     >
       <div style={{ cursor: 'pointer' }}>

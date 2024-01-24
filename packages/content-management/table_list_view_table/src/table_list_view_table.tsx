@@ -54,7 +54,7 @@ interface ContentEditorConfig
 }
 
 export interface TableListViewTableProps<
-  T extends UserContentCommonSchema = UserContentCommonSchema
+  T extends UserContentCommonSchema = UserContentCommonSchema,
 > {
   entityName: string;
   entityNamePlural: string;
@@ -958,8 +958,8 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const testSubjectState = isDeletingItems
     ? 'table-is-deleting'
     : hasInitialFetchReturned && !isFetchingItems
-    ? 'table-is-ready'
-    : 'table-is-loading';
+      ? 'table-is-ready'
+      : 'table-is-loading';
 
   return (
     <>

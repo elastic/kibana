@@ -67,7 +67,7 @@ const steps: Record<CustomLogsSteps, Step> = {
       'xpack.observability_onboarding.customLogs.installShipper.title',
       {
         defaultMessage: 'Install shipper to collect logs',
-      }
+      },
     ),
   },
   inspect: { component: Inspect },

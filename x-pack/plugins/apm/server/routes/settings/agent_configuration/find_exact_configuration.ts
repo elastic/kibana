@@ -81,7 +81,7 @@ async function getIsAppliedByAgent({
 
   const appliedEtags = await getAgentConfigEtagMetrics(
     apmEventClient,
-    agentConfiguration.etag
+    agentConfiguration.etag,
   );
 
   return appliedEtags.includes(agentConfiguration.etag);

@@ -48,11 +48,11 @@ export const useTransactionDistributionChartData = () => {
                 chartType: LatencyDistributionChartType.transactionLatency,
               },
             },
-          }
+          },
         );
       }
     },
-    [params]
+    [params],
   );
 
   useEffect(() => {
@@ -63,7 +63,7 @@ export const useTransactionDistributionChartData = () => {
           {
             defaultMessage:
               'An error occurred fetching the overall latency distribution.',
-          }
+          },
         ),
         text: overallLatencyError.toString(),
       });
@@ -108,11 +108,11 @@ export const useTransactionDistributionChartData = () => {
                   chartType: LatencyDistributionChartType.transactionLatency,
                 },
               },
-            }
+            },
           );
         }
       },
-      [params, overallLatencyData.durationMin, overallLatencyData.durationMax]
+      [params, overallLatencyData.durationMin, overallLatencyData.durationMax],
     );
 
   useEffect(() => {
@@ -123,7 +123,7 @@ export const useTransactionDistributionChartData = () => {
           {
             defaultMessage:
               'An error occurred fetching the failed transactions latency distribution.',
-          }
+          },
         ),
         text: errorHistogramError.toString(),
       });

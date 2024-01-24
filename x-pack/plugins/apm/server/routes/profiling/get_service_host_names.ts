@@ -57,7 +57,7 @@ export async function getServiceHostNames({
 
   return (
     response.aggregations?.hostNames.buckets.map(
-      (bucket) => bucket.key as string
+      (bucket) => bucket.key as string,
     ) || []
   );
 }

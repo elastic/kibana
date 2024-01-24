@@ -10,7 +10,7 @@ import { RULE_TYPES_CONFIG } from '../../../../common/rules/apm_rule_types';
 
 export function getInitialAlertValues(
   ruleType: ApmRuleType | null,
-  serviceName: string | undefined
+  serviceName: string | undefined,
 ) {
   const ruleTypeName = ruleType ? RULE_TYPES_CONFIG[ruleType].name : undefined;
   const alertName = ruleTypeName

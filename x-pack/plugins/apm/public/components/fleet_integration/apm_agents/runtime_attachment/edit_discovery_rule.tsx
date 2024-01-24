@@ -59,7 +59,7 @@ export function EditDiscoveryRule({
             legend={{
               children: i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.operation',
-                { defaultMessage: 'Operation' }
+                { defaultMessage: 'Operation' },
               ),
             }}
           >
@@ -83,7 +83,7 @@ export function EditDiscoveryRule({
             legend={{
               children: i18n.translate(
                 'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.type',
-                { defaultMessage: 'Type' }
+                { defaultMessage: 'Type' },
               ),
             }}
           >
@@ -93,7 +93,7 @@ export function EditDiscoveryRule({
                 'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.helpText',
                 {
                   defaultMessage: 'Choose from allowed parameters',
-                }
+                },
               )}
             >
               <EuiSuperSelect
@@ -103,7 +103,7 @@ export function EditDiscoveryRule({
                   operationTypes
                     .find(
                       ({ operation: definedOperation }) =>
-                        definedOperation.value === operation
+                        definedOperation.value === operation,
                     )
                     ?.types.map((item) => ({
                       inputDisplay: item.label,
@@ -132,7 +132,7 @@ export function EditDiscoveryRule({
               legend={{
                 children: i18n.translate(
                   'xpack.apm.fleetIntegration.apmAgent.editDisacoveryRule.probe',
-                  { defaultMessage: 'Probe' }
+                  { defaultMessage: 'Probe' },
                 ),
               }}
             >
@@ -142,7 +142,7 @@ export function EditDiscoveryRule({
                   'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.probeValue',
                   {
                     defaultMessage: 'Enter the probe value',
-                  }
+                  },
                 )}
               >
                 <EuiFieldText
@@ -175,11 +175,11 @@ export function EditDiscoveryRule({
             {id === STAGED_DISCOVERY_RULE_ID
               ? i18n.translate(
                   'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.add',
-                  { defaultMessage: 'Add' }
+                  { defaultMessage: 'Add' },
                 )
               : i18n.translate(
                   'xpack.apm.fleetIntegration.apmAgent.runtimeAttachment.editRule.save',
-                  { defaultMessage: 'Save' }
+                  { defaultMessage: 'Save' },
                 )}
           </EuiButton>
         </EuiFlexItem>

@@ -46,7 +46,7 @@ describe('Span stacktrace', () => {
       cy.contains('Span A').click();
       cy.getByTestSubj('spanStacktraceTab').click();
       cy.contains(
-        'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)'
+        'at org.apache.catalina.connector.OutputBuffer.flushByteBuffer(OutputBuffer.java:825)',
       );
     });
 
@@ -56,7 +56,7 @@ describe('Span stacktrace', () => {
       cy.contains('Span A').click();
       cy.getByTestSubj('spanStacktraceTab').click();
       cy.contains(
-        `java.lang.Throwable at co.elastic.otel.ElasticSpanProcessor.captureStackTrace(ElasticSpanProcessor.java:81)`
+        `java.lang.Throwable at co.elastic.otel.ElasticSpanProcessor.captureStackTrace(ElasticSpanProcessor.java:81)`,
       );
     });
   });

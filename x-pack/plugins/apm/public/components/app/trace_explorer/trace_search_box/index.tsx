@@ -101,7 +101,7 @@ export function TraceSearchBox({
                         'xpack.apm.traceExplorer.appName',
                         {
                           defaultMessage: 'APM',
-                        }
+                        },
                       )}
                     />
                   </form>

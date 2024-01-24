@@ -30,7 +30,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
         .find('input')
         .should('not.have.text');
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
+        'be.disabled',
       );
     });
 
@@ -39,7 +39,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
         .find('input')
         .type('myLogs.log');
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'not.be.disabled'
+        'not.be.disabled',
       );
     });
 
@@ -53,13 +53,13 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAddFilePath').click();
       cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should(
         'have.length',
-        2
+        2,
       );
 
       cy.getByTestSubj('obltOnboardingLogFilePathDelete-1').click();
       cy.get('*[data-test-subj^="obltOnboardingLogFilePath-"]').should(
         'have.length',
-        1
+        1,
       );
     });
 
@@ -70,11 +70,11 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
           .type('myLogs.log');
         cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
           'have.value',
-          'mylogs'
+          'mylogs',
         );
         cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
           'have.value',
-          'mylogs'
+          'mylogs',
         );
       });
 
@@ -84,10 +84,10 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
           .find('input')
           .type('myLogs.log');
         cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
-          'be.empty'
+          'be.empty',
         );
         cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
-          'be.empty'
+          'be.empty',
         );
       });
     });
@@ -105,7 +105,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
     it('should be optional allowing user to continue if it is empty', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsServiceName').should(
-        'not.have.text'
+        'not.have.text',
       );
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should('be.enabled');
     });
@@ -125,10 +125,10 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAdvancedSettings').click();
 
       cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
-        'be.visible'
+        'be.visible',
       );
       cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-        'be.visible'
+        'be.visible',
       );
     });
 
@@ -136,10 +136,10 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsAdvancedSettings').click();
 
       cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
-        'not.be.visible'
+        'not.be.visible',
       );
       cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-        'not.be.visible'
+        'not.be.visible',
       );
     });
 
@@ -155,7 +155,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       it('Users should see a default namespace', () => {
         cy.getByTestSubj('obltOnboardingCustomLogsNamespace').should(
           'have.value',
-          'default'
+          'default',
         );
       });
 
@@ -163,7 +163,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
         cy.getByTestSubj('obltOnboardingCustomLogsNamespace').clear();
 
         cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-          'be.disabled'
+          'be.disabled',
         );
       });
     });
@@ -179,10 +179,10 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       it('should be optional allowing user to continue if it is empty', () => {
         cy.getByTestSubj('obltOnboardingCustomLogsCustomConfig').should(
-          'not.have.text'
+          'not.have.text',
         );
         cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-          'be.enabled'
+          'be.enabled',
         );
       });
     });
@@ -202,7 +202,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').clear();
 
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
+        'be.disabled',
       );
     });
 
@@ -213,7 +213,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingCustomLogsIntegrationsName').should(
         'have.value',
-        'hello_world'
+        'hello_world',
       );
     });
 
@@ -240,7 +240,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').clear();
 
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').should(
-        'be.disabled'
+        'be.disabled',
       );
     });
 
@@ -251,7 +251,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       cy.getByTestSubj('obltOnboardingCustomLogsDatasetName').should(
         'have.value',
-        'hello_world'
+        'hello_world',
       );
     });
 
@@ -285,7 +285,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       it('installation fails', () => {
         cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
-          'exist'
+          'exist',
         );
       });
     });
@@ -309,7 +309,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       it('installation succeed and user is redirected install elastic agent step', () => {
         cy.url().should(
           'include',
-          '/app/observabilityOnboarding/customLogs/installElasticAgent'
+          '/app/observabilityOnboarding/customLogs/installElasticAgent',
         );
       });
     });
@@ -325,7 +325,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
       cy.getByTestSubj('obltOnboardingCustomLogsContinue').click();
 
       cy.contains(
-        'Failed to create the integration as an installation with the name mylogs already exists.'
+        'Failed to create the integration as an installation with the name mylogs already exists.',
       );
     });
 
@@ -349,7 +349,7 @@ describe('[Logs onboarding] Custom logs - configure step', () => {
 
       it('user should see the error displayed', () => {
         cy.getByTestSubj('obltOnboardingCustomIntegrationErrorCallout').should(
-          'exist'
+          'exist',
         );
       });
     });

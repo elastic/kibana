@@ -36,7 +36,7 @@ export const I18LABELS = {
     'xpack.ux.dashboard.pageLoadDuration.label',
     {
       defaultMessage: 'Page load duration',
-    }
+    },
   ),
   pageLoad: i18n.translate('xpack.ux.dashboard.pageLoad.label', {
     defaultMessage: 'Page load',
@@ -45,7 +45,7 @@ export const I18LABELS = {
     'xpack.ux.dashboard.pageLoadDistribution.label',
     {
       defaultMessage: 'Page load distribution',
-    }
+    },
   ),
   jsErrors: i18n.translate('xpack.ux.dashboard.impactfulMetrics.jsErrors', {
     defaultMessage: 'JavaScript errors',
@@ -54,7 +54,7 @@ export const I18LABELS = {
     'xpack.ux.dashboard.impactfulMetrics.highTrafficPages',
     {
       defaultMessage: 'High traffic pages',
-    }
+    },
   ),
   resetZoom: i18n.translate('xpack.ux.dashboard.resetZoom.label', {
     defaultMessage: 'Reset zoom',
@@ -90,13 +90,13 @@ export const I18LABELS = {
     'xpack.ux.visitorBreakdownMap.avgPageLoadDuration',
     {
       defaultMessage: 'Average page load duration',
-    }
+    },
   ),
   pageLoadDurationByRegion: i18n.translate(
     'xpack.ux.visitorBreakdownMap.pageLoadDurationByRegion',
     {
       defaultMessage: 'Page load duration by region (avg.)',
-    }
+    },
   ),
   filterByUrl: i18n.translate('xpack.ux.filters.filterByUrl', {
     defaultMessage: 'Filter by URL',
@@ -159,7 +159,7 @@ export const I18LABELS = {
     'xpack.ux.dashboard.tooltips.totalPageLoad',
     {
       defaultMessage: 'Total represents the full page load duration',
-    }
+    },
   ),
   frontEndTooltip: i18n.translate('xpack.ux.dashboard.tooltips.frontEnd', {
     defaultMessage:
@@ -175,5 +175,5 @@ export const VisitorBreakdownLabel = i18n.translate(
   'xpack.ux.visitorBreakdown',
   {
     defaultMessage: 'Visitor breakdown',
-  }
+  },
 );

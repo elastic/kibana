@@ -45,7 +45,7 @@ export async function getHasData({
 
     const response = await apmEventClient.search(
       'observability_overview_has_apm_data',
-      params
+      params,
     );
     return {
       hasData: response.hits.total.value > 0,

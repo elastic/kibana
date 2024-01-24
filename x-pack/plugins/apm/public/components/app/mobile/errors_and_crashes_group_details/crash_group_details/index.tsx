@@ -107,7 +107,7 @@ export function CrashGroupDetails() {
       netConnectionType,
     },
   } = useApmParams(
-    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}'
+    '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}',
   );
 
   const kueryWithMobileFilters = getKueryWithMobileFilters({
@@ -137,7 +137,7 @@ export function CrashGroupDetails() {
             serviceGroup,
             comparisonEnabled,
           },
-        }
+        },
       ),
     }),
     [
@@ -150,7 +150,7 @@ export function CrashGroupDetails() {
       rangeTo,
       serviceGroup,
       serviceName,
-    ]
+    ],
   );
 
   const kueryForTreemap = getKueryWithMobileCrashFilter({
@@ -179,11 +179,11 @@ export function CrashGroupDetails() {
                 end,
               },
             },
-          }
+          },
         );
       }
     },
-    [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
+    [environment, kueryWithMobileFilters, serviceName, start, end, groupId],
   );
 
   const { crashDistributionData, status: crashDistributionStatus } =
@@ -196,7 +196,7 @@ export function CrashGroupDetails() {
 
   useEffect(() => {
     const selectedSample = errorSamplesData?.errorSampleIds.find(
-      (sample) => sample === errorId
+      (sample) => sample === errorId,
     );
 
     if (errorSamplesFetchStatus === FETCH_STATUS.SUCCESS && !selectedSample) {
@@ -231,14 +231,14 @@ export function CrashGroupDetails() {
               distribution={crashDistributionData}
               title={i18n.translate(
                 'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                { defaultMessage: 'Crash occurrences' }
+                { defaultMessage: 'Crash occurrences' },
               )}
               height={300}
               tip={i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
                 {
                   defaultMessage: `Crash occurrence is measured in crashes per minute.`,
-                }
+                },
               )}
             />
           </EuiFlexItem>

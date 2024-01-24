@@ -67,7 +67,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
 
   private async handleResponseAction<
     TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
-    TResponse extends ActionDetails = ActionDetails
+    TResponse extends ActionDetails = ActionDetails,
   >(command: ResponseActionsApiCommandNames, options: TOptions): Promise<TResponse> {
     const agentIds = await this.checkAgentIds(options.endpoint_ids);
     const createPayload: CreateActionPayload = {

@@ -18,7 +18,7 @@ describe('mergePeriodsTimeseries', () => {
         offsetPreviousPeriodCoordinates({
           currentPeriodTimeseries,
           previousPeriodTimeseries: undefined,
-        })
+        }),
       ).toEqual([]);
     });
 
@@ -27,7 +27,7 @@ describe('mergePeriodsTimeseries', () => {
         offsetPreviousPeriodCoordinates({
           currentPeriodTimeseries,
           previousPeriodTimeseries: [],
-        })
+        }),
       ).toEqual([]);
     });
   });
@@ -44,7 +44,7 @@ describe('mergePeriodsTimeseries', () => {
       offsetPreviousPeriodCoordinates({
         currentPeriodTimeseries,
         previousPeriodTimeseries,
-      })
+      }),
     ).toEqual([
       { x: new Date('2021-01-28T14:45:00.000Z').valueOf(), y: 1 },
       { x: new Date('2021-01-28T15:00:00.000Z').valueOf(), y: 2 },

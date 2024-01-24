@@ -24,7 +24,7 @@ const defaultRollupIntervals = [
 
 function getDefaultFilter(
   metricsetName: string,
-  rollupInterval: RollupInterval
+  rollupInterval: RollupInterval,
 ) {
   return [
     ...termQuery(METRICSET_NAME, metricsetName),
@@ -91,22 +91,22 @@ const documentTypeConfigMap = {
 } as const;
 
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =
-  typeof documentTypeConfigMap[TApmDocumentType];
+  (typeof documentTypeConfigMap)[TApmDocumentType];
 
 export function getConfigForDocumentType<
-  TApmDocumentType extends ApmDocumentType
+  TApmDocumentType extends ApmDocumentType,
 >(docType: TApmDocumentType): DocumentTypeConfigOf<TApmDocumentType> {
   return documentTypeConfigMap[docType];
 }
 
 export type ProcessorEventOfDocumentType<
-  TApmDocumentType extends ApmDocumentType
+  TApmDocumentType extends ApmDocumentType,
 > = DocumentTypeConfigOf<TApmDocumentType>['processorEvent'];
 
 export function getProcessorEventForDocumentType<
-  TApmDocumentType extends ApmDocumentType
+  TApmDocumentType extends ApmDocumentType,
 >(
-  documentType: TApmDocumentType
+  documentType: TApmDocumentType,
 ): ProcessorEventOfDocumentType<TApmDocumentType> {
   return getConfigForDocumentType(documentType).processorEvent;
 }

@@ -42,7 +42,10 @@ export interface ChatClient {
 
 export class KibanaClient {
   axios: AxiosInstance;
-  constructor(private readonly url: string, private readonly spaceId?: string) {
+  constructor(
+    private readonly url: string,
+    private readonly spaceId?: string
+  ) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',

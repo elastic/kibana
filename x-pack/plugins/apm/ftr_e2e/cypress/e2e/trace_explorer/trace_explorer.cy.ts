@@ -27,7 +27,7 @@ describe('Trace Explorer', () => {
       opbeans({
         from: new Date(start).getTime(),
         to: new Date(end).getTime(),
-      })
+      }),
     );
 
     cy.updateAdvancedSettings({

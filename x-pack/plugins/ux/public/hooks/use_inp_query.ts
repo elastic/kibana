@@ -23,19 +23,19 @@ export function useINPQuery(uxQuery: ReturnType<typeof useUxQuery>) {
         callDateMath(uxQuery?.end),
         uxQuery?.urlQuery,
         uxQuery?.uiFilters ? JSON.parse(uxQuery.uiFilters) : {},
-        uxQuery?.percentile ? Number(uxQuery.percentile) : undefined
+        uxQuery?.percentile ? Number(uxQuery.percentile) : undefined,
       ),
     },
     [uxQuery, dataViewTitle],
-    { name: 'UxINPMetrics' }
+    { name: 'UxINPMetrics' },
   );
   const data = useMemo(
     () =>
       transformINPResponse(
         esQueryResponse,
-        uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT
+        uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT,
       ),
-    [esQueryResponse, uxQuery?.percentile]
+    [esQueryResponse, uxQuery?.percentile],
   );
   return { data, loading };
 }

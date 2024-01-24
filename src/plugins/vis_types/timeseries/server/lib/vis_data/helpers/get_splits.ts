@@ -35,7 +35,7 @@ interface SplittedData<TMeta extends BaseMeta = BaseMeta> {
           // should be typed
           values: Record<string, unknown>;
         };
-      } & { key: string | number }
+      } & { key: string | number },
     ];
   };
 }

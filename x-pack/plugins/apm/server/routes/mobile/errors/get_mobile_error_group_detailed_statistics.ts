@@ -103,7 +103,7 @@ export async function getMobileErrorGroupDetailedStatistics({
           },
         },
       },
-    }
+    },
   );
 
   if (!timeseriesResponse.aggregations) {
@@ -191,7 +191,7 @@ export async function getMobileErrorGroupPeriods({
           previousPeriodTimeseries: errorRateGroup.timeseries,
         }),
       })),
-      'groupId'
+      'groupId',
     ),
   };
 }

@@ -30,7 +30,7 @@ export const cleanFiltersForSerialize = (filters?: Filter[]): Filter[] => {
 };
 
 export const cleanInputForRedux = <
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
 >(
   explicitInput: ReduxEmbeddableStateType['explicitInput']
 ) => {
@@ -41,7 +41,7 @@ export const cleanInputForRedux = <
 };
 
 export const cleanStateForRedux = <
-  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState
+  ReduxEmbeddableStateType extends ReduxEmbeddableState = ReduxEmbeddableState,
 >(
   state: ReduxEmbeddableStateType
 ) => {

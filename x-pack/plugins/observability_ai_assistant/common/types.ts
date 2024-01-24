@@ -111,7 +111,7 @@ export enum FunctionVisibility {
 }
 
 export interface FunctionDefinition<
-  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
+  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema,
 > {
   name: string;
   description: string;

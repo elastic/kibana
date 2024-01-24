@@ -50,11 +50,11 @@ export function useFailedTransactionsCorrelations() {
   // `setResponse.flush()` can be used to enforce an update.
   const [response, setResponseUnDebounced] = useReducer(
     getReducer<FailedTransactionsCorrelationsResponse & CorrelationsProgress>(),
-    getInitialResponse()
+    getInitialResponse(),
   );
   const setResponse = useMemo(
     () => debounce(setResponseUnDebounced, DEBOUNCE_INTERVAL),
-    []
+    [],
   );
 
   const abortCtrl = useRef(new AbortController());
@@ -98,7 +98,7 @@ export function useFailedTransactionsCorrelations() {
                 LatencyDistributionChartType.failedTransactionsCorrelations,
             },
           },
-        }
+        },
       );
 
       if (abortCtrl.current.signal.aborted) {
@@ -143,7 +143,7 @@ export function useFailedTransactionsCorrelations() {
                 LatencyDistributionChartType.failedTransactionsCorrelations,
             },
           },
-        }
+        },
       );
 
       if (abortCtrl.current.signal.aborted) {
@@ -167,7 +167,7 @@ export function useFailedTransactionsCorrelations() {
           params: {
             query: fetchParams,
           },
-        }
+        },
       );
 
       if (abortCtrl.current.signal.aborted) {
@@ -203,7 +203,7 @@ export function useFailedTransactionsCorrelations() {
                 durationMax,
               },
             },
-          }
+          },
         );
 
         if (pValues.failedTransactionsCorrelations.length > 0) {
@@ -211,7 +211,7 @@ export function useFailedTransactionsCorrelations() {
             fieldsToSample.add(d.fieldName);
           });
           failedTransactionsCorrelations.push(
-            ...pValues.failedTransactionsCorrelations
+            ...pValues.failedTransactionsCorrelations,
           );
           responseUpdate.failedTransactionsCorrelations =
             getFailedTransactionsCorrelationsSortedByScore([
@@ -293,7 +293,7 @@ export function useFailedTransactionsCorrelations() {
       loaded: Math.round(loaded * 100) / 100,
       isRunning,
     }),
-    [error, loaded, isRunning]
+    [error, loaded, isRunning],
   );
 
   return {

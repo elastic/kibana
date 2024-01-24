@@ -19,7 +19,7 @@ describe('Embedded Map', () => {
     const wrapper = render(
       <KibanaContextProvider services={{ ...core }}>
         <EmbeddedMap />
-      </KibanaContextProvider>
+      </KibanaContextProvider>,
     );
 
     expect(wrapper).toMatchSnapshot();

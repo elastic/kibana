@@ -146,7 +146,7 @@ export async function getTraceSampleIds({
   try {
     const tracesSampleResponse = await apmEventClient.search(
       'get_trace_sample_ids',
-      params
+      params,
     );
     // make sure at least one trace per composite/connection bucket is queried
     const traceIdsWithPriority =
@@ -154,14 +154,14 @@ export async function getTraceSampleIds({
         bucket.sample.trace_ids.buckets.map((sampleDocBucket, index) => ({
           traceId: sampleDocBucket.key as string,
           priority: index,
-        }))
+        })),
       ) || [];
 
     const traceIds = take(
       uniq(
-        sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId)
+        sortBy(traceIdsWithPriority, 'priority').map(({ traceId }) => traceId),
       ),
-      config.serviceMapMaxTraces
+      config.serviceMapMaxTraces,
     );
 
     return { traceIds };

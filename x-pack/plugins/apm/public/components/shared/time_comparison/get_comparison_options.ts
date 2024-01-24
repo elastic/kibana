@@ -46,7 +46,7 @@ function formatDate({
   const dateFormat = isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
 
   return `${previousPeriodStart.format(
-    dateFormat
+    dateFormat,
   )} - ${previousPeriodEnd.format(dateFormat)}`;
 }
 
@@ -158,7 +158,7 @@ export function getComparisonOptions({
     const disabled =
       anomalyDetectionJobsStatus === 'success' &&
       !anomalyDetectionJobsData.jobs.some(
-        (j) => j.environment === preferredEnvironment
+        (j) => j.environment === preferredEnvironment,
       );
     comparisonOptions.push({
       value: TimeRangeComparisonEnum.ExpectedBounds,

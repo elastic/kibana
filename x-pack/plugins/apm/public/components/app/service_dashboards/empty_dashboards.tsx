@@ -52,7 +52,7 @@ export function EmptyDashboards({ actions }: Props) {
                   'xpack.apm.serviceDashboards.emptyBody.second',
                   {
                     defaultMessage: 'tell a story about your data',
-                  }
+                  },
                 )}
               </li>
               <li>
@@ -67,7 +67,7 @@ export function EmptyDashboards({ actions }: Props) {
                 'xpack.apm.serviceDashboards.emptyBody.getStarted',
                 {
                   defaultMessage: 'To get started, add your dashaboard',
-                }
+                },
               )}
             </p>
           </>
