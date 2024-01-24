@@ -5,47 +5,28 @@
  * 2.0.
  */
 
-import _ from 'lodash';
-import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { getEntitiesAndGenerateAlerts } from './get_entities_and_generate_alerts';
 import { OTHER_CATEGORY } from '../constants';
-import type {
-  GeoContainmentAlertInstanceState,
-  GeoContainmentAlertInstanceContext,
-} from '../types';
-
-const alertFactory = (contextKeys: unknown[], testAlertActionArr: unknown[]) => ({
-  create: (instanceId: string) => {
-    const alertInstance = alertsMock.createAlertFactory.create<
-      GeoContainmentAlertInstanceState,
-      GeoContainmentAlertInstanceContext
-    >();
-    (alertInstance.scheduleActions as jest.Mock).mockImplementation(
-      (actionGroupId: string, context?: GeoContainmentAlertInstanceContext) => {
-        // Check subset of alert for comparison to expected results
-        // @ts-ignore
-        const contextSubset = _.pickBy(context, (v, k) => contextKeys.includes(k));
-        testAlertActionArr.push({
-          actionGroupId,
-          instanceId,
-          context: contextSubset,
-        });
-      }
-    );
-    return alertInstance;
-  },
-  alertLimit: {
-    getValue: () => 1000,
-    setLimitReached: () => {},
-  },
-  done: () => ({ getRecoveredAlerts: () => [] }),
-});
+import type { GeoContainmentAlertInstanceContext } from '../types';
 
 describe('getEntitiesAndGenerateAlerts', () => {
-  const testAlertActionArr: unknown[] = [];
+  const alerts: unknown[] = [];
+  const mockAlertsClient = {
+    report: ({ id, context }: { id: string; context: GeoContainmentAlertInstanceContext }) => {
+      alerts.push({
+        context: {
+          containingBoundaryId: context.containingBoundaryId,
+          entityDocumentId: context.entityDocumentId,
+          entityId: context.entityId,
+          entityLocation: context.entityLocation,
+        },
+        instanceId: id,
+      });
+    },
+  } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
   beforeEach(() => {
-    jest.clearAllMocks();
-    testAlertActionArr.length = 0;
+    alerts.length = 0;
   });
 
   const currLocationMap = new Map([
@@ -87,9 +68,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
     ],
   ]);
 
-  const expectedAlertResults = [
+  const expectedAlerts = [
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '123',
         entityDocumentId: 'docId1',
@@ -99,7 +79,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'a-123',
     },
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '456',
         entityDocumentId: 'docId2',
@@ -109,7 +88,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'b-456',
     },
     {
-      actionGroupId: 'Tracked entity contained',
       context: {
         containingBoundaryId: '789',
         entityDocumentId: 'docId3',
@@ -119,7 +97,6 @@ describe('getEntitiesAndGenerateAlerts', () => {
       instanceId: 'c-789',
     },
   ];
-  const contextKeys = Object.keys(expectedAlertResults[0].context);
   const emptyShapesIdsNamesMap = {};
 
   const currentDateTime = new Date();
@@ -129,12 +106,12 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should overwrite older identical entity entries', () => {
@@ -155,12 +132,12 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       prevLocationMapWithIdenticalEntityEntry,
       currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
     expect(activeEntities).toEqual(currLocationMap);
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should preserve older non-identical entity entries', () => {
@@ -178,9 +155,18 @@ describe('getEntitiesAndGenerateAlerts', () => {
         ],
       ],
     ]);
-    const expectedAlertResultsPlusD = [
+
+    const { activeEntities } = getEntitiesAndGenerateAlerts(
+      prevLocationMapWithNonIdenticalEntityEntry,
+      currLocationMap,
+      mockAlertsClient,
+      emptyShapesIdsNamesMap,
+      currentDateTime
+    );
+    expect(activeEntities).not.toEqual(currLocationMap);
+    expect(activeEntities.has('d')).toBeTruthy();
+    expect(alerts).toMatchObject([
       {
-        actionGroupId: 'Tracked entity contained',
         context: {
           containingBoundaryId: '999',
           entityDocumentId: 'docId7',
@@ -189,19 +175,8 @@ describe('getEntitiesAndGenerateAlerts', () => {
         },
         instanceId: 'd-999',
       },
-      ...expectedAlertResults,
-    ];
-
-    const { activeEntities } = getEntitiesAndGenerateAlerts(
-      prevLocationMapWithNonIdenticalEntityEntry,
-      currLocationMap,
-      alertFactory(contextKeys, testAlertActionArr),
-      emptyShapesIdsNamesMap,
-      currentDateTime
-    );
-    expect(activeEntities).not.toEqual(currLocationMap);
-    expect(activeEntities.has('d')).toBeTruthy();
-    expect(testAlertActionArr).toMatchObject(expectedAlertResultsPlusD);
+      ...expectedAlerts,
+    ]);
   });
 
   test('should remove "other" entries and schedule the expected number of actions', () => {
@@ -219,7 +194,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities, inactiveEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -240,7 +215,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
         ],
       ])
     );
-    expect(testAlertActionArr).toMatchObject(expectedAlertResults);
+    expect(alerts).toMatchObject(expectedAlerts);
   });
 
   test('should generate multiple alerts per entity if found in multiple shapes in interval', () => {
@@ -271,7 +246,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithThreeMore,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -279,7 +254,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     currLocationMapWithThreeMore.forEach((v) => {
       numEntitiesInShapes += v.length;
     });
-    expect(testAlertActionArr.length).toEqual(numEntitiesInShapes);
+    expect(alerts.length).toEqual(numEntitiesInShapes);
   });
 
   test('should not return entity as active entry if most recent location is "other"', () => {
@@ -311,7 +286,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );
@@ -346,7 +321,7 @@ describe('getEntitiesAndGenerateAlerts', () => {
     const { activeEntities } = getEntitiesAndGenerateAlerts(
       emptyPrevLocationMap,
       currLocationMapWithOther,
-      alertFactory(contextKeys, testAlertActionArr),
+      mockAlertsClient,
       emptyShapesIdsNamesMap,
       currentDateTime
     );

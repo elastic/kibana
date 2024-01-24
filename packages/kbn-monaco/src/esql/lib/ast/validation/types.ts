@@ -108,13 +108,17 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  ccsNotSupportedForCommand: {
-    message: string;
-    type: { value: string };
-  };
   unsupportedFieldType: {
     message: string;
     type: { field: string };
+  };
+  unsupportedSetting: {
+    message: string;
+    type: { setting: string; expected: string };
+  };
+  unsupportedSettingCommandValue: {
+    message: string;
+    type: { command: string; setting: string; value: string; expected: string };
   };
 }
 

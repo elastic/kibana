@@ -16,14 +16,7 @@ import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { ChatState } from '../hooks/use_chat';
-
-function safeParse(jsonStr: string) {
-  try {
-    return JSON.parse(jsonStr);
-  } catch (err) {
-    return jsonStr;
-  }
-}
+import { safeJsonParse } from './safe_json_parse';
 
 function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   let value: object;
@@ -31,7 +24,7 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   if (!message.name) {
     const name = message.function_call?.name;
     const args = message.function_call?.arguments
-      ? safeParse(message.function_call.arguments)
+      ? safeJsonParse(message.function_call.arguments)
       : undefined;
 
     value = {
@@ -41,9 +34,9 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   } else {
     const content =
       message.role !== MessageRole.Assistant && message.content
-        ? safeParse(message.content)
+        ? safeJsonParse(message.content)
         : message.content;
-    const data = message.data ? safeParse(message.data) : undefined;
+    const data = message.data ? safeJsonParse(message.data) : undefined;
     value = omitBy(
       {
         content,

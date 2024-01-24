@@ -19,11 +19,11 @@ import {
 import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
-  alerts: boolean;
+  isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  assistantLangChain: boolean;
+  isEnabledKnowledgeBase: boolean;
   assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
@@ -45,11 +45,11 @@ export interface FetchConnectorExecuteResponse {
 }
 
 export const fetchConnectorExecuteAction = async ({
-  alerts,
+  isEnabledRAGAlerts,
   alertsIndexPattern,
   allow,
   allowReplacement,
-  assistantLangChain,
+  isEnabledKnowledgeBase,
   assistantStreamingEnabled,
   http,
   messages,
@@ -82,9 +82,9 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = assistantStreamingEnabled && !assistantLangChain && !alerts;
+  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
   const optionalRequestParams = getOptionalRequestParams({
-    alerts,
+    isEnabledRAGAlerts,
     alertsIndexPattern,
     allow,
     allowReplacement,
@@ -98,7 +98,8 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeStream',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       }
     : {
@@ -106,7 +107,8 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeAI',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
         ...optionalRequestParams,
       };
 
@@ -187,8 +189,8 @@ export const fetchConnectorExecuteAction = async ({
 
     return {
       response: hasParsableResponse({
-        alerts,
-        assistantLangChain,
+        isEnabledRAGAlerts,
+        isEnabledKnowledgeBase,
       })
         ? getFormattedMessageContent(response.data)
         : response.data,

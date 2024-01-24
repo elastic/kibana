@@ -32,13 +32,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
+  // TODO: add a new service for pulling kibana username, similar to getService('es')
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
 
-  // Marking as ESS and brokenInServerless as it's currently exposed in both, but if this is already
-  // deprecated, it should cease being exposed in Serverless prior to GA, in which case this
-  // test would be run for ESS only.
+  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
   describe('@ess @brokenInServerless @skipInQA delete_rules_bulk', () => {
     describe('deprecations', () => {
       it('should return a warning header', async () => {

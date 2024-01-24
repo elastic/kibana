@@ -24,8 +24,10 @@ export const createMockClients = () => {
     clusterClient: core.elasticsearch.client,
     elasticAssistant: {
       actions: actionsClientMock.create(),
+      getRegisteredFeatures: jest.fn(),
       getRegisteredTools: jest.fn(),
       logger: loggingSystemMock.createLogger(),
+      telemetry: coreMock.createSetup().analytics,
     },
     savedObjectsClient: core.savedObjects.client,
 
@@ -73,8 +75,10 @@ const createElasticAssistantRequestContextMock = (
 ): jest.Mocked<ElasticAssistantApiRequestHandlerContext> => {
   return {
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
+    getRegisteredFeatures: jest.fn(),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
+    telemetry: clients.elasticAssistant.telemetry,
   };
 };
 

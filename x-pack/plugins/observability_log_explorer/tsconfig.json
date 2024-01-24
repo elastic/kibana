@@ -37,6 +37,7 @@
     "@kbn/ui-theme",
     "@kbn/xstate-utils",
     "@kbn/router-utils",
+    "@kbn/observability-ai-assistant-plugin",
   ],
   "exclude": [
     "target/**/*"

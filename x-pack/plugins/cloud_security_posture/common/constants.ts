@@ -30,6 +30,10 @@ export const CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH =
   '/internal/cloud_security_posture/rules/_bulk_action';
 export const CSP_BENCHMARK_RULES_BULK_ACTION_API_CURRENT_VERSION = '1';
 
+export const CSP_GET_BENCHMARK_RULES_STATE_ROUTE_PATH =
+  '/internal/cloud_security_posture/rules/_get_states';
+export const CSP_GET_BENCHMARK_RULES_STATE_API_CURRENT_VERSION = '1';
+
 export const GET_DETECTION_RULE_ALERTS_STATUS_PATH =
   '/internal/cloud_security_posture/detection_engine_rules/alerts/_status';
 export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
@@ -47,6 +51,7 @@ export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
+
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';

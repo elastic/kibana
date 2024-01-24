@@ -149,7 +149,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('edit index pattern', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/174066
+    describe.skip('edit index pattern', () => {
       it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 
@@ -187,8 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/173625
-    describe.skip('index pattern edit', function () {
+    describe('index pattern edit', function () {
       it('should update field list', async function () {
         await PageObjects.settings.editIndexPattern(
           'kibana_sample_data_flights',

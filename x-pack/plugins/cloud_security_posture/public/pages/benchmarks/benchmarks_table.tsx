@@ -14,10 +14,13 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { generatePath } from 'react-router-dom';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
@@ -25,6 +28,7 @@ import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
+import { benchmarksNavigation } from '../../common/navigation/constants';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -35,6 +39,28 @@ interface BenchmarksTableProps
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
   'data-test-subj'?: string;
 }
+
+const BenchmarkButtonLink = ({
+  benchmarkId,
+  benchmarkVersion,
+}: {
+  benchmarkId: BenchmarksCisId;
+  benchmarkVersion: string;
+}) => {
+  const { application } = useKibana().services;
+  return (
+    <EuiLink
+      href={application?.getUrlForApp('security', {
+        path: generatePath(benchmarksNavigation.rules.path, {
+          benchmarkVersion,
+          benchmarkId,
+        }),
+      })}
+    >
+      {getBenchmarkCisName(benchmarkId)}
+    </EuiLink>
+  );
+};
 
 export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
   switch (benchmarkId) {
@@ -123,9 +149,12 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     width: '17.5%',
     sortable: true,
-    render: (benchmarkId: BenchmarksCisId) => {
-      return getBenchmarkCisName(benchmarkId);
-    },
+    render: (benchmarkId: Benchmark['id'], benchmark: Benchmark) => (
+      <BenchmarkButtonLink
+        benchmarkId={benchmarkId || ''}
+        benchmarkVersion={benchmark.version || ''}
+      />
+    ),
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
   },
   {
@@ -168,8 +197,8 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
-    render: (complianceScore: Benchmark['evaluation'], data) => {
-      return getBenchmarkPlurals(data.id, data.evaluation);
+    render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
+      return getBenchmarkPlurals(benchmark.id, benchmarkEvaluation);
     },
   },
   {

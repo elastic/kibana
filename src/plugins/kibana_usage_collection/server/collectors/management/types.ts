@@ -48,6 +48,7 @@ export interface UsageStats {
   'observability:enableInfrastructureHostsView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
   'observability:apmAgentExplorerView': boolean;
+  'observability:apmEnableTableSearchBar': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:colorMapping': string;
   'visualization:useLegacyTimeAxis': boolean;
@@ -80,6 +81,7 @@ export interface UsageStats {
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
+  'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
   defaultColumns: string[];

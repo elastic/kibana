@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('..')],
     junit: {
       reportName:
-        'Detection Engine ESS - Exception Operators Data Types API - Long Integration Tests',
+        'Detection Engine - Exception Operators Long Types Integration Tests - ESS Env - Trial License',
     },
   };
 }

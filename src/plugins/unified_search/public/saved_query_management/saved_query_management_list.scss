@@ -5,7 +5,7 @@
 }
 
 .kbnSavedQueryManagement__text {
-  padding: $euiSizeM $euiSizeM ($euiSizeM / 2) $euiSizeM;
+  padding: $euiSizeM $euiSizeM calc($euiSizeM / 2) $euiSizeM;
 }
 
 .kbnSavedQueryManagement__list {
@@ -13,5 +13,5 @@
   max-height: inherit; // Fixes overflow for applied max-height
   // Left/Right padding is calculated to match the left alignment of the
   // popover text and buttons
-  padding: ($euiSizeM / 2) $euiSizeXS !important; // Override flush
+  padding: calc($euiSizeM / 2) $euiSizeXS !important; // Override flush
 }

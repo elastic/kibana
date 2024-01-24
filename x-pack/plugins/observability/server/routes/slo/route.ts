@@ -114,6 +114,42 @@ const createSLORoute = createObservabilityServerRoute({
   },
 });
 
+const inspectSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
+  options: {
+    tags: ['access:slo_write'],
+    access: 'public',
+  },
+  params: createSLOParamsSchema,
+  handler: async ({ context, params, logger, dependencies, request }) => {
+    await assertPlatinumLicense(context);
+
+    const spaceId =
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const createSLO = new CreateSLO(
+      esClient,
+      repository,
+      transformManager,
+      summaryTransformManager,
+      logger,
+      spaceId
+    );
+
+    return createSLO.inspect(params.body);
+  },
+});
+
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
@@ -481,6 +517,7 @@ const getPreviewData = createObservabilityServerRoute({
 
 export const sloRouteRepository = {
   ...createSLORoute,
+  ...inspectSLORoute,
   ...deleteSLORoute,
   ...deleteSloInstancesRoute,
   ...disableSLORoute,

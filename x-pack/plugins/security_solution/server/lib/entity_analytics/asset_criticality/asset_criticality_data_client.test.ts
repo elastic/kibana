@@ -57,4 +57,68 @@ describe('AssetCriticalityDataClient', () => {
       });
     });
   });
+
+  describe('#search()', () => {
+    let esClientMock: ReturnType<
+      typeof elasticsearchServiceMock.createScopedClusterClient
+    >['asInternalUser'];
+    let loggerMock: ReturnType<typeof loggingSystemMock.createLogger>;
+    let subject: AssetCriticalityDataClient;
+
+    beforeEach(() => {
+      esClientMock = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;
+      loggerMock = loggingSystemMock.createLogger();
+      subject = new AssetCriticalityDataClient({
+        esClient: esClientMock,
+        logger: loggerMock,
+        namespace: 'default',
+      });
+    });
+
+    it('searches in the asset criticality index', async () => {
+      subject.search({ query: { match_all: {} } });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ index: '.asset-criticality.asset-criticality-default' })
+      );
+    });
+
+    it('requires a query parameter', async () => {
+      subject.search({ query: { match_all: {} } });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ body: { query: { match_all: {} } } })
+      );
+    });
+
+    it('accepts a size parameter', async () => {
+      subject.search({ query: { match_all: {} }, size: 100 });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: 100 }));
+    });
+
+    it('defaults to the default query size', async () => {
+      subject.search({ query: { match_all: {} } });
+      const defaultSize = 1_000;
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ size: defaultSize })
+      );
+    });
+
+    it('caps the size to the maximum query size', async () => {
+      subject.search({ query: { match_all: {} }, size: 999999 });
+      const maxSize = 100_000;
+
+      expect(esClientMock.search).toHaveBeenCalledWith(expect.objectContaining({ size: maxSize }));
+    });
+
+    it('ignores an index_not_found_exception if the criticality index does not exist', async () => {
+      subject.search({ query: { match_all: {} } });
+
+      expect(esClientMock.search).toHaveBeenCalledWith(
+        expect.objectContaining({ ignore_unavailable: true })
+      );
+    });
+  });
 });

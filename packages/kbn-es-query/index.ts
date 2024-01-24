@@ -55,6 +55,7 @@ export {
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  getLimitFromESQLQuery,
   getLanguageDisplayName,
   cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmMlDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '@kbn/apm-plugin/common/anomaly_detection/apm_ml_detectors';
 import { ServiceAnomalyTimeseries } from '@kbn/apm-plugin/common/anomaly_detection/service_anomaly_timeseries';
 import { Environment } from '@kbn/apm-plugin/common/environment_rt';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
@@ -209,13 +209,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ).body.allAnomalyTimeseries;
 
             latencySeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txLatency
+              (spec) => spec.type === AnomalyDetectorType.txLatency
             );
             throughputSeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txThroughput
+              (spec) => spec.type === AnomalyDetectorType.txThroughput
             );
             failureRateSeries = allAnomalyTimeseries.find(
-              (spec) => spec.type === ApmMlDetectorType.txFailureRate
+              (spec) => spec.type === AnomalyDetectorType.txFailureRate
             );
           });
 
@@ -247,7 +247,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             }
 
             expect(omitTimeseriesData(latencySeries)).to.eql({
-              type: ApmMlDetectorType.txLatency,
+              type: AnomalyDetectorType.txLatency,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
@@ -256,7 +256,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(omitTimeseriesData(throughputSeries)).to.eql({
-              type: ApmMlDetectorType.txThroughput,
+              type: AnomalyDetectorType.txThroughput,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',
@@ -265,7 +265,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             });
 
             expect(omitTimeseriesData(failureRateSeries)).to.eql({
-              type: ApmMlDetectorType.txFailureRate,
+              type: AnomalyDetectorType.txFailureRate,
               jobId: 'apm-tx-metrics-production',
               serviceName: 'a',
               environment: 'production',

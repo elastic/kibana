@@ -24,6 +24,8 @@ See the {fleet-guide}/index.html[{fleet}] docs for more information about {fleet
 `xpack.fleet.agents.enabled` {ess-icon}::
 Set to `true` (default) to enable {fleet}.
 
+`xpack.fleet.isAirGapped`::
+Set to `true` to indicate {fleet} is running in an air-gapped environment. Refer to {fleet-guide}/air-gapped.html[Air-gapped environments] for details. Enabling this flag helps Fleet skip needless requests and improve the user experience for air-gapped environments.
 
 [[fleet-data-visualizer-settings]]
 
