@@ -6,7 +6,7 @@
  */
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract, RewriteResponseCase } from '@kbn/actions-plugin/common';
-import { isSystemAction, SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
+import { SanitizedDefaultRuleAction } from '@kbn/alerting-plugin/common';
 import { Rule, RuleUpdates } from '../../../types';
 import { BASE_ALERTING_API_PATH } from '../../constants';
 import { transformRule } from './common_transformations';
@@ -29,27 +29,19 @@ const rewriteBodyRequest: RewriteResponseCase<RuleCreateBody> = ({
   ...res,
   rule_type_id: ruleTypeId,
   actions: actions.map((action) => {
-    if (isSystemAction(action)) {
-      const { id, params, useAlertDataForTemplate } = action;
-      return {
-        id,
-        params,
-        ...(typeof useAlertDataForTemplate !== 'undefined'
-          ? { use_alert_data_for_template: useAlertDataForTemplate }
-          : {}),
-      };
-    }
     const { group, id, params, frequency, alertsFilter, useAlertDataForTemplate } =
       action as SanitizedDefaultRuleAction;
     return {
       group,
       id,
       params,
-      frequency: {
-        notify_when: frequency!.notifyWhen,
-        throttle: frequency!.throttle,
-        summary: frequency!.summary,
-      },
+      frequency: frequency
+        ? {
+            notify_when: frequency!.notifyWhen,
+            throttle: frequency!.throttle,
+            summary: frequency!.summary,
+          }
+        : undefined,
       alerts_filter: alertsFilter,
       ...(typeof useAlertDataForTemplate !== 'undefined'
         ? { use_alert_data_for_template: useAlertDataForTemplate }

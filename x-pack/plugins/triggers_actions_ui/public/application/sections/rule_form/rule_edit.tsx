@@ -7,12 +7,7 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  isSystemAction,
-  RuleActionTypes,
-  RuleNotifyWhen,
-  SanitizedRuleAction,
-} from '@kbn/alerting-plugin/common';
+import { RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -86,45 +81,15 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map(
-      // Clone untyped actions and add a type property to them. This is necessary for the downstream rewrite functions.
-      (action: SanitizedRuleAction | Omit<SanitizedRuleAction, 'type'>) => {
-        if ('type' in action) {
-          return isSystemAction(action)
-            ? action
-            : ({
-                ...action,
-                frequency,
-              } as SanitizedRuleAction);
-        }
-        if (actionHasDefinedGroup(action as SanitizedRuleAction)) {
-          return {
-            ...action,
-            frequency,
-            type: RuleActionTypes.DEFAULT,
-          } as SanitizedRuleAction;
-        }
+    clonedRule.actions = clonedRule.actions.map((action: SanitizedRuleAction) => {
+      if (actionHasDefinedGroup(action as SanitizedRuleAction)) {
         return {
           ...action,
-          type: RuleActionTypes.SYSTEM,
+          frequency,
         } as SanitizedRuleAction;
       }
-    );
-  } else {
-    // Clone untyped actions and add a type property to them. This is necessary for the downstream rewrite functions.
-    // Note that this type is supposed to be stripped before sending to the server. This type property is used
-    // to tell the downstream rewrite functions whether to include properties such as frequency, alertsFilter, etc.
-    clonedRule.actions = clonedRule.actions.map(
-      (action: SanitizedRuleAction | Omit<SanitizedRuleAction, 'type'>) =>
-        'type' in action
-          ? action
-          : ({
-              ...action,
-              type: actionHasDefinedGroup(action as SanitizedRuleAction)
-                ? RuleActionTypes.DEFAULT
-                : RuleActionTypes.SYSTEM,
-            } as SanitizedRuleAction)
-    );
+      return action as SanitizedRuleAction;
+    });
   }
   return clonedRule;
 };
