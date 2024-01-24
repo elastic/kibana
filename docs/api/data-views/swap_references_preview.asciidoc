@@ -1,5 +1,5 @@
 [[data-views-api-swap-references-preview]]
-=== Swap references data view API
+=== Swap references preview data view API
 ++++
 <titleabbrev>Swap references preview</titleabbrev>
 ++++
