@@ -449,3 +449,10 @@ export function getLastCharFromTrimmed(text: string) {
 export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',';
 }
+
+export function shouldBeQuotedText(
+  text: string,
+  { dashSupported }: { dashSupported?: boolean } = {}
+) {
+  return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
+}

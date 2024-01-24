@@ -111,18 +111,28 @@ export const builtinFunctions: FunctionDefinition[] = [
     i18n.translate('monaco.esql.definition.divideDoc', {
       defaultMessage: 'Divide (/)',
     }),
-    (left, right) => {
-      if (right.type === 'literal' && right.literalType === 'number') {
-        return right.value === 0
-          ? i18n.translate('monaco.esql.divide.warning.divideByZero', {
-              defaultMessage: 'Cannot divide by zero: {left}/{right}',
-              values: {
-                left: left.text,
-                right: right.value,
-              },
-            })
-          : undefined;
+    (fnDef) => {
+      const [left, right] = fnDef.args;
+      const messages = [];
+      if (!Array.isArray(left) && !Array.isArray(right)) {
+        if (right.type === 'literal' && right.literalType === 'number') {
+          if (right.value === 0) {
+            messages.push({
+              type: 'warning' as const,
+              code: 'divideByZero',
+              text: i18n.translate('monaco.esql.divide.warning.divideByZero', {
+                defaultMessage: 'Cannot divide by zero: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }),
+              location: fnDef.location,
+            });
+          }
+        }
       }
+      return messages;
     }
   ),
   createMathDefinition(
@@ -131,18 +141,28 @@ export const builtinFunctions: FunctionDefinition[] = [
     i18n.translate('monaco.esql.definition.moduleDoc', {
       defaultMessage: 'Module (%)',
     }),
-    (left, right) => {
-      if (right.type === 'literal' && right.literalType === 'number') {
-        return right.value === 0
-          ? i18n.translate('monaco.esql.divide.warning.zeroModule', {
-              defaultMessage: 'Module by zero can return null value: {left}/{right}',
-              values: {
-                left: left.text,
-                right: right.value,
-              },
-            })
-          : undefined;
+    (fnDef) => {
+      const [left, right] = fnDef.args;
+      const messages = [];
+      if (!Array.isArray(left) && !Array.isArray(right)) {
+        if (right.type === 'literal' && right.literalType === 'number') {
+          if (right.value === 0) {
+            messages.push({
+              type: 'warning' as const,
+              code: 'moduleByZero',
+              text: i18n.translate('monaco.esql.divide.warning.zeroModule', {
+                defaultMessage: 'Module by zero can return null value: {left}/{right}',
+                values: {
+                  left: left.text,
+                  right: right.value,
+                },
+              }),
+              location: fnDef.location,
+            });
+          }
+        }
       }
+      return messages;
     }
   ),
   ...[

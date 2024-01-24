@@ -55,6 +55,7 @@ function wrapAsMonacoMessage(
       endLineNumber: endPosition.lineNumber,
       severity: type === 'error' ? monaco.MarkerSeverity.Error : monaco.MarkerSeverity.Warning,
       _source: 'client' as const,
+      code: e.code,
     };
   });
 }

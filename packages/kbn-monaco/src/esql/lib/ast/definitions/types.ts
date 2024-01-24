@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { ESQLCommand, ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
+import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '../types';
 
 export interface FunctionDefinition {
   builtin?: boolean;
@@ -28,7 +28,7 @@ export interface FunctionDefinition {
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (...args: ESQLSingleAstItem[]) => string | undefined;
+  warning?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {

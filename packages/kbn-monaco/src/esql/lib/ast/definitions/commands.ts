@@ -137,6 +137,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
           }),
           type: 'warning',
+          code: 'projectCommandDeprecated',
         });
       }
       return messages;
@@ -164,6 +165,7 @@ export const commandDefinitions: CommandDefinition[] = [
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
+            code: 'dropAllColumnsError',
           }))
         );
       }
@@ -177,6 +179,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',
+          code: 'dropTimestampWarning',
         });
       }
       return messages;

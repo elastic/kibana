@@ -48,6 +48,7 @@ export interface EditorError {
   endLineNumber: number;
   endColumn: number;
   message: string;
+  code: string;
 }
 
 export interface LangValidation {

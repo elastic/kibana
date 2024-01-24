@@ -79,6 +79,7 @@ export interface ESQLMessage {
   type: 'error' | 'warning';
   text: string;
   location: ESQLLocation;
+  code: string;
 }
 
 export type AstProviderFn = (
