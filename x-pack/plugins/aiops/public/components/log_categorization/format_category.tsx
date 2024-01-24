@@ -22,7 +22,7 @@ const wildcardStyle = css`
   color: #357160;
 `;
 
-function createFormattedExample(key: string, example: string): JSX.Element[] {
+export function createFormattedExample(key: string, example: string): JSX.Element[] {
   const keyTokens = key.split(' ');
   let tempExample = ` ${example} `;
   const positions = keyTokens.map((t) => ({
@@ -78,10 +78,7 @@ function createFormattedExample(key: string, example: string): JSX.Element[] {
 export const FormattedPatternExamples: FC<Props> = ({ category, count }) => {
   const e = useMemo(() => {
     const { key, examples } = category;
-    const tempCount =
-      count === undefined || (count !== undefined && count > examples.length)
-        ? examples.length
-        : count;
+    const tempCount = count === undefined || count > examples.length ? examples.length : count;
     const formattedExamples = new Array(tempCount)
       .fill(0)
       .map((_, i) => createFormattedExample(key, examples[i]));

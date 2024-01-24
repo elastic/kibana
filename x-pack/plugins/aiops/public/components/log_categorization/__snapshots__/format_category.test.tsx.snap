@@ -1,0 +1,92 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FormattedPatternExamples renders each category correctly 1`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 messages out of 676",
+      ],
+      "key": "Processed messages out of",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 2`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed out 676 messages messages out of 676 Processed",
+      ],
+      "key": "Processed messages out of",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 3`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 messages out of 676",
+      ],
+      "key": "Processed of",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 4`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "Processed messages out of",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 5`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 6`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 (*?) message* out of 676",
+      ],
+      "key": "Processed messages out of",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 7`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "[05/Jan/2024 04:11:42 +0000] 40.69.144.53 - Lucio77 admin-console.you-got.mail to: admin-console.prod.008:6000: \\"GET /api/listCustomers HTTP/1.1\\" 200 383 \\"https://admin-console.you-got.mail\\" \\"Mozilla/5.0 (Windows; U; Windows NT 6.3) AppleWebKit/531.1.1 (KHTML, like Gecko) Chrome/23.0.835.0 Safari/531.1.1\\"",
+      ],
+      "key": "2024 0000 admin to admin console.prod 6000 api HTTP 1.1 https admin Mozilla 5.0 AppleWebKit KHTML like Gecko Chrome Safari",
+    }
+  }
+/>
+`;
