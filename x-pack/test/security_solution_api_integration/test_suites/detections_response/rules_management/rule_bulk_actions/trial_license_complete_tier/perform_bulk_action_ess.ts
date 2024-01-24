@@ -7,7 +7,7 @@
 
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,

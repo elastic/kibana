@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   DEFAULT_ALERTS_INDEX,
   DETECTION_ENGINE_INDEX_URL,
