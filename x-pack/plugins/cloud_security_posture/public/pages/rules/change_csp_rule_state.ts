@@ -6,6 +6,9 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useQueryClient } from '@tanstack/react-query';
+import { getCspmStatsKey, getKspmStatsKey } from '../../common/api';
+import { BENCHMARK_INTEGRATION_QUERY_KEY_V2 } from '../benchmarks/use_csp_benchmark_integrations';
 import {
   CspBenchmarkRulesBulkActionRequestSchema,
   RuleStateAttributes,
@@ -15,18 +18,25 @@ import { CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH } from '../../../common/cons
 export type RuleStateAttributesWithoutStates = Omit<RuleStateAttributes, 'muted'>;
 export const useChangeCspRuleState = () => {
   const { http } = useKibana().services;
+  const queryClient = useQueryClient();
 
   return async (actionOnRule: 'mute' | 'unmute', ruleIds: RuleStateAttributesWithoutStates[]) => {
     const query = {
       action: actionOnRule,
       rules: ruleIds,
     };
-    return await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
+
+    const cspRuleBulkActionResponse = await http?.post<CspBenchmarkRulesBulkActionRequestSchema>(
       CSP_BENCHMARK_RULES_BULK_ACTION_ROUTE_PATH,
       {
         version: '1',
         body: JSON.stringify(query),
       }
     );
+    await queryClient.invalidateQueries(BENCHMARK_INTEGRATION_QUERY_KEY_V2);
+    await queryClient.invalidateQueries(getCspmStatsKey);
+    await queryClient.invalidateQueries(getKspmStatsKey);
+
+    return cspRuleBulkActionResponse;
   };
 };

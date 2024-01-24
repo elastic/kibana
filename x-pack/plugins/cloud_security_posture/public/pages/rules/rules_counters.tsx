@@ -88,7 +88,13 @@ const EvaluationPieChart = ({ failed, passed }: { failed: number; passed: number
   );
 };
 
-export const RulesCounters = () => {
+export const RulesCounters = ({
+  mutedRulesCount,
+  setEnabledDisabledItemsFilter,
+}: {
+  mutedRulesCount: number;
+  setEnabledDisabledItemsFilter: (filterState: string) => void;
+}) => {
   const { http } = useKibana().services;
   const rulesPageParams = useParams<{ benchmarkId: string; benchmarkVersion: string }>();
   const getBenchmarks = useCspBenchmarkIntegrationsV2();
@@ -306,9 +312,9 @@ export const RulesCounters = () => {
       description: i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterTitle', {
         defaultMessage: 'Disabled Rules',
       }),
-      title: 'WIP',
+      title: mutedRulesCount,
       button: (
-        <EuiButtonEmpty iconType="search">
+        <EuiButtonEmpty iconType="search" onClick={() => setEnabledDisabledItemsFilter('disabled')}>
           {i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterButton', {
             defaultMessage: 'View all disabled rules',
           })}
