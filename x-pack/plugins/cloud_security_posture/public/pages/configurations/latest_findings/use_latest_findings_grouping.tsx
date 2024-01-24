@@ -18,9 +18,7 @@ import { buildEsQuery, Filter } from '@kbn/es-query';
 import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
-import {
-  LATEST_FINDINGS_RETENTION_POLICY,
-} from '../../../../common/constants';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
   FindingsGroupingAggregation,
   FindingsRootGroupingAggregation,
@@ -135,7 +133,6 @@ export const useLatestFindingsGrouping = ({
   selectedGroup,
   onGroupChange,
 }: {
-
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
   groupingLevel?: number;
@@ -149,7 +146,6 @@ export const useLatestFindingsGrouping = ({
 }) => {
   const { dataView } = useDataViewContext();
 
-  
   const {
     activePageIndex,
     grouping,
@@ -176,14 +172,11 @@ export const useLatestFindingsGrouping = ({
     groupingLevel,
   });
 
-
   const additionalFilters = buildEsQuery(dataView, [], groupFilters);
   const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
 
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
   const mutedRulesFilterQuery = rulesStates ? buildMutedRulesFilter(rulesStates) : [];
-
-
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: query ? [query, additionalFilters] : [additionalFilters],

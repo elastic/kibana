@@ -78,8 +78,6 @@ export const LatestFindingsContainer = () => {
   const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
- 
-
   const renderChildComponent = ({
     level,
     currentSelectedGroup,
