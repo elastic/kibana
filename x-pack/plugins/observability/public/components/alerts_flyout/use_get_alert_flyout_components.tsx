@@ -22,7 +22,7 @@ export const useGetAlertFlyoutComponents = (
   const body = useCallback(
     (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
-      return <AlertsFlyoutBody alert={alert} id={props.id} />;
+      return <AlertsFlyoutBody alert={alert} rawAlert={props.alert} id={props.id} />;
     },
     [observabilityRuleTypeRegistry]
   );
