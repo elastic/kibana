@@ -127,6 +127,10 @@ describe('AgentBulkActions', () => {
   });
 
   describe('When in query mode', () => {
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      diagnosticFileUploadEnabled: true,
+    } as any);
+
     it('should show correct actions for active agents when no managed policies exist', async () => {
       const results = render({
         ...defaultProps,
@@ -143,6 +147,9 @@ describe('AgentBulkActions', () => {
       expect(results.getByText('Unenroll 10 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 10 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 10 agents').closest('button')!).toBeDisabled();
+      expect(
+        results.getByText('Request diagnostics for 10 agents').closest('button')!
+      ).toBeEnabled();
       expect(results.getByText('Restart upgrade 10 agents').closest('button')!).toBeEnabled();
     });
 
@@ -160,6 +167,9 @@ describe('AgentBulkActions', () => {
 
       expect(results.getByText('Add / remove tags').closest('button')!).toBeEnabled();
       expect(results.getByText('Assign to new policy').closest('button')!).toBeEnabled();
+      expect(
+        results.getByText('Request diagnostics for 8 agents').closest('button')!
+      ).toBeEnabled();
       expect(results.getByText('Unenroll 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Upgrade 8 agents').closest('button')!).toBeEnabled();
       expect(results.getByText('Schedule upgrade for 8 agents').closest('button')!).toBeDisabled();
