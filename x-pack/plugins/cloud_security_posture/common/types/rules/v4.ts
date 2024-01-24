@@ -16,6 +16,20 @@ export type {
   FindCspBenchmarkRuleResponse,
 } from './v3';
 
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
+
+export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
+
+export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
+  typeof cspBenchmarkRulesBulkActionRequestSchema
+>;
+
+export type RuleStateAttributes = TypeOf<typeof ruleStateAttributes>;
+
+export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
+
+export type CspSettings = TypeOf<typeof cspSettingsSchema>;
+
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
@@ -98,8 +112,6 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   ruleNumber: schema.maybe(schema.arrayOf(schema.string())),
 });
 
-export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
-
 export interface BenchmarkRuleSelectParams {
   section?: string;
   ruleNumber?: string;
@@ -124,12 +136,6 @@ export const cspBenchmarkRulesBulkActionRequestSchema = schema.object({
   rules: rulesToUpdate,
 });
 
-export type RulesToUpdate = TypeOf<typeof rulesToUpdate>;
-
-export type CspBenchmarkRulesBulkActionRequestSchema = TypeOf<
-  typeof cspBenchmarkRulesBulkActionRequestSchema
->;
-
 export interface CspBenchmarkRulesBulkActionResponse {
   updated_benchmark_rules: CspBenchmarkRulesStates;
   disabled_detection_rules?: string[];
@@ -144,17 +150,11 @@ const ruleStateAttributes = schema.object({
   rule_id: schema.string(),
 });
 
-export type RuleStateAttributes = TypeOf<typeof ruleStateAttributes>;
-
 const rulesStates = schema.recordOf(schema.string(), ruleStateAttributes);
-
-export type CspBenchmarkRulesStates = TypeOf<typeof rulesStates>;
 
 export const cspSettingsSchema = schema.object({
   rules: rulesStates,
 });
-
-export type CspSettings = TypeOf<typeof cspSettingsSchema>;
 
 export interface BulkActionBenchmarkRulesResponse {
   updatedBenchmarkRulesStates: CspBenchmarkRulesStates;

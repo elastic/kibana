@@ -26,6 +26,8 @@ export type {
   BulkActionBenchmarkRulesResponse,
 } from './v4';
 
+export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
+
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * An Elasticsearch simple_query_string
@@ -111,8 +113,6 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
     schema.oneOf([schema.string(), schema.arrayOf(schema.string(), { minSize: 1 })])
   ),
 });
-
-export type FindCspBenchmarkRuleRequest = TypeOf<typeof findCspBenchmarkRuleRequestSchema>;
 
 export interface BenchmarkRuleSelectParams {
   section?: string[];

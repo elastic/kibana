@@ -6,7 +6,7 @@
  */
 import React, { useState, useMemo } from 'react';
 import compareVersions from 'compare-versions';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
