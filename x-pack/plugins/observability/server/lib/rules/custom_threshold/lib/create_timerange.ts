@@ -14,15 +14,18 @@ export const createTimerange = (
   isRateAgg?: boolean
 ) => {
   const end = moment(timeframe.end).valueOf();
-  const start = moment(timeframe.start).valueOf();
+  let start = moment(timeframe.start).valueOf();
 
   // Rate aggregations need 5 buckets worth of data
   const minimumBuckets = isRateAgg ? 2 : 1;
-  const calculatedFrom = lastPeriodEnd ? lastPeriodEnd - interval : end - interval * minimumBuckets;
+
+  interval = interval * minimumBuckets;
+  start = start - interval;
 
   // Use lastPeriodEnd - interval when it's less than start
-  return {
-    start: start <= calculatedFrom ? start : calculatedFrom,
-    end,
-  };
+  if (lastPeriodEnd && lastPeriodEnd - interval < start) {
+    start = lastPeriodEnd - interval;
+  }
+
+  return { start, end };
 };
