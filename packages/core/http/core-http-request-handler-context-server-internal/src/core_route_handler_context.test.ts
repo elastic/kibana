@@ -10,12 +10,14 @@ import { CoreRouteHandlerContext } from './core_route_handler_context';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { createCoreRouteHandlerContextParamsMock } from './test_helpers';
 
+const callerId = Symbol.for('test');
+
 describe('#elasticsearch', () => {
   describe('#client', () => {
     test('returns the results of coreStart.elasticsearch.client.asScoped', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client = context.elasticsearch.client;
       expect(client).toBe(coreStart.elasticsearch.client.asScoped.mock.results[0].value);
@@ -24,7 +26,7 @@ describe('#elasticsearch', () => {
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       expect(coreStart.elasticsearch.client.asScoped).not.toHaveBeenCalled();
       const client = context.elasticsearch.client;
@@ -35,7 +37,7 @@ describe('#elasticsearch', () => {
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client1 = context.elasticsearch.client;
       const client2 = context.elasticsearch.client;
@@ -52,7 +54,7 @@ describe('#savedObjects', () => {
     test('returns the results of coreStart.savedObjects.getScopedClient', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client = context.savedObjects.client;
       expect(client).toBe(coreStart.savedObjects.getScopedClient.mock.results[0].value);
@@ -61,7 +63,7 @@ describe('#savedObjects', () => {
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const savedObjects = context.savedObjects;
       expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
@@ -73,7 +75,7 @@ describe('#savedObjects', () => {
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client1 = context.savedObjects.client;
       const client2 = context.savedObjects.client;
@@ -88,7 +90,7 @@ describe('#savedObjects', () => {
     test('returns the results of coreStart.savedObjects.getTypeRegistry', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const typeRegistry = context.savedObjects.typeRegistry;
       expect(typeRegistry).toBe(coreStart.savedObjects.getTypeRegistry.mock.results[0].value);
@@ -97,7 +99,7 @@ describe('#savedObjects', () => {
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       expect(coreStart.savedObjects.getTypeRegistry).not.toHaveBeenCalled();
       const typeRegistry = context.savedObjects.typeRegistry;
@@ -108,7 +110,7 @@ describe('#savedObjects', () => {
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const typeRegistry1 = context.savedObjects.typeRegistry;
       const typeRegistry2 = context.savedObjects.typeRegistry;
@@ -125,7 +127,7 @@ describe('#uiSettings', () => {
     test('returns the results of coreStart.uiSettings.asScopedToClient', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client = context.uiSettings.client;
       expect(client).toBe(coreStart.uiSettings.asScopedToClient.mock.results[0].value);
@@ -134,7 +136,7 @@ describe('#uiSettings', () => {
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       expect(coreStart.uiSettings.asScopedToClient).not.toHaveBeenCalled();
       const client = context.uiSettings.client;
@@ -145,7 +147,7 @@ describe('#uiSettings', () => {
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client1 = context.uiSettings.client;
       const client2 = context.uiSettings.client;
@@ -162,7 +164,7 @@ describe('#deprecations', () => {
     test('returns the results of coreStart.deprecations.asScopedToClient', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client = context.deprecations.client;
       expect(client).toBe(coreStart.deprecations.asScopedToClient.mock.results[0].value);
@@ -171,7 +173,7 @@ describe('#deprecations', () => {
     test('lazily created', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       expect(coreStart.deprecations.asScopedToClient).not.toHaveBeenCalled();
       const client = context.deprecations.client;
@@ -182,7 +184,7 @@ describe('#deprecations', () => {
     test('only creates one instance', () => {
       const request = httpServerMock.createKibanaRequest();
       const coreStart = createCoreRouteHandlerContextParamsMock();
-      const context = new CoreRouteHandlerContext(coreStart, request);
+      const context = new CoreRouteHandlerContext(coreStart, request, callerId);
 
       const client1 = context.deprecations.client;
       const client2 = context.deprecations.client;
