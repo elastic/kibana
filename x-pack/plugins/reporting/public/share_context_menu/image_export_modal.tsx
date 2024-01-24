@@ -318,21 +318,23 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       return <ErrorUrlTooLongPanel isUnsaved={false} />;
     }
     return (
-      <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
-        {(copy) => (
-          <EuiButtonEmpty
-            iconType="copy"
-            flush="both"
-            onClick={copy}
-            data-test-subj="shareReportingCopyURL"
-          >
-            <FormattedMessage
-              id="xpack.reporting.modalContent.copyUrlButtonLabel"
-              defaultMessage="Copy POST URL  "
-            />
-          </EuiButtonEmpty>
-        )}
-      </EuiCopy>
+      <EuiToolTip content="Copy this POST URL to call generation from outside Kibana or from Watcher.">
+        <EuiCopy textToCopy={absoluteUrl} anchorClassName="eui-displayBlock">
+          {(copy) => (
+            <EuiButtonEmpty
+              iconType="copy"
+              flush="both"
+              onClick={copy}
+              data-test-subj="shareReportingCopyURL"
+            >
+              <FormattedMessage
+                id="xpack.reporting.modalContent.copyUrlButtonLabel"
+                defaultMessage="Copy POST URL  "
+              />
+            </EuiButtonEmpty>
+          )}
+        </EuiCopy>
+      </EuiToolTip>
     );
   };
 
