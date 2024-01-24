@@ -6,7 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
-import { EuiText, EuiHorizontalRule, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiText, EuiHorizontalRule } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Category } from '../../../common/api/log_categorization/types';
 
@@ -16,12 +16,13 @@ interface Props {
 }
 
 const tokenStyle = css`
-  font-weight: bold;
   color: #765b96;
 `;
 const wildcardStyle = css`
-  font-weight: bold;
   color: #357160;
+`;
+const generalStyle = css`
+  font-weight: bold;
 `;
 
 function createFormattedExample(key: string, example: string): JSX.Element[] {
@@ -87,19 +88,15 @@ export const FormattedPatternExamples: FC<Props> = ({ category, count }) => {
     const formattedExamples = new Array(tempCount)
       .fill(0)
       .map((_, i) => createFormattedExample(key, examples[i]));
-    return (
-      <EuiFlexGroup direction="column" gutterSize="none">
-        {formattedExamples.map((example, i) => (
-          <EuiFlexItem grow={false}>
-            <code>{example}</code>
-            {i < formattedExamples.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
+    return formattedExamples.map((example, i) => (
+      <>
+        <code>{example}</code>
+        {i < formattedExamples.length - 1 ? <EuiHorizontalRule margin="s" /> : null}
+      </>
+    ));
   }, [category, count]);
 
-  return <EuiText size="s">{e}</EuiText>;
+  return <WrapInText>{e}</WrapInText>;
 };
 
 export const FormattedRegex: FC<Props> = ({ category }) => {
@@ -118,14 +115,20 @@ export const FormattedRegex: FC<Props> = ({ category }) => {
     return elements;
   }, [regex]);
   return (
-    <EuiText size="s">
+    <WrapInText>
       <code>{formattedRegex}</code>
-    </EuiText>
+    </WrapInText>
   );
 };
 
 export const FormattedTokens: FC<Props> = ({ category }) => (
-  <EuiText size="s">
+  <WrapInText>
     <code css={tokenStyle}>{category.key}</code>
+  </WrapInText>
+);
+
+const WrapInText: FC = ({ children }) => (
+  <EuiText css={generalStyle} size="s">
+    {children}
   </EuiText>
 );
