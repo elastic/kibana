@@ -53,7 +53,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
       supportedServiceMaps: isServerless
-        ? `${SERVERLESS_DOCS}apm-service-map#supported-apm-agents `
+        ? `${SERVERLESS_DOCS}apm-service-map#supported-apm-agents`
         : `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
       customLinks: isServerless
         ? `${SERVERLESS_DOCS}apm-create-custom-links`
