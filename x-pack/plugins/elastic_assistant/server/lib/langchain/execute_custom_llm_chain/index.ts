@@ -50,6 +50,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
   traceOptions,
 }) => {
   // TODO implement llmClass for bedrock streaming
+  // tracked here: https://github.com/elastic/security-team/issues/7363
   const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
 
   const llm = new llmClass({
@@ -133,7 +134,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
     readStream(logStream, push, streamEnd);
 
-    // TODO figure out how to pass trace_data and replacements @spong @macri @yuliia
+    // TODO before merge to main
+    // figure out how to pass trace_data and replacements @spong @macri @yuliia
     return responseWithHeaders;
   }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx

@@ -160,7 +160,6 @@ export const postEvaluateRoute = (
               getConnectorName(connectorId, connectors) ?? '[unknown connector]';
             const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
             agents.push({
-              // TODO ask @spong for help with type?
               agentEvaluator: async (langChainMessages, exampleId) => {
                 const evalResult = await AGENT_EXECUTOR_MAP[agentName]({
                   actions,
