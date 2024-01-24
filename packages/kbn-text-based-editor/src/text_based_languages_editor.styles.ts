@@ -45,7 +45,7 @@ export const textBasedLanguagedEditorStyles = (
     },
     resizableContainer: {
       display: 'flex',
-      width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 80 : 40}px)`,
+      width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 120 : 40}px)`,
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
       borderTopLeftRadius: euiTheme.border.radius.medium,

@@ -975,6 +975,30 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                   </EuiFlexItem>
                 )}
               </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType={AssistantAvatar}
+                  color="text"
+                  size="m"
+                  css={{
+                    ...(documentationSections
+                      ? {
+                          borderRadius: 0,
+                        }
+                      : {
+                          borderTopLeftRadius: 0,
+                          borderBottomLeftRadius: 0,
+                        }),
+                    backgroundColor: isDark ? euiTheme.colors.lightestShade : '#e9edf3',
+                    border: '1px solid rgb(17 43 134 / 10%) !important',
+                  }}
+                  isDisabled={!observabilityAIAssistant}
+                  onClick={() => {
+                    expandCodeEditor(true);
+                    setIsChatVisible(true);
+                  }}
+                />
+              </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
