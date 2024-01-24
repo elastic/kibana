@@ -82,7 +82,7 @@ export const ShareMenu = ({ openReportingModal, onExport }: Props) => {
         ? {
             name: strings.getShareDownloadPDFTitle(),
             icon: 'document',
-            'data-test-subj': 'sharePanel-PDFReports',
+            'data-test-subj': 'sharePanel-imageExports',
             onClick: openReportingModal,
           }
         : false,

@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.canvas.goToListingPage();
         await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
         await testSubjects.click('shareTopNavButton');
-        await testSubjects.click('sharePanel-PDFReports');
+        await PageObjects.reporting.openImageReportingPanel();
         await PageObjects.reporting.clickGenerateReportButton();
 
         const url = await PageObjects.reporting.getReportURL(60000);
