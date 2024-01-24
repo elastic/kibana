@@ -32,6 +32,7 @@ interface WrapScopedClusterClientFactoryOpts {
   rule: RuleInfo;
   logger: Logger;
   abortController: AbortController;
+  requestTimeout?: number;
 }
 
 type WrapScopedClusterClientOpts = WrapScopedClusterClientFactoryOpts & {
@@ -88,9 +89,15 @@ function wrapScopedClusterClient(opts: WrapScopedClusterClientOpts): IScopedClus
 }
 
 function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
-  const { esClient, ...rest } = opts;
+  const { esClient, requestTimeout, ...rest } = opts;
 
-  const wrappedClient = esClient.child({});
+  const wrappedClient = esClient.child(
+    requestTimeout
+      ? {
+          requestTimeout,
+        }
+      : {}
+  );
 
   // Mutating the functions we want to wrap
   wrappedClient.transport.request = getWrappedTransportRequestFn({
