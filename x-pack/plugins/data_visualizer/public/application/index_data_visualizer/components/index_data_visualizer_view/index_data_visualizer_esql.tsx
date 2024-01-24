@@ -39,6 +39,7 @@ import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
 import { UI_SETTINGS } from '@kbn/data-service';
+import { useStorage } from '@kbn/ml-local-storage';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -72,7 +73,8 @@ import {
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
-import { ESQLDefaultLimitSize } from '../search_panel/esql/limit_size';
+import { ESQLDefaultLimitSizeSelect } from '../search_panel/esql/limit_size';
+import { DV_ESQL_LIMIT_SIZE } from '../../types/storage';
 
 const defaults = getDefaultPageState();
 
@@ -118,7 +120,7 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  limitSize: '10000',
+  limitSize: undefined,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -171,8 +173,13 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     return indexPatternFromQuery;
   }, [query]);
 
+  const [savedLimitSize, saveLimitSizePreference] = useStorage<
+    DVKey,
+    DVStorageMapped<typeof DV_ESQL_LIMIT_SIZE>
+  >(DV_ESQL_LIMIT_SIZE, '10000');
+
   const restorableDefaults = useMemo(
-    () => getDefaultDataVisualizerListState({}),
+    () => getDefaultDataVisualizerListState({ limitSize: savedLimitSize }),
     // We just need to load the saved preference when the page is first loaded
 
     []
@@ -194,7 +201,13 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     });
   };
 
+  // @TODO: remove
+  console.log(`--@@restorableDefaults.limitSize`, restorableDefaults.limitSize);
   const limitSize = dataVisualizerListState.limitSize ?? restorableDefaults.limitSize;
+
+  // @TODO: remove
+  console.log(`--@@limitSize`, limitSize);
+
   const updateLimitSize = (newLimitSize) => {
     setDataVisualizerListState({
       ...dataVisualizerListState,
@@ -753,6 +766,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                       totalCount={totalCount}
                       samplingProbability={1}
                       loading={false}
+                      showSettings={false}
                     />
                   </EuiFlexGroup>
                 </>
@@ -765,7 +779,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   fieldsCountStats={fieldsCountStats}
                   metricsStats={metricsStats}
                 />
-                <ESQLDefaultLimitSize limitSize={limitSize} onChangeLimitSize={updateLimitSize} />
+                <EuiFlexItem />
+                <ESQLDefaultLimitSizeSelect
+                  limitSize={limitSize}
+                  onChangeLimitSize={updateLimitSize}
+                />
               </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiProgress value={combinedProgress} max={100} size="xs" />

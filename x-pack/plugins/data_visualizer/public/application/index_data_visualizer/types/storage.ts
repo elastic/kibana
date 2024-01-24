@@ -14,12 +14,14 @@ export const DV_FROZEN_TIER_PREFERENCE = 'dataVisualizer.frozenDataTierPreferenc
 export const DV_RANDOM_SAMPLER_PREFERENCE = 'dataVisualizer.randomSamplerPreference';
 export const DV_RANDOM_SAMPLER_P_VALUE = 'dataVisualizer.randomSamplerPValue';
 export const DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE = 'dataVisualizer.dataDriftChartType';
+export const DV_ESQL_LIMIT_SIZE = 'dataVisualizer.esql.limitSize';
 
 export type DV = Partial<{
   [DV_FROZEN_TIER_PREFERENCE]: FrozenTierPreference;
   [DV_RANDOM_SAMPLER_PREFERENCE]: RandomSamplerOption;
   [DV_RANDOM_SAMPLER_P_VALUE]: null | number;
   [DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE]: DATA_DRIFT_COMPARISON_CHART_TYPE;
+  [DV_ESQL_LIMIT_SIZE]: string;
 }> | null;
 
 export type DVKey = keyof Exclude<DV, null>;
@@ -32,6 +34,8 @@ export type DVStorageMapped<T extends DVKey> = T extends typeof DV_FROZEN_TIER_P
   ? number | null
   : T extends typeof DV_DATA_DRIFT_DISTRIBUTION_CHART_TYPE
   ? DATA_DRIFT_COMPARISON_CHART_TYPE
+  : T extends typeof DV_ESQL_LIMIT_SIZE
+  ? string
   : null;
 
 export const DV_STORAGE_KEYS = [

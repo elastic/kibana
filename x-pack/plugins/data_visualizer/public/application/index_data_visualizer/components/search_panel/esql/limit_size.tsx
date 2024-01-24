@@ -6,25 +6,49 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSelect, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 const options = [
-  { value: '5000', text: '5,000' },
-  { value: '10000', text: '10,000' },
-  { value: '100000', text: '100,000' },
-  { value: '1000000', text: '1,000,000' },
+  {
+    value: '5000',
+    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
+      defaultMessage: '{limit} rows',
+      values: { limit: '5,000' },
+    }),
+  },
+  {
+    value: '10000',
+    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
+      defaultMessage: '{limit} rows',
+      values: { limit: '10,000' },
+    }),
+  },
+  {
+    value: '100000',
+    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
+      defaultMessage: '{limit} rows',
+      values: { limit: '100,000' },
+    }),
+  },
+  {
+    value: '1000000',
+    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeOptionLabel', {
+      defaultMessage: '{limit} rows',
+      values: { limit: '1,000,000' },
+    }),
+  },
   {
     value: 'none',
-    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.noLimitSize', {
-      defaultMessage: 'No limit',
+    text: i18n.translate('xpack.dataVisualizer.searchPanel.esql.analyzeAll', {
+      defaultMessage: 'Analyze all',
     }),
   },
 ];
 
-export type ESQLDefaultLimitSize = '5000' | '10000' | '100000' | '1000000' | 'none';
+export type ESQLDefaultLimitSizeSelect = '5000' | '10000' | '100000' | '1000000' | 'none';
 
-export const ESQLDefaultLimitSize = ({
+export const ESQLDefaultLimitSizeSelect = ({
   limitSize,
   onChangeLimitSize,
 }: {
@@ -38,30 +62,23 @@ export const ESQLDefaultLimitSize = ({
   };
 
   return (
-    <EuiFlexGroup
-      direction="row"
-      alignItems="center"
-      data-test-subj="dvESQLLimitSizeOptionsFormRow"
-      gutterSize="none"
-      css={{ width: 120, marginLeft: 'auto' }}
-    >
-      <EuiFlexItem>
-        <FormattedMessage
-          id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
-          defaultMessage="Limit size"
-        />
-      </EuiFlexItem>
-      <EuiSelect
-        size="s"
-        css={{ width: 50 }}
-        id={basicSelectId}
-        options={options}
-        value={limitSize}
-        onChange={onChange}
-        aria-label={i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeAriaLabel', {
-          defaultMessage: 'Limit size',
-        })}
-      />
-    </EuiFlexGroup>
+    <EuiSelect
+      size="s"
+      id={basicSelectId}
+      options={options}
+      value={limitSize}
+      onChange={onChange}
+      aria-label={i18n.translate('xpack.dataVisualizer.searchPanel.esql.limitSizeAriaLabel', {
+        defaultMessage: 'Limit size',
+      })}
+      prepend={
+        <EuiText alignItems="center" size="s">
+          <FormattedMessage
+            id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
+            defaultMessage="Limit analysis to"
+          />
+        </EuiText>
+      }
+    />
   );
 };
