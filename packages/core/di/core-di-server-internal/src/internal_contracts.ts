@@ -9,6 +9,7 @@
 import type { PluginOpaqueId, PluginManifest } from '@kbn/core-base-common';
 import type { ContainerModule, PluginContainer, ReadonlyContainer } from '@kbn/core-di-common';
 import type { CoreDiSetupModuleCallback } from '@kbn/core-di-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 
 /** @internal */
 export type InternalCoreDiServiceSetup = {
@@ -34,4 +35,7 @@ export type InternalCoreDiServiceSetup = {
 /** @internal */
 export interface InternalCoreDiServiceStart {
   getPluginContainer(pluginId: PluginOpaqueId): ReadonlyContainer;
+
+  createRequestContainer(request: KibanaRequest, pluginId: PluginOpaqueId): ReadonlyContainer;
+  disposeRequestContainer(request: KibanaRequest): boolean;
 }

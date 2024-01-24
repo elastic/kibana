@@ -426,7 +426,7 @@ export class Server {
 
     await this.plugins.start(this.coreStart);
 
-    await this.http.start();
+    await this.http.start({ injection: injectionStart });
 
     startTransaction.end();
 
@@ -459,7 +459,7 @@ export class Server {
       coreId,
       'core',
       (context, req) => {
-        return new CoreRouteHandlerContext(this.coreStart!, req);
+        return new CoreRouteHandlerContext(this.coreStart!, req, context._source);
       }
     );
   }

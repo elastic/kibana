@@ -6,8 +6,16 @@
  * Side Public License, v 1.
  */
 
+import type { ReadonlyContainer } from '@kbn/core-di-common';
+
 /**
- *
+ * Core's `injection` request handler context.
  * @public
  */
-export interface DIRequestHandlerContext {}
+export interface InjectionRequestHandlerContext {
+  /**
+   * The injection container scoped to the current request
+   * and to the plugin that registered the handler.
+   */
+  container: ReadonlyContainer;
+}

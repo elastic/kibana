@@ -32,6 +32,7 @@ import { Type } from '@kbn/config-schema';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 import { appendersSchema } from '@kbn/core-logging-server-internal';
 import { loggerServiceId, configServiceId } from '@kbn/core-plugins-server';
+import { requestServiceId } from '@kbn/core-di-server';
 import type {
   ExecutionContextSetup,
   ExecutionContextStart,
@@ -55,13 +56,22 @@ import type {
 export { bootstrap } from '@kbn/core-root-server-internal';
 
 /**
- * Record of all global public core services available though dependency injection.
+ * Record of all global public core services available through dependency injection.
  *
  * @public
  */
 export const coreGlobalServiceIds = {
   logger: loggerServiceId,
   config: configServiceId,
+};
+
+/**
+ * Record of all core request-scope service exposed through dependency injection.
+ *
+ * @public
+ */
+export const coreRequestScopedServices = {
+  request: requestServiceId,
 };
 
 export type { PluginOpaqueId } from '@kbn/core-base-common';

@@ -15,6 +15,7 @@ import {
   pluginManifestServiceId,
 } from '@kbn/core-di-common-internal';
 import type { CoreContext } from '@kbn/core-base-server-internal';
+import { requestServiceId } from '@kbn/core-di-server';
 import type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './internal_contracts';
 import { createModule } from './utils';
 
@@ -22,10 +23,13 @@ import { createModule } from './utils';
 export class CoreInjectionService {
   private rootContainer: Container;
   private pluginContainers: Map<PluginOpaqueId, Container> = new Map();
+  private requestContainers: Map<string, Container> = new Map();
   private internalPluginModules: ContainerModule[] = [];
+  private requestScopedModules: ContainerModule[] = [];
+
   // private blockInternalRegistration: false; // TODO: use
 
-  constructor(coreContext: CoreContext) {
+  constructor(private readonly coreContext: CoreContext) {
     this.rootContainer = new Container({ defaultScope: 'Singleton', skipBaseClassChecks: true });
   }
 
@@ -35,10 +39,10 @@ export class CoreInjectionService {
         const pluginContainer = this.pluginContainers.get(pluginId)!;
         const modules = callback(pluginContainer, { createModule });
         if (modules.global) {
-          // TODO
+          this.rootContainer.load(modules.global);
         }
         if (modules.request) {
-          // TODO
+          this.requestScopedModules.push(modules.request);
         }
       },
 
@@ -59,10 +63,10 @@ export class CoreInjectionService {
         this.internalPluginModules.push(module);
       },
       registerGlobalModule: (module) => {
-        // TODO
+        this.rootContainer.load(module);
       },
       registerRequestModule: (module) => {
-        // TODO
+        this.requestScopedModules.push(module);
       },
     };
   }
@@ -72,6 +76,31 @@ export class CoreInjectionService {
       getPluginContainer: (pluginId: PluginOpaqueId) => {
         const pluginContainer = this.pluginContainers.get(pluginId)!;
         return toReadonly(pluginContainer);
+      },
+      createRequestContainer: (request, callerId) => {
+        const parentContainer =
+          callerId === this.coreContext.coreId
+            ? this.rootContainer
+            : this.pluginContainers.get(callerId)!;
+
+        const requestContainer = parentContainer.createChild();
+        this.requestContainers.set(request.uuid, requestContainer);
+
+        requestContainer.bind(requestServiceId).toConstantValue(request);
+        this.requestScopedModules.forEach((requestModule) => {
+          requestContainer.load(requestModule);
+        });
+
+        return requestContainer;
+      },
+      disposeRequestContainer: (request) => {
+        const requestContainer = this.requestContainers.get(request.uuid);
+        if (!requestContainer) {
+          return false;
+        }
+        requestContainer.unbindAll();
+        this.requestContainers.delete(request.uuid);
+        return true;
       },
     };
   }
