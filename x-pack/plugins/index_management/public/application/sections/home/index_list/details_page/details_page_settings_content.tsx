@@ -39,11 +39,9 @@ import { AppDependencies, useAppContext } from '../../../../app_context';
 
 const getEditableSettings = ({
   data,
-  isIndexOpen,
   editableIndexSettings,
 }: {
   data: Props['data'];
-  isIndexOpen: boolean;
   editableIndexSettings: AppDependencies['config']['editableIndexSettings'];
 }): { originalSettings: Record<string, any>; settingsString: string } => {
   const { defaults, settings } = data;
@@ -62,23 +60,17 @@ const getEditableSettings = ({
     readOnlySettings.forEach((e) => delete newSettings[e]);
   }
 
-  // can't change codec on an open index
-  if (isIndexOpen) {
-    delete newSettings['index.codec'];
-  }
   const settingsString = JSON.stringify(newSettings, null, 2);
   return { originalSettings: newSettings, settingsString };
 };
 
 interface Props {
-  isIndexOpen: boolean;
   data: IndexSettingsResponse;
   indexName: string;
   reloadIndexSettings: () => void;
 }
 
 export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
-  isIndexOpen,
   data,
   indexName,
   reloadIndexSettings,
@@ -94,7 +86,6 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
 
   const { originalSettings, settingsString } = getEditableSettings({
     data,
-    isIndexOpen,
     editableIndexSettings,
   });
   const [editableSettings, setEditableSettings] = useState(settingsString);
