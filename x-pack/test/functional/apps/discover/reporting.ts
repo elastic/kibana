@@ -25,6 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'share',
     'header',
+    'unifiedFieldList',
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
@@ -51,13 +52,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return res;
   };
 
-  describe.skip('Discover CSV Export', () => {
+  describe.only('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
-        await reportingAPI.initEcommerce();
+        await reportingAPI.initEcommerce({
+          batchSize: 5000,
+          concurrency: 4,
+        });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd('order_id');
+        await PageObjects.discover.clickFieldSort('order_id', 'Sort Low-High');
       });
 
       after(async () => {
@@ -79,7 +85,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Generate CSV: new search', () => {
       before(async () => {
-        await reportingAPI.initEcommerce();
+        await reportingAPI.initEcommerce({
+          batchSize: 5000,
+          concurrency: 4,
+        });
       });
 
       after(async () => {
@@ -288,7 +297,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       };
 
       before(async () => {
-        await reportingAPI.initEcommerce();
+        await reportingAPI.initEcommerce({
+          batchSize: 5000,
+          concurrency: 4,
+        });
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
