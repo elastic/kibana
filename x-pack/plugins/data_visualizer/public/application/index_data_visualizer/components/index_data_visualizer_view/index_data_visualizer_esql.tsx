@@ -72,6 +72,7 @@ import {
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
+import { ESQLDefaultLimitSize } from '../search_panel/esql/limit_size';
 
 const defaults = getDefaultPageState();
 
@@ -117,7 +118,7 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
+  limitSize: '10000',
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -176,6 +177,30 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
 
     []
   );
+
+  const [dataVisualizerListState, setDataVisualizerListState] =
+    usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
+      DATA_VISUALIZER_INDEX_VIEWER,
+      restorableDefaults
+    );
+  const [globalState, setGlobalState] = useUrlState('_g');
+
+  const showEmptyFields =
+    dataVisualizerListState.showEmptyFields ?? restorableDefaults.showEmptyFields;
+  const toggleShowEmptyFields = () => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      showEmptyFields: !dataVisualizerListState.showEmptyFields,
+    });
+  };
+
+  const limitSize = dataVisualizerListState.limitSize ?? restorableDefaults.limitSize;
+  const updateLimitSize = (newLimitSize) => {
+    setDataVisualizerListState({
+      ...dataVisualizerListState,
+      limitSize: newLimitSize,
+    });
+  };
 
   useEffect(
     function updateAdhocDataViewFromQuery() {
@@ -261,7 +286,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
       aggInterval,
       intervalMs: aggInterval?.asMilliseconds(),
       searchQuery: query,
-      samplerShardSize: undefined,
+      limitSize,
       sessionId: undefined,
       indexPattern,
       timeFieldName: currentDataView?.timeFieldName,
@@ -276,23 +301,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     JSON.stringify(query),
     indexPattern,
     lastRefresh,
+    limitSize,
   ]);
-
-  const [dataVisualizerListState, setDataVisualizerListState] =
-    usePageUrlState<DataVisualizerIndexBasedPageUrlState>(
-      DATA_VISUALIZER_INDEX_VIEWER,
-      restorableDefaults
-    );
-  const [globalState, setGlobalState] = useUrlState('_g');
-
-  const showEmptyFields =
-    dataVisualizerListState.showEmptyFields ?? restorableDefaults.showEmptyFields;
-  const toggleShowEmptyFields = () => {
-    setDataVisualizerListState({
-      ...dataVisualizerListState,
-      showEmptyFields: !dataVisualizerListState.showEmptyFields,
-    });
-  };
 
   useEffect(() => {
     // Force refresh on index pattern change
@@ -398,6 +408,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
+    limitSize: fieldStatsRequest?.limitSize,
   });
 
   const createMetricCards = useCallback(() => {
@@ -747,12 +758,15 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 </>
               )}
               <EuiSpacer size="m" />
-              <FieldCountPanel
-                showEmptyFields={showEmptyFields}
-                toggleShowEmptyFields={toggleShowEmptyFields}
-                fieldsCountStats={fieldsCountStats}
-                metricsStats={metricsStats}
-              />
+              <EuiFlexGroup direction="row">
+                <FieldCountPanel
+                  showEmptyFields={showEmptyFields}
+                  toggleShowEmptyFields={toggleShowEmptyFields}
+                  fieldsCountStats={fieldsCountStats}
+                  metricsStats={metricsStats}
+                />
+                <ESQLDefaultLimitSize limitSize={limitSize} onChangeLimitSize={updateLimitSize} />
+              </EuiFlexGroup>
               <EuiSpacer size="m" />
               <EuiProgress value={combinedProgress} max={100} size="xs" />
               <DataVisualizerTable<FieldVisConfig>

@@ -84,14 +84,22 @@ export interface Column {
 type BucketCount = number;
 type BucketTerm = string;
 
+const getSafeESQLLimitSize = (str?: string) => {
+  // @TODO: remove
+  console.log(`--@@getSafeESQLLimitSize str`, str);
+  if (str === 'none' || !str) return '';
+  return ` | LIMIT ${str}`;
+};
 export const useESQLFieldStatsData = <T extends Column>({
   searchQuery,
   columns: allColumns,
   filter,
+  limitSize,
 }: {
   searchQuery?: AggregateQuery;
   columns?: T[];
   filter?: QueryDslQueryContainer;
+  limitSize?: string;
 }) => {
   const [fieldStats, setFieldStats] = useState<Map<string, FieldStats>>();
 
@@ -125,7 +133,10 @@ export const useESQLFieldStatsData = <T extends Column>({
         });
         try {
           // By default, limit the source data to 100,000 rows
-          const esqlBaseQuery = searchQuery.esql + '| LIMIT 100000';
+          const esqlBaseQuery = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+
+          // @TODO: remove
+          console.log(`--@@fieldStats esqlBaseQuery`, esqlBaseQuery);
           const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
 
@@ -449,7 +460,7 @@ export const useESQLFieldStatsData = <T extends Column>({
       };
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [allColumns, JSON.stringify({ filter })]
+    [allColumns, JSON.stringify({ filter }), limitSize]
   );
 
   return { fieldStats, fieldStatsProgress: fetchState };
@@ -467,6 +478,7 @@ export const useESQLOverallStatsData = (
       timeFieldName: string | undefined;
       lastRefresh: number;
       filter?: QueryDslQueryContainer;
+      limitSize?: 'string' | 'none';
     }
     | undefined
 ) => {
@@ -500,7 +512,7 @@ export const useESQLOverallStatsData = (
         });
         setTableData({ totalCount: undefined, documentCountStats: undefined });
 
-        const { searchQuery, intervalMs, filter } = fieldStatsRequest;
+        const { searchQuery, intervalMs, filter, limitSize } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
           return;
@@ -508,8 +520,8 @@ export const useESQLOverallStatsData = (
 
         const intervalInMs = intervalMs === 0 ? 60 * 60 * 60 * 10 : intervalMs;
 
-        // By default, limit the source data to 100,000 rows
-        const esqlBaseQuery = searchQuery.esql + '| LIMIT 100000';
+        // For doc count chart, we want the full base query without any limit
+        const esqlBaseQuery = searchQuery.esql;
 
         const columnsResp = await runRequest(
           {
@@ -607,24 +619,30 @@ export const useESQLOverallStatsData = (
         // COUNT + CARDINALITY
         setTableData({ aggregatableFields, nonAggregatableFields });
 
+        // For % count & cardinality, we want the full base query WITH specified limit
+        // to safeguard against huge datasets
+        const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
+
         if (fields.length > 0) {
           const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
 
           let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
           countQuery += aggregatableFieldsToQuery
             .map((field) => {
+              // count idx = 0, cardinality idx = 1
               return `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
                 field.name
-              )}), ${getSafeESQLName(
-                `${field.name}_cardinality`
-              )} = COUNT_DISTINCT(${getSafeESQLName(field.name)})`;
+              )}),
+              ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
+                field.name
+              )})`;
             })
             .join(',');
 
           const esqlResults = await runRequest(
             {
               params: {
-                query: searchQuery.esql + countQuery,
+                query: esqlBaseQueryWithLimit + countQuery,
                 ...(filter ? { filter } : {}),
               },
             },
