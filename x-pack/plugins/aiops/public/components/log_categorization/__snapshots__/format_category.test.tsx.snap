@@ -8,32 +8,35 @@ exports[`FormattedPatternExamples renders each category correctly 1`] = `
         "Processed 676 messages out of 676",
       ],
       "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
 `;
 
 exports[`FormattedPatternExamples renders each category correctly 2`] = `
-<FormattedPatternExamples
+<FormattedRegex
   category={
     Object {
       "examples": Array [
-        "Processed out 676 messages messages out of 676 Processed",
+        "Processed 676 messages out of 676",
       ],
       "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
 `;
 
 exports[`FormattedPatternExamples renders each category correctly 3`] = `
-<FormattedPatternExamples
+<FormattedTokens
   category={
     Object {
       "examples": Array [
         "Processed 676 messages out of 676",
       ],
-      "key": "Processed of",
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
@@ -44,35 +47,38 @@ exports[`FormattedPatternExamples renders each category correctly 4`] = `
   category={
     Object {
       "examples": Array [
-        "Processed messages out of",
+        "Processed out 676 messages messages out of 676 Processed",
       ],
       "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
 `;
 
 exports[`FormattedPatternExamples renders each category correctly 5`] = `
-<FormattedPatternExamples
+<FormattedRegex
   category={
     Object {
       "examples": Array [
-        "Processed messages out of",
+        "Processed out 676 messages messages out of 676 Processed",
       ],
-      "key": "",
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
 `;
 
 exports[`FormattedPatternExamples renders each category correctly 6`] = `
-<FormattedPatternExamples
+<FormattedTokens
   category={
     Object {
       "examples": Array [
-        "Processed 676 (*?) message* out of 676",
+        "Processed out 676 messages messages out of 676 Processed",
       ],
       "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
     }
   }
 />
@@ -83,9 +89,206 @@ exports[`FormattedPatternExamples renders each category correctly 7`] = `
   category={
     Object {
       "examples": Array [
+        "Processed 676 messages out of 676",
+      ],
+      "key": "Processed of",
+      "regex": ".*?Processed.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 8`] = `
+<FormattedRegex
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 messages out of 676",
+      ],
+      "key": "Processed of",
+      "regex": ".*?Processed.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 9`] = `
+<FormattedTokens
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 messages out of 676",
+      ],
+      "key": "Processed of",
+      "regex": ".*?Processed.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 10`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 11`] = `
+<FormattedRegex
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 12`] = `
+<FormattedTokens
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 13`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "",
+      "regex": ".*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 14`] = `
+<FormattedRegex
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "",
+      "regex": ".*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 15`] = `
+<FormattedTokens
+  category={
+    Object {
+      "examples": Array [
+        "Processed messages out of",
+      ],
+      "key": "",
+      "regex": ".*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 16`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 (*?) message* out of 676",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 17`] = `
+<FormattedRegex
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 (*?) message* out of 676",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 18`] = `
+<FormattedTokens
+  category={
+    Object {
+      "examples": Array [
+        "Processed 676 (*?) message* out of 676",
+      ],
+      "key": "Processed messages out of",
+      "regex": ".*?Processed.+?messages.+?out.+?of.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 19`] = `
+<FormattedPatternExamples
+  category={
+    Object {
+      "examples": Array [
         "[05/Jan/2024 04:11:42 +0000] 40.69.144.53 - Lucio77 admin-console.you-got.mail to: admin-console.prod.008:6000: \\"GET /api/listCustomers HTTP/1.1\\" 200 383 \\"https://admin-console.you-got.mail\\" \\"Mozilla/5.0 (Windows; U; Windows NT 6.3) AppleWebKit/531.1.1 (KHTML, like Gecko) Chrome/23.0.835.0 Safari/531.1.1\\"",
       ],
       "key": "2024 0000 admin to admin console.prod 6000 api HTTP 1.1 https admin Mozilla 5.0 AppleWebKit KHTML like Gecko Chrome Safari",
+      "regex": ".*?2024.+?0000.+?admin.+?to.+?admin.+?console.prod.+?6000.+?api.+?HTTP.+?1.1.+?https.+?admin.+?Mozilla.+?5.0.+?AppleWebKit.+?KHTML.+?like.+?Gecko.+?Chrome.+?Safari.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 20`] = `
+<FormattedRegex
+  category={
+    Object {
+      "examples": Array [
+        "[05/Jan/2024 04:11:42 +0000] 40.69.144.53 - Lucio77 admin-console.you-got.mail to: admin-console.prod.008:6000: \\"GET /api/listCustomers HTTP/1.1\\" 200 383 \\"https://admin-console.you-got.mail\\" \\"Mozilla/5.0 (Windows; U; Windows NT 6.3) AppleWebKit/531.1.1 (KHTML, like Gecko) Chrome/23.0.835.0 Safari/531.1.1\\"",
+      ],
+      "key": "2024 0000 admin to admin console.prod 6000 api HTTP 1.1 https admin Mozilla 5.0 AppleWebKit KHTML like Gecko Chrome Safari",
+      "regex": ".*?2024.+?0000.+?admin.+?to.+?admin.+?console.prod.+?6000.+?api.+?HTTP.+?1.1.+?https.+?admin.+?Mozilla.+?5.0.+?AppleWebKit.+?KHTML.+?like.+?Gecko.+?Chrome.+?Safari.*?",
+    }
+  }
+/>
+`;
+
+exports[`FormattedPatternExamples renders each category correctly 21`] = `
+<FormattedTokens
+  category={
+    Object {
+      "examples": Array [
+        "[05/Jan/2024 04:11:42 +0000] 40.69.144.53 - Lucio77 admin-console.you-got.mail to: admin-console.prod.008:6000: \\"GET /api/listCustomers HTTP/1.1\\" 200 383 \\"https://admin-console.you-got.mail\\" \\"Mozilla/5.0 (Windows; U; Windows NT 6.3) AppleWebKit/531.1.1 (KHTML, like Gecko) Chrome/23.0.835.0 Safari/531.1.1\\"",
+      ],
+      "key": "2024 0000 admin to admin console.prod 6000 api HTTP 1.1 https admin Mozilla 5.0 AppleWebKit KHTML like Gecko Chrome Safari",
+      "regex": ".*?2024.+?0000.+?admin.+?to.+?admin.+?console.prod.+?6000.+?api.+?HTTP.+?1.1.+?https.+?admin.+?Mozilla.+?5.0.+?AppleWebKit.+?KHTML.+?like.+?Gecko.+?Chrome.+?Safari.*?",
     }
   }
 />
