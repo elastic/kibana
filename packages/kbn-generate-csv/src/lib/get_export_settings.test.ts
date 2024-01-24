@@ -32,7 +32,7 @@ describe('getExportSettings', () => {
       checkForFormulas: true,
       escapeFormulaValues: false,
       maxSizeBytes: 180000,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       useByteOrderMarkEncoding: false,
       maxConcurrentShardRequests: 5,
       enablePanelActionDownload: true,

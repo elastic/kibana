@@ -117,7 +117,7 @@ describe('CsvGenerator', () => {
       escapeFormulaValues: true,
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       enablePanelActionDownload: true,
       maxConcurrentShardRequests: 5,
     };
@@ -248,7 +248,7 @@ describe('CsvGenerator', () => {
       escapeFormulaValues: true,
       maxSizeBytes: TEST_MAX_SIZE,
       useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       enablePanelActionDownload: true,
       maxConcurrentShardRequests: 5,
     };
@@ -688,7 +688,7 @@ describe('CsvGenerator', () => {
         createMockJob({
           searchSource: {
             query: { query: '', language: 'kuery' },
-            sort: [{ '@date': 'desc' }],
+            sort: [{ '@date': 'desc' as any }],
             index: '93f4bc50-6662-11eb-98bc-f550e2308366',
             fields: ['_id', '_index', '@date', 'message'],
             filter: [],
@@ -744,7 +744,7 @@ describe('CsvGenerator', () => {
         createMockJob({
           searchSource: {
             query: { query: '', language: 'kuery' },
-            sort: [{ '@date': 'desc' }],
+            sort: [{ '@date': 'desc' as any }],
             index: '93f4bc50-6662-11eb-98bc-f550e2308366',
             fields: ['*'],
             filter: [],
@@ -979,7 +979,7 @@ describe('CsvGenerator', () => {
         escapeFormulaValues: false,
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
-        scroll: { size: 500, duration: '30s' },
+        scroll: { size: 500, duration: '30s', strategy: 'pit' },
         enablePanelActionDownload: true,
         maxConcurrentShardRequests: 5,
       };
