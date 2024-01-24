@@ -80,6 +80,9 @@ export const IGNORE_FILE_GLOBS = [
 
   // generator templates use weird filenames based on the requirements for the files they're generating
   'packages/kbn-generate/templates/**/*',
+
+  // ecs templates
+  '**/ecs/fields/**/*',
 ];
 
 /**

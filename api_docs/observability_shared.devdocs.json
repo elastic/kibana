@@ -1276,7 +1276,15 @@
             "section": "def-common.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
-          "[], app?: { id: string; label: string; } | undefined) => void"
+          "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumbsAppendExtension",
+            "text": "ChromeBreadcrumbsAppendExtension"
+          },
+          " | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1338,6 +1346,28 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useBreadcrumbs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "breadcrumbsAppendExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumbsAppendExtension",
+                "text": "ChromeBreadcrumbsAppendExtension"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
