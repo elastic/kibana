@@ -326,7 +326,9 @@ export class SecurityPageObject extends FtrService {
           await alert.accept();
         }
 
+        // ToDo: Is this section necessary?
         await this.retry.waitFor('URL redirects to finish', async () => {
+          // If this is necessary, should the "before" URL be moved to above?
           const urlBefore = await this.browser.getCurrentUrl();
           await this.delay(1000);
           const urlAfter = await this.browser.getCurrentUrl();
