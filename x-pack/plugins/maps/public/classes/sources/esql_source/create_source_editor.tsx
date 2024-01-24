@@ -6,6 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { ESQLColumn } from '@kbn/es-types';
 import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
@@ -112,20 +113,24 @@ export function CreateSourceEditor(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useEffect(() => {
-    const sourceConfig = esql && esql.length
-    ? {
-        columns,
-        dateField,
-        geoField,
-        esql,
-        narrowByGlobalSearch,
-        narrowByGlobalTime,
-        narrowByMapBounds,
-      }
-    : null;
-    props.onSourceConfigChange(sourceConfig);
-  }, [columns, dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]);
+  useDebounce(
+    () => {
+      const sourceConfig = esql && esql.length
+      ? {
+          columns,
+          dateField,
+          geoField,
+          esql,
+          narrowByGlobalSearch,
+          narrowByGlobalTime,
+          narrowByMapBounds,
+        }
+      : null;
+      props.onSourceConfigChange(sourceConfig);
+    },
+    0,
+    [columns, dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
+  );
 
   return (
     <EuiPanel>
