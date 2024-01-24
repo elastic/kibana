@@ -29,7 +29,7 @@ jest.mock('@kbn/expandable-flyout/src/context', () => {
 
   return {
     ...original,
-    useExpandableFlyoutContext: () => ({
+    useExpandableFlyoutApi: () => ({
       openRightPanel: mockOpenRightPanel,
     }),
   };
