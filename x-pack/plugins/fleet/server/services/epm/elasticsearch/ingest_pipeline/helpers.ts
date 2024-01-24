@@ -100,8 +100,8 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
       ? [
           {
             pipeline: {
-              // This pipeline name gets the `.package` suffix to avoid conflicts with the pipeline name for the dataset below
-              name: `${pipeline.dataStream.type}-${pipeline.dataStream.package}.package@custom`,
+              // This pipeline name gets the `.integration` suffix to avoid conflicts with the pipeline name for the dataset below
+              name: `${pipeline.dataStream.type}-${pipeline.dataStream.package}.integration@custom`,
               ignore_missing_pipeline: true,
               description: `[Fleet] Pipeline for all data streams of type \`${pipeline.dataStream.type}\` defined by the \`${pipeline.dataStream.package}\` integration`,
             },
