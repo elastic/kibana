@@ -53,7 +53,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     apm: {
       kibanaSettings: `${KIBANA_DOCS}apm-settings-in-kibana.html`,
       supportedServiceMaps: isServerless
-        ? `${SERVERLESS_DOCS}apm-service-map`
+        ? `${SERVERLESS_DOCS}apm-service-map#supported-apm-agents `
         : `${KIBANA_DOCS}service-maps.html#service-maps-supported`,
       customLinks: isServerless
         ? `${SERVERLESS_DOCS}apm-create-custom-links`
@@ -64,15 +64,15 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       overview: `${APM_DOCS}guide/${DOC_LINK_VERSION}/apm-overview.html`,
       tailSamplingPolicies: isServerless
         ? `${SERVERLESS_DOCS}apm-transaction-sampling`
-        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/configure-tail-based-sampling.html`,
+        : `${OBSERVABILITY_DOCS}configure-tail-based-sampling.html`,
       elasticAgent: `${APM_DOCS}guide/${DOC_LINK_VERSION}/upgrade-to-apm-integration.html`,
       storageExplorer: `${KIBANA_DOCS}storage-explorer.html`,
       spanCompression: isServerless
         ? `${SERVERLESS_DOCS}apm-compress-spans`
-        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/span-compression.html`,
+        : `${OBSERVABILITY_DOCS}span-compression.html`,
       transactionSampling: isServerless
         ? `${SERVERLESS_DOCS}apm-transaction-sampling`
-        : `${APM_DOCS}guide/${DOC_LINK_VERSION}/sampling.html`,
+        : `${OBSERVABILITY_DOCS}sampling.html`,
       indexLifecycleManagement: `${APM_DOCS}guide/${DOC_LINK_VERSION}/ilm-how-to.html`,
     },
     canvas: {
