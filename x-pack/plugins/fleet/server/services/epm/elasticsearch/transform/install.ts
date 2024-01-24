@@ -43,6 +43,7 @@ import type {
 } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
+import { isUserSettingsTemplate } from '../template/utils';
 
 import { deleteTransforms } from './remove';
 import { getDestinationIndexAliases } from './transform_utils';
@@ -542,6 +543,8 @@ const installTransformsAssets = async (
                   ],
                   _meta: destinationIndexTemplate._meta,
                   composed_of: Object.keys(componentTemplates),
+                  ignore_missing_component_templates:
+                    Object.keys(componentTemplates).filter(isUserSettingsTemplate),
                 },
               },
             });

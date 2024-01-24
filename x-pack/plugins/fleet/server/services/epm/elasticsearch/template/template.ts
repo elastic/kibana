@@ -36,6 +36,7 @@ import { retryTransientEsErrors } from '../retry';
 import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
+import { isUserSettingsTemplate } from './utils';
 
 interface Properties {
   [key: string]: any;
@@ -118,6 +119,8 @@ export function getTemplate({
       ? [FLEET_AGENT_ID_VERIFY_COMPONENT_TEMPLATE_NAME]
       : []),
   ];
+
+  template.ignore_missing_component_templates = template.composed_of.filter(isUserSettingsTemplate);
 
   return template;
 }
