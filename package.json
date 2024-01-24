@@ -524,6 +524,7 @@
     "@kbn/logging-mocks": "link:packages/kbn-logging-mocks",
     "@kbn/logs-shared-plugin": "link:x-pack/plugins/logs_shared",
     "@kbn/logstash-plugin": "link:x-pack/plugins/logstash",
+    "@kbn/managed-content-badge": "link:packages/kbn-managed-content-badge",
     "@kbn/management-cards-navigation": "link:packages/kbn-management/cards_navigation",
     "@kbn/management-plugin": "link:src/plugins/management",
     "@kbn/management-settings-application": "link:packages/kbn-management/settings/application",
