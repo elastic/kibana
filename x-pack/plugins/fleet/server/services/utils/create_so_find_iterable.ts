@@ -14,7 +14,7 @@ import type {
 
 export interface CreateSoFindIterableOptions<TDocument = unknown> {
   soClient: SavedObjectsClientContract;
-  findRequest: Omit<SavedObjectsFindOptions, 'searchAfter' | 'page' | 'sortField'> &
+  findRequest: Omit<SavedObjectsFindOptions, 'searchAfter' | 'page' | 'sortField' | 'pit'> &
     // sortField is required
     Pick<Required<SavedObjectsFindOptions>, 'sortField'>;
   /**
@@ -24,6 +24,8 @@ export interface CreateSoFindIterableOptions<TDocument = unknown> {
    * @param data
    */
   resultsMapper?: (data: SavedObjectsFindResponse<TDocument>) => any;
+  /** If a Point in Time should be used while executing the search. Defaults to `true` */
+  usePointInTime?: boolean;
 }
 
 export type InferSoFindIteratorResultValue<TDocument = unknown> =
@@ -42,19 +44,46 @@ export const createSoFindIterable = <TDocument = unknown>({
   soClient,
   findRequest: { perPage = 1000, ...findOptions },
   resultsMapper,
+  usePointInTime = true,
 }: CreateSoFindIterableOptions<TDocument>): AsyncIterable<
   InferSoFindIteratorResultValue<TDocument>
 > => {
+  const keepAliveValue = '5m';
   let done = false;
   let value: SavedObjectsFindResponse<TDocument>;
   let searchAfterValue: SavedObjectsFindResult['sort'] | undefined;
+  let pointInTime: Promise<{ id: string }> = usePointInTime
+    ? soClient.openPointInTimeForType(findOptions.type, { keepAlive: keepAliveValue })
+    : Promise.resolve({ id: '' });
 
-  // FIXME:PT should use PIT for the query. Look into adding it.
+  const setValue = (findResponse: SavedObjectsFindResponse<TDocument>): void => {
+    value = resultsMapper ? resultsMapper(findResponse) : findResponse;
+  };
+
+  const setDone = async (): Promise<void> => {
+    done = true;
+
+    if (usePointInTime) {
+      const pitId = (await pointInTime).id;
+
+      if (pitId) {
+        await soClient.closePointInTime(pitId);
+      }
+    }
+  };
 
   const fetchData = async () => {
     const findResult = await soClient
       .find<TDocument>({
         ...findOptions,
+        ...(usePointInTime
+          ? {
+              pit: {
+                id: (await pointInTime).id,
+                keepAlive: keepAliveValue,
+              },
+            }
+          : {}),
         perPage,
         searchAfter: searchAfterValue,
       })
@@ -63,22 +92,23 @@ export const createSoFindIterable = <TDocument = unknown>({
         throw e;
       });
 
-    value = resultsMapper ? resultsMapper(findResult) : findResult;
-
     const soItems = findResult.saved_objects;
+    const lastSearchHit = soItems[soItems.length - 1];
 
     if (soItems.length === 0) {
-      done = true;
+      setValue(findResult);
+      await setDone();
       return;
     }
 
-    const lastSearchHit = soItems[soItems.length - 1];
     searchAfterValue = lastSearchHit.sort;
+    pointInTime = Promise.resolve({ id: findResult.pit_id ?? '' });
+    setValue(findResult);
 
     // If (for some reason) we don't have a `searchAfterValue`,
     // then throw an error, or else we'll keep looping forever
     if (!searchAfterValue) {
-      done = true;
+      await setDone();
       throw new Error(
         `Unable to store 'searchAfter' value. Last 'SavedObjectsFindResult' did not include a 'sort' property \n(did you forget to set the 'sortField' attribute on your SavedObjectsFindOptions?)':\n${JSON.stringify(
           lastSearchHit

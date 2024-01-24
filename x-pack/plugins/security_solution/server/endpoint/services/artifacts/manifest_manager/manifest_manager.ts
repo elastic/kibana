@@ -489,7 +489,11 @@ export class ManifestManager {
         return errors;
       }
 
-      this.logger.info(`Cleaned up artifacts:\n  ${artifactIds.join('\n  ')}`);
+      this.logger.info(`Count of cleaned up artifacts: ${artifactIds.length}`);
+
+      if (artifactIds.length !== 0) {
+        this.logger.debug(`Deleted artifacts from cleanup:\n${artifactIds.join('\n  ')}`);
+      }
 
       return [];
     } catch (err) {
@@ -816,8 +820,6 @@ export class ManifestManager {
 
     await artifactDeletionProcess.complete();
 
-    this.logger.debug(`Orphan artifacts deleted from Fleet:\n${stringify(badArtifactIds)}`);
-
     if (errors.length > 0) {
       this.logger.error(
         `The following errors were encountered while attempting to delete [${
@@ -825,7 +827,8 @@ export class ManifestManager {
         }] orphaned artifacts:\n${stringify(errors)}`
       );
     } else if (badArtifactIds.length > 0) {
-      this.logger.info(`Orphan artifacts cleaned up: ${badArtifactIds.length}`);
+      this.logger.info(`Count of orphan artifacts cleaned up: ${badArtifactIds.length}`);
+      this.logger.debug(`Orphan artifacts deleted from Fleet:\n${stringify(badArtifactIds)}`);
     }
   }
 }
