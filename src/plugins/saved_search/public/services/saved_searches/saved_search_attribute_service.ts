@@ -98,6 +98,7 @@ export const toSavedSearch = async (
       ...splitReferences(result.attributes),
       savedSearchId: id,
       sharingSavedObjectProps,
+      managed: false,
     },
     createGetSavedSearchDeps(services)
   );

@@ -31,6 +31,8 @@ import {
 } from '@kbn/observability-shared-plugin/public';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 const LazyFieldRow = React.lazy(async () => ({
@@ -40,24 +42,35 @@ const LazyFieldRow = React.lazy(async () => ({
 
 const FieldRow = withSuspense(LazyFieldRow);
 
-const apmSettingsKeys = [
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-  apmServiceGroupMaxNumberOfServices,
-  enableInspectEsQueries,
-  apmLabsButton,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
-  apmEnableTableSearchBar,
-  apmEnableProfilingIntegration,
-];
+function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+  const keys = [
+    enableComparisonByDefault,
+    defaultApmServiceEnvironment,
+    apmServiceGroupMaxNumberOfServices,
+    enableInspectEsQueries,
+    apmLabsButton,
+    apmAWSLambdaPriceFactor,
+    apmAWSLambdaRequestCostPerMillion,
+    apmEnableServiceMetrics,
+    apmEnableContinuousRollups,
+    enableAgentExplorerView,
+    apmEnableTableSearchBar,
+  ];
+
+  if (isProfilingIntegrationEnabled) {
+    keys.push(apmEnableProfilingIntegration);
+  }
+
+  return keys;
+}
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
+  const isProfilingIntegrationEnabled = useApmFeatureFlag(
+    ApmFeatureFlagName.ProfilingIntegrationAvailable
+  );
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {
     fields,
     handleFieldChange,
