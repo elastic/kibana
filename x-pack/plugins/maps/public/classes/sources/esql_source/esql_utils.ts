@@ -117,18 +117,20 @@ async function getColumns(esql: string) {
 
 export async function getFields(esql: string) {
   const dateFields: string[] = [];
-  const geoFields: string[] = []; 
+  const geoFields: string[] = [];
   const pattern: string = getIndexPatternFromESQLQuery(esql);
   try {
     // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
-    (await getIndexPatternService().getFieldsForWildcard({ pattern }))
-      .forEach((field) => {
-        if (field.type === 'date') {
-          dateFields.push(field.name);
-        } else if (field.type === ES_GEO_FIELD_TYPE.GEO_POINT || field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE) {
-          geoFields.push(field.name);
-        }
-      });
+    (await getIndexPatternService().getFieldsForWildcard({ pattern })).forEach((field) => {
+      if (field.type === 'date') {
+        dateFields.push(field.name);
+      } else if (
+        field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+        field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+      ) {
+        geoFields.push(field.name);
+      }
+    });
   } catch (error) {
     throw new Error(
       i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
@@ -143,6 +145,6 @@ export async function getFields(esql: string) {
 
   return {
     dateFields,
-    geoFields
+    geoFields,
   };
 }

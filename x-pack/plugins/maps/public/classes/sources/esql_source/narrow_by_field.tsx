@@ -6,38 +6,34 @@
  */
 
 import React, { ChangeEvent, useMemo } from 'react';
-import {
-  EuiFormRow,
-  EuiSelect,
-  EuiSwitch,
-  EuiSwitchEvent,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFormRow, EuiSelect, EuiSwitch, EuiSwitchEvent, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
-
 export function NarrowByMapBounds(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fieldTypes'>) {
-  return <NarrowByField
-    switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
-      defaultMessage: 'Narrow ES|QL statement by visible map area',
-    })}
-    fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
-    {...props}
-  />
+  return (
+    <NarrowByField
+      switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
+        defaultMessage: 'Narrow ES|QL statement by visible map area',
+      })}
+      fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+      {...props}
+    />
+  );
 }
 
 export function NarrowByTime(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fieldTypes'>) {
-  return <NarrowByField
-    switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
-      defaultMessage: `Narrow ES|QL statement by global time`,
-    })}
-    fieldTypes={['date']}
-    {...props}
-  />
+  return (
+    <NarrowByField
+      switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+        defaultMessage: `Narrow ES|QL statement by global time`,
+      })}
+      fieldTypes={['date']}
+      {...props}
+    />
+  );
 }
-
 
 interface NarrowByFieldProps {
   switchLabel: string;
@@ -81,9 +77,11 @@ function NarrowByField(props: NarrowByFieldProps) {
             content={i18n.translate('xpack.maps.esqlSource.noFieldsMsg', {
               defaultMessage: `No {fieldTypes} fields are available from index pattern: {pattern}.`,
               values: {
-                fieldTypes: props.fieldTypes.map(type => {
-                  return `'${type}'`;
-                }).join(', '),
+                fieldTypes: props.fieldTypes
+                  .map((type) => {
+                    return `'${type}'`;
+                  })
+                  .join(', '),
                 pattern: getIndexPatternFromESQLQuery(props.esql),
               },
             })}

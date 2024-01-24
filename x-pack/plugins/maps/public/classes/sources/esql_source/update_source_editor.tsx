@@ -82,10 +82,7 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'esql', value: change.esql },
               ];
               function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
-                if (
-                  props.sourceDescriptor[key] &&
-                  !fields.includes(props.sourceDescriptor[key]!)
-                ) {
+                if (props.sourceDescriptor[key] && !fields.includes(props.sourceDescriptor[key]!)) {
                   const value = fields.length ? fields[0] : undefined;
                   changes.push({
                     propName: key,
@@ -95,7 +92,7 @@ export function UpdateSourceEditor(props: Props) {
                   if (!value) {
                     changes.push({
                       propName: key === 'dateField' ? 'narrowByGlobalTime' : 'narrowByMapBounds',
-                      value: false
+                      value: false,
                     });
                   }
                 }
@@ -118,7 +115,7 @@ export function UpdateSourceEditor(props: Props) {
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'narrowByMapBounds', value: narrowByField }
+                { propName: 'narrowByMapBounds', value: narrowByField },
               ];
               // auto select first geo field when enabling narrowByMapBounds and geoField is not set
               if (narrowByField && geoFields.length && !!props.sourceDescriptor.geoField) {
@@ -151,7 +148,7 @@ export function UpdateSourceEditor(props: Props) {
             }}
             onNarrowByFieldChange={(narrowByField: boolean) => {
               const changes: OnSourceChangeArgs[] = [
-                { propName: 'narrowByGlobalTime', value: narrowByField }
+                { propName: 'narrowByGlobalTime', value: narrowByField },
               ];
               // auto select first date field when enabling narrowByGlobalTime and dateField is not set
               if (narrowByField && dateFields.length && !!props.sourceDescriptor.dateField) {

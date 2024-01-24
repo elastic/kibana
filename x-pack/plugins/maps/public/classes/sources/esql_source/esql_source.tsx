@@ -67,9 +67,13 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
           ? descriptor.narrowByGlobalSearch
           : true,
       narrowByGlobalTime:
-        typeof descriptor.narrowByGlobalTime !== 'undefined' ? descriptor.narrowByGlobalTime : descriptor.dateField !== 'undefined',
+        typeof descriptor.narrowByGlobalTime !== 'undefined'
+          ? descriptor.narrowByGlobalTime
+          : descriptor.dateField !== 'undefined',
       narrowByMapBounds:
-        typeof descriptor.narrowByMapBounds !== 'undefined' ? descriptor.narrowByMapBounds : descriptor.geoField !== 'undefined',
+        typeof descriptor.narrowByMapBounds !== 'undefined'
+          ? descriptor.narrowByMapBounds
+          : descriptor.geoField !== 'undefined',
       applyForceRefresh:
         typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
@@ -169,9 +173,12 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
     if (this._descriptor.narrowByMapBounds && requestMeta.buffer) {
       if (!this._descriptor.geoField) {
-        throw new Error(i18n.translate('xpack.maps.source.esql.noGeoFieldError', {
-          defaultMessage: 'Unable to narrow ES|QL statement by visible map area, geospatial field is not provided',
-        }));
+        throw new Error(
+          i18n.translate('xpack.maps.source.esql.noGeoFieldError', {
+            defaultMessage:
+              'Unable to narrow ES|QL statement by visible map area, geospatial field is not provided',
+          })
+        );
       }
       const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField]);
       filters.push(extentFilter);
@@ -179,9 +186,12 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
 
     if (requestMeta.applyGlobalTime) {
       if (!this._descriptor.dateField) {
-        throw new Error(i18n.translate('xpack.maps.source.esql.noDateFieldError', {
-          defaultMessage: 'Unable to narrow ES|QL statement by global time, date field is not provided',
-        }));
+        throw new Error(
+          i18n.translate('xpack.maps.source.esql.noDateFieldError', {
+            defaultMessage:
+              'Unable to narrow ES|QL statement by global time, date field is not provided',
+          })
+        );
       }
       const timeRange = requestMeta.timeslice
         ? {

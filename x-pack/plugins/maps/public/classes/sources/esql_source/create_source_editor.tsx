@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { ESQLColumn } from '@kbn/es-types';
-import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiPanel,
+  EuiSkeletonText,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
@@ -86,7 +93,7 @@ export function CreateSourceEditor(props: Props) {
                     ? ESQL_GEO_SHAPE_TYPE
                     : ESQL_GEO_POINT_TYPE,
               },
-            ])
+            ]);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
             setGeoField(geoField.name);
@@ -115,21 +122,30 @@ export function CreateSourceEditor(props: Props) {
 
   useDebounce(
     () => {
-      const sourceConfig = esql && esql.length
-      ? {
-          columns,
-          dateField,
-          geoField,
-          esql,
-          narrowByGlobalSearch,
-          narrowByGlobalTime,
-          narrowByMapBounds,
-        }
-      : null;
+      const sourceConfig =
+        esql && esql.length
+          ? {
+              columns,
+              dateField,
+              geoField,
+              esql,
+              narrowByGlobalSearch,
+              narrowByGlobalTime,
+              narrowByMapBounds,
+            }
+          : null;
       props.onSourceConfigChange(sourceConfig);
     },
     0,
-    [columns, dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]
+    [
+      columns,
+      dateField,
+      geoField,
+      esql,
+      narrowByGlobalSearch,
+      narrowByGlobalTime,
+      narrowByMapBounds,
+    ]
   );
 
   return (
@@ -179,7 +195,7 @@ export function CreateSourceEditor(props: Props) {
                 setNarrowByMapBounds(narrowByField);
                 // auto select first geo field when enabling narrowByMapBounds and geoField is not set
                 if (narrowByField && geoFields.length && !!geoField) {
-                  setGeoField(geoFields[0])
+                  setGeoField(geoFields[0]);
                 }
               }}
             />
@@ -209,7 +225,7 @@ export function CreateSourceEditor(props: Props) {
                 setNarrowByGlobalTime(narrowByField);
                 // auto select first geo field when enabling narrowByMapBounds and geoField is not set
                 if (narrowByField && dateFields.length && !!dateField) {
-                  setDateField(dateFields[0])
+                  setDateField(dateFields[0]);
                 }
               }}
             />
