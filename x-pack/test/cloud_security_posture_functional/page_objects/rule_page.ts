@@ -20,8 +20,8 @@ export const RULES_CLEAR_ALL_RULES_SELECTION = 'clear-rules-selection-button';
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_DISABLED_FILTER = 'rules-disabled-filter';
 export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
-export const CIS_SECTION_FILTER = 'options-filter-popover-button-section';
-export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number';
+export const CIS_SECTION_FILTER = 'options-filter-popover-button-cis-section-multi-select-filter';
+export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number-multi-select-filter';
 export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {

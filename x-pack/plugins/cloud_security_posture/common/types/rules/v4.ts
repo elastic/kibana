@@ -108,8 +108,8 @@ export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
    * rule section
    */
-  section: schema.maybe(schema.arrayOf(schema.string())),
-  ruleNumber: schema.maybe(schema.arrayOf(schema.string())),
+  section: schema.maybe(schema.string()),
+  ruleNumber: schema.maybe(schema.string()),
 });
 
 export interface BenchmarkRuleSelectParams {

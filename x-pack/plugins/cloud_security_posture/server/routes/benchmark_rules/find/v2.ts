@@ -11,9 +11,9 @@ import { CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE } from '../../../../common/constan
 
 import type {
   CspBenchmarkRule,
+  FindCspBenchmarkRuleRequest,
   FindCspBenchmarkRuleResponse,
-} from '../../../../common/types/latest';
-import type { FindCspBenchmarkRuleRequest } from '../../../../common/types/rules/v4';
+} from '../../../../common/types/rules/v4';
 import { getSortedCspBenchmarkRulesTemplates } from './utils';
 
 export const findBenchmarkRuleHandler = async (
