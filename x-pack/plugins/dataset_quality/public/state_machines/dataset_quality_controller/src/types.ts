@@ -15,19 +15,6 @@ import {
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
-interface TableCriteria {
-  page: number;
-  rowsPerPage: number;
-  sort: {
-    field: SortField;
-    direction: Direction;
-  };
-}
-
-interface WithTableOptions {
-  table: TableCriteria;
-}
-
 export interface FlyoutDataset {
   rawName: string;
   type: string;
@@ -41,17 +28,31 @@ export interface FlyoutDataset {
   };
 }
 
-interface WithFlyoutOptions {
+interface TableCriteria {
+  page: number;
+  rowsPerPage: number;
+  sort: {
+    field: SortField;
+    direction: Direction;
+  };
+}
+
+export interface WithTableOptions {
+  table: TableCriteria;
+}
+
+export interface WithFlyoutOptions {
   flyout: {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
   };
 }
 
-interface WithDataStreamStats {
+export interface WithDataStreamStats {
   dataStreamStats: DataStreamStat[];
 }
-interface WithDegradedDocs {
+
+export interface WithDegradedDocs {
   degradedDocStats: DegradedDocsStat[];
 }
 
