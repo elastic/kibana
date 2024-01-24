@@ -54,7 +54,7 @@ export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
   currentTimeOverride?: Date
 ) => Promise<SuppressedAlertServiceResult<T>>;
 
-interface SuppressedAlertServiceResult<T>
+export interface SuppressedAlertServiceResult<T>
   extends Omit<PersistenceAlertServiceResult<T>, 'alertsWereTruncated'> {
   suppressedAlerts: Array<{ _id: string; _source: T }>;
 }

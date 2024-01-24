@@ -17,6 +17,7 @@ import {
   ALERT_SUPPRESSION_END,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 import type { SignalSourceHit } from '../types';
 
 import type {
@@ -92,8 +93,8 @@ export const wrapSuppressedAlerts = ({
       id,
       publicBaseUrl
     );
-    // suppression start/end equals to alert timestamp, since we suppress alerts for rule type, not documents as for query rule type
-    const suppressionTime = new Date(baseAlert[TIMESTAMP]);
+
+    const suppressionTime = new Date(baseAlert[ALERT_ORIGINAL_TIME] ?? baseAlert[TIMESTAMP]);
     return {
       _id: id,
       _index: '',

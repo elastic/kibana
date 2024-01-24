@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import sortBy from 'lodash/sortBy';
 import dateMath from '@elastic/datemath';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -17,6 +18,7 @@ import {
   ALERT_START,
   ALERT_SUPPRESSION_DOCS_COUNT,
   ALERT_SUPPRESSION_END,
+  ALERT_SUPPRESSION_START,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
@@ -117,7 +119,12 @@ const filterDuplicateAlerts = async <T extends { _id: string }>({
  * suppress alerts by ALERT_INSTANCE_ID in memory
  */
 const suppressAlertsInMemory = <
-  T extends { [ALERT_SUPPRESSION_DOCS_COUNT]: number; [ALERT_INSTANCE_ID]: string },
+  T extends {
+    [ALERT_SUPPRESSION_DOCS_COUNT]: number;
+    [ALERT_INSTANCE_ID]: string;
+    [ALERT_SUPPRESSION_START]: Date;
+    [ALERT_SUPPRESSION_END]: Date;
+  },
   A extends {
     _id: string;
     _source: T;
@@ -128,26 +135,36 @@ const suppressAlertsInMemory = <
   alertCandidates: A[];
   suppressedAlerts: A[];
 } => {
-  const idsMap: Record<string, number> = {};
+  const idsMap: Record<string, { count: number; suppressionEnd: Date }> = {};
   const suppressedAlerts: A[] = [];
-  const filteredAlerts = alerts.filter((alert) => {
-    const instanceId = alert._source[ALERT_INSTANCE_ID];
-    const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
 
-    if (instanceId && idsMap[instanceId] != null) {
-      idsMap[instanceId] += suppressionDocsCount + 1;
-      suppressedAlerts.push(alert);
-      return false;
-    } else {
-      idsMap[instanceId] = suppressionDocsCount;
-      return true;
-    }
-  }, []);
+  const filteredAlerts = sortBy(alerts, (alert) => alert._source[ALERT_SUPPRESSION_START]).filter(
+    (alert) => {
+      const instanceId = alert._source[ALERT_INSTANCE_ID];
+      const suppressionDocsCount = alert._source[ALERT_SUPPRESSION_DOCS_COUNT];
+      const suppressionEnd = alert._source[ALERT_SUPPRESSION_END];
+
+      if (instanceId && idsMap[instanceId] != null) {
+        idsMap[instanceId].count += suppressionDocsCount + 1;
+        // store the max value of suppression end boundary
+        if (suppressionEnd > idsMap[instanceId].suppressionEnd) {
+          idsMap[instanceId].suppressionEnd = suppressionEnd;
+        }
+        suppressedAlerts.push(alert);
+        return false;
+      } else {
+        idsMap[instanceId] = { count: suppressionDocsCount, suppressionEnd };
+        return true;
+      }
+    },
+    []
+  );
 
   const alertCandidates = filteredAlerts.map((alert) => {
     const instanceId = alert._source[ALERT_INSTANCE_ID];
     if (instanceId) {
-      alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId];
+      alert._source[ALERT_SUPPRESSION_DOCS_COUNT] = idsMap[instanceId].count;
+      alert._source[ALERT_SUPPRESSION_END] = idsMap[instanceId].suppressionEnd;
     }
     return alert;
   });
@@ -391,23 +408,33 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
-                  return [
-                    {
-                      update: {
-                        _id: existingAlert._id,
-                        _index: existingAlert._index,
-                        require_alias: false,
+
+                  // do not count alerts that already were suppressed
+                  if (
+                    existingAlert._source?.[ALERT_SUPPRESSION_END] &&
+                    existingAlert._source?.[ALERT_SUPPRESSION_END] <=
+                      alert._source[ALERT_SUPPRESSION_END]
+                  ) {
+                    return [];
+                  } else {
+                    return [
+                      {
+                        update: {
+                          _id: existingAlert._id,
+                          _index: existingAlert._index,
+                          require_alias: false,
+                        },
                       },
-                    },
-                    {
-                      doc: {
-                        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                        [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
-                        [ALERT_SUPPRESSION_DOCS_COUNT]:
-                          existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
+                      {
+                        doc: {
+                          [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+                          [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
+                          [ALERT_SUPPRESSION_DOCS_COUNT]:
+                            existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
+                        },
                       },
-                    },
-                  ];
+                    ];
+                  }
                 });
 
                 let enrichedAlerts = newAlerts;
