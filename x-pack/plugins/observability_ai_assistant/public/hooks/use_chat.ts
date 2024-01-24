@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { merge } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { MessageRole, type Message } from '../../common';
 import {
   ConversationCreateEvent,
@@ -99,7 +100,11 @@ export function useChat({
           defaultMessage: 'Failed to load response from the AI Assistant',
         }),
       });
-      setChatState(ChatState.Error);
+      if (error instanceof AbortError) {
+        setChatState(ChatState.Aborted);
+      } else {
+        setChatState(ChatState.Error);
+      }
     },
     [notifications.toasts]
   );
