@@ -186,15 +186,15 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
       it('creates a case with custom fields that have default values', async () => {
         const customFields = [
           {
-            key: 'valid_key_1',
-            label: 'Summary',
+            key: 'valid_key_3',
+            label: 'Summary required',
             type: CustomFieldTypes.TEXT as const,
             defaultValue: 'Default value',
             required: true,
           },
           {
-            key: 'valid_key_2',
-            label: 'Sync',
+            key: 'valid_key_4',
+            label: 'Sync required',
             type: CustomFieldTypes.TOGGLE as const,
             defaultValue: true,
             required: true,
