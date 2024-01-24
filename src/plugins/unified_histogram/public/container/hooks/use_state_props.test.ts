@@ -7,7 +7,6 @@
  */
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { Suggestion } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
@@ -32,7 +31,6 @@ describe('useStateProps', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
-    currentSuggestionContext: undefined,
   };
 
   const getStateService = (options: Omit<UnifiedHistogramStateOptions, 'services'>) => {
@@ -46,7 +44,6 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setTimeInterval');
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
-    jest.spyOn(stateService, 'setCurrentSuggestionContext');
     return stateService;
   };
 
@@ -121,7 +118,6 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -201,7 +197,6 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -223,7 +218,6 @@ describe('useStateProps', () => {
     const stateService = getStateService({
       initialState: {
         ...initialState,
-        currentSuggestionContext: undefined,
       },
     });
     const { result } = renderHook(() =>
@@ -302,7 +296,6 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -379,7 +372,6 @@ describe('useStateProps', () => {
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
-        "onSuggestionContextChange": [Function],
         "onTimeIntervalChange": [Function],
         "onTopPanelHeightChange": [Function],
         "onTotalHitsChange": [Function],
@@ -415,7 +407,6 @@ describe('useStateProps', () => {
       onChartHiddenChange,
       onChartLoad,
       onBreakdownFieldChange,
-      onSuggestionContextChange,
     } = result.current;
     act(() => {
       onTopPanelHeightChange(200);
@@ -445,13 +436,6 @@ describe('useStateProps', () => {
       onBreakdownFieldChange({ name: 'field' } as DataViewField);
     });
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
-
-    act(() => {
-      onSuggestionContextChange({ title: 'Stacked Bar' } as Suggestion);
-    });
-    expect(stateService.setCurrentSuggestionContext).toHaveBeenLastCalledWith({
-      title: 'Stacked Bar',
-    });
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {

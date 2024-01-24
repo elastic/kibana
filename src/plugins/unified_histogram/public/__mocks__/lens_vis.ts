@@ -11,7 +11,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import { LensVisService, type QueryParams } from '../services/lens_vis_service';
 import { unifiedHistogramServicesMock } from './services';
-import { CurrentSuggestionContext, LensAttributesContext } from '../types';
+import { UnifiedHistogramSuggestionContext, UnifiedHistogramLensAttributesContext } from '../types';
 
 export const getLensVisMock = async ({
   chartTitle,
@@ -33,12 +33,12 @@ export const getLensVisMock = async ({
   isPlainRecord: boolean;
   timeInterval: string;
   breakdownField: DataViewField | undefined;
-  suggestionContext: CurrentSuggestionContext | undefined;
+  suggestionContext: UnifiedHistogramSuggestionContext | undefined;
   allSuggestions?: Suggestion[];
 }): Promise<{
   lensService: LensVisService;
-  lensAttributesContext: LensAttributesContext | undefined;
-  currentSuggestionContext: CurrentSuggestionContext | undefined;
+  lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
 }> => {
   const lensApi = await unifiedHistogramServicesMock.lens.stateHelperApi();
   const lensService = new LensVisService({
@@ -46,19 +46,18 @@ export const getLensVisMock = async ({
     lensSuggestionsApi: allSuggestions ? () => allSuggestions : lensApi.suggestions,
   });
 
-  let lensAttributesContext: LensAttributesContext | undefined;
+  let lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
   lensService.lensAttributesContext$.subscribe((nextAttributesContext) => {
     lensAttributesContext = nextAttributesContext;
   });
 
-  let currentSuggestionContext: CurrentSuggestionContext | undefined;
+  let currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   lensService.currentSuggestionContext$.subscribe((nextSuggestionContext) => {
     currentSuggestionContext = nextSuggestionContext;
   });
 
   lensService.update({
     chartTitle,
-    suggestionContextSelectedPreviously: suggestionContext,
     queryParams: {
       query,
       filters,
@@ -71,5 +70,9 @@ export const getLensVisMock = async ({
     externalVisContext: undefined,
   });
 
-  return { lensService, lensAttributesContext, currentSuggestionContext };
+  return {
+    lensService,
+    lensAttributesContext,
+    currentSuggestionContext: suggestionContext || currentSuggestionContext,
+  };
 };

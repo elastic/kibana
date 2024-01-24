@@ -23,8 +23,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { Histogram } from './histogram';
 import type {
-  CurrentSuggestionContext,
-  ExternalVisContext,
+  UnifiedHistogramSuggestionContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
@@ -74,8 +73,6 @@ export interface ChartProps {
   onChartHiddenChange?: (chartHidden: boolean) => void;
   onTimeIntervalChange?: (timeInterval: string) => void;
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
-  onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
-  onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   onChartLoad?: (event: UnifiedHistogramChartLoadEvent) => void;
   onFilter?: LensEmbeddableInput['onFilter'];
@@ -109,8 +106,6 @@ export function Chart({
   isChartLoading,
   onChartHiddenChange,
   onTimeIntervalChange,
-  onSuggestionContextChange,
-  onVisContextChanged,
   onBreakdownFieldChange,
   onTotalHitsChange,
   onChartLoad,
@@ -179,16 +174,13 @@ export function Chart({
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const onSuggestionContextEdit = useCallback(
-    (editedSuggestionContext: CurrentSuggestionContext | undefined) => {
+    (editedSuggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
       console.log('suggestion context was edited', editedSuggestionContext);
-      onVisContextChanged?.(
-        lensVisService.getLensAttributesContextForEditedSuggestion({
-          editedSuggestionContext,
-        })
-      );
-      onSuggestionContextChange?.(editedSuggestionContext);
+      lensVisService.onSuggestionEdited({
+        editedSuggestionContext,
+      });
     },
-    [onSuggestionContextChange, onVisContextChanged, lensVisService]
+    [lensVisService]
   );
 
   const onSuggestionSelectorChange = useCallback(

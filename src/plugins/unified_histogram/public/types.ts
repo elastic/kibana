@@ -158,7 +158,7 @@ export enum UnifiedHistogramSuggestionType {
   localHistogramDefault = 'localHistogramDefault',
 }
 
-export interface CurrentSuggestionContext {
+export interface UnifiedHistogramSuggestionContext {
   suggestion: Suggestion | undefined;
   type: UnifiedHistogramSuggestionType;
   suggestionDeps:
@@ -173,7 +173,7 @@ export interface LensRequestData {
   breakdownField?: string;
 }
 
-export interface LensAttributesContext {
+export interface UnifiedHistogramLensAttributesContext {
   attributes: TypedLensByValueInput['attributes'];
   requestData: LensRequestData;
   suggestionType: UnifiedHistogramSuggestionType;
@@ -182,4 +182,4 @@ export interface LensAttributesContext {
 /**
  * Unified Histogram type for recreating a stored Lens vis
  */
-export type ExternalVisContext = LensAttributesContext;
+export type ExternalVisContext = UnifiedHistogramLensAttributesContext;

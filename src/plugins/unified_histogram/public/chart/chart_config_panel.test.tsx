@@ -16,7 +16,7 @@ import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { lensAdaptersMock } from '../__mocks__/lens_adapters';
 import { ChartConfigPanel } from './chart_config_panel';
-import type { LensAttributesContext } from '../types';
+import type { UnifiedHistogramLensAttributesContext } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 
 describe('ChartConfigPanel', () => {
@@ -32,7 +32,7 @@ describe('ChartConfigPanel', () => {
           dataView: dataViewWithTimefieldMock,
           lensAttributesContext: {
             attributes: lensAttributes,
-          } as unknown as LensAttributesContext,
+          } as unknown as UnifiedHistogramLensAttributesContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           isPlainRecord: true,
@@ -64,7 +64,7 @@ describe('ChartConfigPanel', () => {
           dataView: dataViewWithTimefieldMock,
           lensAttributesContext: {
             attributes: lensAttributes,
-          } as unknown as LensAttributesContext,
+          } as unknown as UnifiedHistogramLensAttributesContext,
           isFlyoutVisible: true,
           setIsFlyoutVisible: jest.fn(),
           isPlainRecord: false,

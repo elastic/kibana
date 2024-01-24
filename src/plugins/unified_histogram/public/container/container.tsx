@@ -20,7 +20,7 @@ import {
 } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
-import { topPanelHeightSelector, currentSuggestionContextSelector } from './utils/state_selectors';
+import { topPanelHeightSelector } from './utils/state_selectors';
 import { getStableVisContext } from '../utils/external_vis_context';
 
 type LayoutProps = Pick<
@@ -129,10 +129,6 @@ export const UnifiedHistogramContainer = forwardRef<
     });
   }, [input$, stateService]);
   const { dataView, query, searchSessionId, requestAdapter, isChartLoading } = containerProps;
-  const currentSuggestionContext = useStateSelector(
-    stateService?.state$,
-    currentSuggestionContextSelector
-  );
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
   const stateProps = useStateProps({
     stateService,
@@ -163,7 +159,6 @@ export const UnifiedHistogramContainer = forwardRef<
       {...containerProps}
       {...layoutProps}
       {...stateProps}
-      currentSuggestionContext={currentSuggestionContext}
       onVisContextChanged={handleVisContextChange}
       isChartLoading={Boolean(isChartLoading)}
       topPanelHeight={topPanelHeight}

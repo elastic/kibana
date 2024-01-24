@@ -15,8 +15,8 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import type {
   UnifiedHistogramServices,
   UnifiedHistogramChartLoadEvent,
-  LensAttributesContext,
-  CurrentSuggestionContext,
+  UnifiedHistogramLensAttributesContext,
+  UnifiedHistogramSuggestionContext,
 } from '../types';
 
 export function ChartConfigPanel({
@@ -32,15 +32,15 @@ export function ChartConfigPanel({
   onSuggestionContextChange,
 }: {
   services: UnifiedHistogramServices;
-  lensAttributesContext: LensAttributesContext;
+  lensAttributesContext: UnifiedHistogramLensAttributesContext;
   isFlyoutVisible: boolean;
   setIsFlyoutVisible: (flag: boolean) => void;
   lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
   lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
-  currentSuggestionContext: CurrentSuggestionContext;
+  currentSuggestionContext: UnifiedHistogramSuggestionContext;
   isPlainRecord?: boolean;
   query?: Query | AggregateQuery;
-  onSuggestionContextChange?: (suggestion: CurrentSuggestionContext | undefined) => void;
+  onSuggestionContextChange?: (suggestion: UnifiedHistogramSuggestionContext | undefined) => void;
 }) {
   const [editLensConfigPanel, setEditLensConfigPanel] = useState<JSX.Element | null>(null);
   const previousSuggestion = useRef<Suggestion | undefined>(undefined);

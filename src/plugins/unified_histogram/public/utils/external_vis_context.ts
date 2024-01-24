@@ -7,7 +7,7 @@
  */
 
 import type { Suggestion } from '@kbn/lens-plugin/public';
-import type { ExternalVisContext, LensAttributesContext } from '../types';
+import type { ExternalVisContext, UnifiedHistogramLensAttributesContext } from '../types';
 
 export const toExternalVisContextJSONString = (
   visContext: ExternalVisContext | undefined
@@ -63,7 +63,9 @@ export const isSuggestionAndVisContextCompatible = (
   );
 };
 
-export const getStableVisContext = (visContext: LensAttributesContext | undefined) => {
+export const getStableVisContext = (
+  visContext: UnifiedHistogramLensAttributesContext | undefined
+) => {
   // clearing out undefined values from the object
   return visContext ? JSON.parse(JSON.stringify(visContext)) : undefined;
 };

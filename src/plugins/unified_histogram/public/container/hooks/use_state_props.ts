@@ -158,13 +158,6 @@ export const useStateProps = ({
     [stateService]
   );
 
-  const onSuggestionContextChange = useCallback(
-    (suggestion) => {
-      stateService?.setCurrentSuggestionContext(suggestion);
-    },
-    [stateService]
-  );
-
   /**
    * Effects
    */
@@ -190,6 +183,5 @@ export const useStateProps = ({
     onChartHiddenChange,
     onChartLoad,
     onBreakdownFieldChange,
-    onSuggestionContextChange,
   };
 };

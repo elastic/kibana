@@ -28,7 +28,6 @@ import {
 } from '@kbn/resizable-layout';
 import { Chart, checkChartAvailability } from '../chart';
 import type {
-  CurrentSuggestionContext,
   ExternalVisContext,
   UnifiedHistogramBreakdownContext,
   UnifiedHistogramChartContext,
@@ -68,10 +67,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The current filters
    */
   filters?: Filter[];
-  /**
-   * The current Lens suggestion
-   */
-  currentSuggestionContext?: CurrentSuggestionContext;
   /**
    * The external custom Lens vis
    */
@@ -163,10 +158,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   /**
-   * Callback to update the suggested chart
-   */
-  onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
-  /**
    * Callback to notify about the change in Lens attributes
    */
   onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
@@ -199,7 +190,6 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query: originalQuery,
   filters: originalFilters,
-  currentSuggestionContext: originalSuggestionContext,
   externalVisContext,
   isChartLoading,
   isPlainRecord,
@@ -224,7 +214,6 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
-  onSuggestionContextChange,
   onVisContextChanged,
   onTotalHitsChange,
   onChartLoad,
@@ -247,7 +236,6 @@ export const UnifiedHistogramLayout = ({
 
   useEffect(() => {
     lensVisService.update({
-      suggestionContextSelectedPreviously: originalSuggestionContext,
       externalVisContext,
       queryParams: {
         dataView,
@@ -260,8 +248,7 @@ export const UnifiedHistogramLayout = ({
       chartTitle: originalChart?.title,
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
-      onSuggestionContextChange,
-      onVisContextChanged,
+      onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
     });
   }, [
     lensVisService,
@@ -269,14 +256,12 @@ export const UnifiedHistogramLayout = ({
     requestParams.query,
     requestParams.filters,
     originalTimeRange,
-    originalSuggestionContext,
     originalChart,
     isPlainRecord,
     columns,
     breakdown,
     externalVisContext,
     onVisContextChanged,
-    onSuggestionContextChange,
   ]);
 
   const chart =
@@ -341,8 +326,6 @@ export const UnifiedHistogramLayout = ({
           onChartHiddenChange={onChartHiddenChange}
           onTimeIntervalChange={onTimeIntervalChange}
           onBreakdownFieldChange={onBreakdownFieldChange}
-          onSuggestionContextChange={onSuggestionContextChange}
-          onVisContextChanged={onVisContextChanged}
           onTotalHitsChange={onTotalHitsChange}
           onChartLoad={onChartLoad}
           onFilter={onFilter}
