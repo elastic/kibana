@@ -5,10 +5,32 @@
  * 2.0.
  */
 import type { HttpFetchOptions } from '@kbn/core/public';
-import { lastValueFrom, Observable } from 'rxjs';
+import { filter, lastValueFrom, Observable } from 'rxjs';
 import { ReadableStream } from 'stream/web';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import {
+  ChatCompletionChunkEvent,
+  ChatCompletionError,
+  StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
+} from '../../common/conversation_complete';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { createChatService } from './create_chat_service';
+
+async function getConcatenatedMessage(
+  response$: Observable<StreamingChatResponseEventWithoutError>
+) {
+  return await lastValueFrom(
+    response$.pipe(
+      filter(
+        (event): event is ChatCompletionChunkEvent =>
+          event.type === StreamingChatResponseEventType.ChatCompletionChunk
+      ),
+      concatenateChatCompletionChunks()
+    )
+  );
+}
 
 describe('createChatService', () => {
   describe('chat', () => {
@@ -34,8 +56,8 @@ describe('createChatService', () => {
       clientSpy.mockResolvedValueOnce(response);
     }
 
-    function chat() {
-      return service.chat({ messages: [], connectorId: '' });
+    function chat({ signal }: { signal: AbortSignal } = { signal: new AbortController().signal }) {
+      return service.chat({ signal, messages: [], connectorId: '' });
     }
 
     beforeEach(async () => {
@@ -63,9 +85,9 @@ describe('createChatService', () => {
 
     it('correctly parses a stream of JSON lines', async () => {
       const chunk1 =
-        'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}';
+        '{"id":"my-id","type":"chatCompletionChunk","message":{"content":"My"}}\n{"id":"my-id","type":"chatCompletionChunk","message":{"content":" new"}}';
       const chunk2 =
-        '\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+        '\n{"id":"my-id","type":"chatCompletionChunk","message":{"content":" message"}}';
 
       respondWithChunks({ chunks: [chunk1, chunk2] });
 
@@ -76,11 +98,12 @@ describe('createChatService', () => {
       const subscription = response$.subscribe({
         next: (data) => results.push(data),
         complete: () => {
-          expect(results).toHaveLength(4);
+          expect(results).toHaveLength(3);
         },
       });
 
-      const value = await lastValueFrom(response$);
+      const value = await getConcatenatedMessage(response$);
+
       subscription.unsubscribe();
 
       expect(value).toEqual({
@@ -98,9 +121,9 @@ describe('createChatService', () => {
 
     it('correctly buffers partial lines', async () => {
       const chunk1 =
-        'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"';
+        '{"id":"my-id","type":"chatCompletionChunk","message":{"content":"My"}}\n{"id":"my-id","type":"chatCompletionChunk","message":{"content":" new"';
       const chunk2 =
-        '}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+        '}}\n{"id":"my-id","type":"chatCompletionChunk","message":{"content":" message"}}';
 
       respondWithChunks({ chunks: [chunk1, chunk2] });
 
@@ -118,9 +141,9 @@ describe('createChatService', () => {
         });
       });
 
-      const value = await lastValueFrom(response$);
+      const value = await getConcatenatedMessage(response$);
 
-      expect(results).toHaveLength(4);
+      expect(results).toHaveLength(3);
 
       expect(value).toEqual({
         message: {
@@ -140,114 +163,71 @@ describe('createChatService', () => {
 
       const response$ = chat();
 
-      const value = await lastValueFrom(response$);
-
-      expect(value).toEqual({
-        aborted: false,
-        error: expect.any(Error),
-        message: {
-          role: 'assistant',
-        },
-      });
+      await expect(async () => {
+        await getConcatenatedMessage(response$);
+      }).rejects.toBeDefined();
     });
 
     it('propagates JSON parsing errors', async () => {
-      respondWithChunks({ chunks: ['data: {}', 'data: invalid json'] });
+      respondWithChunks({ chunks: ['{}', 'invalid json'] });
 
       const response$ = chat();
 
-      const value = await lastValueFrom(response$);
-
-      expect(value).toEqual({
-        aborted: false,
-        error: expect.any(Error),
-        message: {
-          role: 'assistant',
-        },
-      });
+      await expect(async () => {
+        await getConcatenatedMessage(response$);
+      }).rejects.toBeDefined();
     });
 
     it('propagates content errors', async () => {
       respondWithChunks({
         chunks: [
-          `data: {"error":{"message":"The server had an error while processing your request. Sorry about that!","type":"server_error","param":null,"code":null}}`,
+          `{"type": "chatCompletionError", "error":{"message":"The server had an error while processing your request. Sorry about that!","type":"server_error","param":null,"code":null}}`,
         ],
       });
 
       const response$ = chat();
 
-      const value = await lastValueFrom(response$);
+      const matcher = await expect(async () => {
+        await getConcatenatedMessage(response$);
+      }).rejects;
 
-      expect(value).toEqual({
-        aborted: false,
-        error: expect.any(Error),
-        message: {
-          role: 'assistant',
-        },
-      });
+      matcher.toEqual(expect.any(ChatCompletionError));
+
+      matcher.toHaveProperty(
+        'message',
+        'The server had an error while processing your request. Sorry about that!'
+      );
     });
 
     it('cancels a running http request when aborted', async () => {
-      clientSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
-        options.signal?.addEventListener('abort', () => {
-          expect(options.signal?.aborted).toBeTruthy();
-        });
-        return Promise.resolve({
-          response: {
-            status: 200,
-            body: new ReadableStream({
-              start(controller) {},
-            }),
-          },
-        });
-      });
+      await expect(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            clientSpy.mockImplementationOnce((endpoint: string, options: HttpFetchOptions) => {
+              return Promise.resolve({
+                response: {
+                  status: 200,
+                  body: new ReadableStream({
+                    start(controller) {},
+                  }),
+                },
+              });
+            });
 
-      const response$ = chat();
+            const controller = new AbortController();
 
-      await new Promise<void>((resolve, reject) => {
-        const subscription = response$.subscribe({});
+            chat({
+              signal: controller.signal,
+            }).subscribe({
+              complete: resolve,
+              error: reject,
+            });
 
-        setTimeout(() => {
-          subscription.unsubscribe();
-          resolve();
-        }, 100);
-      });
-
-      const value = await lastValueFrom(response$);
-
-      expect(value).toEqual({
-        message: {
-          role: 'assistant',
-        },
-        aborted: true,
-      });
-    });
-
-    it('propagates an error if finish_reason == length', async () => {
-      respondWithChunks({
-        chunks: [
-          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":"roaming"},"finish_reason":null}]}\n',
-          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{"content":" deer"},"finish_reason":null}]}\n',
-          'data: {"id":"chatcmpl-7mna2SFmEAqdCTX5arxueoErLjmt1","object":"chat.completion.chunk","created":1691864686,"model":"gpt-4-0613","choices":[{"index":0,"delta":{},"finish_reason":"length"}]}\n',
-        ],
-      });
-      const response$ = chat();
-
-      const value = await lastValueFrom(response$);
-
-      expect(value).toEqual({
-        aborted: false,
-        error: expect.any(Error),
-        message: {
-          role: 'assistant',
-          content: 'roaming deer',
-          function_call: {
-            name: '',
-            arguments: '',
-            trigger: 'assistant',
-          },
-        },
-      });
+            setTimeout(() => {
+              controller.abort();
+            }, 0);
+          })
+      ).rejects.toEqual(expect.any(AbortError));
     });
   });
 });
