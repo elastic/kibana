@@ -493,16 +493,12 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext) {
-  if (!ctx.BY()) {
+export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+  if (!ctx.BY() || !expr) {
     return [];
   }
   const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
-  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    if (qnCtx?.text?.length) {
-      option.args.push(createColumn(qnCtx));
-    }
-  }
+  option.args.push(...collectAllFieldsStatements(expr));
   return [option];
 }
 
