@@ -8,22 +8,17 @@
 import { useConversation } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { alertConvo, welcomeConvo } from '../../mock/conversation';
+import { welcomeConvo } from '../../mock/conversation';
 import React from 'react';
 import { ConversationRole } from '../../assistant_context/types';
-
-/* import {
-  updateConversationApi as _updateConversationApi,
-  getConversationById as _getConversationById,
-  appendConversationMessagesApi as _appendConversationMessagesApi,
+import {
+  appendConversationMessagesApi,
+  deleteConversationApi,
+  getConversationById,
+  updateConversationApi,
 } from '../api/conversations';
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
-
-const updateConversationApiMock = _updateConversationApi as jest.Mock;
-const getConversationByIdMock = _getConversationById as jest.Mock;
-const useMutationMock = _useMutation as jest.Mock;
-*/
 jest.mock('../api/conversations', () => {
   const actual = jest.requireActual('../api/conversations');
   return {
@@ -37,6 +32,11 @@ jest.mock('../api/conversations', () => {
     getConversationById: jest.fn((...args) => actual.getConversationById(...args)),
   };
 });
+
+const updateConversationApiMock = updateConversationApi as jest.Mock;
+const getConversationByIdMock = getConversationById as jest.Mock;
+const deleteConversationApiMock = deleteConversationApi as jest.Mock;
+const appendConversationMessagesApiMock = appendConversationMessagesApi as jest.Mock;
 
 const message = {
   content: 'You are a robot',
@@ -57,7 +57,11 @@ const mockConvo = {
 };
 
 describe('useConversation', () => {
+  let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
+
   beforeEach(() => {
+    httpMock = httpServiceMock.createSetupContract({ basePath: '/test' });
+
     jest.clearAllMocks();
   });
   it('should append a message to an existing conversation when called with valid conversationId and message', async () => {
@@ -134,15 +138,17 @@ describe('useConversation', () => {
       });
       await waitForNextUpdate();
 
-      const deleteResult = await result.current.deleteConversation('new-convo');
+      await result.current.deleteConversation('new-convo');
 
-      expect(deleteResult).toEqual(mockConvo);
+      expect(deleteConversationApiMock).toHaveBeenCalledWith({
+        http: httpMock,
+        id: 'new-convo',
+      });
     });
   });
 
   it('should update the apiConfig for an existing conversation when called with a valid conversationId and apiConfig', async () => {
     await act(async () => {
-      const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
@@ -154,8 +160,10 @@ describe('useConversation', () => {
         title: welcomeConvo.title,
       });
 
-      expect(setConversations).toHaveBeenCalledWith({
-        [welcomeConvo.id]: { ...welcomeConvo, apiConfig: mockConvo.apiConfig },
+      expect(updateConversationApiMock).toHaveBeenCalledWith({
+        http: httpMock,
+        conversationId: welcomeConvo.id,
+        apiConfig: mockConvo.apiConfig,
       });
     });
   });
@@ -167,6 +175,8 @@ describe('useConversation', () => {
       });
       await waitForNextUpdate();
 
+      getConversationByIdMock.mockResolvedValue(mockConvo);
+
       await result.current.appendReplacements({
         conversationId: welcomeConvo.id,
         replacements: {
@@ -177,14 +187,12 @@ describe('useConversation', () => {
       });
 
       expect(updateConversationApiMock).toHaveBeenCalledWith({
-        [alertConvo.id]: alertConvo,
-        [welcomeConvo.id]: {
-          ...welcomeConvo,
-          replacements: {
-            '1.0.0.721': '127.0.0.1',
-            '1.0.0.01': '10.0.0.1',
-            'tsoh-tset': 'test-host',
-          },
+        http: httpMock,
+        conversationId: welcomeConvo.id,
+        replacements: {
+          '1.0.0.721': '127.0.0.1',
+          '1.0.0.01': '10.0.0.1',
+          'tsoh-tset': 'test-host',
         },
       });
     });
@@ -192,26 +200,21 @@ describe('useConversation', () => {
 
   it('should remove the last message from a conversation when called with valid conversationId', async () => {
     await act(async () => {
-      const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
       await waitForNextUpdate();
 
+      getConversationByIdMock.mockResolvedValue(mockConvo);
+
       const removeResult = await result.current.removeLastMessage('new-convo');
 
       expect(removeResult).toEqual([message]);
-      expect(setConversations).toHaveBeenCalledWith({
-        [alertConvo.id]: alertConvo,
-        [welcomeConvo.id]: welcomeConvo,
-        [mockConvo.id]: { ...mockConvo, messages: [message] },
-      });
     });
   });
 
   it('amendMessage updates the last message of conversation[] for a given conversationId with provided content', async () => {
     await act(async () => {
-      const setConversations = jest.fn();
       const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
       });
@@ -222,19 +225,15 @@ describe('useConversation', () => {
         content: 'hello world',
       });
 
-      expect(setConversations).toHaveBeenCalledWith({
-        [alertConvo.id]: alertConvo,
-        [welcomeConvo.id]: welcomeConvo,
-        [mockConvo.id]: {
-          ...mockConvo,
-          messages: [
-            message,
-            {
-              ...anotherMessage,
-              content: 'hello world',
-            },
-          ],
-        },
+      expect(appendConversationMessagesApiMock).toHaveBeenCalledWith({
+        http: httpMock,
+        conversationId: mockConvo.id,
+        messages: [
+          {
+            ...anotherMessage,
+            content: 'hello world',
+          },
+        ],
       });
     });
   });

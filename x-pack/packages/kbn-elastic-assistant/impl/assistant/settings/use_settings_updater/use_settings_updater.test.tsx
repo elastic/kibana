@@ -146,7 +146,7 @@ describe('useSettingsUpdater', () => {
       setUpdatedDefaultAllowReplacement(updatedValues.defaultAllowReplacement);
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
-      result.current.saveSettings();
+      await result.current.saveSettings();
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/api/elastic_assistant/conversations/_bulk_action',
@@ -173,7 +173,7 @@ describe('useSettingsUpdater', () => {
 
       setUpdatedKnowledgeBaseSettings(updatedValues.knowledgeBase);
 
-      result.current.saveSettings();
+      await result.current.saveSettings();
       expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
         isEnabledKnowledgeBase: false,
         isEnabledRAGAlerts: false,
@@ -190,7 +190,7 @@ describe('useSettingsUpdater', () => {
         ...updatedValues.knowledgeBase,
         isEnabledKnowledgeBase: true,
       });
-      result.current.saveSettings();
+      await result.current.saveSettings();
       expect(reportAssistantSettingToggled).toHaveBeenCalledWith({
         isEnabledRAGAlerts: false,
       });
@@ -203,7 +203,7 @@ describe('useSettingsUpdater', () => {
       const { setUpdatedKnowledgeBaseSettings } = result.current;
 
       setUpdatedKnowledgeBaseSettings(mockValues.knowledgeBase);
-      result.current.saveSettings();
+      await result.current.saveSettings();
       expect(reportAssistantSettingToggled).not.toHaveBeenCalledWith();
     });
   });

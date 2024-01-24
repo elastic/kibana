@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
@@ -21,10 +20,27 @@ export interface FetchConversationsResponse {
   data: Conversation[];
 }
 
-export const useFetchCurrentUserConversations = (
-  onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>
-) => {
-  const { http } = useKibana<CoreStart>().services;
+export interface UseFetchCurrentUserConversationsParams {
+  http: HttpSetup;
+  onFetch: (result: FetchConversationsResponse) => Record<string, Conversation>;
+  signal?: AbortSignal | undefined;
+}
+
+/**
+ * API call for fetching assistant conversations for the current user
+ *
+ * @param {Object} options - The options object.
+ * @param {HttpSetup} options.http - HttpSetup
+ * @param {Function} [options.onFetch] - transformation function for conversations fetch result
+ * @param {AbortSignal} [options.signal] - AbortSignal
+ *
+ * @returns {useQuery} hook for getting the status of the conversations
+ */
+export const useFetchCurrentUserConversations = ({
+  http,
+  onFetch,
+  signal,
+}: UseFetchCurrentUserConversationsParams) => {
   const query = {
     page: 1,
     perPage: 100,
@@ -36,17 +52,17 @@ export const useFetchCurrentUserConversations = (
     query.perPage,
     ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ];
-  const querySt = useQuery([cachingKeys, query], async () => {
+
+  return useQuery([cachingKeys, query], async () => {
     const res = await http.fetch<FetchConversationsResponse>(
       ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
       {
         method: 'GET',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         query,
+        signal,
       }
     );
     return onFetch(res);
   });
-
-  return querySt;
 };
