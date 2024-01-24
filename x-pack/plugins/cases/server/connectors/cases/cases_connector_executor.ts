@@ -16,7 +16,7 @@ import { MAX_ALERTS_PER_CASE } from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import { MAX_CONCURRENT_ES_REQUEST } from './constants';
+import { MAX_CONCURRENT_ES_REQUEST, MAX_OPEN_CASES } from './constants';
 import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
 import type { CasesOracleService } from './cases_oracle_service';
 import { partitionByNonFoundErrors, partitionRecordsByError } from './utils';
@@ -64,12 +64,16 @@ export class CasesConnectorExecutor {
     const { alerts, groupingBy } = params;
 
     const groupedAlerts = this.groupAlerts({ alerts, groupingBy });
+    const groupedAlertsWithCircuitBreakers = this.applyCircuitBreakers(params, groupedAlerts);
 
     /**
      * Based on the rule ID, the grouping, the owner, the space ID,
      * the oracle record ID is generated
      */
-    const groupedAlertsWithOracleKey = this.generateOracleKeys(params, groupedAlerts);
+    const groupedAlertsWithOracleKey = this.generateOracleKeys(
+      params,
+      groupedAlertsWithCircuitBreakers
+    );
 
     /**
      * TODO: Add circuit breakers to the number of oracles they can be created or retrieved
@@ -174,6 +178,29 @@ export class CasesConnectorExecutor {
     }
 
     return Array.from(groupingMap.values());
+  }
+
+  private applyCircuitBreakers(
+    params: CasesConnectorRunParams,
+    groupedAlerts: GroupedAlerts[]
+  ): GroupedAlerts[] {
+    if (groupedAlerts.length > params.maximumCasesToOpen || groupedAlerts.length > MAX_OPEN_CASES) {
+      const maxCasesCircuitBreaker = Math.min(params.maximumCasesToOpen, MAX_OPEN_CASES);
+
+      this.logger.warn(
+        `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases ${maxCasesCircuitBreaker}. Falling back to one case.`
+      );
+
+      return this.removeGrouping(groupedAlerts);
+    }
+
+    return groupedAlerts;
+  }
+
+  private removeGrouping(groupedAlerts: GroupedAlerts[]): GroupedAlerts[] {
+    const allAlerts = groupedAlerts.map(({ alerts }) => alerts).flat();
+
+    return [{ alerts: allAlerts, grouping: {} }];
   }
 
   private generateOracleKeys(

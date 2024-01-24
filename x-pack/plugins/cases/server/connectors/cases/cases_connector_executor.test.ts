@@ -33,6 +33,8 @@ import {
 } from './test_helpers';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
+import type { CasesConnectorRunParams } from './types';
+import { MAX_OPEN_CASES } from './constants';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -60,6 +62,16 @@ describe('CasesConnectorExecutor', () => {
   const resetCounters = () => {
     oracleIdCounter = 0;
     caseIdCounter = 0;
+  };
+
+  const params: CasesConnectorRunParams = {
+    alerts,
+    groupingBy,
+    owner,
+    rule,
+    timeWindow,
+    reopenClosedCases,
+    maximumCasesToOpen: 5,
   };
 
   beforeEach(() => {
@@ -164,14 +176,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         it('attach the alerts correctly when the rule runs for the first time', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkGetRecords).toHaveBeenCalledTimes(1);
           expect(mockBulkGetRecords).toHaveBeenCalledWith([
@@ -277,12 +282,8 @@ describe('CasesConnectorExecutor', () => {
       describe('Oracle records', () => {
         it('generates the oracle keys correctly with grouping by one field', async () => {
           await connectorExecutor.execute({
-            alerts,
+            ...params,
             groupingBy: ['host.name'],
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
           });
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(2);
@@ -303,14 +304,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         it('generates the oracle keys correct with grouping by multiple fields', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockGetRecordId).toHaveBeenCalledTimes(3);
 
@@ -325,14 +319,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         it('gets the oracle records correctly', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkGetRecords).toHaveBeenCalledWith([
             groupedAlertsWithOracleKey[0].oracleKey,
@@ -342,14 +329,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         it('created the non found oracle records correctly', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkCreateRecords).toHaveBeenCalledWith([
             {
@@ -366,14 +346,7 @@ describe('CasesConnectorExecutor', () => {
         it('does not create oracle records if there are no 404 errors', async () => {
           mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkCreateRecords).not.toHaveBeenCalled();
         });
@@ -384,14 +357,7 @@ describe('CasesConnectorExecutor', () => {
 
           mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           // 1. Get all records
           expect(mockBulkGetRecords).toHaveBeenCalledWith([
@@ -422,28 +388,14 @@ describe('CasesConnectorExecutor', () => {
       describe('Time window', () => {
         it('does not increase the counter if the time window has not passed', async () => {
           mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkUpdateRecord).not.toHaveBeenCalled();
         });
 
         it('updates the counter correctly if the time window has passed', async () => {
           dateMathMock.parse.mockImplementation(() => moment('2023-11-10T10:23:42.769Z'));
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
             { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
@@ -454,14 +406,7 @@ describe('CasesConnectorExecutor', () => {
 
       describe('Cases', () => {
         it('generates the case ids correctly', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockGetCaseId).toHaveBeenCalledTimes(3);
 
@@ -481,14 +426,7 @@ describe('CasesConnectorExecutor', () => {
 
           mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(mockGetCaseId).toBeCalledTimes(3);
 
@@ -530,14 +468,7 @@ describe('CasesConnectorExecutor', () => {
         });
 
         it('gets the cases correctly', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
             ids: ['mock-id-1', 'mock-id-2', 'mock-id-3'],
@@ -558,14 +489,7 @@ describe('CasesConnectorExecutor', () => {
             ],
           });
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledWith({
             cases: [
@@ -597,11 +521,7 @@ describe('CasesConnectorExecutor', () => {
           });
 
           await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
+            ...params,
             reopenClosedCases: false,
           });
 
@@ -615,11 +535,7 @@ describe('CasesConnectorExecutor', () => {
           });
 
           await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
+            ...params,
             reopenClosedCases: true,
           });
 
@@ -637,11 +553,7 @@ describe('CasesConnectorExecutor', () => {
           mockBulkUpdateRecord.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
 
           await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
+            ...params,
             reopenClosedCases: false,
           });
 
@@ -675,14 +587,7 @@ describe('CasesConnectorExecutor', () => {
 
       describe('Alerts', () => {
         it('attach the alerts to the correct cases correctly', async () => {
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
         });
@@ -698,11 +603,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
+            ...params,
             reopenClosedCases: true,
           });
 
@@ -746,11 +647,7 @@ describe('CasesConnectorExecutor', () => {
           });
 
           await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
+            ...params,
             reopenClosedCases: false,
           });
 
@@ -788,14 +685,7 @@ describe('CasesConnectorExecutor', () => {
             errors: [],
           });
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
         });
@@ -811,14 +701,7 @@ describe('CasesConnectorExecutor', () => {
             errors: [],
           });
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
         });
@@ -834,14 +717,7 @@ describe('CasesConnectorExecutor', () => {
             errors: [],
           });
 
-          await connectorExecutor.execute({
-            alerts,
-            groupingBy,
-            owner,
-            rule,
-            timeWindow,
-            reopenClosedCases,
-          });
+          await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
         });
@@ -867,14 +743,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
             `"Conflict: getting records: mockBulkGetRecords error"`
           );
@@ -901,14 +770,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
             `"Bad request: creating records: mockBulkCreateRecords error"`
           );
@@ -937,14 +799,7 @@ describe('CasesConnectorExecutor', () => {
           ]);
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
             `"Bad request: timeWindow: bulkUpdateRecord error"`
           );
@@ -972,14 +827,7 @@ describe('CasesConnectorExecutor', () => {
           });
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden: getting cases: bulkGet error"`);
 
           expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
@@ -1003,14 +851,7 @@ describe('CasesConnectorExecutor', () => {
           );
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(
             `"creating non found cases: bulkCreate error"`
           );
@@ -1030,11 +871,7 @@ describe('CasesConnectorExecutor', () => {
 
           await expect(() =>
             connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
+              ...params,
               reopenClosedCases: true,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1069,11 +906,7 @@ describe('CasesConnectorExecutor', () => {
 
           await expect(() =>
             connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
+              ...params,
               reopenClosedCases: false,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1097,11 +930,7 @@ describe('CasesConnectorExecutor', () => {
 
           await expect(() =>
             connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
+              ...params,
               reopenClosedCases: false,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1117,14 +946,7 @@ describe('CasesConnectorExecutor', () => {
           );
 
           await expect(() =>
-            connectorExecutor.execute({
-              alerts,
-              groupingBy,
-              owner,
-              rule,
-              timeWindow,
-              reopenClosedCases,
-            })
+            connectorExecutor.execute(params)
           ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
         });
       });
@@ -1173,14 +995,7 @@ describe('CasesConnectorExecutor', () => {
 
     describe('Oracle records', () => {
       it('generates the oracle keys correctly with no grouping', async () => {
-        await connectorExecutor.execute({
-          alerts,
-          groupingBy: [],
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        });
+        await connectorExecutor.execute({ ...params, groupingBy: [] });
 
         expect(mockGetRecordId).toHaveBeenCalledTimes(1);
 
@@ -1193,14 +1008,7 @@ describe('CasesConnectorExecutor', () => {
       });
 
       it('gets the oracle records correctly', async () => {
-        await connectorExecutor.execute({
-          alerts,
-          groupingBy: [],
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        });
+        await connectorExecutor.execute({ ...params, groupingBy: [] });
 
         expect(mockBulkGetRecords).toHaveBeenCalledWith(['so-oracle-record-0']);
       });
@@ -1208,14 +1016,7 @@ describe('CasesConnectorExecutor', () => {
 
     describe('Cases', () => {
       it('generates the case ids correctly', async () => {
-        await connectorExecutor.execute({
-          alerts,
-          groupingBy: [],
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        });
+        await connectorExecutor.execute({ ...params, groupingBy: [] });
 
         expect(mockGetCaseId).toHaveBeenCalledTimes(1);
 
@@ -1229,14 +1030,7 @@ describe('CasesConnectorExecutor', () => {
       });
 
       it('gets the cases correctly', async () => {
-        await connectorExecutor.execute({
-          alerts,
-          groupingBy: [],
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        });
+        await connectorExecutor.execute({ ...params, groupingBy: [] });
 
         expect(casesClientMock.cases.bulkGet).toHaveBeenCalledWith({
           ids: ['mock-id-1'],
@@ -1246,14 +1040,7 @@ describe('CasesConnectorExecutor', () => {
 
     describe('Alerts', () => {
       it('attach all alerts to the same case when the grouping is not defined', async () => {
-        await connectorExecutor.execute({
-          alerts,
-          groupingBy: [],
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        });
+        await connectorExecutor.execute({ ...params, groupingBy: [] });
 
         expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
 
@@ -1289,14 +1076,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce(oracleRecords);
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Conflict: getting records: mockBulkGetRecords error"`
       );
@@ -1304,14 +1084,7 @@ describe('CasesConnectorExecutor', () => {
       resetCounters();
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
@@ -1330,14 +1103,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([createdOracleRecord]);
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Conflict: creating records: bulkCreateRecord error"`
       );
@@ -1345,14 +1111,7 @@ describe('CasesConnectorExecutor', () => {
       resetCounters();
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       expectCasesToHaveTheCorrectAlertsAttachedWithGrouping(casesClientMock);
     });
@@ -1374,14 +1133,7 @@ describe('CasesConnectorExecutor', () => {
       ]);
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Conflict: creating records: bulkCreateRecord error"`
       );
@@ -1389,14 +1141,7 @@ describe('CasesConnectorExecutor', () => {
       resetCounters();
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       // called only once when the conflict occurs
       expect(mockBulkCreateRecords).toHaveBeenCalledTimes(1);
@@ -1419,14 +1164,7 @@ describe('CasesConnectorExecutor', () => {
         .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }]);
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Conflict: updating records: mockBulkUpdateRecord error"`
       );
@@ -1455,14 +1193,7 @@ describe('CasesConnectorExecutor', () => {
       });
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       expectCasesToHaveTheCorrectAlertsAttachedWithGroupingAndIncreasedCounter(casesClientMock);
     });
@@ -1499,14 +1230,7 @@ describe('CasesConnectorExecutor', () => {
       ]);
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Conflict: updating records: mockBulkUpdateRecord error"`
       );
@@ -1532,14 +1256,7 @@ describe('CasesConnectorExecutor', () => {
       });
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       expect(mockGetCaseId).toHaveBeenCalledTimes(2);
       // case ID is constructed with the new counter and the correct grouping
@@ -1634,27 +1351,13 @@ describe('CasesConnectorExecutor', () => {
       );
 
       await expect(() =>
-        connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
-          reopenClosedCases,
-        })
+        connectorExecutor.execute(params)
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"creating non found cases: bulkCreate error"`);
 
       resetCounters();
 
       // retry
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       // called only once when the conflict occurs
       expect(casesClientMock.cases.bulkCreate).toHaveBeenCalledTimes(1);
@@ -1681,11 +1384,7 @@ describe('CasesConnectorExecutor', () => {
 
       await expect(() =>
         connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
+          ...params,
           reopenClosedCases: true,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"reopening closed cases: bulkUpdate error"`);
@@ -1694,11 +1393,7 @@ describe('CasesConnectorExecutor', () => {
 
       // retry
       await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
+        ...params,
         reopenClosedCases: true,
       });
 
@@ -1777,11 +1472,7 @@ describe('CasesConnectorExecutor', () => {
 
       await expect(() =>
         connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
+          ...params,
           reopenClosedCases: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1794,11 +1485,7 @@ describe('CasesConnectorExecutor', () => {
 
       // retry
       await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
+        ...params,
         reopenClosedCases: false,
       });
 
@@ -1871,11 +1558,7 @@ describe('CasesConnectorExecutor', () => {
 
       await expect(() =>
         connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
+          ...params,
           reopenClosedCases: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
@@ -1888,11 +1571,7 @@ describe('CasesConnectorExecutor', () => {
 
       // retry
       await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
+        ...params,
         reopenClosedCases: false,
       });
 
@@ -1949,11 +1628,7 @@ describe('CasesConnectorExecutor', () => {
 
       await expect(() =>
         connectorExecutor.execute({
-          alerts,
-          groupingBy,
-          owner,
-          rule,
-          timeWindow,
+          ...params,
           reopenClosedCases: false,
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"attaching alerts: bulkCreate error"`);
@@ -1962,11 +1637,7 @@ describe('CasesConnectorExecutor', () => {
 
       // retry
       await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
+        ...params,
         reopenClosedCases: false,
       });
 
@@ -2095,12 +1766,8 @@ describe('CasesConnectorExecutor', () => {
       dateMathMock.parse.mockImplementation(() => undefined);
 
       await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
+        ...params,
         timeWindow: 'invalid',
-        reopenClosedCases,
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -2111,18 +1778,180 @@ describe('CasesConnectorExecutor', () => {
     it('logs a warning when the last updated date of the oracle record is not valid', async () => {
       mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], updatedAt: 'invalid' }]);
 
-      await connectorExecutor.execute({
-        alerts,
-        groupingBy,
-        owner,
-        rule,
-        timeWindow,
-        reopenClosedCases,
-      });
+      await connectorExecutor.execute(params);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
         '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
       );
+    });
+  });
+
+  describe('Circuit breakers', () => {
+    describe('user defined', () => {
+      it('generates the oracle keys correctly when the total cases to be open is more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockGetRecordId).toHaveBeenCalledTimes(1);
+        expect(mockGetRecordId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+        });
+      });
+
+      it('generates the case ids correctly when the total cases to be open is more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockGetCaseId).toHaveBeenCalledTimes(1);
+        expect(mockGetCaseId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+          counter: 1,
+        });
+      });
+
+      it('attach all alerts to the same case when the grouping generates more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          caseId: 'mock-id-1',
+          attachments: [
+            {
+              type: 'alert',
+              alertId: 'alert-id-0',
+              index: 'alert-index-0',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-2',
+              index: 'alert-index-2',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-1',
+              index: 'alert-index-1',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-3',
+              index: 'alert-index-3',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+          ],
+        });
+      });
+
+      it('logs correctly', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`
+        );
+      });
+    });
+
+    describe('hard limits', () => {
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
+        _id: `alert-id-${index}`,
+        _index: `alert-index-${index}`,
+        'host.name': `host-${index}`,
+      }));
+
+      it('generates the oracle keys correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockGetRecordId).toHaveBeenCalledTimes(1);
+        expect(mockGetRecordId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+        });
+      });
+
+      it('generates the case ids correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockGetCaseId).toHaveBeenCalledTimes(1);
+        expect(mockGetCaseId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+          counter: 1,
+        });
+      });
+
+      it('attach all alerts to the same case when the grouping generates more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          caseId: 'mock-id-1',
+          attachments: allAlerts.map((alert) => ({
+            alertId: alert._id,
+            index: alert._index,
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+            type: 'alert',
+          })),
+        });
+      });
+
+      it('logs correctly', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`
+        );
+      });
     });
   });
 });
