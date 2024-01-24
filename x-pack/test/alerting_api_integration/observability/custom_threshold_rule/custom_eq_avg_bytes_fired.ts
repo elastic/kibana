@@ -4,15 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
 
 import moment from 'moment';
-import { cleanup, generate } from '@kbn/infra-forge';
+import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
   Comparator,
@@ -41,17 +35,27 @@ export default function ({ getService }: FtrProviderContext) {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     // DATE_VIEW should match the index template:
-    // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
-    let infraDataIndex: string;
+    let dataForgeConfig: PartialConfig;
+    let dataForgeIndices: string[];
     let actionId: string;
     let ruleId: string;
     let alertId: string;
     let startedAt: string;
 
     before(async () => {
-      infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
+      dataForgeConfig = {
+        schedule: [{ template: 'good', start: 'now-15m', end: 'now+5m' }],
+        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 60000 },
+      };
+      dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      await waitForDocumentInIndex({
+        esClient,
+        indexName: dataForgeIndices.join(','),
+        docCountTarget: 60,
+      });
+
       await createDataView({
         supertest,
         name: DATE_VIEW,
@@ -75,8 +79,8 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         id: DATA_VIEW_ID,
       });
-      await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
-      await cleanup({ esClient, logger });
+      await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
+      await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
     describe('Rule creation', () => {

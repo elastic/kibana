@@ -19,13 +19,13 @@ import { TestProviders } from '../../../../common/mock';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useGetEndpointDetails } from '../../../../management/hooks';
 import { useSentinelOneAgentData } from '../../../../detections/components/host_isolation/use_sentinelone_host_isolation';
-import { useExpandableFlyoutContext, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, type ExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../management/hooks');
 jest.mock('../../../../detections/components/host_isolation/use_sentinelone_host_isolation');
 
 jest.mock('@kbn/expandable-flyout', () => ({
-  useExpandableFlyoutContext: jest.fn(),
+  useExpandableFlyoutApi: jest.fn(),
   ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
 }));
 
@@ -48,7 +48,7 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
 
 describe('<HighlightedFieldsCell />', () => {
   beforeAll(() => {
-    jest.mocked(useExpandableFlyoutContext).mockReturnValue(flyoutContextValue);
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue(flyoutContextValue);
   });
 
   it('should render a basic cell', () => {
