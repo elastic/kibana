@@ -13,8 +13,13 @@ import { AlertingRequestHandlerContext, BASE_ALERTING_API_PATH } from '../types'
 
 const paramSchema = schema.object({
   id: schema.string(),
-  untrack: schema.maybe(schema.boolean({ defaultValue: true })),
 });
+
+const bodySchema = schema.maybe(
+  schema.object({
+    untrack: schema.maybe(schema.boolean({ defaultValue: true })),
+  })
+);
 
 export const disableRuleRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -25,12 +30,14 @@ export const disableRuleRoute = (
       path: `${BASE_ALERTING_API_PATH}/rule/{id}/_disable`,
       validate: {
         params: paramSchema,
+        body: bodySchema,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const { id, untrack = true } = req.params;
+        const { id } = req.params;
+        const { untrack = true } = req.body || {};
         try {
           await rulesClient.disable({ id, untrack });
           return res.noContent();

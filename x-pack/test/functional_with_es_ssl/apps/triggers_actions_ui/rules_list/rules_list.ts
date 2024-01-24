@@ -17,19 +17,28 @@ import {
 } from '../../../lib/alert_api_actions';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
+import { getTestAlertData } from '../../../lib/get_test_data';
 
-export default ({ getPageObjects, getService }: FtrProviderContext) => {
+export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
   const pageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const supertest = getService('supertest');
   const retry = getService('retry');
+  const header = getPageObject('header');
   const objectRemover = new ObjectRemover(supertest);
 
   async function refreshAlertsList() {
     await testSubjects.click('logsTab');
     await testSubjects.click('rulesTab');
   }
+
+  const getAlertSummary = async (ruleId: string) => {
+    const { body: summary } = await supertest
+      .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_alert_summary`)
+      .expect(200);
+    return summary;
+  };
 
   describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
@@ -177,6 +186,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.click('confirmModalConfirmButton');
+
       await refreshAlertsList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
@@ -185,6 +196,84 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         'statusDropdown',
         'disabled'
       );
+    });
+
+    it('should untrack disable rule if untrack switch is true', async () => {
+      const { body: createdRule } = await supertest
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.always-firing',
+            schedule: { interval: '24h' },
+            params: {
+              instances: [{ id: 'alert-id' }],
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(createdRule.id, 'alert', 'alerts');
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(Object.keys(alertInstances).length).to.eql(1);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('disableButton');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+      expect(alertInstances['alert-id'].tracked).to.eql(false);
+    });
+
+    it('should not untrack disable rule if untrack switch if false', async () => {
+      const { body: createdRule } = await supertest
+        .post(`/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestAlertData({
+            rule_type_id: 'test.always-firing',
+            schedule: { interval: '24h' },
+            params: {
+              instances: [{ id: 'alert-id' }],
+            },
+          })
+        )
+        .expect(200);
+
+      objectRemover.add(createdRule.id, 'alert', 'alerts');
+
+      await retry.try(async () => {
+        const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+        expect(Object.keys(alertInstances).length).to.eql(1);
+        expect(alertInstances['alert-id'].tracked).to.eql(true);
+      });
+
+      await refreshAlertsList();
+      await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
+
+      await testSubjects.click('collapsedItemActions');
+
+      await testSubjects.click('disableButton');
+
+      await testSubjects.click('untrackAlertsModalSwitch');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
+      expect(alertInstances['alert-id'].tracked).to.eql(true);
     });
 
     it('should re-enable single alert', async () => {
