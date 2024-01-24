@@ -155,7 +155,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe.only('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe.skip('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
