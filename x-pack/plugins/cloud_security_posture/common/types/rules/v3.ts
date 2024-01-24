@@ -8,7 +8,7 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../constants';
 
-const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
+export const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 // Since version 8.7.0
 export const cspBenchmarkRuleMetadataSchema = schema.object({

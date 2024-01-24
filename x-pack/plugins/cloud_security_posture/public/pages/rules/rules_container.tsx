@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
+import compareVersions from 'compare-versions';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
@@ -146,7 +147,7 @@ export const RulesContainer = () => {
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
     () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),

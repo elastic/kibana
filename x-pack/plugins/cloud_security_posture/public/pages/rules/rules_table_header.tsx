@@ -144,7 +144,7 @@ export const RulesTableHeader = ({
                   defaultMessage: 'CIS Section',
                 }
               )}
-              id={'section'}
+              id={'cis-section-multi-select-filter'}
               onChange={(section) => {
                 setSelectedSection([...section?.selectedOptionKeys]);
                 onSectionChange(
@@ -167,7 +167,7 @@ export const RulesTableHeader = ({
                   defaultMessage: 'Rule Number',
                 }
               )}
-              id={'rule-number'}
+              id={'rule-number-multi-select-filter'}
               onChange={(ruleNumber) => {
                 setSelectedRuleNumber([...ruleNumber?.selectedOptionKeys]);
                 onRuleNumberChange(

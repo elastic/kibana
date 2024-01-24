@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+/* This code is based on MultiSelectFilter component from x-pack/plugins/cases/public/components/all_cases/multi_select_filter.tsx */
 import React, { useState, useEffect } from 'react';
 import { css } from '@emotion/react';
 import type { EuiSelectableOption } from '@elastic/eui';

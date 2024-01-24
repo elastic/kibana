@@ -7,6 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { BenchmarksCisId } from '../latest';
+import { DEFAULT_BENCHMARK_RULES_PER_PAGE } from './v3';
 export type {
   cspBenchmarkRuleMetadataSchema,
   CspBenchmarkRuleMetadata,
@@ -14,8 +15,6 @@ export type {
   CspBenchmarkRule,
   FindCspBenchmarkRuleResponse,
 } from './v3';
-
-const DEFAULT_BENCHMARK_RULES_PER_PAGE = 25;
 
 export const findCspBenchmarkRuleRequestSchema = schema.object({
   /**
