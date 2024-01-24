@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Boom from '@hapi/boom';
 import {
   GetServicesRequestQueryRT,
   GetServicesRequestQuery,
