@@ -35,7 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
     // DATE_VIEW should match the index template:
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
@@ -46,21 +46,30 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       dataForgeConfig = {
-        schedule: [{ template: 'good', start: 'now-15m', end: 'now+5m' }],
+        schedule: [
+          {
+            template: 'good',
+            start: 'now-15m',
+            end: 'now+10m',
+            metrics: [
+              { name: 'system.network.in.bytes', method: 'linear', start: 5, end: 5 },
+              { name: 'system.network.out.bytes', method: 'linear', start: 5, end: 5 },
+            ],
+          },
+        ],
         indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 60000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await waitForDocumentInIndex({
         esClient,
-        indexName: dataForgeIndices.join(','),
-        docCountTarget: 60,
+        indexName: DATA_VIEW,
+        docCountTarget: 75,
       });
-
       await createDataView({
         supertest,
-        name: DATE_VIEW,
+        name: DATA_VIEW,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
       });
     });
 
@@ -102,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.GT,
                 threshold: [0.9],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [
                   { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
@@ -199,7 +208,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.GT,
                 threshold: [0.9],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [
                   { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.AVERAGE },
@@ -226,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Custom equation is 1, above the threshold of 0.9. (duration: 1 min, data view: ${DATE_VIEW})`
+          `Custom equation is 1, above the threshold of 0.9. (duration: 5 min, data view: ${DATA_VIEW})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('1');
       });
