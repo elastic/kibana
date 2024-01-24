@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import {
   AlertsTableConfigurationRegistry,
   RenderCustomActionsRowArgs,
@@ -34,7 +34,7 @@ export const getAlertsPageTableConfiguration = (
     }),
   sort: [
     {
-      [TIMESTAMP]: {
+      [ALERT_START]: {
         order: 'desc' as SortOrder,
       },
     },
