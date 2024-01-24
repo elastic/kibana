@@ -10,6 +10,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
@@ -17,6 +19,9 @@ export const RANGE_MIN_SAMPLE_SIZE = 10; // it's necessary to be able to use `st
 export const RANGE_STEP_SAMPLE_SIZE = 10;
 
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
+  storage: Storage;
+  consumer: string;
+  rowLineHeightOverride?: string;
   maxAllowedSampleSize?: number;
   sampleSize: number;
   onChangeSampleSize: (sampleSize: number) => void;
@@ -25,6 +30,9 @@ export interface UnifiedDataTableAdditionalDisplaySettingsProps {
 export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   UnifiedDataTableAdditionalDisplaySettingsProps
 > = ({
+  storage,
+  consumer,
+  rowLineHeightOverride,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
@@ -67,19 +75,56 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
+  const [headerRowHeight, setHeaderRowHeight] = useState<
+    RowHeightSettingsProps['rowHeight'] | undefined
+  >();
+  const [headerRowLines, setHeaderRowLines] = useState<
+    RowHeightSettingsProps['rowHeightLines'] | undefined
+  >();
+
+  const [cellRowHeight, setCellRowHeight] = useState<
+    RowHeightSettingsProps['rowHeight'] | undefined
+  >();
+  const [cellRowLines, setCellRowLines] = useState<
+    RowHeightSettingsProps['rowHeightLines'] | undefined
+  >();
+
   return (
-    <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-      <EuiRange
-        compressed
-        fullWidth
-        min={minRangeSampleSize}
-        max={maxAllowedSampleSize}
-        step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
-        showInput
-        value={activeSampleSize}
-        onChange={onChangeActiveSampleSize}
-        data-test-subj="unifiedDataTableSampleSizeInput"
+    <>
+      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+        <EuiRange
+          compressed
+          fullWidth
+          min={minRangeSampleSize}
+          max={maxAllowedSampleSize}
+          step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
+          showInput
+          value={activeSampleSize}
+          onChange={onChangeActiveSampleSize}
+          data-test-subj="unifiedDataTableSampleSizeInput"
+        />
+      </EuiFormRow>
+      <RowHeightSettings
+        rowHeight={headerRowHeight}
+        rowHeightLines={headerRowLines}
+        label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
+          defaultMessage: 'Header row height',
+        })}
+        onChangeRowHeight={(mode) => setHeaderRowHeight(mode)}
+        onChangeRowHeightLines={(lines) => setHeaderRowLines(lines)}
+        data-test-subj="lnsHeaderHeightSettings"
+        maxRowHeight={5}
       />
-    </EuiFormRow>
+      <RowHeightSettings
+        rowHeight={cellRowHeight}
+        rowHeightLines={cellRowLines}
+        label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
+          defaultMessage: 'Cell row height',
+        })}
+        onChangeRowHeight={(mode) => setCellRowHeight(mode)}
+        onChangeRowHeightLines={(lines) => setCellRowLines(lines)}
+        data-test-subj="lnsRowHeightSettings"
+      />
+    </>
   );
 };
