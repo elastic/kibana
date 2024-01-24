@@ -318,7 +318,7 @@ describe('TransactionActionMenu ', () => {
 
   describe('Profiling items', () => {
     beforeEach(() => {
-      useProfilingIntegrationSetting.mockReturnValue(true);
+      (useProfilingIntegrationSetting as jest.Mock).mockReturnValue(true);
     });
 
     it('renders flamegraph item', async () => {
