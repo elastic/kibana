@@ -304,6 +304,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.BottomBarActions",
+        "type": "Function",
+        "tags": [],
+        "label": "BottomBarActions",
+        "description": [],
+        "signature": [
+          "({ isLoading, onDiscardChanges, onSave, unsavedChangesCount, saveLabel, appTestSubj, areChangesInvalid, }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.BottomBarActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isLoading,\n  onDiscardChanges,\n  onSave,\n  unsavedChangesCount,\n  saveLabel,\n  appTestSubj,\n  areChangesInvalid = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
