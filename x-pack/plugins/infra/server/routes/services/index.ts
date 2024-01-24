@@ -31,9 +31,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
           if (invalidResponse) {
             return invalidResponse;
           }
-          if (parsedFilters) {
-            q.validatedFilters = parsedFilters;
-          }
+          q.validatedFilters = parsedFilters;
           return validate(q, res);
         },
       },
@@ -42,37 +40,18 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
       const [{ savedObjects }] = await libs.getStartServices();
       const { from, to, size = 10, validatedFilters } = request.query;
 
-      try {
-        if (!validatedFilters) {
-          throw Boom.badRequest('Invalid filters');
-        }
-        const client = createSearchClient(requestContext, framework, request);
-        const soClient = savedObjects.getScopedClient(request);
-        const apmIndices = await libs.getApmIndices(soClient);
-        const services = await getServices(client, apmIndices, {
-          from,
-          to,
-          size,
-          filters: validatedFilters,
-        });
-        return response.ok({
-          body: ServicesAPIResponseRT.encode(services),
-        });
-      } catch (err) {
-        if (Boom.isBoom(err)) {
-          return response.customError({
-            statusCode: err.output.statusCode,
-            body: { message: err.output.payload.message },
-          });
-        }
-
-        return response.customError({
-          statusCode: err.statusCode ?? 500,
-          body: {
-            message: err.message ?? 'An unexpected error occurred',
-          },
-        });
-      }
+      const client = createSearchClient(requestContext, framework, request);
+      const soClient = savedObjects.getScopedClient(request);
+      const apmIndices = await libs.getApmIndices(soClient);
+      const services = await getServices(client, apmIndices, {
+        from,
+        to,
+        size,
+        filters: validatedFilters!,
+      });
+      return response.ok({
+        body: ServicesAPIResponseRT.encode(services),
+      });
     }
   );
 };
