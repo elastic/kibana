@@ -4666,6 +4666,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -7052,6 +7056,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -8339,6 +8347,10 @@
               {
                 "plugin": "ftrApis",
                 "path": "src/plugins/ftr_apis/server/routes/kbn_client_so/update.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -13940,6 +13952,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -14260,6 +14276,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -15187,6 +15207,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",

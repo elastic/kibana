@@ -117,6 +117,7 @@ function SavedObjectSaveModalDashboard(props: SaveModalDashboardProps) {
       options={isAddToLibrarySelected ? tagOptions : undefined} // Show tags when not adding to dashboard
       description={documentInfo.description}
       showDescription={true}
+      mustCopyOnSaveMessage={props.mustCopyOnSaveMessage}
       {...{
         confirmButtonLabel,
         initialCopyOnSave,
