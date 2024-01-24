@@ -3675,6 +3675,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-di-server-mocks@link:packages/core/di/core-di-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-di-server@link:packages/core/di/core-di-server":
   version "0.0.0"
   uid ""

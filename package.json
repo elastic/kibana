@@ -1198,6 +1198,7 @@
     "@kbn/core-chrome-browser-mocks": "link:packages/core/chrome/core-chrome-browser-mocks",
     "@kbn/core-deprecations-browser-mocks": "link:packages/core/deprecations/core-deprecations-browser-mocks",
     "@kbn/core-deprecations-server-mocks": "link:packages/core/deprecations/core-deprecations-server-mocks",
+    "@kbn/core-di-server-mocks": "link:packages/core/di/core-di-server-mocks",
     "@kbn/core-doc-links-browser-mocks": "link:packages/core/doc-links/core-doc-links-browser-mocks",
     "@kbn/core-doc-links-server-mocks": "link:packages/core/doc-links/core-doc-links-server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks": "link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
