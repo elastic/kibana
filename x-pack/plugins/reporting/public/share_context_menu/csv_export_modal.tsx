@@ -10,13 +10,12 @@ import {
   EuiButtonEmpty,
   EuiCallOut,
   EuiCopy,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
@@ -173,33 +172,26 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
             title="CSV reports can take a few minutes to generate based upon the size of your report"
             iconType="iInCircle"
           />
+          <EuiSpacer size="m" />
+          {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup gutterSize="m">
-          <EuiFlexItem>
-            {renderCopyURLButton({ isUnsaved: !isSaved, exceedsMaxLength })}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButtonEmpty onClick={props.onClose} data-test-subj="share.doneButton">
-              <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton
-              disabled={Boolean(createReportingJob)}
-              fill
-              onClick={() => generateReportingJob()}
-              data-test-subj="generateReportButton"
-              isLoading={Boolean(createReportingJob)}
-            >
-              <FormattedMessage
-                id="xpack.reporting.generateButtonLabel"
-                defaultMessage="Download CSV"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonEmpty onClick={props.onClose} data-test-subj="share.doneButton">
+          <FormattedMessage id="xpack.reporting.links.doneButton" defaultMessage="Done" />
+        </EuiButtonEmpty>
+        <EuiButton
+          disabled={Boolean(createReportingJob)}
+          fill
+          onClick={() => generateReportingJob()}
+          data-test-subj="generateReportButton"
+          isLoading={Boolean(createReportingJob)}
+        >
+          <FormattedMessage
+            id="xpack.reporting.generateButtonLabel"
+            defaultMessage="Download CSV"
+          />
+        </EuiButton>
       </EuiModalFooter>
     </>
   );

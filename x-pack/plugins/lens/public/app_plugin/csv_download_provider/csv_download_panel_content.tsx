@@ -9,8 +9,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiForm,
   EuiModalBody,
   EuiModalFooter,
@@ -50,28 +48,21 @@ export function DownloadPanelContent({
         <EuiSpacer size="m" />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
-          <EuiFlexItem>
-            <EuiButtonEmpty onClick={onClose} data-test-subj="share.doneButton">
-              <FormattedMessage id="xpack.lens.doneButton" defaultMessage="Done" />
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton
-              disabled={isDisabled}
-              fullWidth
-              fill
-              onClick={onClick}
-              data-test-subj="lnsApp_downloadCSVButton"
-              size="s"
-            >
-              <FormattedMessage
-                id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
-                defaultMessage="Download CSV"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonEmpty onClick={onClose} data-test-subj="share.doneButton">
+          <FormattedMessage id="xpack.lens.doneButton" defaultMessage="Done" />
+        </EuiButtonEmpty>
+        <EuiButton
+          disabled={isDisabled}
+          fill
+          onClick={onClick}
+          data-test-subj="lnsApp_downloadCSVButton"
+          size="s"
+        >
+          <FormattedMessage
+            id="xpack.lens.application.csvPanelContent.downloadButtonLabel"
+            defaultMessage="Download CSV"
+          />
+        </EuiButton>
       </EuiModalFooter>
     </>
   );

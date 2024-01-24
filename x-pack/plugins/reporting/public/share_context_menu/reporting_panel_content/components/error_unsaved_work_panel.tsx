@@ -29,7 +29,7 @@ export const ErrorUnsavedWorkPanel: FunctionComponent = () => {
         <p>
           <FormattedMessage
             id="xpack.reporting.panelContent.unsavedStateErrorText"
-            defaultMessage="Save your work before copying this URL."
+            defaultMessage="Save your work before copying this POST URL."
           />
         </p>
       </EuiText>
