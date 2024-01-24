@@ -7,7 +7,12 @@
 
 import React, { useReducer, useState, useEffect, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RuleActionTypes, RuleNotifyWhen, SanitizedRuleAction } from '@kbn/alerting-plugin/common';
+import {
+  isSystemAction,
+  RuleActionTypes,
+  RuleNotifyWhen,
+  SanitizedRuleAction,
+} from '@kbn/alerting-plugin/common';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -58,6 +63,14 @@ const defaultUpdateRuleErrorMessage = i18n.translate(
   }
 );
 
+// Separate function for determining if an untyped action has a group property or not, which helps determine if
+// it is a default action or a system action. Consolidated here to deal with type definition complexity
+const actionHasDefinedGroup = (action: SanitizedRuleAction) => {
+  if (!('group' in action)) return false;
+  // If the group property is present, ensure that it isn't null or undefined
+  return Boolean(action.group);
+};
+
 const cloneAndMigrateRule = (initialRule: Rule) => {
   const clonedRule = cloneDeep(omit(initialRule, 'notifyWhen', 'throttle'));
 
@@ -74,7 +87,7 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
     clonedRule.actions = clonedRule.actions.map((action) =>
-      action.type === RuleActionTypes.SYSTEM
+      isSystemAction(action)
         ? action
         : {
             ...action,
@@ -83,13 +96,17 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
     );
   } else {
     // Migrate untyped actions
+    // Note that this type is supposed to be stripped before sending to the server. This type property is used
+    // to tell the downstream rewrite functions whether to include properties such as frequency, alertsFilter, etc.
     clonedRule.actions = clonedRule.actions.map(
       (action: SanitizedRuleAction | Omit<SanitizedRuleAction, 'type'>) =>
         'type' in action
           ? action
           : ({
               ...action,
-              type: action.frequency ? RuleActionTypes.DEFAULT : RuleActionTypes.SYSTEM,
+              type: actionHasDefinedGroup(action as SanitizedRuleAction)
+                ? RuleActionTypes.DEFAULT
+                : RuleActionTypes.SYSTEM,
             } as SanitizedRuleAction)
     );
   }
