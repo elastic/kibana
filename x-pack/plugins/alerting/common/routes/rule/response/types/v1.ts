@@ -53,4 +53,5 @@ export interface RuleResponse<Params extends RuleParams = never> {
   revision: RuleResponseSchemaType['revision'];
   running?: RuleResponseSchemaType['running'];
   view_in_app_relative_url?: RuleResponseSchemaType['view_in_app_relative_url'];
+  notification_delay?: RuleResponseSchemaType['notification_delay'];
 }
