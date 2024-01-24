@@ -7,21 +7,22 @@
 
 import { NEVER, lastValueFrom } from 'rxjs';
 
-import { getIndicesSearchResultProvider } from "./indices_search_result_provider";
 import { IScopedClusterClient } from '@kbn/core/server';
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '@kbn/enterprise-search-plugin/common/constants';
+
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+
+import { getIndicesSearchResultProvider } from './indices_search_result_provider';
 
 describe('Enterprise Search - indices search provider', () => {
-  
   const indicesSearchResultProvider = getIndicesSearchResultProvider();
-  
+
   const regularIndexResponse = {
     'search-github-api': {
       aliases: {},
     },
     'search-msft-sql-index': {
       aliases: {},
-    }
+    },
   };
 
   const mockClient = {
@@ -41,17 +42,17 @@ describe('Enterprise Search - indices search provider', () => {
   mockClient.asCurrentUser.indices.get.mockResolvedValue(regularIndexResponse);
 
   const githubIndex = {
-      id: 'search-github-api',
-      score: 75,
-      title: 'search-github-api',
-      type: 'Index',
-      url: {
-        path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-github-api`,
-        prependBasePath: true,
-      },
-    };
+    id: 'search-github-api',
+    score: 75,
+    title: 'search-github-api',
+    type: 'Index',
+    url: {
+      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/search-github-api`,
+      prependBasePath: true,
+    },
+  };
 
-  const msftIndex =  {
+  const msftIndex = {
     id: 'search-msft-sql-index',
     score: 75,
     title: 'search-msft-sql-index',
@@ -69,48 +70,54 @@ describe('Enterprise Search - indices search provider', () => {
   });
 
   describe('find', () => {
-    it('returns formatted results', async () => {      
-      const results = await lastValueFrom(indicesSearchResultProvider.find(
-        { term: 'search-github-api' },
-        { 
-          aborted$: NEVER, 
-          client, 
-          maxResults: 100, 
-          preference: ''
-        },
-        {} as any
-      ));
-      expect(results).toEqual([{...githubIndex, score: 100}]);
+    it('returns formatted results', async () => {
+      const results = await lastValueFrom(
+        indicesSearchResultProvider.find(
+          { term: 'search-github-api' },
+          {
+            aborted$: NEVER,
+            client,
+            maxResults: 100,
+            preference: '',
+          },
+          {} as any
+        )
+      );
+      expect(results).toEqual([{ ...githubIndex, score: 100 }]);
     });
 
     it('returns all matched results', async () => {
-      const results = await lastValueFrom(indicesSearchResultProvider.find(
-        { term: 'search' },
-        { 
-          aborted$: NEVER, 
-          client, 
-          maxResults: 100, 
-          preference: ''
-        },
-        {} as any
-      ));
+      const results = await lastValueFrom(
+        indicesSearchResultProvider.find(
+          { term: 'search' },
+          {
+            aborted$: NEVER,
+            client,
+            maxResults: 100,
+            preference: '',
+          },
+          {} as any
+        )
+      );
       expect(results).toEqual([
-        { ...githubIndex, score: 90 }, 
+        { ...githubIndex, score: 90 },
         { ...msftIndex, score: 90 },
       ]);
     });
 
     it('returns all indices on empty string', async () => {
-      const results = await lastValueFrom(indicesSearchResultProvider.find(
-        { term: '' },
-        { 
-          aborted$: NEVER, 
-          client, 
-          maxResults: 100, 
-          preference: ''
-        },
-        {} as any
-      ));
+      const results = await lastValueFrom(
+        indicesSearchResultProvider.find(
+          { term: '' },
+          {
+            aborted$: NEVER,
+            client,
+            maxResults: 100,
+            preference: '',
+          },
+          {} as any
+        )
+      );
       expect(results).toEqual([
         { ...githubIndex, score: 80 },
         { ...msftIndex, score: 80 },
@@ -118,75 +125,83 @@ describe('Enterprise Search - indices search provider', () => {
     });
 
     it('respect maximum results', async () => {
-      const results = await lastValueFrom(indicesSearchResultProvider.find(
-        { term: 'search' },
-        { 
-          aborted$: NEVER, 
-          client, 
-          maxResults: 1, 
-          preference: ''
-        },
-        {} as any
-      ));
-      expect(results).toEqual([
-        { ...githubIndex, score: 90 },
-      ]);
+      const results = await lastValueFrom(
+        indicesSearchResultProvider.find(
+          { term: 'search' },
+          {
+            aborted$: NEVER,
+            client,
+            maxResults: 1,
+            preference: '',
+          },
+          {} as any
+        )
+      );
+      expect(results).toEqual([{ ...githubIndex, score: 90 }]);
     });
 
     describe('returns empty results', () => {
-      it('when term does not match with created indices', async () => {        
-        const results = await lastValueFrom(indicesSearchResultProvider.find(
-          { term: 'sample' },
-          { 
-            aborted$: NEVER, 
-            client, 
-            maxResults: 100, 
-            preference: ''
-          },
-          {} as any
-        ));
+      it('when term does not match with created indices', async () => {
+        const results = await lastValueFrom(
+          indicesSearchResultProvider.find(
+            { term: 'sample' },
+            {
+              aborted$: NEVER,
+              client,
+              maxResults: 100,
+              preference: '',
+            },
+            {} as any
+          )
+        );
         expect(results).toEqual([]);
       });
 
-      it('if client is undefined', async () => {        
-        const results = await lastValueFrom(indicesSearchResultProvider.find(
-          { term: 'sample' },
-          { 
-            aborted$: NEVER, 
-            client: undefined, 
-            maxResults: 100, 
-            preference: ''
-          },
-          {} as any
-        ));
+      it('if client is undefined', async () => {
+        const results = await lastValueFrom(
+          indicesSearchResultProvider.find(
+            { term: 'sample' },
+            {
+              aborted$: NEVER,
+              client: undefined,
+              maxResults: 100,
+              preference: '',
+            },
+            {} as any
+          )
+        );
         expect(results).toEqual([]);
       });
 
-      it('if tag is specified', async () => {        
-        const results = await lastValueFrom(indicesSearchResultProvider.find(
-          { term: 'search', tags: ['tag'] },
-          { 
-            aborted$: NEVER, 
-            client, 
-            maxResults: 100, 
-            preference: ''
-          },
-          {} as any
-        ));
+      it('if tag is specified', async () => {
+        const results = await lastValueFrom(
+          indicesSearchResultProvider.find(
+            { term: 'search', tags: ['tag'] },
+            {
+              aborted$: NEVER,
+              client,
+              maxResults: 100,
+              preference: '',
+            },
+            {} as any
+          )
+        );
         expect(results).toEqual([]);
       });
 
-      it('if unknown type is specified', async () => {        
-        const results = await lastValueFrom(indicesSearchResultProvider.find(
-          { term: 'search', types: ['tag'] },
-          { 
-            aborted$: NEVER, 
-            client, 
-            maxResults: 100, 
-            preference: ''
-          },
-          {} as any
-        ));
+      it('if unknown type is specified', async () => {
+        const results = await lastValueFrom(
+          indicesSearchResultProvider.find(
+            { term: 'search', types: ['tag'] },
+            {
+              aborted$: NEVER,
+              client,
+              maxResults: 100,
+              preference: '',
+            },
+            {} as any
+          )
+        );
         expect(results).toEqual([]);
       });
     });

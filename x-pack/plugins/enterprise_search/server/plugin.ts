@@ -80,8 +80,8 @@ import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/t
 import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
-import { getSearchResultProvider } from './utils/search_result_provider';
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
+import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
 

@@ -5,55 +5,57 @@
  * 2.0.
  */
 
-import { from, takeUntil } from "rxjs";
+import { from, takeUntil } from 'rxjs';
 
-import { i18n } from "@kbn/i18n";
-import { GlobalSearchProviderResult, GlobalSearchResultProvider } from "@kbn/global-search-plugin/server";
-import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from "@kbn/enterprise-search-plugin/common/constants";
+import {
+  GlobalSearchProviderResult,
+  GlobalSearchResultProvider,
+} from '@kbn/global-search-plugin/server';
+import { i18n } from '@kbn/i18n';
 
-import { getIndexData } from "../lib/indices/utils/get_index_data";
+import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
+
+import { getIndexData } from '../lib/indices/utils/get_index_data';
 
 export function getIndicesSearchResultProvider(): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
-      if (
-        !client || tags || 
-        (types && !(types.includes('indices')))
-      ) {
+      if (!client || tags || (types && !types.includes('indices'))) {
         return from([[]]);
       }
       const fetchIndices = async (): Promise<GlobalSearchProviderResult[]> => {
         const { indexNames } = await getIndexData(client, true, false, term);
 
-        const searchResults: GlobalSearchProviderResult[] = indexNames.map((indexName) => {
-          let score = 0;
-          const searchTerm = (term || '').toLowerCase();
-          const searchName = indexName.toLowerCase();
-          if (!searchTerm) {
-            score = 80;
-          } else if (searchName === searchTerm) {
-            score = 100;
-          } else if (searchName.startsWith(searchTerm)) {
-            score = 90;
-          } else if (searchName.includes(searchTerm)) {
-            score = 75;
-          }
+        const searchResults: GlobalSearchProviderResult[] = indexNames
+          .map((indexName) => {
+            let score = 0;
+            const searchTerm = (term || '').toLowerCase();
+            const searchName = indexName.toLowerCase();
+            if (!searchTerm) {
+              score = 80;
+            } else if (searchName === searchTerm) {
+              score = 100;
+            } else if (searchName.startsWith(searchTerm)) {
+              score = 90;
+            } else if (searchName.includes(searchTerm)) {
+              score = 75;
+            }
 
-          return {
-            id: indexName,
-            title: indexName,
-            type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
-              defaultMessage: 'Index',
-            }),
-            url: {
-              path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/${indexName}`,
-              prependBasePath: true,
-            },
-            score,
-          };
-        })
-        .filter(({ score }) => score > 0)
-        .slice(0, maxResults);
+            return {
+              id: indexName,
+              title: indexName,
+              type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
+                defaultMessage: 'Index',
+              }),
+              url: {
+                path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/search_indices/${indexName}`,
+                prependBasePath: true,
+              },
+              score,
+            };
+          })
+          .filter(({ score }) => score > 0)
+          .slice(0, maxResults);
         return searchResults;
       };
       return from(fetchIndices()).pipe(takeUntil(aborted$));
