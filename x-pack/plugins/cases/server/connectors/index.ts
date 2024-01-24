@@ -16,9 +16,11 @@ export { casesConnectors } from './factory';
 export function registerConnectorTypes({
   actions,
   getCasesClient,
+  getSpaceId,
 }: {
   actions: ActionsPluginSetupContract;
   getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+  getSpaceId: (request?: KibanaRequest) => string;
 }) {
-  actions.registerSubActionConnectorType(getCasesConnectorType({ getCasesClient }));
+  actions.registerSubActionConnectorType(getCasesConnectorType({ getCasesClient, getSpaceId }));
 }

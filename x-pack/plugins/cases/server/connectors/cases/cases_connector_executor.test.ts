@@ -109,6 +109,7 @@ describe('CasesConnectorExecutor', () => {
       casesOracleService: new CasesOracleServiceMock(),
       casesService: new CasesServiceMock(),
       casesClient: casesClientMock,
+      spaceId: 'default',
     });
 
     dateMathMock.parse.mockImplementation(() => moment('2023-10-09T10:23:42.769Z'));
@@ -990,6 +991,7 @@ describe('CasesConnectorExecutor', () => {
         casesOracleService: new CasesOracleServiceMock(),
         casesService: new CasesServiceMock(),
         casesClient: casesClientMock,
+        spaceId: 'default',
       });
     });
 

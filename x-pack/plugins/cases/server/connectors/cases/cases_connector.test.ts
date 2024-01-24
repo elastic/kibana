@@ -44,6 +44,7 @@ describe('CasesConnector', () => {
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
+  const getSpaceId = jest.fn().mockReturnValue('default');
   // 1ms delay before retrying
   const nextBackOff = jest.fn().mockReturnValue(1);
 
@@ -51,8 +52,7 @@ describe('CasesConnector', () => {
     create: () => ({ nextBackOff }),
   };
 
-  const casesParams = { getCasesClient };
-
+  const casesParams = { getCasesClient, getSpaceId };
   const connectorParams = {
     configurationUtilities: actionsConfigMock.create(),
     config: {},
@@ -99,6 +99,7 @@ describe('CasesConnector', () => {
       casesClient: { foo: 'bar' },
       casesOracleService: expect.any(CasesOracleService),
       casesService: expect.any(CasesService),
+      spaceId: 'default',
     });
   });
 

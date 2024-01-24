@@ -30,6 +30,7 @@ interface CasesConnectorExecutorParams {
   casesOracleService: CasesOracleService;
   casesService: CasesService;
   casesClient: CasesClient;
+  spaceId: string;
 }
 
 interface GroupedAlerts {
@@ -47,17 +48,20 @@ export class CasesConnectorExecutor {
   private readonly casesOracleService: CasesOracleService;
   private readonly casesService: CasesService;
   private readonly casesClient: CasesClient;
+  private readonly spaceId: string;
 
   constructor({
     logger,
     casesOracleService,
     casesService,
     casesClient,
+    spaceId,
   }: CasesConnectorExecutorParams) {
     this.logger = logger;
     this.casesOracleService = casesOracleService;
     this.casesService = casesService;
     this.casesClient = casesClient;
+    this.spaceId = spaceId;
   }
 
   public async execute(params: CasesConnectorRunParams) {
@@ -209,10 +213,6 @@ export class CasesConnectorExecutor {
     );
 
     const { rule, owner } = params;
-    /**
-     * TODO: Take spaceId from the actions framework
-     */
-    const spaceId = 'default';
 
     const oracleMap = new Map<string, GroupedAlertsWithOracleKey>();
 
@@ -221,7 +221,7 @@ export class CasesConnectorExecutor {
         ruleId: rule.id,
         grouping,
         owner,
-        spaceId,
+        spaceId: this.spaceId,
       };
 
       const oracleKey = this.casesOracleService.getRecordId(getRecordIdParams);
@@ -494,11 +494,6 @@ export class CasesConnectorExecutor {
 
     const { rule, owner } = params;
 
-    /**
-     * TODO: Take spaceId from the actions framework
-     */
-    const spaceId = 'default';
-
     const casesMap = new Map<string, GroupedAlertsWithCaseId>();
 
     for (const [recordId, entry] of groupedAlertsWithOracleRecords.entries()) {
@@ -506,7 +501,7 @@ export class CasesConnectorExecutor {
         ruleId: rule.id,
         grouping: entry.grouping,
         owner,
-        spaceId,
+        spaceId: this.spaceId,
         counter: entry.oracleRecord.counter,
       };
 

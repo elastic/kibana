@@ -25,7 +25,10 @@ import { fullJitterBackoffFactory } from './full_jitter_backoff';
 
 interface CasesConnectorParams {
   connectorParams: ServiceParams<CasesConnectorConfig, CasesConnectorSecrets>;
-  casesParams: { getCasesClient: (request: KibanaRequest) => Promise<CasesClient> };
+  casesParams: {
+    getCasesClient: (request: KibanaRequest) => Promise<CasesClient>;
+    getSpaceId: (request?: KibanaRequest) => string;
+  };
 }
 
 export class CasesConnector extends SubActionConnector<
@@ -86,28 +89,25 @@ export class CasesConnector extends SubActionConnector<
       this.handleError(error);
     }
 
-    /**
-     * TODO: Tell the task manager to not retry on non
-     * retryable errors
-     */
     await this.retryService.retryWithBackoff(() => this._run(params));
   }
 
   private async _run(params: CasesConnectorRunParams) {
     try {
-      const casesClient = await this.casesParams.getCasesClient(
-        /**
-         * The case connector will throw an error if the Kibana request
-         * is not define before executing the _run method
-         */
-        this.kibanaRequest as KibanaRequest
-      );
+      /**
+       * The case connector will throw an error if the Kibana request
+       * is not define before executing the _run method
+       */
+      const kibanaRequest = this.kibanaRequest as KibanaRequest;
+      const casesClient = await this.casesParams.getCasesClient(kibanaRequest);
+      const spaceId = this.casesParams.getSpaceId(kibanaRequest);
 
       const connectorExecutor = new CasesConnectorExecutor({
         logger: this.logger,
         casesOracleService: this.casesOracleService,
         casesService: this.casesService,
         casesClient,
+        spaceId,
       });
 
       this.logDebugCurrentState('start', '[CasesConnector][_run] Executing case connector', params);
