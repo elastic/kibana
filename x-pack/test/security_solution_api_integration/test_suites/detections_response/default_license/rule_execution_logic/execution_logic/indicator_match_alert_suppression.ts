@@ -33,6 +33,8 @@ import {
   patchRule,
   setAlertStatus,
   dataGeneratorFactory,
+  deleteAllAlerts,
+  deleteAllRules,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -160,6 +162,8 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+      await deleteAllAlerts(supertest, log, es);
+      await deleteAllRules(supertest, log);
     });
 
     cases.forEach(({ eventsCount, threatsCount, title }) => {
