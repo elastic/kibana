@@ -20,7 +20,13 @@ describe('getStreamObservable', () => {
   const typedReader = mockReader as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
   const setLoading = jest.fn();
-
+  const defaultProps = {
+    connectorTypeTitle: 'OpenAI',
+    isEnabledLangChain: false,
+    isError: false,
+    reader: typedReader,
+    setLoading,
+  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -69,10 +75,8 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
+      ...defaultProps,
       connectorTypeTitle: 'Amazon Bedrock',
-      isError: false,
-      reader: typedReader,
-      setLoading,
     });
     const emittedStates: PromptObservableState[] = [];
 
@@ -141,12 +145,7 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
-    const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
-    });
+    const source = getStreamObservable(defaultProps);
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
@@ -214,12 +213,7 @@ describe('getStreamObservable', () => {
         done: true,
       });
 
-    const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
-    });
+    const source = getStreamObservable(defaultProps);
     const emittedStates: PromptObservableState[] = [];
 
     source.subscribe({
@@ -268,10 +262,8 @@ describe('getStreamObservable', () => {
       });
 
     const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
+      ...defaultProps,
       isError: true,
-      reader: typedReader,
-      setLoading,
     });
     const emittedStates: PromptObservableState[] = [];
 
@@ -298,12 +290,7 @@ describe('getStreamObservable', () => {
     const error = new Error('Test Error');
     // Simulate an error
     mockReader.read.mockRejectedValue(error);
-    const source = getStreamObservable({
-      connectorTypeTitle: 'OpenAI',
-      isError: false,
-      reader: typedReader,
-      setLoading,
-    });
+    const source = getStreamObservable(defaultProps);
 
     source.subscribe({
       next: (state) => {},

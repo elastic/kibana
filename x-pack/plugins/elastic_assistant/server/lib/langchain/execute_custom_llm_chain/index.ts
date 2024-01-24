@@ -133,6 +133,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     // Do not call this using `await` so it will run asynchronously while we return the stream in responseWithHeaders
     readStream(logStream, push, streamEnd);
 
+    // TODO figure out how to pass trace_data and replacements @spong @macri @yuliia
     return responseWithHeaders;
   }
   // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx

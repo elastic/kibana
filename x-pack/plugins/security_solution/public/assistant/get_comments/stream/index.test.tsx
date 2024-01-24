@@ -18,6 +18,7 @@ const testProps = {
   amendMessage: jest.fn(),
   content,
   index: 1,
+  isEnabledLangChain: true,
   isLastComment: true,
   connectorTypeTitle: 'OpenAI',
   regenerateMessage: jest.fn(),

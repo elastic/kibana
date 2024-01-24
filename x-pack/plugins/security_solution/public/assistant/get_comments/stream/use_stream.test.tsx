@@ -39,6 +39,7 @@ const readerComplete = {
 const defaultProps = {
   amendMessage,
   reader: readerComplete,
+  isEnabledLangChain: false,
   isError: false,
   connectorTypeTitle: 'OpenAI',
 };
