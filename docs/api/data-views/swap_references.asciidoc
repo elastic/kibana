@@ -55,7 +55,7 @@ Indicates a successful call.
 [[data-views-api-swap-references-example]]
 ==== Examples
 
-Preview swapping references to data view id "abcd-efg" with "xyz-123":
+Swap references to data view id "abcd-efg" with "xyz-123":
 
 [source,sh]
 --------------------------------------------------
