@@ -24,7 +24,6 @@ import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
-import { omit } from 'lodash';
 
 export function runSaveAs(this: DashboardContainer) {
   const {

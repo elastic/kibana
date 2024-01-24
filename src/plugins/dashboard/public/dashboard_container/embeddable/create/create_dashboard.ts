@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
 import { BehaviorSubject, combineLatestWith, distinctUntilChanged, map, Subject } from 'rxjs';
 import { v4 } from 'uuid';
@@ -46,10 +45,6 @@ import { startSyncingDashboardControlGroup } from './controls/dashboard_control_
 import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
 import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import {
-  keysNotConsideredUnsavedChanges,
-  keysToOmitFromSessionStorage,
-} from '../../state/diffing/dashboard_diffing_integration';
 
 /**
  * Builds a new Dashboard from scratch.
