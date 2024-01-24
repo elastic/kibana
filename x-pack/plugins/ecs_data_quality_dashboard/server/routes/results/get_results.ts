@@ -51,6 +51,10 @@ export const getResultsRoute = (
         validate: { request: { query: buildRouteValidation(GetResultQuery) } },
       },
       async (context, request, response) => {
+        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
+        return response.ok({ body: [] });
+
+        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 

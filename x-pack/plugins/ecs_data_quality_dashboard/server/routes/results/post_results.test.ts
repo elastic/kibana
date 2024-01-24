@@ -17,7 +17,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { resultBody, resultDocument } from './results.mock';
 
-describe('postResultsRoute route', () => {
+// TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
+describe.skip('postResultsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: MockedLogger;

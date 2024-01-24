@@ -35,7 +35,8 @@ const searchResponse = {
   Record<string, { buckets: LatestAggResponseBucket[] }>
 >;
 
-describe('getResultsRoute route', () => {
+// TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
+describe.skip('getResultsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
   let logger: MockedLogger;

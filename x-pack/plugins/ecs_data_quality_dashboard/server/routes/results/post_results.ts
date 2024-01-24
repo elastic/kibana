@@ -29,13 +29,13 @@ export const postResultsRoute = (
     .addVersion(
       {
         version: INTERNAL_API_VERSION,
-        validate: {
-          request: {
-            body: buildRouteValidation(PostResultBody),
-          },
-        },
+        validate: { request: { body: buildRouteValidation(PostResultBody) } },
       },
       async (context, request, response) => {
+        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
+        return response.ok({ body: { result: 'noop' } });
+
+        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
