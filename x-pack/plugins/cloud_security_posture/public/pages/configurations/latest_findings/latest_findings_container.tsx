@@ -78,8 +78,6 @@ export const LatestFindingsContainer = () => {
   const { grouping, isFetching, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestFindingsGrouping({ groupPanelRenderer, groupStatsRenderer });
 
- 
-
   const renderChildComponent = ({
     level,
     currentSelectedGroup,
@@ -95,7 +93,7 @@ export const LatestFindingsContainer = () => {
   }) => {
     let getChildComponent;
 
-    if (selectedGroupOptions.length === 1 && currentSelectedGroup === 'none') {
+    if (currentSelectedGroup === 'none') {
       return (
         <LatestFindingsTable
           groupSelectorComponent={groupSelectorComponent}

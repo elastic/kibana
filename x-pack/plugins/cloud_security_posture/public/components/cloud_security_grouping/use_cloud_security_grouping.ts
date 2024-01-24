@@ -43,7 +43,7 @@ export const useCloudSecurityGrouping = ({
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
   groupStatsRenderer?: GroupStatsRenderer<any>;
-  groupingLevel: number;
+  groupingLevel?: number;
   groupingLocalStorageKey: string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -72,7 +72,9 @@ export const useCloudSecurityGrouping = ({
     },
   });
 
-  const selectedGroup = grouping.selectedGroups[groupingLevel];
+  const selectedGroup = groupingLevel
+    ? grouping.selectedGroups[groupingLevel]
+    : grouping.selectedGroups[0];
   /**
    * Reset the active page when the filters or query change
    * This is needed because the active page is not automatically reset when the filters or query change
