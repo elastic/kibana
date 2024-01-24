@@ -134,7 +134,7 @@ export default async () => {
         // user navigates to `/login` page directly and enters username and password in the login form.
         '--xpack.security.authc.selector.enabled=false',
         `--xpack.security.authc.providers=${JSON.stringify({
-          saml: { MOCK_IDP_REALM_NAME: { order: 0, realm: MOCK_IDP_REALM_NAME } },
+          saml: { 'cloud-saml-kibana': { order: 0, realm: MOCK_IDP_REALM_NAME } },
           basic: { 'cloud-basic': { order: 1 } },
         })}`,
         '--xpack.encryptedSavedObjects.encryptionKey="wuGNaIhoMpk5sO4UBxgr3NyW1sFcLgIf"',
