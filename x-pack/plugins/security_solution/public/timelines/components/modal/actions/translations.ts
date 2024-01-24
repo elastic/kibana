@@ -20,3 +20,23 @@ export const OPEN_TIMELINE_BTN_LABEL = i18n.translate(
     defaultMessage: 'Open Existing Timeline',
   }
 );
+
+export const ATTACH_TO_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.modal.attachToCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to case',
+  }
+);
+
+export const ATTACH_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to new case',
+  }
+);
+export const ATTACH_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel',
+  {
+    defaultMessage: 'Attach to existing case',
+  }
+);
