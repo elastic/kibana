@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FunctionComponent, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -15,12 +15,10 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import {
   MOCK_IDP_REALM_NAME,
   MOCK_IDP_REALM_TYPE,
-  MOCK_IDP_SECURITY_ROLE_NAMES,
-  MOCK_IDP_OBSERVABILITY_ROLE_NAMES,
-  MOCK_IDP_SEARCH_ROLE_NAMES,
 } from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
+import { fetchRoles } from './login_page';
 
 const useCurrentUser = () => {
   const { services } = useKibana<CoreStart>();
@@ -53,18 +51,16 @@ export const useAuthenticator = (reloadPage = false) => {
   });
 };
 
-export interface RoleSwitcherProps {
-  projectType?: string;
-}
-
-export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType }) => {
+export const RoleSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const { services } = useKibana<CoreStart>();
+  const [roles, setRoles] = useState<string[]>([]);
   const [currentUserState, getCurrentUser] = useCurrentUser();
   const [authenticateUserState, authenticateUser] = useAuthenticator();
+  const { services } = useKibana<CoreStart>();
 
   useEffect(() => {
     getCurrentUser();
+    fetchRoles(services.http).then(response => setRoles(response.roles));
   }, [getCurrentUser, authenticateUserState.value]);
 
   useEffect(() => {
@@ -79,18 +75,11 @@ export const RoleSwitcher: FunctionComponent<RoleSwitcherProps> = ({ projectType
     }
   }, [authenticateUserState.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!currentUserState.value || !isAuthenticatedWithMockIDP(currentUserState.value)) {
+  if (!currentUserState.value || !isAuthenticatedWithMockIDP(currentUserState.value) || roles.length === 0) {
     return null;
   }
 
   const [currentRole] = currentUserState.value.roles;
-
-  const roles =
-    projectType === 'security'
-      ? MOCK_IDP_SECURITY_ROLE_NAMES
-      : projectType === 'observability'
-      ? MOCK_IDP_OBSERVABILITY_ROLE_NAMES
-      : MOCK_IDP_SEARCH_ROLE_NAMES;
 
   return (
     <EuiPopover

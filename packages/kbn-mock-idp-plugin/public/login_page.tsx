@@ -17,22 +17,37 @@ import {
   EuiComboBoxOptionOption,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { ChangeEvent, FunctionComponent } from 'react';
+import React, { ChangeEvent, useEffect, useState } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
 import { useAuthenticator } from './role_switcher';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { type HttpSetup } from '@kbn/core-http-browser';
 
-export interface LoginPageProps {
-  roles: string[];
-}
+export const fetchRoles = (http: HttpSetup) => http.get<{roles: string[]}>('/mock_idp/supported_roles')
 
-export const LoginPage: FunctionComponent<LoginPageProps> = ({ roles }) => {
+export const LoginPage = () => {
+  const { services } = useKibana<CoreStart>();
+  const [roles, setRoles] = useState<string[]>([]);
+  const isRolesDefined = () => roles.length > 0;
+
+  useEffect(() => {
+    fetchRoles(services.http).then(response => {
+      setRoles(response.roles);
+      formik.setFieldValue('role', response.roles[0]);
+    });
+  }, []);
+
   const [, switchCurrentUser] = useAuthenticator(true);
   const formik = useFormik({
     initialValues: {
       full_name: 'Test User',
-      role: roles[0],
+      role: undefined,
     },
     async onSubmit(values) {
+      if (!values.role) {
+        return;
+      }
       await switchCurrentUser({
         username: sanitizeUsername(values.full_name),
         full_name: values.full_name,
@@ -85,6 +100,8 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ roles }) => {
                   <EuiFormRow error={formik.errors.role} isInvalid={!!formik.errors.role}>
                     <Field
                       as={EuiComboBox}
+                      isLoading={!isRolesDefined()}
+                      disabled={!isRolesDefined()}
                       name="role"
                       placeholder="Select your role"
                       singleSelection={{ asPlainText: true }}
@@ -116,7 +133,7 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ roles }) => {
               actions={[
                 <EuiButton
                   type="submit"
-                  disabled={!formik.isValid}
+                  disabled={!formik.isValid || !isRolesDefined()}
                   isLoading={formik.isSubmitting}
                   fill
                 >
@@ -132,7 +149,7 @@ export const LoginPage: FunctionComponent<LoginPageProps> = ({ roles }) => {
       </EuiPageTemplate>
     </FormikProvider>
   );
-  }
+  };
 
 const sanitizeUsername = (username: string) =>
   username.replace(/[^a-zA-Z0-9_]/g, '_').toLowerCase();

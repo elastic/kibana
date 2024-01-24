@@ -46,16 +46,11 @@ export const plugin: PluginInitializer<
           import('./login_page'),
         ]);
 
-        // fetch roles
-        const response = await coreStart.http.post<{roles: string[]}>('/mock_idp/supported_roles', {
-          body: JSON.stringify({projectType: plugins.cloud?.serverless.projectType}),
-        });
-
         ReactDOM.render(
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <LoginPage roles={response.roles} />
+                <LoginPage />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,
@@ -75,7 +70,7 @@ export const plugin: PluginInitializer<
           <KibanaThemeProvider theme={coreStart.theme}>
             <KibanaContextProvider services={coreStart}>
               <I18nProvider>
-                <RoleSwitcher projectType={plugins.cloud?.serverless.projectType} />
+                <RoleSwitcher />
               </I18nProvider>
             </KibanaContextProvider>
           </KibanaThemeProvider>,

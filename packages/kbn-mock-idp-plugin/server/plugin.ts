@@ -12,16 +12,17 @@ import type { TypeOf } from '@kbn/config-schema';
 import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '@kbn/mock-idp-utils';
 import { SERVERLESS_ROLES_ROOT_PATH, readRolesFromResource } from '@kbn/es';
 import { resolve } from 'path';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
+
+export interface PluginSetupDependencies {
+  cloud: CloudSetup;
+}
 
 const createSAMLResponseSchema = schema.object({
   username: schema.string(),
   full_name: schema.maybe(schema.nullable(schema.string())),
   email: schema.maybe(schema.nullable(schema.string())),
   roles: schema.arrayOf(schema.string()),
-});
-
-const getRolesResponseSchema = schema.object({
-  projectType: schema.string(),
 });
 
 const projectToAlias = new Map<string, string>([
@@ -42,8 +43,12 @@ const readServerlessRoles = (projectType: string) => {
 
 export type CreateSAMLResponseParams = TypeOf<typeof createSAMLResponseSchema>;
 
-export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
-  setup(core) {
+export const plugin: PluginInitializer<
+  void,
+  void,
+  PluginSetupDependencies
+> = async (): Promise<Plugin> => ({
+  setup(core, plugins: PluginSetupDependencies) {
     const router = core.http.createRouter();
 
     core.http.resources.register(
@@ -57,24 +62,32 @@ export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> =
       }
     );
 
-    router.post(
+    // caching roles on the first call
+    const roles: string[] = [];
+
+    router.get(
       {
         path: '/mock_idp/supported_roles',
-        validate: {
-          body: getRolesResponseSchema,
-        },
+        validate: false,
         options: { authRequired: false },
       },
       (context, request, response) => {
-        try {
-          const roles = readServerlessRoles(request.body.projectType);
-          return response.ok({
-            body: {
-              roles,
-            },
-          });
-        } catch (err) {
-          return response.customError({ statusCode: 500, body: err.message });
+        const projectType = plugins.cloud.serverless?.projectType;
+        if (!projectType) {
+          return response.customError({ statusCode: 500, body: 'projectType is not defined' });
+        } else {
+          try {
+            if (roles.length === 0) {
+              roles.push(...readServerlessRoles(projectType));
+            }
+            return response.ok({
+              body: {
+                roles,
+              },
+            });
+          } catch (err) {
+            return response.customError({ statusCode: 500, body: err.message });
+          }
         }
       }
     );
