@@ -85,7 +85,6 @@ export const LatestFindingsTable = ({
   showDistributionBar = true,
   nonPersistedFilters,
 }: LatestFindingsTableProps) => {
- 
   const {
     cloudPostureDataTable,
     rows,

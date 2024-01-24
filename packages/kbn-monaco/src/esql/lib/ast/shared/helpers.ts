@@ -127,7 +127,8 @@ type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 export function isSupportedFunction(
   name: string,
-  parentCommand?: string
+  parentCommand?: string,
+  option?: string
 ): { supported: boolean; reason: ReasonTypes | undefined } {
   if (!parentCommand) {
     return {
@@ -136,7 +137,11 @@ export function isSupportedFunction(
     };
   }
   const fn = buildFunctionLookup().get(name);
-  const isSupported = Boolean(fn?.supportedCommands.includes(parentCommand));
+  const isSupported = Boolean(
+    option == null
+      ? fn?.supportedCommands.includes(parentCommand)
+      : fn?.supportedOptions?.includes(option)
+  );
   return {
     supported: isSupported,
     reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
