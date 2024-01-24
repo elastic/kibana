@@ -70,6 +70,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
         retry: false,
       },
     },
+    logger: {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: () => {},
+    },
   });
 
   return (

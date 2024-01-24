@@ -39,7 +39,8 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
-    "@kbn/management-settings-utilities"
+    "@kbn/management-settings-utilities",
+    "@kbn/core-chrome-browser"
   ],
   "exclude": ["target/**/*"]
 }

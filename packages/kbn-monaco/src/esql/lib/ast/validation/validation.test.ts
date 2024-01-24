@@ -60,6 +60,12 @@ function getCallbackMocks() {
         matchField: 'otherStringField',
         enrichFields: ['otherField', 'yetAnotherField'],
       },
+      {
+        name: 'policy[]',
+        sourceIndices: ['enrichIndex1'],
+        matchField: 'otherStringField',
+        enrichFields: ['otherField', 'yetAnotherField'],
+      },
     ]),
   };
 }
@@ -512,15 +518,15 @@ describe('validation logic', () => {
 
   describe('keep', () => {
     testErrorsAndWarnings('from index | keep ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | keep stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | keep `stringField`, `numberField`, `dateField`', []);
     testErrorsAndWarnings('from index | keep 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | keep `4.5`', ['Unknown column [4.5]']);
@@ -530,7 +536,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | keep `any#Char$ field`', []);
     testErrorsAndWarnings(
       'from index | project ',
-      [`SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`],
+      [`SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`],
       ['PROJECT command is no longer supported, please use KEEP instead']
     );
     testErrorsAndWarnings(
@@ -567,14 +573,14 @@ describe('validation logic', () => {
 
   describe('drop', () => {
     testErrorsAndWarnings('from index | drop ', [
-      `SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'`,
+      `SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`,
     ]);
     testErrorsAndWarnings('from index | drop stringField, numberField, dateField', []);
     testErrorsAndWarnings('from index | drop 4.5', [
       "SyntaxError: token recognition error at: '4'",
       "SyntaxError: token recognition error at: '5'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '.'",
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '.'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [.]',
     ]);
     testErrorsAndWarnings('from index | drop missingField, numberField, dateField', [
@@ -628,7 +634,7 @@ describe('validation logic', () => {
 
   describe('rename', () => {
     testErrorsAndWarnings('from a | rename', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename stringField', [
       'SyntaxError: expected {DOT, AS} but found "<EOF>"',
@@ -638,10 +644,10 @@ describe('validation logic', () => {
       'Unknown column [a]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename missingField as', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from a | rename stringField as b', []);
@@ -660,7 +666,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename s* as strings', [
       'Using wildcards (*) in rename is not allowed [s*]',
@@ -1329,22 +1335,68 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      'SyntaxError: expected {OPENING_BRACKET, ENRICH_POLICY_NAME} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [`, [
+      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode`, [
+      'SyntaxError: expected {COLON} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:`, [
+      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "<EOF>"',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] `, [
+      "SyntaxError: extraneous input '<EOF>' expecting {OPENING_BRACKET, ENRICH_POLICY_NAME}",
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:value] policy `, [
+      'Unrecognized value [value], ENRICH [ccq.mode] needs to be one of [ANY, COORDINATOR, REMOTE]',
+    ]);
+    for (const value of ['any', 'coordinator', 'remote']) {
+      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value}] policy `, []);
+      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value.toUpperCase()}] policy `, []);
+    }
+
+    testErrorsAndWarnings(`from a | enrich [setting:value policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+      'Unsupported setting [setting], expected [ccq.mode]',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
+      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
+    ]);
+
+    testErrorsAndWarnings(`from a | enrich [setting:value] policy`, [
+      'Unsupported setting [setting], expected [ccq.mode]',
+    ]);
+    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] policy[]`, []);
+
+    testErrorsAndWarnings(
+      `from a | enrich [ccq.mode:any][ccq.mode:coordinator] policy[]`,
+      [],
+      ['Multiple definition of setting [ccq.mode]. Only last one will be applied.']
+    );
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
     testErrorsAndWarnings(`from a | enrich policy on `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a | enrich policy on b `, ['Unknown column [b]']);
     testErrorsAndWarnings(`from a | enrich policy on numberField with `, [
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 `, [
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = c `, [
@@ -1356,8 +1408,8 @@ describe('validation logic', () => {
     //   `Unknown column [stringField]`,
     // ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = , `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at ','",
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at ','",
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
       'Unknown column [var0]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 `, [
@@ -1369,7 +1421,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy on numberField with var0 = otherField, var1 = `, [
-      "SyntaxError: missing {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} at '<EOF>'",
+      "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
       'Unknown column [var1]',
     ]);
 
@@ -1378,7 +1430,7 @@ describe('validation logic', () => {
       []
     );
     testErrorsAndWarnings(`from a | enrich policy with `, [
-      'SyntaxError: expected {QUOTED_IDENTIFIER, PROJECT_UNQUOTED_IDENTIFIER} but found "<EOF>"',
+      'SyntaxError: expected {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
