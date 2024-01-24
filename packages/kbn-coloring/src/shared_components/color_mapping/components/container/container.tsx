@@ -262,7 +262,7 @@ export function Container({
                   `}
                 >
                   {i18n.translate('coloring.colorMapping.container.resetButtonLabel', {
-                    defaultMessage: 'Reset',
+                    defaultMessage: 'Clear all',
                   })}
                 </EuiButtonEmpty>
               </EuiFlexGroup>
