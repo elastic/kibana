@@ -1029,7 +1029,7 @@ module.exports = {
       rules: {
         'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        '@typescript-eslint/import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
