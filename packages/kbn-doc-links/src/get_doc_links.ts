@@ -563,7 +563,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       logsThreshold: `${OBSERVABILITY_DOCS}logs-threshold-alert.html`,
       metricsThreshold: `${OBSERVABILITY_DOCS}metrics-threshold-alert.html`,
       customThreshold: isServerless
-        ? `${SERVERLESS_OBSERVABILITY_DOCS} `
+        ? `${SERVERLESS_OBSERVABILITY_DOCS}create-custom-threshold-alert-rule`
         : `${OBSERVABILITY_DOCS}custom-threshold-alert.html`,
       monitorStatus: `${OBSERVABILITY_DOCS}monitor-status-alert.html`,
       monitorUptime: `${OBSERVABILITY_DOCS}monitor-uptime.html`,
