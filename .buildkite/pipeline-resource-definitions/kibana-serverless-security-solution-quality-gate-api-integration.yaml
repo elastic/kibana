@@ -14,7 +14,6 @@ spec:
       name: kibana / serverless / security-solution-quality-gate / api-integration
       description: Runs the serverless security solution api integration tests for the Quality Gate
     spec:
-      env: null
       branch_configuration: ''
       default_branch: main
       repository: elastic/kibana

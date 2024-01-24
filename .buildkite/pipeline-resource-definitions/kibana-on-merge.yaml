@@ -20,7 +20,7 @@ spec:
         GITHUB_BUILD_COMMIT_STATUS_ENABLED: 'true'
         GITHUB_COMMIT_STATUS_CONTEXT: buildkite/on-merge
         REPORT_FAILED_TESTS_TO_GITHUB: 'true'
-      branch_configuration: main 8.12 8.11 7.17 gh-readonly-queue/main/* merge-queue-trial gh-readonly-queue/merge-queue-trial/*
+      branch_configuration: main 8.12 7.17 gh-readonly-queue/main/* merge-queue-trial gh-readonly-queue/merge-queue-trial/*
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/on_merge.yml

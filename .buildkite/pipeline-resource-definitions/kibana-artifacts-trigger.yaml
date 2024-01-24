@@ -17,7 +17,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_ENABLED: 'true'
         RELEASE_BUILD: 'true'
-      branch_configuration: 8.12 8.11
+      branch_configuration: '8.12'
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts_trigger.yml
@@ -36,7 +36,3 @@ spec:
           cronline: 0 */2 * * * America/New_York
           message: Daily build
           branch: '8.12'
-        Daily build (8.11):
-          cronline: 0 */2 * * * America/New_York
-          message: Daily build
-          branch: '8.11'

@@ -49,7 +49,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_ENABLED: 'true'
-      branch_configuration: main 8.12 8.11 7.17
+      branch_configuration: main 8.12 7.17
       default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts.yml
@@ -72,10 +72,6 @@ spec:
           cronline: 0 7 * * * America/New_York
           message: Daily build
           branch: '8.12'
-        Daily build (8.11):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: '8.11'
         Daily build (7.17):
           cronline: 0 7 * * * America/New_York
           message: Daily build
@@ -100,7 +96,7 @@ spec:
       env:
         SLACK_NOTIFICATIONS_ENABLED: 'true'
         RELEASE_BUILD: 'true'
-      branch_configuration: 8.12 8.11 7.17
+      branch_configuration: 8.12 7.17
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/artifacts.yml
       provider_settings:
@@ -118,10 +114,6 @@ spec:
           cronline: 0 7 * * * America/New_York
           message: Daily build
           branch: '8.12'
-        Daily build (8.11):
-          cronline: 0 7 * * * America/New_York
-          message: Daily build
-          branch: '8.11'
         Daily build (7.17):
           cronline: 0 7 * * * America/New_York
           message: Daily build

@@ -14,7 +14,6 @@ spec:
       name: kibana / flaky-test-suite-runner
       description: ':warning: Trigger a new build here: https://ci-stats.kibana.dev/trigger_flaky_test_runner :warning:'
     spec:
-      env: null
       default_branch: refs/pull/INSERT_PR_NUMBER/head
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/flaky_tests/pipeline.sh

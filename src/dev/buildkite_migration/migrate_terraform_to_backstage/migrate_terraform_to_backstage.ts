@@ -32,6 +32,8 @@ const TMP_DIR = fs.mkdtempSync(path.resolve(os.tmpdir(), 'buildkite-migration'))
 
 const SCHEMA_DEF = `# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json\n`;
 
+const DUMP_OPTIONS = { skipInvalid: true, lineWidth: 200 };
+
 export const runMigration = () =>
   run(
     async ({ log, flagsReader }) => {
@@ -178,14 +180,7 @@ function generateCatalogFile({
   }
 
   const yamlDoc = elasticBuildkiteResources
-    .map(
-      (d) =>
-        SCHEMA_DEF +
-        yaml.safeDump(d, {
-          skipInvalid: true,
-          lineWidth: 200,
-        })
-    )
+    .map((d) => SCHEMA_DEF + yaml.safeDump(d, DUMP_OPTIONS))
     .join('---\n');
 
   if (DRY_RUN) {
@@ -403,7 +398,7 @@ function extractOrGeneratePipelineFile(
         },
       ],
     },
-    { skipInvalid: true }
+    DUMP_OPTIONS
   );
   const recreatedPipelineWords = new Set(recreatedPipelineDef.split(' ').map((w) => w.trim()));
   const originalPipelineWords = new Set(pipelineStepsStr.split(' ').map((w) => w.trim()));
@@ -411,7 +406,8 @@ function extractOrGeneratePipelineFile(
   const accuracy = wordOverlap.length / originalPipelineWords.size;
 
   return {
-    env: (env && Object.keys(env).reduce((o, k) => ({ ...o, [k]: String(env[k]) }), {})) || null,
+    env:
+      (env && Object.keys(env).reduce((o, k) => ({ ...o, [k]: String(env[k]) }), {})) || undefined,
     pipelineFile,
     accuracy,
   };
@@ -426,18 +422,21 @@ function compileLocationFile({
   locationFilePath: string;
   log: ToolingLog;
 }): string {
-  const locationFileContent = yaml.safeDump({
-    apiVersion: 'backstage.io/v1alpha1',
-    kind: 'Location',
-    metadata: {
-      name: 'kibana-buildkite-pipelines',
-      description: 'This file points out individual buildkite pipeline definition files',
+  const locationFileContent = yaml.safeDump(
+    {
+      apiVersion: 'backstage.io/v1alpha1',
+      kind: 'Location',
+      metadata: {
+        name: 'kibana-buildkite-pipelines',
+        description: 'This file points to individual buildkite pipeline definition files',
+      },
+      spec: {
+        type: 'url',
+        targets: catalogFileNames.map((e) => path.join('.', path.basename(e))),
+      },
     },
-    spec: {
-      type: 'url',
-      targets: catalogFileNames.map((e) => `./${e}`),
-    },
-  });
+    DUMP_OPTIONS
+  );
 
   if (DRY_RUN) {
     const tempLocationPath = path.resolve(TMP_DIR, 'locations.yml');
