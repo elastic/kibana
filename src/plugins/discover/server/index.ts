@@ -8,7 +8,13 @@
 
 import { KibanaRequest, PluginInitializerContext } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { ColumnsFromLocatorFn, SearchSourceFromLocatorFn, TitleFromLocatorFn } from './locator';
+import {
+  ColumnsFromLocatorFn,
+  SearchSourceFromLocatorFn,
+  TitleFromLocatorFn,
+  QueryFromLocatorFn,
+  FiltersFromLocatorFn,
+} from './locator';
 
 export interface DiscoverServerPluginStartDeps {
   data: DataPluginStart;
@@ -18,6 +24,8 @@ export interface LocatorServiceScopedClient {
   columnsFromLocator: ColumnsFromLocatorFn;
   searchSourceFromLocator: SearchSourceFromLocatorFn;
   titleFromLocator: TitleFromLocatorFn;
+  queryFromLocator: QueryFromLocatorFn;
+  filtersFromLocator: FiltersFromLocatorFn;
 }
 
 export interface DiscoverServerPluginLocatorService {

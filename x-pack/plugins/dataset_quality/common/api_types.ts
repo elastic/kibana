@@ -54,6 +54,12 @@ export const degradedDocsRt = rt.type({
 
 export type DegradedDocs = rt.TypeOf<typeof degradedDocsRt>;
 
+export const dataStreamDetailsRt = rt.type({
+  createdOn: rt.number,
+});
+
+export type DataStreamDetails = rt.TypeOf<typeof dataStreamDetailsRt>;
+
 export const getDataStreamsStatsResponseRt = rt.exact(
   rt.intersection([
     rt.type({
@@ -70,3 +76,5 @@ export const getDataStreamsDegradedDocsStatsResponseRt = rt.exact(
     degradedDocs: rt.array(degradedDocsRt),
   })
 );
+
+export const getDataStreamsDetailsResponseRt = rt.exact(dataStreamDetailsRt);

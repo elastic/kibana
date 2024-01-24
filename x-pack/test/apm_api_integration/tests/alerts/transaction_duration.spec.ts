@@ -45,7 +45,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   };
 
   registry.when('transaction duration alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -68,7 +68,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return synthtraceEsClient.index(events);
     });
 
     after(async () => {

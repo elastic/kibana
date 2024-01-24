@@ -25,7 +25,7 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import { Router } from '@kbn/core-http-router-server-internal';
+import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
 
 import { CspConfigType, cspConfig } from './csp';
 import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
@@ -132,7 +132,10 @@ export class HttpService
           path,
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
-          { isDev: this.env.mode.dev, versionedRouteResolution: config.versioned.versionResolution }
+          {
+            isDev: this.env.mode.dev,
+            versionedRouterOptions: getVersionedRouterOptions(config),
+          }
         );
 
         registerCallback(router);
@@ -178,7 +181,7 @@ export class HttpService
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
           isDev: this.env.mode.dev,
-          versionedRouteResolution: config.versioned.versionResolution,
+          versionedRouterOptions: getVersionedRouterOptions(config),
         });
         registerRouter(router);
         return router;
@@ -247,4 +250,12 @@ export class HttpService
     await this.httpServer.stop();
     await this.httpsRedirectServer.stop();
   }
+}
+
+function getVersionedRouterOptions(config: HttpConfig): RouterOptions['versionedRouterOptions'] {
+  return {
+    defaultHandlerResolutionStrategy: config.versioned.versionResolution,
+    useVersionResolutionStrategyForInternalPaths:
+      config.versioned.useVersionResolutionStrategyForInternalPaths,
+  };
 }

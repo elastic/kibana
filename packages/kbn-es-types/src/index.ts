@@ -15,6 +15,7 @@ import {
   ESQLColumn,
   ESQLRow,
   ESQLSearchReponse,
+  ESQLSearchParams,
 } from './search';
 
 export type ESFilter = estypes.QueryDslQueryContainer;
@@ -47,4 +48,5 @@ export type {
   ESQLColumn,
   ESQLRow,
   ESQLSearchReponse,
+  ESQLSearchParams,
 };

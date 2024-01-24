@@ -8,7 +8,7 @@
 
 import Url from 'url';
 import { inspect, format } from 'util';
-import { setTimeout } from 'timers/promises';
+import { setTimeout as setTimer } from 'timers/promises';
 import * as Rx from 'rxjs';
 import apmNode from 'elastic-apm-node';
 import playwright, { ChromiumBrowser, Page, BrowserContext, CDPSession, Request } from 'playwright';
@@ -222,7 +222,7 @@ export class JourneyFtrHarness {
     // can't track but hope it is started within 3 seconds, node will stay
     // alive for active requests
     // https://github.com/elastic/apm-agent-nodejs/issues/2088
-    await setTimeout(3000);
+    await setTimer(3000);
   }
 
   private async onTeardown() {
@@ -333,33 +333,36 @@ export class JourneyFtrHarness {
   private telemetryTrackerCount = 0;
 
   private trackTelemetryRequests(page: Page) {
-    const id = ++this.telemetryTrackerCount;
-
-    const requestFailure$ = Rx.fromEvent<Request>(page, 'requestfailed');
-    const requestSuccess$ = Rx.fromEvent<Request>(page, 'requestfinished');
-    const request$ = Rx.fromEvent<Request>(page, 'request').pipe(
+    const requestSuccess$ = Rx.fromEvent(
+      page,
+      'requestfinished'
+    ) as Rx.Observable<playwright.Request>;
+    const request$ = (Rx.fromEvent(page, 'request') as Rx.Observable<playwright.Request>).pipe(
       Rx.takeUntil(
         this.pageTeardown$.pipe(
           Rx.first((p) => p === page),
           Rx.delay(3000)
-          // If EBT client buffers:
-          // Rx.mergeMap(async () => {
-          //  await page.waitForFunction(() => {
-          //    // return window.kibana_ebt_client.buffer_size == 0
-          //  });
-          // })
         )
       ),
-      Rx.mergeMap((request) => {
+      Rx.mergeMap((request: Request) => {
         if (!request.url().includes('telemetry-staging.elastic.co')) {
           return Rx.EMPTY;
         }
 
-        this.log.debug(`Waiting for telemetry request #${id} to complete`);
-        return Rx.merge(requestFailure$, requestSuccess$).pipe(
-          Rx.first((r) => r === request),
+        const id = ++this.telemetryTrackerCount;
+        this.log.info(`Waiting for telemetry request #${id} to complete`);
+        return Rx.of(requestSuccess$).pipe(
+          Rx.timeout(60_000),
+          Rx.catchError((error) => {
+            if (error instanceof Error && error.name === 'TimeoutError') {
+              this.log.error(`Timeout error occurred: ${error.message}`);
+            }
+            // Rethrow the error if it's not a TimeoutError
+            return Rx.throwError(() => new Error(error));
+          }),
           Rx.tap({
-            complete: () => this.log.debug(`Telemetry request #${id} complete`),
+            complete: () => this.log.info(`Telemetry request #${id} complete`),
+            error: (err) => this.log.error(`Telemetry request was not processed: ${err.message}`),
           })
         );
       })
@@ -446,6 +449,15 @@ export class JourneyFtrHarness {
   private onConsoleEvent = async (message: playwright.ConsoleMessage) => {
     try {
       const { url, lineNumber, columnNumber } = message.location();
+
+      if (
+        url.includes('kbn-ui-shared-deps-npm.dll.js') ||
+        url.includes('kbn-ui-shared-deps-src.js')
+      ) {
+        // ignore messages from kbn-ui-shared-deps-npm.dll.js & kbn-ui-shared-deps-src.js
+        return;
+      }
+
       const location = `${url}:${lineNumber}:${columnNumber}`;
 
       const args = await asyncMap(message.args(), (handle) => handle.jsonValue());
@@ -453,8 +465,17 @@ export class JourneyFtrHarness {
         ? args.map((arg) => (typeof arg === 'string' ? arg : inspect(arg, false, null))).join(' ')
         : message.text();
 
-      if (url.includes('kbn-ui-shared-deps-npm.dll.js')) {
-        // ignore errors/warning from kbn-ui-shared-deps-npm.dll.js
+      if (text.includes(`Unrecognized feature: 'web-share'`)) {
+        // ignore Error with Permissions-Policy header: Unrecognized feature: 'web-share'
+        return;
+      }
+
+      if (
+        url.includes('core.entry.js') &&
+        args.length > 1 &&
+        !('performance_metric' === args[1]?.ebt_event?.event_type)
+      ) {
+        // ignore events like "click", log to console only 'event_type: performance_metric'
         return;
       }
 
