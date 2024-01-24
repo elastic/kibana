@@ -52,9 +52,11 @@ jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
     }) => {
       if (connectorId === 'mock-connector-id') {
         return {
-          connector_id: 'mock-connector-id',
-          data: mockActionResponse,
-          status: 'ok',
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            status: 'ok',
+          },
         };
       } else {
         throw new Error('simulated error');

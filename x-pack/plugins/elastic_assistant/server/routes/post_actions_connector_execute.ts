@@ -125,9 +125,22 @@ export const postActionsConnectorExecuteRoute = (
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
         });
+        let result: StreamFactoryReturnType['responseWithHeaders'] | StaticReturnType =
+          langChainResponse;
+        if (Object.hasOwn(langChainResponse.body, 'data')) {
+          // update replacements on static response
+          const staticResponse = langChainResponse as StaticReturnType;
+          result = {
+            ...staticResponse,
+            body: {
+              ...staticResponse.body,
+              replacements: latestReplacements,
+            },
+          };
+        }
         return response.ok<
           StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
-        >(langChainResponse);
+        >(result);
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
