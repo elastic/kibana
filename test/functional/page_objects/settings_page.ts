@@ -494,10 +494,19 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
-  async refreshDataViewFieldList(dataViewName?: string) {
+  async refreshDataViewFieldList(
+    dataViewName?: string,
+    options: { ignoreMissing?: boolean } = { ignoreMissing: false }
+  ) {
     if (dataViewName) {
       await this.common.navigateToApp('management/kibana/dataViews');
       await this.header.waitUntilLoadingHasFinished();
+      if (
+        options.ignoreMissing &&
+        (await this.testSubjects.exists(`detail-link-${dataViewName}`)) === false
+      ) {
+        return;
+      }
       await this.testSubjects.click(`detail-link-${dataViewName}`);
     }
     await this.testSubjects.click('refreshDataViewButton');

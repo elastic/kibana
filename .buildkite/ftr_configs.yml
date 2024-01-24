@@ -415,6 +415,7 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group3.ts
@@ -426,6 +427,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/test_serverless/functional/test_suites/search/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/search/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/search/common_configs/config.group3.ts
@@ -435,6 +437,7 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/security/config.ts
   - x-pack/test_serverless/functional/test_suites/security/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
+  - x-pack/test_serverless/functional/test_suites/security/config.saved_objects_management.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group1.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group2.ts
   - x-pack/test_serverless/functional/test_suites/security/common_configs/config.group3.ts

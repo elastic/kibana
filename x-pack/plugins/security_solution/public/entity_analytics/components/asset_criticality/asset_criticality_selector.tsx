@@ -6,14 +6,12 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
-
 import {
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiLoadingSpinner,
   EuiModal,
   EuiModalBody,
@@ -26,21 +24,17 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-
 import React, { useState } from 'react';
-
 import { FormattedMessage } from '@kbn/i18n-react';
-
 import { css } from '@emotion/react';
+import { PICK_ASSET_CRITICALITY } from './translations';
 import {
-  CRITICALITY_LEVEL_DESCRIPTION,
-  CRITICALITY_LEVEL_TITLE,
-  PICK_ASSET_CRITICALITY,
-} from './translations';
+  AssetCriticalityBadge,
+  AssetCriticalityBadgeAllowMissing,
+} from './asset_criticality_badge';
 import type { Entity, ModalState, State } from './use_asset_criticality';
 import { useAssetCriticalityData, useCriticalityModal } from './use_asset_criticality';
-import type { CriticalityLevel } from './common';
-import { CRITICALITY_LEVEL_COLOR } from './common';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
   entity: Entity;
@@ -57,6 +51,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   return (
     <>
       <EuiAccordion
+        initialIsOpen
         id="asset-criticality-selector"
         buttonContent={
           <EuiTitle size="xs">
@@ -86,21 +81,10 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           >
             <EuiFlexItem>
               <EuiText size="s">
-                {criticality.status === 'update' && criticality.query.data?.criticality_level ? (
-                  <EuiHealth
-                    data-test-subj="asset-criticality-level"
-                    color={CRITICALITY_LEVEL_COLOR[criticality.query.data.criticality_level]}
-                  >
-                    {CRITICALITY_LEVEL_TITLE[criticality.query.data.criticality_level]}
-                  </EuiHealth>
-                ) : (
-                  <EuiHealth color="subdued">
-                    <FormattedMessage
-                      id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-                      defaultMessage="No criticality assigned yet"
-                    />
-                  </EuiHealth>
-                )}
+                <AssetCriticalityBadgeAllowMissing
+                  criticalityLevel={criticality.query.data?.criticality_level}
+                  dataTestSubj="asset-criticality-level"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem css={{ flexGrow: 'unset' }}>
@@ -194,21 +178,15 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
 const option = (level: CriticalityLevel): EuiSuperSelectOption<CriticalityLevel> => ({
   value: level,
   dropdownDisplay: (
-    <EuiHealth
-      color={CRITICALITY_LEVEL_COLOR[level]}
+    <AssetCriticalityBadge
+      criticalityLevel={level}
       style={{ lineHeight: 'inherit' }}
-      data-test-subj="asset-criticality-modal-select-option"
-    >
-      <strong>{CRITICALITY_LEVEL_TITLE[level]}</strong>
-      <EuiText size="s" color="subdued">
-        <p>{CRITICALITY_LEVEL_DESCRIPTION[level]}</p>
-      </EuiText>
-    </EuiHealth>
+      dataTestSubj="asset-criticality-modal-select-option"
+      withDescription
+    />
   ),
   inputDisplay: (
-    <EuiHealth color={CRITICALITY_LEVEL_COLOR[level]} style={{ lineHeight: 'inherit' }}>
-      {CRITICALITY_LEVEL_TITLE[level]}
-    </EuiHealth>
+    <AssetCriticalityBadge criticalityLevel={level} style={{ lineHeight: 'inherit' }} />
   ),
 });
 const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
