@@ -125,6 +125,7 @@ export class LensVisService {
     timeInterval,
     breakdownField,
     onSuggestionContextChange,
+    onVisContextChanged,
   }: {
     suggestionContextSelectedPreviously: CurrentSuggestionContext | undefined;
     externalVisContext: ExternalVisContext | undefined;
@@ -133,6 +134,7 @@ export class LensVisService {
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
+    onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
   }) => {
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
@@ -149,7 +151,7 @@ export class LensVisService {
 
     console.log('service suggestionState', suggestionState);
 
-    const lensAttributesContext = this.getLensAttributesState({
+    const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       externalVisContext,
       queryParams,
@@ -158,13 +160,18 @@ export class LensVisService {
       breakdownField,
     });
 
-    console.log('service lensAttributesContext', lensAttributesContext);
+    console.log('service lensAttributesState', lensAttributesState);
 
-    if (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange) {
+    if (
+      suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange ||
+      lensAttributesState.shouldUpdateVisContextDueToIncompatibleSuggestion
+    ) {
       console.log(
-        'forced to update selected suggestion',
-        suggestionState.currentSuggestionContext.suggestion
+        'forced to update selected suggestion and vis context',
+        suggestionState.currentSuggestionContext.suggestion,
+        lensAttributesState.lensAttributesContext
       );
+      onVisContextChanged?.(lensAttributesState.lensAttributesContext);
       onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
     }
 
@@ -172,7 +179,7 @@ export class LensVisService {
       status: LensVisServiceStatus.completed,
       allSuggestions,
       currentSuggestionContext: suggestionState.currentSuggestionContext,
-      lensAttributesContext,
+      lensAttributesContext: lensAttributesState.lensAttributesContext,
     });
 
     this.prevUpdateContext = {
@@ -532,12 +539,18 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
-  }): LensAttributesContext | undefined => {
+  }): {
+    shouldUpdateVisContextDueToIncompatibleSuggestion: boolean;
+    lensAttributesContext: LensAttributesContext | undefined;
+  } => {
     const { dataView, query, filters, timeRange } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
     if (!suggestion || !suggestion.datasourceId) {
-      return undefined;
+      return {
+        shouldUpdateVisContextDueToIncompatibleSuggestion: false,
+        lensAttributesContext: undefined,
+      };
     }
 
     const requestData = {
@@ -556,7 +569,9 @@ export class LensVisService {
           }
         : query;
 
-    if (externalVisContext) {
+    let shouldUpdateVisContextDueToIncompatibleSuggestion = false;
+
+    if (externalVisContext?.attributes) {
       if (
         isEqual(externalVisContext.attributes?.state?.query, currentQuery) &&
         timeInterval === externalVisContext?.requestData?.timeInterval &&
@@ -564,12 +579,16 @@ export class LensVisService {
         isSuggestionAndVisContextCompatible(suggestion, externalVisContext)
       ) {
         console.log('using the external lens attributes');
-        return externalVisContext;
+        return {
+          shouldUpdateVisContextDueToIncompatibleSuggestion: false,
+          lensAttributesContext: externalVisContext,
+        };
       } else {
         console.log('external vis is not compatible with the current suggestion');
         console.log('query', externalVisContext.attributes?.state?.query, currentQuery);
         console.log('timeInterval', timeInterval, externalVisContext?.requestData?.timeInterval);
         console.log('suggestionType', suggestionType, externalVisContext?.suggestionType);
+        shouldUpdateVisContextDueToIncompatibleSuggestion = true;
       }
     }
 
@@ -618,9 +637,12 @@ export class LensVisService {
     } as TypedLensByValueInput['attributes'];
 
     return {
-      attributes,
-      requestData,
-      suggestionType,
+      shouldUpdateVisContextDueToIncompatibleSuggestion,
+      lensAttributesContext: {
+        attributes,
+        requestData,
+        suggestionType,
+      },
     };
   };
 }

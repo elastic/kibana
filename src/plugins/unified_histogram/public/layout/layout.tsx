@@ -246,7 +246,6 @@ export const UnifiedHistogramLayout = ({
   );
 
   useEffect(() => {
-    console.log('before running update', originalSuggestionContext, externalVisContext);
     lensVisService.update({
       suggestionContextSelectedPreviously: originalSuggestionContext,
       externalVisContext,
@@ -262,6 +261,7 @@ export const UnifiedHistogramLayout = ({
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
       onSuggestionContextChange,
+      onVisContextChanged,
     });
   }, [
     lensVisService,

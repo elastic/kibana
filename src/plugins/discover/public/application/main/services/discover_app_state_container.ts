@@ -180,11 +180,15 @@ export const getDiscoverAppStateContainer = ({
         appStateContainer.set(value);
       }
     },
-    get: () => {
-      const state = { ...appStateContainer.getState() };
-      delete state.visContext; // don't sync visContext to URL as it can be very long
-      return state;
-    },
+  };
+
+  const enhancedAppContainerFiltered = {
+    ...enhancedAppContainer,
+    // get: () => {
+    //   const state = { ...appStateContainer.getState() };
+    //   delete state.visContext; // don't sync visContext to URL as it can be very long
+    //   return state;
+    // },
   };
 
   const hasChanged = () => {
@@ -212,7 +216,7 @@ export const getDiscoverAppStateContainer = ({
   const replaceUrlState = async (newPartial: DiscoverAppState = {}, merge = true) => {
     addLog('[appState] replaceUrlState', { newPartial, merge });
     const state = merge ? { ...appStateContainer.getState(), ...newPartial } : newPartial;
-    delete state.visContext; // don't sync visContext to URL as it can be very long
+    // delete state.visContext; // don't sync visContext to URL as it can be very long
     await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
   };
 
@@ -220,7 +224,7 @@ export const getDiscoverAppStateContainer = ({
     addLog('[appState] start syncing state with URL');
     return syncState({
       storageKey: APP_STATE_URL_KEY,
-      stateContainer: enhancedAppContainer,
+      stateContainer: enhancedAppContainerFiltered,
       stateStorage,
     });
   };
