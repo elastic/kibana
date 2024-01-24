@@ -13,17 +13,21 @@ jest.mock('@kbn/kibana-utils-plugin/public');
 const { createKbnUrlStateStorage } = jest.requireMock('@kbn/kibana-utils-plugin/public');
 
 const useUrlStateStorageGetMock = jest.fn();
+const useUrlStateStorageSetMock = jest.fn();
+const setRulesListFilterLocalMock = jest.fn();
 const LOCAL_STORAGE_KEY = 'test_local';
 describe('useRulesListFilterStore', () => {
   beforeAll(() => {
     createKbnUrlStateStorage.mockReturnValue({
       get: useUrlStateStorageGetMock,
-      set: jest.fn(),
+      set: useUrlStateStorageSetMock,
     });
   });
 
   beforeEach(() => {
-    jest.spyOn(useLocalStorage, 'default').mockImplementation(() => [null, () => null, () => {}]);
+    jest
+      .spyOn(useLocalStorage, 'default')
+      .mockImplementation(() => [null, setRulesListFilterLocalMock, () => {}]);
     useUrlStateStorageGetMock.mockReturnValue(null);
   });
 
@@ -218,6 +222,8 @@ describe('useRulesListFilterStore', () => {
       types: [],
     });
     expect(result.current.numberOfFiltersStore).toEqual(0);
+    expect(useUrlStateStorageSetMock).toBeCalledTimes(1);
+    expect(setRulesListFilterLocalMock).toBeCalledTimes(1);
   });
 
   it('Should set filter when setFiltersStore has been called', async () => {
@@ -255,5 +261,7 @@ describe('useRulesListFilterStore', () => {
       types: [],
     });
     expect(result.current.numberOfFiltersStore).toEqual(1);
+    expect(useUrlStateStorageSetMock).toBeCalledTimes(1);
+    expect(setRulesListFilterLocalMock).toBeCalledTimes(1);
   });
 });

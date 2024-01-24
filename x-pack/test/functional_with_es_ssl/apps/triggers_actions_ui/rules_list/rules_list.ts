@@ -33,10 +33,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('rules-list-clear-filter');
     } else if (existsRefreshButton) {
       await testSubjects.click('refreshRulesButton');
-    } else {
-      await testSubjects.click('logsTab');
-      await testSubjects.click('rulesTab');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
     }
+    await testSubjects.click('logsTab');
+    await testSubjects.click('rulesTab');
   }
 
   describe('rules list', function () {
