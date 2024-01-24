@@ -64,6 +64,7 @@ const defaultProps = {
   connectorId: mockConnectorId,
   esClient: esClientMock,
   langChainMessages,
+  llmType: 'openai',
   logger: mockLogger,
   onNewReplacements: jest.fn(),
   request: mockRequest,
@@ -88,6 +89,8 @@ describe('callAgentExecutor', () => {
       connectorId: mockConnectorId,
       logger: mockLogger,
       request: mockRequest,
+      streaming: false,
+      llmType: 'openai',
     });
   });
 
