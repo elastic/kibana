@@ -94,7 +94,7 @@ export class KibanaClient {
         'kbn-xsrf': 'true',
         'x-elastic-internal-origin': 'foo',
       },
-      //timeout: 60000,
+      timeout: 60000,
     });
   }
 
