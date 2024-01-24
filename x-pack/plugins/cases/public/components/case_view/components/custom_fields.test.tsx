@@ -40,6 +40,8 @@ describe('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
     expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_3')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_4')).toBeInTheDocument();
   });
 
   it('should render the custom fields types when the custom fields are empty', async () => {
@@ -133,7 +135,11 @@ describe('Case View Page files tab', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
         customFieldsMock[2],
         customFieldsMock[3],
@@ -155,10 +161,80 @@ describe('Case View Page files tab', () => {
 
     await waitFor(() => {
       expect(onSubmit).toBeCalledWith([
-        { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: null },
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
         { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: false },
         customFieldsMock[2],
         customFieldsMock[3],
+      ]);
+    });
+  });
+
+  it('adds missing defaultValues to required text custom fields without value', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[{ ...customFieldsMock[0], value: null }, customFieldsMock[1]]}
+        customFieldsConfiguration={[
+          customFieldsConfigurationMock[0],
+          customFieldsConfigurationMock[1],
+        ]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    // Clicking the toggle triggers the form submit
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: customFieldsConfigurationMock[0].defaultValue,
+        },
+        {
+          type: CustomFieldTypes.TOGGLE,
+          key: 'test_key_2',
+          value: false,
+        },
+      ]);
+    });
+  });
+
+  it('does not overwrite existing text values with a configured defaultValue', async () => {
+    appMockRender.render(
+      <CustomFields
+        isLoading={false}
+        customFields={[
+          { key: customFieldsMock[0].key, type: CustomFieldTypes.TEXT, value: 'existing value' },
+          { ...customFieldsMock[1] },
+        ]}
+        customFieldsConfiguration={[
+          customFieldsConfigurationMock[0],
+          customFieldsConfigurationMock[1],
+        ]}
+        onSubmit={onSubmit}
+      />
+    );
+
+    userEvent.click((await screen.findAllByRole('switch'))[0]);
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith([
+        {
+          type: CustomFieldTypes.TEXT,
+          key: 'test_key_1',
+          value: 'existing value',
+        },
+        {
+          type: CustomFieldTypes.TOGGLE,
+          key: 'test_key_2',
+          value: false,
+        },
       ]);
     });
   });

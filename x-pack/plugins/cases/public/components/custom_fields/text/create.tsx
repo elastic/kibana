@@ -16,8 +16,12 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   customFieldConfiguration,
   isLoading,
 }) => {
-  const { key, label, required } = customFieldConfiguration;
-  const config = getTextFieldConfig({ required, label });
+  const { key, label, required, defaultValue } = customFieldConfiguration;
+  const config = getTextFieldConfig({
+    required,
+    label,
+    ...(defaultValue && { defaultValue: String(defaultValue) }),
+  });
 
   return (
     <UseField
