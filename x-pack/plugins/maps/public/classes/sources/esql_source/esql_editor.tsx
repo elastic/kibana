@@ -19,10 +19,12 @@ interface Props {
   onESQLChange: ({
     columns,
     dateFields,
+    geoFields,
     esql,
   }: {
     columns: ESQLColumn[];
     dateFields: string[];
+    geoFields: string[];
     esql: string;
   }) => void;
 }
@@ -73,6 +75,7 @@ export function ESQLEditor(props: Props) {
             props.onESQLChange({
               columns: esqlMeta.columns,
               dateFields: esqlMeta.dateFields,
+              geoFields: esqlMeta.geoFields,
               esql,
             });
           } catch (err) {
@@ -83,6 +86,7 @@ export function ESQLEditor(props: Props) {
             props.onESQLChange({
               columns: [],
               dateFields: [],
+              geoFields: [],
               esql: '',
             });
           }
