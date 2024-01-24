@@ -146,11 +146,17 @@ export const Chat = memo(function Chat({
   const aiService = getAiService(observabilityAIAssistant, chatService);
   if (!aiService.isLoading && requestHasBeenSubmitted) {
     const assistantESQLMessages = aiService.messages.filter(({ message }) => {
-      return 'content' in message && message.content && message.role === MessageRole.Assistant;
+      return (
+        'content' in message &&
+        message.content &&
+        message.role === MessageRole.Assistant &&
+        message.content?.includes('ES|QL')
+      );
     });
     if (assistantESQLMessages.length) {
       const message = assistantESQLMessages[assistantESQLMessages.length - 1];
-      if (message && message.message.content?.includes('ES|QL')) {
+      // if (message && message.message.content?.includes('ES|QL')) {
+      if (message) {
         const splitCode = message.message.content?.split('```');
         if (splitCode && splitCode.length > 1) {
           const esqlQuery = splitCode[1].replace('esql', '');
