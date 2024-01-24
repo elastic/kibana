@@ -698,7 +698,7 @@ export class ManifestManager {
     await policyUpdateBatchProcessor.complete();
 
     this.logger.info(
-      `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies (updated: [${
+      `Processed [${updatedPolicies.length + unChangedPolicies.length}] Policies: updated: [${
         updatedPolicies.length
       }], un-changed: [${unChangedPolicies.length}]`
     );
@@ -775,7 +775,7 @@ export class ManifestManager {
       total += artifacts.length;
     }
 
-    this.logger.debug(`Retrieved [${total}] artifacts from fleet`);
+    this.logger.info(`Count of current stored artifacts: ${total}`);
 
     return fleetArtifacts;
   }
