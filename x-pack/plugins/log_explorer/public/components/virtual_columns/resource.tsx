@@ -9,11 +9,13 @@ import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { first } from 'lodash';
 import { AgentName } from '@kbn/elastic-agent-utils';
-import { AgentIcon } from '@kbn/custom-icons';
 import { ChipWithPopover } from '../common/popover_chip';
 import * as constants from '../../../common/constants';
 import { getUnformattedResourceFields } from '../../utils/resource';
 import { LogDocument } from '../../../common/document';
+import { dynamic } from '../../utils/dynamic';
+
+const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_icon'));
 
 export const Resource = ({ row }: DataGridCellValueElementProps) => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);

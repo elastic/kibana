@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { resourceHeaderTooltipParagraph, resourceLabel } from '../../common/translations';
 import { HoverPopover } from '../../common/hover_popover';
 import { TooltipButtonComponent } from './tooltip_button';
