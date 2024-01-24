@@ -48,3 +48,14 @@ export const getLensOperationFromRuleMetric = (metric: CustomThresholdExpression
 
 export const getBufferThreshold = (threshold?: number): string =>
   (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
+
+export const lensFieldFormatter = (metrics: CustomThresholdExpressionMetric[]) => {
+  if (metrics.length < 1 || !metrics[0].field) return 'number';
+  const firstMetricField = metrics[0].field;
+  if (firstMetricField.endsWith('.pct')) return 'percent';
+  if (firstMetricField.endsWith('.bytes')) return 'bits';
+  return 'number';
+};
+
+export const isRate = (metrics: CustomThresholdExpressionMetric[]): boolean =>
+  Boolean(metrics.length > 0 && metrics[0].aggType === Aggregators.RATE);

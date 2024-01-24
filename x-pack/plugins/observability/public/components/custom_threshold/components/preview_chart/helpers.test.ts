@@ -8,7 +8,7 @@ import {
   Aggregators,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
-import { getBufferThreshold, getLensOperationFromRuleMetric } from './helpers';
+import { getBufferThreshold, getLensOperationFromRuleMetric, lensFieldFormatter } from './helpers';
 const useCases = [
   [
     {
@@ -120,5 +120,19 @@ describe('getBufferThreshold', () => {
 
   it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ threshold, buffer }) => {
     expect(getBufferThreshold(threshold)).toBe(buffer);
+  });
+});
+
+describe('lensFieldFormatter', () => {
+  const testData = [
+    { metrics: [{ field: 'system.bytes' }], format: 'bits' },
+    { metrics: [{ field: 'system.pct' }], format: 'percent' },
+    { metrics: [{ field: 'system.host.cores' }], format: 'number' },
+    { metrics: [{ field: undefined }], format: 'number' },
+  ];
+  it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ metrics, format }) => {
+    expect(lensFieldFormatter(metrics as unknown as CustomThresholdExpressionMetric[])).toBe(
+      format
+    );
   });
 });

@@ -18,14 +18,18 @@ import {
   XYLayerOptions,
   XYReferenceLinesLayer,
 } from '@kbn/lens-embeddable-utils';
-
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
-import { getBufferThreshold, getLensOperationFromRuleMetric } from './helpers';
+import {
+  lensFieldFormatter,
+  getBufferThreshold,
+  getLensOperationFromRuleMetric,
+  isRate,
+} from './helpers';
 
 interface PreviewChartPros {
   metricExpression: MetricExpression;
@@ -85,13 +89,6 @@ export function PreviewChart({
   useEffect(() => {
     if (!threshold) return;
     const refLayers = [];
-    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
-    const format = {
-      id: isPercent ? 'percent' : 'number',
-      params: {
-        decimals: isPercent ? 0 : 2,
-      },
-    };
 
     if (
       comparator === Comparator.OUTSIDE_RANGE ||
@@ -103,7 +100,6 @@ export function PreviewChart({
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'none',
-            format,
           },
         ],
       });
@@ -113,7 +109,6 @@ export function PreviewChart({
             value: (threshold[1] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'none',
-            format,
           },
         ],
       });
@@ -130,7 +125,6 @@ export function PreviewChart({
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill,
-            format,
           },
         ],
       });
@@ -141,7 +135,6 @@ export function PreviewChart({
             value: getBufferThreshold(threshold[0]),
             color: 'transparent',
             fill,
-            format,
           },
         ],
       });
@@ -187,16 +180,16 @@ export function PreviewChart({
     if (!formulaAsync.value || !dataView || !formula) {
       return;
     }
-    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
+    const formatId = lensFieldFormatter(metrics);
     const baseLayer = {
       type: 'formula',
       value: formula,
       label: 'Custom Threshold',
       groupBy,
       format: {
-        id: isPercent ? 'percent' : 'number',
+        id: formatId,
         params: {
-          decimals: isPercent ? 0 : 2,
+          decimals: 2,
         },
       },
     };
@@ -228,6 +221,8 @@ export function PreviewChart({
         value: layer.value,
         label: layer.label,
         format: layer.format,
+        // We always scale the chart with seconds with RATE Agg.
+        timeScale: isRate(metrics) ? 's' : undefined,
       })),
       options: xYDataLayerOptions,
     });
