@@ -188,7 +188,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [inactiveShownAgents, setInactiveShownAgents] = useState(0);
   const [totalInactiveAgents, setTotalInactiveAgents] = useState(0);
   const [totalManagedAgentIds, setTotalManagedAgentIds] = useState<string[]>([]);
-  const [inactiveManagedAgentIds, setinactiveManagedAgentIds] = useState<string[]>([]);
+  const [inactiveManagedAgentIds, setInactiveManagedAgentIds] = useState<string[]>([]);
   const [managedAgentsOnCurrentPage, setManagedAgentsOnCurrentPage] = useState(0);
   const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
   const getSortFieldForAPI = (field: keyof Agent): string => {
@@ -340,7 +340,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
               ?.filter((agent) => agent.status === 'inactive')
               .map((agent) => agent.id);
             setTotalManagedAgentIds(allManagedAgentIds);
-            setinactiveManagedAgentIds(inactiveManagedIds);
+            setInactiveManagedAgentIds(inactiveManagedIds);
 
             setManagedAgentsOnCurrentPage(
               agentsResponse.data.items
