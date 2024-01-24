@@ -40,6 +40,8 @@ describe('Case View Page files tab', () => {
 
     expect(await screen.findByTestId('case-custom-field-wrapper-test_key_1')).toBeInTheDocument();
     expect(await screen.findByTestId('case-custom-field-wrapper-test_key_2')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_3')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-custom-field-wrapper-test_key_4')).toBeInTheDocument();
   });
 
   it('should render the custom fields types when the custom fields are empty', async () => {
@@ -171,14 +173,11 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('adds missing defaultValues to required custom fields without value', async () => {
+  it('adds missing defaultValues to required text custom fields without value', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
-        customFields={[
-          { ...customFieldsMock[0], value: null },
-          { ...customFieldsMock[1], value: null },
-        ]}
+        customFields={[{ ...customFieldsMock[0], value: null }, customFieldsMock[1]]}
         customFieldsConfiguration={[
           customFieldsConfigurationMock[0],
           customFieldsConfigurationMock[1],
@@ -187,6 +186,7 @@ describe('Case View Page files tab', () => {
       />
     );
 
+    // Clicking the toggle triggers the form submit
     userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
@@ -199,7 +199,7 @@ describe('Case View Page files tab', () => {
         {
           type: CustomFieldTypes.TOGGLE,
           key: 'test_key_2',
-          value: customFieldsConfigurationMock[1].defaultValue,
+          value: false,
         },
       ]);
     });

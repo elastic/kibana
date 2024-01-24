@@ -61,8 +61,8 @@ const FormWrapperComponent: React.FC<FormWrapper> = ({
   const { form } = useForm<{ value: string }>({
     defaultValue: {
       value:
-        typeof customFieldConfiguration?.defaultValue === 'string' && isEmpty(initialValue)
-          ? customFieldConfiguration?.defaultValue
+        customFieldConfiguration?.defaultValue != null && isEmpty(initialValue)
+          ? String(customFieldConfiguration.defaultValue)
           : initialValue,
     },
   });

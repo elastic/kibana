@@ -116,7 +116,7 @@ describe('Edit ', () => {
     expect(await screen.findByText('No value is added')).toBeInTheDocument();
   });
 
-  it('shows the no value text if the the value is null', async () => {
+  it('uses the required value correctly if a required field is empty', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Edit
@@ -130,6 +130,23 @@ describe('Edit ', () => {
     );
 
     expect(await screen.findByText('No value is added')).toBeInTheDocument();
+    userEvent.click(await screen.findByTestId('case-text-custom-field-edit-button-test_key_1'));
+
+    expect(
+      await screen.findByTestId(`case-text-custom-field-form-field-${customFieldConfiguration.key}`)
+    ).toHaveValue(customFieldConfiguration.defaultValue as string);
+    expect(
+      await screen.findByText('This field is populated with the default value.')
+    ).toBeInTheDocument();
+
+    userEvent.click(await screen.findByTestId('case-text-custom-field-submit-button-test_key_1'));
+
+    await waitFor(() => {
+      expect(onSubmit).toBeCalledWith({
+        ...customField,
+        value: customFieldConfiguration.defaultValue,
+      });
+    });
   });
 
   it('does not show the value when the custom field is undefined', async () => {

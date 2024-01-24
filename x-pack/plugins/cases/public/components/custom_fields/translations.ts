@@ -122,8 +122,8 @@ export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
 );
 
 export const POPULATED_WITH_DEFAULT = i18n.translate(
-  'xpack.cases.customFields.fieldOptions.PopulatedWithDefault',
+  'xpack.cases.customFields.fieldOptions.populatedWithDefault',
   {
-    defaultMessage: 'This field was populated with the default value.',
+    defaultMessage: 'This field is populated with the default value.',
   }
 );

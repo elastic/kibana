@@ -21,9 +21,10 @@ describe('Create ', () => {
     jest.clearAllMocks();
   });
 
+  // required text custom field with a default value
   const customFieldConfiguration = customFieldsConfigurationMock[0];
 
-  it('renders correctly', async () => {
+  it('renders correctly with default values', async () => {
     render(
       <FormTestComponent onSubmit={onSubmit}>
         <Create isLoading={false} customFieldConfiguration={customFieldConfiguration} />
@@ -31,9 +32,25 @@ describe('Create ', () => {
     );
 
     expect(await screen.findByText(customFieldConfiguration.label)).toBeInTheDocument();
+
     expect(
       await screen.findByTestId(`${customFieldConfiguration.key}-text-create-custom-field`)
-    ).toBeInTheDocument();
+    ).toHaveValue(customFieldConfiguration.defaultValue as string);
+  });
+
+  it('renders correctly with optional fields', async () => {
+    const optionalField = customFieldsConfigurationMock[2]; // optional text custom field
+
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Create isLoading={false} customFieldConfiguration={optionalField} />
+      </FormTestComponent>
+    );
+
+    expect(await screen.findByText(optionalField.label)).toBeInTheDocument();
+    expect(await screen.findByTestId(`${optionalField.key}-text-create-custom-field`)).toHaveValue(
+      ''
+    );
   });
 
   it('renders loading state correctly', async () => {

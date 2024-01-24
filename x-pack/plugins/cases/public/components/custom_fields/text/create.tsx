@@ -20,7 +20,7 @@ const CreateComponent: CustomFieldType<CaseCustomFieldText>['Create'] = ({
   const config = getTextFieldConfig({
     required,
     label,
-    ...(typeof defaultValue === 'string' && { defaultValue }),
+    ...(defaultValue && { defaultValue: String(defaultValue) }),
   });
 
   return (
