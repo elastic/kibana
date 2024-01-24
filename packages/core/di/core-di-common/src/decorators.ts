@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { inject, injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
+
+export { inject, injectable };
