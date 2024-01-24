@@ -660,6 +660,7 @@ export const useESQLOverallStatsData = (
           }
           const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
 
+          const sampleCount = limitSize === 'none' ? totalCount : parseInt(limitSize, 10);
           aggregatableFieldsToQuery.forEach((field, idx) => {
             const count = esqlResultsResp.values[0][idx * 2] as number;
             const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
@@ -671,7 +672,7 @@ export const useESQLOverallStatsData = (
                   fieldName: field.name,
                   existsInDocs: true,
                   stats: {
-                    sampleCount: totalCount,
+                    sampleCount,
                     count,
                     cardinality,
                   },
