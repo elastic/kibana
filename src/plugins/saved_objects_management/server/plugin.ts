@@ -12,6 +12,7 @@ import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } 
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 import { capabilitiesProvider } from './capabilities_provider';
+import { MyExampleService, myExampleServiceId } from './injection_example';
 
 export class SavedObjectsManagementPlugin
   implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}>
@@ -23,7 +24,7 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public setup({ http, capabilities }: CoreSetup) {
+  public setup({ http, capabilities, injection }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
@@ -32,6 +33,21 @@ export class SavedObjectsManagementPlugin
 
     capabilities.registerProvider(capabilitiesProvider);
 
+    // bind a global service though Core's injector
+    injection.setupModule((pluginContainer, { createModule }) => {
+      pluginContainer.bind(myExampleServiceId).to(MyExampleService).inSingletonScope();
+
+      return {
+        global: createModule(({ bind }) => {
+          bind(myExampleServiceId)
+            .toDynamicValue(() => {
+              return pluginContainer.get(myExampleServiceId);
+            })
+            .inSingletonScope();
+        }),
+      };
+    });
+
     return {};
   }
 
@@ -39,6 +55,10 @@ export class SavedObjectsManagementPlugin
     this.logger.debug('Starting up SavedObjectsManagement plugin');
     const managementService = new SavedObjectsManagement(core.savedObjects.getTypeRegistry());
     this.managementService$.next(managementService);
+
+    // retrieve the service and use it
+    const myService = core.injection.container.get(myExampleServiceId);
+    myService.doSomething();
 
     return {};
   }
