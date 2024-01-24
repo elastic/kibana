@@ -107,7 +107,7 @@ export function createConversationNotFoundError() {
 
 export function createTokenLimitReachedError() {
   return new ChatCompletionError(
-    ChatCompletionErrorCode.NotFound,
+    ChatCompletionErrorCode.TokenLimitReachedError,
     i18n.translate('xpack.observabilityAiAssistant.chatCompletionError.tokenLimitReachedError', {
       defaultMessage: 'Token limit reached',
     })
