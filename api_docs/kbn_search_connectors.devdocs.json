@@ -559,7 +559,7 @@
             "text": "ElasticsearchClient"
           },
           ", id: string) => Promise<",
-          "WriteResponseBase",
+          "AcknowledgedResponseBase",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/delete_connector.ts",
