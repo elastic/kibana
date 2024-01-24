@@ -37,6 +37,7 @@ import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data
 import { changeIndexPattern } from '../state_management/lens_slice';
 import { LensByReferenceInput } from '../embeddable';
 import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getShareURL } from './share_action';
+import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({
   contextFromEmbeddable,
@@ -602,8 +603,13 @@ export const LensTopNavMenu = ({
               shareUrlEnabled,
               isCurrentStateDirty
             );
+
             const sharingData = {
               activeData,
+              columnsSorting: visualizationMap[visualization.activeId].getSortedColumns?.(
+                visualization.state,
+                getDatasourceLayers(datasourceStates, datasourceMap, dataViews.indexPatterns)
+              ),
               csvEnabled,
               reportingDisabled: !csvEnabled,
               title: title || defaultLensTitle,
