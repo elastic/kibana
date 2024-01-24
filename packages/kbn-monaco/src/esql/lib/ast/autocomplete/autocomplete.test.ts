@@ -447,14 +447,30 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions]);
-    testSuggestions('from a | stats a=max(b) by ', [...getFieldNamesByType('any'), 'var0 =']);
-    testSuggestions('from a | stats a=max(b) BY ', [...getFieldNamesByType('any'), 'var0 =']);
+    testSuggestions('from a | stats a=max(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats a=max(b) BY ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
-    testSuggestions('from a | stats a=c by d, ', [...getFieldNamesByType('any'), 'var0 =']);
+    testSuggestions('from a | stats a=c by d, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
-    testSuggestions('from a | stats a=min(b) by ', [...getFieldNamesByType('any'), 'var0 =']);
+    testSuggestions('from a | stats a=min(b) by ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min(b), b=max()', getFieldNamesByType('number'));
@@ -484,7 +500,19 @@ describe('autocomplete', () => {
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
       '`avg(b)`',
     ]);
-    testSuggestions('from a | stats avg(b) by var0 = ', getFieldNamesByType('any'));
+    testSuggestions('from a | stats avg(b) by var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | stats avg(b) by c, ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      'var0 =',
+    ]);
+    testSuggestions('from a | stats avg(b) by c, var0 = ', [
+      ...getFieldNamesByType('any'),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
     testSuggestions('from a | stats avg(b) by numberField % 2 ', ['|', ',']);
   });
 
