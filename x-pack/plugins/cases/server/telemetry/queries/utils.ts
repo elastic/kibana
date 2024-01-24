@@ -202,16 +202,16 @@ export const getSolutionValues = ({
 };
 
 export const getCustomFieldsTelemetry = (
-  customFields: ConfigurationPersistedAttributes['customFields']
+  customFields?: ConfigurationPersistedAttributes['customFields']
 ): CustomFieldsTelemetry => {
-  let customFiledTypes: Record<string, number> = {};
+  const customFiledTypes: Record<string, number> = {};
 
   const totalsByType = customFields?.reduce((a, c) => {
     if (c?.type) {
-      customFiledTypes = { ...customFiledTypes, [c.type]: (customFiledTypes[c.type] ?? 0) + 1 };
+      Object.assign(customFiledTypes, { [c.type]: (customFiledTypes[c.type] ?? 0) + 1 });
     }
 
-    return { ...customFiledTypes };
+    return customFiledTypes;
   }, {});
 
   const allRequiredCustomFields = customFields?.filter((field) => field?.required).length;
