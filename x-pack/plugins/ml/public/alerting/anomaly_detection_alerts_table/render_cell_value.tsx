@@ -90,8 +90,16 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
           </>
         );
       case ALERT_ANOMALY_SCORE:
-        const resultValue: number[] = value.split(',').map(Number);
-        const latestValue = resultValue.at(-1) as number;
+        let latestValue: number | undefined;
+        if (typeof value === 'number') {
+          latestValue = value;
+        } else {
+          const resultValue: number[] = value.split(',').map(Number);
+          latestValue = resultValue.at(-1) as number;
+        }
+        if (latestValue === undefined) {
+          return <>-</>;
+        }
         return (
           <EuiHealth textSize={'xs'} color={getSeverityColor(latestValue)}>
             {getFormattedSeverityScore(latestValue)}
