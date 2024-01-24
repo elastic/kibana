@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { css } from '@emotion/css';
 
 import { TogglePanel } from './toggle_panel';
 
@@ -23,6 +21,7 @@ import type { SecurityProductTypes } from './configs';
 import { ProductLine } from './configs';
 
 import type { StepId } from './types';
+import { useOnboardingStyles } from './styles/onboarding.styles';
 
 interface OnboardingProps {
   indicesExist?: boolean;
@@ -35,8 +34,6 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   productTypes,
   onboardingSteps,
 }) => {
-  const { euiTheme } = useEuiTheme();
-
   const {
     onStepClicked,
     toggleTaskCompleteStatus,
@@ -52,41 +49,19 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
   const productTier = productTypes?.find(
     (product) => product.product_line === ProductLine.security
   )?.product_tier;
+  const { wrapperStyles, progressSectionStyles, stepsSectionStyles } = useOnboardingStyles();
 
   useScrollToHash();
 
   return (
-    <KibanaPageTemplate
-      restrictWidth={false}
-      contentBorder={false}
-      grow={true}
-      /* this is the only page without padding in Security Solution,
-       **  ignoring main page wrapper padding using absolute positioning
-       */
-      css={css`
-        top: 0;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        position: absolute;
-      `}
-    >
-      <KibanaPageTemplate.Section
-        restrictWidth={CONTENT_WIDTH}
-        paddingSize="xl"
-        css={css`
-          padding: 0 ${euiTheme.size.xxl};
-        `}
-      >
+    <div className={wrapperStyles}>
+      <KibanaPageTemplate.Section restrictWidth={CONTENT_WIDTH} paddingSize="xl">
         <WelcomeHeader productTier={productTier} />
       </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
-        css={css`
-          background-color: ${euiTheme.colors.lightestShade};
-          padding: ${euiTheme.size.xxl} ${euiTheme.size.xxl} ${euiTheme.size.m};
-        `}
+        className={progressSectionStyles}
       >
         <Progress
           totalActiveSteps={totalActiveSteps}
@@ -100,10 +75,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
         grow={true}
         restrictWidth={CONTENT_WIDTH}
         paddingSize="none"
-        css={css`
-          padding: 0 ${euiTheme.size.xxl} ${euiTheme.size.xxxl};
-          background-color: ${euiTheme.colors.lightestShade};
-        `}
+        className={stepsSectionStyles}
       >
         <StepContextProvider
           expandedCardSteps={expandedCardSteps}
@@ -118,7 +90,7 @@ export const OnboardingComponent: React.FC<OnboardingProps> = ({
       <KibanaPageTemplate.Section grow={true} restrictWidth={CONTENT_WIDTH} paddingSize="none">
         <Footer />
       </KibanaPageTemplate.Section>
-    </KibanaPageTemplate>
+    </div>
   );
 };
 
