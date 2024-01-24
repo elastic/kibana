@@ -93,7 +93,7 @@ describe('CsvESQLGenerator', () => {
       escapeFormulaValues: true,
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       enablePanelActionDownload: true,
       maxConcurrentShardRequests: 5,
     };
@@ -373,7 +373,7 @@ describe('CsvESQLGenerator', () => {
         escapeFormulaValues: false,
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
-        scroll: { size: 500, duration: '30s' },
+        scroll: { size: 500, duration: '30s', strategy: 'pit' },
         enablePanelActionDownload: true,
         maxConcurrentShardRequests: 5,
       };
