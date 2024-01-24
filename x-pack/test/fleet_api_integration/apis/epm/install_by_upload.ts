@@ -88,7 +88,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('should install a tar archive correctly', async function () {
       const res = await uploadPackage();
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(31);
     });
 
     it('should upgrade when uploading a newer zip archive', async () => {
