@@ -4329,6 +4329,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-view-editor-plugin@link:src/plugins/data_view_editor":
   version "0.0.0"
   uid ""
@@ -25338,11 +25342,6 @@ public-encrypt@^4.0.0:
     create-hash "^1.1.0"
     parse-asn1 "^5.0.0"
     randombytes "^2.0.1"
-
-puid@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
-  integrity sha1-+mOKc317IEGQWdk5Za7TbKIOHIQ=
 
 pump@^2.0.0:
   version "2.0.1"

@@ -8,7 +8,10 @@
     "server": true,
     "browser": false,
     "requiredPlugins": [
-      "data"
+      "data",
+    ],
+    "optionalPlugins": [
+      "spaces",
     ]
   }
 }

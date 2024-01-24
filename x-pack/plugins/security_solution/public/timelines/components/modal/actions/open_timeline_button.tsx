@@ -13,28 +13,28 @@ import * as i18n from './translations';
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['createFrom'];
 
-export const OpenTimelineAction = React.memo(() => {
+/**
+ * Renders a button that opens the `OpenTimelineModal` to allow users to select a saved timeline to open
+ */
+export const OpenTimelineButton = React.memo(() => {
   const [showTimelineModal, setShowTimelineModal] = useState(false);
-  const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
-  const onOpenTimelineModal = useCallback(() => {
-    setShowTimelineModal(true);
-  }, []);
+  const toggleTimelineModal = useCallback(() => setShowTimelineModal((prev) => !prev), []);
 
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="open-timeline-button"
-        onClick={onOpenTimelineModal}
+        data-test-subj="timeline-modal-open-timeline-button"
+        onClick={toggleTimelineModal}
         aria-label={i18n.OPEN_TIMELINE_BTN_LABEL}
       >
         {i18n.OPEN_TIMELINE_BTN}
       </EuiButtonEmpty>
 
       {showTimelineModal ? (
-        <OpenTimelineModal onClose={onCloseTimelineModal} hideActions={actionTimelineToHide} />
+        <OpenTimelineModal onClose={toggleTimelineModal} hideActions={actionTimelineToHide} />
       ) : null}
     </>
   );
 });
 
-OpenTimelineAction.displayName = 'OpenTimelineAction';
+OpenTimelineButton.displayName = 'OpenTimelineButton';
