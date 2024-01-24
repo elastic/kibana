@@ -5,10 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { EuiFlexItem, EuiTablePagination } from '@elastic/eui';
+import React, { useState } from 'react';
 import { GroupListView } from './group_list_view';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
 import type { SortDirection } from '../slo_list_search_bar';
+import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../../../common/slo/constants';
 
 interface Props {
   isCompact: boolean;
@@ -20,7 +22,13 @@ interface Props {
 }
 
 export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Props) {
-  const { data, isLoading } = useFetchSloGroups();
+  const [page, setPage] = useState(0);
+  const [perPage, setPerPage] = useState(DEFAULT_SLO_GROUPS_PAGE_SIZE);
+  const { data, isLoading } = useFetchSloGroups({ perPage, page: page + 1 });
+  const { results = {}, total = 0 } = data ?? {};
+  const handlePageClick = (pageNumber: number) => {
+    setPage(pageNumber);
+  };
 
   if (isLoading) {
     return (
@@ -33,10 +41,11 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Pro
   }
   return (
     <>
-      {data &&
-        Object.keys(data).map((group) => {
+      {results &&
+        Object.keys(results).map((group) => {
           return (
             <GroupListView
+              key={group}
               sloView={sloView}
               group={group}
               kqlQuery={kqlQuery}
@@ -46,6 +55,21 @@ export function GroupView({ isCompact, kqlQuery, sloView, sort, direction }: Pro
             />
           );
         })}
+
+      {total > 0 ? (
+        <EuiFlexItem>
+          <EuiTablePagination
+            pageCount={Math.ceil(total / perPage)}
+            activePage={page}
+            onChangePage={handlePageClick}
+            itemsPerPage={perPage}
+            itemsPerPageOptions={[25, 50, 100]}
+            onChangeItemsPerPage={(newPerPage) => {
+              setPerPage(newPerPage);
+            }}
+          />
+        </EuiFlexItem>
+      ) : null}
     </>
   );
 }

@@ -51,6 +51,7 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
   return (
     <>
       <EuiAccordion
+        initialIsOpen
         id="asset-criticality-selector"
         buttonContent={
           <EuiTitle size="xs">
@@ -80,12 +81,10 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
           >
             <EuiFlexItem>
               <EuiText size="s">
-                {criticality.status === 'update' && (
-                  <AssetCriticalityBadgeAllowMissing
-                    criticalityLevel={criticality.query.data?.criticality_level}
-                    dataTestSubj="asset-criticality-level"
-                  />
-                )}
+                <AssetCriticalityBadgeAllowMissing
+                  criticalityLevel={criticality.query.data?.criticality_level}
+                  dataTestSubj="asset-criticality-level"
+                />
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem css={{ flexGrow: 'unset' }}>

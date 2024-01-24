@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { FunctionComponent } from 'react';
+import { FunctionComponent, ReactNode } from 'react';
 import { ApplicationStart } from '@kbn/core-application-browser';
 import { EuiBadgeProps } from '@elastic/eui';
 import type { IndexDetailsTab } from '../../common/constants';
@@ -19,6 +19,11 @@ export interface IndexContent {
   }) => ReturnType<FunctionComponent>;
 }
 
+export interface IndexToggle {
+  matchIndex: (index: Index) => boolean;
+  label: string;
+  name: string;
+}
 export interface IndexBadge {
   matchIndex: (index: Index) => boolean;
   label: string;
@@ -29,8 +34,16 @@ export interface IndexBadge {
 
 export interface EmptyListContent {
   renderContent: (args: {
+    // the button to open the "create index" modal
     createIndexButton: ReturnType<FunctionComponent>;
   }) => ReturnType<FunctionComponent>;
+}
+
+export interface IndicesListColumn {
+  fieldName: string;
+  label: string;
+  order: number;
+  render?: (index: Index) => ReactNode;
 }
 
 export interface ExtensionsSetup {
@@ -43,7 +56,9 @@ export interface ExtensionsSetup {
   // adds a badge to the index name
   addBadge(badge: IndexBadge): void;
   // adds a toggle to the indices list
-  addToggle(toggle: any): void;
+  addToggle(toggle: IndexToggle): void;
+  // adds a column to display additional information added via a data enricher
+  addColumn(column: IndicesListColumn): void;
   // set the content to render when the indices list is empty
   setEmptyListContent(content: EmptyListContent): void;
   // adds a tab to the index details page
@@ -60,7 +75,7 @@ export class ExtensionsService {
   private _filters: any[] = [];
   private _badges: IndexBadge[] = [
     {
-      matchIndex: (index: { isFrozen: boolean }) => {
+      matchIndex: (index) => {
         return index.isFrozen;
       },
       label: i18n.translate('xpack.idxMgmt.frozenBadgeLabel', {
@@ -70,7 +85,18 @@ export class ExtensionsService {
       color: 'primary',
     },
   ];
-  private _toggles: any[] = [];
+  private _toggles: IndexToggle[] = [
+    {
+      matchIndex: (index) => {
+        return index.hidden;
+      },
+      label: i18n.translate('xpack.idxMgmt.indexTable.hiddenIndicesSwitchLabel', {
+        defaultMessage: 'Include hidden indices',
+      }),
+      name: 'includeHiddenIndices',
+    },
+  ];
+  private _columns: IndicesListColumn[] = [];
   private _emptyListContent: EmptyListContent | null = null;
   private _indexDetailsTabs: IndexDetailsTab[] = [];
   private _indexOverviewContent: IndexContent | null = null;
@@ -84,6 +110,7 @@ export class ExtensionsService {
       addBanner: this.addBanner.bind(this),
       addFilter: this.addFilter.bind(this),
       addToggle: this.addToggle.bind(this),
+      addColumn: this.addColumn.bind(this),
       setEmptyListContent: this.setEmptyListContent.bind(this),
       addIndexDetailsTab: this.addIndexDetailsTab.bind(this),
       setIndexOverviewContent: this.setIndexOverviewContent.bind(this),
@@ -111,6 +138,10 @@ export class ExtensionsService {
 
   private addToggle(toggle: any) {
     this._toggles.push(toggle);
+  }
+
+  private addColumn(column: IndicesListColumn) {
+    this._columns.push(column);
   }
 
   private setEmptyListContent(content: EmptyListContent) {
@@ -159,6 +190,10 @@ export class ExtensionsService {
 
   public get toggles() {
     return this._toggles;
+  }
+
+  public get columns() {
+    return this._columns;
   }
 
   public get emptyListContent() {

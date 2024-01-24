@@ -4694,7 +4694,7 @@ describe('Package policy service', () => {
       );
       expect(result).toEqual({
         name: 'apache-1',
-        namespace: 'default',
+        namespace: '',
         description: '',
         package: { name: 'apache', title: 'Apache', version: '1.0.0' },
         enabled: true,
@@ -4770,7 +4770,7 @@ describe('Package policy service', () => {
       );
       expect(result).toEqual({
         name: 'aws-1',
-        namespace: 'default',
+        namespace: '',
         description: '',
         package: { name: 'aws', title: 'AWS', version: '1.0.0' },
         enabled: true,
