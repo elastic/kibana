@@ -21,9 +21,6 @@ const tokenStyle = css`
 const wildcardStyle = css`
   color: #357160;
 `;
-const generalStyle = css`
-  font-weight: bold;
-`;
 
 function createFormattedExample(key: string, example: string): JSX.Element[] {
   const keyTokens = key.split(' ');
@@ -128,7 +125,7 @@ export const FormattedTokens: FC<Props> = ({ category }) => (
 );
 
 const WrapInText: FC = ({ children }) => (
-  <EuiText css={generalStyle} size="s">
+  <EuiText css={{ fontWeight: 'bold' }} size="s">
     {children}
   </EuiText>
 );

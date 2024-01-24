@@ -24,7 +24,6 @@ import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
 import moment from 'moment';
-import { cloneDeep } from 'lodash';
 import type { CategorizationAdditionalFilter } from '../../../../common/api/log_categorization/create_category_request';
 import {
   type QueryMode,
@@ -139,21 +138,15 @@ export const CategoryTable: FC<Props> = ({
 
   const toggleDetails = useCallback(
     (category: Category) => {
-      const itemIdToExpandedRowMapValues = cloneDeep(itemIdToExpandedRowMap);
+      const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
       if (itemIdToExpandedRowMapValues[category.key]) {
         delete itemIdToExpandedRowMapValues[category.key];
       } else {
-        const timefilterActiveBounds = timefilter.getActiveBounds();
-        if (timefilterActiveBounds === undefined || selectedField === undefined) {
-          return;
-        }
-        itemIdToExpandedRowMapValues[category.key] = (
-          <ExpandedRow category={category} onClose={() => {}} />
-        );
+        itemIdToExpandedRowMapValues[category.key] = <ExpandedRow category={category} />;
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [itemIdToExpandedRowMap, timefilter, selectedField]
+    [itemIdToExpandedRowMap]
   );
 
   const columns: Array<EuiBasicTableColumn<Category>> = [

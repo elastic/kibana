@@ -7,43 +7,56 @@
 
 import React, { FC } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 import type { Category } from '../../../../../common/api/log_categorization/types';
 import { FormattedPatternExamples, FormattedRegex, FormattedTokens } from '../../format_category';
 
 interface ExpandedRowProps {
   category: Category;
-  onClose?(): void;
 }
 
-export const ExpandedRow: FC<ExpandedRowProps> = ({ category, onClose }) => {
+export const ExpandedRow: FC<ExpandedRowProps> = ({ category }) => {
   return (
     <div css={{ marginRight: '40px', width: '100%' }}>
       <EuiSpacer />
 
-      <EuiText size="s">
-        <strong>Tokens</strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <FormattedTokens category={category} />
+      <Section
+        title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.tokens', {
+          defaultMessage: 'Tokens',
+        })}
+      >
+        <FormattedTokens category={category} />
+      </Section>
 
-      <EuiSpacer />
+      <Section
+        title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.regex', {
+          defaultMessage: 'Regex',
+        })}
+      >
+        <FormattedRegex category={category} />
+      </Section>
 
-      <EuiText size="s">
-        <strong>Regex</strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <FormattedRegex category={category} />
-
-      <EuiSpacer />
-
-      <EuiText size="s">
-        <strong>Examples</strong>
-      </EuiText>
-      <EuiSpacer size="xs" />
-      <FormattedPatternExamples category={category} />
-
-      <EuiSpacer />
+      <Section
+        title={i18n.translate('xpack.aiops.logCategorization.expandedRow.title.examples', {
+          defaultMessage: 'Examples',
+        })}
+      >
+        <FormattedPatternExamples category={category} />
+      </Section>
     </div>
+  );
+};
+
+const Section: FC<{ title: string }> = ({ title, children }) => {
+  return (
+    <>
+      <EuiText size="s">
+        <strong>{title}</strong>
+      </EuiText>
+      <EuiSpacer size="xs" />
+      {children}
+      <EuiSpacer />
+    </>
   );
 };
