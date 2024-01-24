@@ -13,8 +13,9 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
+import { shouldBeQuotedText } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
-import { AstProviderFn } from '../types';
+import { AstProviderFn, ESQLAst } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
 
 type GetSourceFn = () => Promise<string[]>;
@@ -105,6 +106,55 @@ async function getSpellingActionForColumns(
   return wrapIntoSpellingChangeAction(error, uri, possibleFields);
 }
 
+async function getQuotableActionForColumns(
+  error: monaco.editor.IMarkerData,
+  uri: monaco.Uri,
+  queryString: string,
+  ast: ESQLAst,
+  { getFieldsByType }: Callbacks
+) {
+  const commandEndIndex = ast.find((command) => command.location.max > error.endColumn)?.location
+    .max;
+  // the error received is unknwonColumn here, but look around the column to see if there's more
+  // which broke the grammar and the validation code couldn't identify as unquoted column
+  const remainingCommandText = queryString.substring(
+    error.endColumn - 1,
+    commandEndIndex ? commandEndIndex + 1 : undefined
+  );
+  const stopIndex = Math.max(
+    remainingCommandText.indexOf(',') > 1
+      ? remainingCommandText.indexOf(',')
+      : remainingCommandText.indexOf(' '),
+    0
+  );
+  const possibleUnquotedText = queryString.substring(
+    error.endColumn - 1,
+    error.endColumn + stopIndex
+  );
+  const errorText = queryString.substring(
+    error.startColumn - 1,
+    error.endColumn + possibleUnquotedText.length
+  );
+  const actions = [];
+  if (shouldBeQuotedText(errorText)) {
+    const solution = `\`${errorText}\``;
+    actions.push(
+      createAction(
+        i18n.translate('xpack.data.querying.esql.quickfix.replaceWithSolution', {
+          defaultMessage: 'Did you mean {solution} ?',
+          values: {
+            solution,
+          },
+        }),
+        solution,
+        { ...error, endColumn: error.startColumn + errorText.length }, // override the location
+        uri
+      )
+    );
+  }
+  return actions;
+}
+
 async function getSpellingActionForIndex(
   error: monaco.editor.IMarkerData,
   uri: monaco.Uri,
@@ -193,13 +243,11 @@ export async function getActions(
     const code = error.code ?? inferCodeFromError(error);
     switch (code) {
       case 'unknownColumn':
-        const columnsSpellChanges = await getSpellingActionForColumns(
-          error,
-          model.uri,
-          innerText,
-          callbacks
-        );
-        actions.push(...columnsSpellChanges);
+        const [columnsSpellChanges, columnsQuotedChanges] = await Promise.all([
+          getSpellingActionForColumns(error, model.uri, innerText, callbacks),
+          getQuotableActionForColumns(error, model.uri, innerText, ast, callbacks),
+        ]);
+        actions.push(...(columnsQuotedChanges.length ? columnsQuotedChanges : columnsSpellChanges));
         break;
       case 'unknownIndex':
         const indexSpellChanges = await getSpellingActionForIndex(
