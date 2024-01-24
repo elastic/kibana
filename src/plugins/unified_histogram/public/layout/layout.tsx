@@ -26,6 +26,7 @@ import {
   ResizableLayoutMode,
   ResizableLayoutDirection,
 } from '@kbn/resizable-layout';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { Chart, checkChartAvailability } from '../chart';
 import type {
   UnifiedHistogramChartContext,
@@ -238,8 +239,16 @@ export const UnifiedHistogramLayout = ({
     data: services.data,
     lensSuggestionsApi,
     onSuggestionChange,
-    table,
   });
+
+  // apply table to current suggestion
+  if (table) {
+    const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
+    Object.keys(layers).forEach((key) => {
+      const layer = layers[key];
+      layer.table = table;
+    });
+  }
 
   const chart = suggestionUnsupported ? undefined : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });

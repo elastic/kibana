@@ -6,14 +6,12 @@
  */
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
-import { TextBasedPersistedState } from './datasources/text_based/types';
 import { getSuggestions } from './editor_frame_service/editor_frame/suggestion_helpers';
 import type { DatasourceMap, VisualizationMap, VisualizeEditorContext } from './types';
 import type { DataViewsState } from './state_management';
 
 interface SuggestionsApi {
-  context: (VisualizeFieldContext | VisualizeEditorContext) & { table?: Datatable };
+  context: VisualizeFieldContext | VisualizeEditorContext;
   dataView: DataView;
   visualizationMap?: VisualizationMap;
   datasourceMap?: DatasourceMap;
@@ -27,7 +25,7 @@ export const suggestionsApi = ({
   visualizationMap,
   excludedVisualizations,
 }: SuggestionsApi) => {
-  const { table, ...initialContext } = context;
+  const initialContext = context;
   if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
@@ -92,14 +90,5 @@ export const suggestionsApi = ({
   // we want to sort XY first
   const sortXYFirst = suggestionsList.sort((a, b) => (a.visualizationId === 'lnsXY' ? -1 : 1));
 
-  if (table) {
-    sortXYFirst.forEach((suggestion) => {
-      const { layers } = suggestion.datasourceState as TextBasedPersistedState;
-      Object.keys(layers).forEach((key) => {
-        const layer = layers[key];
-        layer.table = table;
-      });
-    });
-  }
   return sortXYFirst;
 };

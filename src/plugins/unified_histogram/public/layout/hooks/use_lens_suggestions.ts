@@ -32,7 +32,6 @@ export const useLensSuggestions = ({
   timeRange,
   lensSuggestionsApi,
   onSuggestionChange,
-  table,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
@@ -51,7 +50,6 @@ export const useLensSuggestions = ({
       fieldName: '',
       textBasedColumns: columns,
       query: query && isOfAggregateQueryType(query) ? query : undefined,
-      table,
     };
     const allSuggestions = isPlainRecord
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
@@ -60,10 +58,11 @@ export const useLensSuggestions = ({
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [dataView, columns, query, table, isPlainRecord, lensSuggestionsApi]);
+  }, [dataView, columns, query, isPlainRecord, lensSuggestionsApi]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion || suggestions.firstSuggestion;
+
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
   const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {
@@ -125,7 +124,7 @@ export const useLensSuggestions = ({
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
-    const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns, table });
+    const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
 
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.allSuggestions);
@@ -136,7 +135,6 @@ export const useLensSuggestions = ({
   }, [
     columns,
     dataView,
-    table,
     onSuggestionChange,
     query,
     suggestions.firstSuggestion,
@@ -156,10 +154,8 @@ const getSuggestionDeps = ({
   dataView,
   query,
   columns,
-  table,
 }: {
   dataView: DataView;
   query?: Query | AggregateQuery;
   columns?: DatatableColumn[];
-  table?: Datatable;
-}) => [dataView.id, columns, query, table];
+}) => [dataView.id, columns, query];
