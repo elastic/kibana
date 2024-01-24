@@ -34,6 +34,7 @@ export function mappingFromFieldMap(
           ...rest,
 
           fields: multi_fields.reduce(
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             (acc, multi_field: MultiField) => {
               acc[multi_field.name] = {
                 type: multi_field.type,
