@@ -8,14 +8,14 @@
 /// <reference types="@kbn/ambient-ftr-types"/>
 
 import expect from '@kbn/expect';
-import { chatClient } from '../../services';
+import { chatClient, esClient } from '../../services';
 import { MessageRole } from '../../../../common';
 
 describe('kb functions', () => {
 
   it('summarizes and recalls information', async () => {
     let conversation = await chatClient.complete(
-      'Remember that this cluster is used to test the AI Assistant using an Evaluation Framework'
+      'Remember that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework'
     );
 
     conversation = await chatClient.complete(
@@ -29,11 +29,25 @@ describe('kb functions', () => {
 
     const result = await chatClient.evaluate(conversation, [
       'Calls the summarize function',
-      'Effectively summarizes and remembers that this cluster is used to test the AI Assistant using an Evaluation Framework',
+      'Effectively summarizes and remembers that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
       'Calls the recall function to respond to What is this cluster used for?',
-      'Effectively recalls that this cluster is used to test the AI Assistant using an Evaluation Framework',
+      'Effectively recalls that this cluster is used to test the AI Assistant using the Observability AI Evaluation Framework',
     ]);
 
     expect(result.passed).to.be(true);
+  });
+
+  after(async () => {
+    await esClient.deleteByQuery({
+      index: '.kibana-observability-ai-assistant-kb-*',
+      ignore_unavailable: true,
+      query: {
+        match: {
+          text: {
+            query: "*Observability AI Evaluation Framework*"
+          }
+        }
+      }
+    });
   });
 })
