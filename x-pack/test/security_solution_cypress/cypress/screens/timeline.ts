@@ -81,7 +81,7 @@ export const DELETE_NOTE = '[data-test-subj="delete-note"]';
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
 
-export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
+export const OPEN_TIMELINE_ICON = '[data-test-subj="timeline-modal-open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 

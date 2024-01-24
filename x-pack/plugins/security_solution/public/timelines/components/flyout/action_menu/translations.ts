@@ -23,34 +23,6 @@ export const NEW_TIMELINE = i18n.translate(
   }
 );
 
-export const OPEN_TIMELINE_BTN = i18n.translate(
-  'xpack.securitySolution.flyout.timeline.actionMenu.openTimelineBtn',
-  {
-    defaultMessage: 'Open',
-  }
-);
-
-export const OPEN_TIMELINE_BTN_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.timeline.actionMenu.openTimelineBtnLabel',
-  {
-    defaultMessage: 'Open Existing Timeline',
-  }
-);
-
-export const SAVE_TIMELINE_BTN = i18n.translate(
-  'xpack.securitySolution.flyout.timeline.actionMenu.saveTimelineBtn',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
-export const SAVE_TIMELINE_BTN_LABEL = i18n.translate(
-  'xpack.securitySolution.flyout.timeline.actionMenu.saveTimelineBtnLabel',
-  {
-    defaultMessage: 'Save currently opened Timeline',
-  }
-);
-
 export const NEW_TEMPLATE_TIMELINE = i18n.translate(
   'xpack.securitySolution.flyout.timeline.actionMenu.newTimelineTemplate',
   {
@@ -63,14 +35,6 @@ export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   {
     defaultMessage:
       'You can use Timeline to investigate events, but you do not have the required permissions to save timelines for future use. If you need to save timelines, contact your Kibana administrator.',
-  }
-);
-
-export const CALL_OUT_IMMUTABLE = i18n.translate(
-  'xpack.securitySolution.timeline.callOut.immutable.message.description',
-  {
-    defaultMessage:
-      'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.',
   }
 );
 
@@ -149,23 +113,9 @@ export const OPTIONAL = i18n.translate(
   }
 );
 
-export const SAVE_TOUR_CLOSE = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.saveTour.closeButton',
-  {
-    defaultMessage: 'Close',
-  }
-);
-
 export const TITLE = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.title', {
   defaultMessage: 'Title',
 });
-
-export const SAVE_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.flyout.saveTour.title',
-  {
-    defaultMessage: 'Timeline changes now require manual saves',
-  }
-);
 
 export const SAVE_AS_NEW = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.saveAsNew',

@@ -16,6 +16,7 @@ properties:
         oneOf:
           - $ref: 'run_connector_subaction_addevent.yaml'
           - $ref: 'run_connector_subaction_closealert.yaml'
+          - $ref: 'run_connector_subaction_closeincident.yaml'
           - $ref: 'run_connector_subaction_createalert.yaml'
           - $ref: 'run_connector_subaction_fieldsbyissuetype.yaml'
           - $ref: 'run_connector_subaction_getchoices.yaml'
