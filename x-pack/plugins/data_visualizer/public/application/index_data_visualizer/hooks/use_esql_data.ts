@@ -85,8 +85,6 @@ type BucketCount = number;
 type BucketTerm = string;
 
 const getSafeESQLLimitSize = (str?: string) => {
-  // @TODO: remove
-  console.log(`--@@getSafeESQLLimitSize str`, str);
   if (str === 'none' || !str) return '';
   return ` | LIMIT ${str}`;
 };
@@ -135,8 +133,6 @@ export const useESQLFieldStatsData = <T extends Column>({
           // By default, limit the source data to 100,000 rows
           const esqlBaseQuery = searchQuery.esql + getSafeESQLLimitSize(limitSize);
 
-          // @TODO: remove
-          console.log(`--@@fieldStats esqlBaseQuery`, esqlBaseQuery);
           const totalFieldsCnt = allColumns.length;
           const processedFieldStats = new Map<string, FieldStats>();
 

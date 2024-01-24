@@ -201,14 +201,10 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     });
   };
 
-  // @TODO: remove
-  console.log(`--@@restorableDefaults.limitSize`, restorableDefaults.limitSize);
   const limitSize = dataVisualizerListState.limitSize ?? restorableDefaults.limitSize;
 
-  // @TODO: remove
-  console.log(`--@@limitSize`, limitSize);
-
   const updateLimitSize = (newLimitSize) => {
+    saveLimitSizePreference(newLimitSize);
     setDataVisualizerListState({
       ...dataVisualizerListState,
       limitSize: newLimitSize,
