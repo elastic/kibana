@@ -19,3 +19,5 @@ export {
   type PreflightCheckHelperMock,
 } from './api_helpers.mocks';
 export { apiContextMock, type ApiExecutionContextMock } from './api_context.mock';
+export { createDocumentMigratorMock, createMigratorMock } from './migrator.mock';
+export { createEncryptionHelperMock } from './helpers';

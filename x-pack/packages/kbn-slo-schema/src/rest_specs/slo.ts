@@ -87,6 +87,7 @@ const sortBySchema = t.union([
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
+    filters: t.string,
     kqlQuery: t.string,
     page: t.string,
     perPage: t.string,

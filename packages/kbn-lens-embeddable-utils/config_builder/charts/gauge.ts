@@ -18,6 +18,7 @@ import {
   buildDatasourceStates,
   buildReferences,
   getAdhocDataviews,
+  mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
 
@@ -66,14 +67,7 @@ function buildFormulaLayer(
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(
-        ACCESSOR,
-        {
-          value: layer.value,
-        },
-        dataView,
-        formulaAPI
-      ),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
     },
   };
 
@@ -83,9 +77,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('goal');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryGoalValue,
-      },
+      { formula: layer.queryGoalValue },
       dataView,
       formulaAPI
     );
@@ -97,9 +89,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('min');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryMinValue,
-      },
+      { formula: layer.queryMinValue },
       dataView,
       formulaAPI
     );
@@ -111,9 +101,7 @@ function buildFormulaLayer(
     const columnName = getAccessorName('max');
     const formulaColumn = getFormulaColumn(
       columnName,
-      {
-        value: layer.queryMaxValue,
-      },
+      { formula: layer.queryMaxValue },
       dataView,
       formulaAPI
     );

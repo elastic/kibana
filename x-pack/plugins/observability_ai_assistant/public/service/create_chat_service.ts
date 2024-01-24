@@ -8,41 +8,24 @@
 import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
-import { cloneDeep, pick } from 'lodash';
+import { pick } from 'lodash';
+import { concatMap, delay, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
 import {
-  BehaviorSubject,
-  catchError,
-  concatMap,
-  delay,
-  finalize,
-  of,
-  scan,
-  shareReplay,
-  Subject,
-  timestamp,
-  map,
-  tap,
-} from 'rxjs';
-import {
-  ChatCompletionErrorCode,
-  ConversationCompletionError,
+  StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
-  StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import {
   FunctionVisibility,
-  MessageRole,
   type FunctionRegistry,
   type FunctionResponse,
   type Message,
 } from '../../common/types';
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import type { ObservabilityAIAssistantAPIClient } from '../api';
 import type {
   ChatRegistrationRenderFunction,
   ObservabilityAIAssistantChatService,
-  PendingMessage,
   RenderFunction,
 } from '../types';
 import { readableStreamReaderIntoObservable } from '../utils/readable_stream_reader_into_observable';
@@ -158,164 +141,108 @@ export async function createChatService({
       return renderFunctionRegistry.has(name);
     },
     complete({ connectorId, messages, conversationId, persist, signal }) {
-      const subject = new Subject<StreamingChatResponseEvent>();
-
-      client('POST /internal/observability_ai_assistant/chat/complete', {
-        params: {
-          body: {
-            messages,
-            connectorId,
-            conversationId,
-            persist,
+      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
+        client('POST /internal/observability_ai_assistant/chat/complete', {
+          params: {
+            body: {
+              messages,
+              connectorId,
+              conversationId,
+              persist,
+            },
           },
-        },
-        signal,
-        asResponse: true,
-        rawResponse: true,
-      })
-        .then((_response) => {
-          const response = _response as unknown as HttpResponse<IncomingMessage>;
-          const response$ = toObservable(response)
-            .pipe(
-              map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-              tap((event) => {
-                if (event.type === StreamingChatResponseEventType.ConversationCompletionError) {
-                  const code = event.error.code ?? ChatCompletionErrorCode.InternalError;
-                  const message = event.error.message;
-                  throw new ConversationCompletionError(code, message);
-                }
-              })
-            )
-            .subscribe(subject);
-
-          signal.addEventListener('abort', () => {
-            response$.unsubscribe();
-          });
+          signal,
+          asResponse: true,
+          rawResponse: true,
         })
-        .catch((err) => {
-          subject.error(err);
-          subject.complete();
-        });
+          .then((_response) => {
+            const response = _response as unknown as HttpResponse<IncomingMessage>;
+            const response$ = toObservable(response)
+              .pipe(
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                throwSerializedChatCompletionErrors()
+              )
+              .subscribe(subscriber);
 
-      return subject;
+            signal.addEventListener('abort', () => {
+              response$.unsubscribe();
+            });
+          })
+          .catch((err) => {
+            subscriber.error(err);
+            subscriber.complete();
+          });
+      });
     },
     chat({
       connectorId,
       messages,
       function: callFunctions = 'auto',
+      signal,
     }: {
       connectorId: string;
       messages: Message[];
       function?: 'none' | 'auto';
+      signal: AbortSignal;
     }) {
-      const subject = new BehaviorSubject<PendingMessage>({
-        message: {
-          role: MessageRole.Assistant,
-        },
-      });
+      return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
+        const contexts = ['core', 'apm'];
 
-      const contexts = ['core', 'apm'];
+        const functions = getFunctions({ contexts });
 
-      const functions = getFunctions({ contexts });
-
-      const controller = new AbortController();
-
-      client('POST /internal/observability_ai_assistant/chat', {
-        params: {
-          body: {
-            messages,
-            connectorId,
-            functions:
-              callFunctions === 'none'
-                ? []
-                : functions
-                    .filter((fn) => fn.visibility !== FunctionVisibility.User)
-                    .map((fn) => pick(fn, 'name', 'description', 'parameters')),
+        client('POST /internal/observability_ai_assistant/chat', {
+          params: {
+            body: {
+              messages,
+              connectorId,
+              functions:
+                callFunctions === 'none'
+                  ? []
+                  : functions
+                      .filter((fn) => fn.visibility !== FunctionVisibility.User)
+                      .map((fn) => pick(fn, 'name', 'description', 'parameters')),
+            },
           },
-        },
-        signal: controller.signal,
-        asResponse: true,
-        rawResponse: true,
-      })
-        .then((_response) => {
-          const response = _response as unknown as HttpResponse<IncomingMessage>;
+          signal,
+          asResponse: true,
+          rawResponse: true,
+        })
+          .then((_response) => {
+            const response = _response as unknown as HttpResponse<IncomingMessage>;
 
-          const subscription = toObservable(response)
-            .pipe(
-              processOpenAiStream(),
-              // merge the messages
-              scan(
-                (acc, { choices }) => {
-                  acc.message.content += choices[0].delta.content ?? '';
-                  acc.message.function_call.name += choices[0].delta.function_call?.name ?? '';
-                  acc.message.function_call.arguments +=
-                    choices[0].delta.function_call?.arguments ?? '';
-                  return cloneDeep(acc);
-                },
-                {
-                  message: {
-                    content: '',
-                    function_call: {
-                      name: '',
-                      arguments: '',
-                      trigger: MessageRole.Assistant as const,
-                    },
-                    role: MessageRole.Assistant,
-                  },
-                }
-              ),
-              // convert an error into state
-              catchError((error) =>
-                of({
-                  ...subject.value,
-                  error,
-                  aborted: error instanceof AbortError || controller.signal.aborted,
-                })
+            const subscription = toObservable(response)
+              .pipe(
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                throwSerializedChatCompletionErrors()
               )
-            )
-            .subscribe(subject);
+              .subscribe(subscriber);
 
-          // if the request is aborted, convert that into state as well
-          controller.signal.addEventListener('abort', () => {
-            subscription.unsubscribe();
-            subject.next({
-              ...subject.value,
-              aborted: true,
+            // if the request is aborted, convert that into state as well
+            signal.addEventListener('abort', () => {
+              subscriber.error(new AbortError());
+              subscription.unsubscribe();
             });
-            subject.complete();
-          });
-        })
-        .catch(async (err) => {
-          if ('response' in err) {
-            const body = await (err.response as HttpResponse['response'])?.json();
-            err.body = body;
-            if (body.message) {
-              err.message = body.message;
+          })
+          .catch(async (err) => {
+            if ('response' in err) {
+              const body = await (err.response as HttpResponse['response'])?.json();
+              err.body = body;
+              if (body.message) {
+                err.message = body.message;
+              }
             }
-          }
-          throw err;
-        })
-        .catch((err) => {
-          subject.next({
-            ...subject.value,
-            aborted: false,
-            error: err,
+            throw err;
+          })
+          .catch((err) => {
+            subscriber.error(err);
           });
-          subject.complete();
-        });
 
-      const pendingMessages$ = subject.pipe(
+        return subscriber;
+      }).pipe(
         // make sure the request is only triggered once,
         // even with multiple subscribers
-        shareReplay(1),
-        // if the Observable is no longer subscribed,
-        // abort the running request
-        finalize(() => {
-          controller.abort();
-        })
+        shareReplay()
       );
-
-      return pendingMessages$;
     },
   };
 }

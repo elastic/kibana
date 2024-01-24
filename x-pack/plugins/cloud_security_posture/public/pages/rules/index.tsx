@@ -49,9 +49,10 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
                 <EuiFlexItem>
                   <CloudPosturePageTitle
                     title={i18n.translate('xpack.csp.rules.rulePageHeader.pageHeaderTitle', {
-                      defaultMessage: '{benchmarkName} - Rules',
+                      defaultMessage: '{benchmarkName} {benchmarkVersion} - Rules',
                       values: {
                         benchmarkName: getBenchmarkCisName(params.benchmarkId),
+                        benchmarkVersion: params.benchmarkVersion,
                       },
                     })}
                   />
