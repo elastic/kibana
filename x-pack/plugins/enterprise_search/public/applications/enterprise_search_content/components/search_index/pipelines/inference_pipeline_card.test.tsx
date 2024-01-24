@@ -16,8 +16,8 @@ import { EuiButtonEmpty, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard, TrainedModelHealthPopover } from './inference_pipeline_card';
-import { MLModelTypeBadge } from './ml_model_type_badge';
 import { MODEL_REDACTED_VALUE } from './ml_inference/utils';
+import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
   modelId: 'sample-bert-ner-model',

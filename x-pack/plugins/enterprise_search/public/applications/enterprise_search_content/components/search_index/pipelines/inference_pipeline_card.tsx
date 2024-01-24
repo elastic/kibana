@@ -33,10 +33,10 @@ import { IndexNameLogic } from '../index_name_logic';
 import { IndexViewLogic } from '../index_view_logic';
 
 import { DeleteInferencePipelineButton } from './delete_inference_pipeline_button';
+import { MODEL_REDACTED_VALUE } from './ml_inference/utils';
 import { TrainedModelHealth } from './ml_model_health';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 import { PipelinesLogic } from './pipelines_logic';
-import { MODEL_REDACTED_VALUE } from './ml_inference/utils';
 
 export const TrainedModelHealthPopover: React.FC<InferencePipeline> = (pipeline) => {
   const { http } = useValues(HttpLogic);
