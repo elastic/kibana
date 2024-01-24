@@ -1,0 +1,105 @@
+{
+  "id": "@kbn/sort-predicates",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/sort-predicates",
+        "id": "def-common.getSortingCriteria",
+        "type": "Function",
+        "tags": [],
+        "label": "getSortingCriteria",
+        "description": [],
+        "signature": [
+          "(type: string | undefined, sortBy: string, formatter: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.FieldFormat",
+            "text": "FieldFormat"
+          },
+          ") => (rowA: Record<string, unknown>, rowB: Record<string, unknown>, direction: \"asc\" | \"desc\") => number"
+        ],
+        "path": "packages/kbn-sort-predicates/src/sorting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/sort-predicates",
+            "id": "def-common.getSortingCriteria.$1",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/sort-predicates",
+            "id": "def-common.getSortingCriteria.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sortBy",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/sort-predicates",
+            "id": "def-common.getSortingCriteria.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "formatter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormat",
+                "text": "FieldFormat"
+              }
+            ],
+            "path": "packages/kbn-sort-predicates/src/sorting.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
