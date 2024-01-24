@@ -7,10 +7,9 @@
 
 const { spawn } = require('child_process');
 
-const [, , type, area, domain, subdomain, licenseFolder, projectType, environment, ...args] =
-  process.argv;
+const [, , type, area, licenseFolder, domain, projectType, environment, ...args] = process.argv;
 
-const configPath = `./test_suites/${area}/${domain}/${subdomain}/${licenseFolder}/configs/${projectType}.config.ts`;
+const configPath = `./test_suites/${area}/${domain}/${licenseFolder}/configs/${projectType}.config.ts`;
 
 const command =
   type === 'server'

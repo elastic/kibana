@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../../ftr_provider_contextext';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Detection Engine - Rule Patch APIs', function () {
