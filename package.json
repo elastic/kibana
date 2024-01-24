@@ -245,6 +245,7 @@
     "@kbn/core-di-common-internal": "link:packages/core/di/core-di-common-internal",
     "@kbn/core-di-server": "link:packages/core/di/core-di-server",
     "@kbn/core-di-server-internal": "link:packages/core/di/core-di-server-internal",
+    "@kbn/core-di-server-mocks": "link:packages/core/di/core-di-server-mocks",
     "@kbn/core-doc-links-browser": "link:packages/core/doc-links/core-doc-links-browser",
     "@kbn/core-doc-links-browser-internal": "link:packages/core/doc-links/core-doc-links-browser-internal",
     "@kbn/core-doc-links-server": "link:packages/core/doc-links/core-doc-links-server",
