@@ -22,7 +22,7 @@ const wildcardStyle = css`
   color: #357160;
 `;
 
-export function createFormattedExample(key: string, example: string): JSX.Element[] {
+function createFormattedExample(key: string, example: string): JSX.Element[] {
   const keyTokens = key.split(' ');
   let tempExample = ` ${example} `;
   const positions = keyTokens.map((t) => ({
