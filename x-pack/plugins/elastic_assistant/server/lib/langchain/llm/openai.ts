@@ -107,6 +107,12 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     }
     return this.caller.call(async () => {
       const requestBody = this.formatRequestForActionsClient(completionRequest);
+      this.#logger.debug(
+        `ActionsClientChatOpenAI#completionWithRetry ${
+          this.#traceId
+        } assistantMessage:\n${JSON.stringify(requestBody.params.subActionParams)} `
+      );
+
       // create an actions client from the authenticated request context:
       const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
 
@@ -136,12 +142,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       subAction: string;
     };
   } {
-    this.#logger.debug(
-      `ActionsClientChatOpenAI#formatRequestForActionsClient ${
-        this.#traceId
-      } assistantMessage:\n${JSON.stringify('todo')} `
-    );
-
     // create a new connector request body with the assistant message:
     return {
       actionId: this.#connectorId,
