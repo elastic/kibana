@@ -330,9 +330,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.confluenceDataCenter.usernameLabel', {
-          defaultMessage: 'Confluence Data Center username',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.confluenceDataCenter.usernameLabel',
+          {
+            defaultMessage: 'Confluence Data Center username',
+          }
+        ),
         options: [],
         order: 4,
         required: true,
@@ -352,9 +355,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           },
         ],
         display: DisplayType.TEXTBOX,
-        label: i18n.translate('searchConnectors.nativeConnectors.confluenceDataCenter.passwordLabel', {
-          defaultMessage: 'Confluence Data Center password',
-        }),
+        label: i18n.translate(
+          'searchConnectors.nativeConnectors.confluenceDataCenter.passwordLabel',
+          {
+            defaultMessage: 'Confluence Data Center password',
+          }
+        ),
         options: [],
         order: 5,
         required: true,
