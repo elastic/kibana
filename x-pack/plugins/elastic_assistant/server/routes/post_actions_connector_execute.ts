@@ -8,6 +8,8 @@
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
+import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
+import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
@@ -123,7 +125,9 @@ export const postActionsConnectorExecuteRoute = (
           isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
           isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
         });
-        return response.ok(langChainResponse);
+        return response.ok<
+          StreamFactoryReturnType['responseWithHeaders']['body'] | StaticReturnType['body']
+        >(langChainResponse);
       } catch (err) {
         logger.error(err);
         const error = transformError(err);

@@ -15,7 +15,7 @@ import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientChatOpenAI } from '../llm/openai';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
-import type { AgentExecutorParams, AgentExecutorResponse } from '../executors/types';
+import { AgentExecutor } from '../executors/types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 import { AssistantToolParams } from '../../../types';
@@ -27,7 +27,7 @@ export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
  * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
  *
  */
-export const callAgentExecutor = async ({
+export const callAgentExecutor: AgentExecutor<true | false> = async ({
   actions,
   alertsIndexPattern,
   allow,
@@ -48,7 +48,7 @@ export const callAgentExecutor = async ({
   size,
   telemetry,
   traceOptions,
-}: AgentExecutorParams): AgentExecutorResponse => {
+}) => {
   // TODO implement llmClass for bedrock streaming
   const llmClass = isStream ? ActionsClientChatOpenAI : ActionsClientLlm;
 

@@ -35,7 +35,7 @@ import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
  * To support additional Agent Executors from the UI, add them to this map
  * and reference your specific AgentExecutor function
  */
-const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
+const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor<false>> = {
   DefaultAgentExecutor: callAgentExecutor,
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
 };
@@ -140,6 +140,7 @@ export const postEvaluateRoute = (
                 messages: [],
               },
             },
+            llmType: 'openai',
             replacements: {},
             size: DEFAULT_SIZE,
             isEnabledKnowledgeBase: true,
@@ -168,6 +169,7 @@ export const postEvaluateRoute = (
                   connectorId,
                   esClient,
                   elserId,
+                  isStream: false,
                   langChainMessages,
                   llmType,
                   logger,

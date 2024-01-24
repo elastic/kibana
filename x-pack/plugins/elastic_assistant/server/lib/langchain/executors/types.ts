@@ -16,7 +16,7 @@ import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import { RequestBody, ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
-export interface AgentExecutorParams {
+export interface AgentExecutorParams<T extends boolean> {
   alertsIndexPattern?: string;
   actions: ActionsPluginStart;
   allow?: string[];
@@ -29,7 +29,7 @@ export interface AgentExecutorParams {
   langChainMessages: BaseMessage[];
   llmType?: string;
   logger: Logger;
-  isStream?: boolean;
+  isStream?: T;
   onNewReplacements?: (newReplacements: Record<string, string>) => void;
   replacements?: Record<string, string>;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -39,20 +39,22 @@ export interface AgentExecutorParams {
   telemetry: AnalyticsServiceSetup;
 }
 
-interface StaticReturnType {
+export interface StaticReturnType {
   body: ResponseBody;
   headers: ResponseHeaders;
 }
-export type AgentExecutorResponse = Promise<
-  StaticReturnType | StreamFactoryReturnType['responseWithHeaders']
->;
+export type AgentExecutorResponse<T extends boolean> = T extends true
+  ? StreamFactoryReturnType['responseWithHeaders']
+  : StaticReturnType;
 
-export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
+export type AgentExecutor<T extends boolean> = (
+  params: AgentExecutorParams<T>
+) => Promise<AgentExecutorResponse<T>>;
 
 export type AgentExecutorEvaluator = (
   langChainMessages: BaseMessage[],
   exampleId?: string
-) => Promise<AgentExecutorResponse>;
+) => Promise<ResponseBody>;
 
 export interface AgentExecutorEvaluatorWithMetadata {
   agentEvaluator: AgentExecutorEvaluator;

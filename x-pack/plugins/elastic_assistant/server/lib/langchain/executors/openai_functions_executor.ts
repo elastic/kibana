@@ -13,7 +13,7 @@ import { ChainTool, Tool } from 'langchain/tools';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
-import type { AgentExecutorParams, AgentExecutorResponse } from './types';
+import { AgentExecutor } from './types';
 import { withAssistantSpan } from '../tracers/with_assistant_span';
 import { APMTracer } from '../tracers/apm_tracer';
 
@@ -26,7 +26,7 @@ export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
  *
  * NOTE: This is not to be used in production as-is, and must be used with an OpenAI ConnectorId
  */
-export const callOpenAIFunctionsExecutor = async ({
+export const callOpenAIFunctionsExecutor: AgentExecutor<false> = async ({
   actions,
   connectorId,
   esClient,
@@ -38,7 +38,7 @@ export const callOpenAIFunctionsExecutor = async ({
   kbResource,
   telemetry,
   traceOptions,
-}: AgentExecutorParams): AgentExecutorResponse => {
+}) => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
