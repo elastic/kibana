@@ -13,6 +13,7 @@ import styled from 'styled-components';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
@@ -38,15 +39,13 @@ const SkipEuiText = styled(EuiText)`
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onSetupComplete?: () => void;
-  conversations: Record<string, Conversation>;
-  setConversations: React.Dispatch<React.SetStateAction<Record<string, Conversation>>>;
+  onConversationUpdate: (cId: string, cTitle?: string) => Promise<void>;
 }
 
 export const useConnectorSetup = ({
   conversation = WELCOME_CONVERSATION,
   onSetupComplete,
-  conversations,
-  setConversations,
+  onConversationUpdate,
 }: ConnectorSetupProps): {
   comments: EuiCommentProps[];
   prompt: React.ReactElement;
@@ -104,8 +103,8 @@ export const useConnectorSetup = ({
     setShowAddConnectorButton(true);
     bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
-    setConversations({ ...conversations, [conversation.id]: clearPresentationData(conversation) });
-  }, [conversation, conversations, onSetupComplete, setConversations]);
+    // setConversations({ ...conversations, [conversation.id]: clearPresentationData(conversation) });
+  }, [onSetupComplete]);
 
   // Show button to add connector after last message has finished streaming
   const handleSkipSetup = useCallback(() => {
@@ -180,10 +179,8 @@ export const useConnectorSetup = ({
       const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
       // persist only the active conversation
 
-      await setApiConfig({
-        conversationId: conversation.id,
-        title: conversation.title,
-        isDefault: conversation.isDefault,
+      const updatedConversation = await setApiConfig({
+        conversation,
         apiConfig: {
           ...conversation.apiConfig,
           connectorId: connector.id,
@@ -192,41 +189,29 @@ export const useConnectorSetup = ({
           model: config?.defaultModel,
         },
       });
-      setConversations(
-        Object.values(conversations).reduce((res, c) => {
-          res[c.id] = {
-            ...c,
-            apiConfig: {
-              ...c.apiConfig,
-              connectorId: connector.id,
-              connectorTypeTitle,
-              provider: config?.apiProvider,
-              model: config?.defaultModel,
-            },
-          };
-          return res;
-        }, {} as Record<string, Conversation>)
-      );
 
-      refetchConnectors?.();
-      setIsConnectorModalVisible(false);
-      await appendMessage({
-        conversationId: conversation.id,
-        message: {
-          role: 'assistant',
-          content: i18n.CONNECTOR_SETUP_COMPLETE,
-          timestamp: new Date().toLocaleString(),
-        },
-      });
+      if (!isHttpFetchError(updatedConversation)) {
+        onConversationUpdate(updatedConversation.id, updatedConversation.title);
+
+        refetchConnectors?.();
+        setIsConnectorModalVisible(false);
+        await appendMessage({
+          conversationId: updatedConversation.id,
+          message: {
+            role: 'assistant',
+            content: i18n.CONNECTOR_SETUP_COMPLETE,
+            timestamp: new Date().toLocaleString(),
+          },
+        });
+      }
     },
     [
       actionTypeRegistry,
       appendMessage,
       conversation,
-      conversations,
+      onConversationUpdate,
       refetchConnectors,
       setApiConfig,
-      setConversations,
     ]
   );
 

@@ -48,9 +48,7 @@ interface CreateConversationProps {
 }
 
 interface SetApiConfigProps {
-  conversationId: string;
-  isDefault?: boolean;
-  title: string;
+  conversation: Conversation;
   apiConfig: Conversation['apiConfig'];
 }
 
@@ -69,10 +67,8 @@ interface UseConversation {
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Promise<Message[] | undefined>;
   setApiConfig: ({
-    conversationId,
+    conversation,
     apiConfig,
-    title,
-    isDefault,
   }: SetApiConfigProps) => Promise<Conversation | IHttpFetchError<unknown>>;
   createConversation: (conversation: Conversation) => Promise<Conversation | undefined>;
   getConversation: (conversationId: string) => Promise<Conversation | undefined>;
@@ -275,22 +271,24 @@ export const useConversation = (): UseConversation => {
    * Create/Update the apiConfig for a given conversationId
    */
   const setApiConfig = useCallback(
-    async ({ conversationId, apiConfig, title, isDefault }: SetApiConfigProps) => {
-      if (title === conversationId) {
+    async ({ conversation, apiConfig }: SetApiConfigProps) => {
+      if (conversation.title === conversation.id) {
         return createConversationApi({
           http,
           conversation: {
             apiConfig,
-            title,
-            isDefault,
+            title: conversation.title,
+            replacements: conversation.replacements,
+            excludeFromLastConversationStorage: conversation.excludeFromLastConversationStorage,
+            isDefault: conversation.isDefault,
             id: '',
-            messages: [],
+            messages: conversation.messages ?? [],
           },
         });
       } else {
         return updateConversationApi({
           http,
-          conversationId,
+          conversationId: conversation.id,
           apiConfig,
         });
       }

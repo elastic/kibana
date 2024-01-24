@@ -55,6 +55,7 @@ import {
   useFetchCurrentUserConversations,
 } from './api/conversations/use_fetch_current_user_conversations';
 import { Conversation } from '../assistant_context/types';
+import { clearPresentationData } from '../connectorland/connector_setup/helpers';
 
 export interface Props {
   conversationId?: string;
@@ -134,7 +135,7 @@ const AssistantComponent: React.FC<Props> = ({
     isLoading,
     isError,
     refetch,
-  } = useFetchCurrentUserConversations(onFetchedConversations);
+  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
 
   useEffect(() => {
     if (!isLoading && !isError) {
@@ -245,12 +246,6 @@ const AssistantComponent: React.FC<Props> = ({
     setLastConversationId,
   ]);
 
-  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
-    conversation: blockBotConversation,
-    conversations,
-    setConversations,
-  });
-
   const [promptTextPreview, setPromptTextPreview] = useState<string>('');
   const [autoPopulatedOnce, setAutoPopulatedOnce] = useState<boolean>(false);
   const [userPrompt, setUserPrompt] = useState<string | null>(null);
@@ -347,6 +342,18 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [allSystemPrompts, conversations, refetchCurrentConversation, refetchResults]
   );
+
+  const { comments: connectorComments, prompt: connectorPrompt } = useConnectorSetup({
+    conversation: blockBotConversation,
+    onConversationUpdate: handleOnConversationSelected,
+    onSetupComplete: () => {
+      console.log('clear')
+      setConversations({
+        ...conversations,
+        [currentConversation.id]: clearPresentationData(currentConversation),
+      });
+    },
+  });
 
   const handleOnConversationDeleted = useCallback(
     async (cId: string) => {

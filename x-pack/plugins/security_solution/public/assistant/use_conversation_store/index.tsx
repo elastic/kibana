@@ -14,9 +14,13 @@ import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/ass
 import { BASE_SECURITY_CONVERSATIONS } from '../content/conversations';
 import { useLinkAuthorized } from '../../common/links';
 import { SecurityPageName } from '../../../common';
+import { useKibana } from '../../common/lib/kibana';
 
 export const useConversationStore = (): Record<string, Conversation> => {
   const [conversations, setConversations] = useState<Record<string, Conversation>>({});
+  const {
+    services: { http },
+  } = useKibana();
   const isDataQualityDashboardPageExists = useLinkAuthorized(SecurityPageName.dataQuality);
   const baseConversations = useMemo(
     () =>
@@ -53,7 +57,7 @@ export const useConversationStore = (): Record<string, Conversation> => {
     data: conversationsData,
     isLoading,
     isError,
-  } = useFetchCurrentUserConversations(onFetchedConversations);
+  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
 
   useEffect(() => {
     if (!isLoading && !isError) {

@@ -9,6 +9,7 @@ import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -107,9 +108,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
 
         if (selectedConversation != null) {
           const conversation = await setApiConfig({
-            conversationId: selectedConversation.id,
-            title: selectedConversation.title,
-            isDefault: selectedConversation.isDefault,
+            conversation: selectedConversation,
             apiConfig: {
               ...selectedConversation.apiConfig,
               connectorId,
@@ -119,7 +118,10 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               model: model ?? config?.defaultModel,
             },
           });
-          onConnectorSelected(conversation as Conversation);
+
+          if (!isHttpFetchError(conversation)) {
+            onConnectorSelected(conversation);
+          }
         }
       },
       [selectedConversation, setApiConfig, onConnectorSelected]
