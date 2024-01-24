@@ -16,6 +16,7 @@ import { CasesService } from './cases_service';
 import { CasesConnectorError } from './cases_connector_error';
 import { CaseError } from '../../common/error';
 import { fullJitterBackoffFactory } from './full_jitter_backoff';
+import { CoreKibanaRequest } from '@kbn/core/server';
 
 jest.mock('./cases_connector_executor');
 jest.mock('./full_jitter_backoff');
@@ -26,6 +27,7 @@ const fullJitterBackoffFactoryMock = fullJitterBackoffFactory as jest.Mock;
 describe('CasesConnector', () => {
   const services = actionsMock.createServices();
   const logger = loggingSystemMock.createLogger();
+  const kibanaRequest = CoreKibanaRequest.from({ path: '/', headers: {} });
 
   const groupingBy = ['host.name', 'dest.ip'];
   const rule = {
@@ -38,6 +40,7 @@ describe('CasesConnector', () => {
   const owner = 'cases';
   const timeWindow = '7d';
   const reopenClosedCases = false;
+  const maximumCasesToOpen = 5;
 
   const mockExecute = jest.fn();
   const getCasesClient = jest.fn().mockResolvedValue({ foo: 'bar' });
@@ -46,6 +49,18 @@ describe('CasesConnector', () => {
 
   const backOffFactory = {
     create: () => ({ nextBackOff }),
+  };
+
+  const casesParams = { getCasesClient };
+
+  const connectorParams = {
+    configurationUtilities: actionsConfigMock.create(),
+    config: {},
+    secrets: {},
+    connector: { id: '1', type: CASES_CONNECTOR_ID },
+    logger,
+    services,
+    request: kibanaRequest,
   };
 
   let connector: CasesConnector;
@@ -63,15 +78,8 @@ describe('CasesConnector', () => {
     fullJitterBackoffFactoryMock.mockReturnValue(backOffFactory);
 
     connector = new CasesConnector({
-      casesParams: { getCasesClient },
-      connectorParams: {
-        configurationUtilities: actionsConfigMock.create(),
-        config: {},
-        secrets: {},
-        connector: { id: '1', type: CASES_CONNECTOR_ID },
-        logger,
-        services,
-      },
+      casesParams,
+      connectorParams,
     });
   });
 
@@ -83,6 +91,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       reopenClosedCases,
+      maximumCasesToOpen,
     });
 
     expect(CasesConnectorExecutorMock).toBeCalledWith({
@@ -101,6 +110,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       reopenClosedCases,
+      maximumCasesToOpen,
     });
 
     expect(mockExecute).toBeCalledWith({
@@ -110,6 +120,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       reopenClosedCases,
+      maximumCasesToOpen,
     });
   });
 
@@ -121,6 +132,7 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       reopenClosedCases,
+      maximumCasesToOpen,
     });
 
     expect(getCasesClient).toBeCalled();
@@ -137,11 +149,12 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         reopenClosedCases,
+        maximumCasesToOpen,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Bad request"`);
 
     expect(logger.error.mock.calls[0][0]).toBe(
-      '[CasesConnector][_run] Execution of case connector failed. Message: Bad request. Status code: 400'
+      '[CasesConnector][run] Execution of case connector failed. Message: Bad request. Status code: 400'
     );
   });
 
@@ -156,11 +169,12 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         reopenClosedCases,
+        maximumCasesToOpen,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Forbidden"`);
 
     expect(logger.error.mock.calls[0][0]).toBe(
-      '[CasesConnector][_run] Execution of case connector failed. Message: Forbidden. Status code: 500'
+      '[CasesConnector][run] Execution of case connector failed. Message: Forbidden. Status code: 500'
     );
   });
 
@@ -175,11 +189,12 @@ describe('CasesConnector', () => {
         rule,
         timeWindow,
         reopenClosedCases,
+        maximumCasesToOpen,
       })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Server error"`);
 
     expect(logger.error.mock.calls[0][0]).toBe(
-      '[CasesConnector][_run] Execution of case connector failed. Message: Server error. Status code: 500'
+      '[CasesConnector][run] Execution of case connector failed. Message: Server error. Status code: 500'
     );
   });
 
@@ -196,9 +211,36 @@ describe('CasesConnector', () => {
       rule,
       timeWindow,
       reopenClosedCases,
+      maximumCasesToOpen,
     });
 
     expect(nextBackOff).toBeCalledTimes(2);
     expect(mockExecute).toBeCalledTimes(3);
+  });
+
+  it('throws if the kibana request is not defined', async () => {
+    connector = new CasesConnector({
+      casesParams,
+      connectorParams: { ...connectorParams, request: undefined },
+    });
+
+    await expect(() =>
+      connector.run({
+        alerts: [],
+        groupingBy,
+        owner,
+        rule,
+        timeWindow,
+        reopenClosedCases,
+        maximumCasesToOpen,
+      })
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Kibana request is not defined"`);
+
+    expect(logger.error.mock.calls[0][0]).toBe(
+      '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'
+    );
+
+    expect(nextBackOff).toBeCalledTimes(0);
+    expect(mockExecute).toBeCalledTimes(0);
   });
 });

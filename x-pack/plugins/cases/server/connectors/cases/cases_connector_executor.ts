@@ -76,10 +76,6 @@ export class CasesConnectorExecutor {
     );
 
     /**
-     * TODO: Add circuit breakers to the number of oracles they can be created or retrieved
-     */
-
-    /**
      * Gets all records by the IDs that produces in generateOracleKeys.
      * If a record does not exist it will create the record.
      * A record does not exist if it is the first time the connector run for a specific grouping.
