@@ -10,7 +10,7 @@ import { kibanaStartMock } from '../utils/kibana_react.mock';
 import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
 import { PluginContextValue } from '../context/plugin_context/plugin_context';
-import { AlertDetail, useFetchAlertDetail } from './use_fetch_alert_detail';
+import { AlertData, useFetchAlertDetail } from './use_fetch_alert_detail';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -64,7 +64,7 @@ describe('useFetchAlertDetail', () => {
 
   it('initially is not loading and does not have data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertDetail | null]>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
         useFetchAlertDetail(id)
       );
 
@@ -80,7 +80,7 @@ describe('useFetchAlertDetail', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertDetail | null]>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
         useFetchAlertDetail('123')
       );
 
@@ -92,7 +92,7 @@ describe('useFetchAlertDetail', () => {
 
   it('retrieves the alert data', async () => {
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertDetail | null]>(() =>
+      const { result, waitForNextUpdate } = renderHook<string, [boolean, AlertData | null]>(() =>
         useFetchAlertDetail(id)
       );
 
@@ -180,7 +180,7 @@ describe('useFetchAlertDetail', () => {
     await act(async () => {
       const { result, waitForNextUpdate, unmount } = renderHook<
         string,
-        [boolean, AlertDetail | null]
+        [boolean, AlertData | null]
       >(() => useFetchAlertDetail('123'));
 
       await waitForNextUpdate();

@@ -66,15 +66,15 @@ export function AlertDetails() {
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
-    ruleId: alertDetail?.alert.fields[ALERT_RULE_UUID],
+    ruleId: alertDetail?.formatted.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
     if (alertDetail) {
-      setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.alert.fields[ALERT_RULE_TYPE_ID]!));
-      setAlertStatus(alertDetail?.alert?.fields[ALERT_STATUS] as AlertStatus);
+      setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
+      setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
     }
   }, [alertDetail, ruleTypeRegistry]);
   useBreadcrumbs([
@@ -87,7 +87,7 @@ export function AlertDetails() {
     },
     {
       text: alertDetail
-        ? pageTitleContent(alertDetail.alert.fields[ALERT_RULE_CATEGORY])
+        ? pageTitleContent(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
         : defaultBreadcrumb,
     },
   ]);
@@ -101,7 +101,7 @@ export function AlertDetails() {
   }
 
   // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.alert, config)) {
+  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.formatted, config)) {
     return <PageNotFound />;
   }
 
@@ -136,7 +136,7 @@ export function AlertDetails() {
       pageHeader={{
         pageTitle: (
           <PageTitle
-            alert={alertDetail?.alert ?? null}
+            alert={alertDetail?.formatted ?? null}
             alertStatus={alertStatus}
             dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
           />
@@ -148,7 +148,7 @@ export function AlertDetails() {
             features={{ alerts: { sync: false } }}
           >
             <HeaderActions
-              alert={alertDetail?.alert ?? null}
+              alert={alertDetail?.formatted ?? null}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />

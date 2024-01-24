@@ -20,12 +20,12 @@ interface AlertDetailParams {
   id: string;
 }
 
-export interface AlertDetail {
-  alert: TopAlert;
-  rawAlert: EcsFieldsResponse;
+export interface AlertData {
+  formatted: TopAlert;
+  raw: EcsFieldsResponse;
 }
 
-export const useFetchAlertDetail = (id: string): [boolean, AlertDetail | null] => {
+export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => {
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const params = useMemo(
     () => ({ id, ruleType: observabilityRuleTypeRegistry }),
@@ -46,8 +46,8 @@ export const useFetchAlertDetail = (id: string): [boolean, AlertDetail | null] =
 
   const data = rawAlert
     ? {
-        alert: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
-        rawAlert,
+        formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
+        raw: rawAlert,
       }
     : null;
 

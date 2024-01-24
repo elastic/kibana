@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Alert } from '@kbn/alerting-types';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/basic_table';
 
 export const search = {
   box: {
@@ -28,7 +29,7 @@ export const search = {
   },
 };
 
-const columns = [
+const columns: Array<EuiBasicTableColumn<AlertField>> = [
   {
     field: 'key',
     name: i18n.translate('alertsUIShared.alertFieldsTable.field', {

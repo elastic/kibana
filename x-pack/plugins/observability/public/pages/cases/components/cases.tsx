@@ -65,11 +65,11 @@ export function Cases({ permissions }: CasesProps) {
         useFetchAlertData={useFetchAlertData}
       />
 
-      {alertDetail?.rawAlert && selectedAlertId !== '' && !alertLoading ? (
+      {alertDetail && selectedAlertId !== '' && !alertLoading ? (
         <Suspense fallback={null}>
           <LazyAlertsFlyout
-            alert={alertDetail.alert}
-            rawAlert={alertDetail.rawAlert}
+            alert={alertDetail.formatted}
+            rawAlert={alertDetail.raw}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
           />
