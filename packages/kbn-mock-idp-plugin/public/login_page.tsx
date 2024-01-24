@@ -17,7 +17,7 @@ import {
   EuiComboBoxOptionOption,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React, { ChangeEvent, useEffect, useState } from 'react';
+import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
@@ -51,12 +51,22 @@ export const LoginPage = () => {
     },
   });
 
+  const formikRef = useRef(formik);
+
   useEffect(() => {
-    fetchRoles(services.http).then((response) => {
+    formikRef.current = formik;
+  }, [formik]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const response = await fetchRoles(services.http);
       setRoles(response.roles);
-      formik.setFieldValue('role', response.roles[0]);
-    });
-  }, [services, formik]);
+      // formik.setFieldValue('role', response.roles[0]);
+      formikRef.current.setFieldValue('role', response.roles[0]);
+    };
+
+    fetchData();
+  }, [services]);
 
   return (
     <FormikProvider value={formik}>
