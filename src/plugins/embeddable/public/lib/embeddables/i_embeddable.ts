@@ -22,6 +22,7 @@ import {
   PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
+  PublishesPhaseEvents,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -38,6 +39,7 @@ export type { EmbeddableInput };
  */
 export type LegacyEmbeddableAPI = HasType &
   HasUniqueId &
+  PublishesPhaseEvents &
   PublishesViewMode &
   PublishesDataViews &
   HasEditCapabilities &
