@@ -184,11 +184,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // match file length, the beginning and the end of the csv file contents
         const { text: csvFile } = await getReport();
         expect(csvFile.length).to.be(4826973);
-
-        /*
-         * NOTE: This test can not check against the snapshot. Data ingestion from
-         * the ES archive is concurrent and dynamic, and affects the search output
-         */
+        expectSnapshot(csvFile.slice(0, 5000)).toMatch();
+        expectSnapshot(csvFile.slice(-5000)).toMatch();
       });
 
       it('generate a report using ES|QL', async () => {
