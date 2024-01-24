@@ -85,7 +85,7 @@ export class ReportingPageObject extends FtrService {
 
   async openCsvReportingPanel() {
     this.log.debug('openCsvReportingPanel');
-    await this.share.openShareMenuItem('CSVDownload');
+    await this.testSubjects.click('sharePanel-CSVDownload');
   }
 
   async openImageReportingPanel() {

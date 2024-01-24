@@ -22,11 +22,11 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import url from 'url';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
 
@@ -54,25 +54,20 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const [absoluteUrl, setAbsoluteUrl] = useState('');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
-  const getAbsoluteReportGenerationUrl = useCallback(() => {
-    const relativePath = apiClient.getReportingPublicJobPath(
-      'csv',
-      apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
-    );
-    return url.resolve(window.location.href, relativePath);
-  }, [apiClient, getJobParams]);
-
-  const setAbsoluteReportGenerationUrl = useCallback(() => {
-    if (!isMounted || !getAbsoluteReportGenerationUrl()) {
-      return;
-    } else {
-      setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
-    }
-  }, [isMounted, getAbsoluteReportGenerationUrl]);
+  const getAbsoluteReportGenerationUrl = useMemo(
+    () => () => {
+      const relativePath = apiClient.getReportingPublicJobPath(
+        CSV_JOB_TYPE,
+        apiClient.getDecoratedJobParams(getJobParams(true))
+      );
+      return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
+    },
+    [apiClient, getJobParams]
+  );
 
   useEffect(() => {
-    setAbsoluteReportGenerationUrl();
-  }, [setAbsoluteReportGenerationUrl]);
+    getAbsoluteReportGenerationUrl();
+  }, [getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
@@ -156,7 +151,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
           >
             <FormattedMessage
               id="xpack.reporting.modalContent.copyUrlButtonLabel"
-              defaultMessage="Copy URL  "
+              defaultMessage="Copy POST URL  "
             />
           </EuiButtonEmpty>
         )}

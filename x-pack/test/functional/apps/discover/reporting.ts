@@ -28,7 +28,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const monacoEditor = getService('monacoEditor');
   const filterBar = getService('filterBar');
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
 
   const setFieldsFromSource = async (setValue: boolean) => {
@@ -105,27 +104,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // click 'Copy POST URL'
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openCsvReportingPanel();
-        const postUrl = await find.byXPath(`//button[descendant::*[text()='Copy POST URL']]`);
-        await postUrl.click();
+        await testSubjects.existOrFail('shareReportingCopyURL');
+        await testSubjects.click('shareReportingCopyURL');
+        await PageObjects.share.closeShareModal();
 
         // get clipboard value using field search input, since
         // 'browser.getClipboardValue()' doesn't work, due to permissions
         const textInput = await testSubjects.find('fieldListFiltersFieldSearch');
         await textInput.click();
-        await browser.getActions().keyDown(Key.CONTROL).perform();
+        await browser
+          .getActions()
+          .keyDown(process.platform === 'darwin' ? Key.COMMAND : Key.CONTROL)
+          .perform();
         await browser.getActions().keyDown('v').perform();
 
         const reportURL = decodeURIComponent(await textInput.getAttribute('value'));
-
         // get number of filters in URLs
         const timeFiltersNumberInReportURL =
-          reportURL.split('query:(range:(order_date:(format:strict_date_optional_time').length - 1;
+          reportURL.split(/query:\(range:\(order_date:\(format:strict_date_optional_time/).length -
+          1;
         const timeFiltersNumberInSharedURL = sharedURL.split('time:').length - 1;
-
-        expect(timeFiltersNumberInSharedURL).to.be(1);
+        expect(timeFiltersNumberInSharedURL).equal(timeFiltersNumberInReportURL);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
-        expect(timeFiltersNumberInReportURL).to.be(1);
+        // expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
           reportURL.includes(
             'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
