@@ -86,16 +86,32 @@ const cloneAndMigrateRule = (initialRule: Rule) => {
             initialRule.notifyWhen === RuleNotifyWhen.THROTTLE ? initialRule.throttle! : null,
         }
       : { summary: false, notifyWhen: RuleNotifyWhen.THROTTLE, throttle: initialRule.throttle! };
-    clonedRule.actions = clonedRule.actions.map((action) =>
-      isSystemAction(action)
-        ? action
-        : {
+    clonedRule.actions = clonedRule.actions.map(
+      // Clone untyped actions and add a type property to them. This is necessary for the downstream rewrite functions.
+      (action: SanitizedRuleAction | Omit<SanitizedRuleAction, 'type'>) => {
+        if ('type' in action) {
+          return isSystemAction(action)
+            ? action
+            : ({
+                ...action,
+                frequency,
+              } as SanitizedRuleAction);
+        }
+        if (actionHasDefinedGroup(action as SanitizedRuleAction)) {
+          return {
             ...action,
             frequency,
-          }
+            type: RuleActionTypes.DEFAULT,
+          } as SanitizedRuleAction;
+        }
+        return {
+          ...action,
+          type: RuleActionTypes.SYSTEM,
+        } as SanitizedRuleAction;
+      }
     );
   } else {
-    // Migrate untyped actions
+    // Clone untyped actions and add a type property to them. This is necessary for the downstream rewrite functions.
     // Note that this type is supposed to be stripped before sending to the server. This type property is used
     // to tell the downstream rewrite functions whether to include properties such as frequency, alertsFilter, etc.
     clonedRule.actions = clonedRule.actions.map(
