@@ -74,7 +74,7 @@ export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRende
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: any): React.ReactElement => {
+  return (columnId: string, value: string): React.ReactElement => {
     switch (columnId) {
       case ALERT_START:
       case ALERT_END:
@@ -90,7 +90,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
           </>
         );
       case ALERT_ANOMALY_SCORE:
-        const resultValue: number[] = typeof value === 'number' ? [value] : value;
+        const resultValue: number[] = (Array.isArray(value) ? value : [value]).map(Number);
         const latestValue = resultValue.at(-1) as number;
         return (
           <EuiHealth textSize={'xs'} color={getSeverityColor(latestValue)}>
