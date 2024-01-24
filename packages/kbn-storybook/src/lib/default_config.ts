@@ -10,7 +10,7 @@ import * as path from 'path';
 import fs from 'fs';
 import type { StorybookConfig } from '@storybook/core-common';
 import webpack, { Configuration } from 'webpack';
-import webpackMerge from 'webpack-merge';
+import { merge as webpackMerge } from 'webpack-merge';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
