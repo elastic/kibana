@@ -11,7 +11,7 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { ALERT_DURATION, ALERT_END, ALERT_START } from '@kbn/rule-data-utils';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { getSeverityColor } from '@kbn/ml-anomaly-utils';
+import { getFormattedSeverityScore, getSeverityColor } from '@kbn/ml-anomaly-utils';
 import { EuiHealth } from '@elastic/eui';
 import {
   alertFieldNameMap,
@@ -94,7 +94,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
         const latestValue = resultValue.at(-1) as number;
         return (
           <EuiHealth textSize={'xs'} color={getSeverityColor(latestValue)}>
-            {getFormatter(FIELD_FORMAT_IDS.NUMBER)(latestValue)}
+            {getFormattedSeverityScore(latestValue)}
           </EuiHealth>
         );
       default:
