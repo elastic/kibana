@@ -47,7 +47,7 @@ export async function getDefaultAsyncSubmitParams(
     | 'keep_on_completion'
   >
 > {
-  return {
+  return getCommonDefaultAsyncSubmitParams(searchConfig, options)
     // Decreases delays due to network when using CCS
     ...getCommonDefaultAsyncSubmitParams(searchConfig, options),
   };

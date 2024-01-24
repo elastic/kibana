@@ -90,7 +90,7 @@ export const esqlAsyncSearchStrategyProvider = (
         if (e.meta?.statusCode === 404) return;
 
         // Log all other (unexpected) error messages
-        logger.error(`cancelAsyncSearch error: ${e.message}`);
+        logger.error(`cancelEsqlAsyncSearch error: ${e.message}`);
       }
     };
 
