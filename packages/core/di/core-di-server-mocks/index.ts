@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { injectionServiceMock } from './src/injection_service.mock';
