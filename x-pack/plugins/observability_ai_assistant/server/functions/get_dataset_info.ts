@@ -9,9 +9,7 @@ import { chunk, groupBy, uniq } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { FunctionVisibility, MessageRole } from '../../common/types';
-import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
-import { streamIntoObservable } from '../service/util/stream_into_observable';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 
 export function registerGetDatasetInfoFunction({
   client,
@@ -112,7 +110,7 @@ export function registerGetDatasetInfoFunction({
 
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
-          const chunkResponse$ = streamIntoObservable(
+          const chunkResponse$ = (
             await client.chat({
               connectorId,
               signal,
@@ -161,9 +159,8 @@ export function registerGetDatasetInfoFunction({
                 },
               ],
               functionCall: 'fields',
-              stream: true,
             })
-          ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+          ).pipe(concatenateChatCompletionChunks());
 
           const chunkResponse = await lastValueFrom(chunkResponse$);
 
