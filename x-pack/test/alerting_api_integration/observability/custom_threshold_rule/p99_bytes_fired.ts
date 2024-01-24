@@ -219,7 +219,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `99th Percentile system.network.in.bytes is 10,000, above the threshold of 1. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
+          `99th percentile system.network.in.bytes is 10,000, above the threshold of 1. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('10,000');
 
