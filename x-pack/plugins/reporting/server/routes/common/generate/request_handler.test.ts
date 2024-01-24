@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-jest.mock(
-  'puid',
-  () =>
-    class MockPuid {
-      generate() {
-        return 'mock-report-id';
-      }
-    }
-);
+jest.mock('uuid', () => ({ v4: () => 'mock-report-id' }));
 
 import rison from '@kbn/rison';
 

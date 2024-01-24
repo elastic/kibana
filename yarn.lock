@@ -23,9 +23,9 @@
     tunnel "^0.0.6"
 
 "@adobe/css-tools@^4.0.1":
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.1.tgz#abfccb8ca78075a2b6187345c26243c1a0842f28"
-  integrity sha512-/62yikz7NLScCGAAST5SHdnjaDJQBDq0M2muyRTpf2VQhw6StBg2ALiu73zSJQ4fMVLA+0uBhBHAle7Wg+2kSg==
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.2.tgz#a6abc715fb6884851fca9dad37fc34739a04fd11"
+  integrity sha512-DA5a1C0gD/pLOvhv33YMrbf2FK3oUzwNl9oOJqE4XVjuEtt6XIakRcsd7eLiOSPkp1kTRQGICTA8cKra/vFbjw==
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.0"
@@ -2305,6 +2305,11 @@
   resolved "https://registry.yarnpkg.com/@exodus/schemasafe/-/schemasafe-1.3.0.tgz#731656abe21e8e769a7f70a4d833e6312fe59b7f"
   integrity sha512-5Aap/GaRupgNx/feGBwLLTVv8OQFfv3pq2lPRzPg9R+IOBnDgghTGW7l7EuVXOvg5cc/xSAlRW8rBrjIC3Nvqw==
 
+"@faker-js/faker@^8.3.1":
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
+  integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
+
 "@fastify/busboy@^2.0.0":
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.0.0.tgz#f22824caff3ae506b18207bad4126dbc6ccdb6b8"
@@ -4308,6 +4313,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-forge@link:x-pack/packages/kbn-data-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/plugins/data":
   version "0.0.0"
   uid ""
@@ -4317,6 +4326,10 @@
   uid ""
 
 "@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
   version "0.0.0"
   uid ""
 
@@ -5053,6 +5066,10 @@
   uid ""
 
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/managed-content-badge@link:packages/kbn-managed-content-badge":
   version "0.0.0"
   uid ""
 
@@ -6125,6 +6142,10 @@
   uid ""
 
 "@kbn/sort-package-json@link:packages/kbn-sort-package-json":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
   version "0.0.0"
   uid ""
 
@@ -15630,10 +15651,10 @@ elastic-apm-node@3.46.0:
     traverse "^0.6.6"
     unicode-byte-truncate "^1.0.0"
 
-elastic-apm-node@^4.3.0:
-  version "4.3.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.3.0.tgz#449cd3d3154858fbe0bbf223d3a1442aa5a354bd"
-  integrity sha512-LLB+RH12cFIdKZxxW6oOt3aL+8oEYNaHILol31dFb2SFdCKCWceMfUSzESTuPiImdyRTi5A+2Iw+46Fgt4caPQ==
+elastic-apm-node@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.4.0.tgz#41452d8c0b040e6df99da71704c3d62783bb0f78"
+  integrity sha512-/CFP1DjK0eM8i4pSt8k10fX8I2UWh9u0Ycr1SXdy3t7ZQfI1FbM18IKFeMjktJIHbk2W+6XOxAY1RN8QhDj+bA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -15653,7 +15674,7 @@ elastic-apm-node@^4.3.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.5.0"
+    import-in-the-middle "1.7.2"
     json-bigint "^1.0.0"
     lru-cache "^10.0.1"
     measured-reporting "^1.51.1"
@@ -18981,10 +19002,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.5.0:
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.5.0.tgz#db939aa2b7220f6149124885160916be715d1cae"
-  integrity sha512-H2hqR0jImhqe9+1k8pYewDKWJHnDeRsWZk5aSztv6MIWD5glmbEOqy1JZrMUC6SJiO1M4A+nVvUUYtWzP5wPYg==
+import-in-the-middle@1.7.2:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.7.2.tgz#31c44088271b50ecb9cacbdfb1e5732c802e0658"
+  integrity sha512-coz7AjRnPyKW36J6JX5Bjz1mcX7MX1H2XsEGseVcnXMdzsAbbAu0HBZhiAem+3SAmuZdi+p8OwoB2qUpTRgjOQ==
   dependencies:
     acorn "^8.8.2"
     acorn-import-assertions "^1.9.0"
@@ -25321,11 +25342,6 @@ public-encrypt@^4.0.0:
     create-hash "^1.1.0"
     parse-asn1 "^5.0.0"
     randombytes "^2.0.1"
-
-puid@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
-  integrity sha1-+mOKc317IEGQWdk5Za7TbKIOHIQ=
 
 pump@^2.0.0:
   version "2.0.1"
