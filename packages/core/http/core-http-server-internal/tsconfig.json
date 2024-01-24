@@ -34,6 +34,7 @@
     "@kbn/core-http-context-server-mocks",
     "@kbn/logging-mocks",
     "@kbn/core-di-server-internal",
+    "@kbn/core-di-server-mocks",
   ],
   "exclude": [
     "target/**/*",
