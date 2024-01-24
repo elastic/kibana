@@ -138,7 +138,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(timeFiltersNumberInSharedURL).equal(timeFiltersNumberInReportURL);
         expect(sharedURL.includes('time:(from:now-24h%2Fh,to:now))')).to.be(true);
 
-        // expect(timeFiltersNumberInReportURL).to.be(1);
         expect(
           reportURL.includes(
             'query:(range:(order_date:(format:strict_date_optional_time,gte:now-24h/h,lte:now))))'
@@ -146,7 +145,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
 
         // return keyboard state
-        await browser.getActions().keyUp(Key.CONTROL).perform();
+        await browser
+          .getActions()
+          .keyUp(process.platform === 'darwin' ? Key.COMMAND : Key.CONTROL)
+          .perform();
         await browser.getActions().keyUp('v').perform();
 
         //  return field search input state
