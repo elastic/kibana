@@ -136,6 +136,8 @@ export class LensVisService {
     onSuggestionContextChange?: (suggestionContext: CurrentSuggestionContext | undefined) => void;
     onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
   }) => {
+    console.log('recalculating chart', suggestionContextSelectedPreviously, externalVisContext);
+
     const allSuggestions = this.getAllSuggestions({ queryParams });
 
     console.log('service allSuggestions', allSuggestions);

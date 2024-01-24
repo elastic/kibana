@@ -148,6 +148,7 @@ export const UnifiedHistogramContainer = forwardRef<
     }
 
     return (visContext) => {
+      console.log('updating vis context', visContext);
       onVisContextChanged(getStableVisContext(visContext));
     };
   }, [onVisContextChanged]);
