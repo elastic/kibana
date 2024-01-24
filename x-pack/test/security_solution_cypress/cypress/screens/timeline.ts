@@ -13,12 +13,14 @@ export const ADD_NOTE_BUTTON = '[data-test-subj="add-note"]';
 export const ADD_FILTER =
   '[data-test-subj="timeline-search-or-filter"] [data-test-subj="addFilter"]';
 
-export const ATTACH_TIMELINE_TO_CASE_BUTTON = '[data-test-subj="attach-timeline-case-button"]';
+export const ATTACH_TIMELINE_TO_CASE_BUTTON =
+  '[data-test-subj="timeline-modal-attach-to-case-dropdown-button"]';
 
-export const ATTACH_TIMELINE_TO_NEW_CASE_ICON = '[data-test-subj="attach-timeline-new-case"]';
+export const ATTACH_TIMELINE_TO_NEW_CASE_ICON =
+  '[data-test-subj="timeline-modal-attach-timeline-to-new-case"]';
 
 export const ATTACH_TIMELINE_TO_EXISTING_CASE_ICON =
-  '[data-test-subj="attach-timeline-existing-case"]';
+  '[data-test-subj="timeline-modal-attach-timeline-to-existing-case"]';
 
 export const SELECT_CASE = (id: string) => {
   return `[data-test-subj="cases-table-row-select-${id}"]`;
@@ -29,8 +31,12 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
 export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
+export const BOTTOM_BAR_CREATE_NEW_TIMELINE =
+  '[data-test-subj="timeline-bottom-bar-create-new-timeline"]';
 
 export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
+export const BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE =
+  '[data-test-subj="timeline-bottom-bar-create-new-timeline-template"]';
 
 export const DATA_PROVIDERS = '.field-value';
 
@@ -77,7 +83,7 @@ export const DELETE_NOTE = '[data-test-subj="delete-note"]';
 export const MARKDOWN_INVESTIGATE_BUTTON =
   '[data-test-subj="insight-investigate-in-timeline-button"]';
 
-export const OPEN_TIMELINE_ICON = '[data-test-subj="open-timeline-button"]';
+export const OPEN_TIMELINE_ICON = '[data-test-subj="timeline-modal-open-timeline-button"]';
 
 export const OPEN_TIMELINE_MODAL = '[data-test-subj="open-timeline-modal"]';
 
@@ -181,7 +187,7 @@ export const TIMELINE_PANEL = `[data-test-subj="timeline-flyout-header-panel"]`;
 
 export const TIMELINE_QUERY = '[data-test-subj="timelineQueryInput"]';
 
-export const TIMELINE_SETTINGS_ICON = '[data-test-subj="timeline-create-open-control"]';
+export const BOTTOM_BAR_TIMELINE_PLUS_ICON = '[data-test-subj="timeline-bottom-bar-open-button"]';
 
 export const TIMELINE_SEARCH_OR_FILTER = '[data-test-subj="timeline-select-search-or-filter"]';
 
