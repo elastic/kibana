@@ -17,7 +17,9 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
+
 jest.mock('@kbn/core-http-router-server-internal');
 import { HttpService } from './http_service';
 import { HttpConfigType, config } from './http_config';
@@ -53,6 +55,9 @@ const prebootDeps = {
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 const fakeHapiServer = {
   start: noop,
@@ -104,7 +109,7 @@ test('creates and sets up http server', async () => {
   expect(httpServer.start).not.toHaveBeenCalled();
   expect(prebootHttpServer.stop).not.toHaveBeenCalled();
 
-  await service.start();
+  await service.start(startDeps);
   expect(httpServer.start).toHaveBeenCalled();
   expect(prebootHttpServer.stop).toHaveBeenCalled();
   await service.stop();
@@ -159,7 +164,7 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   }).toMatchSnapshot('503 response');
 
   await service.setup(setupDeps);
-  await service.start();
+  await service.start(startDeps);
 
   expect(httpServer.start).toBeCalledTimes(1);
   expect(prebootHapiServer.stop).toBeCalledTimes(1);
@@ -217,7 +222,7 @@ test('stops http server', async () => {
 
   await service.preboot(prebootDeps);
   await service.setup(setupDeps);
-  await service.start();
+  await service.start(startDeps);
 
   expect(httpServer.stop).toHaveBeenCalledTimes(0);
   expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
@@ -276,7 +281,7 @@ test('does not try to stop `preboot` server if it has been already stopped', asy
   expect(prebootHttpServer.stop).not.toHaveBeenCalled();
   expect(standardHttpServer.stop).not.toHaveBeenCalled();
 
-  await service.start();
+  await service.start(startDeps);
 
   expect(prebootHttpServer.stop).toHaveBeenCalledTimes(1);
   expect(standardHttpServer.stop).not.toHaveBeenCalled();
@@ -439,7 +444,7 @@ test('does not start http server if configured with `autoListen:false`', async (
 
   await service.preboot(prebootDeps);
   await service.setup(setupDeps);
-  await service.start();
+  await service.start(startDeps);
 
   expect(httpServer.start).not.toHaveBeenCalled();
   await service.stop();
