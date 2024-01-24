@@ -16,6 +16,8 @@ import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useStepFromQueryString } from '../use_step_from_query_string';
+import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
+import { MANAGED_BY_FLEET } from '../../constants';
 
 interface Props {
   /**
@@ -58,6 +60,7 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
   }, [locationSearchParams, sourceComponentTemplate]);
 
   const { api } = useComponentTemplatesContext();
+  const { showDatastreamRolloverModal } = useDatastreamsRollover();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -72,6 +75,9 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
     if (error) {
       setSaveError(error);
       return;
+    }
+    if (componentTemplate._meta?.managed_by === MANAGED_BY_FLEET) {
+      await showDatastreamRolloverModal(componentTemplate.name);
     }
 
     redirectTo(encodeURI(`/component_templates/${encodeURIComponent(name)}`));
