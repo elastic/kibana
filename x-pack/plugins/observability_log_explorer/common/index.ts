@@ -13,7 +13,7 @@ export {
 export {
   OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
   OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY,
-  urlSchemaV1,
-  datasetQualityUrlSchema,
+  logExplorerUrlSchemaV1,
+  datasetQualityUrlSchemaV1,
 } from './url_schema';
 export { deepCompactObject } from './utils/deep_compact_object';

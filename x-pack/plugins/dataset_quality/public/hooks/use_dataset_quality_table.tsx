@@ -16,10 +16,10 @@ import { useDatasetQualityContext } from '../components/dataset_quality/context'
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
 import { useKibanaContextForPlugin } from '../utils';
 
-export type DIRECTION = 'asc' | 'desc';
-export type SORT_FIELD = keyof DataStreamStat;
+export type Direction = 'asc' | 'desc';
+export type SortField = keyof DataStreamStat;
 
-const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
+const sortingOverrides: Partial<{ [key in SortField]: SortField }> = {
   ['title']: 'name',
   ['size']: 'sizeBytes',
 };
@@ -75,7 +75,7 @@ export const useDatasetQualityTable = () => {
   const onTableChange = useCallback(
     (options: {
       page: { index: number; size: number };
-      sort?: { field: SORT_FIELD; direction: DIRECTION };
+      sort?: { field: SortField; direction: Direction };
     }) => {
       service.send({
         type: 'CHANGE_PAGE',

@@ -7,16 +7,23 @@
 
 import * as rt from 'io-ts';
 
-export const sortRT = rt.strict({
-  field: rt.string,
-  direction: rt.string,
+export const directionRT = rt.keyof({
+  asc: null,
+  desc: null,
 });
 
-export const tableRT = rt.strict({
-  page: rt.number,
-  rowsPerPage: rt.number,
-  sort: sortRT,
+export const sortRT = rt.strict({
+  field: rt.string,
+  direction: directionRT,
 });
+
+export const tableRT = rt.exact(
+  rt.partial({
+    page: rt.number,
+    rowsPerPage: rt.number,
+    sort: sortRT,
+  })
+);
 
 const integrationRT = rt.strict({
   name: rt.string,

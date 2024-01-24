@@ -19,7 +19,6 @@ import {
   ObservabilityDatasetQualityPageStateProvider,
   useObservabilityDatasetQualityPageStateContext,
 } from '../../state_machines/dataset_quality/src/provider';
-import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import { useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
@@ -30,8 +29,7 @@ export interface DatasetQualityRouteProps {
 
 export const DatasetQualityRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { datasetQuality, serverless, chrome, notifications, appParams } = services;
-  const { history } = appParams;
+  const { datasetQuality, serverless, chrome, notifications } = services;
   const logExplorerLinkProps = useLinkProps({ app: OBSERVABILITY_LOG_EXPLORER_APP_ID });
 
   useBreadcrumbs(
@@ -55,7 +53,6 @@ export const DatasetQualityRoute = () => {
       toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
     >
-      <LazyOriginInterpreter history={history} toasts={notifications.toasts} />
       <ConnectedContent />
     </ObservabilityDatasetQualityPageStateProvider>
   );

@@ -7,10 +7,10 @@
 
 import { DatasetQualityPublicStateUpdate } from '@kbn/dataset-quality-plugin/public/controller';
 import * as rt from 'io-ts';
-import { datasetQualityUrlSchema, deepCompactObject } from '../../../../common';
+import { datasetQualityUrlSchemaV1, deepCompactObject } from '../../../../common';
 
 export const getStateFromUrlValue = (
-  urlValue: datasetQualityUrlSchema.UrlSchema
+  urlValue: datasetQualityUrlSchemaV1.UrlSchema
 ): DatasetQualityPublicStateUpdate =>
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
@@ -19,8 +19,8 @@ export const getStateFromUrlValue = (
 
 export const getUrlValueFromState = (
   state: DatasetQualityPublicStateUpdate
-): datasetQualityUrlSchema.UrlSchema =>
-  deepCompactObject<datasetQualityUrlSchema.UrlSchema>({
+): datasetQualityUrlSchemaV1.UrlSchema =>
+  deepCompactObject<datasetQualityUrlSchemaV1.UrlSchema>({
     table: state.table,
     flyout: state.flyout,
     v: 1,
@@ -28,8 +28,8 @@ export const getUrlValueFromState = (
 
 const stateFromUrlSchemaRT = new rt.Type<
   DatasetQualityPublicStateUpdate,
-  datasetQualityUrlSchema.UrlSchema,
-  datasetQualityUrlSchema.UrlSchema
+  datasetQualityUrlSchemaV1.UrlSchema,
+  datasetQualityUrlSchemaV1.UrlSchema
 >(
   'stateFromUrlSchemaRT',
   rt.never.is,
@@ -38,4 +38,4 @@ const stateFromUrlSchemaRT = new rt.Type<
 );
 
 export const stateFromUntrustedUrlRT =
-  datasetQualityUrlSchema.urlSchemaRT.pipe(stateFromUrlSchemaRT);
+  datasetQualityUrlSchemaV1.urlSchemaRT.pipe(stateFromUrlSchemaRT);
