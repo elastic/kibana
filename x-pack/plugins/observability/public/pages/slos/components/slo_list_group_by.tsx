@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,11 +19,11 @@ import {
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { SearchState } from '../hooks/use_url_search_state';
 
-export type GroupByField = 'ungrouped' | 'tags'; // TODO add 'sli_indicator' | 'status' | 'instanceId'
+export type GroupByField = 'ungrouped' | 'tags' | 'status' | 'sliType';
 export interface Props {
   loading: boolean;
-  onChangeGroupBy: (groupBy: GroupByField) => void;
-  initialState: SearchState;
+  initialState: SearchState['groupBy'];
+  onStateChange: (newState: Partial<SearchState>) => void;
 }
 
 export type Item<T> = EuiSelectableOption & {
@@ -45,16 +45,36 @@ const GROUP_BY_OPTIONS: Array<Item<GroupByField>> = [
     }),
     type: 'tags',
   },
-  // TODO add more options (SLI indicator, status, instance id)
+  {
+    label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
+      defaultMessage: 'Status',
+    }),
+    type: 'status',
+  },
+  {
+    label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
+      defaultMessage: 'SLI type',
+    }),
+    type: 'sliType',
+  },
 ];
-export function SloGroupBy({ loading, onChangeGroupBy, initialState }: Props) {
+export function SloGroupBy({ loading, onStateChange, initialState }: Props) {
   const [isGroupByPopoverOpen, setGroupByPopoverOpen] = useState(false);
   const [groupByOptions, setGroupByOptions] = useState<Array<Item<GroupByField>>>(
     GROUP_BY_OPTIONS.map((option) => ({
       ...option,
-      checked: option.type === initialState.groupBy ? 'on' : undefined,
+      checked: option.type === initialState ? 'on' : undefined,
     }))
   );
+
+  useEffect(() => {
+    setGroupByOptions(
+      GROUP_BY_OPTIONS.map((option) => ({
+        ...option,
+        checked: option.type === initialState ? 'on' : undefined,
+      }))
+    );
+  }, [initialState]);
 
   const selectedGroupBy = groupByOptions.find((option) => option.checked === 'on');
   const handleToggleGroupByButton = () => setGroupByPopoverOpen(!isGroupByPopoverOpen);
@@ -62,7 +82,10 @@ export function SloGroupBy({ loading, onChangeGroupBy, initialState }: Props) {
   const handleChangeGroupBy = (newOptions: Array<Item<GroupByField>>) => {
     setGroupByOptions(newOptions);
     setGroupByPopoverOpen(false);
-    onChangeGroupBy(newOptions.find((o) => o.checked)!.type);
+    onStateChange({
+      page: 0,
+      groupBy: newOptions.find((o) => o.checked)!.type,
+    });
   };
   return (
     <EuiFlexItem grow={false}>

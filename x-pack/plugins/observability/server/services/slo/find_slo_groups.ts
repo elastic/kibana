@@ -6,6 +6,7 @@
  */
 import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
 import { ElasticsearchClient } from '@kbn/core/server';
+import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
 import { IllegalArgumentError } from '../../errors';
 import {
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
@@ -32,13 +33,30 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 interface Aggregation {
   doc_count: number;
   key: string;
+  min_sli_value: {
+    worse_violated: {
+      value: number | undefined;
+    };
+  };
+  violated: {
+    doc_count: number;
+  };
+  healthy: {
+    doc_count: number;
+  };
+  degrading: {
+    doc_count: number;
+  };
+  noData: {
+    doc_count: number;
+  };
 }
 
 interface GroupAggregationsResponse {
-  groupByTags: {
+  groupBy: {
     buckets: Aggregation[];
   };
-  distinct_tags: {
+  distinct_items: {
     value: number;
   };
 }
@@ -47,6 +65,18 @@ export class FindSLOGroups {
   constructor(private esClient: ElasticsearchClient, private spaceId: string) {}
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
+    const groupBy = params.groupBy;
+    let groupByField;
+    switch (groupBy) {
+      case 'tags':
+        groupByField = 'slo.tags';
+        break;
+      case 'status':
+        groupByField = 'status';
+        break;
+      case 'sliType':
+        groupByField = 'slo.indicator.type';
+    }
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
@@ -57,12 +87,54 @@ export class FindSLOGroups {
       },
       body: {
         aggs: {
-          groupByTags: {
+          groupBy: {
             terms: {
-              field: 'slo.tags',
+              field: groupByField,
               size: 10000,
             },
             aggs: {
+              min_sli_value: {
+                filter: {
+                  term: {
+                    status: 'VIOLATED',
+                  },
+                },
+                aggs: {
+                  worse_violated: {
+                    min: {
+                      field: 'sliValue',
+                    },
+                  },
+                },
+              },
+              violated: {
+                filter: {
+                  term: {
+                    status: 'VIOLATED',
+                  },
+                },
+              },
+              healthy: {
+                filter: {
+                  term: {
+                    status: 'HEALTHY',
+                  },
+                },
+              },
+              degrading: {
+                filter: {
+                  term: {
+                    status: 'DEGRADING',
+                  },
+                },
+              },
+              noData: {
+                filter: {
+                  term: {
+                    status: 'NO_DATA',
+                  },
+                },
+              },
               bucket_sort: {
                 bucket_sort: {
                   sort: [
@@ -78,24 +150,40 @@ export class FindSLOGroups {
               },
             },
           },
-          distinct_tags: {
+          distinct_items: {
             cardinality: {
-              field: 'slo.tags',
+              field: groupByField,
             },
           },
         },
       },
     });
-    const total = response.aggregations?.distinct_tags?.value ?? 0;
+
+    const total = response.aggregations?.distinct_items?.value ?? 0;
     const results =
-      response.aggregations?.groupByTags?.buckets.reduce((acc, bucket) => {
-        return { ...acc, [bucket.key]: bucket.doc_count ?? 0 };
-      }, {} as Record<string, number>) ?? {};
-    return {
+      response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
+        return [
+          ...acc,
+          {
+            group: bucket.key,
+            groupBy,
+            summary: {
+              total: bucket.doc_count ?? 0,
+              worse: bucket.min_sli_value?.worse_violated?.value,
+              violated: bucket.violated?.doc_count,
+              healthy: bucket.healthy?.doc_count,
+              degrading: bucket.degrading?.doc_count,
+              noData: bucket.noData?.doc_count,
+            },
+          },
+        ];
+      }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
+
+    return findSLOGroupsResponseSchema.encode({
       page: pagination.page,
       perPage: pagination.perPage,
       total,
       results,
-    };
+    });
   }
 }
