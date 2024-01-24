@@ -200,7 +200,7 @@ export function projectPixelCoordsToViewportSize(
 
   // Note that y is not being translated here as a shorter viewport height doesn't mean the image is shrunk
   // For viewport responsiveness, only width is translated
-  return coordinates.map(({ x, y }) => ({
+  return coordinates?.map(({ x, y }) => ({
     x: x * translateFactorX,
     y,
   }));
