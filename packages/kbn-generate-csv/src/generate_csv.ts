@@ -253,7 +253,7 @@ export class CsvGenerator {
     // use a class to internalize the paging strategy
     const cursor = new SearchCursor(
       indexPatternTitle,
-      this.job.searchStrategy,
+      this.job.pagingStrategy,
       settings,
       this.clients,
       this.logger

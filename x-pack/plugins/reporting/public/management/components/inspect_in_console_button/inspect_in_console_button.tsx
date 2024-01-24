@@ -31,7 +31,7 @@ interface PropsUI {
 const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
   const { csvConfig, job, searchSourceStart, locators } = props;
 
-  const { title: jobTitle, searchStrategy } = job;
+  const { title: jobTitle, pagingStrategy } = job;
   const serializedSearchSource = (job.payload as TaskPayloadCSV).searchSource;
 
   const handleDevToolsLinkClick = useCallback(async () => {
@@ -42,7 +42,7 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
     }
     const indexPatternTitle = index.getIndexPattern();
     const queryUri = compressToEncodedURIComponent(
-      searchStrategy === 'scroll'
+      pagingStrategy === 'scroll'
         ? getScrollApiTextForConsole(jobTitle, indexPatternTitle, searchSource, csvConfig)
         : getPitApiTextForConsole(jobTitle, indexPatternTitle, searchSource, csvConfig)
     );
@@ -50,7 +50,7 @@ const InspectInConsoleButtonUi: React.FC<PropsUI> = (props) => {
     consoleLocator?.navigate({
       loadFrom: `data:text/plain,${queryUri}`,
     });
-  }, [searchSourceStart, serializedSearchSource, jobTitle, searchStrategy, csvConfig, locators]);
+  }, [searchSourceStart, serializedSearchSource, jobTitle, pagingStrategy, csvConfig, locators]);
 
   return (
     <EuiContextMenuItem

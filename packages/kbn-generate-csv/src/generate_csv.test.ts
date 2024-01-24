@@ -332,7 +332,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'pit' }),
+        createMockJob({ columns: ['date', 'ip', 'message'], pagingStrategy: 'pit' }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -384,7 +384,7 @@ describe('CsvGenerator', () => {
       );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'pit' }),
+        createMockJob({ columns: ['date', 'ip', 'message'], pagingStrategy: 'pit' }),
         mockConfig,
         mockTaskInstanceFields,
         {
@@ -537,7 +537,7 @@ describe('CsvGenerator', () => {
         );
 
       const generateCsv = new CsvGenerator(
-        createMockJob({ columns: ['date', 'ip', 'message'], searchStrategy: 'scroll' }),
+        createMockJob({ columns: ['date', 'ip', 'message'], pagingStrategy: 'scroll' }),
         mockConfig,
         mockTaskInstanceFields,
         {
