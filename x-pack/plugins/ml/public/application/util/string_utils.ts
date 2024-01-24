@@ -8,8 +8,8 @@
 /*
  * Contains utility functions for performing operations on Strings.
  */
-import d3 from 'd3';
-import he from 'he';
+import { select, format } from 'd3';
+import { encode } from 'he';
 
 import { escapeKuery } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
@@ -115,7 +115,7 @@ export function mlEscape(str: string): string {
   // encodeEverything option. But with this option enabled
   // each word character is encoded as well.
   return String(str).replace(/\W/g, (s) =>
-    he.encode(s, {
+    encode(s, {
       useNamedReferences: true,
       encodeEverything: true,
       allowUnsafeSymbols: false,
@@ -161,11 +161,11 @@ export function escapeKueryForEmbeddableFieldValuePair(
 }
 
 export function calculateTextWidth(txt: string | number, isNumber: boolean) {
-  txt = isNumber && typeof txt === 'number' ? d3.format(',')(txt) : txt;
+  txt = isNumber && typeof txt === 'number' ? format(',')(txt) : txt;
 
   // Create a temporary selection to append the label to.
   // Note styling of font will be inherited from CSS of page.
-  const $body = d3.select('body');
+  const $body = select('body');
   const $el = $body.append('div');
   const svg = $el.append('svg');
 
@@ -179,7 +179,7 @@ export function calculateTextWidth(txt: string | number, isNumber: boolean) {
     .text(txt);
   const width = (tempLabelText[0][0] as SVGSVGElement).getBBox().width;
 
-  d3.select('.temp-axis-label').remove();
+  select('.temp-axis-label').remove();
   if ($el !== undefined) {
     $el.remove();
   }

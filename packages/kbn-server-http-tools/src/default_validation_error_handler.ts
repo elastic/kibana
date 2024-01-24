@@ -8,7 +8,7 @@
 
 import { Lifecycle, Request, ResponseToolkit, Util } from '@hapi/hapi';
 import { ValidationError } from 'joi';
-import Hoek from '@hapi/hoek';
+import { escape } from 'he';
 
 /**
  * Hapi extends the ValidationError interface to add this output key with more data.
@@ -49,7 +49,7 @@ export function defaultValidationErrorHandler(
 
     validationError.details.forEach((detail) => {
       if (detail.path.length > 0) {
-        validationKeys.push(Hoek.escapeHtml(detail.path.join('.')));
+        validationKeys.push(escape(detail.path.join('.')));
       } else {
         // If no path, use the value sigil to signal the entire value had an issue.
         validationKeys.push('value');
