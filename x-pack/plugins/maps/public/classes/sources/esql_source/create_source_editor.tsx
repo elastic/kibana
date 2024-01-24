@@ -6,12 +6,14 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiSkeletonText } from '@elastic/eui';
+import type { ESQLColumn } from '@kbn/es-types';
+import { EuiSkeletonText, EuiSpacer } from '@elastic/eui';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import { getIndexPatternService } from '../../../kibana_services';
 import { ESQLEditor } from './esql_editor';
+import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import { ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE } from './esql_utils';
 
 interface Props {
@@ -21,8 +23,15 @@ interface Props {
 
 export function CreateSourceEditor(props: Props) {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [columns, setColumns] = useState<ESQLColumn[]>([]);
   const [esql, setEsql] = useState('');
   const [dateField, setDateField] = useState<string | undefined>();
+  const [dateFields, setDateFields] = useState<string[]>([]);
+  const [geoField, setGeoField] = useState<string | undefined>();
+  const [geoFields, setGeoFields] = useState<string[]>([]);
+  const [narrowByGlobalSearch] = useState(true);
+  const [narrowByGlobalTime, setNarrowByGlobalTime] = useState(true);
+  const [narrowByMapBounds, setNarrowByMapBounds] = useState(true);
 
   useEffect(() => {
     let ignore = false;
@@ -42,15 +51,16 @@ export function CreateSourceEditor(props: Props) {
         if (dataView) {
           let geoField: DataViewField | undefined;
           const initialDateFields: string[] = [];
+          const initialGeoFields: string[] = [];
           for (let i = 0; i < dataView.fields.length; i++) {
             const field = dataView.fields[i];
             if (
-              !geoField &&
               [ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE].includes(
                 field.type as ES_GEO_FIELD_TYPE
               )
             ) {
-              geoField = field;
+              initialGeoFields.push(field.name);
+              if (!geoField) geoField = field;
             } else if ('date' === field.type) {
               initialDateFields.push(field.name);
             }
@@ -66,21 +76,23 @@ export function CreateSourceEditor(props: Props) {
             const initialEsql = `from ${dataView.getIndexPattern()} | keep ${
               geoField.name
             } | limit 10000`;
+            setColumns([
+              {
+                name: geoField.name,
+                type:
+                  geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+                    ? ESQL_GEO_SHAPE_TYPE
+                    : ESQL_GEO_POINT_TYPE,
+              },
+            ])
             setDateField(initialDateField);
+            setDateFields(initialDateFields);
+            setGeoField(geoField.name);
+            setGeoFields(initialGeoFields);
             setEsql(initialEsql);
-            props.onSourceConfigChange({
-              columns: [
-                {
-                  name: geoField.name,
-                  type:
-                    geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-                      ? ESQL_GEO_SHAPE_TYPE
-                      : ESQL_GEO_POINT_TYPE,
-                },
-              ],
-              dateField: initialDateField,
-              esql: initialEsql,
-            });
+            if (!initialDateField) {
+              setNarrowByGlobalTime(false);
+            }
           }
         }
         setIsInitialized(true);
@@ -99,30 +111,85 @@ export function CreateSourceEditor(props: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  useEffect(() => {
+    console.log('running effect onSourceConfigChange');
+    const sourceConfig = esql && esql.length
+    ? {
+        columns,
+        dateField,
+        geoField,
+        esql,
+        narrowByGlobalSearch,
+        narrowByGlobalTime,
+        narrowByMapBounds,
+      }
+    : null;
+    props.onSourceConfigChange(sourceConfig);
+  }, [columns, dateField, geoField, esql, narrowByGlobalSearch, narrowByGlobalTime, narrowByMapBounds]);
+
   return (
     <EuiSkeletonText lines={3} isLoading={!isInitialized}>
       <ESQLEditor
         esql={esql}
-        onESQLChange={(change: {
-          columns: ESQLSourceDescriptor['columns'];
-          dateFields: string[];
-          esql: string;
-        }) => {
-          let nextDateField = dateField;
-          if (!dateField || !change.dateFields.includes(dateField)) {
-            nextDateField = change.dateFields.length ? change.dateFields[0] : undefined;
-          }
-          setDateField(nextDateField);
+        onESQLChange={(change) => {
+          setColumns(change.columns);
           setEsql(change.esql);
-          const sourceConfig =
-            change.esql && change.esql.length
-              ? {
-                  columns: change.columns,
-                  dateField: nextDateField,
-                  esql: change.esql,
-                }
-              : null;
-          props.onSourceConfigChange(sourceConfig);
+          setDateFields(change.dateFields);
+          setGeoFields(change.geoFields);
+
+          if (!dateField || !change.dateFields.includes(dateField)) {
+            if (change.dateFields.length) {
+              setDateField(change.dateFields[0]);
+            } else {
+              setDateField(undefined);
+              setNarrowByGlobalTime(false);
+            }
+          }
+
+          if (!geoField || !change.geoFields.includes(geoField)) {
+            if (change.geoFields.length) {
+              setGeoField(change.geoFields[0]);
+            } else {
+              setGeoField(undefined);
+              setNarrowByMapBounds(false);
+            }
+          }
+        }}
+      />
+
+      <EuiSpacer size="m" />
+
+      <NarrowByMapBounds
+        esql={esql}
+        field={geoField}
+        fields={geoFields}
+        narrowByField={narrowByMapBounds}
+        onFieldChange={(fieldName: string) => {
+          setGeoField(fieldName);
+        }}
+        onNarrowByFieldChange={(narrowByField: boolean) => {
+          setNarrowByMapBounds(narrowByField);
+          // auto select first geo field when enabling narrowByMapBounds and geoField is not set
+          if (narrowByField && geoFields.length && !!geoField) {
+            setGeoField(geoFields[0])
+          }
+        }}
+      />
+
+      <NarrowByTime
+        esql={esql}
+        field={dateField}
+        fields={dateFields}
+        narrowByField={narrowByGlobalTime}
+        onFieldChange={(fieldName: string) => {
+          setDateField(fieldName);
+        }}
+        onNarrowByFieldChange={(narrowByField: boolean) => {
+          setNarrowByGlobalTime(narrowByField);
+          // auto select first geo field when enabling narrowByMapBounds and geoField is not set
+          if (narrowByField && dateFields.length && !!dateField) {
+            setDateField(dateFields[0])
+          }
         }}
       />
     </EuiSkeletonText>

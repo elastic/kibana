@@ -81,7 +81,7 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'columns', value: change.columns },
                 { propName: 'esql', value: change.esql },
               ];
-              function cleanupField(key: 'dateField' | 'geoField', fields: string[]) {
+              function ensureField(key: 'dateField' | 'geoField', fields: string[]) {
                 if (
                   props.sourceDescriptor[key] &&
                   !fields.includes(props.sourceDescriptor[key]!)
@@ -100,8 +100,8 @@ export function UpdateSourceEditor(props: Props) {
                   }
                 }
               }
-              cleanupField('dateField', change.dateFields);
-              cleanupField('geoField', change.geoFields);
+              ensureField('dateField', change.dateFields);
+              ensureField('geoField', change.geoFields);
               props.onChange(...changes);
             }}
           />
