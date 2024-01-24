@@ -53,12 +53,28 @@ export const ADD_EXCEPTION_SUCCESS = i18n.translate(
   }
 );
 
+export const ADD_ENDPOINT_EXCEPTION_SUCCESS = i18n.translate(
+  'xpack.securitySolution.ruleExceptions.addEnpointException.success',
+  {
+    defaultMessage: 'Endpoint exception is added to shared exception list',
+  }
+);
+
 export const ADD_EXCEPTION_SUCCESS_DETAILS = (listNames: string) =>
   i18n.translate(
     'xpack.securitySolution.ruleExceptions.addExceptionFlyout.closeAlerts.successDetails',
     {
       values: { listNames },
       defaultMessage: 'Rule exception has been added to shared lists: {listNames}.',
+    }
+  );
+
+export const ADD_ENDPOINT_EXCEPTION_SUCCESS_DETAILS = (listNames: string) =>
+  i18n.translate(
+    'xpack.securitySolution.ruleExceptions.addEndpointExceptionFlyout.closeAlerts.successDetails',
+    {
+      values: { listNames },
+      defaultMessage: 'Endpoint exception has been added to shared lists: {listNames}.',
     }
   );
 

@@ -112,8 +112,8 @@ export const useAddNewExceptionItems = (): ReturnUseAddNewExceptionItems => {
           const sharedListNames = sharedLists.map(({ name }) => name);
 
           addSuccess({
-            title: i18n.ADD_EXCEPTION_SUCCESS,
-            text: i18n.ADD_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
+            title: i18n.ADD_ENDPOINT_EXCEPTION_SUCCESS,
+            text: i18n.ADD_ENDPOINT_EXCEPTION_SUCCESS_DETAILS(sharedListNames.join(',')),
           });
         }
 
