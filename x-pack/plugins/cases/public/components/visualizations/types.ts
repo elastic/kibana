@@ -7,4 +7,10 @@
 
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-export type LensProps = Pick<TypedLensByValueInput, 'attributes' | 'timeRange'>;
+export type LensProps = Pick<TypedLensByValueInput, 'attributes' | 'timeRange'> & {
+  metadata?: LensMetadataProps;
+};
+export interface LensMetadataProps {
+  description?: string;
+  width?: string | number;
+}

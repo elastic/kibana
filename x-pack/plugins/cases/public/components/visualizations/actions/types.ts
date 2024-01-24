@@ -32,3 +32,11 @@ export interface CasesUIActionProps {
 export type ActionContext = ActionExecutionContext<{
   embeddable: Embeddable;
 }>;
+
+/**
+ * Optional metadata is used to render extra information about the Lens Attachment.
+ */
+export interface LensCaseAttachmentMetadata {
+  description?: string;
+  width?: number;
+}
