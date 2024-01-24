@@ -550,7 +550,7 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                         >
                           <FormattedMessage
                             id="share.embed.embedButton"
-                            defaultMessage="Copy Embed"
+                            defaultMessage="Copy embed"
                           />
                         </EuiButton>
                       )}

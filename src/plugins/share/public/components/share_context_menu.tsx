@@ -142,7 +142,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     if (allowEmbed) {
       menuItems.push({
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
-          defaultMessage: 'Embed',
+          defaultMessage: 'Copy embed',
         }),
         icon: 'console',
         sortOrder: 0,
