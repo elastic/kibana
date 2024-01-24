@@ -14,14 +14,12 @@ import {
 } from './test_ids';
 import { RightPanelContext } from '../context';
 import { InvestigationSection } from './investigation_section';
-import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
+import { TestProvider } from '@kbn/expandable-flyout/src/test/provider';
 
 jest.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 
-const flyoutContextValue = {} as unknown as ExpandableFlyoutContextValue;
 const panelContextValue = {
   dataFormattedForFieldBrowser: mockDataFormattedForFieldBrowser.filter(
     (d) => d.field !== 'kibana.alert.rule.type'
@@ -31,11 +29,11 @@ const panelContextValue = {
 const renderInvestigationSection = (expanded: boolean = false) =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+      <TestProvider>
         <RightPanelContext.Provider value={panelContextValue}>
           <InvestigationSection expanded={expanded} />
         </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     </IntlProvider>
   );
 

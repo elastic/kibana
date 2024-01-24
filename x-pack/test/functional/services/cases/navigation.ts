@@ -22,8 +22,9 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
     },
 
-    async navigateToSingleCase(app: string = 'cases', caseId: string) {
-      await common.navigateToUrlWithBrowserHistory(app, caseId);
+    async navigateToSingleCase(app: string = 'cases', caseId: string, tabId?: string) {
+      const search = tabId != null ? `?tabId=${tabId}` : '';
+      await common.navigateToUrlWithBrowserHistory(app, caseId, search);
     },
   };
 }

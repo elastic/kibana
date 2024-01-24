@@ -2428,6 +2428,10 @@
           },
           {
             "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/utils.ts"
           },
           {

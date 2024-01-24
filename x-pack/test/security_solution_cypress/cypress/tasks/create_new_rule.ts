@@ -23,7 +23,7 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
-import type { Actions } from '../objects/types';
+import type { Actions, AlertsFilter } from '../objects/types';
 // For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
@@ -125,6 +125,13 @@ import {
   INDEX_SELECTOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
+  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
+  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
@@ -462,6 +469,25 @@ export const fillRuleAction = (actions: Actions) => {
         break;
     }
   });
+};
+
+export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_BUTTON).click();
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_INPUT()).type(alertsFilter.query.kql);
+
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON).click();
+  alertsFilter.timeframe.days.forEach((day) =>
+    cy.get(ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON(day)).click()
+  );
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_START_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.start}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_END_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.end}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {

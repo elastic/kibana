@@ -18,7 +18,7 @@ import {
 import { css } from '@emotion/css';
 import { getOr } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import { ENTITIES_TAB_ID } from '../../left/components/entities_details';
 import { useRightPanelContext } from '../context';
@@ -68,7 +68,7 @@ export interface UserEntityOverviewProps {
  */
 export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({ userName }) => {
   const { eventId, indexName, scopeId } = useRightPanelContext();
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
   const goToEntitiesTab = useCallback(() => {
     openLeftPanel({
       id: DocumentDetailsLeftPanelKey,

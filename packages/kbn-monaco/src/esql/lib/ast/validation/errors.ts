@@ -172,15 +172,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'ccsNotSupportedForCommand':
-      return {
-        message: i18n.translate('monaco.esql.validation.ccsNotSupportedForCommand', {
-          defaultMessage: 'ES|QL does not yet support querying remote indices [{value}]',
-          values: {
-            value: out.value,
-          },
-        }),
-      };
     case 'unsupportedFieldType':
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedFieldType', {
@@ -191,6 +182,31 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
         type: 'warning',
+      };
+    case 'unsupportedSetting':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSetting', {
+          defaultMessage: 'Unsupported setting [{setting}], expected [{expected}]',
+          values: {
+            setting: out.setting,
+            expected: out.expected,
+          },
+        }),
+        type: 'error',
+      };
+    case 'unsupportedSettingCommandValue':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
+          defaultMessage:
+            'Unrecognized value [{value}], {command} [{setting}] needs to be one of [{expected}]',
+          values: {
+            setting: out.setting,
+            expected: out.expected,
+            value: out.value,
+            command: out.command,
+          },
+        }),
+        type: 'error',
       };
   }
   return { message: '' };
