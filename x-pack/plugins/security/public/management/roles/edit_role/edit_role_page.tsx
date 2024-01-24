@@ -17,6 +17,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTextArea,
   EuiTitle,
 } from '@elastic/eui';
 import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
@@ -415,39 +416,66 @@ export const EditRolePage: FunctionComponent<Props> = ({
 
   const getRoleName = () => {
     return (
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        <EuiFormRow
-          data-test-subj={'roleNameFormRow'}
-          label={
+      <EuiFormRow
+        data-test-subj={'roleNameFormRow'}
+        fullWidth={true}
+        label={
+          <h3>
             <FormattedMessage
               id="xpack.security.management.editRole.roleNameFormRowTitle"
               defaultMessage="Role name"
             />
-          }
-          helpText={
-            !isRoleReserved && isEditingExistingRole ? (
-              <FormattedMessage
-                id="xpack.security.management.editRole.roleNameFormRowHelpText"
-                defaultMessage="A role's name cannot be changed once it has been created."
-              />
-            ) : undefined
-          }
-          {...validator.validateRoleName(role)}
-          {...(creatingRoleAlreadyExists
-            ? { error: 'A role with this name already exists.', isInvalid: true }
-            : {})}
-        >
-          <EuiFieldText
-            name={'name'}
-            value={role.name || ''}
-            onChange={onNameChange}
-            onBlur={onNameBlur}
-            data-test-subj={'roleFormNameInput'}
-            disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
-            isInvalid={creatingRoleAlreadyExists}
-          />
-        </EuiFormRow>
-      </EuiPanel>
+          </h3>
+        }
+        helpText={
+          !isRoleReserved && isEditingExistingRole ? (
+            <FormattedMessage
+              id="xpack.security.management.editRole.roleNameFormRowHelpText"
+              defaultMessage="A role's name cannot be changed once it has been created."
+            />
+          ) : undefined
+        }
+        {...validator.validateRoleName(role)}
+        {...(creatingRoleAlreadyExists
+          ? { error: 'A role with this name already exists.', isInvalid: true }
+          : {})}
+      >
+        <EuiFieldText
+          name={'name'}
+          value={role.name || ''}
+          onChange={onNameChange}
+          onBlur={onNameBlur}
+          data-test-subj={'roleFormNameInput'}
+          disabled={isRoleReserved || isEditingExistingRole || isRoleReadOnly}
+          isInvalid={creatingRoleAlreadyExists}
+        />
+      </EuiFormRow>
+    );
+  };
+
+  const getRoleDescription = () => {
+    return (
+      <EuiFormRow
+        data-test-subj={'roleDescriptionFormRow'}
+        label={
+          <h3>
+            <FormattedMessage
+              id="xpack.security.management.editRole.roleDescriptionFormRowTitle"
+              defaultMessage="Description (optional)"
+            />
+          </h3>
+        }
+        {...validator.validateRoleDescription(role)}
+      >
+        <EuiTextArea
+          name={'description'}
+          value={role.description || ''}
+          onChange={onDescriptionChange}
+          data-test-subj={'roleFormDescriptionInput'}
+          disabled={isRoleReserved || isRoleReadOnly}
+          compressed
+        />
+      </EuiFormRow>
     );
   };
 
@@ -465,6 +493,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
       });
     }
   };
+
+  const onDescriptionChange = (e: ChangeEvent<HTMLTextAreaElement>) =>
+    setRole({
+      ...role,
+      description: e.target.value,
+    });
 
   const getElasticsearchPrivileges = () => {
     return (
@@ -680,7 +714,10 @@ export const EditRolePage: FunctionComponent<Props> = ({
           </Fragment>
         )}
         <EuiSpacer />
-        {getRoleName()}
+        <EuiPanel hasShadow={false} hasBorder={true}>
+          {getRoleName()}
+          {getRoleDescription()}
+        </EuiPanel>
         {getElasticsearchPrivileges()}
         {getKibanaPrivileges()}
         <EuiSpacer />

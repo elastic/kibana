@@ -8,6 +8,7 @@
 import type { HttpStart } from '@kbn/core/public';
 
 import type { Role, RoleIndexPrivilege, RoleRemoteIndexPrivilege } from '../../../common';
+import { ROLE_DESCRIPTION_METADATA_KEY } from '../../../common/constants';
 import { copyRole } from '../../../common/model';
 
 export class RolesAPIClient {
@@ -64,8 +65,14 @@ export class RolesAPIClient {
       }
     });
 
+    role.metadata = {
+      ...role.metadata,
+      [ROLE_DESCRIPTION_METADATA_KEY]: role.description?.trim(),
+    };
+
     // @ts-expect-error
     delete role.name;
+    delete role.description;
     delete role.transient_metadata;
     delete role._unrecognized_applications;
     delete role._transform_error;

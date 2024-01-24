@@ -30,6 +30,7 @@ export interface RoleKibanaPrivilege {
 
 export interface Role {
   name: string;
+  description?: string;
   elasticsearch: {
     cluster: string[];
     indices: RoleIndexPrivilege[];

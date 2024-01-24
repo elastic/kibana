@@ -8,7 +8,7 @@
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
 import { getPutPayloadSchema } from './put_payload';
-import { ALL_SPACES_ID } from '../../../../../common/constants';
+import { ALL_SPACES_ID, ROLE_DESCRIPTION_METADATA_KEY } from '../../../../../common/constants';
 import { validateKibanaPrivileges } from '../../../../lib';
 
 const basePrivilegeNamesMap = {
@@ -63,6 +63,16 @@ describe('Put payload schema', () => {
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"[kibana.0]: definition of [feature] isn't allowed when non-empty [base] is defined."`
+    );
+  });
+
+  test(`doesn't allow metadata description to exceed 1024 characters`, () => {
+    expect(() =>
+      getPutPayloadSchema(() => basePrivilegeNamesMap).validate({
+        metadata: { [ROLE_DESCRIPTION_METADATA_KEY]: 'a'.repeat(1025) },
+      })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[metadata.kibana_description]: value has length [1025] but it must have a maximum length of [1024]."`
     );
   });
 

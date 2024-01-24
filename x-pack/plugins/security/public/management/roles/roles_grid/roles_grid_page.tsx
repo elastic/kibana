@@ -223,6 +223,13 @@ export class RolesGridPage extends Component<Props, State> {
         },
       },
       {
+        field: 'description',
+        name: i18n.translate('xpack.security.management.roles.descriptionColumnName', {
+          defaultMessage: 'Description',
+        }),
+        truncateText: true,
+      },
+      {
         field: 'metadata',
         name: i18n.translate('xpack.security.management.roles.statusColumnName', {
           defaultMessage: 'Status',
