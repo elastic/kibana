@@ -36,6 +36,7 @@
     "@kbn/router-to-openapispec",
     "@kbn/core-base-server-mocks",
     "@kbn/core-di-server-internal",
+    "@kbn/core-di-server-mocks",
   ],
   "exclude": [
     "target/**/*",
