@@ -315,6 +315,7 @@ src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
+x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
@@ -587,10 +588,15 @@ packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
+packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 examples/portable_dashboards_example @elastic/kibana-presentation
 examples/preboot_example @elastic/kibana-security @elastic/kibana-core
+packages/presentation/presentation_containers @elastic/kibana-presentation
+packages/presentation/presentation_library @elastic/kibana-presentation
+src/plugins/presentation_panel @elastic/kibana-presentation
+packages/presentation/presentation_publishing @elastic/kibana-presentation
 src/plugins/presentation_util @elastic/kibana-presentation
 x-pack/plugins/profiling_data_access @elastic/obs-ux-infra_services-team
 x-pack/plugins/profiling @elastic/obs-ux-infra_services-team
@@ -765,6 +771,7 @@ x-pack/packages/kbn-slo-schema @elastic/obs-ux-management-team
 x-pack/plugins/snapshot_restore @elastic/platform-deployment-management
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
+packages/kbn-sort-predicates @elastic/kibana-visualizations
 x-pack/plugins/spaces @elastic/kibana-security
 x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 packages/kbn-spec-to-console @elastic/platform-deployment-management
@@ -1043,9 +1050,9 @@ x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
 x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 
 # Elastic Stack Monitoring
-/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team
-/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
+/x-pack/test/api_integration/apis/monitoring_collection @elastic/obs-ux-infra_services-team @elastic/stack-monitoring
 /x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer @elastic/obs-ux-logs-team
 
 # Fleet
@@ -1523,6 +1530,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
