@@ -40,6 +40,7 @@ import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -377,7 +378,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         items={sloList}
         columns={columns}
         loading={loading}
-        noItemsMessage={loading ? LOADING_SLOS_LABEL : NOT_AVAILABLE_LABEL}
+        noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
       />
       {sloToAddRule ? (
         <AddRuleFlyout
@@ -411,6 +412,6 @@ const LOADING_SLOS_LABEL = i18n.translate('xpack.observability.slo.loadingSlosLa
   defaultMessage: 'Loading SLOs ...',
 });
 
-const NOT_AVAILABLE_LABEL = i18n.translate('xpack.observability.slo.notAvailableLabel', {
+const NO_SLOS_FOUND = i18n.translate('xpack.observability.slo.noSlosFound', {
   defaultMessage: 'No SLOs found',
 });
