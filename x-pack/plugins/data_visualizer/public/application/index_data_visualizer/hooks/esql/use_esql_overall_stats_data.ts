@@ -8,13 +8,11 @@
 import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
-import type { ESQLSearchReponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
 import { useCallback, useEffect, useMemo, useReducer } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
-import { isDefined } from '@kbn/ml-is-defined';
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import type { TimeBucketsInterval } from '../../../../../common/services/time_buckets';
 import type {
@@ -33,6 +31,7 @@ import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
 import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import type { AggregatableField } from './use_esql_field_stats_data';
+import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 
 export interface Column {
   type: string;
@@ -295,87 +294,21 @@ export const useESQLOverallStatsData = (
           }
         });
 
-        // COUNT + CARDINALITY
         setTableData({ aggregatableFields, nonAggregatableFields });
 
+        // COUNT + CARDINALITY
         // For % count & cardinality, we want the full base query WITH specified limit
         // to safeguard against huge datasets
         const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
 
         if (fields.length > 0) {
-          const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
-
-          let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
-          countQuery += aggregatableFieldsToQuery
-            .map((field) => {
-              // count idx = 0, cardinality idx = 1
-              return `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
-                field.name
-              )}),
-              ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
-                field.name
-              )})`;
-            })
-            .join(',');
-
-          const esqlResults = await runRequest(
-            {
-              params: {
-                query: esqlBaseQueryWithLimit + countQuery,
-                ...(filter ? { filter } : {}),
-              },
-            },
-            { strategy: ESQL_SEARCH_STRATEGY }
-          );
-          const stats = {
-            aggregatableExistsFields: [] as AggregatableField[],
-            aggregatableNotExistsFields: [] as AggregatableField[],
-            nonAggregatableExistsFields: [] as NonAggregatableField[],
-            nonAggregatableNotExistsFields: [] as NonAggregatableField[],
-          };
-
-          if (!esqlResults) {
-            return;
-          }
-          const esqlResultsResp = esqlResults.rawResponse as unknown as ESQLSearchReponse;
-
-          const sampleCount =
-            limitSize === 'none' || !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
-          aggregatableFieldsToQuery.forEach((field, idx) => {
-            const count = esqlResultsResp.values[0][idx * 2] as number;
-            const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
-
-            if (field.aggregatable === true) {
-              if (count > 0) {
-                stats.aggregatableExistsFields.push({
-                  ...field,
-                  fieldName: field.name,
-                  existsInDocs: true,
-                  stats: {
-                    sampleCount,
-                    count,
-                    cardinality,
-                  },
-                });
-              } else {
-                stats.aggregatableNotExistsFields.push({
-                  ...field,
-                  fieldName: field.name,
-                  existsInDocs: false,
-                  stats: undefined,
-                });
-              }
-            } else {
-              const fieldData = {
-                fieldName: field.name,
-                existsInDocs: true,
-              };
-              if (count > 0) {
-                stats.nonAggregatableExistsFields.push(fieldData);
-              } else {
-                stats.nonAggregatableNotExistsFields.push(fieldData);
-              }
-            }
+          const stats = await getESQLOverallStats({
+            runRequest,
+            fields,
+            esqlBaseQueryWithLimit,
+            filter,
+            limitSize,
+            totalCount,
           });
 
           setTableData({ overallStats: stats });
