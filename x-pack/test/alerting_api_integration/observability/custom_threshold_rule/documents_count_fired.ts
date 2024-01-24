@@ -97,7 +97,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/175407
-    describe.skip('Rule creation', () => {
+    describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await createIndexConnector({
           supertest,
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: 'container.id:*', aggType: Aggregators.COUNT }],
               },
@@ -212,7 +212,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 1,
+                timeSize: 5,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: 'container.id:*', aggType: 'count' }],
               },
@@ -238,9 +238,9 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATE_VIEW_NAME})`
+          `Document count is 15, not between the threshold of 1 and 2. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('3');
+        expect(resp.hits.hits[0]._source?.value).eql('15');
 
         const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
