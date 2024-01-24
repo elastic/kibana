@@ -16,21 +16,25 @@ export const journey = new Journey({
     'x-pack/performance/kbn_archives/logs_no_map_dashboard',
   ],
 })
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector(subj('table-is-ready'));
+    await kibanaPage.waitForListViewTable();
   })
-  .step('Search dashboards', async ({ page, inputDelays }) => {
+  .step('Search dashboards', async ({ page, inputDelays, kibanaPage }) => {
     await page.type(subj('tableListSearchBox'), 'Web', {
       delay: inputDelays.TYPING,
     });
-    await page.waitForSelector(subj('table-is-ready'));
+    await kibanaPage.waitForListViewTable();
   })
-  .step('Delete dashboard', async ({ page }) => {
-    await page.click(subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b'));
+  .step('Delete dashboard', async ({ page, kibanaPage }) => {
+    const deletedDashboard = page.locator(
+      subj('checkboxSelectRow-edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b')
+    );
+    await deletedDashboard.click();
     await page.click(subj('deleteSelectedItems'));
     await page.click(subj('confirmModalConfirmButton'));
-    await page.waitForSelector(subj('table-is-ready'));
+    await kibanaPage.waitForListViewTable();
+    await deletedDashboard.waitFor({ state: 'detached' });
   })
   .step('Add  dashboard', async ({ page, inputDelays }) => {
     await page.click(subj('newItemButton'));
@@ -41,7 +45,7 @@ export const journey = new Journey({
     await page.click(subj('confirmSaveSavedObjectButton'));
     await page.waitForSelector(subj('saveDashboardSuccess'));
   })
-  .step('Return to dashboard list', async ({ kibanaPage, page }) => {
-    kibanaPage.backToDashboardListing();
-    await page.waitForSelector(subj('table-is-ready'));
+  .step('Return to dashboard list', async ({ kibanaPage }) => {
+    await kibanaPage.backToDashboardListing();
+    await kibanaPage.waitForListViewTable();
   });

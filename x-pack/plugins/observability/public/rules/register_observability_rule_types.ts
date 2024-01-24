@@ -112,6 +112,9 @@ export const registerObservabilityRuleTypes = async (
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
+    alertDetailsAppSection: lazy(
+      () => import('../components/slo/burn_rate/alert_details/alert_details_app_section')
+    ),
     priority: 100,
   });
 
