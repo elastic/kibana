@@ -106,7 +106,8 @@
     "@kbn/test-eui-helpers",
     "@kbn/shared-ux-utility",
     "@kbn/text-based-editor",
-    "@kbn/managed-content-badge"
+    "@kbn/managed-content-badge",
+    "@kbn/sort-predicates"
   ],
   "exclude": ["target/**/*"]
 }

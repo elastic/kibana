@@ -258,4 +258,68 @@ describe('Versioned route', () => {
       expect(validatedOutputBody).toBe(true);
     });
   });
+
+  it('allows using default resolution for specific internal routes', async () => {
+    const versionedRouter = CoreVersionedRouter.from({
+      router,
+      isDev: true,
+      useVersionResolutionStrategyForInternalPaths: ['/bypass_me/{id?}'],
+    });
+
+    let bypassVersionHandler: RequestHandler;
+    (router.post as jest.Mock).mockImplementation(
+      (opts: unknown, fn) => (bypassVersionHandler = fn)
+    );
+    versionedRouter.post({ path: '/bypass_me/{id?}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    let doNotBypassHandler1: RequestHandler;
+    (router.put as jest.Mock).mockImplementation((opts: unknown, fn) => (doNotBypassHandler1 = fn));
+    versionedRouter.put({ path: '/do_not_bypass_me/{id}', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    let doNotBypassHandler2: RequestHandler;
+    (router.get as jest.Mock).mockImplementation((opts: unknown, fn) => (doNotBypassHandler2 = fn));
+    versionedRouter.get({ path: '/do_not_bypass_me_either', access: 'internal' }).addVersion(
+      {
+        version: '1',
+        validate: false,
+      },
+      handlerFn
+    );
+
+    const byPassedVersionResponse = await bypassVersionHandler!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    const doNotBypassResponse1 = await doNotBypassHandler1!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    const doNotBypassResponse2 = await doNotBypassHandler2!(
+      {} as any,
+      createRequest({ version: undefined }),
+      responseFactory
+    );
+
+    expect(byPassedVersionResponse.status).toBe(200);
+    expect(doNotBypassResponse1.status).toBe(400);
+    expect(doNotBypassResponse1.payload).toMatch('Please specify a version');
+    expect(doNotBypassResponse2.status).toBe(400);
+    expect(doNotBypassResponse2.payload).toMatch('Please specify a version');
+  });
 });

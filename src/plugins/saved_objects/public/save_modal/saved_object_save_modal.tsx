@@ -252,7 +252,7 @@ export class SavedObjectSaveModal extends React.Component<Props, SaveModalState>
 
     await this.props.onSave({
       newTitle: this.state.title,
-      newCopyOnSave: this.state.copyOnSave,
+      newCopyOnSave: Boolean(this.props.mustCopyOnSaveMessage) || this.state.copyOnSave,
       isTitleDuplicateConfirmed: this.state.isTitleDuplicateConfirmed,
       onTitleDuplicate: this.onTitleDuplicate,
       newDescription: this.state.visualizationDescription,
