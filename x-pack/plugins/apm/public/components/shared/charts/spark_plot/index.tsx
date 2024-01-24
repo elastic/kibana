@@ -67,9 +67,7 @@ export function SparkPlot({
       alignItems="flexEnd"
       style={flexGroupStyle}
     >
-      <EuiFlexItem grow={false} style={{ whiteSpace: 'nowrap' }}>
-        {valueLabel}
-      </EuiFlexItem>
+      <EuiFlexItem>{valueLabel}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SparkPlotItem
           type={type}
