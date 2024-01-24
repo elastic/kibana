@@ -96,7 +96,7 @@ export class DashboardAddPanelService extends FtrService {
           continue;
         }
         await button.click();
-        await this.toasts.closeToastIfExists();
+
         embeddableList.push(name);
       }
     });
