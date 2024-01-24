@@ -24,7 +24,7 @@ export const useAlertSuppression = (ruleType?: Type): UseAlertSuppressionReturn 
     if (ruleType === SuppressibleAlertRules.THREAT_MATCH) return isThreatMatchRuleFFEnabled;
 
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType]);
+  }, [ruleType, isThreatMatchRuleFFEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),
