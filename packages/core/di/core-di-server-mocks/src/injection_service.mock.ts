@@ -63,9 +63,9 @@ const createInternalStartContractMock = () => {
 };
 
 export const injectionServiceMock = {
-  createReadonlyContainer: createReadonlyContainerMock(),
-  createSetupContract: createSetupContractMock(),
-  createStartContract: createStartContractMock(),
-  createInternalSetupContract: createInternalSetupContractMock(),
-  createInternalStartContract: createInternalStartContractMock(),
+  createReadonlyContainer: createReadonlyContainerMock,
+  createSetupContract: createSetupContractMock,
+  createStartContract: createStartContractMock,
+  createInternalSetupContract: createInternalSetupContractMock,
+  createInternalStartContract: createInternalStartContractMock,
 };
