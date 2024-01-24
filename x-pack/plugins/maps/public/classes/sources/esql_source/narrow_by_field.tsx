@@ -14,18 +14,43 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 
-interface Props {
+
+export function NarrowByMapBounds(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fieldTypes'>) {
+  return <NarrowByField
+    switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
+      defaultMessage: 'Narrow ES|QL statement by visible map area',
+    })}
+    fieldTypes={[ES_GEO_FIELD_TYPE.GEO_POINT, ES_GEO_FIELD_TYPE.GEO_SHAPE]}
+    {...props}
+  />
+}
+
+export function NarrowByTime(props: Omit<NarrowByFieldProps, 'switchLabel' | 'fieldTypes'>) {
+  return <NarrowByField
+    switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
+      defaultMessage: `Narrow ES|QL statement by global time`,
+    })}
+    fieldTypes={['date']}
+    {...props}
+  />
+}
+
+
+interface NarrowByFieldProps {
   switchLabel: string;
-  noFieldsMessage: string;
+  esql: string;
   field?: string;
   fields: string[];
+  fieldTypes: string[];
   narrowByField: boolean;
   onFieldChange: (fieldName: string) => void;
   onNarrowByFieldChange: (narrowByField: boolean) => void;
 }
 
-export function NarrowByField(props: Props) {
+function NarrowByField(props: NarrowByFieldProps) {
   const options = useMemo(() => {
     return props.fields.map((field) => {
       return {
@@ -53,7 +78,15 @@ export function NarrowByField(props: Props) {
         {props.fields.length === 0 ? (
           <EuiToolTip
             position="top"
-            content={props.noFieldsMessage}
+            content={i18n.translate('xpack.maps.esqlSource.noFieldsMsg', {
+              defaultMessage: `No {fieldTypes} fields are available from index pattern: {pattern}.`,
+              values: {
+                fieldTypes: props.fieldTypes.map(type => {
+                  return `'${type}'`;
+                }).join(', '),
+                pattern: getIndexPatternFromESQLQuery(props.esql),
+              },
+            })}
           >
             {narrowBySwitch}
           </EuiToolTip>

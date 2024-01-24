@@ -16,12 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';
 import type { OnSourceChangeArgs } from '../source';
 import { ForceRefreshCheckbox } from '../../../components/force_refresh_checkbox';
 import { ESQLEditor } from './esql_editor';
-import { NarrowByField } from './narrow_by_field';
+import { NarrowByMapBounds, NarrowByTime } from './narrow_by_field';
 import { getFields } from './esql_utils';
 
 interface Props {
@@ -114,16 +113,8 @@ export function UpdateSourceEditor(props: Props) {
 
           <EuiSpacer size="m" />
 
-          <NarrowByField
-            switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByMapExtentLabel', {
-              defaultMessage: 'Narrow ES|QL statement by visible map area',
-            })}
-            noFieldsMessage={i18n.translate('xpack.maps.esqlSource.noGeoFieldsDisabledMsg', {
-              defaultMessage: `No geospatial fields are available from index pattern: {pattern}.`,
-              values: {
-                pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
-              },
-            })}
+          <NarrowByMapBounds
+            esql={props.sourceDescriptor.esql}
             field={props.sourceDescriptor.geoField}
             fields={geoFields}
             narrowByField={props.sourceDescriptor.narrowByMapBounds}
@@ -155,16 +146,8 @@ export function UpdateSourceEditor(props: Props) {
             />
           </EuiFormRow>
 
-          <NarrowByField
-            switchLabel={i18n.translate('xpack.maps.esqlSource.narrowByGlobalTimeLabel', {
-              defaultMessage: `Narrow ES|QL statement by global time`,
-            })}
-            noFieldsMessage={i18n.translate('xpack.maps.esqlSource.noDateFieldsDisabledMsg', {
-              defaultMessage: `No date fields are available from index pattern: {pattern}.`,
-              values: {
-                pattern: getIndexPatternFromESQLQuery(props.sourceDescriptor.esql),
-              },
-            })}
+          <NarrowByTime
+            esql={props.sourceDescriptor.esql}
             field={props.sourceDescriptor.dateField}
             fields={dateFields}
             narrowByField={props.sourceDescriptor.narrowByGlobalTime}
