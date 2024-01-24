@@ -82,6 +82,11 @@ export const getServices = async (
               'metricset.name': 'transaction',
             },
           },
+          {
+            term: {
+              'metricset.interval': '1m', // make this dynamic if we start returning time series data
+            },
+          },
           ...commonFiltersList,
         ],
       },
