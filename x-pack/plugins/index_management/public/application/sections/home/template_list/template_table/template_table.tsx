@@ -52,7 +52,7 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
       width: '30%',
       render: (name: TemplateListItem['name'], item: TemplateListItem) => {
         return (
-          <>
+          <span>
             <EuiLink
               {...reactRouterNavigate(history, getTemplateDetailsLink(name), () =>
                 uiMetricService.trackMetric(METRIC_TYPE.CLICK, UIM_TEMPLATE_SHOW_DETAILS_CLICK)
@@ -60,10 +60,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
               data-test-subj="templateDetailsLink"
             >
               {name}
-            </EuiLink>
-            &nbsp;
+            </EuiLink>{' '}
             <TemplateTypeIndicator templateType={item._kbnMeta.type} />
-          </>
+          </span>
         );
       },
     },

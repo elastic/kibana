@@ -157,7 +157,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
         sortable: true,
         width: '45%',
         render: (name: string, item: ComponentTemplateListItem) => (
-          <>
+          <span>
             <EuiLink
               {...reactRouterNavigate(
                 history,
@@ -172,7 +172,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
             </EuiLink>
             {item.isManaged && (
               <>
-                &nbsp;
+                {' '}
                 <EuiBadge color="hollow" data-test-subj="isManagedBadge">
                   {i18n.translate('xpack.idxMgmt.componentTemplatesList.table.managedBadgeLabel', {
                     defaultMessage: 'Managed',
@@ -180,7 +180,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
                 </EuiBadge>
               </>
             )}
-          </>
+          </span>
         ),
       },
       {
