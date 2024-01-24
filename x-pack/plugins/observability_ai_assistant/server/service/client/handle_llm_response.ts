@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
-import { v4 } from 'uuid';
-import { Message, MessageRole } from '../../../common';
+import { Observable, toArray } from 'rxjs';
 import {
-  StreamingChatResponseEvent,
+  MessageAddEvent,
   StreamingChatResponseEventType,
+  type ChatCompletionChunkEvent,
+  type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
-import type { CreateChatCompletionResponseChunk } from '../../../common/types';
 
 export function handleLlmResponse({
   signal,
@@ -21,51 +20,31 @@ export function handleLlmResponse({
 }: {
   signal: AbortSignal;
   write: (event: StreamingChatResponseEvent) => Promise<void>;
-  source$: Observable<CreateChatCompletionResponseChunk>;
-}): Promise<{ id: string; message: Message['message'] }> {
-  return new Promise<{ message: Message['message']; id: string }>((resolve, reject) => {
-    const message = {
-      content: '',
-      role: MessageRole.Assistant,
-      function_call: { name: '', arguments: '', trigger: MessageRole.Assistant as const },
-    };
+  source$: Observable<ChatCompletionChunkEvent | MessageAddEvent>;
+}) {
+  const writePromises: Array<Promise<void>> = [];
 
-    const id = v4();
-    const subscription = source$.subscribe({
-      next: (chunk) => {
-        const delta = chunk.choices[0].delta;
-
-        message.content += delta.content || '';
-        message.function_call.name += delta.function_call?.name || '';
-        message.function_call.arguments += delta.function_call?.arguments || '';
-
-        write({
-          type: StreamingChatResponseEventType.ChatCompletionChunk,
-          message: delta,
-          id,
+  return source$.pipe((source) => {
+    return new Observable<MessageAddEvent>((subscriber) => {
+      function writeOrFail(chunk: ChatCompletionChunkEvent) {
+        return write(chunk).catch((err) => {
+          subscriber.error(err);
+          throw err;
         });
-      },
-      complete: () => {
-        resolve({ id, message });
-      },
-      error: (error) => {
-        reject(error);
-      },
-    });
+      }
 
-    signal.addEventListener('abort', () => {
-      subscription.unsubscribe();
-      reject(new Error('Request aborted'));
+      source.subscribe({
+        next: (chunk) => {
+          if (chunk.type === StreamingChatResponseEventType.ChatCompletionChunk) {
+            writePromises.push(writeOrFail(chunk));
+          }
+        },
+        complete: () => {
+          Promise.all(writePromises).then(() => {
+            subscriber.complete();
+          });
+        },
+      });
     });
-  }).then(async ({ id, message }) => {
-    await write({
-      type: StreamingChatResponseEventType.MessageAdd,
-      message: {
-        '@timestamp': new Date().toISOString(),
-        message,
-      },
-      id,
-    });
-    return { id, message };
-  });
+  }, toArray());
 }
