@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { Owner } from '../../../common/constants/types';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import type { Buckets, CasesTelemetry, CollectTelemetryDataParams } from '../types';
 import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 import { findValueInBuckets, getCustomFieldsTelemetry } from './utils';
-import { Owner } from '@kbn/cases-plugin/common/constants/types';
 
 export const getConfigurationTelemetryData = async ({
   savedObjectsClient,

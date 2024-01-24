@@ -31,7 +31,7 @@ import type {
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
-import { ConfigurationPersistedAttributes } from '../../common/types/configure';
+import type { ConfigurationPersistedAttributes } from '../../common/types/configure';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {

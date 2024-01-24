@@ -7004,8 +7004,10 @@
                 "customFields": {
                   "properties": {
                     "totalsByType": {
-                      "DYNAMIC_KEY": {
-                        "type": "long"
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
                       }
                     },
                     "totals": {
@@ -7023,8 +7025,10 @@
                 "customFields": {
                   "properties": {
                     "totalsByType": {
-                      "DYNAMIC_KEY": {
-                        "type": "long"
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
                       }
                     },
                     "totals": {
@@ -7042,8 +7046,10 @@
                 "customFields": {
                   "properties": {
                     "totalsByType": {
-                      "DYNAMIC_KEY": {
-                        "type": "long"
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
                       }
                     },
                     "totals": {
@@ -7061,8 +7067,10 @@
                 "customFields": {
                   "properties": {
                     "totalsByType": {
-                      "DYNAMIC_KEY": {
-                        "type": "long"
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
                       }
                     },
                     "totals": {
