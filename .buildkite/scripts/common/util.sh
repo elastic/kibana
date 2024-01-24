@@ -172,7 +172,7 @@ download_artifact() {
 }
 
 # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
-if [[ "$VAULT_ADDR" == *"secrets.elastic.co"* ]]; then
+if [[ "${VAULT_ADDR:-}" == *"secrets.elastic.co"* ]]; then
   VAULT_PATH_PREFIX="secret/kibana-issues/dev"
   VAULT_KV_PREFIX="secret/kibana-issues/dev"
   IS_LEGACY_VAULT_ADDR=true
