@@ -16,8 +16,6 @@ import type {
 /**
  * Public setup contract of the DI service.
  *
-
- *
  * @public
  */
 export interface CoreDiServiceSetup {
