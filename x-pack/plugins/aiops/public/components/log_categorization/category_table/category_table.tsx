@@ -219,7 +219,7 @@ export const CategoryTable: FC<Props> = ({
   ] as Array<EuiBasicTableColumn<Category>>;
 
   if (showSparkline === true) {
-    columns.splice(1, 0, {
+    columns.splice(2, 0, {
       field: 'sparkline',
       name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
         defaultMessage: 'Log rate',
