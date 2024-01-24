@@ -81,6 +81,7 @@ import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
 import { getSearchResultProvider } from './utils/search_result_provider';
+import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 
 import { ConfigType } from '.';
 
@@ -343,6 +344,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (globalSearch) {
       globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getIndicesSearchResultProvider());
     }
   }
 
