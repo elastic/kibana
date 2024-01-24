@@ -20,6 +20,7 @@ import {
   EmbeddableConsoleDependencies,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo } from './services';
+import { loadActiveApi } from './lib/kb';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   private readonly autocompleteInfo = new AutocompleteInfo();
@@ -68,6 +69,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
             docLinks: { DOC_LINK_VERSION, links },
           } = core;
 
+          await loadActiveApi(core.http);
           const { renderApp } = await import('./application');
 
           return renderApp({
