@@ -16,7 +16,7 @@ import { waitForUncommonProcessesToBeLoaded } from '../../../tasks/hosts/uncommo
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { refreshPage } from '../../../tasks/security_header';
-import { hostsUrl, USERS_URL } from '../../../urls/navigation';
+import { hostsUrl, usersUrl } from '../../../urls/navigation';
 import { ALL_HOSTS_TABLE } from '../../../screens/hosts/all_hosts';
 import { ALL_USERS_TABLE } from '../../../screens/users/all_users';
 import { goToTablePage, sortFirstTableColumn } from '../../../tasks/table_pagination';
@@ -123,7 +123,7 @@ describe('Pagination', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it(`reset all users pagination when sorting column`, () => {
-      visitWithTimeRange(USERS_URL);
+      visitWithTimeRange(usersUrl('allUsers'));
       goToTablePage(2);
       cy.get(ALL_USERS_TABLE).find(TABLE_FIRST_PAGE).should('not.have.attr', 'aria-current');
 
