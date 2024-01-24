@@ -34,6 +34,7 @@ import {
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
 import type { CasesConnectorRunParams } from './types';
+import { MAX_OPEN_CASES } from './constants';
 
 jest.mock('./cases_oracle_service');
 jest.mock('./cases_service');
@@ -1782,6 +1783,175 @@ describe('CasesConnectorExecutor', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith(
         '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
       );
+    });
+  });
+
+  describe('Circuit breakers', () => {
+    describe('user defined', () => {
+      it('generates the oracle keys correctly when the total cases to be open is more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockGetRecordId).toHaveBeenCalledTimes(1);
+        expect(mockGetRecordId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+        });
+      });
+
+      it('generates the case ids correctly when the total cases to be open is more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockGetCaseId).toHaveBeenCalledTimes(1);
+        expect(mockGetCaseId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+          counter: 1,
+        });
+      });
+
+      it('attach all alerts to the same case when the grouping generates more than maximumCasesToOpen', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          caseId: 'mock-id-1',
+          attachments: [
+            {
+              type: 'alert',
+              alertId: 'alert-id-0',
+              index: 'alert-index-0',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-2',
+              index: 'alert-index-2',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-1',
+              index: 'alert-index-1',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+            {
+              type: 'alert',
+              alertId: 'alert-id-3',
+              index: 'alert-index-3',
+              rule: { id: 'rule-test-id', name: 'Test rule' },
+              owner: 'securitySolution',
+            },
+          ],
+        });
+      });
+
+      it('logs correctly', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          maximumCasesToOpen: 1,
+        });
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`
+        );
+      });
+    });
+
+    describe('hard limits', () => {
+      const allAlerts = Array.from({ length: MAX_OPEN_CASES + 1 }).map((_, index) => ({
+        _id: `alert-id-${index}`,
+        _index: `alert-index-${index}`,
+        'host.name': `host-${index}`,
+      }));
+
+      it('generates the oracle keys correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockGetRecordId).toHaveBeenCalledTimes(1);
+        expect(mockGetRecordId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+        });
+      });
+
+      it('generates the case ids correctly when the total cases to be open is more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockGetCaseId).toHaveBeenCalledTimes(1);
+        expect(mockGetCaseId).nthCalledWith(1, {
+          ruleId: rule.id,
+          grouping: {},
+          owner,
+          spaceId: 'default',
+          counter: 1,
+        });
+      });
+
+      it('attach all alerts to the same case when the grouping generates more than MAX_OPEN_CASES', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(1);
+        expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+          caseId: 'mock-id-1',
+          attachments: allAlerts.map((alert) => ({
+            alertId: alert._id,
+            index: alert._index,
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+            type: 'alert',
+          })),
+        });
+      });
+
+      it('logs correctly', async () => {
+        await connectorExecutor.execute({
+          ...params,
+          alerts: allAlerts,
+          groupingBy: ['host.name'],
+          // MAX_OPEN_CASES < maximumCasesToOpen
+          maximumCasesToOpen: 20,
+        });
+
+        expect(mockLogger.warn).toHaveBeenCalledWith(
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`
+        );
+      });
     });
   });
 });
