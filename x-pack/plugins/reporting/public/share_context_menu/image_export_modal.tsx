@@ -28,7 +28,7 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
@@ -152,23 +152,25 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     [getJobsParams, getLayout, jobProviderOptions, selectedRadio]
   );
 
-  const getAbsoluteReportGenerationUrl = useCallback(() => {
-    if (getJobsParams(selectedRadio, jobProviderOptions) !== undefined && objectType !== 'Canvas') {
-      const relativePath = apiClient.getReportingPublicJobPath(
-        selectedRadio,
-        apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
-      );
-      return url.resolve(window.location.href, relativePath);
-    }
-  }, [apiClient, getJobParams, getJobsParams, jobProviderOptions, objectType, selectedRadio]);
+  const getAbsoluteReportGenerationUrl = useMemo(
+    () => () => {
+      if (
+        getJobsParams(selectedRadio, jobProviderOptions) !== undefined &&
+        objectType !== 'Canvas'
+      ) {
+        const relativePath = apiClient.getReportingPublicJobPath(
+          selectedRadio,
+          apiClient.getDecoratedJobParams(getJobParams(true) as unknown as AppParams)
+        );
+        return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
+      }
+    },
+    [apiClient, getJobParams, selectedRadio, getJobsParams, objectType, jobProviderOptions]
+  );
 
-  const setAbsoluteReportGenerationUrl = useCallback(() => {
-    if (!isMounted || !getAbsoluteReportGenerationUrl()) {
-      return;
-    } else {
-      setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
-    }
-  }, [isMounted, getAbsoluteReportGenerationUrl]);
+  useEffect(() => {
+    getAbsoluteReportGenerationUrl();
+  }, [getAbsoluteReportGenerationUrl]);
 
   const markAsStale = useCallback(() => {
     if (!isMounted) return;
@@ -176,9 +178,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   }, [isMounted]);
 
   useEffect(() => {
-    setAbsoluteReportGenerationUrl();
+    getAbsoluteReportGenerationUrl();
     markAsStale();
-  }, [markAsStale, setAbsoluteReportGenerationUrl]);
+  }, [markAsStale, getAbsoluteReportGenerationUrl]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(
