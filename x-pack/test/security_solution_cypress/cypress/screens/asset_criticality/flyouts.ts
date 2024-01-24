@@ -30,4 +30,4 @@ export const HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN = getDataTestS
 );
 
 export const OPEN_HOST_FLYOUT_BUTTON = getDataTestSubjectSelector('host-details-button');
-export const OPEN_USER_FLYOUT_BUTTON = getDataTestSubjectSelector('user-details-button');
+export const OPEN_USER_FLYOUT_BUTTON = getDataTestSubjectSelector('users-link-anchor');

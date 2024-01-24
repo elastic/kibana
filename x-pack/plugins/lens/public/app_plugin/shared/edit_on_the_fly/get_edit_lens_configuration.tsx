@@ -117,6 +117,8 @@ export async function getEditLensConfiguration(
     isNewPanel,
     deletePanel,
     hidesSuggestions,
+    onApplyCb,
+    onCancelCb,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -212,6 +214,8 @@ export async function getEditLensConfiguration(
       setCurrentAttributes,
       isNewPanel,
       deletePanel,
+      onApplyCb,
+      onCancelCb,
     };
 
     return getWrapper(

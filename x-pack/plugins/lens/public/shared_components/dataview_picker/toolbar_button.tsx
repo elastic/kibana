@@ -76,7 +76,7 @@ export const ToolbarButton: React.FunctionComponent<ToolbarButtonProps> = ({
       }}
       textProps={{
         ...textProps,
-        className: classNames('kbnToolbarButton__text', textProps?.className),
+        className: classNames('kbnToolbarButton__text', textProps && textProps.className),
       }}
       {...rest}
       size={size}

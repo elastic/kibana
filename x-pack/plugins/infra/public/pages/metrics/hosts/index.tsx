@@ -6,12 +6,12 @@
  */
 
 import { EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import React, { useContext } from 'react';
+import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { FeatureFeedbackButton } from '../../../components/feature_feedback_button';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
@@ -29,6 +29,7 @@ const HOSTS_FEEDBACK_LINK =
 
 export const HostsPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
@@ -84,6 +85,9 @@ export const HostsPage = () => {
               <FeatureFeedbackButton
                 data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
                 formUrl={HOSTS_FEEDBACK_LINK}
+                kibanaVersion={kibanaVersion}
+                isCloudEnv={isCloudEnv}
+                isServerlessEnv={isServerlessEnv}
               />,
             ],
           }}

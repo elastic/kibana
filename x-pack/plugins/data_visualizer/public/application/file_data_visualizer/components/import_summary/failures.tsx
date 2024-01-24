@@ -34,7 +34,7 @@ export class Failures extends Component<Props, State> {
   _renderPaginationControl() {
     return this.props.failedDocs.length > PAGE_SIZE ? (
       <EuiPagination
-        pageCount={Math.floor(this.props.failedDocs.length / PAGE_SIZE)}
+        pageCount={Math.ceil(this.props.failedDocs.length / PAGE_SIZE)}
         activePage={this.state.page}
         onPageClick={(page) => this.setState({ page })}
         compressed
@@ -43,9 +43,8 @@ export class Failures extends Component<Props, State> {
   }
 
   render() {
-    const lastDocIndex = this.props.failedDocs.length - 1;
     const startIndex = this.state.page * PAGE_SIZE;
-    const endIndex = startIndex + PAGE_SIZE > lastDocIndex ? lastDocIndex : startIndex + PAGE_SIZE;
+    const endIndex = startIndex + PAGE_SIZE;
     return (
       <EuiAccordion
         id="failureList"

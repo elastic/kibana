@@ -34,7 +34,6 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import { createKbnUrlTracker } from '@kbn/kibana-utils-plugin/public';
-import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
 import type { VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -96,7 +95,6 @@ export interface DashboardStartDependencies {
   inspector: InspectorStartContract;
   navigation: NavigationPublicPluginStart;
   presentationUtil: PresentationUtilPluginStart;
-  savedObjects: SavedObjectsStart;
   contentManagement: ContentManagementPublicStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedObjectsTaggingOss?: SavedObjectTaggingOssPluginStart;

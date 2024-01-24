@@ -95,6 +95,9 @@ export const EditIndexPattern = withRouter(
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
     const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
     const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+    const [refreshCount, setRefreshCount] = useState<number>(0); // used for forcing rerender of field list
+    const [isRefreshing, setIsRefreshing] = React.useState(false);
+
     const conflictFieldsUrl = useMemo(() => {
       return setStateToKbnUrl(
         APP_STATE_STORAGE_KEY,
@@ -144,7 +147,7 @@ export const EditIndexPattern = withRouter(
       setConflictedFields(
         indexPattern.fields.getAll().filter((field) => field.type === 'conflict')
       );
-    }, [indexPattern]);
+    }, [indexPattern, refreshCount]);
 
     useEffect(() => {
       setTags(
@@ -332,6 +335,13 @@ export const EditIndexPattern = withRouter(
             setFields(indexPattern.getNonScriptedFields());
             setCompositeRuntimeFields(getCompositeRuntimeFields(indexPattern));
           }}
+          refreshIndexPatternClick={async () => {
+            setIsRefreshing(true);
+            await dataViews.refreshFields(indexPattern, false, true);
+            setRefreshCount(refreshCount + 1); // rerender field list
+            setIsRefreshing(false);
+          }}
+          isRefreshing={isRefreshing}
         />
         {displayIndexPatternEditor}
       </div>

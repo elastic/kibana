@@ -16,8 +16,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   describe('connectors', function () {
-    // failsOnMKI, see https://github.com/elastic/kibana/issues/173929
-    this.tags(['failsOnMKI']);
     before(async () => {
       await pageObjects.svlCommonPage.login();
       await pageObjects.svlCommonNavigation.sidenav.clickLink({
@@ -31,6 +29,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     it('Connector app is loaded and  has no connectors', async () => {
       await pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectConnectorOverviewPageComponentsToExist();
+    });
+    it('has embedded dev console', async () => {
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleControlBarExists();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeOpen();
+      await pageObjects.svlCommonNavigation.devConsole.clickEmbeddedConsoleControlBar();
+      await pageObjects.svlCommonNavigation.devConsole.expectEmbeddedConsoleToBeClosed();
     });
     describe('create and configure connector', async () => {
       it('create connector and confirm connector configuration page is loaded', async () => {
@@ -65,7 +71,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.expectSearchBarToExist();
       });
 
-      it('searchBar and select filter connector table', async () => {
+      it('searchBar and select, filters connector table', async () => {
         pageObjects.svlSearchConnectorsPage.connectorOverviewPage.getConnectorFromConnectorTable(
           TEST_CONNECTOR_NAME
         );

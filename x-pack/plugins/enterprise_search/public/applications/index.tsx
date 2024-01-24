@@ -22,7 +22,7 @@ import { Router } from '@kbn/shared-ux-router';
 
 import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientData } from '../plugin';
+import { PluginsStart, ClientData, ESConfig } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
@@ -50,7 +50,7 @@ export const renderApp = (
     params: AppMountParameters;
     plugins: PluginsStart;
   },
-  { config, data }: { config: ClientConfigType; data: ClientData }
+  { config, data, esConfig }: { config: ClientConfigType; data: ClientData; esConfig: ESConfig }
 ) => {
   const {
     access,
@@ -106,6 +106,7 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    esConfig,
     data: plugins.data,
     guidedOnboarding,
     history,
@@ -198,5 +199,5 @@ export const renderHeaderActions = (
     </I18nProvider>,
     kibanaHeaderEl
   );
-  return () => ReactDOM.unmountComponentAtNode(kibanaHeaderEl);
+  return () => ReactDOM.render(<></>, kibanaHeaderEl);
 };

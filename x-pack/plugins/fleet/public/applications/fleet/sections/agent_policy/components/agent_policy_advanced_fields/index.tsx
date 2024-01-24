@@ -185,7 +185,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   );
 
   const AgentTamperProtectionSection = useMemo(() => {
-    if (agentTamperProtectionEnabled && licenseService.isPlatinum()) {
+    if (agentTamperProtectionEnabled && licenseService.isPlatinum() && !agentPolicy.is_managed &&) {
       if (AgentTamperProtectionWrapper) {
         return (
           <Suspense fallback={null}>

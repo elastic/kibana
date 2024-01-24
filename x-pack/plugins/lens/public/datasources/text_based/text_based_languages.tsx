@@ -8,19 +8,17 @@
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { AggregateQuery, isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
-import { EuiFormRow } from '@elastic/eui';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DimensionTrigger } from '@kbn/visualization-ui-components';
 import memoizeOne from 'memoize-one';
 import { isEqual } from 'lodash';
-import { TextBasedDataPanel } from './datapanel';
+import { TextBasedDataPanel } from './components/datapanel';
+import { TextBasedDimensionEditor } from './components/dimension_editor';
+import { TextBasedDimensionTrigger } from './components/dimension_trigger';
 import { toExpression } from './to_expression';
 import {
   DatasourceDimensionEditorProps,
@@ -40,12 +38,16 @@ import type {
   TextBasedLayerColumn,
   TextBasedField,
 } from './types';
-import { FieldSelect } from './field_select';
 import type { Datasource } from '../../types';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
 import { canColumnBeUsedBeInMetricDimension, MAX_NUM_OF_COLUMNS } from './utils';
+import {
+  getColumnsFromCache,
+  addColumnsToCache,
+  retrieveLayerColumnsFromCache,
+} from './fieldlist_cache';
 
 function getLayerReferenceName(layerId: string) {
   return `textBasedLanguages-datasource-layer-${layerId}`;
@@ -78,6 +80,7 @@ export function getTextBasedDatasource({
 }) {
   const getSuggestionsForState = (state: TextBasedPrivateState) => {
     return Object.entries(state.layers)?.map(([id, layer]) => {
+      const allColumns = retrieveLayerColumnsFromCache(layer.columns, layer.query);
       return {
         state: {
           ...state,
@@ -89,7 +92,7 @@ export function getTextBasedDatasource({
           columns:
             layer.columns?.map((f) => {
               const inMetricDimension = canColumnBeUsedBeInMetricDimension(
-                layer.allColumns,
+                allColumns,
                 f?.meta?.type
               );
               return {
@@ -141,12 +144,13 @@ export function getTextBasedDatasource({
         };
       });
 
+      addColumnsToCache(context.query, textBasedQueryColumns);
+
       const index = context.dataViewSpec.id ?? context.dataViewSpec.title;
       const query = context.query;
       const updatedState = {
         ...state,
         initialContext: undefined,
-        fieldList: textBasedQueryColumns,
         ...(context.dataViewSpec.id
           ? {
               indexPatternRefs: [
@@ -164,7 +168,6 @@ export function getTextBasedDatasource({
             index,
             query,
             columns: newColumns.slice(0, MAX_NUM_OF_COLUMNS) ?? [],
-            allColumns: newColumns ?? [],
             timeField: context.dataViewSpec.timeFieldName,
           },
         },
@@ -275,7 +278,6 @@ export function getTextBasedDatasource({
     insertLayer(state: TextBasedPrivateState, newLayerId: string) {
       const layer = Object.values(state?.layers)?.[0];
       const query = layer?.query;
-      const columns = layer?.allColumns ?? [];
       const index =
         layer?.index ??
         (JSON.parse(localStorage.getItem('lens-settings') || '{}').indexPatternId ||
@@ -284,7 +286,7 @@ export function getTextBasedDatasource({
         ...state,
         layers: {
           ...state.layers,
-          [newLayerId]: blankLayer(index, query, columns),
+          [newLayerId]: blankLayer(index, query),
         },
       };
     },
@@ -292,7 +294,6 @@ export function getTextBasedDatasource({
       return {
         indexPatternRefs: [],
         layers: {},
-        fieldList: [],
       };
     },
 
@@ -316,7 +317,6 @@ export function getTextBasedDatasource({
         newState: {
           ...state,
           layers: newLayers,
-          fieldList: state.fieldList,
         },
       };
     },
@@ -336,13 +336,6 @@ export function getTextBasedDatasource({
 
     getLayers(state: TextBasedPrivateState) {
       return state && state.layers ? Object.keys(state?.layers) : [];
-    },
-    // there are cases where a query can return a big amount of columns
-    // at this case we don't suggest all columns in a table but the first
-    // MAX_NUM_OF_COLUMNS
-    suggestsLimitedColumns(state: TextBasedPrivateState) {
-      const fieldsList = state?.fieldList ?? [];
-      return fieldsList.length >= MAX_NUM_OF_COLUMNS;
     },
     isTimeBased: (state, indexPatterns) => {
       if (!state) return false;
@@ -388,24 +381,11 @@ export function getTextBasedDatasource({
 
     DimensionTriggerComponent: (props: DatasourceDimensionTriggerProps<TextBasedPrivateState>) => {
       const columnLabelMap = TextBasedDatasource.uniqueLabels(props.state, props.indexPatterns);
-      const layer = props.state.layers[props.layerId];
-      const selectedField = layer?.allColumns?.find((column) => column.columnId === props.columnId);
-      let customLabel: string | undefined = columnLabelMap[props.columnId];
-      if (!customLabel) {
-        customLabel = selectedField?.fieldName;
-      }
-
       return (
-        <DimensionTrigger
-          id={props.columnId}
-          color={customLabel && selectedField ? 'primary' : 'danger'}
-          dataTestSubj="lns-dimensionTrigger-textBased"
-          label={
-            customLabel ??
-            i18n.translate('xpack.lens.textBasedLanguages.missingField', {
-              defaultMessage: 'Missing field',
-            })
-          }
+        <TextBasedDimensionTrigger
+          {...props}
+          expressions={expressions}
+          columnLabelMap={columnLabelMap}
         />
       );
     },
@@ -421,95 +401,7 @@ export function getTextBasedDatasource({
     },
 
     DimensionEditorComponent: (props: DatasourceDimensionEditorProps<TextBasedPrivateState>) => {
-      const fields = props.state.fieldList;
-      const allColumns = props.state.layers[props.layerId]?.allColumns;
-      const selectedField = allColumns?.find((column) => column.columnId === props.columnId);
-      const hasNumberTypeColumns = allColumns?.some((c) => c?.meta?.type === 'number');
-
-      const updatedFields = fields?.map((f) => {
-        return {
-          ...f,
-          compatible:
-            props.isMetricDimension && hasNumberTypeColumns
-              ? props.filterOperations({
-                  dataType: f.meta.type as DataType,
-                  isBucketed: Boolean(f?.meta?.type !== 'number'),
-                  scale: 'ordinal',
-                })
-              : true,
-        };
-      });
-      return (
-        <>
-          <EuiFormRow
-            data-test-subj="text-based-languages-field-selection-row"
-            label={i18n.translate('xpack.lens.textBasedLanguages.chooseField', {
-              defaultMessage: 'Field',
-            })}
-            fullWidth
-            className="lnsIndexPatternDimensionEditor--padded"
-          >
-            <FieldSelect
-              existingFields={updatedFields ?? []}
-              selectedField={selectedField}
-              onChoose={(choice) => {
-                const meta = fields?.find((f) => f.name === choice.field)?.meta;
-                const newColumn = {
-                  columnId: props.columnId,
-                  fieldName: choice.field,
-                  meta,
-                };
-                return props.setState(
-                  !selectedField
-                    ? {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: [...props.state.layers[props.layerId].columns, newColumn],
-                            allColumns: [
-                              ...props.state.layers[props.layerId].allColumns,
-                              newColumn,
-                            ],
-                          },
-                        },
-                      }
-                    : {
-                        ...props.state,
-                        layers: {
-                          ...props.state.layers,
-                          [props.layerId]: {
-                            ...props.state.layers[props.layerId],
-                            columns: props.state.layers[props.layerId].columns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field, meta }
-                            ),
-                            allColumns: props.state.layers[props.layerId].allColumns.map((col) =>
-                              col.columnId !== props.columnId
-                                ? col
-                                : { ...col, fieldName: choice.field, meta }
-                            ),
-                          },
-                        },
-                      }
-                );
-              }}
-            />
-          </EuiFormRow>
-          {props.dataSectionExtra && (
-            <div
-              style={{
-                paddingLeft: euiThemeVars.euiSize,
-                paddingRight: euiThemeVars.euiSize,
-              }}
-            >
-              {props.dataSectionExtra}
-            </div>
-          )}
-        </>
-      );
+      return <TextBasedDimensionEditor {...props} expressions={expressions} />;
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
@@ -539,12 +431,8 @@ export function getTextBasedDatasource({
         datasourceId: 'textBased',
 
         getTableSpec: () => {
-          const columns = state.layers[layerId]?.columns.filter((c) => {
-            const columnExists = state?.fieldList?.some((f) => f.name === c?.fieldName);
-            if (columnExists) return c;
-          });
           return (
-            columns.map((column) => ({
+            state.layers[layerId]?.columns.map((column) => ({
               columnId: column.columnId,
               fields: [column.fieldName],
             })) || []
@@ -552,7 +440,7 @@ export function getTextBasedDatasource({
         },
         getOperationForColumnId: (columnId: string) => {
           const layer = state.layers[layerId];
-          const column = layer?.allColumns?.find((c) => c.columnId === columnId);
+          const column = layer?.columns?.find((c) => c.columnId === columnId);
           const columnLabelMap = TextBasedDatasource.uniqueLabels(state, indexPatterns);
 
           if (column) {
@@ -592,7 +480,10 @@ export function getTextBasedDatasource({
       };
     },
     getDatasourceSuggestionsForField(state, draggedField) {
-      const field = state.fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
+      const layers = Object.values(state.layers);
+      const query = layers?.[0]?.query;
+      const fieldList = query ? getColumnsFromCache(query) : [];
+      const field = fieldList?.find((f) => f.id === (draggedField as TextBasedField).id);
       if (!field) return [];
       return Object.entries(state.layers)?.map(([id, layer]) => {
         const newId = generateId();
@@ -609,7 +500,6 @@ export function getTextBasedDatasource({
               [id]: {
                 ...state.layers[id],
                 columns: [...layer.columns, newColumn],
-                allColumns: [...layer.allColumns, newColumn],
               },
             },
           },
@@ -692,11 +582,10 @@ export function getTextBasedDatasource({
   return TextBasedDatasource;
 }
 
-function blankLayer(index: string, query?: AggregateQuery, columns?: TextBasedLayerColumn[]) {
+function blankLayer(index: string, query?: AggregateQuery) {
   return {
     index,
     query,
     columns: [],
-    allColumns: columns ?? [],
   };
 }

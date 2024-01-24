@@ -399,7 +399,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const kafkaSslKeySecretInput = useSecretInput(
-    kafkaOutput?.ssl?.certificate,
+    kafkaOutput?.secrets?.ssl?.key,
     kafkaAuthMethodInput.value === kafkaAuthType.Ssl ? validateSSLKeySecret : undefined,
     isSSLEditable
   );

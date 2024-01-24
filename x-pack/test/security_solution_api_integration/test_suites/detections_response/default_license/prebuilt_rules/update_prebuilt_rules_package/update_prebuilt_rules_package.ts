@@ -29,6 +29,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   let currentVersion: string;
   let previousVersion: string;
@@ -89,14 +90,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
     });
 
     it('should allow user to install prebuilt rules from scratch, then install new rules and upgrade existing rules from the new package', async () => {
       // PART 1: Install prebuilt rules from the previous minor version as the current version
 
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -105,14 +106,15 @@ export default ({ getService }: FtrProviderContext): void => {
       const installPreviousPackageResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        previousVersion
+        previousVersion,
+        retry
       );
 
       expect(installPreviousPackageResponse._meta.install_source).toBe('registry');
       expect(installPreviousPackageResponse.items.length).toBeGreaterThan(0);
 
       // Verify that status is updated after the installation of package "N-1"
-      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBeGreaterThan(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -157,12 +159,13 @@ export default ({ getService }: FtrProviderContext): void => {
       const installLatestPackageResponse = await installPrebuiltRulesPackageByVersion(
         es,
         supertest,
-        currentVersion
+        currentVersion,
+        retry
       );
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 
       // Verify status after intallation of the latest package
-      const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterLatestPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(
         statusAfterLatestPackageInstallation.stats.num_prebuilt_rules_installed
       ).toBeGreaterThan(0);
