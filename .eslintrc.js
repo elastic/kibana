@@ -1207,7 +1207,7 @@ module.exports = {
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        '@typescript-eslint/no-duplicate-imports': ['error'],
+        '@typescript-eslint/import/no-duplicates': ['error'],
       },
       overrides: [
         {
