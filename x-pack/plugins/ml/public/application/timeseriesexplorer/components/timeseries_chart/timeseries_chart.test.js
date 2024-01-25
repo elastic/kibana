@@ -54,6 +54,8 @@ describe('TimeseriesChart', () => {
 
     const wrapper = mountWithIntl(<TimeseriesChart {...props} />);
 
-    expect(wrapper.html()).toBe(`<div class="ml-timeseries-chart-react"></div>`);
+    expect(wrapper.html()).toBe(
+      '<div style="position: absolute; margin-left: 0px; margin-top: 0px; display: none;"><div class="euiPopover css-n7tnex-euiPopover-inline-block"></div></div><div class="ml-timeseries-chart-react"></div>'
+    );
   });
 });
