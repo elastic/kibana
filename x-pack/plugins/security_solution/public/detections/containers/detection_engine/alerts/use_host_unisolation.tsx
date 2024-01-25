@@ -48,6 +48,6 @@ export const useHostUnisolation = ({
       addError(error.message, { title: HOST_ISOLATION_FAILURE });
       return false;
     }
-  }, [endpointId, comment, caseIds, addError]);
+  }, [endpointId, comment, caseIds, agentType, addError]);
   return { loading, unIsolateHost };
 };
