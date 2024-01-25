@@ -9,8 +9,8 @@ import React, { useCallback, useContext, useMemo } from 'react';
 import type { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
@@ -55,7 +55,7 @@ const UserNameComponent: React.FC<Props> = ({
   const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
   const userName = `${value}`;
   const isInTimelineContext = userName && eventContext?.timelineID;
-  const { openRightPanel } = useExpandableFlyoutContext();
+  const { openRightPanel } = useExpandableFlyoutApi();
 
   const openUserDetailsSidePanel = useCallback(
     (e) => {

@@ -74,7 +74,7 @@ export interface NewPackagePolicy {
   id?: string | number;
   name: string;
   description?: string;
-  namespace: string;
+  namespace?: string;
   enabled: boolean;
   is_managed?: boolean;
   policy_id: string;
