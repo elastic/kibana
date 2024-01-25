@@ -101,7 +101,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(31);
       expect(res.body.items.some((item: any) => item.id.includes(testPkgNewVersion)));
 
       await deletePackage(testPkgName, testPkgNewVersion);
@@ -156,7 +156,7 @@ export default function (providerContext: FtrProviderContext) {
         .type('application/zip')
         .send(buf)
         .expect(200);
-      expect(res.body.items.length).to.be(30);
+      expect(res.body.items.length).to.be(31);
     });
 
     it('should throw an error if the archive is zip but content type is gzip', async function () {
