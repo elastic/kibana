@@ -8,11 +8,16 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { getConversation } from './get_conversation';
 
-export const deleteConversation = async (
-  esClient: ElasticsearchClient,
-  conversationIndex: string,
-  id: string
-): Promise<void> => {
+export interface DeleteConversationParams {
+  esClient: ElasticsearchClient;
+  conversationIndex: string;
+  id: string;
+}
+export const deleteConversation = async ({
+  esClient,
+  conversationIndex,
+  id,
+}: DeleteConversationParams): Promise<void> => {
   const conversation = await getConversation(esClient, conversationIndex, id);
   if (conversation !== null) {
     const response = await esClient.deleteByQuery({

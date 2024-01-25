@@ -7,6 +7,51 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { getConversation } from './get_conversation';
+import { estypes } from '@elastic/elasticsearch';
+import { SearchEsConversationSchema } from './types';
+import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
+
+export const getConversationResponseMock = (): ConversationResponse => ({
+  createdAt: '2020-04-20T15:25:31.830Z',
+  title: 'title-1',
+  updatedAt: '2020-04-20T15:25:31.830Z',
+  messages: [],
+  id: '1',
+  namespace: 'default',
+});
+
+export const getSearchConversationMock =
+  (): estypes.SearchResponse<SearchEsConversationSchema> => ({
+    _scroll_id: '123',
+    _shards: {
+      failed: 0,
+      skipped: 0,
+      successful: 0,
+      total: 0,
+    },
+    hits: {
+      hits: [
+        {
+          _id: '1',
+          _index: '',
+          _score: 0,
+          _source: {
+            '@timestamp': '2020-04-20T15:25:31.830Z',
+            created_at: '2020-04-20T15:25:31.830Z',
+            title: 'title-1',
+            updated_at: '2020-04-20T15:25:31.830Z',
+            messages: [],
+            id: '1',
+            namespace: 'default',
+          },
+        },
+      ],
+      max_score: 0,
+      total: 1,
+    },
+    timed_out: false,
+    took: 10,
+  });
 
 describe('getConversation', () => {
   beforeEach(() => {
@@ -17,21 +62,21 @@ describe('getConversation', () => {
     jest.clearAllMocks();
   });
 
-  test('it returns a list as expected if the list is found', async () => {
-    const data = getSearchListMock();
+  test('it returns a conversation as expected if the conversation is found', async () => {
+    const data = getSearchConversationMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(esClient, LIST_INDEX, id);
-    const expected = getListResponseMock();
+    const conversation = await getConversation(esClient, '', '1');
+    const expected = getConversationResponseMock();
     expect(conversation).toEqual(expected);
   });
 
   test('it returns null if the search is empty', async () => {
-    const data = getSearchListMock();
+    const data = getSearchConversationMock();
     data.hits.hits = [];
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.search.mockResponse(data);
-    const conversation = await getConversation(esClient, LIST_INDEX, id);
+    const conversation = await getConversation(esClient, '', '1');
     expect(conversation).toEqual(null);
   });
 });

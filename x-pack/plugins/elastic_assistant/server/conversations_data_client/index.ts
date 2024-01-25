@@ -181,17 +181,17 @@ export class AIAssistantConversationsDataClient {
    * @returns The conversation created
    */
   public createConversation = async (
-    props: ConversationCreateProps
+    conversation: ConversationCreateProps
   ): Promise<ConversationResponse> => {
     const { currentUser } = this;
     const esClient = await this.options.elasticsearchClientPromise;
-    return createConversation(
+    return createConversation({
       esClient,
-      this.indexTemplateAndPattern.alias,
-      this.spaceId,
-      { id: currentUser?.profile_uid, name: currentUser?.username },
-      props
-    );
+      conversationIndex: this.indexTemplateAndPattern.alias,
+      spaceId: this.spaceId,
+      user: { id: currentUser?.profile_uid, name: currentUser?.username },
+      conversation,
+    });
   };
 
   /**
@@ -211,14 +211,14 @@ export class AIAssistantConversationsDataClient {
     isPatch?: boolean
   ): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
-    return updateConversation(
+    return updateConversation({
       esClient,
-      this.options.logger,
-      this.indexTemplateAndPattern.alias,
+      logger: this.options.logger,
+      conversationIndex: this.indexTemplateAndPattern.alias,
       existingConversation,
-      updatedProps,
-      isPatch
-    );
+      conversation: updatedProps,
+      isPatch,
+    });
   };
 
   /**
@@ -229,6 +229,6 @@ export class AIAssistantConversationsDataClient {
    */
   public deleteConversation = async (id: string): Promise<void> => {
     const esClient = await this.options.elasticsearchClientPromise;
-    deleteConversation(esClient, this.indexTemplateAndPattern.alias, id);
+    deleteConversation({ esClient, conversationIndex: this.indexTemplateAndPattern.alias, id });
   };
 }

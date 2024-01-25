@@ -43,14 +43,23 @@ export interface UpdateConversationSchema {
   updated_at?: string;
 }
 
-export const updateConversation = async (
-  esClient: ElasticsearchClient,
-  logger: Logger,
-  conversationIndex: string,
-  existingConversation: ConversationResponse,
-  conversation: ConversationUpdateProps,
-  isPatch?: boolean
-): Promise<ConversationResponse | null> => {
+export interface UpdateConversationParams {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+  conversationIndex: string;
+  existingConversation: ConversationResponse;
+  conversation: ConversationUpdateProps;
+  isPatch?: boolean;
+}
+
+export const updateConversation = async ({
+  esClient,
+  logger,
+  conversationIndex,
+  existingConversation,
+  conversation,
+  isPatch,
+}: UpdateConversationParams): Promise<ConversationResponse | null> => {
   const updatedAt = new Date().toISOString();
   const params = transformToUpdateScheme(updatedAt, conversation);
 

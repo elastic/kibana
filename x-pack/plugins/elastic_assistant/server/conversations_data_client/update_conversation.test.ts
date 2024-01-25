@@ -6,7 +6,8 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { UpdateConversationSchema, updateConversation } from './update_conversation';
+import { loggerMock } from '@kbn/logging-mocks';
+import { updateConversation } from './update_conversation';
 import { getConversation } from './get_conversation';
 import {
   ConversationResponse,
@@ -43,6 +44,11 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   messages: [],
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   replacements: {} as any,
+  createdAt: Date.now().toLocaleString(),
+  namespace: 'default',
+  isDefault: false,
+  updatedAt: Date.now().toLocaleString(),
+  timestamp: Date.now().toLocaleString(),
 });
 
 jest.mock('./get_conversation', () => ({
@@ -59,23 +65,21 @@ describe('updateConversation', () => {
   });
 
   test('it returns a conversation with serializer and deserializer', async () => {
-    const conversation: UpdateConversationSchema = {
-      ...getConversationResponseMock(),
-      title: 'test',
-      '@timestamp': Date.now().toLocaleString(),
-    };
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
-    const options = getUpdateConversationOptionsMock();
+    const conversation: ConversationUpdateProps = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 1 });
-    const updatedList = await updateConversation(
+
+    const updatedList = await updateConversation({
       esClient,
-      jest.fn(),
-      'index-1',
-      options,
-      conversation
-    );
-    const expected: UpdateConversationSchema = {
+      logger: loggerMock.create(),
+      conversationIndex: 'index-1',
+      existingConversation,
+      conversation,
+    });
+    const expected: ConversationResponse = {
       ...getConversationResponseMock(),
       id: conversation.id,
       title: 'test',
@@ -85,22 +89,34 @@ describe('updateConversation', () => {
 
   test('it returns null when there is not a conversation to update', async () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
-    const options = getUpdateConversationOptionsMock();
-    const updatedList = await updateConversation(options);
+    const conversation = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+
+    const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+    const updatedList = await updateConversation({
+      esClient,
+      logger: loggerMock.create(),
+      conversationIndex: 'index-1',
+      existingConversation,
+      conversation,
+    });
     expect(updatedList).toEqual(null);
   });
 
   test('throw error if no conversation was updated', async () => {
-    const conversation: UpdateConversationSchema = {
-      ...getConversationResponseMock(),
-      title: 'test',
-    };
-    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
-    const options = getUpdateConversationOptionsMock();
+    const existingConversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(existingConversation);
+    const conversation = getUpdateConversationOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 0 });
-    await expect(updateConversation({ ...options, esClient })).rejects.toThrow(
-      'No conversation has been updated'
-    );
+    await expect(
+      updateConversation({
+        esClient,
+        logger: loggerMock.create(),
+        conversationIndex: 'index-1',
+        existingConversation,
+        conversation,
+      })
+    ).rejects.toThrow('No conversation has been updated');
   });
 });

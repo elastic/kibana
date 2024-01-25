@@ -54,20 +54,23 @@ export interface CreateMessageSchema {
   namespace: string;
 }
 
-export const createConversation = async (
-  esClient: ElasticsearchClient,
-  conversationIndex: string,
-  namespace: string,
-  user: { id?: UUID; name?: string },
-  conversation: ConversationCreateProps
-): Promise<ConversationResponse> => {
+export interface CreateConversationParams {
+  esClient: ElasticsearchClient;
+  conversationIndex: string;
+  spaceId: string;
+  user: { id?: UUID; name?: string };
+  conversation: ConversationCreateProps;
+}
+
+export const createConversation = async ({
+  esClient,
+  conversationIndex,
+  spaceId,
+  user,
+  conversation,
+}: CreateConversationParams): Promise<ConversationResponse> => {
   const createdAt = new Date().toISOString();
-  const body: CreateMessageSchema = transformToCreateScheme(
-    createdAt,
-    namespace,
-    user,
-    conversation
-  );
+  const body: CreateMessageSchema = transformToCreateScheme(createdAt, spaceId, user, conversation);
 
   const response = await esClient.index({
     body,
@@ -85,7 +88,7 @@ export const createConversation = async (
 
 export const transformToCreateScheme = (
   createdAt: string,
-  namespace: string,
+  spaceId: string,
   user: { id?: UUID; name?: string },
   {
     title,
@@ -125,7 +128,7 @@ export const transformToCreateScheme = (
     })),
     updated_at: createdAt,
     replacements,
-    namespace,
+    namespace: spaceId,
   };
 };
 

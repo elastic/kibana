@@ -6,8 +6,11 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { CreateMessageSchema, createConversation } from './create_conversation';
-import { ConversationCreateProps } from '../schemas/conversations/common_attributes.gen';
+import { createConversation } from './create_conversation';
+import {
+  ConversationCreateProps,
+  ConversationResponse,
+} from '../schemas/conversations/common_attributes.gen';
 
 export const getCreateConversationMock = (): ConversationCreateProps => ({
   title: 'test',
@@ -25,6 +28,27 @@ export const getCreateConversationMock = (): ConversationCreateProps => ({
   replacements: {} as any,
 });
 
+export const getConversationResponseMock = (): ConversationResponse => ({
+  id: 'test',
+  title: 'test',
+  apiConfig: {
+    connectorId: '1',
+    connectorTypeTitle: 'test-connector',
+    defaultSystemPromptId: 'default-system-prompt',
+    model: 'test-model',
+    provider: 'OpenAI',
+  },
+  excludeFromLastConversationStorage: false,
+  messages: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacements: {} as any,
+  createdAt: Date.now().toLocaleString(),
+  namespace: 'default',
+  isDefault: false,
+  updatedAt: Date.now().toLocaleString(),
+  timestamp: Date.now().toLocaleString(),
+});
+
 describe('createConversation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -35,28 +59,31 @@ describe('createConversation', () => {
   });
 
   test('it returns a conversation as expected with the id changed out for the elastic id', async () => {
-    const options = getCreateConversationMock();
+    const conversation = getCreateConversationMock();
+
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );
-    const conversation = await createConversation(
+    const createdConversation = await createConversation({
       esClient,
-      'index-1',
-      'test',
-      { name: 'test' },
-      options
-    );
-    const expected: CreateMessageSchema = {
-      ...getconversationResponseMock(),
+      conversationIndex: 'index-1',
+      spaceId: 'test',
+      user: { name: 'test' },
+      conversation,
+    });
+
+    const expected: ConversationResponse = {
+      ...getConversationResponseMock(),
       id: 'elastic-id-123',
     };
-    expect(conversation).toEqual(expected);
+
+    expect(createdConversation).toEqual(expected);
   });
 
-  test('it returns a conversation as expected with the id changed out for the elastic id and seralizer and deseralizer set', async () => {
-    const options: CreateconversationOptions = {
+  test('it returns a conversation as expected with the id changed out for the elastic id and title set', async () => {
+    const conversation: ConversationCreateProps = {
       ...getCreateConversationMock(),
       title: '{{value}}',
     };
@@ -65,53 +92,55 @@ describe('createConversation', () => {
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );
-    const conversation = await createConversation(
+    const createdConversation = await createConversation({
       esClient,
-      'index-1',
-      'test',
-      { name: 'test' },
-      options
-    );
-    const expected: CreateMessageSchema = {
-      ...getconversationResponseMock(),
-      title: '{{value}}',
+      conversationIndex: 'index-1',
+      spaceId: 'test',
+      user: { name: 'test' },
+      conversation,
+    });
+
+    const expected: ConversationResponse = {
+      ...getConversationResponseMock(),
       id: 'elastic-id-123',
+      title: 'test new title',
     };
-    expect(conversation).toEqual(expected);
+    expect(createdConversation).toEqual(expected);
   });
 
   test('It calls "esClient" with body, id, and conversationIndex', async () => {
-    const options = getCreateConversationMock();
+    const conversation = getCreateConversationMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-    await createConversation(esClient, 'index-1', 'test', { name: 'test' }, options);
-    const body = getIndexESconversationMock();
-    const expected = {
-      body,
-      id: '1',
-      index: 'index-1',
-      refresh: 'wait_for',
-    };
-    expect(options.esClient.create).toBeCalledWith(expected);
+    await createConversation({
+      esClient,
+      conversationIndex: 'index-1',
+      spaceId: 'test',
+      user: { name: 'test' },
+      conversation,
+    });
+
+    expect(esClient.create).toBeCalled();
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {
-    const options = getCreateConversationMock();
+    const conversation = getCreateConversationMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.create.mockResponse(
       // @ts-expect-error not full response interface
       { _id: 'elastic-id-123' }
     );
-    const conversation = await createConversation(
+    const createdConversation = await createConversation({
       esClient,
-      'index-1',
-      'test',
-      { name: 'test' },
-      options
-    );
-    const expected: CreateMessageSchema = {
-      ...getconversationResponseMock(),
+      conversationIndex: 'index-1',
+      spaceId: 'test',
+      user: { name: 'test' },
+      conversation,
+    });
+
+    const expected: ConversationResponse = {
+      ...getConversationResponseMock(),
       id: 'elastic-id-123',
     };
-    expect(conversation).toEqual(expected);
+    expect(createdConversation).toEqual(expected);
   });
 });

@@ -5,22 +5,43 @@
  * 2.0.
  */
 
-import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';
-import { LIST_ID, LIST_INDEX, LIST_ITEM_INDEX } from '../../../common/constants.mock';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { DeleteConversationParams, deleteConversation } from './delete_conversation';
+import { getConversation } from './get_conversation';
+import { ConversationResponse } from '../schemas/conversations/common_attributes.gen';
 
-import { getList } from './get_list';
-import { deleteList } from './delete_list';
-import { getDeleteListOptionsMock } from './delete_list.mock';
-
-jest.mock('../utils', () => ({
-  waitUntilDocumentIndexed: jest.fn(),
+jest.mock('./get_conversation', () => ({
+  getConversation: jest.fn(),
 }));
 
-jest.mock('./get_list', () => ({
-  getList: jest.fn(),
-}));
+export const getConversationResponseMock = (): ConversationResponse => ({
+  id: 'test',
+  title: 'test',
+  apiConfig: {
+    connectorId: '1',
+    connectorTypeTitle: 'test-connector',
+    defaultSystemPromptId: 'default-system-prompt',
+    model: 'test-model',
+    provider: 'OpenAI',
+  },
+  excludeFromLastConversationStorage: false,
+  messages: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacements: {} as any,
+  createdAt: Date.now().toLocaleString(),
+  namespace: 'default',
+  isDefault: false,
+  updatedAt: Date.now().toLocaleString(),
+  timestamp: Date.now().toLocaleString(),
+});
 
-describe('delete_list', () => {
+export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({
+  esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
+  id: 'test',
+  conversationIndex: '',
+});
+
+describe('deleteConversation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -29,71 +50,35 @@ describe('delete_list', () => {
     jest.clearAllMocks();
   });
 
-  test('Delete returns a null if the list is also null', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
-    const options = getDeleteListOptionsMock();
-    const deletedList = await deleteList(options);
+  test('Delete returns a null if the conversation is also null', async () => {
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
+    const options = getDeleteConversationOptionsMock();
+    const deletedList = await deleteConversation(options);
     expect(deletedList).toEqual(null);
   });
 
-  test('Delete returns the list if a list is returned from getList', async () => {
-    const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListOptionsMock();
+  test('Delete returns the conversation if a conversation is returned from getConversation', async () => {
+    const conversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    const options = getDeleteConversationOptionsMock();
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
-    const deletedList = await deleteList(options);
-    expect(deletedList).toEqual(list);
+    const deletedList = await deleteConversation(options);
+    expect(deletedList).toEqual(conversation);
   });
 
-  test('Delete calls "deleteByQuery" for list items if a list is returned from getList', async () => {
-    const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
-    await deleteList(options);
-    const deleteByQuery = {
-      body: { query: { term: { list_id: LIST_ID } } },
-      conflicts: 'proceed',
-      index: LIST_ITEM_INDEX,
-      refresh: false,
-    };
-    expect(options.esClient.deleteByQuery).toHaveBeenNthCalledWith(1, deleteByQuery);
-  });
-
-  test('Delete calls "deleteByQuery" for list if a list is returned from getList', async () => {
-    const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListOptionsMock();
-    options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
-    await deleteList(options);
-    const deleteByQuery = {
-      body: {
-        query: {
-          ids: {
-            values: [LIST_ID],
-          },
-        },
-      },
-      conflicts: 'proceed',
-      index: LIST_INDEX,
-      refresh: false,
-    };
-    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(deleteByQuery);
-  });
-
-  test('Delete does not call data client if the list returns null', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
-    const options = getDeleteListOptionsMock();
-    await deleteList(options);
+  test('Delete does not call data client if the conversation returns null', async () => {
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
+    const options = getDeleteConversationOptionsMock();
+    await deleteConversation(options);
     expect(options.esClient.delete).not.toHaveBeenCalled();
   });
 
-  test('throw error if no list was deleted', async () => {
-    const list = getListResponseMock();
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getDeleteListOptionsMock();
+  test('throw error if no conversation was deleted', async () => {
+    const conversation = getConversationResponseMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    const options = getDeleteConversationOptionsMock();
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 0 });
 
-    await expect(deleteList(options)).rejects.toThrow('No list has been deleted');
+    await expect(deleteConversation(options)).rejects.toThrow('No conversation has been deleted');
   });
 });
