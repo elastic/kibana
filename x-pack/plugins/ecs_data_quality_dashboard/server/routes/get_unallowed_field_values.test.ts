@@ -12,7 +12,8 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getUnallowedFieldValuesRoute } from './get_unallowed_field_values';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   getUnallowedFieldValues: jest.fn(),
