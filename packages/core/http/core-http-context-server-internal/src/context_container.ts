@@ -181,6 +181,7 @@ const createExposedContext = ({
 }) => {
   const exposedContext: Partial<HandlerContextType<RequestHandler>> = {};
   exposedContext.resolve = contextAccessors.resolve;
+  exposedContext._source = contextAccessors._source;
 
   for (const contextName of exposedContextNames) {
     if (contextName === currentContextName) {
