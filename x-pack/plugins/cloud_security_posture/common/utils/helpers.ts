@@ -32,6 +32,7 @@ import type {
   RuleSection,
 } from '../types_old';
 import type { BenchmarkRuleSelectParams, BenchmarksCisId } from '../types/latest';
+import type { BenchmarkRuleSelectParams as BenchmarkRuleSelectParamsV1 } from '../types/rules/v4';
 
 /**
  * @example
@@ -205,16 +206,42 @@ export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
 };
 
 export const getBenchmarkFilterQuery = (
-  id: BenchmarkId,
-  version?: string,
-  selectParams?: BenchmarkRuleSelectParams
+  benchmarkId: BenchmarkId,
+  benchmarkVersion?: string,
+  selectParams?: BenchmarkRuleSelectParamsV1
 ): string => {
-  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${id} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${version}"`;
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
   const sectionQuery = selectParams?.section
     ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${selectParams.section}"`
     : '';
   const ruleNumberQuery = selectParams?.ruleNumber
     ? ` AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${selectParams.ruleNumber}"`
     : '';
+  return baseQuery + sectionQuery + ruleNumberQuery;
+};
+
+export const getBenchmarkFilterQueryV2 = (
+  benchmarkId: BenchmarkId,
+  benchmarkVersion?: string,
+  selectParams?: BenchmarkRuleSelectParams
+): string => {
+  const baseQuery = `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id:${benchmarkId} AND ${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version:"v${benchmarkVersion}"`;
+
+  let sectionQuery = '';
+  let ruleNumberQuery = '';
+  if (selectParams?.section) {
+    const sectionParamsArr = selectParams.section?.map(
+      (params) => `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.section: "${params}"`
+    );
+    sectionQuery = ' AND (' + sectionParamsArr.join(' OR ') + ')';
+  }
+  if (selectParams?.ruleNumber) {
+    const ruleNumbersParamsArr = selectParams.ruleNumber?.map(
+      (params) =>
+        `${CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.rule_number: "${params}"`
+    );
+    ruleNumberQuery = ' AND (' + ruleNumbersParamsArr.join(' OR ') + ')';
+  }
+
   return baseQuery + sectionQuery + ruleNumberQuery;
 };
