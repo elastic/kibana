@@ -942,7 +942,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
           expect(mockLogger.warn).toHaveBeenCalledWith(
             'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
-            { tags: ['rule:rule-test-id'] }
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
           );
         });
 
@@ -962,7 +962,7 @@ describe('CasesConnectorExecutor', () => {
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
           expect(mockLogger.warn).toHaveBeenCalledWith(
             'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
-            { tags: ['rule:rule-test-id'] }
+            { tags: ['cases-connector', 'rule:rule-test-id'], labels: {} }
           );
         });
 
@@ -2032,7 +2032,8 @@ describe('CasesConnectorExecutor', () => {
       });
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"'
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Parsing time window error. Parsing value: "invalid"',
+        { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
       );
     });
 
@@ -2042,7 +2043,8 @@ describe('CasesConnectorExecutor', () => {
       await connectorExecutor.execute(params);
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
-        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date'
+        '[CasesConnector][CasesConnectorExecutor][isTimeWindowPassed] Timestamp "invalid" is not a valid date',
+        { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
       );
     });
   });
@@ -2129,7 +2131,8 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 1. Falling back to one case.`,
+          { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
     });
@@ -2210,7 +2213,8 @@ describe('CasesConnectorExecutor', () => {
         });
 
         expect(mockLogger.warn).toHaveBeenCalledWith(
-          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`
+          `[CasesConnector][CasesConnectorExecutor][applyCircuitBreakers] Circuit breaker: Grouping definition would create more than the maximum number of allowed cases 10. Falling back to one case.`,
+          { labels: {}, tags: ['cases-connector', 'rule:rule-test-id'] }
         );
       });
     });
