@@ -68,7 +68,6 @@ export const loadDashboardState = async ({
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
-    console.log('cached dashboard', cachedDashboard);
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
