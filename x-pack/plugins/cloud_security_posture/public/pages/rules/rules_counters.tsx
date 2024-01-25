@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { Chart, Partition, PartitionLayout, Settings } from '@elastic/charts';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RULE_COUNTERS_TEST_SUBJ } from './test_subjects';
 import noDataIllustration from '../../assets/illustrations/no_data_illustration.svg';
 import { BenchmarksCisId } from '../../../common/types/benchmarks/v2';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
@@ -233,7 +234,7 @@ export const RulesCounters = ({
 
   const counters = [
     {
-      id: 'rules-counters-posture-score',
+      id: RULE_COUNTERS_TEST_SUBJ.POSTURE_SCORE_COUNTER,
       description: i18n.translate('xpack.csp.rulesCounters.postureScoreTitle', {
         defaultMessage: 'Posture Score',
       }),
@@ -250,6 +251,7 @@ export const RulesCounters = ({
       ),
       button: (
         <EuiButtonEmpty
+          data-test-subj={RULE_COUNTERS_TEST_SUBJ.POSTURE_SCORE_BUTTON}
           iconType="pivot"
           href={http.basePath.prepend(`/app/security${cloudPosturePages.dashboard.path}`)}
         >
@@ -260,7 +262,7 @@ export const RulesCounters = ({
       ),
     },
     {
-      id: 'rules-counters-evaluated',
+      id: RULE_COUNTERS_TEST_SUBJ.INTEGRATIONS_EVALUATED_COUNTER,
       description: i18n.translate('xpack.csp.rulesCounters.accountsEvaluatedTitle', {
         defaultMessage: '{resourceName} Evaluated',
         values: {
@@ -270,6 +272,7 @@ export const RulesCounters = ({
       title: benchmarkRulesStats.evaluation || 0,
       button: (
         <EuiButtonEmpty
+          data-test-subj={RULE_COUNTERS_TEST_SUBJ.INTEGRATIONS_EVALUATED_BUTTON}
           iconType="listAdd"
           href={benchmarkDynamicValues[benchmarkRulesStats.id].integrationLink}
         >
@@ -284,7 +287,7 @@ export const RulesCounters = ({
       ),
     },
     {
-      id: 'rules-counters-failed-findings',
+      id: RULE_COUNTERS_TEST_SUBJ.FAILED_FINDINGS_COUNTER,
       description: i18n.translate('xpack.csp.rulesCounters.failedFindingsTitle', {
         defaultMessage: 'Failed Findings',
       }),
@@ -292,6 +295,7 @@ export const RulesCounters = ({
       titleColor: benchmarkRulesStats.score.totalFailed > 0 ? statusColors.failed : undefined,
       button: (
         <EuiButtonEmpty
+          data-test-subj={RULE_COUNTERS_TEST_SUBJ.FAILED_FINDINGS_BUTTON}
           iconType="pivot"
           onClick={() =>
             navToFindings({
@@ -308,13 +312,17 @@ export const RulesCounters = ({
       ),
     },
     {
-      id: 'rules-counters-disabled-rules',
+      id: RULE_COUNTERS_TEST_SUBJ.DISABLED_RULES_COUNTER,
       description: i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterTitle', {
         defaultMessage: 'Disabled Rules',
       }),
       title: mutedRulesCount,
       button: (
-        <EuiButtonEmpty iconType="search" onClick={() => setEnabledDisabledItemsFilter('disabled')}>
+        <EuiButtonEmpty
+          data-test-subj={RULE_COUNTERS_TEST_SUBJ.DISABLED_RULES_BUTTON}
+          iconType="search"
+          onClick={() => setEnabledDisabledItemsFilter('disabled')}
+        >
           {i18n.translate('xpack.csp.rulesCounters.disabledRulesCounterButton', {
             defaultMessage: 'View all disabled rules',
           })}
