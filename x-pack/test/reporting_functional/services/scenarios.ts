@@ -116,10 +116,12 @@ export function createScenarios(
     await testSubjects.missingOrFail('sharePanel-CSVReports');
   };
   const tryDiscoverCsvSuccess = async () => {
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openCsvReportingPanel();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePdfFail = async () => {
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openImageReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
