@@ -19,7 +19,6 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
-import { AppFeatureSecurityKey } from '@kbn/security-solution-features/src/app_features_keys';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
@@ -116,6 +115,7 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
+import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -557,9 +557,11 @@ export class Plugin implements ISecuritySolutionPlugin {
           logger
         );
 
-        plugins.fleet?.appFeatureEnabled(
-          appFeaturesService.isEnabled.bind(appFeaturesService),
-          AppFeatureSecurityKey.endpointAgentTamperProtection
+        turnOffAgentPolicyFeatures(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          appFeaturesService,
+          logger
         );
       });
 

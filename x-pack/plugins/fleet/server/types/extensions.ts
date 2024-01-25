@@ -104,6 +104,6 @@ export type ExternalCallbackAgentPolicy =
   | ExternalCallbackAgentPolicyCreate
   | ExternalCallbackAgentPolicyUpdate;
 
-type ExternalCallbackType = ExternalCallback | ExternalCallbackAgentPolicy;
+export type ExternalCallbackType = ExternalCallback | ExternalCallbackAgentPolicy;
 
 export type ExternalCallbacksStorage = Map<ExternalCallbackType[0], Set<ExternalCallbackType[1]>>;

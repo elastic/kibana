@@ -54,8 +54,6 @@ import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/
 
 import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
-import type { AppFeatureKeyType } from '@kbn/security-solution-features';
-
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import {
@@ -245,10 +243,6 @@ export interface FleetStartContract {
   Function exported to allow creating unique ids for saved object tags
    */
   getPackageSpecTagId: (spaceId: string, pkgName: string, tagName: string) => string;
-  appFeatureEnabled: (
-    checkAppFeatureStatus: (appFeatureKey: AppFeatureKeyType) => boolean,
-    appFeatureKey: AppFeatureKeyType
-  ) => void;
 }
 
 export class FleetPlugin
@@ -632,6 +626,7 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
+        bumpRevision: agentPolicyService.bumpRevision.bind(agentPolicyService),
       },
       packagePolicyService,
       registerExternalCallback: (
@@ -655,10 +650,6 @@ export class FleetPlugin
         return new FleetActionsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       getPackageSpecTagId,
-      appFeatureEnabled: (checkAppFeatureStatus, appFeatureKey) => {
-        const isEnabled = checkAppFeatureStatus(appFeatureKey);
-        this.policyWatcher?.checkAppFeature(appFeatureKey, isEnabled);
-      },
     };
   }
 

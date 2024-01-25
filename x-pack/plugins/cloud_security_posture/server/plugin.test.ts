@@ -32,7 +32,6 @@ import {
   UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import {
-  ExternalCallback,
   FleetStartContract,
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
@@ -49,6 +48,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
+import { ExternalCallbackType } from '@kbn/fleet-plugin/server/types';
 
 const chance = new Chance();
 
@@ -70,7 +70,7 @@ const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> =>
     // @ts-expect-error 2322
     packageService: createMockPackageService(),
     agentPolicyService: createMockAgentPolicyService(),
-    registerExternalCallback: jest.fn((..._: ExternalCallback) => {}),
+    registerExternalCallback: jest.fn((..._: ExternalCallbackType) => {}),
     packagePolicyService: createPackagePolicyServiceMock(),
     createArtifactsClient: jest.fn().mockReturnValue(createArtifactsClientMock()),
   };
