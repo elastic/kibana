@@ -21,6 +21,7 @@ import { waitFor } from '@testing-library/react';
 // FLAKY: https://github.com/elastic/kibana/issues/175311
 // FLAKY: https://github.com/elastic/kibana/issues/175312
 // FLAKY: https://github.com/elastic/kibana/issues/175313
+// FLAKY: https://github.com/elastic/kibana/issues/175314
 describe.skip('UserCommentPropertyActions', () => {
   let appMock: AppMockRenderer;
 
