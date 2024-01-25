@@ -134,6 +134,8 @@ export class SecurityUsageReportingTask {
     // the next query range should start
     const meteringCallbackTime = new Date();
     try {
+      this.logger.error(`failed to retrieve usage records: foo boo`); // test
+      this.logger.error(`Failed to send usage records report zoo `); // test
       usageRecords = await meteringCallback({
         esClient,
         cloudSetup: this.cloudSetup,

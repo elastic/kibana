@@ -25,6 +25,7 @@ export const cloudSecurityMetringCallback = async ({
   const tier: Tier = getCloudProductTier(config, logger);
 
   try {
+    logger.error(`Failed to process Cloud Security metering data bla bla`); // test
     const cloudSecuritySolutions: CloudSecuritySolutions[] = [CSPM, KSPM, CNVM, CLOUD_DEFEND];
 
     const promiseResults = await Promise.allSettled(
@@ -64,6 +65,7 @@ export const getCloudProductTier = (config: ServerlessSecurityConfig, logger: Lo
   const cloud = config.productTypes.find(
     (productType) => productType.product_line === ProductLine.cloud
   );
+  logger.error(`Failed to fetch cloud product tier, config: ${JSON.stringify(config)}`); // test
   const tier = cloud ? cloud.product_tier : 'none';
   if (tier === 'none') {
     logger.error(`Failed to fetch cloud product tier, config: ${JSON.stringify(config)}`);
