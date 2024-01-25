@@ -82,6 +82,7 @@ export function correctCommonEsqlMistakes(content: string, log: Logger) {
             formattedCommand = formattedCommand
               .replaceAll(/FROM "(.*)"/g, 'FROM `$1`')
               .replaceAll(/FROM '(.*)'/g, 'FROM `$1`');
+            break;
 
           case 'WHERE':
           case 'EVAL':

@@ -211,7 +211,7 @@ export function registerEsqlFunction({
 
               Prefer to use commands and functions for which you have requested documentation.
 
-              DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ESQL
+              DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
               as mentioned in the system message and documentation.
               
               Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation

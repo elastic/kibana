@@ -34,14 +34,14 @@ describe('correctCommonEsqlMistakes', () => {
     expectQuery(
       `FROM traces-apm*
       | WHERE @timestamp >= NOW() - 24 hours
-      | STATS AVG(transaction.duration.us) AS avg_duration, SUM(success) / (SUM(success) + SUM(failure)) AS success_rate, COUNT(*) AS total_requests BY service.name`,
+      | STATS AVG(transaction.duration.us) AS avg_duration, SUM(success) AS total_successes, COUNT(*) AS total_requests BY service.name`,
       `FROM traces-apm*
       | WHERE @timestamp >= NOW() - 24 hours
-      | STATS avg_duration = AVG(transaction.duration.us), success_rate = SUM(success) / (SUM(success) + SUM(failure)), total_requests = COUNT(*) BY service.name`
+      | STATS avg_duration = AVG(transaction.duration.us), total_successes = SUM(success), total_requests = COUNT(*) BY service.name`
     );
   });
 
-  it('replaces " or \' escaping in FROM statements with backticks', () => {
+  it(`replaces " or ' escaping in FROM statements with backticks`, () => {
     expectQuery(`FROM "logs-*" | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
     expectQuery(`FROM 'logs-*' | LIMIT 10`, 'FROM `logs-*`\n| LIMIT 10');
     expectQuery(`FROM logs-* | LIMIT 10`, 'FROM logs-*\n| LIMIT 10');
