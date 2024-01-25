@@ -15,6 +15,7 @@ import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
@@ -56,6 +57,10 @@ const contextPreboot = contextServiceMock.createPrebootContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 const prebootDeps = {
@@ -130,7 +135,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -168,7 +173,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -200,7 +205,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
@@ -231,7 +236,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener)
         .get('/')
@@ -277,7 +282,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener)
         .get('/')
@@ -414,7 +419,7 @@ describe('Cookie based SessionStorage', () => {
         innerServer,
         cookieOptions
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -471,7 +476,7 @@ describe('Cookie based SessionStorage', () => {
             name: `sid-${sameSite}`,
             sameSite,
           });
-          await server.start();
+          await server.start(startDeps);
 
           const response = await supertest(innerServer.listener).get('/').expect(200);
 

@@ -15,6 +15,7 @@ import { schema } from '@kbn/config-schema';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import { createHttpService } from '@kbn/core-http-server-mocks';
@@ -28,6 +29,10 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 beforeEach(async () => {
@@ -58,7 +63,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -88,7 +93,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
@@ -117,7 +122,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -146,7 +151,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -179,7 +184,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -203,7 +208,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -233,7 +238,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: true,
@@ -250,7 +255,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(401);
       });
@@ -265,7 +270,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(401);
       });
@@ -285,7 +290,7 @@ describe('Options', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: 'ok' })
         );
-        await server.start();
+        await server.start(startDeps);
 
         const result = await supertest(innerServer.listener).get('/').expect(302);
 
@@ -315,7 +320,7 @@ describe('Options', () => {
               },
             })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           httpAuthIsAuthenticated: false,
@@ -368,7 +373,7 @@ describe('Options', () => {
             return res.ok({});
           }
         );
-        await server.start();
+        await server.start(startDeps);
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -393,7 +398,7 @@ describe('Options', () => {
           },
           async (context, req, res) => res.ok({})
         );
-        await server.start();
+        await server.start(startDeps);
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -428,7 +433,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start(startDeps);
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -461,7 +466,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start(startDeps);
 
         // start the request
         const request = supertest(innerServer.listener)
@@ -495,7 +500,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start(startDeps);
         await expect(supertest(innerServer.listener).post('/a')).rejects.toThrow('socket hang up');
       });
 
@@ -520,7 +525,7 @@ describe('Options', () => {
           }
         );
 
-        await server.start();
+        await server.start(startDeps);
         await expect(supertest(innerServer.listener).post('/a')).resolves.toHaveProperty(
           'status',
           200
@@ -536,7 +541,7 @@ describe('Cache-Control', () => {
     const router = createRouter('/');
 
     router.get({ path: '/', validate: false, options: {} }, (context, req, res) => res.ok());
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .get('/')
@@ -554,7 +559,7 @@ describe('Cache-Control', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect('Cache-Control', 'public, max-age=1200');
   });
@@ -569,7 +574,7 @@ describe('Handler', () => {
       throw new Error('unexpected error');
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -589,7 +594,7 @@ describe('Handler', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => {
       throw error;
     });
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(500);
 
@@ -604,7 +609,7 @@ describe('Handler', () => {
     router.get({ path: '/{query}', validate: false }, (context, req, res) => {
       throw Boom.unauthorized();
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/some-data').expect(500);
 
@@ -640,7 +645,7 @@ describe('Handler', () => {
 
     const router = createRouter('/');
     router.get({ path: '/', validate: false }, (context, req, res) => 'ok' as any);
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -685,7 +690,7 @@ describe('Handler', () => {
       },
       (context, req, res) => res.noContent()
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener)
       .get('/')
@@ -738,7 +743,7 @@ describe('Handler', () => {
         return res.ok({ body: 'ok' });
       }
     );
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .post('/')
@@ -765,7 +770,7 @@ describe('Handler', () => {
         return res.ok({ body: 'ok' });
       }
     );
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).post('/').type('json').send('12').expect(200);
 
@@ -784,7 +789,7 @@ describe('handleLegacyErrors', () => {
         throw Boom.notFound();
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -804,7 +809,7 @@ describe('handleLegacyErrors', () => {
         throw new Error('Unexpected');
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -826,7 +831,7 @@ describe('Response factory', () => {
         return res.ok({ body: { key: 'value' } });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -842,7 +847,7 @@ describe('Response factory', () => {
         return res.ok({ body: 'result' });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -858,7 +863,7 @@ describe('Response factory', () => {
         return res.ok(undefined);
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(innerServer.listener).get('/').expect(200);
     });
@@ -880,7 +885,7 @@ describe('Response factory', () => {
         return res.ok({ body: stream });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -911,7 +916,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -940,7 +945,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -963,7 +968,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
@@ -987,7 +992,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200).buffer(true);
 
@@ -1009,7 +1014,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1031,7 +1036,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1053,7 +1058,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1073,7 +1078,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1090,7 +1095,7 @@ describe('Response factory', () => {
         return res.ok({ body: payload });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1106,7 +1111,7 @@ describe('Response factory', () => {
         return res.ok({ body: { key: 'value' } });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1122,7 +1127,7 @@ describe('Response factory', () => {
         return res.accepted({ body: { location: 'somewhere' } });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(202);
 
@@ -1138,7 +1143,7 @@ describe('Response factory', () => {
         return res.noContent();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(204);
 
@@ -1161,7 +1166,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(302);
 
@@ -1182,7 +1187,7 @@ describe('Response factory', () => {
         } as any); // location headers is required
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1223,7 +1228,7 @@ describe('Response factory', () => {
         return res.badRequest({ body: error });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1242,7 +1247,7 @@ describe('Response factory', () => {
         return res.badRequest();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1263,7 +1268,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1299,7 +1304,7 @@ describe('Response factory', () => {
         }
       );
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(innerServer.listener)
         .post('/foo/')
@@ -1347,7 +1352,7 @@ describe('Response factory', () => {
         }
       );
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(innerServer.listener)
         .post('/foo/')
@@ -1469,7 +1474,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1485,7 +1490,7 @@ describe('Response factory', () => {
         return res.unauthorized();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1501,7 +1506,7 @@ describe('Response factory', () => {
         return res.forbidden({ body: error });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(403);
 
@@ -1516,7 +1521,7 @@ describe('Response factory', () => {
         return res.forbidden();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(403);
 
@@ -1532,7 +1537,7 @@ describe('Response factory', () => {
         return res.notFound({ body: error });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -1547,7 +1552,7 @@ describe('Response factory', () => {
         return res.notFound();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(404);
 
@@ -1563,7 +1568,7 @@ describe('Response factory', () => {
         return res.conflict({ body: error });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(409);
 
@@ -1578,7 +1583,7 @@ describe('Response factory', () => {
         return res.conflict();
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(409);
 
@@ -1597,7 +1602,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(418);
 
@@ -1621,7 +1626,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1645,7 +1650,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1668,7 +1673,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1716,7 +1721,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(201);
 
@@ -1737,7 +1742,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(301);
 
@@ -1756,7 +1761,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1795,7 +1800,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1816,7 +1821,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1842,7 +1847,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1866,7 +1871,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1884,7 +1889,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1907,7 +1912,7 @@ describe('Response factory', () => {
         });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1947,7 +1952,7 @@ describe('Response factory', () => {
         } as any); // requires error message
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1986,7 +1991,7 @@ describe('Response factory', () => {
         return res.custom({ body: error } as any); // options.statusCode is required
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -2025,7 +2030,7 @@ describe('Response factory', () => {
         return res.custom({ body: error, statusCode: 20 });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -2076,7 +2081,7 @@ describe('ETag', () => {
         })
     );
 
-    await server.start();
+    await server.start(startDeps);
     const response = await supertest(innerServer.listener)
       .get('/route')
       .expect(200, { foo: 'bar' });
@@ -2101,7 +2106,7 @@ describe('ETag', () => {
         })
     );
 
-    await server.start();
+    await server.start(startDeps);
     await supertest(innerServer.listener)
       .get('/route')
       .set('If-None-Match', '"etag-1"')
@@ -2136,7 +2141,7 @@ describe('registerRouterAfterListening', () => {
 
     registerRouterAfterListening(otherRouter);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
     await supertest(innerServer.listener).get('/test/afterListening').expect(200);
@@ -2154,7 +2159,7 @@ describe('registerRouterAfterListening', () => {
       return res.ok({ body: 'hello' });
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
     await supertest(innerServer.listener).get('/test/afterListening').expect(404);

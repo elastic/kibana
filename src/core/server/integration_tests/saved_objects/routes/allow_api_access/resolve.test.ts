@@ -24,7 +24,7 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from '../routes_test_utils';
+import { setupConfig, getStartDeps } from '../routes_test_utils';
 
 const coreId = Symbol('core');
 
@@ -81,7 +81,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id} with allowApiAccess true', 
 
     registerResolveRoute(router, { config, coreUsageData, logger });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

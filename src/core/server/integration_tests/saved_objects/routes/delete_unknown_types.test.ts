@@ -15,6 +15,7 @@ import {
   registerDeleteUnknownTypesRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -48,7 +49,7 @@ describe('POST /internal/saved_objects/deprecations/_delete_unknown_types', () =
       kibanaIndex,
     });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {
