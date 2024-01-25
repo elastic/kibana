@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useState, useEffect } from 'react';
-import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { EuiEmptyPrompt, transparentize, useEuiTheme } from '@elastic/eui';
 import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,10 +17,15 @@ import {
   XYDataLayer,
   XYLayerOptions,
   XYReferenceLinesLayer,
+  XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
 
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { v4 as uuidv4 } from 'uuid';
+import chroma from 'chroma-js';
+import type { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-common';
+import { TimeRange } from '@kbn/es-query';
 import {
   Aggregators,
   Comparator,
@@ -30,12 +35,17 @@ import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 
-interface PreviewChartPros {
+interface RuleConditionChartPros {
   metricExpression: MetricExpression;
   dataView?: DataView;
   filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
+  timeRange?: TimeRange;
+  annotation?: {
+    timestamp?: string;
+    endTimestamp?: string;
+  };
 }
 
 const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
@@ -47,13 +57,15 @@ const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
 export const getBufferThreshold = (threshold?: number): string =>
   (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
 
-export function PreviewChart({
+export function RuleConditionChart({
   metricExpression,
   dataView,
   filterQuery,
   groupBy,
   error,
-}: PreviewChartPros) {
+  annotation,
+  timeRange,
+}: RuleConditionChartPros) {
   const {
     services: { lens },
   } = useKibana();
@@ -63,6 +75,7 @@ export function PreviewChart({
   const [aggMap, setAggMap] = useState<AggMap>();
   const [formula, setFormula] = useState<string>('');
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
+  const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
@@ -162,6 +175,33 @@ export function PreviewChart({
     setThresholdReferenceLine(refLayers);
   }, [threshold, comparator, euiTheme.colors.danger, metrics]);
 
+  // Build alert annotation
+  useEffect(() => {
+    const annotationLayer = new XYByValueAnnotationsLayer({
+      annotations: [
+        {
+          label: `Alert`,
+          type: 'manual',
+          key: {
+            type: annotation?.endTimestamp ? 'range' : 'point_in_time',
+            timestamp: annotation?.timestamp,
+            endTimestamp: annotation?.endTimestamp,
+          },
+          color: annotation?.endTimestamp
+            ? chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase()
+            : euiTheme.colors.danger,
+          icon: 'alert',
+          textVisibility: true,
+          id: uuidv4(),
+        } as PointInTimeEventAnnotationConfig,
+      ],
+      ignoreGlobalFilters: true,
+      dataView,
+    });
+
+    setAlertAnnotation(annotationLayer);
+  }, [euiTheme.colors.danger, dataView, annotation]);
+
   // Build the aggregation map from the metrics
   useEffect(() => {
     if (!metrics || metrics.length === 0) {
@@ -254,9 +294,14 @@ export function PreviewChart({
       options: xYDataLayerOptions,
     });
 
-    const layers: Array<XYDataLayer | XYReferenceLinesLayer> = [xyDataLayer];
+    const layers: Array<XYDataLayer | XYReferenceLinesLayer | XYByValueAnnotationsLayer> = [
+      xyDataLayer,
+    ];
     if (thresholdReferenceLine) {
       layers.push(...thresholdReferenceLine);
+    }
+    if (alertAnnotation) {
+      layers.push(alertAnnotation);
     }
     const attributesLens = new LensAttributesBuilder({
       visualization: new XYChart({
@@ -286,6 +331,7 @@ export function PreviewChart({
     metrics,
     threshold,
     thresholdReferenceLine,
+    alertAnnotation,
     timeSize,
     timeUnit,
   ]);
@@ -295,7 +341,8 @@ export function PreviewChart({
     !attributes ||
     error?.equation ||
     Object.keys(error?.metrics || {}).length !== 0 ||
-    !timeSize
+    !timeSize ||
+    !timeRange
   ) {
     return (
       <div style={{ maxHeight: 180, minHeight: 180 }}>
@@ -327,7 +374,7 @@ export function PreviewChart({
         onLoad={setChartLoading}
         id="customThresholdPreviewChart"
         style={{ height: 180 }}
-        timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
+        timeRange={timeRange}
         attributes={attributes}
         disableTriggers={true}
         query={{
