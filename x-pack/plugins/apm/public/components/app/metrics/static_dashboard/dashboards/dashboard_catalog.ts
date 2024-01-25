@@ -7,7 +7,7 @@
 
 export const AGENT_NAME_DASHBOARD_FILE_MAPPING: Record<string, string> = {
   nodejs: 'nodejs',
-  'opentelemetry/nodejs': 'opentelemetry-nodejs',
+  'opentelemetry/nodejs': 'opentelemetry_nodejs',
   java: 'java',
 };
 
@@ -23,7 +23,7 @@ export async function loadDashboardFile(filename: string): Promise<any> {
         './nodejs.json'
       );
     }
-    case 'opentelemetry-nodejs': {
+    case 'opentelemetry_nodejs': {
       return import(
         /* webpackChunkName: "lazyNodeJsDashboard" */
         './opentelemetry_nodejs.json'
