@@ -71,7 +71,7 @@ export const timelineChangedMiddleware: Middleware =
   (next) =>
   (action: Action) => {
     // perform the action
-    next(action);
+    const ret = next(action);
 
     // if the action matches one of the "change" actions,
     // dispatch a `setChanged` action on top
@@ -83,4 +83,6 @@ export const timelineChangedMiddleware: Middleware =
         })
       );
     }
+
+    return ret;
   };

@@ -28,7 +28,7 @@ const debouncedpersistUserAssetTableInStorage = debounce(
 export const userAssetTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =
   (storage: Storage) => (store) => (next) => (action: Action) => {
     // perform the action
-    next(action);
+    const ret = next(action);
 
     // persist the table state when a table action has been performed
     if (tableActionTypes.has(action.type)) {
@@ -40,4 +40,6 @@ export const userAssetTableLocalStorageMiddleware: (storage: Storage) => Middlew
         }
       }
     }
+
+    return ret;
   };

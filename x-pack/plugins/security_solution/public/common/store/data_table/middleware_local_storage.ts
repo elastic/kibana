@@ -57,7 +57,7 @@ const debouncedAddTableInStorage = debounce(
 export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =
   (storage: Storage) => (store) => (next) => (action: Action) => {
     // perform the action
-    next(action);
+    const ret = next(action);
 
     // persist the data table state when a table action has been performed
     if (tableActionTypes.has(action.type)) {
@@ -67,4 +67,6 @@ export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{
         debouncedAddTableInStorage(storage, tableId, tableById[tableId]);
       }
     }
+
+    return ret;
   };
