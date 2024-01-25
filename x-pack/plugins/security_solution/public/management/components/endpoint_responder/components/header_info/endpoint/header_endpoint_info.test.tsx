@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { EndpointActionGenerator } from '../../../../../common/endpoint/data_generators/endpoint_action_generator';
-import type { HostInfo } from '../../../../../common/endpoint/types';
-import type { AppContextTestRender } from '../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_details';
-import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
-import { mockEndpointDetailsApiResult } from '../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
+import { EndpointActionGenerator } from '../../../../../../../common/endpoint/data_generators/endpoint_action_generator';
+import type { HostInfo } from '../../../../../../../common/endpoint/types';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
+import { useGetEndpointDetails } from '../../../../../hooks/endpoint/use_get_endpoint_details';
+import { useGetEndpointPendingActionsSummary } from '../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import { mockEndpointDetailsApiResult } from '../../../../../pages/endpoint_hosts/store/mock_endpoint_result_list';
 import { HeaderEndpointInfo } from './header_endpoint_info';
 
-jest.mock('../../../hooks/endpoint/use_get_endpoint_details');
-jest.mock('../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
+jest.mock('../../../../../hooks/endpoint/use_get_endpoint_details');
+jest.mock('../../../../../hooks/response_actions/use_get_endpoint_pending_actions_summary');
 
 const getEndpointDetails = useGetEndpointDetails as jest.Mock;
 const getPendingActions = useGetEndpointPendingActionsSummary as jest.Mock;
@@ -49,7 +49,7 @@ describe('Responder header endpoint info', () => {
     jest.clearAllMocks();
   });
   it('should show endpoint name', async () => {
-    const name = await renderResult.findByTestId('responderHeaderEndpointName');
+    const name = await renderResult.findByTestId('responderHeaderHostName');
     expect(name.textContent).toBe(`${endpointDetails.metadata.host.name}`);
   });
   it('should show agent and isolation status', async () => {
@@ -63,7 +63,7 @@ describe('Responder header endpoint info', () => {
     expect(lastUpdated).toBeTruthy();
   });
   it('should show platform icon', async () => {
-    const platformIcon = await renderResult.findByTestId('responderHeaderEndpointPlatformIcon');
+    const platformIcon = await renderResult.findByTestId('responderHeaderHostPlatformIcon');
     expect(platformIcon).toBeTruthy();
   });
 });

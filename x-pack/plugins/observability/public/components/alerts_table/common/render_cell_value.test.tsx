@@ -7,8 +7,8 @@
 
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { render } from '../../utils/test_helper';
+import { createObservabilityRuleTypeRegistryMock } from '../../../rules/observability_rule_type_registry_mock';
+import { render } from '../../../utils/test_helper';
 import { getRenderCellValue } from './render_cell_value';
 
 interface AlertsTableRow {

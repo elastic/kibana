@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
+import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../../../common/mock/endpoint';
 import { PlatformIcon, type PlatformIconProps } from './platform_icon';
 
 describe('PlatformIcon', () => {
