@@ -16,6 +16,7 @@ import {
   FunctionDefinition,
   CommandDefinition,
   CommandOptionsDefinition,
+  CommandModeDefinition,
 } from '../definitions/types';
 import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
@@ -70,11 +71,14 @@ export const isCompatibleFunctionName = (fnName: string, command: string) => {
 
 export const getCompatibleFunctionDefinition = (
   command: string,
+  option: string | undefined,
   returnTypes?: string[],
   ignored: string[] = []
 ): AutocompleteCommandDefinition[] => {
   const fnSupportedByCommand = allFunctions.filter(
-    ({ name, supportedCommands }) => supportedCommands.includes(command) && !ignored.includes(name)
+    ({ name, supportedCommands, supportedOptions }) =>
+      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+      !ignored.includes(name)
   );
   if (!returnTypes) {
     return fnSupportedByCommand.map(getAutocompleteFunctionDefinition);
@@ -213,6 +217,44 @@ export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
     completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   return completeItem;
+};
+
+export const buildSettingDefinitions = (
+  setting: CommandModeDefinition
+): AutocompleteCommandDefinition[] => {
+  // for now there's just a single setting with one argument
+  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
+    return values!.map((value, i) => {
+      const completeItem: AutocompleteCommandDefinition = {
+        label: `${setting.name}:${value}`,
+        insertText: `${setting.name}:${value}`,
+        kind: 21,
+        detail: valueDescriptions
+          ? `${setting.description} - ${valueDescriptions[i]}`
+          : setting.description,
+        sortText: 'D',
+      };
+      return completeItem;
+    });
+  });
+};
+
+export const buildSettingValueDefinitions = (
+  setting: CommandModeDefinition
+): AutocompleteCommandDefinition[] => {
+  // for now there's just a single setting with one argument
+  return setting.signature.params.flatMap(({ values, valueDescriptions }) => {
+    return values!.map((value, i) => {
+      const completeItem: AutocompleteCommandDefinition = {
+        label: value,
+        insertText: value,
+        kind: 21,
+        detail: valueDescriptions ? valueDescriptions[i] : setting.description,
+        sortText: 'D',
+      };
+      return completeItem;
+    });
+  });
 };
 
 export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition => ({

@@ -8,6 +8,7 @@
 import type { JSONSchema } from 'json-schema-to-ts';
 import type OpenAI from 'openai';
 import type { Observable } from 'rxjs';
+import { ChatCompletionChunkEvent, MessageAddEvent } from './conversation_complete';
 
 export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
   choices: Array<
@@ -101,7 +102,7 @@ export type FunctionResponse =
       content?: any;
       data?: any;
     }
-  | Observable<CreateChatCompletionResponseChunk>;
+  | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
 export enum FunctionVisibility {
   System = 'system',

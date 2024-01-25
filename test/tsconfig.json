@@ -18,7 +18,7 @@
     "api_integration/apis/logstash/pipelines/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json",
     "api_integration/apis/telemetry/fixtures/*.json"
-  ],
+    , "../x-pack/test_serverless/functional/test_suites/common/saved_objects_management/export_transform copy.ts"  ],
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",

@@ -18,7 +18,7 @@ export const byOption: CommandOptionsDefinition = {
   }),
   signature: {
     multipleParams: true,
-    params: [{ name: 'column', type: 'column' }],
+    params: [{ name: 'expression', type: 'any' }],
   },
   optional: true,
 };
@@ -93,7 +93,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
         location: firstArg.location,
         text: i18n.translate('monaco.esql.validation.wrongDissectOptionArgumentType', {
           defaultMessage:
-            'Invalid value for dissect append_separator: expected a string, but was [{value}]',
+            'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
           values: {
             value,
           },
