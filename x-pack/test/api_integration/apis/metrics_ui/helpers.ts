@@ -10,6 +10,7 @@ import { SuperTest, Test } from 'supertest';
 
 export type KibanaSupertest = SuperTest<Test>;
 
+// generates traces, metrics for services
 export function generateServicesData({
   from,
   to,
@@ -22,7 +23,6 @@ export function generateServicesData({
   servicesPerHost?: number;
 }) {
   const range = timerange(from, to);
-
   const services = Array(instanceCount)
     .fill(null)
     .flatMap((_, hostIdx) =>
@@ -48,6 +48,43 @@ export function generateServicesData({
           .timestamp(timestamp)
           .duration(500)
           .success()
+      )
+    );
+}
+// generates error logs only for services
+export function generateServicesLogsOnlyData({
+  from,
+  to,
+  instanceCount = 1,
+  servicesPerHost = 1,
+}: {
+  from: string;
+  to: string;
+  instanceCount?: number;
+  servicesPerHost?: number;
+}) {
+  const range = timerange(from, to);
+  const services = Array(instanceCount)
+    .fill(null)
+    .flatMap((_, hostIdx) =>
+      Array(servicesPerHost)
+        .fill(null)
+        .map((__, serviceIdx) =>
+          apm
+            .service({
+              name: `service-${hostIdx}-${serviceIdx}`,
+              environment: 'production',
+              agentName: 'go',
+            })
+            .instance(`host-${hostIdx}`)
+        )
+    );
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp, index) =>
+      services.map((service) =>
+        service.error({ message: 'error', type: 'My Type' }).timestamp(timestamp)
       )
     );
 }
