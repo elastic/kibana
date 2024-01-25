@@ -835,6 +835,7 @@ class TimeseriesChartIntl extends Component {
       .attr('cy', (d) => {
         return this.focusYScale(d.value);
       })
+      .attr('data-test-subj', (d) => (d.anomalyScore !== undefined ? 'mlAnomalyMarker' : undefined))
       .attr('class', (d) => {
         let markerClass = 'metric-value';
         if (d.anomalyScore !== undefined) {
@@ -870,6 +871,7 @@ class TimeseriesChartIntl extends Component {
         'transform',
         (d) => `translate(${this.focusXScale(d.date)}, ${this.focusYScale(d.value)})`
       )
+      .attr('data-test-subj', 'mlAnomalyMarker')
       .attr('class', (d) => `anomaly-marker multi-bucket ${getSeverityWithLow(d.anomalyScore).id}`);
 
     // Add rectangular markers for any scheduled events.
@@ -1867,6 +1869,7 @@ class TimeseriesChartIntl extends Component {
           .append('path')
           .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
           .attr('transform', (d) => `translate(${focusXScale(d.date)}, ${focusYScale(d.value)})`)
+          .attr('data-test-subj', 'mlAnomalyMarker')
           .attr(
             'class',
             (d) =>
@@ -1879,6 +1882,7 @@ class TimeseriesChartIntl extends Component {
           .attr('r', LINE_CHART_ANOMALY_RADIUS)
           .attr('cx', (d) => focusXScale(d.date))
           .attr('cy', (d) => focusYScale(d.value))
+          .attr('data-test-subj', 'mlAnomalyMarker')
           .attr(
             'class',
             (d) =>

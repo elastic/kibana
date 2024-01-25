@@ -90,6 +90,13 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('anomalies table is not empty');
         await ml.anomaliesTable.assertTableNotEmpty();
       });
+
+      it('should click on an anomaly marker', async () => {
+        await ml.singleMetricViewer.assertAnomalyMarkerExist();
+        await ml.singleMetricViewer.openAnomalyMarkerActionsPopover();
+        await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+        await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
+      });
     });
 
     describe('with entity fields', function () {
