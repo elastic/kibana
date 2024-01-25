@@ -27,18 +27,18 @@ export class CasesOracleService {
    * TODO: Think about permissions etc.
    * Should we authorize based on the owner?
    */
-  private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  private readonly savedObjectsClient: SavedObjectsClientContract;
   private cryptoService: CryptoService;
 
   constructor({
     logger,
-    unsecuredSavedObjectsClient,
+    savedObjectsClient,
   }: {
     logger: Logger;
-    unsecuredSavedObjectsClient: SavedObjectsClientContract;
+    savedObjectsClient: SavedObjectsClientContract;
   }) {
     this.logger = logger;
-    this.unsecuredSavedObjectsClient = unsecuredSavedObjectsClient;
+    this.savedObjectsClient = savedObjectsClient;
     this.cryptoService = new CryptoService();
   }
 
@@ -64,7 +64,7 @@ export class CasesOracleService {
       tags: ['cases-oracle-service', 'getRecord', recordId],
     });
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.get<OracleRecordAttributes>(
+    const oracleRecord = await this.savedObjectsClient.get<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       recordId
     );
@@ -77,7 +77,7 @@ export class CasesOracleService {
       tags: ['cases-oracle-service', 'bulkGetRecords', ...ids],
     });
 
-    const oracleRecords = (await this.unsecuredSavedObjectsClient.bulkGet<OracleRecordAttributes>(
+    const oracleRecords = (await this.savedObjectsClient.bulkGet<OracleRecordAttributes>(
       ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
     )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
@@ -92,7 +92,7 @@ export class CasesOracleService {
       tags: ['cases-oracle-service', 'createRecord', recordId],
     });
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.create<OracleRecordAttributes>(
+    const oracleRecord = await this.savedObjectsClient.create<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       this.getCreateRecordAttributes(payload),
       { id: recordId }
@@ -116,10 +116,9 @@ export class CasesOracleService {
       attributes: this.getCreateRecordAttributes(record.payload),
     }));
 
-    const oracleRecords =
-      (await this.unsecuredSavedObjectsClient.bulkCreate<OracleRecordAttributes>(
-        req
-      )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
+    const oracleRecords = (await this.savedObjectsClient.bulkCreate<OracleRecordAttributes>(
+      req
+    )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
     return this.getBulkRecordsResponse(oracleRecords);
   }
@@ -135,7 +134,7 @@ export class CasesOracleService {
       }
     );
 
-    const oracleRecord = await this.unsecuredSavedObjectsClient.update<OracleRecordAttributes>(
+    const oracleRecord = await this.savedObjectsClient.update<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
       recordId,
       { counter: newCounter },
@@ -165,10 +164,9 @@ export class CasesOracleService {
       attributes: { ...record.payload, updatedAt: new Date().toISOString() },
     }));
 
-    const oracleRecords =
-      (await this.unsecuredSavedObjectsClient.bulkUpdate<OracleRecordAttributes>(
-        req
-      )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
+    const oracleRecords = (await this.savedObjectsClient.bulkUpdate<OracleRecordAttributes>(
+      req
+    )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
 
     return this.getBulkRecordsResponse(oracleRecords);
   }

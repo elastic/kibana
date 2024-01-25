@@ -45,12 +45,7 @@ export class CasesConnector extends SubActionConnector<
 
     this.casesOracleService = new CasesOracleService({
       logger: this.logger,
-      /**
-       * TODO: Think about permissions etc.
-       * Should we use our own savedObjectsClient as we do
-       * in the cases client? Should we so the createInternalRepository?
-       */
-      unsecuredSavedObjectsClient: this.savedObjectsClient,
+      savedObjectsClient: this.savedObjectsClient,
     });
 
     this.casesService = new CasesService();
