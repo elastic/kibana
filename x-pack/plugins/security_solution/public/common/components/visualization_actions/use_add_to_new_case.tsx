@@ -17,7 +17,7 @@ export interface UseAddToNewCaseProps {
   onClick?: () => void;
   lensAttributes: LensProps['attributes'] | null;
   timeRange: LensProps['timeRange'] | null;
-  lensMetadata: LensProps['metadata'] | null;
+  lensMetadata: LensProps['metadata'];
 }
 
 export const useAddToNewCase = ({

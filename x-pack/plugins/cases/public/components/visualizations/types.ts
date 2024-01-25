@@ -8,9 +8,11 @@
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 export type LensProps = Pick<TypedLensByValueInput, 'attributes' | 'timeRange'> & {
-  metadata?: LensMetadataProps;
+  /**
+   * Optional metadata used to customize the Lens Attachment rendering.
+   */
+  metadata?: {
+    description?: string;
+    width?: string | number;
+  };
 };
-export interface LensMetadataProps {
-  description?: string;
-  width?: string | number;
-}

@@ -92,7 +92,7 @@ export const useActions = ({
   withActions = DEFAULT_ACTIONS,
 }: {
   attributes: LensAttributes | null;
-  lensMetadata?: LensProps['metadata'] | null;
+  lensMetadata?: LensProps['metadata'];
   extraActions?: Action[];
   inspectActionProps: {
     handleInspectClick: () => void;

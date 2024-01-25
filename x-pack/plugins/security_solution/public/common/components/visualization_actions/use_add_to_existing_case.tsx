@@ -22,7 +22,7 @@ export const useAddToExistingCase = ({
   onAddToCaseClicked?: () => void;
   lensAttributes: LensProps['attributes'] | null;
   timeRange: LensProps['timeRange'] | null;
-  lensMetadata: LensProps['metadata'] | null;
+  lensMetadata: LensProps['metadata'];
 }) => {
   const { cases } = useKibana().services;
   const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
