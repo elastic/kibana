@@ -9,6 +9,7 @@
 export { inject, injectable } from './src/decorators';
 export type {
   ServiceIdentifier,
+  ServiceType,
   PluginContainer,
   ContainerModule,
   CreateModuleFn,

@@ -12,7 +12,12 @@ import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } 
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
 import { capabilitiesProvider } from './capabilities_provider';
-import { MyExampleService, myExampleServiceId } from './injection_example';
+import {
+  MyExampleService,
+  myExampleServiceId,
+  MyExampleRequestHandler,
+  myExampleRequestHandlerId,
+} from './injection_example';
 
 export class SavedObjectsManagementPlugin
   implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}>
@@ -33,16 +38,26 @@ export class SavedObjectsManagementPlugin
 
     capabilities.registerProvider(capabilitiesProvider);
 
-    // bind a global service though Core's injector
+
     injection.setupModule((pluginContainer, { createModule }) => {
       pluginContainer.bind(myExampleServiceId).to(MyExampleService).inSingletonScope();
 
       return {
         global: createModule(({ bind }) => {
+          // bind a global service though Core's injector
+          // by re-exposing the plugin's local service
           bind(myExampleServiceId)
             .toDynamicValue(() => {
               return pluginContainer.get(myExampleServiceId);
             })
+            .inSingletonScope();
+        }),
+        request: createModule(({ bind }) => {
+          // bind a request-scoped service
+          // note that is can use the services from the plugin's container
+          bind(myExampleRequestHandlerId)
+            .to(MyExampleRequestHandler)
+            // yes, it's a singleton at the request container's level
             .inSingletonScope();
         }),
       };

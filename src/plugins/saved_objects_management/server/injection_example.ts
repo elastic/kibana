@@ -6,8 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { inject, injectable, ServiceIdentifier } from '@kbn/core-di-common';
-import { coreGlobalServiceIds, LoggerFactory } from '@kbn/core/server';
+import { inject, injectable, ServiceIdentifier, ServiceType } from '@kbn/core-di-common';
+import { coreGlobalService, coreRequestServices } from '@kbn/core/server';
+
+//////////////////////////
+// example of a global-scoped service
 
 export interface MyExampleServiceInterface {
   doSomething(): void;
@@ -18,9 +21,36 @@ export const myExampleServiceId: ServiceIdentifier<MyExampleServiceInterface> =
 
 @injectable()
 export class MyExampleService implements MyExampleServiceInterface {
-  constructor(@inject(coreGlobalServiceIds.logger) private logger: LoggerFactory) {}
+  constructor(
+    @inject(coreGlobalService.logger)
+    private logger: ServiceType<typeof coreGlobalService.logger>
+  ) {}
 
   doSomething() {
     this.logger.get('test').info('I printed something to the console using a DI service');
+  }
+}
+
+/////////////////////////
+// example of a request-scoped service
+
+export interface MyExampleRequestHandlerInterface {
+  logSomethingRequestRelated(): void;
+}
+
+export const myExampleRequestHandlerId: ServiceIdentifier<MyExampleRequestHandlerInterface> =
+  Symbol.for('myExampleRequestHandler');
+
+@injectable()
+export class MyExampleRequestHandler {
+  constructor(
+    @inject(coreGlobalService.logger)
+    private logger: ServiceType<typeof coreGlobalService.logger>,
+    @inject(coreRequestServices.request)
+    private request: ServiceType<typeof coreRequestServices.request>
+  ) {}
+
+  logSomethingRequestRelated() {
+    this.logger.get('http').info(`Serving request with id ${this.request.uuid}`);
   }
 }

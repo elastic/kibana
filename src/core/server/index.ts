@@ -60,7 +60,7 @@ export { bootstrap } from '@kbn/core-root-server-internal';
  *
  * @public
  */
-export const coreGlobalServiceIds = {
+export const coreGlobalService = {
   logger: loggerServiceId,
   config: configServiceId,
 };
@@ -70,7 +70,7 @@ export const coreGlobalServiceIds = {
  *
  * @public
  */
-export const coreRequestScopedServices = {
+export const coreRequestServices = {
   request: requestServiceId,
 };
 
