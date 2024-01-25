@@ -451,16 +451,16 @@ describe('validation logic', () => {
 
     describe('date math', () => {
       testErrorsAndWarnings('row 1 anno', [
-        'Row does not support [date_period] in expression [1 anno]',
+        'ROW does not support [date_period] in expression [1 anno]',
       ]);
       testErrorsAndWarnings('row var = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
       testErrorsAndWarnings('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
       for (const timeLiteral of timeLiterals) {
         testErrorsAndWarnings(`row 1 ${timeLiteral.name}`, [
-          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
         testErrorsAndWarnings(`row 1                ${timeLiteral.name}`, [
-          `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
 
         // this is not possible for now
@@ -616,7 +616,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | mv_expand stringField', [
-      'Mv_expand only supports list type values, found [stringField] of type string',
+      'MV_EXPAND only supports list type values, found [stringField] of type string',
     ]);
 
     testErrorsAndWarnings(`from a | mv_expand listField`, []);
@@ -627,7 +627,7 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', [
-      'Mv_expand only supports list type values, found [a] of type string',
+      'MV_EXPAND only supports list type values, found [a] of type string',
     ]);
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
   });
@@ -669,7 +669,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings('from a | rename s* as strings', [
-      'Using wildcards (*) in rename is not allowed [s*]',
+      'Using wildcards (*) in RENAME is not allowed [s*]',
       'Unknown column [strings]',
     ]);
   });
@@ -694,24 +694,24 @@ describe('validation logic', () => {
     // Do not try to validate the dissect pattern string
     testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
     testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
-      'Dissect only supports string type values, found [numberField] of type number',
+      'DISSECT only supports string type values, found [numberField] of type number',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
-      'Invalid option for dissect: [option]',
+      'Invalid option for DISSECT: [option]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option = 1', [
-      'Invalid option for dissect: [option]',
+      'Invalid option for DISSECT: [option]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = "-"', []);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" ignore_missing = true', [
-      'Invalid option for dissect: [ignore_missing]',
+      'Invalid option for DISSECT: [ignore_missing]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
-      'Invalid value for dissect append_separator: expected a string, but was [true]',
+      'Invalid value for DISSECT append_separator: expected a string, but was [true]',
     ]);
     // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
     //   'Using wildcards (*) in dissect is not allowed [s*]',
@@ -734,7 +734,7 @@ describe('validation logic', () => {
     // Do not try to validate the grok pattern string
     testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
-      'Grok only supports string type values, found [numberField] of type number',
+      'GROK only supports string type values, found [numberField] of type number',
     ]);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
@@ -1067,12 +1067,12 @@ describe('validation logic', () => {
       'Argument of [not_in] must be [number[]], found value [(1, 2, 3, stringField)] type [(number, number, number, string)]',
     ]);
 
-    testErrorsAndWarnings('from a | eval avg(numberField)', ['Eval does not support function avg']);
+    testErrorsAndWarnings('from a | eval avg(numberField)', ['EVAL does not support function avg']);
     testErrorsAndWarnings('from a | stats avg(numberField) | eval `avg(numberField)` + 1', []);
 
     describe('date math', () => {
       testErrorsAndWarnings('from a | eval 1 anno', [
-        'Eval does not support [date_period] in expression [1 anno]',
+        'EVAL does not support [date_period] in expression [1 anno]',
       ]);
       testErrorsAndWarnings('from a | eval var = 1 anno', [
         "Unexpected time interval qualifier: 'anno'",
@@ -1082,10 +1082,10 @@ describe('validation logic', () => {
       ]);
       for (const timeLiteral of timeLiterals) {
         testErrorsAndWarnings(`from a | eval 1 ${timeLiteral.name}`, [
-          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
         testErrorsAndWarnings(`from a | eval 1                ${timeLiteral.name}`, [
-          `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+          `EVAL does not support [date_period] in expression [1 ${timeLiteral.name}]`,
         ]);
 
         // this is not possible for now
@@ -1119,28 +1119,26 @@ describe('validation logic', () => {
   describe('stats', () => {
     testErrorsAndWarnings('from a | stats ', []);
     testErrorsAndWarnings('from a | stats numberField ', [
-      'Stats expects an aggregate function, found [numberField]',
+      'STATS expects an aggregate function, found [numberField]',
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | stats numberField=5 by ', [
-      "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a | stats numberField=5 by ', [
-      "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
-    ]);
-
     testErrorsAndWarnings('from a | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
     ]);
-    testErrorsAndWarnings('from a | stats avg(numberField) by 1', [
-      'SyntaxError: expected {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "1"',
-      'Unknown column [1]',
+    testErrorsAndWarnings('from a | stats avg(numberField) by wrongField + 1', [
+      'Unknown column [wrongField]',
     ]);
+    testErrorsAndWarnings('from a | stats avg(numberField) by var0 = wrongField + 1', [
+      'Unknown column [wrongField]',
+    ]);
+    testErrorsAndWarnings('from a | stats avg(numberField) by 1', []);
     testErrorsAndWarnings('from a | stats avg(numberField) by percentile(numberField)', [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-      'Unknown column [percentile]',
+      'STATS BY does not support function percentile',
     ]);
     testErrorsAndWarnings('from a | stats count(`numberField`)', []);
 
@@ -1154,8 +1152,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(
       'from a | stats avg(numberField) by stringField, percentile(numberField) by ipField',
       [
-        'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-        'Unknown column [percentile]',
+        'SyntaxError: expected {<EOF>, PIPE, AND, COMMA, OR, PLUS, MINUS, ASTERISK, SLASH, PERCENT} but found "by"',
+        'STATS BY does not support function percentile',
       ]
     );
 
@@ -1168,22 +1166,40 @@ describe('validation logic', () => {
       'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
-
-    testErrorsAndWarnings('from a | stats numberField + 1', ['Stats does not support function +']);
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY numberField % 2',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY numberField % 2, numberField + 1',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, var1 = numberField + 1',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, numberField + 1',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, ipField',
+      []
+    );
+    testErrorsAndWarnings('from a | stats numberField + 1', ['STATS does not support function +']);
 
     testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
-      'Stats does not support function +',
+      'STATS does not support function +',
     ]);
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
-      ['Stats does not support function +']
+      ['STATS does not support function +']
     );
-
-    testErrorsAndWarnings('from a | stats avg(numberField) by avg(numberField)', [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, DOT} but found "("',
-      'Unknown column [avg]',
-    ]);
 
     testErrorsAndWarnings('from a | stats count(*)', []);
     testErrorsAndWarnings('from a | stats count()', []);
@@ -1436,7 +1452,7 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
     testErrorsAndWarnings('from a | enrich my-pol*', [
-      'Using wildcards (*) in enrich is not allowed [my-pol*]',
+      'Using wildcards (*) in ENRICH is not allowed [my-pol*]',
     ]);
   });
 

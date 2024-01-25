@@ -74,11 +74,14 @@ export const isCompatibleFunctionName = (fnName: string, command: string) => {
 
 export const getCompatibleFunctionDefinition = (
   command: string,
+  option: string | undefined,
   returnTypes?: string[],
   ignored: string[] = []
 ): AutocompleteCommandDefinition[] => {
   const fnSupportedByCommand = allFunctions.filter(
-    ({ name, supportedCommands }) => supportedCommands.includes(command) && !ignored.includes(name)
+    ({ name, supportedCommands, supportedOptions }) =>
+      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+      !ignored.includes(name)
   );
   if (!returnTypes) {
     return fnSupportedByCommand.map(getAutocompleteFunctionDefinition);
