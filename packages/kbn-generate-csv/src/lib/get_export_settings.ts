@@ -86,15 +86,23 @@ export const getExportSettings = async (
           return config.scroll.duration;
         }
 
+        if (!retryAt) {
+          throw new Error(
+            'config "xpack.reporting.csv.scroll.duration" of "auto" mandates that the task instance field passed specifies a retryAt value'
+          );
+        }
+
         const now = new Date(Date.now()).getTime();
-        const timeTillRetry = new Date(retryAt!).getTime();
+        const timeTillRetry = new Date(retryAt).getTime();
 
         if (now > timeTillRetry) {
           return `0${format}`;
         }
 
         const _duration = timeTillRetry - now;
-        return format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
+        const result = format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
+        logger.debug(`using timeout duration of ${result}`);
+        return result;
       },
     },
     bom,

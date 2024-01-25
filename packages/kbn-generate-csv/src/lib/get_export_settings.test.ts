@@ -152,6 +152,27 @@ describe('getExportSettings', () => {
       expect(scroll.duration(mockedTaskInstanceFields)).toBe(config.scroll.duration);
     });
 
+    it('throws when the scroll duration config is auto and retryAt value of the taskInstanceField passed is falsy', async () => {
+      const configWithScrollAutoDuration = {
+        ...config,
+        scroll: {
+          ...config.scroll,
+          duration: 'auto',
+        },
+      };
+
+      const { scroll } = await getExportSettings(
+        uiSettingsClient,
+        configWithScrollAutoDuration,
+        '',
+        logger
+      );
+
+      expect(
+        scroll.duration.bind(null, { startedAt: new Date(Date.now()), retryAt: null })
+      ).toThrow();
+    });
+
     it('returns a value that is the difference of the current time from the value of retryAt provided in the passed taskInstanceFields', async () => {
       const configWithScrollAutoDuration = {
         ...config,
