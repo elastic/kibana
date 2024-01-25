@@ -38,8 +38,17 @@ export function addSyntheticsScreenshotRasterLayer(
       paint: {
         'raster-opacity': 1,
       },
-      maxzoom: 18,
     },
     CLICKS_LAYER_ID
   );
+}
+
+// Remove the synthetics screenshot raster layer if it exists
+export function removeSyntheticsScreenshotRasterLayer(map: MLMap) {
+  if (map.getLayer(SYNTHETICS_LAYER_ID)) {
+    map.removeLayer(SYNTHETICS_LAYER_ID);
+  }
+  if (map.getSource(SYNTHETICS_SOURCE_ID)) {
+    map.removeSource(SYNTHETICS_SOURCE_ID);
+  }
 }

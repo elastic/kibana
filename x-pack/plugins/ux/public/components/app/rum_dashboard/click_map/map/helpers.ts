@@ -27,12 +27,15 @@ import {
   X_MAX,
   Y_MAX,
   SYNTHETICS_LAYER_ID,
+  MAX_BOUNDS_EXTENDED,
 } from './constants';
 
 export function paintMapWithBackgroundColor(
   map: MLMap,
   color: string = 'white'
 ) {
+  map.setPaintProperty('background', 'background-color', 'white');
+
   // Add a polygon layer with white background
 
   map.addSource(BACKGROUND_SOURCE_ID, {
@@ -43,11 +46,11 @@ export function paintMapWithBackgroundColor(
         type: 'Polygon',
         coordinates: [
           [
-            [X_MIN, Y_MIN],
-            [X_MAX, Y_MIN],
-            [X_MAX, Y_MAX],
-            [X_MIN, Y_MAX],
-            [X_MIN, Y_MIN],
+            [MAX_BOUNDS_EXTENDED[0], MAX_BOUNDS_EXTENDED[1]],
+            [MAX_BOUNDS_EXTENDED[2], MAX_BOUNDS_EXTENDED[1]],
+            [MAX_BOUNDS_EXTENDED[2], MAX_BOUNDS_EXTENDED[3]],
+            [MAX_BOUNDS_EXTENDED[0], MAX_BOUNDS_EXTENDED[3]],
+            [MAX_BOUNDS_EXTENDED[0], MAX_BOUNDS_EXTENDED[1]],
           ],
         ],
       },
@@ -201,8 +204,8 @@ export function projectPixelCoordsToViewportSize(
 
   // Note that y is not being translated here as a shorter viewport height doesn't mean the image is shrunk
   // For viewport responsiveness, only width is translated
-  return coordinates?.map(({ x, y }) => ({
-    x: x * translateFactorX,
+  return coordinates.map(({ x, y }) => ({
+    x: x * translateFactorX - (captureWidth - viewportWidth) / 4,
     y,
   }));
 }

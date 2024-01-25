@@ -12,16 +12,18 @@ import styled from 'styled-components';
 import { MapEmbeddable, MapEmbeddableInput } from '@kbn/maps-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '@kbn/maps-plugin/common';
 import { ErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { addSyntheticsScreenshotRasterLayer } from './synthetics_raster_layer';
-import { addClicksFeatureLayer } from './clicks_feature_layer';
+import {
+  addSyntheticsScreenshotRasterLayer,
+  removeSyntheticsScreenshotRasterLayer,
+} from './synthetics_raster_layer';
+import {
+  addClicksFeatureLayer,
+  removeClicksFeatureLayer,
+} from './clicks_feature_layer';
 import { MLMap, paintMapWithBackgroundColor } from './helpers';
 import { useKibanaServices } from '../../../../../hooks/use_kibana_services';
 
-import {
-  MAX_BOUNDS_MIN,
-  MAX_BOUNDS_MAX,
-  MAX_BOUNDS_EXTENDED,
-} from './constants';
+import { MAX_BOUNDS_EXTENDED } from './constants';
 
 const EmbeddedPanel = styled.div`
   z-index: auto;
@@ -94,6 +96,14 @@ export function EmbeddedMapComponent({
     hideFilterActions: true,
   };
 
+  const destroyMap = () => {
+    if (mapRef.current) {
+      mapRef.current?.remove();
+      // @ts-ignore
+      mapRef.current = null;
+    }
+  };
+
   useEffect(() => {
     async function setupEmbeddable() {
       if (!factory) {
@@ -125,6 +135,7 @@ export function EmbeddedMapComponent({
       viewportWidth &&
       imageUrl
     ) {
+      destroyMap();
       const map = new MLMap({
         container: embeddableRoot.current,
         style:
@@ -136,9 +147,9 @@ export function EmbeddedMapComponent({
       // @ts-ignore
       mapRef.current = map;
 
-      map.fitBounds([MAX_BOUNDS_MIN, MAX_BOUNDS_MAX]);
-
       map.on('load', () => {
+        // map.fitBounds(MAX_BOUNDS, { padding: 20 });
+        removeClicksFeatureLayer(map);
         addClicksFeatureLayer(
           map,
           captureWidth,
@@ -147,6 +158,7 @@ export function EmbeddedMapComponent({
           viewportHeight,
           clickCoordinates
         );
+        removeSyntheticsScreenshotRasterLayer(map);
         addSyntheticsScreenshotRasterLayer(
           map,
           viewportWidth,
@@ -170,16 +182,12 @@ export function EmbeddedMapComponent({
   useEffect(() => {
     // Destroy map if component get removed from DOM
     return () => {
-      if (mapRef.current) {
-        mapRef.current?.remove();
-        // @ts-ignore
-        mapRef.current = null;
-      }
+      destroyMap();
     };
   }, []);
 
   return (
-    <div style={{ height: 400, width: '100%' }}>
+    <div style={{ height: 400, width }}>
       <EmbeddedPanel>
         <div
           data-test-subj="xpack.ux.regionMap.embeddedPanel"

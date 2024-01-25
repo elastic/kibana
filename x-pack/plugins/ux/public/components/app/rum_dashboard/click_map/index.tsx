@@ -63,6 +63,7 @@ export function ClickMap() {
         css={{ alignItems: 'center', justifyContent: 'center', minHeight: 520 }}
       >
         <ImageMap
+          width={812}
           height={520}
           imageUrl={imageState.url}
           clickCoordinates={clickData.clickCoordinates}

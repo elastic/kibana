@@ -37,9 +37,18 @@ export function addClicksFeatureLayer(
     id: CLICKS_LAYER_ID,
     type: 'heatmap',
     source: CLICKS_SOURCE_ID,
-    maxzoom: 24,
     paint: pointStyle2,
   });
+}
+
+// Remove the clicks feature layer if it exists
+export function removeClicksFeatureLayer(map: MLMap) {
+  if (map.getLayer(CLICKS_LAYER_ID)) {
+    map.removeLayer(CLICKS_LAYER_ID);
+  }
+  if (map.getSource(CLICKS_SOURCE_ID)) {
+    map.removeSource(CLICKS_SOURCE_ID);
+  }
 }
 
 const pointStyle1 = {
@@ -84,9 +93,9 @@ const pointStyle2 = {
     0,
     'rgba(50, 50, 255, 0)',
     0.2,
-    'rgb(0, 204, 255)',
+    'rgb(7,43,63)',
     0.4,
-    'rgb(128, 255, 128)',
+    'rgb(24,87,171)',
     0.6,
     'rgb(255, 255, 102)',
     0.8,
@@ -101,7 +110,7 @@ const pointStyle2 = {
     0,
     1,
     9,
-    30, // Adjust the maximum radius based on your preference
+    70, // Adjust the maximum radius based on your preference
   ],
-  'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 1, 9, 0],
+  'heatmap-opacity': ['interpolate', ['linear'], ['zoom'], 7, 0.7, 9, 0],
 } as MLHeatmapLayerSpecification['paint'];
