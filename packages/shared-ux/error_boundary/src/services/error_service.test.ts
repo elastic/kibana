@@ -20,7 +20,7 @@ describe('KibanaErrorBoundary Error Service', () => {
 
   it('decorates fatal error object', () => {
     const testFatal = new Error('This is an unrecognized and fatal error');
-    const serviceError = service.registerError(testFatal, {});
+    const serviceError = service.registerError(testFatal, { componentStack: '' });
 
     expect(serviceError.isFatal).toBe(true);
   });
@@ -28,7 +28,7 @@ describe('KibanaErrorBoundary Error Service', () => {
   it('decorates recoverable error object', () => {
     const testRecoverable = new Error('Could not load chunk blah blah');
     testRecoverable.name = 'ChunkLoadError';
-    const serviceError = service.registerError(testRecoverable, {});
+    const serviceError = service.registerError(testRecoverable, { componentStack: '' });
 
     expect(serviceError.isFatal).toBe(false);
   });
