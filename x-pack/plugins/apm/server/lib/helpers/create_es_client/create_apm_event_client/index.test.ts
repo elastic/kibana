@@ -8,6 +8,7 @@ import { setTimeout as setTimeoutPromise } from 'timers/promises';
 import {
   contextServiceMock,
   executionContextServiceMock,
+  injectionServiceMock,
 } from '@kbn/core/server/mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
@@ -69,7 +70,9 @@ describe('APMEventClient', () => {
       }
     );
 
-    await server.start();
+    await server.start({
+      injection: injectionServiceMock.createInternalStartContract(),
+    });
 
     expect(abortSignal?.aborted).toBeFalsy();
 

@@ -16,6 +16,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 const defaultCoreId = Symbol('core');
 
@@ -39,6 +40,7 @@ function createCoreServerRequestHandlerContextMock() {
     },
   };
 }
+
 export const setupServer = async (coreId: symbol = defaultCoreId) => {
   const coreContext = createCoreContext({ coreId });
   const contextService = new ContextService(coreContext);
@@ -55,9 +57,14 @@ export const setupServer = async (coreId: symbol = defaultCoreId) => {
     return handlerContext;
   });
 
+  const startDeps = {
+    injection: injectionServiceMock.createInternalStartContract(),
+  };
+
   return {
     server,
     httpSetup,
     handlerContext,
+    startDeps,
   };
 };

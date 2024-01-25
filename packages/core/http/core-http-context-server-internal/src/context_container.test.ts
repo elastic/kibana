@@ -122,7 +122,7 @@ describe('ContextContainer', () => {
     const resolveAllContexts = async (ctx: Record<string, any>): Promise<unknown> => {
       const resolved = {} as Record<string, any>;
       for (const key of Object.getOwnPropertyNames(ctx)) {
-        if (key === 'resolve') {
+        if (key === 'resolve' || key === '_source') {
           continue;
         }
         resolved[key] = await ctx[key];
@@ -622,7 +622,7 @@ describe('ContextContainer', () => {
       const response = createKibanaResponseFactory();
       await handler1(request, response);
       expect(rawHandler1).toHaveBeenCalledWith(
-        { resolve: expect.any(Function) },
+        { resolve: expect.any(Function), _source: pluginA },
         request,
         response
       );

@@ -26,7 +26,6 @@ export const registerGetAllowedTypesRoute = (router: IRouter) => {
       validate: false,
     },
     async (context, req, res) => {
-
       // access a request-scoped service
       const { injection } = await context.core;
       const myRequestService = injection.container.get(myExampleRequestHandlerId);

@@ -45,6 +45,7 @@ export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+export { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export type {
   ElasticsearchClientMock,
