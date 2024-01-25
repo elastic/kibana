@@ -76,7 +76,7 @@ describe('ES|QL query generation', () => {
       it('top 10 unique domains', async () => {
         await evaluateEsqlQuery({
           question:
-            'For standard Elastic ECS compliant packetbeat data view, shows the top 10 unique destination.domain by doc count',
+            'For standard Elastic ECS compliant packetbeat data view, shows the top 10 unique destination.domain with more docs',
           expected: `FROM packetbeat-*
           | STATS doc_count = COUNT(destination.domain) BY destination.domain
           | SORT doc_count DESC
@@ -240,7 +240,7 @@ describe('ES|QL query generation', () => {
     it('metrics avg duration', async () => {
       await evaluateEsqlQuery({
         question:
-          'I want to see for metrics-apm*, filtering on metricset.name:service_transaction and metricset.interval:1m, the average duration (via transaction.duration.histogram), in 50 buckets.',
+          'Execute a query for metrics-apm*, filtering on metricset.name:service_transaction and metricset.interval:1m, the average duration (via transaction.duration.histogram), in 50 buckets.',
         execute: true,
         criteria: [
           'The assistant know that transaction.duration.histogram cannot be used in ESQL and proposes an alertative solution',
