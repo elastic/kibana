@@ -49,6 +49,7 @@ export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 export { securityServiceMock } from '@kbn/core-security-server-mocks';
 export { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
+export { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export type {
   ElasticsearchClientMock,

@@ -33,12 +33,13 @@ const expectedResults = (...ids: string[]) => ids.map((id) => expect.objectConta
 describe('POST /internal/global_search/find', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let globalSearchHandlerContext: ReturnType<
     typeof globalSearchPluginMock.createRouteHandlerContext
   >;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(pluginId));
+    ({ server, httpSetup, startDeps } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
     httpSetup.registerRouteHandlerContext<
@@ -50,7 +51,7 @@ describe('POST /internal/global_search/find', () => {
 
     registerInternalFindRoute(router);
 
-    await server.start();
+    await server.start(startDeps);
   });
 
   afterEach(async () => {

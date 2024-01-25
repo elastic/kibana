@@ -5,7 +5,11 @@
  * 2.0.
  */
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
-import { contextServiceMock, executionContextServiceMock } from '@kbn/core/server/mocks';
+import {
+  contextServiceMock,
+  executionContextServiceMock,
+  injectionServiceMock,
+} from '@kbn/core/server/mocks';
 import { createHttpService } from '@kbn/core-http-server-mocks';
 import supertest from 'supertest';
 import { APMEventClient } from '.';
@@ -58,7 +62,9 @@ describe('APMEventClient', () => {
       return res.ok({ body: 'ok' });
     });
 
-    await server.start();
+    await server.start({
+      injection: injectionServiceMock.createInternalStartContract(),
+    });
 
     expect(abortSignal?.aborted).toBeFalsy();
 
