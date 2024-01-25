@@ -23,9 +23,9 @@
     tunnel "^0.0.6"
 
 "@adobe/css-tools@^4.0.1":
-  version "4.3.1"
-  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.1.tgz#abfccb8ca78075a2b6187345c26243c1a0842f28"
-  integrity sha512-/62yikz7NLScCGAAST5SHdnjaDJQBDq0M2muyRTpf2VQhw6StBg2ALiu73zSJQ4fMVLA+0uBhBHAle7Wg+2kSg==
+  version "4.3.2"
+  resolved "https://registry.yarnpkg.com/@adobe/css-tools/-/css-tools-4.3.2.tgz#a6abc715fb6884851fca9dad37fc34739a04fd11"
+  integrity sha512-DA5a1C0gD/pLOvhv33YMrbf2FK3oUzwNl9oOJqE4XVjuEtt6XIakRcsd7eLiOSPkp1kTRQGICTA8cKra/vFbjw==
 
 "@ampproject/remapping@^2.2.0":
   version "2.2.0"
@@ -1740,10 +1740,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@92.0.0-backport.0":
-  version "92.0.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.0.0-backport.0.tgz#201757bef89141dad6f8f719976fa2a0b52be86a"
-  integrity sha512-ZliSke0YehCbCuHvYkY0BIMg32QeqTMZy+qgGYsh+Bp0UZ4CZn9j5e7LWavfal3+t8HMFCHTk0RUFFXrcepplA==
+"@elastic/eui@92.1.1":
+  version "92.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.1.1.tgz#f5713bfa12733a2c62df365e37f7983a7c08411e"
+  integrity sha512-kjUP+IewVcoJ59e84lHwtdy5OvGNSmlHvzn5uUmGTKnBGOxoYv5K9pyGujVWpxSCG9MNr3anMsNE7EX6usj37A==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -2304,6 +2304,11 @@
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/@exodus/schemasafe/-/schemasafe-1.3.0.tgz#731656abe21e8e769a7f70a4d833e6312fe59b7f"
   integrity sha512-5Aap/GaRupgNx/feGBwLLTVv8OQFfv3pq2lPRzPg9R+IOBnDgghTGW7l7EuVXOvg5cc/xSAlRW8rBrjIC3Nvqw==
+
+"@faker-js/faker@^8.3.1":
+  version "8.3.1"
+  resolved "https://registry.yarnpkg.com/@faker-js/faker/-/faker-8.3.1.tgz#7753df0cb88d7649becf984a96dd1bd0a26f43e3"
+  integrity sha512-FdgpFxY6V6rLZE9mmIBb9hM0xpfvQOSNOLnzolzKwsE1DH+gC7lEKV1p1IbR0lAYyvYd5a4u3qWJzowUkw1bIw==
 
 "@fastify/busboy@^2.0.0":
   version "2.0.0"
@@ -4308,6 +4313,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-forge@link:x-pack/packages/kbn-data-forge":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-plugin@link:src/plugins/data":
   version "0.0.0"
   uid ""
@@ -4317,6 +4326,10 @@
   uid ""
 
 "@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
   version "0.0.0"
   uid ""
 
@@ -5053,6 +5066,10 @@
   uid ""
 
 "@kbn/logstash-plugin@link:x-pack/plugins/logstash":
+  version "0.0.0"
+  uid ""
+
+"@kbn/managed-content-badge@link:packages/kbn-managed-content-badge":
   version "0.0.0"
   uid ""
 
@@ -6125,6 +6142,10 @@
   uid ""
 
 "@kbn/sort-package-json@link:packages/kbn-sort-package-json":
+  version "0.0.0"
+  uid ""
+
+"@kbn/sort-predicates@link:packages/kbn-sort-predicates":
   version "0.0.0"
   uid ""
 
@@ -25321,11 +25342,6 @@ public-encrypt@^4.0.0:
     create-hash "^1.1.0"
     parse-asn1 "^5.0.0"
     randombytes "^2.0.1"
-
-puid@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
-  integrity sha1-+mOKc317IEGQWdk5Za7TbKIOHIQ=
 
 pump@^2.0.0:
   version "2.0.1"
