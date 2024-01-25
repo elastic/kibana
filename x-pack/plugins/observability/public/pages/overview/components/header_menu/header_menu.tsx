@@ -12,6 +12,8 @@ import React from 'react';
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
+import { useLocation } from 'react-router';
+
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 
 export function HeaderMenu(): React.ReactElement | null {
@@ -25,19 +27,26 @@ export function HeaderMenu(): React.ReactElement | null {
     appMountParameters: { setHeaderActionMenu },
   } = usePluginContext();
 
+  const { pathname } = useLocation();
+  const path = pathname.split('/').slice(1)[0];
+  const isSloRelatedPath = path === 'slos';
+
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
       <EuiHeaderLinks>
-        <EuiHeaderLink
-          data-test-subj="sloFeedbackButton"
-          color="warning"
-          href={SLO_FEEDBACK_LINK}
-          iconType="popout"
-        >
-          {i18n.translate('xpack.observability.slo.giveFeedback', {
-            defaultMessage: 'Give feedback',
-          })}
-        </EuiHeaderLink>
+        {isSloRelatedPath ? (
+          <EuiHeaderLink
+            data-test-subj="sloFeedbackButton"
+            color="warning"
+            href={SLO_FEEDBACK_LINK}
+            iconType="popout"
+            target="_blank"
+          >
+            {i18n.translate('xpack.observability.slo.giveFeedback', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiHeaderLink>
+        ) : null}
         <EuiHeaderLink
           color="primary"
           href={http.basePath.prepend('/app/integrations/browse')}
