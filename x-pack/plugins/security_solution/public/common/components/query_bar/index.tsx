@@ -126,8 +126,14 @@ export const QueryBar = memo<QueryBarComponentProps>(
         setDataView(indexPattern);
       } else if (!isEsql) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ title: indexPattern.title });
+          dv = await data.dataViews.create({ id: indexPattern.title, title: indexPattern.title });
           setDataView(dv);
+
+          /**
+           * We update filters and set new data view id to make sure that SearchBar does not show data view picker
+           * More details in https://github.com/elastic/kibana/issues/174026
+           */
+          filters.forEach((filter) => (filter.meta.index = indexPattern.title));
         };
         createDataView();
       }
@@ -136,7 +142,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, isEsql]);
+    }, [data.dataViews, filters, indexPattern, isEsql]);
 
     const timeHistory = useMemo(() => new TimeHistory(new Storage(localStorage)), []);
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);

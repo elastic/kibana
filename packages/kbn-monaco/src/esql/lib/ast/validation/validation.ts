@@ -7,7 +7,6 @@
  */
 
 import uniqBy from 'lodash/uniqBy';
-import capitalize from 'lodash/capitalize';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
@@ -22,7 +21,6 @@ import {
   getCommandDefinition,
   getFunctionDefinition,
   isArrayType,
-  isAssignment,
   isColumnItem,
   isEqualType,
   isFunctionItem,
@@ -223,6 +221,7 @@ function validateFunctionColumnArg(
 function validateFunction(
   astFunction: ESQLFunction,
   parentCommand: string,
+  parentOption: string | undefined,
   references: ReferenceMaps
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
@@ -231,7 +230,7 @@ function validateFunction(
     return messages;
   }
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand);
+  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -247,11 +246,21 @@ function validateFunction(
     }
     if (isFnSupported.reason === 'unsupportedFunction') {
       messages.push(
-        getMessageFromId({
-          messageId: 'unsupportedFunction',
-          values: { name: astFunction.name, command: capitalize(parentCommand) },
-          locations: astFunction.location,
-        })
+        parentOption
+          ? getMessageFromId({
+              messageId: 'unsupportedFunctionForCommandOption',
+              values: {
+                name: astFunction.name,
+                command: parentCommand.toUpperCase(),
+                option: parentOption.toUpperCase(),
+              },
+              locations: astFunction.location,
+            })
+          : getMessageFromId({
+              messageId: 'unsupportedFunctionForCommand',
+              values: { name: astFunction.name, command: parentCommand.toUpperCase() },
+              locations: astFunction.location,
+            })
       );
     }
     return messages;
@@ -288,7 +297,7 @@ function validateFunction(
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(...validateFunction(subArg, parentCommand, references));
+        messages.push(...validateFunction(subArg, parentCommand, parentOption, references));
       }
     }
   }
@@ -447,7 +456,7 @@ function validateOption(
     messages.push(
       getMessageFromId({
         messageId: 'unknownOption',
-        values: { command: command.name, option: option.name },
+        values: { command: command.name.toUpperCase(), option: option.name },
         locations: option.location,
       })
     );
@@ -455,7 +464,7 @@ function validateOption(
   }
   // use dedicate validate fn if provided
   if (optionDef.validate) {
-    messages.push(...optionDef.validate(option));
+    messages.push(...optionDef.validate(option, command));
   }
   if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg, index) => {
@@ -500,8 +509,8 @@ function validateOption(
           if (isColumnItem(arg)) {
             messages.push(...validateColumnForCommand(arg, command.name, referenceMaps));
           }
-          if (isFunctionItem(arg) && isAssignment(arg)) {
-            messages.push(...validateFunction(arg, command.name, referenceMaps));
+          if (isFunctionItem(arg)) {
+            messages.push(...validateFunction(arg, command.name, option.name, referenceMaps));
           }
         }
       }
@@ -545,7 +554,7 @@ function validateSource(
         messages.push(
           getMessageFromId({
             messageId: 'wildcardNotSupportedForCommand',
-            values: { command: commandName, value: source.name },
+            values: { command: commandName.toUpperCase(), value: source.name },
             locations: source.location,
           })
         );
@@ -617,7 +626,7 @@ function validateColumnForCommand(
             getMessageFromId({
               messageId: 'unsupportedColumnTypeForCommand',
               values: {
-                command: capitalize(commandName),
+                command: commandName.toUpperCase(),
                 type: supportedTypes.join(', '),
                 typeCount: supportedTypes.length,
                 givenType: columnRef.type,
@@ -636,7 +645,7 @@ function validateColumnForCommand(
           getMessageFromId({
             messageId: 'wildcardNotSupportedForCommand',
             values: {
-              command: commandName,
+              command: commandName.toUpperCase(),
               value: nameHit,
             },
             locations: column.location,
@@ -677,7 +686,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
     const wrappedArg = Array.isArray(commandArg) ? commandArg : [commandArg];
     for (const arg of wrappedArg) {
       if (isFunctionItem(arg)) {
-        messages.push(...validateFunction(arg, command.name, references));
+        messages.push(...validateFunction(arg, command.name, undefined, references));
       }
 
       if (isSettingItem(arg)) {
@@ -707,7 +716,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
             getMessageFromId({
               messageId: 'unknownAggregateFunction',
               values: {
-                command: capitalize(command.name),
+                command: command.name.toUpperCase(),
                 value: (arg as ESQLSingleAstItem).name,
               },
               locations: (arg as ESQLSingleAstItem).location,
@@ -722,7 +731,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
           getMessageFromId({
             messageId: 'unsupportedTypeForCommand',
             values: {
-              command: capitalize(command.name),
+              command: command.name.toUpperCase(),
               type: 'date_period',
               value: arg.name,
             },
