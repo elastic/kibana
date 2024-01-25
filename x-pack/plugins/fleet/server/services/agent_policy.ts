@@ -1033,17 +1033,21 @@ class AgentPolicyService {
       message: `User deleting policy [id=${agentPolicyId}]`,
     });
 
-    await esClient.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      body: {
+    let hasMore = true;
+    while (hasMore) {
+      const res = await esClient.deleteByQuery({
+        index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
+        scroll_size: SO_SEARCH_LIMIT,
+        refresh: true,
         query: {
           term: {
             policy_id: agentPolicyId,
           },
         },
-      },
-    });
+      });
+      hasMore = (res.deleted ?? 0) === SO_SEARCH_LIMIT;
+    }
   }
 
   public async getLatestFleetPolicy(esClient: ElasticsearchClient, agentPolicyId: string) {
