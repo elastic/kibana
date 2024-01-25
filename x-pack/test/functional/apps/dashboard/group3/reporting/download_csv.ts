@@ -201,8 +201,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/hugedata');
       });
 
-      // To be addressed by: https://github.com/elastic/kibana/issues/175171
-      it.skip('Download CSV export of a saved search panel', async () => {
+      it('Download CSV export of a saved search panel', async () => {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 
