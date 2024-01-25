@@ -135,7 +135,7 @@ export function EmbeddedMapComponent({
       viewportWidth &&
       imageUrl
     ) {
-      destroyMap();
+      const oldMap = mapRef.current;
       const map = new MLMap({
         container: embeddableRoot.current,
         style:
@@ -167,6 +167,12 @@ export function EmbeddedMapComponent({
         );
         paintMapWithBackgroundColor(map, 'white');
       });
+
+      oldMap?.remove();
+    }
+
+    if (mapRef.current) {
+      mapRef.current.repaint = true;
     }
   }, [
     embeddable,
