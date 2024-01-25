@@ -279,7 +279,7 @@ describe('helpers', () => {
     }
     toNotHaveProperties.calls = 0;
 
-    const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}']; // KCG
+    const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
     const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
 
     for (const template of nonBlockTemplates) {
