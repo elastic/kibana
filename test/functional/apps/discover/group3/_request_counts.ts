@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES|QL mode-woof and meow', () => {
+    describe('ES|QL mode', () => {
       const type = 'esql';
 
       beforeEach(async () => {
