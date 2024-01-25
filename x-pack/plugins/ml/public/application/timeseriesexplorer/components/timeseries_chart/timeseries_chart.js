@@ -64,6 +64,7 @@ const contextChartLineTopMargin = 3;
 const chartSpacing = 25;
 const swimlaneHeight = 30;
 const ctxAnnotationMargin = 2;
+const popoverMenuOffset = 28;
 const annotationHeight = ANNOTATION_SYMBOL_HEIGHT + ctxAnnotationMargin * 2;
 const margin = { top: 10, right: 10, bottom: 15, left: 40 };
 
@@ -216,7 +217,10 @@ class TimeseriesChartIntl extends Component {
     const highlightFocusChartAnomaly = this.highlightFocusChartAnomaly.bind(this);
     const boundHighlightFocusChartAnnotation = highlightFocusChartAnnotation.bind(this);
     function tableRecordMousenterListener({ record, type = 'anomaly' }) {
-      if (type === 'anomaly') {
+      // do not display tooltips if the action popover is active
+      if (this.state.popoverData !== null) {
+        return;
+      } else if (type === 'anomaly') {
         highlightFocusChartAnomaly(record);
       } else if (type === 'annotation') {
         boundHighlightFocusChartAnnotation(record);
@@ -227,7 +231,7 @@ class TimeseriesChartIntl extends Component {
     const boundUnhighlightFocusChartAnnotation = unhighlightFocusChartAnnotation.bind(this);
     function tableRecordMouseleaveListener({ record, type = 'anomaly' }) {
       if (type === 'anomaly') {
-        unhighlightFocusChartAnomaly(record);
+        unhighlightFocusChartAnomaly();
       } else {
         boundUnhighlightFocusChartAnnotation(record);
       }
@@ -787,19 +791,39 @@ class TimeseriesChartIntl extends Component {
       .attr('r', LINE_CHART_ANOMALY_RADIUS)
       .on('click', function (d) {
         const anomalyTime = d.date.getTime();
-        const tableItem = that.props.tableDataAnomalies.find(
-          (d) => d.source.timestamp === anomalyTime
-        );
 
-        const dotRect = this.getBoundingClientRect();
-        const rootRect = that.rootNode.getBoundingClientRect();
-        const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
-        const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - 28;
+        // The table items could be aggregated, so we have to find the item
+        // that has the closest timestamp to the selected anomaly from the chart.
+        const tableItem = that.props.tableDataAnomalies.reduce((closestItem, currentItem) => {
+          const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
+          const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
+          return currentItemDelta < closestItemDelta ? currentItem : closestItem;
+        }, that.props.tableDataAnomalies[0]);
 
-        if (tableItem) that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+        if (tableItem) {
+          // Overwrite the timestamp of the possibly aggregated table item with the
+          // timestamp of the anomaly clicked in the chart so we're able to pick
+          // the right baseline and deviation time ranges for Log Rate Analysis.
+          tableItem.source.timestamp = anomalyTime;
+
+          // Calculate the relative coordinates of the clicked anomaly marker
+          // so we're able to position the popover actions menu above it.
+          const dotRect = this.getBoundingClientRect();
+          const rootRect = that.rootNode.getBoundingClientRect();
+          const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+          const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
+
+          // Hide any active tooltip
+          that.props.tooltipService.hide();
+          // Set the popover state to enable the actions menu
+          that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+        }
       })
       .on('mouseover', function (d) {
-        showFocusChartTooltip(d, this);
+        // Show the tooltip only if the actions menu isn't active
+        if (that.state.popoverData === null) {
+          showFocusChartTooltip(d, this);
+        }
       })
       .on('mouseout', () => this.props.tooltipService.hide());
 
