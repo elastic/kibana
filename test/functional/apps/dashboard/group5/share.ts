@@ -60,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         expect(await getSharedUrl(mode)).to.not.contain('filters');
-        await PageObjects.share.closeShareModal();
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
@@ -120,11 +119,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.unsetTime();
-    });
-    afterEach(async () => {
-      if (await PageObjects.share.isShareModalOpen()) {
-        await PageObjects.share.closeShareModal();
-      }
     });
 
     describe('snapshot share', async () => {
