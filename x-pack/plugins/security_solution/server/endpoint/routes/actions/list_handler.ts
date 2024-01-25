@@ -12,6 +12,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import { getActionList, getActionListByStatus } from '../../services';
@@ -54,7 +55,7 @@ export const actionListHandler = (
     const {
       query: {
         agentIds: elasticAgentIds,
-        agentTypes,
+        agentTypes: _agentTypes,
         page,
         pageSize,
         startDate,
@@ -79,8 +80,21 @@ export const actionListHandler = (
         return res.notFound({ body: 'index_not_found_exception' });
       }
 
+      // verify feature flag for sentinel_one `aaentType`
+      const agentTypes = formatAgentTypeValues(_agentTypes);
+      if (
+        !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
+        agentTypes?.includes('sentinel_one')
+      ) {
+        return errorHandler(
+          logger,
+          res,
+          new CustomHttpRequestError('[request body.agentTypes]: sentinel_one is disabled', 400)
+        );
+      }
+
       const requestParams = {
-        agentTypes: formatAgentTypeValues(agentTypes),
+        agentTypes,
         withOutputs: formatStringIds(withOutputs),
         types: formatStringIds(types),
         commands: formatCommandValues(commands),
