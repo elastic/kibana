@@ -21,7 +21,9 @@ import { scrollAlertTableColumnIntoView, waitForAlerts } from '../alerts';
  */
 export const expandFirstAlertHostFlyout = () => {
   waitForAlerts();
-  cy.get(OPEN_HOST_FLYOUT_BUTTON).first().click();
+  // Cypress is flaky on clicking this button despite production not having that issue
+  // eslint-disable-next-line cypress/no-force
+  cy.get(OPEN_HOST_FLYOUT_BUTTON).first().click({ force: true });
 };
 
 /**
