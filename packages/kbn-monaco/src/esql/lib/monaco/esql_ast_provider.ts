@@ -15,7 +15,7 @@ import { getHoverItem } from '../ast/hover';
 import { getSignatureHelp } from '../ast/signature';
 import type { ESQLMessage } from '../ast/types';
 import { validateAst } from '../ast/validation/validation';
-import { getActions } from '../ast/codeActions';
+import { getActions } from '../ast/code_actions';
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
