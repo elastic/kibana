@@ -8,7 +8,7 @@
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -67,16 +67,17 @@ export default function AlertDetailsAppSection({
   const { hasAtLeast } = useLicense();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
+  const [filterQuery, setFilterQuery] = useState<string>('');
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
+  const groups = alert.fields[ALERT_GROUP];
+  const tags = alert.fields[TAGS];
 
   useEffect(() => {
-    const groups = alert.fields[ALERT_GROUP];
-    const tags = alert.fields[TAGS];
     const alertSummaryFields = [];
     if (groups) {
       alertSummaryFields.push({
@@ -115,16 +116,20 @@ export default function AlertDetailsAppSection({
     });
 
     setAlertSummaryFields(alertSummaryFields);
-  }, [alert, rule, ruleLink, setAlertSummaryFields]);
+  }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
-  const filterQuery = useMemo<string>(() => {
-    let query = `(${(ruleParams.searchConfiguration?.query as Query)?.query as string})`;
-    const groups = alert.fields[ALERT_GROUP] as Array<{ field: string; value: string }>;
-    groups.forEach(({ field, value }) => {
-      query += ` and ${field}: ${value}`;
-    });
-    return query;
-  }, [ruleParams.searchConfiguration, alert.fields]);
+  useEffect(() => {
+    let query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
+    if (query) {
+      query = `(${query})`;
+    }
+    if (groups) {
+      groups?.forEach(({ field, value }) => {
+        query += ` and ${field}: ${value}`;
+      });
+    }
+    setFilterQuery(query);
+  }, [groups, ruleParams.searchConfiguration]);
 
   useEffect(() => {
     const initDataView = async () => {
