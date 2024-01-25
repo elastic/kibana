@@ -97,7 +97,7 @@ const normalizeRule = (originalRule: RuleResponse): RuleResponse => {
   /*
     The "machine_learning_job_id" property is converted from the legacy string format 
     to the new array format during installation and upgrade. Thus, all installed rules 
-    use the new format. For correct comparison, we must ensure that the new rule is 
+    use the new format. For correct comparison, we must ensure that the rule update is 
     also in the new format before showing the diff.
   */
   if ('machine_learning_job_id' in rule) {
