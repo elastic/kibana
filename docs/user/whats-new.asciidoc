@@ -149,6 +149,7 @@ The supported hash functions for case files are MD5, SHA-1, and SHA-256.
 
 [discrete]
 ==== Connector improvements
+
 PagerDuty alert action is now supported by 2 new fields `links` and `custom_details`. 
 ServiceNow ITSM alert action allows users to define incident resolution when alert is recovered to ensure bi-directional sync between the Elastic Alerts and ServiceNow Incidents. 
 

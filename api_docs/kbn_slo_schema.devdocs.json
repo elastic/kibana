@@ -765,7 +765,7 @@
         "label": "FindSLOParams",
         "description": [],
         "signature": [
-          "{ kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
+          "{ filters?: string | undefined; kqlQuery?: string | undefined; page?: string | undefined; perPage?: string | undefined; sortBy?: \"status\" | \"error_budget_consumed\" | \"error_budget_remaining\" | \"sli_value\" | undefined; sortDirection?: \"asc\" | \"desc\" | undefined; }"
         ],
         "path": "x-pack/packages/kbn-slo-schema/src/rest_specs/slo.ts",
         "deprecated": false,
@@ -2599,7 +2599,9 @@
           "PartialC",
           "<{ query: ",
           "PartialC",
-          "<{ kqlQuery: ",
+          "<{ filters: ",
+          "StringC",
+          "; kqlQuery: ",
           "StringC",
           "; page: ",
           "StringC",
