@@ -20,7 +20,7 @@ import type { Store } from 'redux';
 let store: Store;
 const storage = createSecuritySolutionStorageMock().storage;
 
-describe('UsersAssetTable EpicStorage', () => {
+describe('UsersAssetTable localStorage middleware', () => {
   beforeEach(() => {
     storage.clear();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);

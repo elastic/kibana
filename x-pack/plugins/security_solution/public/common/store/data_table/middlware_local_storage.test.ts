@@ -36,7 +36,7 @@ jest.mock('../../../timelines/containers/local_storage');
 
 const addTableInStorageMock = addTableInStorage as jest.Mock;
 
-describe('epicLocalStorage', () => {
+describe('DataTable localStorage middleware', () => {
   const state: State = mockGlobalState;
   const { storage } = createSecuritySolutionStorageMock();
   let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
