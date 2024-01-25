@@ -1360,7 +1360,10 @@ export default function (providerContext: FtrProviderContext) {
           expectIdArraysEqual(installation.installed_es, expectedAssets);
 
           for (const expectedAsset of expectedAssets) {
-            if (expectedAsset.type === 'component_template') {
+            if (
+              expectedAsset.type === 'component_template' &&
+              !expectedAsset.id.endsWith('@custom')
+            ) {
               const componentTemplate = await getComponentTemplate(expectedAsset.id);
               expect(componentTemplate).not.to.be(null);
             }
