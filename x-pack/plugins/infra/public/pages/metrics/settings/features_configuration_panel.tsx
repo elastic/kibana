@@ -10,9 +10,13 @@ import { EuiSpacer } from '@elastic/eui';
 import { EuiForm } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
+import {
+  enableInfrastructureHostsView,
+  enableInfrastructureProfilingIntegration,
+} from '@kbn/observability-plugin/common';
 import { useEditableSettings } from '@kbn/observability-shared-plugin/public';
 import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 type Props = Pick<
@@ -31,6 +35,7 @@ export function FeaturesConfigurationPanel({
   const {
     services: { docLinks, notifications },
   } = useKibanaContextForPlugin();
+  const { featureFlags } = usePluginConfig();
 
   return (
     <EuiForm>
@@ -52,6 +57,17 @@ export function FeaturesConfigurationPanel({
         toasts={notifications.toasts}
         unsavedChanges={unsavedChanges[enableInfrastructureHostsView]}
       />
+      {featureFlags.profilingEnabled && (
+        <LazyField
+          key={enableInfrastructureProfilingIntegration}
+          setting={settingsEditableConfig[enableInfrastructureProfilingIntegration]}
+          handleChange={handleFieldChange}
+          enableSaving={!readOnly}
+          docLinks={docLinks.links}
+          toasts={notifications.toasts}
+          unsavedChanges={unsavedChanges[enableInfrastructureProfilingIntegration]}
+        />
+      )}
     </EuiForm>
   );
 }

@@ -57,7 +57,8 @@
     "@kbn/expressions-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/serverless",
-    "@kbn/triggers-actions-ui-types"
+    "@kbn/triggers-actions-ui-types",
+    "@kbn/lens-plugin"
   ],
   "exclude": ["target/**/*"]
 }

@@ -17,6 +17,8 @@ export const apmServiceGroupMaxNumberOfServices =
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
 export const apmLabsButton = 'observability:apmLabsButton';
 export const enableInfrastructureHostsView = 'observability:enableInfrastructureHostsView';
+export const enableInfrastructureProfilingIntegration =
+  'observability:enableInfrastructureProfilingIntegration';
 export const enableAwsLambdaMetrics = 'observability:enableAwsLambdaMetrics';
 export const enableAgentExplorerView = 'observability:apmAgentExplorerView';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';

@@ -10,11 +10,11 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
+import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
-import { Builder, logging } from 'selenium-webdriver';
+import { Builder, logging, WebDriver } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
 import firefox from 'selenium-webdriver/firefox';
 import edge from 'selenium-webdriver/edge';
@@ -25,7 +25,7 @@ import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { pollForLogEntry$ } from './poll_for_log_entry';
+import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
@@ -139,6 +139,18 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   return options;
 }
 
+function pollForChromiumLogs$(session: WebDriver, logPollingMs: number) {
+  return pollForLogEntry$(session, logging.Type.BROWSER, logPollingMs).pipe(
+    takeWhile(
+      (loggingEntry: logging.Entry) => !loggingEntry.message.startsWith(FINAL_LOG_ENTRY_PREFIX)
+    ),
+    map(({ message, level: { name: level } }) => ({
+      message: message.replace(/\\n/g, '\n'),
+      level,
+    }))
+  );
+}
+
 let attemptCounter = 0;
 let edgePaths: { driverPath: string | undefined; browserPath: string | undefined };
 async function attemptToCreateCommand(
@@ -175,18 +187,7 @@ async function attemptToCreateCommand(
 
         return {
           session,
-          consoleLog$: pollForLogEntry$(
-            session,
-            logging.Type.BROWSER,
-            config.logPollingMs,
-            lifecycle.cleanup.after$
-          ).pipe(
-            takeUntil(lifecycle.cleanup.after$),
-            map(({ message, level: { name: level } }) => ({
-              message: message.replace(/\\n/g, '\n'),
-              level,
-            }))
-          ),
+          consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
         };
       }
 
@@ -203,18 +204,7 @@ async function attemptToCreateCommand(
             .build();
           return {
             session,
-            consoleLog$: pollForLogEntry$(
-              session,
-              logging.Type.BROWSER,
-              config.logPollingMs,
-              lifecycle.cleanup.after$
-            ).pipe(
-              takeUntil(lifecycle.cleanup.after$),
-              map(({ message, level: { name: level } }) => ({
-                message: message.replace(/\\n/g, '\n'),
-                level,
-              }))
-            ),
+            consoleLog$: pollForChromiumLogs$(session, config.logPollingMs),
           };
         } else {
           throw new Error(

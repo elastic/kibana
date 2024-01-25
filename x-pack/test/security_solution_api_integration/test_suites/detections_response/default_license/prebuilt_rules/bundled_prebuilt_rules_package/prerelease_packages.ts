@@ -22,6 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
+  const retry = getService('retry');
 
   /* This test makes use of the mock packages created in the '/fleet_bundled_packages' folder,
   /* in order to assert that, in production environments, the latest stable version of the package
@@ -33,13 +34,13 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA prerelease_packages', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
-      await deleteAllPrebuiltRuleAssets(es);
+      await deleteAllPrebuiltRuleAssets(es, log);
       await deletePrebuiltRulesFleetPackage(supertest);
     });
 
     it('should install latest stable version and ignore prerelease packages', async () => {
       // Verify that status is empty before package installation
-      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusBeforePackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -47,7 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
       // Install package without specifying version to check if latest stable version is installed
       const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
         es,
-        supertest
+        supertest,
+        retry
       );
 
       expect(fleetPackageInstallationResponse.items.length).toBe(1);
@@ -59,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(prebuiltRulesFleetPackage.status).toBe(200);
 
       // Get status of our prebuilt rules (nothing should be instaled yet)
-      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterPackageInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(1); // 1 rule in package 99.0.0
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
@@ -68,7 +70,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await installPrebuiltRules(es, supertest);
 
       // Verify that status is updated after package installation
-      const statusAfterRulesInstallation = await getPrebuiltRulesStatus(supertest);
+      const statusAfterRulesInstallation = await getPrebuiltRulesStatus(es, supertest);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_installed).toBe(1); // 1 rule in package 99.0.0
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusAfterRulesInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);

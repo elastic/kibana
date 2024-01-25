@@ -45,7 +45,7 @@ export function ProfilingLinks({
       <EuiFlexItem grow={false}>
         <EuiLink data-test-subj="infraFlamegraphTestLink" href={PROFILING_FEEDBACK_URL} external>
           {i18n.translate('xpack.infra.flamegraph.profilingFeedbackLink', {
-            defaultMessage: 'Give feedback about profiling',
+            defaultMessage: 'Give feedback',
           })}
         </EuiLink>
       </EuiFlexItem>

@@ -100,6 +100,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           pathname: '/app/discover',
           hash: '/context',
         },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
+        },
       },
       // choose where screenshots should be saved
       screenshots: {

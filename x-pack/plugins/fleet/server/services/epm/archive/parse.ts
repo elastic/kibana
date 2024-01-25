@@ -198,7 +198,11 @@ export function parseAndVerifyArchive(
   topLevelDirOverride?: string
 ): ArchivePackage {
   // The top-level directory must match pkgName-pkgVersion, and no other top-level files or directories may be present
-  const toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
+  let toplevelDir = topLevelDirOverride || '';
+  if (paths.length > 0) {
+    toplevelDir = topLevelDirOverride || paths[0].split('/')[0];
+  }
+
   paths.forEach((filePath) => {
     if (!filePath.startsWith(toplevelDir)) {
       throw new PackageInvalidArchiveError(
