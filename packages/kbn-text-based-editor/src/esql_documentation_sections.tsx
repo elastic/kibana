@@ -1625,13 +1625,13 @@ NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
           defaultMessage: 'MV_FIRST',
         }
       ),
-    description: (
-      <Markdown
-        openLinksInNewTab={true}
-        markdown={i18n.translate(
-          'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirst.markdown',
-          {
-            defaultMessage: `### MV_FIRST
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirst.markdown',
+            {
+              defaultMessage: `### MV_FIRST
 Converts a multivalued field into a single valued field containing the first value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`.
 
 For example:
@@ -1649,8 +1649,8 @@ foo;bar;baz | foo
 
 The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like SPLIT.
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
         />
@@ -1821,7 +1821,7 @@ Returning:
 
 NOTE: The input type can be any number and the output type is the same as the input type.
               `,
-               description:
+              description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
@@ -1835,12 +1835,12 @@ NOTE: The input type can be any number and the output type is the same as the in
           defaultMessage: 'MV_LAST',
         }
       ),
-    description: (
-      <Markdown
-        markdown={i18n.translate(
-          'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLast.markdown',
-          {
-            defaultMessage: `### MV_LAST
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLast.markdown',
+            {
+              defaultMessage: `### MV_LAST
 Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
   
 \`\`\`
@@ -1854,8 +1854,8 @@ Returning:
 foo;bar;baz | baz
 \`\`\`
             `,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
         />
@@ -2384,7 +2384,7 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction',
         {
-          defaultMessage: "TO_CARTESIANSHAPE",
+          defaultMessage: 'TO_CARTESIANSHAPE',
         }
       ),
       description: (
@@ -2408,8 +2408,8 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.
 | EVAL geom = TO_CARTESIANSHAPE(wkt)
 \`\`\`
                         `,
-                        description:
-                        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
         />
@@ -2776,7 +2776,7 @@ Some Text | some text
           )}
         />
       ),
-    },    
+    },
     {
       label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction',
