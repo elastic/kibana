@@ -74,7 +74,7 @@ export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRende
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: string): React.ReactElement => {
+  return (columnId: string, value: string | number): React.ReactElement => {
     switch (columnId) {
       case ALERT_START:
       case ALERT_END:
@@ -95,7 +95,7 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
           latestValue = value;
         } else {
           const resultValue: number[] = value.split(',').map(Number);
-          latestValue = resultValue.at(-1) as number;
+          latestValue = resultValue.at(-1);
         }
         if (latestValue === undefined) {
           return <>-</>;
