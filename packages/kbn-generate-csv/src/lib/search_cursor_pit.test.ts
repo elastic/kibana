@@ -48,25 +48,6 @@ describe('CSV Export Search Cursor', () => {
     expect(openPointInTimeSpy).toBeCalledTimes(1);
   });
 
-  it('can update internal cursor ID', () => {
-    cursor.updateIdFromResults({ pit_id: 'very-typical-point-in-time-id' });
-    expect(cursor.getPagingFieldsForSearchSource()).toMatchObject([
-      'pit',
-      { id: 'very-typical-point-in-time-id', keep_alive: '10m' },
-    ]);
-  });
-
-  it('manages search_after', () => {
-    cursor.setSearchAfter([
-      {
-        _index: 'test-index',
-        _id: 'test-doc-id',
-        sort: ['Wed Jan 17 15:35:47 MST 2024', 42],
-      },
-    ]);
-    expect(cursor.getSearchAfter()).toEqual(['Wed Jan 17 15:35:47 MST 2024', 42]);
-  });
-
   it('supports point-in-time', async () => {
     const searchWithPitSpy = jest
       // @ts-expect-error create spy on private method
@@ -77,5 +58,25 @@ describe('CSV Export Search Cursor', () => {
     const searchSource = createSearchSourceMock();
     await cursor.getPage(searchSource);
     expect(searchWithPitSpy).toBeCalledTimes(1);
+  });
+
+  it('can update internal cursor ID', () => {
+    cursor.updateIdFromResults({ pit_id: 'very-typical-pit-id', hits: { hits: [] } });
+    // @ts-expect-error private field
+    expect(cursor.cursorId).toBe('very-typical-pit-id');
+  });
+
+  it('manages search_after', () => {
+    // @ts-expect-error access private method
+    cursor.setSearchAfter([
+      {
+        _index: 'test-index',
+        _id: 'test-doc-id',
+        sort: ['Wed Jan 17 15:35:47 MST 2024', 42],
+      },
+    ]);
+
+    // @ts-expect-error access private method
+    expect(cursor.getSearchAfter()).toEqual(['Wed Jan 17 15:35:47 MST 2024', 42]);
   });
 });

@@ -289,17 +289,7 @@ export class CsvGenerator {
         if (this.cancellationToken.isCancelled()) {
           break;
         }
-        const pagingFieldsForSearchSource = cursor.getPagingFieldsForSearchSource();
-        if (pagingFieldsForSearchSource) {
-          searchSource.setField(...pagingFieldsForSearchSource); // for pit only
-        }
-
         searchSource.setField('size', settings.scroll.size);
-
-        const searchAfter = cursor.getSearchAfter();
-        if (searchAfter) {
-          searchSource.setField('searchAfter', searchAfter); // for pit only
-        }
 
         let results: estypes.SearchResponse<unknown> | undefined;
         try {
@@ -314,7 +304,7 @@ export class CsvGenerator {
           break;
         }
 
-        const { hits, total } = results.hits;
+        const { total } = results.hits;
         const trackedTotal = total as estypes.SearchTotalHits;
         const currentTotal = trackedTotal?.value ?? total;
 
@@ -325,9 +315,6 @@ export class CsvGenerator {
 
         // use the most recently received cursor id for the next search request
         cursor.updateIdFromResults(results);
-
-        // track the beginning of the next page of search results
-        cursor.setSearchAfter(hits); // for pit only
 
         // check for shard failures, log them and add a warning if found
         const { _shards: shards } = results;
@@ -389,7 +376,7 @@ export class CsvGenerator {
       }
     } finally {
       try {
-        await cursor.closeCursorId();
+        await cursor.closeCursor();
       } catch (err) {
         logger.error(err);
         warnings.push(cursor.getUnableToCloseCursorMessage());

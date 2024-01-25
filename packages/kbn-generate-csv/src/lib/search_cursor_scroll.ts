@@ -105,12 +105,7 @@ export class SearchCursorScroll extends SearchCursor {
     this.cursorId = results._scroll_id ?? this.cursorId;
   }
 
-  public getPagingFieldsForSearchSource() {}
-
-  // Paging with the Scroll API does not use the search_after field
-  public setSearchAfter() {}
-
-  public async closeCursorId() {
+  public async closeCursor() {
     if (this.cursorId) {
       this.logger.debug(`Executing clearScroll on ${this.formatCursorId(this.cursorId)}`);
       await this.clients.es.asCurrentUser.clearScroll({ scroll_id: [this.cursorId] });

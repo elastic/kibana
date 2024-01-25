@@ -41,12 +41,6 @@ describe('CSV Export Search Cursor', () => {
     await cursor.initialize();
   });
 
-  it('can update internal cursor ID', () => {
-    cursor.updateIdFromResults({ _scroll_id: 'not-unusual-scroll-id' });
-    // @ts-expect-error private field
-    expect(cursor.cursorId).toBe('not-unusual-scroll-id');
-  });
-
   it('supports scan/scroll', async () => {
     const scanSpy = jest
       // @ts-expect-error create spy on private method
@@ -57,5 +51,11 @@ describe('CSV Export Search Cursor', () => {
     const searchSource = createSearchSourceMock();
     await cursor.getPage(searchSource);
     expect(scanSpy).toBeCalledTimes(1);
+  });
+
+  it('can update internal cursor ID', () => {
+    cursor.updateIdFromResults({ _scroll_id: 'not-unusual-scroll-id', hits: { hits: [] } });
+    // @ts-expect-error private field
+    expect(cursor.cursorId).toBe('not-unusual-scroll-id');
   });
 });

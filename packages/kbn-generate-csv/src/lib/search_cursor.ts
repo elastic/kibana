@@ -13,7 +13,6 @@ import type {
   IKibanaSearchResponse,
   ISearchClient,
   ISearchSource,
-  SearchSourceFields,
 } from '@kbn/data-plugin/common';
 import type { CsvExportSettings } from './get_export_settings';
 
@@ -29,7 +28,6 @@ export type SearchCursorSettings = Pick<
 
 export abstract class SearchCursor {
   protected cursorId: string | undefined;
-  protected searchAfter: estypes.SortResults | undefined;
 
   constructor(
     protected indexPatternTitle: string,
@@ -45,20 +43,10 @@ export abstract class SearchCursor {
   ): Promise<IEsSearchResponse['rawResponse'] | undefined>;
 
   public abstract updateIdFromResults(
-    results: Pick<estypes.SearchResponse<unknown>, '_scroll_id' | 'pit_id'>
+    results: Pick<estypes.SearchResponse<unknown>, '_scroll_id' | 'pit_id' | 'hits'>
   ): void;
 
-  /**
-   * Returns fields to set into a SearchSource so the correct paging parameters are sent in search requests.
-   */
-  public abstract getPagingFieldsForSearchSource(): [keyof SearchSourceFields, object] | void;
-
-  /**
-   * The searchAfter should be set with a new place to begin the next page of search results.
-   */
-  public abstract setSearchAfter(hits: Array<estypes.SearchHit<unknown>>): void;
-
-  public abstract closeCursorId(): Promise<void>;
+  public abstract closeCursor(): Promise<void>;
 
   public abstract getUnableToCloseCursorMessage(): string;
 
@@ -91,10 +79,6 @@ export abstract class SearchCursor {
       },
     };
     this.logger.debug(`Result details: ${JSON.stringify(logInfo)}`);
-  }
-
-  public getSearchAfter() {
-    return this.searchAfter;
   }
 
   /**
