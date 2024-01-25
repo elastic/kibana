@@ -1824,6 +1824,80 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
+          it('should deduplicate single alerts while suppressing new ones on rule execution', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T05:45:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': firstTimestamp,
+              host: { name: 'host-a' },
+            };
+
+            const doc2 = {
+              ...doc1,
+              '@timestamp': secondTimestamp,
+            };
+
+            await eventsFiller({
+              id,
+              count: eventsCount,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+            // 3 alerts should be suppressed
+            await indexListOfSourceDocuments([doc1, doc2, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              // large look-back time covers all docs
+              from: 'now-1h',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['host.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+            });
+          });
+
           it('should not suppress more than limited number (max_signals x5)', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';

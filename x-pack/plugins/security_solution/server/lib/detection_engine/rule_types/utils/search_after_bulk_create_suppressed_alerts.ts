@@ -180,7 +180,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
           const suppressionDuration = alertSuppression?.duration;
           const suppressionWindow = suppressionDuration
             ? `now-${suppressionDuration.value}${suppressionDuration.unit}`
-            : `now`;
+            : tuple.from.toISOString();
 
           const suppressOnMissingFields =
             (alertSuppression?.missingFieldsStrategy ??
