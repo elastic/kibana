@@ -397,7 +397,10 @@ function isFunctionArgComplete(
   arg: ESQLFunction,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const fnDefinition = getFunctionDefinition(arg.name)!;
+  const fnDefinition = getFunctionDefinition(arg.name);
+  if (!fnDefinition) {
+    return { complete: false };
+  }
   const cleanedArgs = removeMarkerArgFromArgsList(arg)!.args;
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.infiniteParams && cleanedArgs.length > 0) {
@@ -803,7 +806,7 @@ async function getBuiltinFunctionNextArgument(
           // technically another boolean value should be suggested, but it is a better experience
           // to actually suggest a wider set of fields/functions
           [
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
               ? 'any'
               : finalType,
           ],
@@ -1003,7 +1006,7 @@ async function getFunctionArgsSuggestions(
           ? {
               ...suggestion,
               insertText:
-                hasMoreMandatoryArgs && !fnDefinition.builtin
+                hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
                   ? `${suggestion.insertText},`
                   : suggestion.insertText,
             }
@@ -1013,7 +1016,8 @@ async function getFunctionArgsSuggestions(
 
     return suggestions.map(({ insertText, ...rest }) => ({
       ...rest,
-      insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
+      insertText:
+        hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${insertText},` : insertText,
     }));
   }
   return mathCommandDefinition;
