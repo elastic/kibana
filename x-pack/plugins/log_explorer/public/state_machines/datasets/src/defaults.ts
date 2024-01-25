@@ -8,7 +8,7 @@
 import { HashedCache } from '../../../../common/hashed_cache';
 import { DefaultDatasetsContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultDatasetsContext = {
+export const createDefaultContext = (): DefaultDatasetsContext => ({
   cache: new HashedCache(),
   datasets: null,
   error: null,
@@ -16,4 +16,4 @@ export const DEFAULT_CONTEXT: DefaultDatasetsContext = {
     datasetQuery: '',
     sortOrder: 'asc',
   },
-};
+});

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchStats = (

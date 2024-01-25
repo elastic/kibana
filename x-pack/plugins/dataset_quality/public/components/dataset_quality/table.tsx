@@ -10,10 +10,20 @@ import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText, EuiEmptyPrompt } 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { loadingDatasetsText, noDatasetsTitle } from '../../../common/translations';
 import { useDatasetQualityTable } from '../../hooks';
+import { Flyout } from '../flyout';
 
 export const Table = () => {
-  const { sort, onTableChange, pagination, renderedItems, columns, loading, resultsCount } =
-    useDatasetQualityTable();
+  const {
+    sort,
+    onTableChange,
+    pagination,
+    renderedItems,
+    columns,
+    loading,
+    resultsCount,
+    selectedDataset,
+    closeFlyout,
+  } = useDatasetQualityTable();
 
   return (
     <>
@@ -29,6 +39,7 @@ export const Table = () => {
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable
+        tableLayout="auto"
         sorting={sort}
         onChange={onTableChange}
         pagination={pagination}
@@ -54,6 +65,7 @@ export const Table = () => {
           )
         }
       />
+      {selectedDataset && <Flyout dataset={selectedDataset} closeFlyout={closeFlyout} />}
     </>
   );
 };
