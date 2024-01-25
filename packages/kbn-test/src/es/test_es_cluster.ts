@@ -241,7 +241,7 @@ export function createTestEsCluster<
         ).installPath;
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
-      } else if (esFrom === 'serverless') {
+      } else if (esFrom === 'serverless' && esServerlessOptions) {
         await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
