@@ -111,14 +111,14 @@ export const CrawlRequestsTable: React.FC = () => {
         <EuiEmptyPrompt
           iconType="tableDensityExpanded"
           title={
-            <h3>
+            <h4>
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.crawlRequestsTable.emptyPrompt.title',
                 {
                   defaultMessage: 'No recent crawl requests',
                 }
               )}
-            </h3>
+            </h4>
           }
           body={
             <p>

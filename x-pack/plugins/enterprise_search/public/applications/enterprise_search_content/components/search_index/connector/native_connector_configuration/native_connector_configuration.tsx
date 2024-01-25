@@ -94,8 +94,8 @@ export const NativeConnectorConfiguration: React.FC = () => {
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiTitle size="m">
-                  <h3>{nativeConnector?.name ?? index.connector.name}</h3>
+                <EuiTitle size="s">
+                  <h2>{nativeConnector?.name ?? index.connector.name}</h2>
                 </EuiTitle>
               </EuiFlexItem>
             </EuiFlexGroup>
