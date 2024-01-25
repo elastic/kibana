@@ -6,24 +6,35 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 
-import { CONNECTORS_INDEX } from '..';
-import { Connector, ConnectorStatus } from '../types/connectors';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { i18n } from '@kbn/i18n';
+import { isNotFoundException } from '../utils/identify_exceptions';
 
 export const putUpdateNative = async (
   client: ElasticsearchClient,
   connectorId: string,
   isNative: boolean
 ) => {
-  const result = await client.update<Connector>({
-    doc: {
-      is_native: isNative,
-      status: ConnectorStatus.CONFIGURED,
-    },
-    id: connectorId,
-    index: CONNECTORS_INDEX,
-  });
+  try {
+    const result = await client.transport.request<Result>({
+      method: 'PUT',
+      path: `/_connector/${connectorId}/_native`,
+      body: {
+        is_native: isNative,
+      },
+    });
+    return result;
+  } catch (err) {
+    if (isNotFoundException(err)) {
+      throw new Error(
+        i18n.translate('searchConnectors.server.connectors.native.error', {
+          defaultMessage: 'Could not find document',
+        })
+      );
+    }
 
-  return result;
+    throw err;
+  }
 };
