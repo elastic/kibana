@@ -45,6 +45,17 @@ describe('DataTable localStorage middleware', () => {
     store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
+  it('should call the storage method with the most recent table state', () => {
+    store.dispatch(updateItemsPerPage({ id: TableId.test, itemsPerPage: 42 }));
+    expect(addTableInStorageMock).toHaveBeenCalledWith(
+      storage,
+      TableId.test,
+      expect.objectContaining({
+        itemsPerPage: 42,
+      })
+    );
+  });
+
   it('persist adding / reordering of a column correctly', () => {
     store.dispatch(upsertColumn({ id: TableId.test, index: 1, column: defaultHeaders[0] }));
     expect(addTableInStorageMock).toHaveBeenCalled();
