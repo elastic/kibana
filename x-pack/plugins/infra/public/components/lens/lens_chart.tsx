@@ -103,7 +103,7 @@ export const LensChart = React.memo(
           }
         `}
       >
-        {error ? <ChartLoadError /> : content}
+        {error ? <ChartLoadError error={error} /> : content}
       </EuiPanel>
     );
   }
