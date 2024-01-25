@@ -79,6 +79,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   width: wrapperWidth,
   withActions = DEFAULT_ACTIONS,
   disableOnClickFilter = false,
+  casesAttachmentMetadata,
 }) => {
   const style = useMemo(
     () => ({
@@ -152,6 +153,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     inspectActionProps,
     timeRange: timerange,
     withActions,
+    lensMetadata: casesAttachmentMetadata,
   });
 
   const updateDateRange = useCallback(
