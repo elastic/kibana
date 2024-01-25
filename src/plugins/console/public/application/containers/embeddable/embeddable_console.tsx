@@ -8,6 +8,7 @@
 
 import React, { useState } from 'react';
 import classNames from 'classnames';
+import useObservable from 'react-use/lib/useObservable';
 import {
   EuiButton,
   EuiFocusTrap,
@@ -38,6 +39,7 @@ export const EmbeddableConsole = ({
 }: EmbeddableConsoleProps & EmbeddableConsoleDependencies) => {
   const [isConsoleOpen, setIsConsoleOpen] = useState<boolean>(false);
   const toggleConsole = () => setIsConsoleOpen(!isConsoleOpen);
+  const chromeStyle = useObservable(core.chrome.getChromeStyle$());
 
   const onKeyDown = (event: any) => {
     if (event.key === keys.ESCAPE) {
@@ -52,6 +54,9 @@ export const EmbeddableConsole = ({
     'embeddableConsole--large': size === 'l',
     'embeddableConsole--medium': size === 'm',
     'embeddableConsole--small': size === 's',
+    'embeddableConsole--classicChrome': chromeStyle === 'classic',
+    'embeddableConsole--projectChrome': chromeStyle === 'project',
+    'embeddableConsole--unknownChrome': chromeStyle === undefined,
     'embeddableConsole--fixed': true,
     'embeddableConsole--showOnMobile': false,
   });
