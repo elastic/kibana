@@ -68,6 +68,7 @@ export function* extractCodeMessages(buffer, reporter) {
         'nullishCoalescingOperator',
         'optionalChaining',
         'exportNamespaceFrom',
+        'decorators-legacy',
       ],
     });
   } catch (error) {
