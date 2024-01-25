@@ -22,9 +22,14 @@ interface Props {
   timeRange: TimeRange;
   onLoaded?: () => void;
   lastReloadRequestTime: number | undefined;
+  showAllGroupByInstances?: boolean;
 }
 
-export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
+export const getSloInstanceFilter = (
+  sloId: string,
+  sloInstanceId: string,
+  showAllGroupByInstances?: boolean
+) => {
   return {
     bool: {
       must: [
@@ -33,7 +38,7 @@ export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
             'slo.id': sloId,
           },
         },
-        ...(sloInstanceId !== ALL_VALUE
+        ...(sloInstanceId !== ALL_VALUE && !showAllGroupByInstances
           ? [
               {
                 term: {
@@ -47,7 +52,11 @@ export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
   };
 };
 
-export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
+export const useSloAlertsQuery = (
+  slos: SloItem[],
+  timeRange: TimeRange,
+  showAllGroupByInstances?: boolean
+) => {
   return useMemo(() => {
     const query: AlertsTableStateProps['query'] = {
       bool: {
@@ -77,14 +86,21 @@ export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
   }, [slos, timeRange]);
 };
 
-export function SloAlertsTable({ slos, deps, timeRange, onLoaded, lastReloadRequestTime }: Props) {
+export function SloAlertsTable({
+  slos,
+  deps,
+  timeRange,
+  onLoaded,
+  lastReloadRequestTime,
+  showAllGroupByInstances,
+}: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
 
   return (
     <AlertsStateTable
-      query={useSloAlertsQuery(slos, timeRange)}
+      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
       configurationId={SLO_ALERTS_TABLE_CONFID}
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}

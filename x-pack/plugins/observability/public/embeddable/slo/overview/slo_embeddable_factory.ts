@@ -65,12 +65,8 @@ export class SloOverviewEmbeddableFactoryDefinition
 
   public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
     try {
-      const [{ uiSettings, application, http, i18n: i18nService }] = await this.getStartServices();
-      return new SLOEmbeddable(
-        { uiSettings, application, http, i18n: i18nService },
-        initialInput,
-        parent
-      );
+      const [coreStart, pluginStart] = await this.getStartServices();
+      return new SLOEmbeddable({ ...coreStart, ...pluginStart }, initialInput, parent);
     } catch (e) {
       return new ErrorEmbeddable(e, initialInput, parent);
     }

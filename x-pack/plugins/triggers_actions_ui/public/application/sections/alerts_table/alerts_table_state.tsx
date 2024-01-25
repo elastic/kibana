@@ -260,6 +260,12 @@ const AlertsTableStateWithQueryProvider = ({
   ]);
 
   useEffect(() => {
+    if (!isLoading && onLoaded) {
+      onLoaded();
+    }
+  }, [isLoading, onLoaded]);
+
+  useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {
       ...alertsTableConfiguration,
       actions: { toggleColumn: onToggleColumn },

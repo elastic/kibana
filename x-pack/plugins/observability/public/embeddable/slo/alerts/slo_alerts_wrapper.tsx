@@ -29,6 +29,7 @@ interface Props {
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
   reloadSubject: Subject<SloAlertsEmbeddableInput | undefined>;
+  showAllGroupByInstances?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -38,6 +39,7 @@ export function SloAlertsWrapper({
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
+  showAllGroupByInstances,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -152,6 +154,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
+            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
