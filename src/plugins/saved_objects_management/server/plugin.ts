@@ -38,7 +38,6 @@ export class SavedObjectsManagementPlugin
 
     capabilities.registerProvider(capabilitiesProvider);
 
-
     injection.setupModule((pluginContainer, { createModule }) => {
       pluginContainer.bind(myExampleServiceId).to(MyExampleService).inSingletonScope();
 
