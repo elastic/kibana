@@ -25,7 +25,6 @@ export class ReportingPageObject extends FtrService {
   private readonly security = this.ctx.getService('security');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
-  private readonly share = this.ctx.getPageObject('share');
   private readonly timePicker = this.ctx.getPageObject('timePicker');
 
   async forceSharedItemsContainerSize({ width }: { width: number }) {
@@ -90,7 +89,7 @@ export class ReportingPageObject extends FtrService {
 
   async openImageReportingPanel() {
     this.log.debug('openPdfAndPngReportingPanel');
-    await this.share.openShareMenuItem('imageExports');
+    await this.testSubjects.click('sharePanel-imageExports');
   }
 
   async clearToastNotifications() {
