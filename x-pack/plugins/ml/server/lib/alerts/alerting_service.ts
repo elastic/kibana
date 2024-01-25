@@ -1015,7 +1015,7 @@ export function alertingServiceProvider(
           'xpack.ml.alertTypes.anomalyDetectionAlertingRule.recoveredReason',
           {
             defaultMessage:
-              'No anomalies have been found in the concecutive bucket after the alert was triggered.',
+              'No anomalies have been found in the consecutive bucket after the alert was triggered.',
           }
         );
 
