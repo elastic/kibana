@@ -13,7 +13,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { shouldBeQuotedText } from '../shared/helpers';
+import { getAllFunctions, shouldBeQuotedText } from '../shared/helpers';
 import { ESQLCallbacks } from '../shared/types';
 import { AstProviderFn, ESQLAst } from '../types';
 import { buildQueryForFieldsFromSource } from '../validation/helpers';
@@ -59,6 +59,29 @@ function getSourcesRetriever(resourceRetriever?: ESQLCallbacks) {
   };
 }
 
+export const getCompatibleFunctionDefinitions = (
+  command: string,
+  option: string | undefined,
+  returnTypes?: string[],
+  ignored: string[] = []
+): string[] => {
+  const fnSupportedByCommand = getAllFunctions({ type: ['eval', 'agg'] }).filter(
+    ({ name, supportedCommands, supportedOptions }) =>
+      (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
+      !ignored.includes(name)
+  );
+  if (!returnTypes) {
+    return fnSupportedByCommand.map(({ name }) => name);
+  }
+  return fnSupportedByCommand
+    .filter((mathDefinition) =>
+      mathDefinition.signatures.some(
+        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+      )
+    )
+    .map(({ name }) => name);
+};
+
 function createAction(
   title: string,
   solution: string,
@@ -86,13 +109,15 @@ function createAction(
 }
 
 async function getSpellingPossibilities(fn: () => Promise<string[]>, errorText: string) {
-  return (await fn()).reduce((solutions, item) => {
+  const allActions = (await fn()).reduce((solutions, item) => {
     const distance = levenshtein(item, errorText);
     if (distance < 3) {
       solutions.push(item);
     }
     return solutions;
   }, [] as string[]);
+  // filter duplicates
+  return Array.from(new Set(allActions));
 }
 
 async function getSpellingActionForColumns(
@@ -162,7 +187,7 @@ async function getSpellingActionForIndex(
   { getSources }: Callbacks
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleFields = await getSpellingPossibilities(async () => {
+  const possibleSources = await getSpellingPossibilities(async () => {
     // Handle fuzzy names via truncation to test levenstein distance
     const sources = await getSources();
     if (errorText.endsWith('*')) {
@@ -172,7 +197,7 @@ async function getSpellingActionForIndex(
     }
     return sources;
   }, errorText);
-  return wrapIntoSpellingChangeAction(error, uri, possibleFields);
+  return wrapIntoSpellingChangeAction(error, uri, possibleSources);
 }
 
 async function getSpellingActionForPolicies(
@@ -182,8 +207,32 @@ async function getSpellingActionForPolicies(
   { getPolicies }: Callbacks
 ) {
   const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
-  const possibleFields = await getSpellingPossibilities(getPolicies, errorText);
-  return wrapIntoSpellingChangeAction(error, uri, possibleFields);
+  const possiblePolicies = await getSpellingPossibilities(getPolicies, errorText);
+  return wrapIntoSpellingChangeAction(error, uri, possiblePolicies);
+}
+
+async function getSpellingActionForFunctions(
+  error: monaco.editor.IMarkerData,
+  uri: monaco.Uri,
+  queryString: string,
+  ast: ESQLAst
+) {
+  const errorText = queryString.substring(error.startColumn - 1, error.endColumn - 1);
+  // fallback to the last command if not found
+  const commandContext =
+    ast.find((command) => command.location.max > error.endColumn) || ast[ast.length - 1];
+  if (!commandContext) {
+    return [];
+  }
+  const possibleSolutions = await getSpellingPossibilities(
+    async () => getCompatibleFunctionDefinitions(commandContext.name, undefined),
+    errorText.substring(0, errorText.lastIndexOf('('))
+  );
+  return wrapIntoSpellingChangeAction(
+    error,
+    uri,
+    possibleSolutions.map((fn) => `${fn}${errorText.substring(errorText.lastIndexOf('('))}`)
+  );
 }
 
 function wrapIntoSpellingChangeAction(
@@ -239,6 +288,9 @@ export async function getActions(
   };
 
   const actions: monaco.languages.CodeAction[] = [];
+  // Markers are sent only on hover and are limited to the hovered area
+  // so unless there are multiple error/markers for the same area, there's just one
+  // in some cases, like syntax + semantic errors (i.e. unquoted fields eval field-1 ), there might be more than one
   for (const error of context.markers) {
     const code = error.code ?? inferCodeFromError(error);
     switch (code) {
@@ -266,6 +318,15 @@ export async function getActions(
           callbacks
         );
         actions.push(...policySpellChanges);
+        break;
+      case 'unknownFunction':
+        const fnsSpellChanges = await getSpellingActionForFunctions(
+          error,
+          model.uri,
+          innerText,
+          ast
+        );
+        actions.push(...fnsSpellChanges);
         break;
       case 'wrongQuotes':
         // it is a syntax error, so location won't be helpful here
