@@ -30,9 +30,10 @@ export interface LlmResponseSimulator {
           function_call?: { name: string; arguments: string };
         }
   ) => Promise<void>;
-  error: (error: Error) => Promise<void>;
+  error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
-  write: (chunk: string) => Promise<void>;
+  rawWrite: (chunk: string) => Promise<void>;
+  rawEnd: () => Promise<void>;
 }
 
 export class LlmProxy {
@@ -112,8 +113,11 @@ export class LlmProxy {
                 const chunk = createOpenAiChunk(msg);
                 return write(`data: ${JSON.stringify(chunk)}\n`);
               },
-              write: (chunk: string) => {
+              rawWrite: (chunk: string) => {
                 return write(chunk);
+              },
+              rawEnd: async () => {
+                await end();
               },
               complete: async () => {
                 await write('data: [DONE]');
