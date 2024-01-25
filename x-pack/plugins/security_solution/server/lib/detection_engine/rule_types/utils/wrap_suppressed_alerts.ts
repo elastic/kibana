@@ -7,6 +7,7 @@
 
 import objectHash from 'object-hash';
 import pick from 'lodash/pick';
+import get from 'lodash/get';
 
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
@@ -17,7 +18,6 @@ import {
   ALERT_SUPPRESSION_END,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { ALERT_ORIGINAL_TIME } from '../../../../../common/field_maps/field_names';
 import type { SignalSourceHit } from '../types';
 
 import type {
@@ -47,6 +47,8 @@ export const wrapSuppressedAlerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
+  primaryTimestamp,
+  secondaryTimestamp,
 }: {
   events: SignalSourceHit[];
   spaceId: string;
@@ -57,6 +59,8 @@ export const wrapSuppressedAlerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
+  primaryTimestamp: string;
+  secondaryTimestamp?: string;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
   const suppressedBy = completeRule?.ruleParams?.alertSuppression?.groupBy ?? [];
 
@@ -94,7 +98,12 @@ export const wrapSuppressedAlerts = ({
       publicBaseUrl
     );
 
-    const suppressionTime = new Date(baseAlert[ALERT_ORIGINAL_TIME] ?? baseAlert[TIMESTAMP]);
+    const suppressionTime = new Date(
+      get(event.fields, primaryTimestamp) ??
+        (secondaryTimestamp && get(event.fields, secondaryTimestamp)) ??
+        baseAlert[TIMESTAMP]
+    );
+
     return {
       _id: id,
       _index: '',

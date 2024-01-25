@@ -95,6 +95,8 @@ export const createIndicatorMatchAlertType = (
           alertTimestampOverride: runOpts.alertTimestampOverride,
           ruleExecutionLogger,
           publicBaseUrl: runOpts.publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
         });
 
       const result = await indicatorMatchExecutor({

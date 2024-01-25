@@ -328,18 +328,13 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   spaceId: options.spaceId,
                 });
 
-                const {
-                  alertCandidates: filteredAlerts,
-                  suppressedAlerts: suppressedInMemoryAlerts,
-                } = suppressAlertsInMemory(filteredDuplicates);
-
-                if (filteredAlerts.length === 0) {
+                if (filteredDuplicates.length === 0) {
                   return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
                 }
 
                 const suppressionAlertSearchRequest = {
                   body: {
-                    size: filteredAlerts.length,
+                    size: filteredDuplicates.length,
                     query: {
                       bool: {
                         filter: [
@@ -352,7 +347,7 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                           },
                           {
                             terms: {
-                              [ALERT_INSTANCE_ID]: filteredAlerts.map(
+                              [ALERT_INSTANCE_ID]: filteredDuplicates.map(
                                 (alert) => alert._source['kibana.alert.instance.id']
                               ),
                             },
@@ -398,8 +393,33 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   return acc;
                 }, {});
 
+                const nonSuppressedAlerts = filteredDuplicates.filter((alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  const suppressionEnd = existingAlert?._source?.[ALERT_SUPPRESSION_END];
+                  const suppressionEndDate =
+                    typeof suppressionEnd === 'string'
+                      ? suppressionEnd
+                      : suppressionEnd?.toISOString();
+
+                  const isSuppressedAlready =
+                    suppressionEnd &&
+                    suppressionEndDate &&
+                    suppressionEndDate >= alert._source[ALERT_SUPPRESSION_END].toISOString();
+
+                  return !isSuppressedAlready;
+                });
+
+                if (nonSuppressedAlerts.length === 0) {
+                  return { createdAlerts: [], errors: {}, suppressedAlerts: [] };
+                }
+
+                const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
+                  suppressAlertsInMemory(nonSuppressedAlerts);
+
                 const [duplicateAlerts, newAlerts] = partition(
-                  filteredAlerts,
+                  alertCandidates,
                   (alert) => existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]] != null
                 );
 
@@ -409,32 +429,23 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingDocsCount =
                     existingAlert._source?.[ALERT_SUPPRESSION_DOCS_COUNT] ?? 0;
 
-                  // do not count alerts that already were suppressed
-                  if (
-                    existingAlert._source?.[ALERT_SUPPRESSION_END] &&
-                    existingAlert._source?.[ALERT_SUPPRESSION_END] <=
-                      alert._source[ALERT_SUPPRESSION_END]
-                  ) {
-                    return [];
-                  } else {
-                    return [
-                      {
-                        update: {
-                          _id: existingAlert._id,
-                          _index: existingAlert._index,
-                          require_alias: false,
-                        },
+                  return [
+                    {
+                      update: {
+                        _id: existingAlert._id,
+                        _index: existingAlert._index,
+                        require_alias: false,
                       },
-                      {
-                        doc: {
-                          [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
-                          [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
-                          [ALERT_SUPPRESSION_DOCS_COUNT]:
-                            existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
-                        },
+                    },
+                    {
+                      doc: {
+                        [ALERT_LAST_DETECTED]: currentTimeOverride ?? new Date(),
+                        [ALERT_SUPPRESSION_END]: alert._source[ALERT_SUPPRESSION_END],
+                        [ALERT_SUPPRESSION_DOCS_COUNT]:
+                          existingDocsCount + alert._source[ALERT_SUPPRESSION_DOCS_COUNT] + 1,
                       },
-                    ];
-                  }
+                    },
+                  ];
                 });
 
                 let enrichedAlerts = newAlerts;
