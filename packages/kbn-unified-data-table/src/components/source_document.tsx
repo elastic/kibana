@@ -36,6 +36,7 @@ export function SourceDocument({
   isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
+  className,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -46,6 +47,7 @@ export function SourceDocument({
   isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
+  className?: string;
 }) {
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairs(row.raw, columnId, dataView, shouldShowFieldHandler).slice(
@@ -58,7 +60,7 @@ export function SourceDocument({
     <EuiDescriptionList
       type="inline"
       compressed
-      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS)}
+      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className)}
       data-test-subj={dataTestSubj}
     >
       {pairs.map(([fieldDisplayName, value, fieldName]) => {
@@ -80,6 +82,7 @@ export function SourceDocument({
     </EuiDescriptionList>
   );
 }
+
 /**
  * Helper function to show top level objects
  * this is used for legacy stuff like displaying products of our ecommerce dataset
