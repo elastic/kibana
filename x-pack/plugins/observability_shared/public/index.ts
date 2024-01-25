@@ -20,8 +20,8 @@ export type {
   ObservabilityPageTemplateProps,
   LazyObservabilityPageTemplateProps,
   NavigationSection,
+  NavigationEntry,
 } from './components/page_template/page_template';
-export type { NavigationEntry } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
 export { useObservabilityTourContext, observTourStepStorageKey } from './components/tour';
 export { ActionMenu, ActionMenuDivider } from './components/action_menu/action_menu';
