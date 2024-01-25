@@ -356,9 +356,9 @@ packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investiga
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
-x-pack/packages/kbn-elastic-assistant @elastic/security-solution
-x-pack/packages/kbn-elastic-assistant-common @elastic/security-solution
-x-pack/plugins/elastic_assistant @elastic/security-solution
+x-pack/packages/kbn-elastic-assistant @elastic/security-generative-ai
+x-pack/packages/kbn-elastic-assistant-common @elastic/security-generative-ai
+x-pack/plugins/elastic_assistant @elastic/security-generative-ai
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
 x-pack/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/plugins/embeddable_enhanced @elastic/kibana-presentation
@@ -1264,7 +1264,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution_serverless/ @elastic/security-solution
 
 # AI assistant in Security Solution tests
-/x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-threat-hunting-investigations @elastic/security-detection-rule-management
+/x-pack/test/security_solution_cypress/cypress/e2e/ai_assistant @elastic/security-generative-ai
 
 # Security Solution cross teams ownership
 /x-pack/test/security_solution_cypress/cypress/fixtures @elastic/security-detections-response @elastic/security-threat-hunting
