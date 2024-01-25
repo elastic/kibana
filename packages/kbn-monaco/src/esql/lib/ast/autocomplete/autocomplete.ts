@@ -603,6 +603,11 @@ async function getExpressionSuggestionsByType(
             }
           ))
         );
+        if (command.name === 'show') {
+          suggestions.push(
+            ...getBuiltinCompatibleFunctionDefinition(command.name, undefined, 'any')
+          );
+        }
       }
     }
 
