@@ -7,113 +7,135 @@
 
 import React from 'react';
 import { waitFor, screen } from '@testing-library/react';
-import userEvent, { specialChars } from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event';
 
-import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Description } from './description';
-import type { FormProps } from './schema';
 import { schema } from './schema';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
+import { FormTestComponent } from '../../common/test_utils';
+import type { FormSchema } from '@kbn/index-management-plugin/public/shared_imports';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174133
-// FLAKY: https://github.com/elastic/kibana/issues/174134
-// FLAKY: https://github.com/elastic/kibana/issues/174135
-// FLAKY: https://github.com/elastic/kibana/issues/175204
-describe.skip('Description', () => {
-  let globalForm: FormHook;
-  let appMockRender: AppMockRenderer;
-  const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
-  const defaultProps = {
-    draftStorageKey,
-    isLoading: false,
-  };
+for (let i = 0; i < 500; i++) {
+  describe('Description', () => {
+    let appMockRender: AppMockRenderer;
+    const onSubmit = jest.fn();
+    const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;
+    const defaultProps = {
+      draftStorageKey,
+      isLoading: false,
+    };
 
-  const MockHookWrapperComponent: React.FC = ({ children }) => {
-    const { form } = useForm<FormProps>({
-      defaultValue: { description: 'My description' },
-      schema: {
-        description: schema.description,
-      },
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRender = createAppMockRenderer();
+      window.sessionStorage.clear();
     });
 
-    globalForm = form;
-
-    return <Form form={form}>{children}</Form>;
-  };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
-  });
-
-  it('it renders', async () => {
-    appMockRender.render(
-      <MockHookWrapperComponent>
-        <Description {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
-
-    expect(screen.getByTestId('caseDescription')).toBeInTheDocument();
-  });
-
-  it('it changes the description', async () => {
-    appMockRender.render(
-      <MockHookWrapperComponent>
-        <Description {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
-
-    const description = screen.getByTestId('euiMarkdownEditorTextArea');
-
-    userEvent.type(
-      description,
-      `${specialChars.selectAll}${specialChars.delete}My new description`
-    );
-
-    await waitFor(() => {
-      expect(globalForm.getFormData()).toEqual({ description: 'My new description' });
+    afterEach(() => {
+      sessionStorage.removeItem(draftStorageKey);
     });
-  });
 
-  it('shows an error when description is empty', async () => {
-    appMockRender.render(
-      <MockHookWrapperComponent>
-        <Description {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
+    it('it renders', async () => {
+      appMockRender.render(
+        <FormTestComponent onSubmit={onSubmit}>
+          <Description {...defaultProps} />
+        </FormTestComponent>
+      );
 
-    const description = screen.getByTestId('euiMarkdownEditorTextArea');
-
-    userEvent.clear(description);
-    userEvent.type(description, '  ');
-
-    await waitFor(() => {
-      expect(screen.getByText('A description is required.')).toBeInTheDocument();
+      expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
     });
-  });
 
-  it('shows an error when description is too long', async () => {
-    const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+    it('it changes the description', async () => {
+      appMockRender.render(
+        <FormTestComponent
+          onSubmit={onSubmit}
+          formDefaultValue={{
+            description: 'default description',
+            title: 'Default title',
+            tags: [],
+          }}
+        >
+          <Description {...defaultProps} />
+        </FormTestComponent>
+      );
 
-    appMockRender.render(
-      <MockHookWrapperComponent>
-        <Description {...defaultProps} />
-      </MockHookWrapperComponent>
-    );
+      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
 
-    const description = screen.getByTestId('euiMarkdownEditorTextArea');
+      userEvent.clear(description);
+      userEvent.paste(description, 'My new description');
 
-    userEvent.paste(description, longDescription);
+      userEvent.click(screen.getByText('Submit'));
 
-    await waitFor(() => {
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({ description: 'My new description' }, true);
+      });
+    });
+
+    it('shows an error when description is empty', async () => {
+      appMockRender.render(
+        <FormTestComponent
+          onSubmit={onSubmit}
+          formDefaultValue={{
+            description: 'default description',
+            title: 'Default title',
+            tags: [],
+          }}
+          schema={{ description: schema.description } as FormSchema}
+        >
+          <Description {...defaultProps} />
+        </FormTestComponent>
+      );
+
+      const description = await screen.findByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.clear(description);
+
+      userEvent.paste(description, '  ');
+
+      userEvent.click(screen.getByText('Submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({}, false);
+      });
+
+      expect(await screen.findByText('A description is required.')).toBeInTheDocument();
+    });
+
+    it('shows an error when description is too long', async () => {
+      const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
+
+      appMockRender.render(
+        <FormTestComponent
+          onSubmit={onSubmit}
+          formDefaultValue={{
+            description: 'default description',
+            title: 'Default title',
+            tags: [],
+          }}
+          schema={{ description: schema.description } as FormSchema}
+        >
+          <Description {...defaultProps} />
+        </FormTestComponent>
+      );
+
+      const description = screen.getByTestId('euiMarkdownEditorTextArea');
+
+      userEvent.clear(description);
+      userEvent.paste(description, longDescription);
+
+      userEvent.click(screen.getByText('Submit'));
+
+      await waitFor(() => {
+        expect(onSubmit).toBeCalledWith({}, false);
+      });
+
       expect(
-        screen.getByText(
+        await screen.findByText(
           'The length of the description is too long. The maximum length is 30000 characters.'
         )
       ).toBeInTheDocument();
     });
   });
-});
+}
