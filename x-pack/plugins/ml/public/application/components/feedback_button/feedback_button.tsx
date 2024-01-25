@@ -24,7 +24,7 @@ const FORM_IDS = {
   ANOMALY_EXPLORER: '1FAIpQLSfF1Ry561b4lYrY7iiyXhuZpxFzAmy2c9BFUT3J2AJUevY1iw',
 };
 
-const allowedCreatedBys = ['ml-module-metrics-ui-hosts'];
+const MATCHED_CREATED_BY_TAGS = ['ml-module-metrics-ui-hosts'];
 
 export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
   const { jobs: getJobs } = useJobsApiService();
@@ -32,6 +32,11 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
     services: { kibanaVersion },
   } = useMlKibana();
   const { isCloud } = useCloudCheck();
+  // ML does not have an explicit isServerless flag,
+  // it does however have individual feature flags which are set depending
+  // whether the environment is serverless or not.
+  // showNodeInfo will always be false in a serverless environment
+  // and true in a non-serverless environment.
   const { showNodeInfo } = useEnabledFeatures();
 
   const [jobIdsString, setJobIdsString] = useState<string>('');
@@ -51,7 +56,7 @@ export const FeedBackButton: FC<Props> = ({ jobIds, page }) => {
       for (const job of resp) {
         const createdBy = job.custom_settings?.created_by;
 
-        if (createdBy && allowedCreatedBys.includes(createdBy)) {
+        if (createdBy && MATCHED_CREATED_BY_TAGS.includes(createdBy)) {
           setShowButton(true);
           break;
         }
