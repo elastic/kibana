@@ -48,6 +48,7 @@ describe('LensRenderer', () => {
         renderMode: 'view',
         style: {
           height: 200,
+          width: '100%',
         },
         syncCursor: false,
         syncTooltips: false,
@@ -61,5 +62,29 @@ describe('LensRenderer', () => {
     appMockRender.render(<LensRenderer {...lensVisualization} attributes={undefined} />);
 
     expect(screen.queryByTestId('embeddableComponent')).not.toBeInTheDocument();
+  });
+
+  it('renders the lens visualization custom width', () => {
+    // @ts-expect-error: props are correct
+    appMockRender.render(<LensRenderer {...lensVisualization} metadata={{ width: '1px' }} />);
+
+    expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        style: {
+          height: 200,
+          width: '1px',
+        },
+      }),
+      {}
+    );
+  });
+
+  it('renders the lens visualization with description', () => {
+    appMockRender.render(
+      // @ts-expect-error: props are correct
+      <LensRenderer {...lensVisualization} metadata={{ description: 'description' }} />
+    );
+
+    expect(screen.getByText('description')).toBeInTheDocument();
   });
 });
