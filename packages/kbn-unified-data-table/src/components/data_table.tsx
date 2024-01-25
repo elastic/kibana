@@ -70,10 +70,12 @@ import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
 import {
   DEFAULT_ROWS_PER_PAGE,
   GRID_STYLE,
+  ROWS_HEIGHT_OPTIONS,
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+import { useRowHeight } from '../hooks/use_row_height';
 
 export interface UnifiedDataTableRenderCustomToolbarProps {
   toolbarProps: EuiDataGridCustomToolbarProps;
@@ -134,7 +136,7 @@ export interface UnifiedDataTableProps {
   /**
    * Determines number of rows of a column header
    */
-  headerRowHeight?: number;
+  headerRowHeightState?: number;
   /**
    * Update header row height state
    */
@@ -370,7 +372,7 @@ export const UnifiedDataTable = ({
   columnTypes,
   showColumnTokens,
   configHeaderRowHeight,
-  headerRowHeight,
+  headerRowHeightState,
   onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
@@ -661,6 +663,28 @@ export const UnifiedDataTable = ({
     dataGridRef,
   });
 
+  const {
+    rowHeight: headerRowHeight,
+    rowHeightLines: headerRowHeightLines,
+    onChangeRowHeight: onChangeHeaderRowHeight,
+    onChangeRowHeightLines: onChangeHeaderRowHeightLines,
+  } = useRowHeight({
+    storage,
+    consumer,
+    key: 'dataGridHeaderRowHeight',
+    configRowHeight: configHeaderRowHeight ?? 1,
+    rowHeightState: headerRowHeightState,
+    onUpdateRowHeight: onUpdateHeaderRowHeight,
+  });
+
+  const { rowHeight, rowHeightLines, onChangeRowHeight, onChangeRowHeightLines } = useRowHeight({
+    storage,
+    consumer,
+    configRowHeight: configRowHeight ?? ROWS_HEIGHT_OPTIONS.default,
+    rowHeightState,
+    onUpdateRowHeight,
+  });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
@@ -683,29 +707,29 @@ export const UnifiedDataTable = ({
         visibleCellActions,
         columnTypes,
         showColumnTokens,
-        headerRowHeight,
+        headerRowHeightLines,
         customGridColumnsConfiguration,
       }),
     [
-      onFilter,
-      visibleColumns,
-      columnsCellActions,
-      displayedRows,
-      dataView,
-      settings,
-      defaultColumns,
-      isSortEnabled,
-      isPlainRecord,
-      uiSettings,
-      toastNotifications,
-      dataViewFieldEditor,
-      valueToStringConverter,
-      editField,
-      visibleCellActions,
       columnTypes,
-      showColumnTokens,
-      headerRowHeight,
+      columnsCellActions,
       customGridColumnsConfiguration,
+      dataView,
+      dataViewFieldEditor.userPermissions,
+      defaultColumns,
+      displayedRows.length,
+      editField,
+      headerRowHeightLines,
+      isPlainRecord,
+      isSortEnabled,
+      onFilter,
+      settings,
+      showColumnTokens,
+      toastNotifications,
+      uiSettings,
+      valueToStringConverter,
+      visibleCellActions,
+      visibleColumns,
     ]
   );
 
@@ -812,21 +836,20 @@ export const UnifiedDataTable = ({
 
     if (onUpdateRowHeight) {
       options.allowDensity = false;
-      options.allowRowHeight = true;
     }
 
-    if (onUpdateSampleSize) {
+    if (onChangeRowHeight || onChangeHeaderRowHeight || onUpdateSampleSize) {
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
-          storage={storage}
-          consumer={consumer}
-          configRowHeight={configRowHeight}
-          rowHeightState={rowHeightState}
-          onChangeRowHeight={onUpdateRowHeight}
-          configHeaderRowHeight={configHeaderRowHeight}
-          headerRowHeightState={headerRowHeight}
-          onChangeHeaderRowHeight={onUpdateHeaderRowHeight}
+          rowHeight={rowHeight}
+          rowHeightLines={rowHeightLines}
+          onChangeRowHeight={onChangeRowHeight}
+          onChangeRowHeightLines={onChangeRowHeightLines}
+          headerRowHeight={headerRowHeight}
+          headerRowHeightLines={headerRowHeightLines}
+          onChangeHeaderRowHeight={onChangeHeaderRowHeight}
+          onChangeHeaderRowHeightLines={onChangeHeaderRowHeightLines}
           maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
@@ -836,17 +859,18 @@ export const UnifiedDataTable = ({
 
     return Object.keys(options).length ? options : undefined;
   }, [
-    configHeaderRowHeight,
-    configRowHeight,
-    consumer,
     headerRowHeight,
+    headerRowHeightLines,
     maxAllowedSampleSize,
-    onUpdateHeaderRowHeight,
+    onChangeHeaderRowHeight,
+    onChangeHeaderRowHeightLines,
+    onChangeRowHeight,
+    onChangeRowHeightLines,
     onUpdateRowHeight,
     onUpdateSampleSize,
-    rowHeightState,
+    rowHeight,
+    rowHeightLines,
     sampleSizeState,
-    storage,
   ]);
 
   const inMemory = useMemo(() => {
@@ -877,11 +901,7 @@ export const UnifiedDataTable = ({
   );
 
   const rowHeightsOptions = useRowHeightsOptions({
-    rowHeightState,
-    onUpdateRowHeight,
-    storage,
-    configRowHeight,
-    consumer,
+    rowHeightLines,
     rowLineHeight: rowLineHeightOverride,
   });
 

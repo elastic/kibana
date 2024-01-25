@@ -321,7 +321,7 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
-  const [headerRowHeight, setHeaderRowHeight] = useState(3);
+  const [headerRowHeight, setHeaderRowHeight] = useState<number>();
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
@@ -408,7 +408,7 @@ function DiscoverDocumentsComponent({
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
                   configHeaderRowHeight={3}
-                  headerRowHeight={headerRowHeight}
+                  headerRowHeightState={headerRowHeight}
                   onUpdateHeaderRowHeight={setHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}

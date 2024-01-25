@@ -23,7 +23,7 @@ interface UseRowHeightProps {
   key?: string;
   configRowHeight: number;
   rowHeightState?: number;
-  onChangeRowHeight?: (rowHeight: number) => void;
+  onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
 export const useRowHeight = ({
@@ -32,7 +32,7 @@ export const useRowHeight = ({
   key,
   configRowHeight,
   rowHeightState,
-  onChangeRowHeight,
+  onUpdateRowHeight,
 }: UseRowHeightProps) => {
   const rowHeightLines = useMemo(() => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer, key);
@@ -65,7 +65,7 @@ export const useRowHeight = ({
     }
   }, [rowHeightLines]);
 
-  const onUpdateRowHeight = useCallback(
+  const onChangeRowHeight = useCallback(
     (newRowHeight: RowHeightSettingsProps['rowHeight']) => {
       let newRowHeightLines: number;
 
@@ -81,18 +81,23 @@ export const useRowHeight = ({
       }
 
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
-      onChangeRowHeight?.(newRowHeightLines);
+      onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onChangeRowHeight, storage]
+    [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
 
-  const onUpdateRowHeightLines = useCallback(
+  const onChangeRowHeightLines = useCallback(
     (newRowHeightLines: number) => {
       updateStoredRowHeight(newRowHeightLines, configRowHeight, storage, consumer, key);
-      onChangeRowHeight?.(newRowHeightLines);
+      onUpdateRowHeight?.(newRowHeightLines);
     },
-    [configRowHeight, consumer, key, onChangeRowHeight, storage]
+    [configRowHeight, consumer, key, onUpdateRowHeight, storage]
   );
 
-  return { rowHeight, rowHeightLines, onUpdateRowHeight, onUpdateRowHeightLines };
+  return {
+    rowHeight,
+    rowHeightLines,
+    onChangeRowHeight: onUpdateRowHeight ? onChangeRowHeight : undefined,
+    onChangeRowHeightLines: onUpdateRowHeight ? onChangeRowHeightLines : undefined,
+  };
 };
