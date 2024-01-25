@@ -13,7 +13,7 @@ import pLimit from 'p-limit';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { processDistributionData } from '../../utils/process_distribution_data';
 import { PERCENTILE_SPACING } from '../requests/constants';
-import { getESQLPercentileQueryArray, getSafeESQLName } from '../requests/esql_utils';
+import { getESQLPercentileQueryArray, getSafeESQLName, PERCENTS } from '../requests/esql_utils';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 
@@ -29,25 +29,31 @@ const getESQLNumericFieldStatsInChunk = async ({
   esqlBaseQuery,
   filter,
 }: Params) => {
+  // Hashmap of agg to index/order of which is made in the ES|QL query
+  // {min: 0, max: 1, p0: 2, p5: 3, ..., p100: 22}
+  const numericAccessorMap = PERCENTS.reduce<{ [key: string]: number }>(
+    (acc, curr, idx) => {
+      // +2 for the min and max aggs
+      acc[`p${curr}`] = idx + 2;
+      return acc;
+    },
+    {
+      // First two are min and max aggs
+      min: 0,
+      max: 1,
+      // and percentiles p0, p5, ..., p100 are the rest
+    }
+  );
   const numericFields = columns.map((field, idx) => {
-    const percentiles = getESQLPercentileQueryArray(field.name);
-    // idx * 23 + 0
-    /**
-     * 0 = min; 23
-     * 1 = max; 24
-     * 2 p0; 25
-     * 3 p5; 26
-     * 4 p10
-     * ...
-     * 22 p100
-     */
+    const percentiles = getESQLPercentileQueryArray(field.name, PERCENTS);
     return {
       field,
       query: `${getSafeESQLName(`${field.name}_min`)} = MIN(${getSafeESQLName(field.name)}),
     ${getSafeESQLName(`${field.name}_max`)} = MAX(${getSafeESQLName(field.name)}),
   ${percentiles.join(',')}
   `,
-      startIndex: idx * (percentiles.length + 2),
+      // Start index of field in the response, so we know to slice & access the values
+      startIndex: idx * Object.keys(numericAccessorMap).length,
     };
   });
 
@@ -68,12 +74,21 @@ const getESQLNumericFieldStatsInChunk = async ({
       const values = fieldStatsResp.rawResponse.values[0];
 
       return numericFields.map(({ field, startIndex }, idx) => {
-        const min = values[startIndex + 0];
-        const max = values[startIndex + 1];
-        const median = values[startIndex + 12];
+        /** Order of aggs we are expecting back from query
+         * 0 = min; 23 = startIndex + 0 for 2nd field
+         * 1 = max; 24 = startIndex + 1
+         * 2 p0; 25; 24 = startIndex + 2
+         * 3 p5; 26
+         * 4 p10; 27
+         * ...
+         * 22 p100;
+         */
+        const min = values[startIndex + numericAccessorMap.min];
+        const max = values[startIndex + numericAccessorMap.max];
+        const median = values[startIndex + numericAccessorMap.p50];
 
         const percentiles = values
-          .slice(startIndex + 2, startIndex + 23)
+          .slice(startIndex + numericAccessorMap.p0, startIndex + numericAccessorMap.p100)
           .map((value: number) => ({ value }));
 
         const distribution = processDistributionData(percentiles, PERCENTILE_SPACING, min);

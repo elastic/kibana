@@ -25,7 +25,7 @@ export const getSafeESQLName = (str: string) => {
 export function isESQLQuery(arg: unknown): arg is ESQLQuery {
   return isPopulatedObject(arg, ['esql']);
 }
-const PERCENTS = Array.from(
+export const PERCENTS = Array.from(
   Array(MAX_PERCENT / PERCENTILE_SPACING + 1),
   (_, i) => i * PERCENTILE_SPACING
 );
