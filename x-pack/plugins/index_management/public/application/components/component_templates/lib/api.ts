@@ -97,7 +97,7 @@ export const getApi = (
 
   async function postDataStreamRollover(name: string) {
     return sendRequest<ComponentTemplateDatastreams>({
-      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover?lazy`,
+      path: `${apiBasePath}/data_streams/${encodeURIComponent(name)}/rollover`,
       method: 'post',
     });
   }
