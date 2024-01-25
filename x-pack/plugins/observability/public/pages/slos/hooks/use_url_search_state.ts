@@ -28,6 +28,10 @@ export interface SearchState {
   compact: boolean;
   filters: Filter[];
   lastRefresh?: number;
+  tags?: {
+    included?: string[];
+    excluded?: string[];
+  };
 }
 
 export const DEFAULT_STATE = {
