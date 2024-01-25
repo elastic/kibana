@@ -543,6 +543,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             );
           });
         });
+
+        describe('Use anomaly table action to view in Discover', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+            await ml.swimLane.waitForSwimLanesToLoad();
+          });
+
+          it('should render the anomaly table', async () => {
+            await ml.testExecution.logTestStep('displays the anomalies table');
+            await ml.anomaliesTable.assertTableExists();
+
+            await ml.testExecution.logTestStep('anomalies table is not empty');
+            await ml.anomaliesTable.assertTableNotEmpty();
+          });
+
+          it('should click the Discover action in the anomaly table', async () => {
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+            await ml.anomaliesTable.scrollRowIntoView(0);
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+            await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+            await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
+          });
+        });
       });
     }
   });
