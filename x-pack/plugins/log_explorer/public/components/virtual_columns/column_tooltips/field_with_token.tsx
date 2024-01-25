@@ -10,6 +10,10 @@ import React from 'react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 
+const spacingXsCss = css`
+  margin-bottom: ${euiThemeVars.euiSizeXS};
+`;
+
 export const FieldWithToken = ({
   field,
   iconType = 'tokenKeyword',
@@ -17,9 +21,6 @@ export const FieldWithToken = ({
   field: string;
   iconType?: string;
 }) => {
-  const spacingXsCss = css`
-    margin-bottom: ${euiThemeVars.euiSizeXS};
-  `;
   return (
     <div css={spacingXsCss}>
       <EuiFlexGroup

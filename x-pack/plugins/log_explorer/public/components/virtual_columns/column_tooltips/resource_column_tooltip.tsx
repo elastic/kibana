@@ -16,11 +16,11 @@ import { TooltipButtonComponent } from './tooltip_button';
 import * as constants from '../../../../common/constants';
 import { FieldWithToken } from './field_with_token';
 
-export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
-  const spacingCSS = css`
-    margin-bottom: ${euiThemeVars.euiSizeS};
-  `;
+const spacingCSS = css`
+  margin-bottom: ${euiThemeVars.euiSizeS};
+`;
 
+export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   return (
     <HoverPopover
       button={

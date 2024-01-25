@@ -41,17 +41,17 @@ export const Resource = ({ row }: DataGridCellValueElementProps) => {
           rightSideIcon="arrowDown"
         />
       )}
-      {resourceDoc[constants.ORCHESTRATOR_NAMESPACE_FIELD] && (
-        <ChipWithPopover
-          property={constants.ORCHESTRATOR_NAMESPACE_FIELD}
-          text={resourceDoc[constants.ORCHESTRATOR_NAMESPACE_FIELD] as string}
-          rightSideIcon="arrowDown"
-        />
-      )}
       {resourceDoc[constants.HOST_NAME_FIELD] && (
         <ChipWithPopover
           property={constants.HOST_NAME_FIELD}
           text={resourceDoc[constants.HOST_NAME_FIELD]}
+          rightSideIcon="arrowDown"
+        />
+      )}
+      {resourceDoc[constants.ORCHESTRATOR_NAMESPACE_FIELD] && (
+        <ChipWithPopover
+          property={constants.ORCHESTRATOR_NAMESPACE_FIELD}
+          text={resourceDoc[constants.ORCHESTRATOR_NAMESPACE_FIELD] as string}
           rightSideIcon="arrowDown"
         />
       )}
