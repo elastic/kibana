@@ -51,10 +51,11 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
 }
 
 export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
+  const hasArgs = fn.signatures.some(({ params }) => params.length);
   return {
     label: fn.name,
-    insertText: `${fn.name} $0`,
-    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertText: hasArgs ? `${fn.name} $0` : fn.name,
+    ...(hasArgs ? { insertTextRules: 4 } : {}), // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 11,
     detail: fn.description,
     documentation: {
