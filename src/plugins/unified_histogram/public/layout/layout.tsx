@@ -37,6 +37,7 @@ import type {
   UnifiedHistogramInput$,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
+  UnifiedHistogramSuggestionContext,
 } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { LensVisService } from '../services/lens_vis_service';
@@ -158,6 +159,12 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   /**
+   * Callback to update the suggested chart
+   */
+  onSuggestionContextChange?: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
+  /**
    * Callback to notify about the change in Lens attributes
    */
   onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
@@ -214,6 +221,7 @@ export const UnifiedHistogramLayout = ({
   onChartHiddenChange,
   onTimeIntervalChange,
   onBreakdownFieldChange,
+  onSuggestionContextChange,
   onVisContextChanged,
   onTotalHitsChange,
   onChartLoad,
@@ -235,6 +243,11 @@ export const UnifiedHistogramLayout = ({
   );
 
   useEffect(() => {
+    if (isChartLoading) {
+      console.log('chart is loading', requestParams.query, externalVisContext);
+      return;
+    }
+
     lensVisService.update({
       externalVisContext,
       queryParams: {
@@ -248,6 +261,7 @@ export const UnifiedHistogramLayout = ({
       chartTitle: originalChart?.title,
       timeInterval: originalChart?.timeInterval,
       breakdownField: breakdown?.field,
+      onSuggestionContextChange,
       onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
     });
   }, [
@@ -261,7 +275,9 @@ export const UnifiedHistogramLayout = ({
     columns,
     breakdown,
     externalVisContext,
+    onSuggestionContextChange,
     onVisContextChanged,
+    isChartLoading,
   ]);
 
   const chart =

@@ -52,6 +52,7 @@ describe('UnifiedHistogramStateService', () => {
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
     totalHitsResult: undefined,
+    currentSuggestionContext: undefined,
   };
 
   it('should initialize state with default values', () => {
@@ -66,6 +67,7 @@ describe('UnifiedHistogramStateService', () => {
       topPanelHeight: undefined,
       totalHitsResult: undefined,
       totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
+      currentSuggestionContext: undefined,
     });
   });
 

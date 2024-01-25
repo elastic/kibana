@@ -19,6 +19,7 @@ import {
   setChartHidden,
   setTopPanelHeight,
 } from '../utils/local_storage_utils';
+import type { UnifiedHistogramSuggestionContext } from '../../types';
 
 /**
  * The current state of the container
@@ -28,6 +29,10 @@ export interface UnifiedHistogramState {
    * The current field used for the breakdown
    */
   breakdownField: string | undefined;
+  /**
+   * The current Lens suggestion
+   */
+  currentSuggestionContext: UnifiedHistogramSuggestionContext | undefined;
   /**
    * Whether or not the chart is hidden
    */
@@ -93,6 +98,12 @@ export interface UnifiedHistogramStateService {
    */
   setChartHidden: (chartHidden: boolean) => void;
   /**
+   * Sets current Lens suggestion
+   */
+  setCurrentSuggestionContext: (
+    suggestionContext: UnifiedHistogramSuggestionContext | undefined
+  ) => void;
+  /**
    * Sets the current top panel height
    */
   setTopPanelHeight: (topPanelHeight: number | undefined) => void;
@@ -142,6 +153,7 @@ export const createStateService = (
   const state$ = new BehaviorSubject<UnifiedHistogramState>({
     breakdownField: initialBreakdownField,
     chartHidden: initialChartHidden,
+    currentSuggestionContext: undefined,
     lensRequestAdapter: undefined,
     timeInterval: 'auto',
     topPanelHeight: initialTopPanelHeight,
@@ -182,6 +194,12 @@ export const createStateService = (
       }
 
       updateState({ breakdownField });
+    },
+
+    setCurrentSuggestionContext: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => {
+      updateState({ currentSuggestionContext: suggestionContext });
     },
 
     setTimeInterval: (timeInterval: string) => {

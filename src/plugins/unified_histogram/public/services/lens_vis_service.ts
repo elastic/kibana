@@ -91,6 +91,9 @@ export class LensVisService {
         chartTitle: string | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
+        onSuggestionContextChange?: (
+          suggestionContext: UnifiedHistogramSuggestionContext | undefined
+        ) => void;
         onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
       }
     | undefined;
@@ -127,6 +130,7 @@ export class LensVisService {
     chartTitle,
     timeInterval,
     breakdownField,
+    onSuggestionContextChange,
     onVisContextChanged,
   }: {
     externalVisContext: ExternalVisContext | undefined;
@@ -134,6 +138,9 @@ export class LensVisService {
     chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
+    onSuggestionContextChange?: (
+      suggestionContext: UnifiedHistogramSuggestionContext | undefined
+    ) => void;
     onVisContextChanged?: (visContext: ExternalVisContext | undefined) => void;
   }) => {
     const suggestionContextSelectedPreviously = this.state$.getValue().currentSuggestionContext;
@@ -165,6 +172,10 @@ export class LensVisService {
     });
 
     console.log('service lensAttributesState', lensAttributesState);
+
+    if (suggestionState.shouldUpdateSelectedSuggestionDueToDepsChange) {
+      onSuggestionContextChange?.(suggestionState.currentSuggestionContext);
+    }
 
     if (
       externalVisContext?.attributes &&
@@ -204,8 +215,14 @@ export class LensVisService {
       return;
     }
 
-    const { queryParams, chartTitle, timeInterval, breakdownField, onVisContextChanged } =
-      this.prevUpdateContext;
+    const {
+      queryParams,
+      chartTitle,
+      timeInterval,
+      breakdownField,
+      onSuggestionContextChange,
+      onVisContextChanged,
+    } = this.prevUpdateContext;
 
     const lensAttributesState = this.getLensAttributesState({
       currentSuggestionContext: editedSuggestionContext,
@@ -222,6 +239,7 @@ export class LensVisService {
       lensAttributesContext: lensAttributesState.lensAttributesContext,
     });
 
+    onSuggestionContextChange?.(editedSuggestionContext);
     onVisContextChanged?.(lensAttributesState.lensAttributesContext);
   };
 

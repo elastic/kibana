@@ -8,6 +8,7 @@
 
 import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import {
+  ExternalVisContext,
   UnifiedHistogramApi,
   UnifiedHistogramFetchStatus,
   UnifiedHistogramState,
@@ -221,10 +222,12 @@ export const useDiscoverHistogram = ({
   const {
     dataView: textBasedDataView,
     query: textBasedQuery,
+    externalVisContext: textBasedExternalVisContext,
     columns,
   } = useObservable(textBasedFetchComplete$, {
     dataView: stateContainer.internalState.getState().dataView!,
-    query: stateContainer.appState.getState().query,
+    query: stateContainer.appState.getState().query!,
+    externalVisContext: stateContainer.appState.getState().visContext,
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
 
@@ -233,12 +236,14 @@ export const useDiscoverHistogram = ({
       return;
     }
 
-    const fetchStart = stateContainer.dataState.fetch$.subscribe(() => {
+    const fetchStart = stateContainer.dataState.fetch$.subscribe((value) => {
+      console.log('fetchStart', value);
       if (!skipRefetch.current) {
         setIsSuggestionLoading(true);
       }
     });
-    const fetchComplete = textBasedFetchComplete$.subscribe(() => {
+    const fetchComplete = textBasedFetchComplete$.subscribe((value) => {
+      console.log('fetchComplete', value);
       setIsSuggestionLoading(false);
     });
 
@@ -325,6 +330,14 @@ export const useDiscoverHistogram = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
 
+  const onVisContextChanged = useCallback(
+    (newVisContext: ExternalVisContext | undefined) => {
+      console.log('got new vis context from histogram', newVisContext);
+      stateContainer.appState.update({ visContext: newVisContext });
+    },
+    [stateContainer]
+  );
+
   return {
     ref,
     getCreationOptions,
@@ -340,6 +353,8 @@ export const useDiscoverHistogram = ({
     withDefaultActions: histogramCustomization?.withDefaultActions,
     disabledActions: histogramCustomization?.disabledActions,
     isChartLoading: isSuggestionLoading,
+    externalVisContext: isPlainRecord ? textBasedExternalVisContext : undefined, // visContext should be in sync with current query
+    onVisContextChanged: isPlainRecord ? onVisContextChanged : undefined,
   };
 };
 
@@ -419,6 +434,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     map(({ textBasedQueryColumns }) => ({
       dataView: stateContainer.internalState.getState().dataView!,
       query: stateContainer.appState.getState().query!,
+      externalVisContext: stateContainer.appState.getState().visContext,
       columns: textBasedQueryColumns ?? [],
     }))
   );
