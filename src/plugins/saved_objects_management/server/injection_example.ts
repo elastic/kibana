@@ -42,7 +42,7 @@ export const myExampleRequestHandlerId: ServiceIdentifier<MyExampleRequestHandle
   Symbol.for('myExampleRequestHandler');
 
 @injectable()
-export class MyExampleRequestHandler {
+export class MyExampleRequestHandler implements MyExampleRequestHandlerInterface {
   constructor(
     @inject(coreGlobalService.logger)
     private logger: ServiceType<typeof coreGlobalService.logger>,
