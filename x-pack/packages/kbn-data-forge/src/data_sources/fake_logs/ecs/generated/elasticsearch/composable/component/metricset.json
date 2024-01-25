@@ -1,0 +1,18 @@
+{
+  "_meta": {
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "metricset": {
+          "properties": {
+            "interval": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    }
+  }
+}

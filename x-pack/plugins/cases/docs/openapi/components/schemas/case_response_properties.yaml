@@ -43,15 +43,16 @@ properties:
     type: array
     maxItems: 10000
     items:
-      discriminator:
-        propertyName: type
       oneOf:
         - $ref: 'alert_comment_response_properties.yaml'
         - $ref: 'user_comment_response_properties.yaml'
+      discriminator:
+        propertyName: type
+        mapping:
+          alert: 'alert_comment_response_properties.yaml'
+          user: 'user_comment_response_properties.yaml'
   connector:
     title: Case response properties for connectors
-    discriminator:
-      propertyName: type
     oneOf:
       - $ref: 'connector_properties_none.yaml'
       - $ref: 'connector_properties_cases_webhook.yaml'
@@ -60,6 +61,16 @@ properties:
       - $ref: 'connector_properties_servicenow.yaml'
       - $ref: 'connector_properties_servicenow_sir.yaml'
       - $ref: 'connector_properties_swimlane.yaml'
+    discriminator:
+      propertyName: type
+      mapping:
+        .none: 'connector_properties_none.yaml'
+        .cases-webhook: 'connector_properties_cases_webhook.yaml'
+        .jira: 'connector_properties_jira.yaml'
+        .resilient: 'connector_properties_resilient.yaml'
+        .servicenow: 'connector_properties_servicenow.yaml'
+        .servicenow-sir: 'connector_properties_servicenow_sir.yaml'
+        .swimlane: 'connector_properties_swimlane.yaml'
   created_at:
     type: string
     format: date-time
