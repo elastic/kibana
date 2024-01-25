@@ -17,7 +17,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';
 import { MetricDatum } from '@elastic/charts/dist/chart_types/metric/specs';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
@@ -82,7 +82,7 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
 
   const kqlQuery = `slo.id:"${sloId}"`;
 
-  const { data: sloList } = useFetchSloList({
+  const { data: sloList, isLoading } = useFetchSloList({
     kqlQuery,
   });
 
@@ -133,6 +133,16 @@ export function SloCardChartList({ sloId }: { sloId: string }) {
     });
     chartsData[chartsData.length - 1].push(data);
   });
+
+  if (isLoading) {
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="center" style={{ height: '100%' }}>
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="xl" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return (
     <div ref={containerRef} style={{ width: '100%' }}>

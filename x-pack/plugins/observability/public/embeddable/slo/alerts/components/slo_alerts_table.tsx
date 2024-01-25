@@ -28,7 +28,7 @@ interface Props {
 export const getSloInstanceFilter = (
   sloId: string,
   sloInstanceId: string,
-  showAllGroupByInstances?: boolean
+  showAllGroupByInstances = false
 ) => {
   return {
     bool: {
@@ -75,7 +75,9 @@ export const useSloAlertsQuery = (
           },
           {
             bool: {
-              should: slos.map((slo) => getSloInstanceFilter(slo.id, slo.instanceId)),
+              should: slos.map((slo) =>
+                getSloInstanceFilter(slo.id, slo.instanceId, showAllGroupByInstances)
+              ),
             },
           },
         ],
@@ -83,7 +85,7 @@ export const useSloAlertsQuery = (
     };
 
     return query;
-  }, [slos, timeRange]);
+  }, [showAllGroupByInstances, slos, timeRange.from]);
 };
 
 export function SloAlertsTable({
