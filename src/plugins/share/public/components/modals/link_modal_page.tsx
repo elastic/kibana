@@ -26,6 +26,7 @@ import {
   EuiIconTip,
   EuiSwitchEvent,
   EuiCopy,
+  EuiToolTip,
 } from '@elastic/eui';
 import { format as formatUrl, parse as parseUrl } from 'url';
 
@@ -495,21 +496,38 @@ export class LinkModal extends Component<LinkModalProps, State> {
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiCopy textToCopy={this.state.url ?? ''}>
-                    {(copy) => (
-                      <EuiButton
-                        fill
-                        onClick={copy}
-                        data-test-subj="copyShareUrlButton"
-                        data-share-url={this.state.url}
-                      >
+                  {this.isNotSaved() ? (
+                    <EuiToolTip
+                      content={
+                        this.props.objectType === 'dashboard'
+                          ? 'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.'
+                          : 'Save before you generate a snapshot.'
+                      }
+                    >
+                      <EuiButton color="warning" iconType="warning">
                         <FormattedMessage
-                          id="share.link.copyLinkButton"
+                          id="share.link.saveNeededButton"
                           defaultMessage="Copy link"
                         />
                       </EuiButton>
-                    )}
-                  </EuiCopy>
+                    </EuiToolTip>
+                  ) : (
+                    <EuiCopy textToCopy={this.state.url ?? ''}>
+                      {(copy) => (
+                        <EuiButton
+                          fill
+                          onClick={copy}
+                          data-test-subj="copyShareUrlButton"
+                          data-share-url={this.state.url}
+                        >
+                          <FormattedMessage
+                            id="share.link.copyLinkButton"
+                            defaultMessage="Copy link"
+                          />
+                        </EuiButton>
+                      )}
+                    </EuiCopy>
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

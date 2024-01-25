@@ -24,6 +24,7 @@ import {
   EuiSwitchEvent,
   EuiIconTip,
   EuiCopy,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -540,21 +541,38 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                     </EuiButtonEmpty>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiCopy textToCopy={this.state.url ?? ''}>
-                      {(copy) => (
-                        <EuiButton
-                          fill
-                          onClick={copy}
-                          data-test-subj="copyShareUrlButton"
-                          data-share-url={this.state.url}
-                        >
+                    {this.isNotSaved() ? (
+                      <EuiToolTip
+                        content={
+                          this.props.objectType === 'dashboard'
+                            ? 'One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard.'
+                            : 'Save before you generate a snapshot.'
+                        }
+                      >
+                        <EuiButton color="warning" iconType="warning">
                           <FormattedMessage
-                            id="share.embed.embedButton"
-                            defaultMessage="Copy embed"
+                            id="share.embed.saveNeededButton"
+                            defaultMessage="Copy link"
                           />
                         </EuiButton>
-                      )}
-                    </EuiCopy>
+                      </EuiToolTip>
+                    ) : (
+                      <EuiCopy textToCopy={this.state.url ?? ''}>
+                        {(copy) => (
+                          <EuiButton
+                            fill
+                            onClick={copy}
+                            data-test-subj="copyShareUrlButton"
+                            data-share-url={this.state.url}
+                          >
+                            <FormattedMessage
+                              id="share.embed.embedButton"
+                              defaultMessage="Copy embed"
+                            />
+                          </EuiButton>
+                        )}
+                      </EuiCopy>
+                    )}
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>
