@@ -9,6 +9,7 @@ import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { isSOError } from '../../common/utils';
+import { INITIAL_ORACLE_RECORD_COUNTER } from './constants';
 import { CryptoService } from './crypto_service';
 import type {
   BulkCreateOracleRecordRequest,
@@ -199,7 +200,7 @@ export class CasesOracleService {
 
   private getCreateRecordAttributes({ cases, rules, grouping }: OracleRecordCreateRequest) {
     return {
-      counter: 1,
+      counter: INITIAL_ORACLE_RECORD_COUNTER,
       cases,
       rules,
       grouping,

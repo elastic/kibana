@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { partition } from 'lodash';
+import { isPlainObject, partition, toString } from 'lodash';
 import type { BulkGetOracleRecordsResponse, OracleRecord, OracleRecordError } from './types';
 
 export const isRecordError = (so: OracleRecord | OracleRecordError): so is OracleRecordError =>
@@ -31,4 +31,20 @@ export const partitionByNonFoundErrors = <T extends Array<{ statusCode: number }
   ];
 
   return [nonFoundErrors, restOfErrors];
+};
+
+export const convertValueToString = (value: unknown): string => {
+  if (value == null) {
+    return '';
+  }
+
+  if (Array.isArray(value) || isPlainObject(value)) {
+    try {
+      return JSON.stringify(value);
+    } catch (error) {
+      return '';
+    }
+  }
+
+  return toString(value);
 };

@@ -8,7 +8,12 @@
 import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import { CasesConnectorExecutor } from './cases_connector_executor';
-import { CASE_ORACLE_SAVED_OBJECT, MAX_ALERTS_PER_CASE } from '../../../common/constants';
+import {
+  CASE_ORACLE_SAVED_OBJECT,
+  MAX_ALERTS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+} from '../../../common/constants';
 import { CasesOracleService } from './cases_oracle_service';
 import { CasesService } from './cases_service';
 import { createCasesClientMock } from '../../client/mocks';
@@ -231,7 +236,13 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:A',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
@@ -248,7 +259,13 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
@@ -265,7 +282,13 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.3',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
@@ -503,7 +526,13 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:B',
+                  'dest.ip:0.0.0.3',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',
@@ -513,6 +542,202 @@ describe('CasesConnectorExecutor', () => {
               },
             ],
           });
+        });
+
+        it('does not add the rule URL to the description if the ruleUrl is null', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, ruleUrl: null },
+          });
+
+          const description =
+            casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
+
+          expect(description).toBe(
+            'This case is auto-created by Test rule. \n\n Grouping: `host.name` equals `A` and `dest.ip` equals `0.0.0.1`'
+          );
+        });
+
+        it('converts grouping values in the description correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            alerts: [
+              {
+                _id: 'test-id',
+                _index: 'test-index',
+                foo: ['bar', 1, true, {}],
+                bar: { foo: 'test' },
+                baz: 'my value',
+              },
+            ],
+            groupingBy: ['foo', 'bar', 'baz'],
+          });
+
+          const description =
+            casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].description;
+
+          expect(description).toBe(
+            'This case is auto-created by [Test rule](https://example.com/rules/rule-test-id). \n\n Grouping: `foo` equals `["bar",1,true,{}]` and `bar` equals `{"foo":"test"}` and `baz` equals `my value`'
+          );
+        });
+
+        it('adds the counter correctly if it is bigger than INITIAL_ORACLE_RECORD_COUNTER', async () => {
+          mockBulkGetRecords.mockResolvedValue([{ ...oracleRecords[0], counter: 2 }]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({ ...params, groupingBy: [] });
+          const title = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].title;
+
+          expect(title).toBe('Test rule (2) (Auto-created)');
+        });
+
+        it(`trims tags that are bigger than ${MAX_LENGTH_PER_TAG} characters`, async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, tags: ['a'.repeat(MAX_LENGTH_PER_TAG * 2)] },
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+            'a'.repeat(MAX_LENGTH_PER_TAG),
+          ]);
+        });
+
+        it(`create cases with up to ${MAX_TAGS_PER_CASE} tags`, async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            rule: { ...params.rule, tags: Array(MAX_TAGS_PER_CASE * 2).fill('foo') },
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+          const systemTags = [
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+          ];
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'host.name:A',
+            'dest.ip:0.0.0.1',
+            ...Array(MAX_TAGS_PER_CASE - systemTags.length).fill('foo'),
+          ]);
+        });
+
+        it('converts grouping values in tags correctly', async () => {
+          mockBulkGetRecords.mockResolvedValue([oracleRecords[0]]);
+          casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[0]] });
+          casesClientMock.cases.bulkGet.mockResolvedValue({
+            cases: [],
+            errors: [
+              {
+                error: 'Not found',
+                message: 'Not found',
+                status: 404,
+                caseId: 'mock-id-1',
+              },
+            ],
+          });
+
+          await connectorExecutor.execute({
+            ...params,
+            alerts: [
+              {
+                _id: 'test-id',
+                _index: 'test-index',
+                foo: ['bar', 1, true, {}],
+                bar: { foo: 'test' },
+                baz: 'my value',
+              },
+            ],
+            groupingBy: ['foo', 'bar', 'baz'],
+          });
+
+          const tags = casesClientMock.cases.bulkCreate.mock.calls[0][0].cases[0].tags;
+
+          expect(tags).toEqual([
+            'auto-generated',
+            'rule:rule-test-id',
+            'foo:["bar",1,true,{}]',
+            'bar:{"foo":"test"}',
+            'baz:my value',
+            'rule',
+            'test',
+          ]);
         });
 
         it('does not reopen closed cases if reopenClosedCases=false', async () => {
@@ -573,7 +798,13 @@ describe('CasesConnectorExecutor', () => {
                 settings: {
                   syncAlerts: false,
                 },
-                tags: ['auto-generated', ...rule.tags],
+                tags: [
+                  'auto-generated',
+                  'rule:rule-test-id',
+                  'host.name:A',
+                  'dest.ip:0.0.0.1',
+                  ...rule.tags,
+                ],
                 connector: {
                   fields: null,
                   id: 'none',

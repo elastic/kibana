@@ -12,14 +12,22 @@ import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 import type { Logger } from '@kbn/core/server';
-import { MAX_ALERTS_PER_CASE } from '../../../common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_LENGTH_PER_TAG,
+  MAX_TAGS_PER_CASE,
+} from '../../../common/constants';
 import type { BulkCreateCasesRequest } from '../../../common/types/api';
 import type { Case } from '../../../common';
 import { ConnectorTypes, AttachmentType } from '../../../common';
-import { MAX_CONCURRENT_ES_REQUEST, MAX_OPEN_CASES } from './constants';
+import {
+  INITIAL_ORACLE_RECORD_COUNTER,
+  MAX_CONCURRENT_ES_REQUEST,
+  MAX_OPEN_CASES,
+} from './constants';
 import type { BulkCreateOracleRecordRequest, CasesConnectorRunParams, OracleRecord } from './types';
 import type { CasesOracleService } from './cases_oracle_service';
-import { partitionByNonFoundErrors, partitionRecordsByError } from './utils';
+import { convertValueToString, partitionByNonFoundErrors, partitionRecordsByError } from './utils';
 import type { CasesService } from './cases_service';
 import type { CasesClient } from '../../client';
 import type { BulkCreateArgs as BulkCreateAlertsReq } from '../../client/attachments/types';
@@ -649,35 +657,27 @@ export class CasesConnectorExecutor {
     params: CasesConnectorRunParams,
     groupingData: GroupedAlertsWithCaseId
   ): Omit<BulkCreateCasesRequest['cases'][number], 'id'> & { id: string } {
-    const { grouping, caseId } = groupingData;
+    const { grouping, caseId, oracleRecord } = groupingData;
 
     const ruleName = params.rule.ruleUrl
       ? `[${params.rule.name}](${params.rule.ruleUrl})`
       : params.rule.name;
 
     const groupingDescription = this.getGroupingDescription(grouping);
-
     const description = `This case is auto-created by ${ruleName}. \n\n Grouping: ${groupingDescription}`;
+    const title =
+      oracleRecord.counter === INITIAL_ORACLE_RECORD_COUNTER
+        ? `${params.rule.name} (Auto-created)`
+        : `${params.rule.name} (${oracleRecord.counter}) (Auto-created)`;
 
-    const tags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
-
-    /**
-     * TODO:
-     * 1. Add grouping info to
-     * 2. Required custom fields will throw an error when creating a case.
-     * We should find a way to fill the custom fields with default values.
-     */
     return {
       id: caseId,
       description,
-      tags: ['auto-generated', ...tags],
-      /**
-       * TODO: Append the counter to the name
-       */
-      title: `${params.rule.name} (Auto-created)`,
+      tags: this.getCaseTags(params, grouping),
+      title,
       connector: { id: 'none', name: 'none', type: ConnectorTypes.none, fields: null },
       /**
-       * Turn on for Security solution
+       * TODO: Turn on for Security solution
        */
       settings: { syncAlerts: false },
       owner: params.owner,
@@ -691,11 +691,28 @@ export class CasesConnectorExecutor {
     return Object.entries(grouping)
       .map(([key, value]) => {
         const keyAsCodeBlock = `\`${key}\``;
-        const valueAsCodeBlock = `\`${value}\``;
+        const valueAsCodeBlock = `\`${convertValueToString(value)}\``;
 
         return `${keyAsCodeBlock} equals ${valueAsCodeBlock}`;
       })
       .join(' and ');
+  }
+
+  private getCaseTags(params: CasesConnectorRunParams, grouping: GroupedAlerts['grouping']) {
+    const ruleTags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
+
+    return [
+      'auto-generated',
+      `rule:${params.rule.id}`,
+      ...this.getGroupingAsTags(grouping),
+      ...ruleTags,
+    ]
+      .splice(0, MAX_TAGS_PER_CASE)
+      .map((tag) => tag.slice(0, MAX_LENGTH_PER_TAG));
+  }
+
+  private getGroupingAsTags(grouping: GroupedAlerts['grouping']) {
+    return Object.entries(grouping).map(([key, value]) => `${key}:${convertValueToString(value)}`);
   }
 
   private async handleClosedCases(
