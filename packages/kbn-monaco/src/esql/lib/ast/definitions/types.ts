@@ -9,7 +9,7 @@
 import type { ESQLCommand, ESQLCommandOption, ESQLFunction, ESQLMessage } from '../types';
 
 export interface FunctionDefinition {
-  builtin?: boolean;
+  type: 'builtin' | 'agg' | 'eval';
   ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
