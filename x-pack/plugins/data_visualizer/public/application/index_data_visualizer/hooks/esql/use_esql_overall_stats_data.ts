@@ -147,17 +147,17 @@ const NON_AGGREGATABLE_FIELD_TYPES = new Set<string>([
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-      earliest: number | undefined;
-      latest: number | undefined;
-      aggInterval: TimeBucketsInterval;
-      intervalMs: number;
-      searchQuery: AggregateQuery;
-      indexPattern: string | undefined;
-      timeFieldName: string | undefined;
-      lastRefresh: number;
-      filter?: QueryDslQueryContainer;
-      limitSize?: ESQLDefaultLimitSizeOption;
-    }
+        earliest: number | undefined;
+        latest: number | undefined;
+        aggInterval: TimeBucketsInterval;
+        intervalMs: number;
+        searchQuery: AggregateQuery;
+        indexPattern: string | undefined;
+        timeFieldName: string | undefined;
+        lastRefresh: number;
+        filter?: QueryDslQueryContainer;
+        limitSize?: ESQLDefaultLimitSizeOption;
+      }
     | undefined
 ) => {
   const {
