@@ -315,9 +315,11 @@ src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
 x-pack/plugins/dashboard_enhanced @elastic/kibana-presentation
 src/plugins/dashboard @elastic/kibana-presentation
+x-pack/packages/kbn-data-forge @elastic/obs-ux-management-team
 src/plugins/data @elastic/kibana-visualizations @elastic/kibana-data-discovery
 test/plugin_functional/plugins/data_search @elastic/kibana-data-discovery
 packages/kbn-data-service @elastic/kibana-visualizations @elastic/kibana-data-discovery
+packages/kbn-data-stream-adapter @elastic/security-threat-hunting-explore
 src/plugins/data_view_editor @elastic/kibana-data-discovery
 examples/data_view_field_editor_example @elastic/kibana-data-discovery
 src/plugins/data_view_field_editor @elastic/kibana-data-discovery
@@ -502,6 +504,7 @@ packages/kbn-logging @elastic/kibana-core
 packages/kbn-logging-mocks @elastic/kibana-core
 x-pack/plugins/logs_shared @elastic/obs-ux-logs-team
 x-pack/plugins/logstash @elastic/logstash
+packages/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
 packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
 packages/kbn-management/cards_navigation @elastic/platform-deployment-management
@@ -1529,6 +1532,9 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 /x-pack/test_serverless/functional/test_suites/security/ftr/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts @elastic/kibana-cloud-security-posture
 /x-pack/test_serverless/api_integration/test_suites/security/cloud_security_posture/ @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components/cloud_security_posture @elastic/fleet @elastic/kibana-cloud-security-posture
+/x-pack/plugins/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
