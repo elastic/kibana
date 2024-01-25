@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
 export enum RULE_PREVIEW_INVOCATION_COUNT {
   HOUR = 12,
