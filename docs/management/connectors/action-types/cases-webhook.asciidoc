@@ -80,7 +80,7 @@ Manually ensure that the JSON is valid, disregarding the Mustache variables, so 
 --
 
 Create case response external key::
-The JSON key in the create case response that contains the external case ID.
+The JSON key in the create external case response that contains the case ID.
 
 Create case URL::
 The REST API URL to create a case in the third-party system.
@@ -125,7 +125,7 @@ https://testing-jira.atlassian.net/browse/{{{external.system.title}}}
 --
 
 Get case response external title key::
-The JSON key in the get case response that contains the external case title.
+The JSON key in the get external case response that contains the case title.
 
 Get case URL::
 The REST API URL to GET case by ID from the third-party system.
