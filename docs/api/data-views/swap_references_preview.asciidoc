@@ -36,7 +36,7 @@ For the most up-to-date API details, refer to the
  (Optional, string) Specify the type of the saved object reference to alter. Default is `index-pattern` for data view.
 
 `forId`::
-(Optional, string) Limit the affected saved objects to one or more by IDs.
+(Optional, string, string[]) Limit the affected saved objects to one or more by IDs.
 
 `forType`::
  (Optional, string) Limit the affected saved objects by type.
