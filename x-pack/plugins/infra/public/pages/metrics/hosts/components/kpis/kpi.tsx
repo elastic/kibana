@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { ChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../hooks/use_data_view';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
@@ -14,16 +15,11 @@ import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
-export const Kpi = ({
-  id,
-  height,
-  visualizationType = 'lnsMetric',
-  dataView,
-  ...chartProps
-}: ChartModel & { height: number }) => {
+export const Kpi = ({ id, height, ...chartProps }: LensConfig & { height: number; id: string }) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
   const { isRequestRunning: hostCountLoading } = useHostCountContext();
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -60,12 +56,10 @@ export const Kpi = ({
     <LensChart
       {...chartProps}
       id={`hostsViewKPI-${id}`}
-      dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
       loading={loading}
       height={height}
-      visualizationType={visualizationType}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
       toolTip={tooltipContent}
