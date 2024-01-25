@@ -5,34 +5,33 @@
  * 2.0.
  */
 
-import { pick } from 'lodash/fp';
 import { EuiContextMenuPanel, EuiContextMenuItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-
+import { useDispatch, useSelector } from 'react-redux';
 import type { CaseUI } from '@kbn/cases-plugin/common';
+import { UNTITLED_TIMELINE } from '../../timeline/properties/translations';
+import { selectTimelineById } from '../../../store/selectors';
+import type { State } from '../../../../common/store';
 import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
-import { timelineSelectors } from '../../../store';
 import { setInsertTimeline, showTimeline } from '../../../store/actions';
-import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
 import { SecurityPageName } from '../../../../app/types';
-import { timelineDefaults } from '../../../store/defaults';
-import * as i18n from '../../timeline/properties/translations';
+import * as i18n from './translations';
 
-interface Props {
+interface AttachToCaseButtonProps {
+  /**
+   * Id of the timeline to be displayed in the bottom bar and within the modal
+   */
   timelineId: string;
 }
 
-const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
-  const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
-  const {
-    cases,
-    application: { navigateToApp },
-  } = useKibana().services;
+/**
+ * Button that opens a popover with options to attach the timeline to new or existing case
+ */
+export const AttachToCaseButton = React.memo<AttachToCaseButtonProps>(({ timelineId }) => {
   const dispatch = useDispatch();
   const {
     graphEventId,
@@ -40,18 +39,23 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     status: timelineStatus,
     title: timelineTitle,
     timelineType,
-  } = useDeepEqualSelector((state) =>
-    pick(
-      ['graphEventId', 'savedObjectId', 'status', 'title', 'timelineType'],
-      getTimeline(state, timelineId) ?? timelineDefaults
-    )
-  );
+  } = useSelector((state: State) => selectTimelineById(state, timelineId));
+
+  const {
+    cases,
+    application: { navigateToApp },
+  } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   const [isPopoverOpen, setPopover] = useState(false);
   const [isCaseModalOpen, openCaseModal] = useState(false);
 
+  const togglePopover = useCallback(() => setPopover((currentIsOpen) => !currentIsOpen), []);
+  const closeCaseModal = useCallback(() => openCaseModal(false), [openCaseModal]);
+
   const onRowClick = useCallback(
     async (theCase?: CaseUI) => {
-      openCaseModal(false);
+      closeCaseModal();
       await navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: theCase != null ? getCaseDetailsUrl({ id: theCase.id }) : getCreateCaseUrl(),
@@ -65,19 +69,19 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
         })
       );
     },
-    [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
+    [
+      closeCaseModal,
+      dispatch,
+      graphEventId,
+      navigateToApp,
+      savedObjectId,
+      timelineId,
+      timelineTitle,
+    ]
   );
 
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
-
-  const handleButtonClick = useCallback(() => {
-    setPopover((currentIsOpen) => !currentIsOpen);
-  }, []);
-
-  const handlePopoverClose = useCallback(() => setPopover(false), []);
-
-  const handleNewCaseClick = useCallback(() => {
-    handlePopoverClose();
+  const attachToNewCase = useCallback(() => {
+    togglePopover();
 
     navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.case,
@@ -88,7 +92,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
           graphEventId,
           timelineId,
           timelineSavedObjectId: savedObjectId,
-          timelineTitle: timelineTitle.length > 0 ? timelineTitle : i18n.UNTITLED_TIMELINE,
+          timelineTitle: timelineTitle.length > 0 ? timelineTitle : UNTITLED_TIMELINE,
         })
       );
       dispatch(showTimeline({ id: TimelineId.active, show: false }));
@@ -97,84 +101,71 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     dispatch,
     graphEventId,
     navigateToApp,
-    handlePopoverClose,
     savedObjectId,
     timelineId,
     timelineTitle,
+    togglePopover,
   ]);
 
-  const handleExistingCaseClick = useCallback(() => {
-    handlePopoverClose();
+  const attachToExistingCase = useCallback(() => {
+    togglePopover();
     openCaseModal(true);
-  }, [openCaseModal, handlePopoverClose]);
-
-  const onCaseModalClose = useCallback(() => {
-    openCaseModal(false);
-  }, [openCaseModal]);
-
-  const closePopover = useCallback(() => {
-    setPopover(false);
-  }, []);
+  }, [togglePopover, openCaseModal]);
 
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        size="m"
-        data-test-subj="attach-timeline-case-button"
         iconType="arrowDown"
         iconSide="right"
-        onClick={handleButtonClick}
         disabled={timelineStatus === TimelineStatus.draft || timelineType !== TimelineType.default}
+        data-test-subj="timeline-modal-attach-to-case-dropdown-button"
+        onClick={togglePopover}
       >
         {i18n.ATTACH_TO_CASE}
       </EuiButtonEmpty>
     ),
-    [handleButtonClick, timelineStatus, timelineType]
+    [togglePopover, timelineStatus, timelineType]
   );
 
   const items = useMemo(
     () => [
       <EuiContextMenuItem
         key="new-case"
-        data-test-subj="attach-timeline-new-case"
-        onClick={handleNewCaseClick}
+        data-test-subj="timeline-modal-attach-timeline-to-new-case"
+        onClick={attachToNewCase}
       >
         {i18n.ATTACH_TO_NEW_CASE}
       </EuiContextMenuItem>,
       <EuiContextMenuItem
         key="existing-case"
-        data-test-subj="attach-timeline-existing-case"
-        onClick={handleExistingCaseClick}
+        data-test-subj="timeline-modal-attach-timeline-to-existing-case"
+        onClick={attachToExistingCase}
       >
         {i18n.ATTACH_TO_EXISTING_CASE}
       </EuiContextMenuItem>,
     ],
-    [handleExistingCaseClick, handleNewCaseClick]
+    [attachToExistingCase, attachToNewCase]
   );
 
   return (
     <>
       <EuiPopover
-        id="singlePanel"
         button={button}
         isOpen={isPopoverOpen}
-        closePopover={closePopover}
+        closePopover={togglePopover}
         panelPaddingSize="none"
-        anchorPosition="downLeft"
       >
         <EuiContextMenuPanel items={items} />
       </EuiPopover>
       {isCaseModalOpen &&
         cases.ui.getAllCasesSelectorModal({
           onRowClick,
-          onClose: onCaseModalClose,
+          onClose: closeCaseModal,
           owner: [APP_ID],
           permissions: userCasesPermissions,
         })}
     </>
   );
-};
+});
 
-AddToCaseButtonComponent.displayName = 'AddToCaseButtonComponent';
-
-export const AddToCaseButton = React.memo(AddToCaseButtonComponent);
+AttachToCaseButton.displayName = 'AttachToCaseButton';
