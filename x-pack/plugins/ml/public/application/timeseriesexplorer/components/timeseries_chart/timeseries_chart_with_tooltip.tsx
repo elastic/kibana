@@ -18,6 +18,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
@@ -31,7 +32,11 @@ interface TimeSeriesChartWithTooltipsProps {
   chartProps: any;
   lastRefresh: number;
   contextAggregationInterval: any;
-  tableDataAnomalies: MlAnomaliesTableRecord;
+  tableData?: {
+    anomalies: MlAnomaliesTableRecord[];
+    interval: string;
+  };
+  sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -45,7 +50,11 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   chartProps,
   lastRefresh,
   contextAggregationInterval,
-  tableDataAnomalies,
+  tableData = {
+    anomalies: [],
+    interval: 'second',
+  },
+  sourceIndicesWithGeoFields,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -135,7 +144,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             showForecast={showForecast}
             showModelBounds={showModelBounds}
             tooltipService={tooltipService}
-            tableDataAnomalies={tableDataAnomalies}
+            tableData={tableData}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
           />
         )}
       </MlTooltipComponent>

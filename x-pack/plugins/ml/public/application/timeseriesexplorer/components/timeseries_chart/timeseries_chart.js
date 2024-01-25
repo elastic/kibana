@@ -128,7 +128,8 @@ class TimeseriesChartIntl extends Component {
     zoomFromFocusLoaded: PropTypes.object,
     zoomToFocusLoaded: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
-    tableDataAnomalies: PropTypes.array,
+    tableData: PropTypes.object,
+    sourceIndicesWithGeoFields: PropTypes.object.isRequired,
   };
 
   rowMouseenterSubscriber = null;
@@ -794,11 +795,11 @@ class TimeseriesChartIntl extends Component {
 
         // The table items could be aggregated, so we have to find the item
         // that has the closest timestamp to the selected anomaly from the chart.
-        const tableItem = that.props.tableDataAnomalies.reduce((closestItem, currentItem) => {
+        const tableItem = that.props.tableData.anomalies.reduce((closestItem, currentItem) => {
           const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
           const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
           return currentItemDelta < closestItemDelta ? currentItem : closestItem;
-        }, that.props.tableDataAnomalies[0]);
+        }, that.props.tableData.anomalies[0]);
 
         if (tableItem) {
           // Overwrite the timestamp of the possibly aggregated table item with the
@@ -1943,9 +1944,10 @@ class TimeseriesChartIntl extends Component {
                 bounds={that.props.bounds}
                 showMapsLink={false}
                 showViewSeriesLink={false}
-                isAggregatedData={false}
-                interval="second"
+                isAggregatedData={that.props.tableData.interval !== 'second'}
+                interval={that.props.tableData.interval}
                 onItemClick={closePopover}
+                sourceIndicesWithGeoFields={that.props.sourceIndicesWithGeoFields}
               />
             )}
           </EuiPopover>
