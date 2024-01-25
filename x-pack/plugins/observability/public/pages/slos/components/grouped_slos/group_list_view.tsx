@@ -69,7 +69,7 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const groupTitle = `${groupName}(${total})`;
+  const groupTitle = `${groupName} (${total})`;
 
   return (
     <EuiPanel>

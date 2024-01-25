@@ -34,7 +34,7 @@ interface Aggregation {
   doc_count: number;
   key: string;
   min_sli_value: {
-    worse_violated: {
+    worst: {
       value: number | undefined;
     };
   };
@@ -100,7 +100,7 @@ export class FindSLOGroups {
                   },
                 },
                 aggs: {
-                  worse_violated: {
+                  worst: {
                     min: {
                       field: 'sliValue',
                     },
@@ -169,7 +169,7 @@ export class FindSLOGroups {
             groupBy,
             summary: {
               total: bucket.doc_count ?? 0,
-              worse: bucket.min_sli_value?.worse_violated?.value,
+              worst: bucket.min_sli_value?.worst?.value,
               violated: bucket.violated?.doc_count,
               healthy: bucket.healthy?.doc_count,
               degrading: bucket.degrading?.doc_count,

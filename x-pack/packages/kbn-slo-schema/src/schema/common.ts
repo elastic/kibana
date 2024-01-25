@@ -45,7 +45,7 @@ const summarySchema = t.type({
 
 const groupSummarySchema = t.type({
   total: t.number,
-  worse: t.number,
+  worst: t.number,
   violated: t.number,
   healthy: t.number,
   degrading: t.number,
