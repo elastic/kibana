@@ -92,7 +92,6 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
-          shouldUseSizeTransitionVeil={true}
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);
