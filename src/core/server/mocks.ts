@@ -22,6 +22,7 @@ import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycl
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -139,6 +140,9 @@ function createCoreRequestHandlerContextMock() {
     },
     security: securityServiceMock.createRequestHandlerContext(),
     userProfile: userProfileServiceMock.createRequestHandlerContext(),
+    injection: {
+      container: injectionServiceMock.createReadonlyContainer(),
+    },
   };
 }
 
