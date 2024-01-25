@@ -2215,4 +2215,199 @@ describe('CasesConnectorExecutor', () => {
       });
     });
   });
+
+  describe('Sequence of executions with missing oracle or cases', () => {
+    const missingDataParams = {
+      ...params,
+      alerts: [
+        {
+          _id: 'test-id',
+          _index: 'test-index',
+          foo: 'bar',
+        },
+      ],
+      groupingBy: ['foo'],
+    };
+
+    it('oracle counter increases but some cases are missing', async () => {
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 3 }]);
+
+      mockGetCaseId
+        .mockReturnValueOnce('mock-id-1')
+        .mockReturnValueOnce('mock-id-2')
+        .mockReturnValueOnce('mock-id-3');
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [cases[0]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[1].id,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          cases: [cases[2]],
+          errors: [],
+        });
+
+      casesClientMock.cases.bulkCreate.mockResolvedValue({ cases: [cases[1]] });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+    });
+
+    it('oracle record is missing but some cases exists', async () => {
+      mockGetRecordId.mockReturnValue(oracleRecords[0].id);
+      mockBulkGetRecords
+        .mockResolvedValueOnce([
+          {
+            id: oracleRecords[0].id,
+            type: CASE_ORACLE_SAVED_OBJECT,
+            message: 'Not found',
+            statusCode: 404,
+            error: 'Not found',
+          },
+        ])
+        .mockResolvedValueOnce([oracleRecords[0]])
+        .mockResolvedValueOnce([{ ...oracleRecords[0], counter: 2 }]);
+
+      mockBulkCreateRecords.mockResolvedValue([oracleRecords[0]]);
+
+      mockGetCaseId
+        .mockReturnValueOnce('mock-id-1')
+        .mockReturnValueOnce('mock-id-2')
+        .mockReturnValueOnce('mock-id-3');
+
+      casesClientMock.cases.bulkGet
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[0].id,
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          cases: [cases[1]],
+          errors: [],
+        })
+        .mockResolvedValueOnce({
+          cases: [],
+          errors: [
+            {
+              error: 'Not found',
+              message: 'Not found',
+              status: 404,
+              caseId: cases[2].id,
+            },
+          ],
+        });
+
+      casesClientMock.cases.bulkCreate
+        .mockResolvedValueOnce({ cases: [cases[0]] })
+        .mockResolvedValueOnce({ cases: [cases[2]] });
+
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+      await connectorExecutor.execute(missingDataParams);
+
+      expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(3);
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(1, {
+        caseId: 'mock-id-1',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(2, {
+        caseId: 'mock-id-2',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+
+      expect(casesClientMock.attachments.bulkCreate).nthCalledWith(3, {
+        caseId: 'mock-id-3',
+        attachments: [
+          {
+            type: 'alert',
+            alertId: 'test-id',
+            index: 'test-index',
+            rule: { id: 'rule-test-id', name: 'Test rule' },
+            owner: 'securitySolution',
+          },
+        ],
+      });
+    });
+  });
 });
