@@ -1218,6 +1218,7 @@ export class TimeSeriesExplorer extends React.Component {
                 showForecast={showForecast}
                 showModelBounds={showModelBounds}
                 lastRefresh={lastRefresh}
+                tableDataAnomalies={tableData?.anomalies ?? []}
               />
               {focusAnnotationError !== undefined && (
                 <>

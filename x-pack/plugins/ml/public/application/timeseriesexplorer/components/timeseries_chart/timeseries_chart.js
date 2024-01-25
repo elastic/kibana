@@ -17,6 +17,8 @@ import { isEqual, reduce, each, get } from 'lodash';
 import d3 from 'd3';
 import moment from 'moment';
 
+import { EuiPopover } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { getFormattedSeverityScore, getSeverityWithLow } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds } from '@kbn/ml-date-utils';
@@ -51,6 +53,8 @@ import {
   ANNOTATION_MIN_WIDTH,
 } from './timeseries_chart_annotations';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+
+import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -123,10 +127,16 @@ class TimeseriesChartIntl extends Component {
     zoomFromFocusLoaded: PropTypes.object,
     zoomToFocusLoaded: PropTypes.object,
     tooltipService: PropTypes.object.isRequired,
+    tableDataAnomalies: PropTypes.array,
   };
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
+
+  constructor(props) {
+    super(props);
+    this.state = { popoverData: null };
+  }
 
   componentWillUnmount() {
     const element = d3.select(this.rootNode);
@@ -766,6 +776,8 @@ class TimeseriesChartIntl extends Component {
         )
       );
 
+    const that = this;
+
     // Remove dots that are no longer needed i.e. if number of chart points has decreased.
     dots.exit().remove();
     // Create any new dots that are needed i.e. if number of chart points has increased.
@@ -773,6 +785,14 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('circle')
       .attr('r', LINE_CHART_ANOMALY_RADIUS)
+      .on('click', function (d) {
+        const anomalyTime = d.date.getTime();
+        const tableItem = that.props.tableDataAnomalies.find(
+          (d) => d.source.timestamp === anomalyTime
+        );
+
+        if (tableItem) that.setState({ popoverData: tableItem });
+      })
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1863,7 +1883,39 @@ class TimeseriesChartIntl extends Component {
   }
 
   render() {
-    return <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />;
+    const button = <>popover</>;
+
+    const that = this;
+    function closePopover() {
+      that.setState({ popoverData: null });
+    }
+
+    return (
+      <>
+        <div>
+          <EuiPopover
+            button={button}
+            isOpen={this.state.popoverData !== null}
+            closePopover={closePopover}
+            panelPaddingSize="none"
+            anchorPosition="downLeft"
+          >
+            {that.state.popoverData !== null && (
+              <LinksMenuUI
+                anomaly={that.state.popoverData}
+                bounds={that.props.bounds}
+                showMapsLink={false}
+                showViewSeriesLink={false}
+                isAggregatedData={false}
+                interval="second"
+                onItemClick={closePopover}
+              />
+            )}
+          </EuiPopover>
+        </div>
+        <div className="ml-timeseries-chart-react" ref={this.setRef.bind(this)} />
+      </>
+    );
   }
 }
 
@@ -1874,6 +1926,7 @@ export const TimeseriesChart = (props) => {
   if (annotationProp === undefined) {
     return null;
   }
+
   return (
     <TimeseriesChartIntl
       annotation={annotationProp}

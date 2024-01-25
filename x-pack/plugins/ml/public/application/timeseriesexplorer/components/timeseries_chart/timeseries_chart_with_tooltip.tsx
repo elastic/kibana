@@ -8,6 +8,7 @@
 import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
@@ -30,6 +31,7 @@ interface TimeSeriesChartWithTooltipsProps {
   chartProps: any;
   lastRefresh: number;
   contextAggregationInterval: any;
+  tableDataAnomalies: MlAnomaliesTableRecord;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -43,6 +45,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   chartProps,
   lastRefresh,
   contextAggregationInterval,
+  tableDataAnomalies,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -132,6 +135,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             showForecast={showForecast}
             showModelBounds={showModelBounds}
             tooltipService={tooltipService}
+            tableDataAnomalies={tableDataAnomalies}
           />
         )}
       </MlTooltipComponent>
