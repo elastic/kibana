@@ -92,7 +92,7 @@ export function getConnectorType(): ConnectorTypeModel<
           }
         });
       }
-      if (actionParams.customDetails?.length && !hasMustacheTokens(actionParams.customDetails)) {
+      if (actionParams.customDetails?.length) {
         try {
           JSON.parse(actionParams.customDetails);
         } catch {

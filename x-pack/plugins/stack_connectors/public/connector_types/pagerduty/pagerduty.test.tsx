@@ -95,7 +95,7 @@ describe('pagerduty action params validation', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
-      customDetails: '{foo:bar}',
+      customDetails: '{foo:bar, "customFields": "{{contex.foo}}"}',
       links: [],
     };
 
@@ -110,7 +110,7 @@ describe('pagerduty action params validation', () => {
     });
   });
 
-  test('action params validation does not fail when customDetails are not JSON but have mustache templates inside', async () => {
+  test('action params validation does not fail when customDetails are JSON', async () => {
     const actionParams = {
       eventAction: 'trigger',
       dedupKey: 'test',
@@ -121,7 +121,7 @@ describe('pagerduty action params validation', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
-      customDetails: '{"details": {{alert.flapping}}}',
+      customDetails: '{"details": "{{alert.flapping}}"}',
       links: [],
     };
 
