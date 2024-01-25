@@ -41,9 +41,10 @@ export const getBuiltinCompatibleFunctionDefinition = (
       !ignoreAsSuggestion &&
       !/not_/.test(name) &&
       (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
-      signatures.some(({ params }) => params.some((pArg) => pArg.type === argType))
+      signatures.some(
+        ({ params }) => !params.length || params.some((pArg) => pArg.type === argType)
+      )
   );
-
   if (!returnTypes) {
     return compatibleFunctions.map(getAutocompleteBuiltinDefinition);
   }

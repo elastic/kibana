@@ -52,23 +52,3 @@ export const ADD_TIMELINE = i18n.translate(
     defaultMessage: 'Add new timeline or template',
   }
 );
-
-export const ATTACH_TO_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to case',
-  }
-);
-
-export const ATTACH_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to new case',
-  }
-);
-export const ATTACH_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.properties.attachToExistingCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to existing case',
-  }
-);
