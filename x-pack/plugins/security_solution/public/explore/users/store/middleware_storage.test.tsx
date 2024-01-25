@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { waitFor } from '@testing-library/react';
 import {
   createSecuritySolutionStorageMock,
   kibanaObservable,
@@ -23,7 +22,6 @@ const storage = createSecuritySolutionStorageMock().storage;
 
 describe('UsersAssetTable EpicStorage', () => {
   beforeEach(() => {
-    jest.useFakeTimers();
     storage.clear();
     store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
@@ -33,22 +31,16 @@ describe('UsersAssetTable EpicStorage', () => {
 
     // Add field to the table
     store.dispatch(addUserAssetTableField({ tableId: UserAssetTableType.assetEntra, fieldName }));
-    await waitFor(() => {
-      return expect(getUserAssetTableFromStorage(storage)).toEqual({
-        [UserAssetTableType.assetEntra]: { fields: [fieldName] },
-      });
+    expect(getUserAssetTableFromStorage(storage)).toEqual({
+      [UserAssetTableType.assetEntra]: { fields: [fieldName] },
     });
-
-    jest.runAllTimers(); // pass the time to ensure that the state is persisted to local storage
 
     // Remove field from the table
     store.dispatch(
       removeUserAssetTableField({ tableId: UserAssetTableType.assetEntra, fieldName })
     );
-    await waitFor(() => {
-      return expect(getUserAssetTableFromStorage(storage)).toEqual({
-        [UserAssetTableType.assetEntra]: { fields: [] },
-      });
+    expect(getUserAssetTableFromStorage(storage)).toEqual({
+      [UserAssetTableType.assetEntra]: { fields: [] },
     });
   });
 });
