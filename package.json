@@ -859,7 +859,6 @@
     "@kbn/watcher-plugin": "link:x-pack/plugins/watcher",
     "@kbn/xstate-utils": "link:packages/kbn-xstate-utils",
     "@kbn/zod-helpers": "link:packages/kbn-zod-helpers",
-    "@langchain/community": "^0.0.20",
     "@langchain/core": "^0.1.17",
     "@langchain/openai": "^0.0.12",
     "@loaders.gl/core": "^3.4.7",
