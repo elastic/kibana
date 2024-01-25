@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import type { Embeddable as LensEmbeddable } from '@kbn/lens-plugin/public';
+import { apiHasLensConfig } from '@kbn/lens-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
-import { isLegacyMap } from '../../legacy_visualizations/is_legacy_map';
+import { isLegacyMapApi } from '../../legacy_visualizations/is_legacy_map';
 import { mapEmbeddablesSingleton } from '../../embeddable/map_embeddables_singleton';
-import type { SynchronizeMovementActionContext } from './types';
+import type { SynchronizeMovementActionApi } from './types';
 
-export function isCompatible({ embeddable }: SynchronizeMovementActionContext) {
+export function isCompatible(api: SynchronizeMovementActionApi) {
   if (!mapEmbeddablesSingleton.hasMultipleMaps()) {
     return false;
   }
 
   if (
-    embeddable.type === 'lens' &&
-    typeof (embeddable as LensEmbeddable).getSavedVis === 'function' &&
-    (embeddable as LensEmbeddable).getSavedVis()?.visualizationType === 'lnsChoropleth'
+    api.type === 'lens' &&
+    apiHasLensConfig(api) &&
+    api.getSavedVis()?.visualizationType === 'lnsChoropleth'
   ) {
     return true;
   }
 
-  if (isLegacyMap(embeddable)) {
+  if (isLegacyMapApi(api)) {
     return true;
   }
 
-  return embeddable.type === MAP_SAVED_OBJECT_TYPE;
+  return api.type === MAP_SAVED_OBJECT_TYPE;
 }

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { HasType } from '@kbn/presentation-publishing';
+import type { HasLensConfig } from '@kbn/lens-plugin/public';
+import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-export interface SynchronizeMovementActionContext {
-  embeddable: Embeddable<EmbeddableInput>;
-}
+export type SynchronizeMovementActionApi = HasType &
+  Partial<HasLensConfig & HasVisualizeConfig>;
