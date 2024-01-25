@@ -74,7 +74,9 @@ export const getRenderCellValue = (fieldFormats: FieldFormatsRegistry): GetRende
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: string | number): React.ReactElement => {
+  return (columnId: string, value: string | number | undefined): React.ReactElement => {
+    if (!isDefined(value)) return <>{'—'}</>;
+
     switch (columnId) {
       case ALERT_START:
       case ALERT_END:
