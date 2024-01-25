@@ -23,7 +23,7 @@ import {
   mergeSearchResults,
   getSafeSortIds,
   addToSearchAfterReturn,
-  getMaxSignalsWarning,
+  getSuppressionMaxSignalsWarning,
 } from './utils';
 import type {
   SearchAfterAndBulkCreateParams,
@@ -175,6 +175,10 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
         // skip the call to bulk create and proceed to the next search_after,
         // if there is a sort id to continue the search_after with.
         if (includedEvents.length !== 0) {
+          // max signals for suppression includes suppressed and created alerts
+          // this allows to lift max signals limitation to higher value
+          // and can detects threats beyond default max_signals value
+          const suppressionMaxSignals = 5 * tuple.maxSignals;
           let enrichedEvents = await enrichment(includedEvents);
 
           const suppressionDuration = alertSuppression?.duration;
@@ -219,15 +223,15 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
             alertTimestampOverride,
           });
 
+          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
+
           if (
-            bulkCreateResult.suppressedItemsCount + bulkCreateResult.createdItemsCount >=
-            tuple.maxSignals
+            (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >=
+            suppressionMaxSignals
           ) {
-            toReturn.warningMessages.push(getMaxSignalsWarning());
+            toReturn.warningMessages.push(getSuppressionMaxSignalsWarning());
             break;
           }
-
-          addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
           ruleExecutionLogger.debug(
             `[${cycleNum}] Created ${bulkCreateResult.createdItemsCount} alerts from ${enrichedEvents.length} events`

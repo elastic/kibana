@@ -17,7 +17,7 @@ import {
   TIMESTAMP,
   ALERT_START,
 } from '@kbn/rule-data-utils';
-import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
@@ -1747,7 +1747,6 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          // this test is not correct, use case for multiple duplicate alerts need to fixed
           it('should deduplicate multiple alerts while suppressing on rule interval only', async () => {
             const id = uuidv4();
             const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -1818,7 +1817,6 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [ALERT_SUPPRESSION_START]: firstTimestamp,
               [ALERT_SUPPRESSION_END]: secondTimestamp,
-              // TODO: fix count, it should be 4 suppressed
               [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
             });
           });
@@ -1897,7 +1895,7 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          // TODO: fix this
+          // TODO: is that correct behaviour?
           it.skip('should create and suppress alert on rule execution when alert created on previous execution', async () => {
             const id = uuidv4();
             const firstTimestamp = '2020-10-28T05:45:00.000Z';
@@ -1985,15 +1983,9 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          it.skip('should not suppress more than limited number (max_signals x5)', async () => {
+          it('should not suppress more than limited number (max_signals x5)', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
-            const doc1 = {
-              id,
-              '@timestamp': timestamp,
-              host: { name: 'host-a' },
-              agent: { name: 'agent-b' },
-            };
 
             await eventsFiller({ id, count: 20 * eventsCount, timestamp: [timestamp] });
             await threatsFiller({ id, count: 20 * threatsCount, timestamp });
@@ -2009,8 +2001,6 @@ export default ({ getService }: FtrProviderContext) => {
                 agent: { name: 'agent-a' },
               }),
             });
-
-            await indexListOfSourceDocuments([doc1, doc1, doc1]);
 
             await addThreatDocuments({
               id,
@@ -2040,7 +2030,9 @@ export default ({ getService }: FtrProviderContext) => {
               invocationCount: 1,
             });
 
-            expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
+            expect(logs[0].warnings).toEqual(
+              expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+            );
 
             const previewAlerts = await getPreviewAlerts({
               es,
@@ -2066,12 +2058,6 @@ export default ({ getService }: FtrProviderContext) => {
           it.skip('should not suppress more than limited number (max_signals x5) for number of events/threats greater than 9,000', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
-            const doc1 = {
-              id,
-              '@timestamp': timestamp,
-              host: { name: 'host-a' },
-              agent: { name: 'agent-b' },
-            };
 
             await eventsFiller({ id, count: 10000 * eventsCount, timestamp: [timestamp] });
             await threatsFiller({ id, count: 10000 * threatsCount, timestamp });
@@ -2087,8 +2073,6 @@ export default ({ getService }: FtrProviderContext) => {
                 agent: { name: 'agent-a' },
               }),
             });
-
-            await indexListOfSourceDocuments([doc1, doc1, doc1]);
 
             await addThreatDocuments({
               id,
@@ -2118,7 +2102,9 @@ export default ({ getService }: FtrProviderContext) => {
               invocationCount: 1,
             });
 
-            expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
+            expect(logs[0].warnings).toEqual(
+              expect.arrayContaining([getSuppressionMaxAlertsWarning()])
+            );
 
             const previewAlerts = await getPreviewAlerts({
               es,
@@ -2135,6 +2121,124 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+            });
+          });
+
+          it('should detect threats beyond max_signals if large number of alerts suppressed', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-b' },
+            };
+
+            const doc2 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-c' },
+              agent: { name: 'agent-c' },
+            };
+
+            await eventsFiller({ id, count: 20 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 20 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 150,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await indexListOfSourceDocuments([doc1, doc1, doc1, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-c',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+
+            // 3 alerts in total
+            // 1 + 149 suppressed host-a threat, 'agent-a' suppressed by
+            // 1 + 2 suppressed host-a threat, 'agent-b' suppressed by
+            // 1 + 1 suppressed host-c threat, 'agent-c' suppressed by
+            expect(previewAlerts.length).toEqual(3);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 149,
+            });
+
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-b'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
+            });
+
+            expect(previewAlerts[2]._source).toEqual({
+              ...previewAlerts[2]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-c'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
             });
           });
         });

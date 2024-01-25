@@ -20,6 +20,7 @@ import {
   ALERT_SUPPRESSION_END,
   ALERT_SUPPRESSION_START,
   ALERT_UUID,
+  ALERT_RULE_EXECUTION_UUID,
   ALERT_WORKFLOW_STATUS,
   TIMESTAMP,
   VERSION,
@@ -397,14 +398,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   const existingAlert =
                     existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
 
+                  // if existing alert was generated earlier during rule execution, it means new ones are not suppressed yet
+                  if (
+                    !existingAlert ||
+                    existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                  ) {
+                    return true;
+                  }
                   const suppressionEnd = existingAlert?._source?.[ALERT_SUPPRESSION_END];
                   const suppressionEndDate =
                     typeof suppressionEnd === 'string'
                       ? suppressionEnd
                       : suppressionEnd?.toISOString();
-
                   const isSuppressedAlready =
-                    suppressionEnd &&
                     suppressionEndDate &&
                     suppressionEndDate >= alert._source[ALERT_SUPPRESSION_END].toISOString();
 

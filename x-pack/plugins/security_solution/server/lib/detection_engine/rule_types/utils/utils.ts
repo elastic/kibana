@@ -735,8 +735,9 @@ export const addToSearchAfterReturn = ({
   current.bulkCreateTimes.push(next.bulkCreateDuration);
   current.enrichmentTimes.push(next.enrichmentDuration);
   current.errors = [...new Set([...current.errors, ...next.errors])];
-  if (current.suppressedAlertsCount != null) {
-    current.suppressedAlertsCount += next.suppressedAlertsCount ?? 0;
+  if (next.suppressedItemsCount != null) {
+    current.suppressedAlertsCount =
+      (current.suppressedAlertsCount ?? 0) + next.suppressedItemsCount;
   }
 };
 
@@ -981,4 +982,8 @@ export const getUnprocessedExceptionsWarnings = (
 
 export const getMaxSignalsWarning = (): string => {
   return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created.`;
+};
+
+export const getSuppressionMaxSignalsWarning = (): string => {
+  return `This rule reached the maximum alert limit for the rule execution. Some alerts were not created or suppressed.`;
 };
