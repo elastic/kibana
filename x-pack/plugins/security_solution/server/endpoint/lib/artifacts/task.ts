@@ -97,7 +97,11 @@ export class ManifestTask {
             },
             cancel: async () => {
               // TODO:PT add support for AbortController to Task manager
-              this.logger.debug(`Task run was canceled.`);
+              this.logger.warn(
+                'Task run was canceled. Packaging of endpoint artifacts may be taking longer due to the ' +
+                  'amount of policies/artifacts. Consider increasing the `xpack.securitySolution.packagerTaskTimeout` ' +
+                  'server configuration setting if this continues'
+              );
             },
           };
         },
