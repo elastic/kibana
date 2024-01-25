@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { LLM } from 'langchain/llms/base';
+import { LLM } from '@langchain/core/language_models/llms';
 import { get } from 'lodash/fp';
 
 import { getMessageContentAndRole } from '../helpers';

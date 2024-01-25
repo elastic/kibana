@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Document } from 'langchain/document';
+import { Document } from '@langchain/core/documents';
 
 /**
  * Mock LangChain `Document`s from `knowledge_base/esql/documentation`, loaded from a LangChain `DirectoryLoader`

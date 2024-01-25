@@ -17,7 +17,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
-import { Tool } from 'langchain/dist/tools/base';
+import { Tool } from '@langchain/core/tools';
 import { RetrievalQAChain } from 'langchain/chains';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { AssistantFeatures } from '@kbn/elastic-assistant-common';

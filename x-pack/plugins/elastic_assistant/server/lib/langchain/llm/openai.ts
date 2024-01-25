@@ -9,7 +9,7 @@ import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { get } from 'lodash/fp';
 
-import { ChatOpenAI } from 'langchain/chat_models/openai';
+import { ChatOpenAI } from '@langchain/openai';
 import { Stream } from 'openai/streaming';
 import {
   ChatCompletion,

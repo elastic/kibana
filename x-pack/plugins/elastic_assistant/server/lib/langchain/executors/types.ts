@@ -7,10 +7,10 @@
 
 import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { BaseMessage } from 'langchain/schema';
+import { BaseMessage } from '@langchain/core/messages';
 import { Logger } from '@kbn/logging';
 import { KibanaRequest, ResponseHeaders } from '@kbn/core-http-server';
-import type { LangChainTracer } from 'langchain/callbacks';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import { RequestBody, ResponseBody } from '../types';

@@ -7,7 +7,7 @@
 import { initializeAgentExecutorWithOptions } from 'langchain/agents';
 import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
-import { Tool } from 'langchain/tools';
+import { Tool } from '@langchain/core/tools';
 
 import { streamFactory } from '@kbn/ml-response-stream/server';
 import { RunLogPatch } from '@langchain/core/dist/tracers/log_stream';

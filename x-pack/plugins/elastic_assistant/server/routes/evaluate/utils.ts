@@ -11,7 +11,7 @@ import type { ActionResult } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { Run } from 'langsmith/schemas';
 import { ToolingLog } from '@kbn/tooling-log';
-import { LangChainTracer } from 'langchain/callbacks';
+import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
 
 /**
