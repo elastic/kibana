@@ -193,7 +193,7 @@ export function EmbeddedMapComponent({
   }, []);
 
   return (
-    <div style={{ height: 400, width }}>
+    <div style={{ height, width }}>
       <EmbeddedPanel>
         <div
           data-test-subj="xpack.ux.regionMap.embeddedPanel"

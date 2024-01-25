@@ -64,7 +64,7 @@ export function ClickMap() {
       >
         <ImageMap
           width={812}
-          height={520}
+          height={400}
           imageUrl={imageState.url}
           clickCoordinates={clickData.clickCoordinates}
           captureWidth={clickData.innerWidth}
