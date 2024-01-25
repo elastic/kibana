@@ -60,10 +60,7 @@ import { filterFields } from '../../../common/components/fields_stats_grid/filte
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { FieldCountPanel } from '../../../common/components/field_count_panel';
-import {
-  useESQLFieldStatsData,
-  type AggregatableField,
-} from '../../hooks/esql/use_esql_field_stats_data';
+import { useESQLFieldStatsData } from '../../hooks/esql/use_esql_field_stats_data';
 import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
@@ -72,6 +69,7 @@ import {
   ESQLDefaultLimitSizeSelect,
 } from '../search_panel/esql/limit_size';
 import { Column, useESQLOverallStatsData } from '../../hooks/esql/use_esql_overall_stats_data';
+import { AggregatableField } from '../../types/esql_data_visualizer';
 
 const defaults = getDefaultPageState();
 
@@ -351,8 +349,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     }
   }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
 
-  const { documentCountStats, totalCount, overallStats, overallStatsProgress, columns } =
-    useESQLOverallStatsData(fieldStatsRequest);
+  const {
+    documentCountStats,
+    totalCount,
+    overallStats,
+    overallStatsProgress,
+    columns,
+    cancelOverallStatsRequest,
+  } = useESQLOverallStatsData(fieldStatsRequest);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
   const [metricsLoaded] = useState(defaults.metricsLoaded);
@@ -414,7 +418,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     ]
   );
 
-  const { fieldStats, fieldStatsProgress } = useESQLFieldStatsData({
+  const { fieldStats, fieldStatsProgress, cancelFieldStatsRequest } = useESQLFieldStatsData({
     searchQuery: fieldStatsRequest?.searchQuery,
     columns: fieldStatFieldsToFetch,
     filter: fieldStatsRequest?.filter,
@@ -673,6 +677,14 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: '' });
 
   const onQueryUpdate = (q?: AggregateQuery) => {
+    // When user submits a new query
+    // resets all current requests and other data
+    if (cancelOverallStatsRequest) {
+      cancelOverallStatsRequest();
+    }
+    if (cancelFieldStatsRequest) {
+      cancelFieldStatsRequest();
+    }
     // Reset field stats to fetch state
     setFieldStatFieldsToFetch(undefined);
     setMetricConfigs(defaults.metricConfigs);

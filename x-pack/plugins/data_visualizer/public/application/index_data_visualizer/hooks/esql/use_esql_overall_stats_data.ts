@@ -30,8 +30,8 @@ import {
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
 import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
-import type { AggregatableField } from './use_esql_field_stats_data';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
+import type { AggregatableField } from '../../types/esql_data_visualizer';
 
 export interface Column {
   type: string;
@@ -246,9 +246,7 @@ export const useESQLOverallStatsData = (
 
         setTableData({ totalCount, documentCountStats });
         setOverallStatsProgress({
-          ...getInitialProgress(),
-          isRunning: true,
-          error: undefined,
+          loaded: 50,
         });
         const aggregatableFields: Array<{
           fieldName: string;
@@ -301,7 +299,15 @@ export const useESQLOverallStatsData = (
         // to safeguard against huge datasets
         const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
 
-        if (fields.length > 0) {
+        if (totalCount === 0) {
+          setOverallStatsProgress({
+            loaded: 100,
+            isRunning: false,
+            error: undefined,
+          });
+          return;
+        }
+        if (totalCount > 0 && fields.length > 0) {
           const stats = await getESQLOverallStats({
             runRequest,
             fields,
@@ -345,5 +351,8 @@ export const useESQLOverallStatsData = (
     startFetch();
   }, [startFetch]);
 
-  return useMemo(() => ({ ...tableData, overallStatsProgress }), [tableData, overallStatsProgress]);
+  return useMemo(
+    () => ({ ...tableData, overallStatsProgress, cancelOverallStatsRequest: cancelRequest }),
+    [tableData, overallStatsProgress, cancelRequest]
+  );
 };
