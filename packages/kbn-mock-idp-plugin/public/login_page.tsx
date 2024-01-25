@@ -21,11 +21,7 @@ import React, { ChangeEvent, useEffect, useState, useRef } from 'react';
 import { FormikProvider, useFormik, Field, Form } from 'formik';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
-import { type HttpSetup } from '@kbn/core-http-browser';
 import { useAuthenticator } from './role_switcher';
-
-export const fetchRoles = (http: HttpSetup) =>
-  http.get<{ roles: string[] }>('/mock_idp/supported_roles');
 
 export const LoginPage = () => {
   const { services } = useKibana<CoreStart>();
@@ -59,7 +55,7 @@ export const LoginPage = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetchRoles(services.http);
+      const response = await services.http.get<{ roles: string[] }>('/mock_idp/supported_roles');
       setRoles(response.roles);
       formikRef.current.setFieldValue('role', response.roles[0]);
     };

@@ -15,7 +15,6 @@ import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { MOCK_IDP_REALM_NAME, MOCK_IDP_REALM_TYPE } from '@kbn/mock-idp-utils/src/constants';
 import { createReloadPageToast } from './reload_page_toast';
 import type { CreateSAMLResponseParams } from '../server';
-import { fetchRoles } from './login_page';
 
 const useCurrentUser = () => {
   const { services } = useKibana<CoreStart>();
@@ -57,7 +56,9 @@ export const RoleSwitcher = () => {
 
   useEffect(() => {
     getCurrentUser();
-    fetchRoles(services.http).then((response) => setRoles(response.roles));
+    services.http
+      .get<{ roles: string[] }>('/mock_idp/supported_roles')
+      .then((response) => setRoles(response.roles));
   }, [getCurrentUser, authenticateUserState.value, services]);
 
   useEffect(() => {
