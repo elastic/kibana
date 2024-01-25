@@ -4,19 +4,18 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { i18n } from '@kbn/i18n';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { StreamingChatResponseEvent } from '../common/conversation_complete';
-import { ObservabilityAIAssistantAPIClient } from './api';
+import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
+import type { ObservabilityAIAssistantAPIClient } from './api';
 import type {
   ObservabilityAIAssistantChatService,
   ObservabilityAIAssistantPluginSetup,
   ObservabilityAIAssistantPluginStart,
   ObservabilityAIAssistantService,
-  PendingMessage,
 } from './types';
 import { buildFunctionElasticsearch, buildFunctionServiceSummary } from './utils/builders';
 
@@ -26,8 +25,8 @@ export const mockChatService: ObservabilityAIAssistantChatService = {
     reportEvent: () => {},
     telemetryCounter$: new Observable(),
   },
-  chat: (options) => new Observable<PendingMessage>(),
-  complete: (options) => new Observable<StreamingChatResponseEvent>(),
+  chat: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
+  complete: (options) => new Observable<StreamingChatResponseEventWithoutError>(),
   getContexts: () => [],
   getFunctions: () => [buildFunctionElasticsearch(), buildFunctionServiceSummary()],
   renderFunction: (name) => (

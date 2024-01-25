@@ -31,12 +31,12 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('@ess @serverless @skipInQA Prebuilt Rules status', () => {
     describe('get_prebuilt_rules_status', () => {
       beforeEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es);
+        await deleteAllPrebuiltRuleAssets(es, log);
         await deleteAllRules(supertest, log);
       });
 
       it('should return empty structure when no prebuilt rule assets', async () => {
-        const { stats } = await getPrebuiltRulesStatus(supertest);
+        const { stats } = await getPrebuiltRulesStatus(es, supertest);
         expect(stats).toMatchObject({
           num_prebuilt_rules_installed: 0,
           num_prebuilt_rules_to_install: 0,
@@ -48,7 +48,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should not update the prebuilt rule status when a custom rule is added', async () => {
         await createRule(supertest, log, getSimpleRule());
 
-        const { stats } = await getPrebuiltRulesStatus(supertest);
+        const { stats } = await getPrebuiltRulesStatus(es, supertest);
         expect(stats).toMatchObject({
           num_prebuilt_rules_installed: 0,
           num_prebuilt_rules_to_install: 0,
@@ -68,7 +68,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('should return the number of rules available to install', async () => {
           await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: 0,
             num_prebuilt_rules_to_install: RULES_COUNT,
@@ -81,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(es, supertest);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -95,7 +95,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
           await deleteRule(supertest, 'rule-1');
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT - 1,
             num_prebuilt_rules_to_install: 1,
@@ -110,12 +110,12 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -130,14 +130,14 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
           // Upgrade all rules
           await upgradePrebuiltRules(es, supertest);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -152,11 +152,11 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Recreate the rules without bumping any versions
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext): void => {
         it('should return the number of rules available to install', async () => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: 0,
             num_prebuilt_rules_to_install: RULES_COUNT,
@@ -192,7 +192,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRules(es, supertest);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -206,7 +206,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
           await deleteRule(supertest, 'rule-1');
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT - 1,
             num_prebuilt_rules_to_install: 1,
@@ -224,7 +224,7 @@ export default ({ getService }: FtrProviderContext): void => {
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -238,14 +238,14 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRules(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
@@ -271,7 +271,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // Upgrade the rule
           await upgradePrebuiltRules(es, supertest);
 
-          const { stats } = await getPrebuiltRulesStatus(supertest);
+          const { stats } = await getPrebuiltRulesStatus(es, supertest);
           expect(stats).toMatchObject({
             num_prebuilt_rules_installed: RULES_COUNT,
             num_prebuilt_rules_to_install: 0,
@@ -286,12 +286,12 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('get_prebuilt_rules_status - legacy', () => {
       beforeEach(async () => {
-        await deleteAllPrebuiltRuleAssets(es);
+        await deleteAllPrebuiltRuleAssets(es, log);
         await deleteAllRules(supertest, log);
       });
 
       it('should return empty structure when no rules package installed', async () => {
-        const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
 
         expect(body).toMatchObject({
           rules_custom_installed: 0,
@@ -304,7 +304,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should show that one custom rule is installed when a custom rule is added', async () => {
         await createRule(supertest, log, getSimpleRule());
 
-        const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+        const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
         expect(body).toMatchObject({
           rules_custom_installed: 1,
           rules_installed: 0,
@@ -324,7 +324,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('should return the number of rules available to install', async () => {
           await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
 
           expect(body).toMatchObject({
             rules_custom_installed: 0,
@@ -338,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRulesAndTimelines(es, supertest);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
@@ -352,7 +352,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
           await deleteRule(supertest, 'rule-1');
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT - 1,
@@ -367,12 +367,12 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Increment the version of one of the installed rules and create the new rule assets
           ruleAssetSavedObjects[0]['security-rule'].version += 1;
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
@@ -387,11 +387,11 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Clear previous rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
           // Recreate the rules without bumping any versions
           await createPrebuiltRuleAssetSavedObjects(es, ruleAssetSavedObjects);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
@@ -413,7 +413,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         it('should return the number of rules available to install', async () => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
 
           expect(body).toMatchObject({
             rules_custom_installed: 0,
@@ -427,7 +427,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, getRuleAssetSavedObjects());
           await installPrebuiltRulesAndTimelines(es, supertest);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
@@ -441,7 +441,7 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
           await deleteRule(supertest, 'rule-1');
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT - 1,
@@ -459,7 +459,7 @@ export default ({ getService }: FtrProviderContext): void => {
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,
@@ -473,14 +473,14 @@ export default ({ getService }: FtrProviderContext): void => {
           await installPrebuiltRulesAndTimelines(es, supertest);
 
           // Delete the previous versions of rule assets
-          await deleteAllPrebuiltRuleAssets(es);
+          await deleteAllPrebuiltRuleAssets(es, log);
 
           // Add a new rule version
           await createHistoricalPrebuiltRuleAssetSavedObjects(es, [
             createRuleAssetSavedObject({ rule_id: 'rule-1', version: 3 }),
           ]);
 
-          const body = await getPrebuiltRulesAndTimelinesStatus(supertest);
+          const body = await getPrebuiltRulesAndTimelinesStatus(es, supertest);
           expect(body).toMatchObject({
             rules_custom_installed: 0,
             rules_installed: RULES_COUNT,

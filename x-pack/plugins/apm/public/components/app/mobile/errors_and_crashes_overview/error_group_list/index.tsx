@@ -10,6 +10,7 @@ import {
   EuiToolTip,
   RIGHT_ALIGNMENT,
   LEFT_ALIGNMENT,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -18,7 +19,7 @@ import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { asInteger } from '../../../../../../common/utils/formatters';
 import { useApmParams } from '../../../../../hooks/use_apm_params';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import { truncate } from '../../../../../utils/style';
+import { truncate, unit } from '../../../../../utils/style';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -30,11 +31,20 @@ import { ITableColumn, ManagedTable } from '../../../../shared/managed_table';
 import { TimestampTooltip } from '../../../../shared/timestamp_tooltip';
 import { isTimeComparison } from '../../../../shared/time_comparison/get_comparison_options';
 
+const GroupIdLink = euiStyled(ErrorDetailLink)`
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+`;
+
 const MessageAndCulpritCell = euiStyled.div`
   ${truncate('100%')};
 `;
 
 const ErrorLink = euiStyled(ErrorOverviewLink)`
+  ${truncate('100%')};
+`;
+
+const MessageLink = euiStyled(ErrorDetailLink)`
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
   ${truncate('100%')};
 `;
 
@@ -71,6 +81,44 @@ function MobileErrorGroupList({
   const columns = useMemo(() => {
     return [
       {
+        name: (
+          <>
+            {i18n.translate('xpack.apm.errorsTable.groupIdColumnLabel', {
+              defaultMessage: 'Group ID',
+            })}{' '}
+            <EuiIconTip
+              size="s"
+              type="questionInCircle"
+              color="subdued"
+              iconProps={{
+                className: 'eui-alignTop',
+              }}
+              content={i18n.translate(
+                'xpack.apm.errorsTable.groupIdColumnDescription',
+                {
+                  defaultMessage:
+                    'Hash of the stack trace. Groups similar errors together, even when the error message is different due to dynamic parameters.',
+                }
+              )}
+            />
+          </>
+        ),
+        field: 'groupId',
+        sortable: false,
+        width: `${unit * 6}px`,
+        render: (_, item: ErrorGroupItem) => {
+          return (
+            <GroupIdLink
+              serviceName={serviceName}
+              groupId={item.groupId}
+              query={query}
+            >
+              {item.groupId.slice(0, 5) || NOT_AVAILABLE_LABEL}
+            </GroupIdLink>
+          );
+        },
+      },
+      {
         name: i18n.translate('xpack.apm.errorsTable.typeColumnLabel', {
           defaultMessage: 'Type',
         }),
@@ -92,12 +140,9 @@ function MobileErrorGroupList({
         },
       },
       {
-        name: i18n.translate(
-          'xpack.apm.errorsTable.errorMessageAndCulpritColumnLabel',
-          {
-            defaultMessage: 'Error message and culprit',
-          }
-        ),
+        name: i18n.translate('xpack.apm.errorsTable.errorMessageColumnLabel', {
+          defaultMessage: 'Error message',
+        }),
         field: 'message',
         sortable: false,
         width: '30%',
@@ -108,13 +153,13 @@ function MobileErrorGroupList({
                 id="error-message-tooltip"
                 content={item.name || NOT_AVAILABLE_LABEL}
               >
-                <ErrorDetailLink
+                <MessageLink
                   serviceName={serviceName}
                   groupId={item.groupId}
                   query={query}
                 >
                   {item.name || NOT_AVAILABLE_LABEL}
-                </ErrorDetailLink>
+                </MessageLink>
               </EuiToolTip>
             </MessageAndCulpritCell>
           );

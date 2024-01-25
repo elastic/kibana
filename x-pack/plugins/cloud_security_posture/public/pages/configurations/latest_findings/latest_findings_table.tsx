@@ -10,7 +10,6 @@ import { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { FindingsBaseProps } from '../../../common/types';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { FindingsDistributionBar } from '../layout/findings_distribution_bar';
 import { ErrorCallout } from '../layout/error_callout';
@@ -22,14 +21,12 @@ import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 
-type LatestFindingsTableProps = FindingsBaseProps & {
+interface LatestFindingsTableProps {
   groupSelectorComponent?: JSX.Element;
   height?: number;
   showDistributionBar?: boolean;
   nonPersistedFilters?: Filter[];
-  dataViewRefetch?: () => void;
-  dataViewIsRefetching?: boolean;
-};
+}
 
 /**
  * Type Guard for checking if the given source is a CspFinding
@@ -84,13 +81,10 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
 });
 
 export const LatestFindingsTable = ({
-  dataView,
   groupSelectorComponent,
   height,
   showDistributionBar = true,
   nonPersistedFilters,
-  dataViewRefetch,
-  dataViewIsRefetching,
 }: LatestFindingsTableProps) => {
   const {
     cloudPostureDataTable,
@@ -104,7 +98,6 @@ export const LatestFindingsTable = ({
     canShowDistributionBar,
     onDistributionBarClick,
   } = useLatestFindingsTable({
-    dataView,
     getDefaultQuery,
     nonPersistedFilters,
     showDistributionBar,
@@ -132,7 +125,6 @@ export const LatestFindingsTable = ({
           )}
           <CloudSecurityDataTable
             data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_TABLE}
-            dataView={dataView}
             isLoading={isFetching}
             defaultColumns={defaultColumns}
             rows={rows}
@@ -144,8 +136,6 @@ export const LatestFindingsTable = ({
             customCellRenderer={customCellRenderer}
             groupSelectorComponent={groupSelectorComponent}
             height={height}
-            dataViewRefetch={dataViewRefetch}
-            dataViewIsRefetching={dataViewIsRefetching}
           />
         </>
       )}

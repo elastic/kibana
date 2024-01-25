@@ -45,9 +45,9 @@ jest.mock('./utils', () => ({
   getCustomChartData: jest.fn().mockReturnValue(true),
 }));
 
-const mockUseVisualizationResponse = jest.fn(() => [
-  { aggregations: [{ buckets: [{ key: '1234' }] }], hits: { total: 999 } },
-]);
+const mockUseVisualizationResponse = jest.fn(() => ({
+  responses: [{ aggregations: [{ buckets: [{ key: '1234' }] }], hits: { total: 999 } }],
+}));
 jest.mock('../visualization_actions/use_visualization_response', () => ({
   useVisualizationResponse: () => mockUseVisualizationResponse(),
 }));
@@ -345,9 +345,9 @@ describe('Matrix Histogram Component', () => {
     });
 
     test('it should render 0 as subtitle when buckets are empty', () => {
-      mockUseVisualizationResponse.mockReturnValue([
-        { aggregations: [{ buckets: [] }], hits: { total: 999 } },
-      ]);
+      mockUseVisualizationResponse.mockReturnValue({
+        responses: [{ aggregations: [{ buckets: [] }], hits: { total: 999 } }],
+      });
       mockUseMatrix.mockReturnValue([
         false,
         {

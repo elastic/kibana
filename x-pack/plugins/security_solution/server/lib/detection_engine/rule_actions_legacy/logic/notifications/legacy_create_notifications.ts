@@ -10,7 +10,7 @@ import { SERVER_APP_ID, LEGACY_NOTIFICATIONS_ID } from '../../../../../../common
 // eslint-disable-next-line no-restricted-imports
 import type {
   CreateNotificationParams,
-  LegacyRuleNotificationAlertTypeParams,
+  LegacyRuleNotificationRuleTypeParams,
 } from './legacy_types';
 
 /**
@@ -23,8 +23,8 @@ export const legacyCreateNotifications = async ({
   ruleAlertId,
   interval,
   name,
-}: CreateNotificationParams): Promise<SanitizedRule<LegacyRuleNotificationAlertTypeParams>> =>
-  rulesClient.create<LegacyRuleNotificationAlertTypeParams>({
+}: CreateNotificationParams): Promise<SanitizedRule<LegacyRuleNotificationRuleTypeParams>> =>
+  rulesClient.create<LegacyRuleNotificationRuleTypeParams>({
     data: {
       name,
       tags: [],

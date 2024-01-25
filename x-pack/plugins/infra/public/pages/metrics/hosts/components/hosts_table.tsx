@@ -44,7 +44,7 @@ export const HostsTable = () => {
       />
       <EuiBasicTable
         ref={refs.tableRef}
-        data-test-subj="hostsView-table"
+        data-test-subj={`hostsView-table-${loading ? 'loading' : 'loaded'}`}
         itemId="id"
         isSelectable
         selection={selection}

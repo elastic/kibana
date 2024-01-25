@@ -47,5 +47,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views/_edit_field'));
     loadTestFile(require.resolve('./_files'));
     loadTestFile(require.resolve('./_data_view_field_filters'));
+    loadTestFile(require.resolve('./data_views/_cache'));
   });
 }

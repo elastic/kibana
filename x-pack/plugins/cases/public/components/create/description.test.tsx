@@ -18,7 +18,11 @@ import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { MAX_DESCRIPTION_LENGTH } from '../../../common/constants';
 
-describe('Description', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174133
+// FLAKY: https://github.com/elastic/kibana/issues/174134
+// FLAKY: https://github.com/elastic/kibana/issues/174135
+// FLAKY: https://github.com/elastic/kibana/issues/175204
+describe.skip('Description', () => {
   let globalForm: FormHook;
   let appMockRender: AppMockRenderer;
   const draftStorageKey = `cases.caseView.createCase.description.markdownEditor`;

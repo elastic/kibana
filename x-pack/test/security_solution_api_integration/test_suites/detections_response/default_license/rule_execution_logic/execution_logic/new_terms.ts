@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
     index: 'new_terms',
     log,
   });
-  // TODO: add a new service
+  // TODO: add a new service for loading archiver files similar to "getService('es')"
   const config = getService('config');
   const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
   const isServerless = config.get('serverless');
