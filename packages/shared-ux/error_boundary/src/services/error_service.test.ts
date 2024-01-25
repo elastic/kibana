@@ -109,7 +109,15 @@ describe('KibanaErrorBoundary Error Service', () => {
 
     expect(mockDeps.analytics.reportEvent).toHaveBeenCalledTimes(1);
     expect(mockDeps.analytics.reportEvent.mock.calls[0][0]).toBe('fatal-error-react');
-    expect(String(mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack).includes('at OutrageousMaker')).toBe(true);
-    expect(String(mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack).startsWith('Error: This is an outrageous and fatal error')).toBe(true);
+    expect(
+      String(mockDeps.analytics.reportEvent.mock.calls[0][1].component_stack).includes(
+        'at OutrageousMaker'
+      )
+    ).toBe(true);
+    expect(
+      String(mockDeps.analytics.reportEvent.mock.calls[0][1].error_stack).startsWith(
+        'Error: This is an outrageous and fatal error'
+      )
+    ).toBe(true);
   });
 });
