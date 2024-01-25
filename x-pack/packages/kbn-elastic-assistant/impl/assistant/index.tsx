@@ -403,6 +403,8 @@ const AssistantComponent: React.FC<Props> = ({
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isEnabledKnowledgeBase,
+      isEnabledRAGAlerts,
       isLoadingChatSend,
       isSettingsModalVisible,
       promptContexts,
