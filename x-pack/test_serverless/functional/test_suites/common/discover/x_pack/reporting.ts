@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async () => {
     // close any open notification toasts
     await PageObjects.reporting.clearToastNotifications();
-
+    await testSubjects.click('shareTopNavButton');
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -65,7 +65,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await PageObjects.share.closeShareModal();
+        if (await PageObjects.share.isShareMenuOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await reportingAPI.teardownEcommerce();
         // TODO: emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",
@@ -74,6 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
+        await testSubjects.click('shareTopNavButton');
         await PageObjects.reporting.openCsvReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();
