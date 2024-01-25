@@ -27,6 +27,5 @@
     "@kbn/mock-idp-utils",
     "@kbn/cloud-plugin",
     "@kbn/es",
-    "@kbn/core-http-browser",
   ]
 }
