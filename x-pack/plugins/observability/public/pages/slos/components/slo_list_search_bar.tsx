@@ -11,11 +11,11 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Filter } from '@kbn/es-query';
 import styled from 'styled-components';
+import { TagsFilter } from './common/tags_filter';
 import { useKibana } from '../../../utils/kibana_react';
-import { ObservabilityPublicPluginsStart } from '../../..';
-import { SortBySelect } from './common/sort_by_select';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
+import { ObservabilityPublicPluginsStart } from '../../..';
 import { SearchState } from '../hooks/use_url_search_state';
 
 export interface Props {
@@ -58,11 +58,7 @@ export function SloListSearchBar({ query, filters, loading, initialState, onStat
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
-          <SortBySelect
-            initialState={initialState}
-            loading={loading}
-            onStateChange={onStateChange}
-          />
+          <TagsFilter initialState={initialState} loading={loading} onStateChange={onStateChange} />
         )}
         filters={filters}
         onFiltersUpdated={(newFilters) => {
