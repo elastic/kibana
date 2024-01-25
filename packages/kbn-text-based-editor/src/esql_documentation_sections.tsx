@@ -1647,7 +1647,7 @@ Returning:
 foo;bar;baz | foo
 \`\`\`
 
-The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like SPLIT.
+The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like \`SPLIT\`.
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2589,9 +2589,9 @@ ROW wkt = "POINT(42.97109630194 14.7552534413725)"
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction.markdown',
             {
               defaultMessage: `### TO_GEOSHAPE
-Converts an input value to a \`geoshape\` value.
+Converts an input value to a \`geo_shape\` value.
 
-The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_point\`.
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_shape\`.
 
 A string will only be successfully converted if it respects the [WKT format](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry).
 
@@ -2605,7 +2605,7 @@ ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
 Returning:
 
 \`\`\`
-"POLYGON 30 10, 40 40, 20 40, 10 20, 30 10" | POLYGON 30 10, 40 40, 20 40, 10 20, 30 10
+POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
 \`\`\`
               `,
               description:
