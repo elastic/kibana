@@ -13,13 +13,14 @@ import {
   GroupPanelRenderer,
   GroupStatsRenderer,
 } from '@kbn/securitysolution-grouping/src';
+
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
-const MAX_GROUPING_LEVELS = 1;
+const MAX_GROUPING_LEVELS = 3;
 
 /*
  Utility hook to handle the grouping logic of the cloud security components
@@ -32,6 +33,7 @@ export const useCloudSecurityGrouping = ({
   unit,
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLevel,
   groupingLocalStorageKey,
 }: {
   dataView: DataView;
@@ -41,6 +43,7 @@ export const useCloudSecurityGrouping = ({
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
   groupStatsRenderer?: GroupStatsRenderer<any>;
+  groupingLevel?: number;
   groupingLocalStorageKey: string;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
@@ -52,14 +55,6 @@ export const useCloudSecurityGrouping = ({
     filters: urlQuery.filters,
     query: urlQuery.query,
   });
-
-  /**
-   * Reset the active page when the filters or query change
-   * This is needed because the active page is not automatically reset when the filters or query change
-   */
-  useEffect(() => {
-    setActivePageIndex(0);
-  }, [urlQuery.filters, urlQuery.query]);
 
   const grouping = useGrouping({
     componentProps: {
@@ -77,7 +72,16 @@ export const useCloudSecurityGrouping = ({
     },
   });
 
-  const selectedGroup = grouping.selectedGroups[0];
+  const selectedGroup = groupingLevel
+    ? grouping.selectedGroups[groupingLevel]
+    : grouping.selectedGroups[0];
+  /**
+   * Reset the active page when the filters or query change
+   * This is needed because the active page is not automatically reset when the filters or query change
+   */
+  useEffect(() => {
+    setActivePageIndex(0);
+  }, [urlQuery.filters, urlQuery.query]);
 
   // This is recommended by the grouping component to cover an edge case
   // where the selectedGroup has multiple values
@@ -104,6 +108,7 @@ export const useCloudSecurityGrouping = ({
 
   return {
     activePageIndex,
+    setActivePageIndex,
     grouping,
     pageSize,
     query,

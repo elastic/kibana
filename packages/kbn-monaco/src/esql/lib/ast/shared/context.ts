@@ -13,6 +13,7 @@ import type {
   ESQLFunction,
   ESQLCommand,
   ESQLCommandOption,
+  ESQLCommandMode,
 } from '../types';
 import { EDITOR_MARKER } from './constants';
 import {
@@ -21,6 +22,7 @@ import {
   getLastCharFromTrimmed,
   getFunctionDefinition,
   isSourceItem,
+  isSettingItem,
 } from './helpers';
 
 function findNode(nodes: ESQLAstItem[], offset: number): ESQLSingleAstItem | undefined {
@@ -56,9 +58,20 @@ function findCommand(ast: ESQLAst, offset: number) {
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
-  // this is a similar logic to the findNode, but it check if the command is in root or option scope
+  return findCommandSubType(nodes, offset, isOptionItem);
+}
+
+function findSetting(nodes: ESQLAstItem[], offset: number): ESQLCommandMode | undefined {
+  return findCommandSubType(nodes, offset, isSettingItem);
+}
+
+function findCommandSubType<T extends ESQLCommandMode | ESQLCommandOption>(
+  nodes: ESQLAstItem[],
+  offset: number,
+  isOfTypeFn: (node: ESQLAstItem) => node is T
+): T | undefined {
   for (const node of nodes) {
-    if (!Array.isArray(node) && isOptionItem(node)) {
+    if (isOfTypeFn(node)) {
       if (
         (node.location.min <= offset && node.location.max >= offset) ||
         (nodes[nodes.length - 1] === node && node.location.max < offset)
@@ -105,12 +118,13 @@ export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCo
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
-    return { command: undefined, node: undefined, option: undefined };
+    return { command: undefined, node: undefined, option: undefined, setting: undefined };
   }
   return {
     command: removeMarkerArgFromArgsList(command)!,
     option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
     node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
+    setting: removeMarkerArgFromArgsList(findSetting(command.args, offset)),
   };
 }
 
@@ -122,32 +136,56 @@ function isBuiltinFunction(node: ESQLFunction) {
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
-  const { command, option, node } = findAstPosition(ast, offset);
+  const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
       if (['in', 'not_in'].includes(node.name)) {
         // command ... a in ( <here> )
-        return { type: 'list' as const, command, node, option };
+        return { type: 'list' as const, command, node, option, setting };
       }
       if (isNotEnrichClauseAssigment(node, command) && !isBuiltinFunction(node)) {
         // command ... fn( <here> )
-        return { type: 'function' as const, command, node, option };
+        return { type: 'function' as const, command, node, option, setting };
       }
     }
     if (node.type === 'option' || option) {
       // command ... by <here>
-      return { type: 'option' as const, command, node, option };
+      return { type: 'option' as const, command, node, option, setting };
     }
+    if (node.type === 'mode' || option) {
+      // command [<here>
+      return { type: 'setting' as const, command, node, option, setting };
+    }
+  }
+  if (!command && innerText.trim().toLowerCase() === 'show') {
+    return {
+      type: 'expression' as const,
+      // The ES grammar makes the "SHOW" command an invalid type at grammar level
+      // so we need to create a fake command to make it work the AST in this case
+      command: {
+        type: 'command',
+        name: 'show',
+        text: innerText.trim(),
+        location: { min: 0, max: innerText.length },
+        incomplete: true,
+        args: [],
+      } as ESQLCommand,
+      node,
+      option,
+    };
   }
 
   if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option };
+    return { type: 'newCommand' as const, command: undefined, node, option, setting };
   }
 
   if (command && command.args.length) {
     if (option) {
-      return { type: 'option' as const, command, node, option };
+      return { type: 'option' as const, command, node, option, setting };
+    }
+    if (setting?.incomplete) {
+      return { type: 'setting' as const, command, node, option, setting };
     }
   }
 
@@ -157,5 +195,6 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
     command,
     option,
     node,
+    setting,
   };
 }

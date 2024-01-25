@@ -73,6 +73,9 @@ import {
   computeLocationExtends,
   createColumnStar,
   wrapIdentifierAsArray,
+  createPolicy,
+  createSettingTuple,
+  createLiteralString,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -117,10 +120,25 @@ export function collectAllColumnIdentifiers(
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName) {
+  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
     return [];
   }
-  return [createSource(ctx._policyName, 'policy')];
+  return [createPolicy(ctx._policyName)];
+}
+
+export function getPolicySettings(ctx: EnrichCommandContext) {
+  if (!ctx.setting() || !ctx.setting().length) {
+    return [];
+  }
+  return ctx.setting().map((setting) => {
+    const node = createSettingTuple(setting);
+    if (setting._name?.text && setting._value?.text) {
+      node.args.push(createLiteralString(setting._value)!);
+      return node;
+    }
+    // incomplete setting
+    return node;
+  });
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
@@ -475,16 +493,12 @@ export function collectAllFieldsStatements(ctx: FieldsContext | undefined): ESQL
   return ast;
 }
 
-export function visitByOption(ctx: StatsCommandContext) {
-  if (!ctx.BY()) {
+export function visitByOption(ctx: StatsCommandContext, expr: FieldsContext | undefined) {
+  if (!ctx.BY() || !expr) {
     return [];
   }
   const option = createOption(ctx.BY()!.text.toLowerCase(), ctx);
-  for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    if (qnCtx?.text?.length) {
-      option.args.push(createColumn(qnCtx));
-    }
-  }
+  option.args.push(...collectAllFieldsStatements(expr));
   return [option];
 }
 
