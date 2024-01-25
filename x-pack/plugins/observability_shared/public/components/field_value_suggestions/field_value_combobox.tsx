@@ -70,10 +70,13 @@ export function FieldValueCombobox({
       fullWidth
       singleSelection={singleSelection ? { asPlainText: true } : false}
       compressed={compressed}
-      placeholder={i18n.translate('xpack.exploratoryView.fieldValueSelection.placeholder.search', {
-        defaultMessage: 'Search {label}',
-        values: { label },
-      })}
+      placeholder={i18n.translate(
+        'xpack.observabilityShared.fieldValueSelection.placeholder.search',
+        {
+          defaultMessage: 'Search {label}',
+          values: { label },
+        }
+      )}
       isLoading={loading}
       onSearchChange={(searchVal) => {
         setQuery(searchVal);
