@@ -11,7 +11,20 @@ import type { interfaces } from 'inversify';
 /**
  * A identifier that can be used to uniquely identify a service.
  */
-export type ServiceIdentifier<T = unknown> = interfaces.ServiceIdentifier<T>;
+export type ServiceIdentifier<T> = interfaces.ServiceIdentifier<T> & {
+  /** require for TS to not lose information on the generic type bound to the identifier... */
+  _identifierType?: T;
+};
+
+/**
+ * Utility type resolving the service type from a service identifier
+ */
+export type ServiceType<Identifier> = Identifier extends ServiceIdentifier<any>
+  ? NonNullable<Identifier['_identifierType']>
+  : never;
+
+// Does not work atm, forced to use the same trick we used for config-schema
+// export type ServiceType<Identifier> = Identifier extends ServiceIdentifier<infer T> ? T : never;
 
 /**
  * The public interface for an injection container during registration by plugins.
