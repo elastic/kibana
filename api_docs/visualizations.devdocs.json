@@ -6903,7 +6903,23 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
+          "[] | undefined>; onPhaseChange: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PhaseEvent",
+            "text": "PhaseEvent"
+          },
+          " | undefined>; setPanelTitle: (newTitle: string | undefined) => void; isEditingEnabled: () => boolean; setHidePanelTitle: (hide: boolean | undefined) => void; getTypeDisplayName: () => string; setPanelDescription: (newTitle: string | undefined) => void; render: (domNode: HTMLElement) => Promise<void>; readonly isContainer: boolean; reload: () => Promise<void>; getExplicitInputIsEqual: (lastExplicitInput: Partial<",
           {
             "pluginId": "visualizations",
             "scope": "public",

@@ -8,7 +8,9 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
-import ReactMonacoEditor from 'react-monaco-editor';
+import ReactMonacoEditor, {
+  type MonacoEditorProps as ReactMonacoEditorProps,
+} from 'react-monaco-editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -57,35 +59,35 @@ export interface CodeEditorProps {
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
   options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html
    */
   suggestionProvider?: monaco.languages.CompletionItemProvider;
 
   /**
    * Signature provider for function parameter info
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html
    */
   signatureProvider?: monaco.languages.SignatureHelpProvider;
 
   /**
    * Hover provider for hover documentation
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html
    */
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
    */
   languageConfiguration?: monaco.languages.LanguageConfiguration;
 
@@ -127,6 +129,10 @@ export interface CodeEditorProps {
 
   isCopyable?: boolean;
   allowFullScreen?: boolean;
+  /**
+   * Alternate text to display, when an attempt is made to edit read only content. (Defaults to "Cannot edit in read-only editor")
+   */
+  readOnlyMessage?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -151,6 +157,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   isCopyable = false,
   allowFullScreen = false,
+  readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
+    defaultMessage: 'Cannot edit in read-only editor',
+  }),
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -311,8 +320,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     );
   }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
 
-  const _editorWillMount = useCallback(
-    (__monaco: unknown) => {
+  const _editorWillMount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillMount']>>(
+    (__monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
@@ -361,8 +370,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     ]
   );
 
-  const _editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+  const _editorDidMount = useCallback<NonNullable<ReactMonacoEditorProps['editorDidMount']>>(
+    (editor, __monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
@@ -373,7 +382,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
       if (textbox) {
-        // Make sure the textarea is not directly accesible with TAB
+        // Make sure the textarea is not directly accessible with TAB
         textbox.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
@@ -388,6 +397,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editor.onKeyDown(onKeydownMonaco);
       editor.onDidBlurEditorText(onBlurMonaco);
+
+      const messageContribution = editor.getContribution('editor.contrib.messageController');
+      editor.onDidAttemptReadOnlyEdit(() => {
+        // @ts-expect-error the show message API does exist and is documented here
+        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
+        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+      });
 
       // "widget" is not part of the TS interface but does exist
       // @ts-expect-errors
@@ -407,7 +423,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editorDidMount?.(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco]
+    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+  );
+
+  const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
+    (editor) => {
+      const model = editor.getModel();
+      model?.dispose();
+    },
+    []
   );
 
   useEffect(() => {
@@ -431,7 +455,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   useEffect(() => {
-    // Register themes when 'useDarkThem' changes
+    // Register themes when 'useDarkTheme' changes
     monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
     monaco.editor.defineTheme(
       'euiColorsTransparent',
@@ -478,6 +502,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           height={isFullScreen ? '100vh' : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
+          editorWillUnmount={_editorWillUnmount}
           options={{
             padding: allowFullScreen || isCopyable ? { top: 24 } : {},
             renderLineHighlight: 'none',
@@ -499,6 +524,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             fontFamily: 'Roboto Mono',
             fontSize: isFullScreen ? 16 : 12,
             lineHeight: isFullScreen ? 24 : 21,
+            // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+            'bracketPairColorization.enabled': false,
             ...options,
           }}
         />
