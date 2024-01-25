@@ -99,9 +99,9 @@ const findSLOParamsSchema = t.partial({
 
 const groupBySchema = t.union([
   t.literal('ungrouped'),
-  t.literal('tags'),
+  t.literal('slo.tags'),
   t.literal('status'),
-  t.literal('sliType'),
+  t.literal('slo.indicator.type'),
 ]);
 
 const findSLOGroupsParamsSchema = t.partial({

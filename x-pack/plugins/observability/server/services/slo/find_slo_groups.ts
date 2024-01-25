@@ -66,17 +66,6 @@ export class FindSLOGroups {
   public async execute(params: FindSLOGroupsParams): Promise<FindSLOGroupsResponse> {
     const pagination = toPagination(params);
     const groupBy = params.groupBy;
-    let groupByField;
-    switch (groupBy) {
-      case 'tags':
-        groupByField = 'slo.tags';
-        break;
-      case 'status':
-        groupByField = 'status';
-        break;
-      case 'sliType':
-        groupByField = 'slo.indicator.type';
-    }
     const response = await this.esClient.search<unknown, GroupAggregationsResponse>({
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
@@ -89,7 +78,7 @@ export class FindSLOGroups {
         aggs: {
           groupBy: {
             terms: {
-              field: groupByField,
+              field: groupBy,
               size: 10000,
             },
             aggs: {
@@ -152,7 +141,7 @@ export class FindSLOGroups {
           },
           distinct_items: {
             cardinality: {
-              field: groupByField,
+              field: groupBy,
             },
           },
         },

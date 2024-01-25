@@ -14,7 +14,7 @@ describe('SloListLocator', () => {
     const location = await locator.getLocation({});
     expect(location.app).toEqual('observability');
     expect(location.path).toMatchInlineSnapshot(
-      `"/slos?search=(compact:!t,filters:!(),groupBy:ungrouped,,kqlQuery:'',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
+      `"/slos?search=(compact:!t,filters:!(),groupBy:ungrouped,kqlQuery:'',lastRefresh:0,page:0,perPage:25,sort:(by:status,direction:desc),view:cardView)"`
     );
   });
 

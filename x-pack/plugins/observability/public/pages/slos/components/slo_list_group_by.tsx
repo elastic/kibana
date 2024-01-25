@@ -19,7 +19,7 @@ import {
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { SearchState } from '../hooks/use_url_search_state';
 
-export type GroupByField = 'ungrouped' | 'tags' | 'status' | 'sliType';
+export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type';
 export interface Props {
   loading: boolean;
   initialState: SearchState['groupBy'];
@@ -43,7 +43,7 @@ const GROUP_BY_OPTIONS: Array<Item<GroupByField>> = [
     label: i18n.translate('xpack.observability.slo.list.groupBy.tags', {
       defaultMessage: 'Tags',
     }),
-    type: 'tags',
+    type: 'slo.tags',
   },
   {
     label: i18n.translate('xpack.observability.slo.list.groupBy.status', {
@@ -55,7 +55,7 @@ const GROUP_BY_OPTIONS: Array<Item<GroupByField>> = [
     label: i18n.translate('xpack.observability.slo.list.groupBy.sliType', {
       defaultMessage: 'SLI type',
     }),
-    type: 'sliType',
+    type: 'slo.indicator.type',
   },
 ];
 export function SloGroupBy({ loading, onStateChange, initialState }: Props) {

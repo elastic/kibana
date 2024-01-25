@@ -31,24 +31,12 @@ export function GroupListView({
   direction,
   groupBy,
 }: Props) {
-  let query = '';
-  let groupName = '';
-  switch (groupBy) {
-    case 'tags':
-      query = kqlQuery ? `"slo.tags": ${group} and ${kqlQuery}` : `"slo.tags": ${group}`;
-      groupName = group;
-      break;
-    case 'status':
-      query = kqlQuery ? `"status": ${group} and ${kqlQuery}` : `"status": ${group}`;
-      groupName = group.toLowerCase();
-      break;
-    case 'sliType':
-      query = kqlQuery
-        ? `"slo.indicator.type": ${group} and ${kqlQuery}`
-        : `"slo.indicator.type": ${group}`;
-      groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
-      break;
+  const query = kqlQuery ? `"${groupBy}": ${group} and ${kqlQuery}` : `"${groupBy}": ${group}`;
+  let groupName = group.toLowerCase();
+  if (groupBy === 'slo.indicator.type') {
+    groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
   }
+
   const [page, setPage] = useState(0);
   const ITEMS_PER_PAGE = 10;
   const {
