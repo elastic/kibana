@@ -38,6 +38,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   let eventTracker: EventTracker;
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let mockExportTypesRegistry: ExportTypesRegistry;
   let reportingCore: ReportingCore;
   let store: ReportingStore;
@@ -58,7 +59,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   );
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    ({ server, httpSetup, startDeps } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
@@ -115,7 +116,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 400 if there are no job params', async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
@@ -130,7 +131,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 400 if job params query is invalid', async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf?jobParams=foo:`)
@@ -141,7 +142,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 400 if job params body is invalid', async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
@@ -153,7 +154,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 400 export type is invalid', async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/TonyHawksProSkater2`)
@@ -167,7 +168,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it('returns 400 on invalid browser timezone', async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
@@ -183,7 +184,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
 
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
@@ -194,7 +195,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
   it(`returns 200 if job handler doesn't error`, async () => {
     registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
@@ -241,7 +242,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     it('increments generation api counter', async () => {
       registerGenerationRoutesPublic(reportingCore, mockLogger);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .post(`${PUBLIC_ROUTES.GENERATE_PREFIX}/printablePdf`)
