@@ -31,6 +31,7 @@ export type {
   DataStreamQualityCheckExecution,
   IgnoredFieldCause,
   QualityProblem,
+  QualityProblemType,
 } from './data_stream_quality_checks';
 export type { FetchOptions } from './fetch_options';
 export type { DatasetQualityConfig } from './plugin_config';

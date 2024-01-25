@@ -6,30 +6,45 @@
  */
 
 import * as rt from 'io-ts';
+import { ignoredFieldCauseRT } from './cause';
 
-export const ignoredFieldCauseRT = rt.strict({
-  type: rt.keyof({
-    'value-malformed': null,
-    'value-too-large': null,
-    'exceeded-field-limit': null,
-    unknown: null,
-  }),
-});
-
-export type IgnoredFieldCause = rt.TypeOf<typeof ignoredFieldCauseRT>;
-
-export const ignoredFieldProblemRT = rt.strict({
+export const ignoredFieldProblemParamsRT = rt.strict({
   type: rt.literal('ignored-field'),
   field_name: rt.string,
+});
+
+export const ignoredFieldProblemInfosRT = rt.strict({
   document_count: rt.number,
   causes: rt.array(ignoredFieldCauseRT),
 });
 
-export const ingestPipelineErrorProblemRT = rt.strict({
+export const ignoredFieldProblemRT = rt.intersection([
+  ignoredFieldProblemParamsRT,
+  ignoredFieldProblemInfosRT,
+]);
+
+export const ingestPipelineErrorProblemParamsRT = rt.strict({
   type: rt.literal('ingest-pipeline-error'),
+  pipelineId: rt.string,
+  processorId: rt.string,
+});
+
+export const ingestPipelineErrorProblemInfosRT = rt.strict({
   message: rt.string,
 });
+
+export const ingestPipelineErrorProblemRT = rt.intersection([
+  ingestPipelineErrorProblemParamsRT,
+  ingestPipelineErrorProblemInfosRT,
+]);
 
 export const qualityProblemRT = rt.union([ignoredFieldProblemRT, ingestPipelineErrorProblemRT]);
 
 export type QualityProblem = rt.TypeOf<typeof qualityProblemRT>;
+
+export type QualityProblemType = QualityProblem['type'];
+
+export const qualityProblemParamsRT = rt.union([
+  ignoredFieldProblemParamsRT,
+  ingestPipelineErrorProblemRT,
+]);

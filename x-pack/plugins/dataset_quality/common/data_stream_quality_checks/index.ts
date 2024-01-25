@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+export * from './cause';
 export * from './check';
 export * from './common';
+export * from './mitigation';
 export * from './plan';
 export * from './problem';
 export * from './result';
