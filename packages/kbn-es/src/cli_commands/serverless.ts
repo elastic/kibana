@@ -32,7 +32,7 @@ export const serverless: Command = {
     return dedent`
     Options:
 
-      --projectType      Serverless project type
+      --projectType       Serverless project type: ${Array.from(serverlessProjectTypes).join(' |')}
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
