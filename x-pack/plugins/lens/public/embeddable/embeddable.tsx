@@ -171,6 +171,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
+  shouldUseSizeTransitionVeil?: boolean;
   onBrushEnd?: (data: Simplify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
   onLoad?: (
     isLoading: boolean,
@@ -1151,6 +1152,7 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
+              shouldUseSizeTransitionVeil={this.input.shouldUseSizeTransitionVeil}
             />
           </KibanaThemeProvider>
           <MessagesBadge

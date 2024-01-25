@@ -20,7 +20,7 @@ import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
+import { shouldDisplayHistogram } from '../helpers';
 
 export const useLensSuggestions = ({
   dataView,
@@ -74,17 +74,8 @@ export const useLensSuggestions = ({
       getAggregateQueryMode(query) === 'esql' &&
       timeRange
     ) {
-      let queryHasTransformationalCommands = false;
-      if ('esql' in query) {
-        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-          if (query.esql.toLowerCase().includes(command)) {
-            queryHasTransformationalCommands = true;
-            return;
-          }
-        });
-      }
-
-      if (queryHasTransformationalCommands) return undefined;
+      const isOnHistogramMode = shouldDisplayHistogram(query);
+      if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);

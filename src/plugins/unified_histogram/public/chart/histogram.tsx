@@ -225,6 +225,7 @@ export function Histogram({
           {...lensProps}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
+          shouldUseSizeTransitionVeil={false}
           onFilter={onFilter}
           onBrushEnd={onBrushEnd}
           withDefaultActions={withDefaultActions}

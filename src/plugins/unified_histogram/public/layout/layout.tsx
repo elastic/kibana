@@ -20,7 +20,7 @@ import type {
   LensSuggestionsApi,
   Suggestion,
 } from '@kbn/lens-plugin/public';
-import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { AggregateQuery, Filter, isOfAggregateQueryType, Query, TimeRange } from '@kbn/es-query';
 import {
   ResizableLayout,
   ResizableLayoutMode,
@@ -39,6 +39,7 @@ import type {
   UnifiedHistogramInput$,
 } from '../types';
 import { useLensSuggestions } from './hooks/use_lens_suggestions';
+import { shouldDisplayHistogram } from './helpers';
 
 const ChartMemoized = React.memo(Chart);
 
@@ -242,9 +243,14 @@ export const UnifiedHistogramLayout = ({
   });
 
   // apply table to current suggestion
-
   const usedSuggestion = useMemo(() => {
-    if (table) {
+    if (
+      currentSuggestion &&
+      table &&
+      query &&
+      isOfAggregateQueryType(query) &&
+      !shouldDisplayHistogram(query)
+    ) {
       const { layers } = currentSuggestion.datasourceState as TextBasedPersistedState;
 
       const newState = {
@@ -264,7 +270,7 @@ export const UnifiedHistogramLayout = ({
     } else {
       return currentSuggestion;
     }
-  }, [currentSuggestion, table]);
+  }, [currentSuggestion, query, table]);
 
   const chart = suggestionUnsupported ? undefined : originalChart;
   const isChartAvailable = checkChartAvailability({ chart, dataView, isPlainRecord });
