@@ -9,7 +9,7 @@ import React from 'react';
 import { FieldValueSuggestions } from '.';
 import { render, screen, fireEvent, waitForElementToBeRemoved } from '@testing-library/react';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import * as obsHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import * as obsHooks from '../../hooks/use_es_search';
 
 jest.setTimeout(30000);
 
