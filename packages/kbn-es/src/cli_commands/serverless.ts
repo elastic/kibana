@@ -19,8 +19,11 @@ import {
   ES_SERVERLESS_DEFAULT_IMAGE,
   DEFAULT_PORT,
   ServerlessOptions,
+  isServerlessProjectType,
+  serverlessProjectTypes,
 } from '../utils';
 import { Command } from './types';
+import { createCliError } from '../errors';
 
 export const serverless: Command = {
   description: 'Run Serverless Elasticsearch through Docker',
@@ -29,6 +32,7 @@ export const serverless: Command = {
     return dedent`
     Options:
 
+      --projectType      Serverless project type
       --tag               Image tag of ES serverless to run from ${ES_SERVERLESS_REPO_ELASTICSEARCH}
       --image             Full path of ES serverless image to run, has precedence over tag. [default: ${ES_SERVERLESS_DEFAULT_IMAGE}]
       --background        Start ES serverless without attaching to the first node's logs
@@ -54,8 +58,8 @@ export const serverless: Command = {
 
     Examples:
 
-      es serverless --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
-      es serverless --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
+      es serverless --projectType es --tag git-fec36430fba2-x86_64 # loads ${ES_SERVERLESS_REPO_ELASTICSEARCH}:git-fec36430fba2-x86_64
+      es serverless --projectType oblt --image docker.elastic.co/kibana-ci/elasticsearch-serverless:latest-verified
     `;
   },
   run: async (defaults = {}) => {
@@ -72,13 +76,20 @@ export const serverless: Command = {
         basePath: 'base-path',
         esArgs: 'E',
         files: 'F',
+        projectType: 'project-type',
       },
 
-      string: ['tag', 'image', 'basePath', 'resources', 'host', 'kibanaUrl'],
+      string: ['projectType', 'tag', 'image', 'basePath', 'resources', 'host', 'kibanaUrl'],
       boolean: ['clean', 'ssl', 'kill', 'background', 'skipTeardown', 'waitForReady'],
 
       default: defaults,
     }) as unknown as ServerlessOptions;
+
+    if (!options.projectType || !isServerlessProjectType(options.projectType)) {
+      throw createCliError(
+        `you must provide a valid project type: ${Array.from(serverlessProjectTypes).join(' |')}`
+      );
+    }
 
     /*
      * The nodes will be killed immediately if background = true and skipTeardown = false
