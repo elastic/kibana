@@ -15,10 +15,12 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const bodySchema = schema.maybe(
-  schema.object({
-    untrack: schema.maybe(schema.boolean({ defaultValue: true })),
-  })
+const bodySchema = schema.nullable(
+  schema.maybe(
+    schema.object({
+      untrack: schema.maybe(schema.boolean({ defaultValue: true })),
+    })
+  )
 );
 
 export const disableRuleRoute = (

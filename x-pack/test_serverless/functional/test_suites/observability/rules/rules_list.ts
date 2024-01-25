@@ -22,6 +22,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const svlCommonPage = getPageObject('svlCommonPage');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlTriggersActionsUI = getPageObject('svlTriggersActionsUI');
+  const header = getPageObject('header');
   const svlObltNavigation = getService('svlObltNavigation');
   const testSubjects = getService('testSubjects');
   const supertest = getService('supertest');
@@ -294,6 +295,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       await testSubjects.click('collapsedItemActions');
       await testSubjects.click('disableButton');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
 
       await refreshRulesList();
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');

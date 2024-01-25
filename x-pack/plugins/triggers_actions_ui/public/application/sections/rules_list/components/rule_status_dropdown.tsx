@@ -204,6 +204,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
 
   const editableBadge = (
     <EuiBadge
+      data-test-subj="ruleStatusDropdownBadge"
       color={badgeColor}
       iconSide="right"
       iconType={!isUpdating && isEditable ? 'arrowDown' : undefined}

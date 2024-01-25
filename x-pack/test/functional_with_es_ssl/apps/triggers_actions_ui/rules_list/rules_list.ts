@@ -281,7 +281,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         supertest,
         objectRemover,
       });
-      await disableAlert({ supertest, alertId: createdAlert.id });
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
@@ -293,8 +292,25 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
-      await refreshAlertsList();
-      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
+
+      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
+        createdAlert.name,
+        'statusDropdown',
+        'disabled'
+      );
+
+      await testSubjects.click('collapsedItemActions');
+
+      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
+        return await testSubjects.isDisplayed('disableButton');
+      });
+
+      await testSubjects.click('disableButton');
+
+      await header.waitUntilLoadingHasFinished();
 
       await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
         createdAlert.name,
@@ -335,6 +351,10 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click(`checkboxSelectRow-${createdAlert.id}`);
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkDisable');
+
+      await testSubjects.click('confirmModalConfirmButton');
+
+      await header.waitUntilLoadingHasFinished();
 
       await retry.try(async () => {
         const toastTitle = await pageObjects.common.closeToast();
