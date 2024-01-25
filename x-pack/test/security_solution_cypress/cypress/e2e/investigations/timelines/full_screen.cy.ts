@@ -14,16 +14,14 @@ import {
   enterFullScreenMode,
   exitFullScreenMode,
 } from '../../../tasks/security_main';
-import { populateTimeline } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
-describe.skip('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
+describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
-    populateTimeline();
   });
 
   it('Should hide timeline header and tab list area', () => {

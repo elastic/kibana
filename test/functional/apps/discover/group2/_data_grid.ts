@@ -71,17 +71,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should hide elements beneath the table when in full screen mode regardless of their z-index', async () => {
       await retry.try(async () => {
-        expect(await isVisible('unifiedHistogramQueryHits')).to.be(true);
+        expect(await isVisible('discover-dataView-switch-link')).to.be(true);
         expect(await isVisible('unifiedHistogramResizableButton')).to.be(true);
       });
       await testSubjects.click('dataGridFullScreenButton');
       await retry.try(async () => {
-        expect(await isVisible('unifiedHistogramQueryHits')).to.be(false);
+        expect(await isVisible('discover-dataView-switch-link')).to.be(false);
         expect(await isVisible('unifiedHistogramResizableButton')).to.be(false);
       });
       await testSubjects.click('dataGridFullScreenButton');
       await retry.try(async () => {
-        expect(await isVisible('unifiedHistogramQueryHits')).to.be(true);
+        expect(await isVisible('discover-dataView-switch-link')).to.be(true);
         expect(await isVisible('unifiedHistogramResizableButton')).to.be(true);
       });
     });

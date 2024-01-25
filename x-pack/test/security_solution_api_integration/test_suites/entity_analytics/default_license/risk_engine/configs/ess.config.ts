@@ -24,7 +24,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Entity Analytics API Integration Tests -  ESS - Risk Engine',
+      reportName: 'Entity Analytics - Risk Engine Integration Tests - ESS Env - Trial License',
     },
   };
 }
