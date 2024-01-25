@@ -155,26 +155,12 @@ export interface StackFrameMetadata {
   FunctionName: string;
   /** StackFrame.FunctionOffset */
   FunctionOffset: number;
-  /** should this be StackFrame.SourceID? */
-  SourceID: FileID;
   /** StackFrame.Filename */
   SourceFilename: string;
   /** StackFrame.LineNumber */
   SourceLine: number;
-  /** auto-generated - see createStackFrameMetadata */
-  FunctionSourceLine: number;
   /** Executable.FileName */
   ExeFileName: string;
-  /** unused atm due to lack of symbolization metadata */
-  CommitHash: string;
-  /** unused atm due to lack of symbolization metadata */
-  SourceCodeURL: string;
-  /** unused atm due to lack of symbolization metadata */
-  SourcePackageHash: string;
-  /** unused atm due to lack of symbolization metadata */
-  SourcePackageURL: string;
-  /** unused atm due to lack of symbolization metadata */
-  SamplingRate: number;
 }
 
 /**
@@ -194,29 +180,9 @@ export function createStackFrameMetadata(
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
   metadata.FunctionName = options.FunctionName ?? '';
   metadata.FunctionOffset = options.FunctionOffset ?? 0;
-  metadata.SourceID = options.SourceID ?? '';
+  metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourceLine = options.SourceLine ?? 0;
   metadata.ExeFileName = options.ExeFileName ?? '';
-  metadata.CommitHash = options.CommitHash ?? '';
-  metadata.SourceCodeURL = options.SourceCodeURL ?? '';
-  metadata.SourceFilename = options.SourceFilename ?? '';
-  metadata.SourcePackageHash = options.SourcePackageHash ?? '';
-  metadata.SourcePackageURL = options.SourcePackageURL ?? '';
-  metadata.SamplingRate = options.SamplingRate ?? 1.0;
-
-  // Unknown/invalid offsets are currently set to 0.
-  //
-  // In this case we leave FunctionSourceLine=0 as a flag for the UI that the
-  // FunctionSourceLine should not be displayed.
-  //
-  // As FunctionOffset=0 could also be a legit value, this work-around needs
-  // a real fix. The idea for after GA is to change FunctionOffset=-1 to
-  // indicate unknown/invalid.
-  if (metadata.FunctionOffset > 0) {
-    metadata.FunctionSourceLine = metadata.SourceLine - metadata.FunctionOffset;
-  } else {
-    metadata.FunctionSourceLine = 0;
-  }
 
   return metadata;
 }

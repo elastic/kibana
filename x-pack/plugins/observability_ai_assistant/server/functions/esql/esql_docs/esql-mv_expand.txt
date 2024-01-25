@@ -7,5 +7,7 @@ column
 The multivalued column to expand.
 DescriptionThe MV_EXPAND processing command expands multivalued columns into one row per
 value, duplicating other columns.Example
+```esql
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
+```

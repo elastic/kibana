@@ -20,7 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
+import { TestProvider as ExpandableFlyoutTestProvider } from '@kbn/expandable-flyout/src/test/provider';
 import { useKibana } from '../lib/kibana';
 import { UpsellingProvider } from '../components/upselling_provider';
 import { MockAssistantProvider } from './mock_assistant_provider';
@@ -70,6 +70,11 @@ export const TestProvidersComponent: React.FC<Props> = ({
         retry: false,
       },
     },
+    logger: {
+      log: jest.fn(),
+      warn: jest.fn(),
+      error: () => {},
+    },
   });
 
   return (
@@ -81,7 +86,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
               <QueryClientProvider client={queryClient}>
                 <MockDiscoverInTimelineContext>
                   <MockAssistantProvider>
-                    <ExpandableFlyoutProvider>
+                    <ExpandableFlyoutTestProvider>
                       <ConsoleManager>
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
@@ -89,7 +94,7 @@ export const TestProvidersComponent: React.FC<Props> = ({
                           <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
                         </CellActionsProvider>
                       </ConsoleManager>
-                    </ExpandableFlyoutProvider>
+                    </ExpandableFlyoutTestProvider>
                   </MockAssistantProvider>
                 </MockDiscoverInTimelineContext>
               </QueryClientProvider>

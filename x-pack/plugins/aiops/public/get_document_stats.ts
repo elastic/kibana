@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { each, get } from 'lodash';
+import { get } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import dateMath from '@kbn/datemath';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SignificantItem } from '@kbn/ml-agg-utils';
@@ -23,6 +24,7 @@ export interface DocumentCountStats {
   timeRangeEarliest?: number;
   timeRangeLatest?: number;
   totalCount: number;
+  lastDocTimeStampMs?: number;
 }
 
 export interface DocumentStatsSearchStrategyParams {
@@ -60,7 +62,6 @@ export const getDocumentCountStatsRequest = (
     trackTotalHits,
   } = params;
 
-  const size = 0;
   const filterCriteria = buildExtendedBaseFilterCriteria(
     timeFieldName,
     earliestMs,
@@ -91,23 +92,33 @@ export const getDocumentCountStatsRequest = (
 
   const aggs = randomSamplerWrapper ? randomSamplerWrapper.wrap(rawAggs) : rawAggs;
 
-  const searchBody = {
+  const searchBody: estypes.MsearchMultisearchBody = {
     query: {
       bool: {
         filter: filterCriteria,
       },
     },
-    ...(!fieldsToFetch &&
+    track_total_hits: trackTotalHits === true,
+    size: 0,
+  };
+
+  if (isPopulatedObject(runtimeFieldMap)) {
+    searchBody.runtime_mappings = runtimeFieldMap;
+  }
+
+  if (
+    !fieldsToFetch &&
     !skipAggs &&
     timeFieldName !== undefined &&
     intervalMs !== undefined &&
     intervalMs > 0
-      ? { aggs }
-      : {}),
-    ...(isPopulatedObject(runtimeFieldMap) ? { runtime_mappings: runtimeFieldMap } : {}),
-    track_total_hits: trackTotalHits === true,
-    size,
-  };
+  ) {
+    searchBody.aggs = aggs;
+    searchBody.sort = { [timeFieldName]: 'desc' };
+    searchBody.fields = [timeFieldName];
+    searchBody.size = 1;
+  }
+
   return {
     index,
     body: searchBody,
@@ -132,7 +143,7 @@ export const processDocumentCountStats = (
       totalCount,
     };
   }
-  const buckets: { [key: string]: number } = {};
+
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
     randomSamplerWrapper && body.aggregations !== undefined
       ? randomSamplerWrapper.unwrap(body.aggregations)
@@ -140,10 +151,15 @@ export const processDocumentCountStats = (
     ['eventRate', 'buckets'],
     []
   );
-  each(dataByTimeBucket, (dataForTime) => {
-    const time = dataForTime.key;
-    buckets[time] = dataForTime.doc_count;
-  });
+
+  const buckets = dataByTimeBucket.reduce<Record<string, number>>((acc, cur) => {
+    acc[cur.key] = cur.doc_count;
+    return acc;
+  }, {});
+
+  const lastDocTimeStamp: string = Object.values(body.hits.hits[0]?.fields ?? [[]])[0][0];
+  const lastDocTimeStampMs =
+    lastDocTimeStamp === undefined ? undefined : dateMath.parse(lastDocTimeStamp)?.valueOf();
 
   return {
     interval: params.intervalMs,
@@ -151,5 +167,6 @@ export const processDocumentCountStats = (
     timeRangeEarliest: params.earliest,
     timeRangeLatest: params.latest,
     totalCount,
+    lastDocTimeStampMs,
   };
 };

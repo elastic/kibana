@@ -73,6 +73,7 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
           }
 
           logger.error(error);
+
           const opts = {
             statusCode: 500,
             body: {
