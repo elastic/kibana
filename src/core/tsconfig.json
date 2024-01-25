@@ -169,6 +169,7 @@
     "@kbn/core-user-profile-server-mocks",
     "@kbn/core-user-profile-browser",
     "@kbn/core-di-server",
+    "@kbn/core-di-server-mocks",
   ],
   "exclude": [
     "target/**/*",
