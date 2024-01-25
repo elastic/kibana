@@ -84,7 +84,8 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    describe('Rule creation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175499
+    describe.skip('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await alertingApi.createIndexConnector({
           name: 'Index Connector: Threshold API test',

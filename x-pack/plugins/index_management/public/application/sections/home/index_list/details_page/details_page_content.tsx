@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
@@ -113,7 +114,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, search, newSection));
+      return history.push(getIndexDetailsLink(index.name, resetIndexUrlParams(search), newSection));
     },
     [history, index.name, search]
   );
