@@ -11,7 +11,6 @@ import type { Action } from 'redux';
 import type { Observable } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { createTimelineEpic } from '../../timelines/store/epic';
-import { createTimelineFavoriteEpic } from '../../timelines/store/epic_favorite';
 import { createTimelineNoteEpic } from '../../timelines/store/epic_note';
 import { createTimelinePinnedEventEpic } from '../../timelines/store/epic_pinned_event';
 import type { TimelineEpicDependencies } from '../../timelines/store/types';
@@ -29,7 +28,6 @@ export const createRootEpic = <StateT extends State>(): Epic<
 > =>
   combineEpics(
     createTimelineEpic<StateT>(),
-    createTimelineFavoriteEpic<StateT>(),
     createTimelineNoteEpic<StateT>(),
     createTimelinePinnedEventEpic<StateT>()
   );

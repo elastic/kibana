@@ -255,7 +255,7 @@ const stateSanitizer = (state: State) => {
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  kibana: Observable<CoreStart>,
+  kibana$: Observable<CoreStart>,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
@@ -273,7 +273,7 @@ export const createStore = (
   const composeEnhancers = composeWithDevTools(enhancerOptions);
 
   const middlewareDependencies: TimelineEpicDependencies<State> = {
-    kibana$: kibana,
+    kibana$,
     selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
     selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
@@ -286,8 +286,16 @@ export const createStore = (
     }
   );
 
+  // TODO: Once `createStore` does not use redux-observable, we will not need to pass a
+  // kibana observable anymore. Then we can remove this `any` cast and replace kibana$
+  // with a regular kibana instance.
+  // I'm not doing it in this PR, as this will have an impact on literally hundreds of test files.
+  // A separate PR will be created to clean this up.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const kibana = (kibana$ as any).source._value.kibana;
+
   const middlewareEnhancer = applyMiddleware(
-    ...createMiddlewares(storage),
+    ...createMiddlewares(kibana, storage),
     epicMiddleware,
     telemetryMiddleware,
     ...(additionalMiddleware ?? [])
