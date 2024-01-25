@@ -32,12 +32,12 @@ export const config: PluginConfigDescriptor<ObservabilityLogExplorerConfig> = {
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.observabilityLogsExplorer.navigation.showAppLink',
+      'xpack.observabilityLogExplorer.navigation.showAppLink',
       'xpack.observabilityLogsExplorer.navigation.showAppLink',
       { level: 'warning' }
     ),
     renameFromRoot(
-      'xpack.observabilityLogsExplorer.enabled',
+      'xpack.observabilityLogExplorer.enabled',
       'xpack.observabilityLogsExplorer.enabled',
       { level: 'warning' }
     ),
