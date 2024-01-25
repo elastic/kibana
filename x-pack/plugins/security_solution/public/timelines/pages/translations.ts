@@ -60,17 +60,3 @@ export const TIMELINE_VERSION_CONFLICT_DESCRIPTION = i18n.translate(
       'Another user has made changes to this timeline. You need to refresh the page to make changes to this timeline.',
   }
 );
-
-export const NEW_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timelines.newTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline',
-  }
-);
-
-export const NEW_TEMPLATE_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timelines.newTemplateTimelineButtonLabel',
-  {
-    defaultMessage: 'Create new Timeline template',
-  }
-);
