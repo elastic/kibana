@@ -40,6 +40,8 @@ export * from '../services/files/mocks';
 // export all mocks from fleet actions client
 export * from '../services/actions/mocks';
 
+export * from './package_policy.mocks';
+
 export interface MockedFleetAppContext extends FleetAppContext {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createStart>;
   data: ReturnType<typeof dataPluginMock.createStartContract>;
@@ -144,6 +146,8 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
     getUpgradePackagePolicyInfo: jest.fn(),
     enrichPolicyWithDefaultsFromPackage: jest.fn(),
     findAllForAgentPolicy: jest.fn(),
+    fetchAllItems: jest.fn(),
+    fetchAllItemIds: jest.fn(),
   };
 };
 
