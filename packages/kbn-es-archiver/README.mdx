@@ -26,7 +26,12 @@ This parameter is optional, with defaults:
  - Batch size: 5000
  - Concurrency (maximum number of bulk requests that can be active in parallel): 4 
 
-### Usage in Test Files
+According to our benchmarks, these default settings are giving the best results in terms of loading time for 
+the majority of the archives. 
+However, there might be cases where different settings are needed, so they can be overridden when loading an archive.
+
+
+### How to override the default performance settings in test files
 
 To control the batch size and concurrency
 
@@ -35,11 +40,8 @@ To control the batch size and concurrency
 ```typescript
 await esArchiver.load('x-pack/test/functional/es_archives/getting_started/shakespeare', {
   performance: {
-    batchSize: 5000,
-    concurrency: 4,
+    batchSize: 300,
+    concurrency: 1,
   },
 });
 ```
-According to our benchmarks, in a servless environment, this archive went from
-loading in around 2 and half minutes, to under 18 seconds.
-This was with a batch size of 5000 and concurrency of 4, as shown above.
