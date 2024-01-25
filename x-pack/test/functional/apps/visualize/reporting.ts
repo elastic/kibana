@@ -27,6 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
     'visualize',
     'visEditor',
+    'share',
   ]);
 
   describe('Visualize Reporting Screenshots', function () {
@@ -73,6 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.clickAggBasedVisualizations();
         await PageObjects.visualize.clickAreaChart();
         await PageObjects.visualize.clickNewSearch('ecommerce');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
@@ -82,6 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.selectAggregation('Date Histogram');
         await PageObjects.visEditor.clickGo();
         await PageObjects.visualize.saveVisualization('my viz');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
       });
@@ -121,9 +124,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         log.debug('open png reporting panel');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openImageReportingPanel();
         log.debug('click generate report button');
-        await PageObjects.reporting.clickGenerateReportButton();
+        await PageObjects.reporting.clickGeneratePngReportButton();
 
         log.debug('get the report download URL');
         const url = await PageObjects.reporting.getReportURL(60000);

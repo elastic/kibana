@@ -194,6 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.closeShareModal();
       }
       const csv = await PageObjects.lens.getCSVContent();
+      await PageObjects.share.closeShareModal();
 
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);

@@ -65,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('is available if new', async () => {
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.openShareMenuItem('CSVDownload');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();
@@ -72,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('becomes available when saved', async () => {
         await PageObjects.discover.saveSearch('my search - expectEnabledGenerateReportButton');
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.openShareMenuItem('CSVDownload');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
         await PageObjects.share.closeShareModal();
