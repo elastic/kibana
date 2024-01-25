@@ -1740,10 +1740,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@92.0.0-backport.0":
-  version "92.0.0-backport.0"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.0.0-backport.0.tgz#201757bef89141dad6f8f719976fa2a0b52be86a"
-  integrity sha512-ZliSke0YehCbCuHvYkY0BIMg32QeqTMZy+qgGYsh+Bp0UZ4CZn9j5e7LWavfal3+t8HMFCHTk0RUFFXrcepplA==
+"@elastic/eui@92.1.1":
+  version "92.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.1.1.tgz#f5713bfa12733a2c62df365e37f7983a7c08411e"
+  integrity sha512-kjUP+IewVcoJ59e84lHwtdy5OvGNSmlHvzn5uUmGTKnBGOxoYv5K9pyGujVWpxSCG9MNr3anMsNE7EX6usj37A==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
@@ -4326,6 +4326,10 @@
   uid ""
 
 "@kbn/data-service@link:packages/kbn-data-service":
+  version "0.0.0"
+  uid ""
+
+"@kbn/data-stream-adapter@link:packages/kbn-data-stream-adapter":
   version "0.0.0"
   uid ""
 
@@ -25338,11 +25342,6 @@ public-encrypt@^4.0.0:
     create-hash "^1.1.0"
     parse-asn1 "^5.0.0"
     randombytes "^2.0.1"
-
-puid@1.0.7:
-  version "1.0.7"
-  resolved "https://registry.yarnpkg.com/puid/-/puid-1.0.7.tgz#fa638a737d7b20419059d93965aed36ca20e1c84"
-  integrity sha1-+mOKc317IEGQWdk5Za7TbKIOHIQ=
 
 pump@^2.0.0:
   version "2.0.1"
