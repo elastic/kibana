@@ -58,7 +58,7 @@ export function CreateSourceEditor(props: Props) {
         }
 
         if (dataView) {
-          let geoField: DataViewField | undefined;
+          let initialGeoField: DataViewField | undefined;
           const initialDateFields: string[] = [];
           const initialGeoFields: string[] = [];
           for (let i = 0; i < dataView.fields.length; i++) {
@@ -69,13 +69,13 @@ export function CreateSourceEditor(props: Props) {
               )
             ) {
               initialGeoFields.push(field.name);
-              if (!geoField) geoField = field;
+              if (!initialGeoField) initialGeoField = field;
             } else if ('date' === field.type) {
               initialDateFields.push(field.name);
             }
           }
 
-          if (geoField) {
+          if (initialGeoField) {
             let initialDateField: string | undefined;
             if (dataView.timeFieldName) {
               initialDateField = dataView.timeFieldName;
@@ -83,20 +83,20 @@ export function CreateSourceEditor(props: Props) {
               initialDateField = initialDateFields[0];
             }
             const initialEsql = `from ${dataView.getIndexPattern()} | keep ${
-              geoField.name
+              initialGeoField.name
             } | limit 10000`;
             setColumns([
               {
-                name: geoField.name,
+                name: initialGeoField.name,
                 type:
-                  geoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+                  initialGeoField.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
                     ? ESQL_GEO_SHAPE_TYPE
                     : ESQL_GEO_POINT_TYPE,
               },
             ]);
             setDateField(initialDateField);
             setDateFields(initialDateFields);
-            setGeoField(geoField.name);
+            setGeoField(initialGeoField.name);
             setGeoFields(initialGeoFields);
             setEsql(initialEsql);
             if (!initialDateField) {
