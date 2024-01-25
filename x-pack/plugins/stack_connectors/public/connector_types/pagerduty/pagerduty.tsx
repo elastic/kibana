@@ -16,6 +16,7 @@ import {
   AlertProvidedActionVariables,
   hasMustacheTokens,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { isPlainObject } from 'lodash';
 import {
   PagerDutyConfig,
   PagerDutySecrets,
@@ -103,7 +104,7 @@ export function getConnectorType(): ConnectorTypeModel<
         try {
           const parsedJSON = JSON.parse(actionParams.customDetails);
 
-          if (typeof parsedJSON !== 'object') {
+          if (!isPlainObject(parsedJSON)) {
             errors.customDetails.push(errorMessage);
           }
         } catch {

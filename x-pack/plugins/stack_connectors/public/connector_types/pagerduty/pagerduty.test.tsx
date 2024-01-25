@@ -136,6 +136,32 @@ describe('pagerduty action params validation', () => {
     });
   });
 
+  test('action params validation fails when customDetails are an array of objects', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '[{"details": "Foo Bar"}, {"details": "{{alert.flapping}}"}]',
+      links: [],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: [],
+        customDetails: ['Custom details must be a valid JSON object.'],
+      },
+    });
+  });
+
   test('action params validation does not fail when customDetails are a valid JSON object', async () => {
     const actionParams = {
       eventAction: 'trigger',
