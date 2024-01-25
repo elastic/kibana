@@ -6,7 +6,6 @@
  */
 
 import { CoreSetup } from '@kbn/core/public';
-import type { BaseParams } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE, JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { JobAppParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import React from 'react';
@@ -21,9 +20,7 @@ export interface ApplicationProps {
    * A function that Reporting calls to get the sharing data from the application.
    * Needed for CSV exports and Canvas PDF reports.
    */
-  getJobParams?:
-    | JobAppParamsPDFV2
-    | ((forShareUrl?: boolean | undefined) => Omit<BaseParams, 'browserTimezone' | 'version'>);
+  getJobParams?: JobAppParamsPDFV2 | JobAppParamsCSV;
 
   /**
    * Option to control how the screenshot(s) is/are placed in the PDF

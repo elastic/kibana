@@ -55,5 +55,13 @@ export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';
 
 export type JobAppParamsCSV = (
+  /*
+   * NOTE: This flag is needed for conditional behavior whether
+   * the report job is ad-hoc or if the params will be used for
+   * automation. If the intention is to set up automated
+   * reporting, the job params will be used to create the POST
+   * URL, and a relative time range filter must be used. Otherwise
+   * it is an ad-hoc report, and absolute time range is preferred.
+   */
   forShareUrl?: boolean | undefined
 ) => Omit<BaseParams, 'browserTimezone' | 'version'>;

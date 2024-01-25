@@ -133,6 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
   });
+
   describe(`PNG report`, () => {
     it(`should not allow to download reports for incomplete visualization`, async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();

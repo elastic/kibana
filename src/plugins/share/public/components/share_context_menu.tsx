@@ -80,6 +80,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           anonymousAccess={anonymousAccess}
           onClose={() => {
             session.close();
+            props.onClose();
           }}
           showPublicUrlSwitch={showPublicUrlSwitch}
           urlService={urlService}
@@ -102,6 +103,7 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           isEmbedded
           onClose={() => {
             session.close();
+            props.onClose();
           }}
           objectId={objectId}
           objectType={objectType}

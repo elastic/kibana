@@ -20,10 +20,10 @@ import {
 import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import type { BaseParams } from '@kbn/reporting-common/types';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import url from 'url';
+import { JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { ErrorUrlTooLongPanel, ErrorUnsavedWorkPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
@@ -34,7 +34,7 @@ export interface CsvModalProps {
   uiSettings: IUiSettingsClient;
   reportType: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
-  getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
+  getJobParams: JobAppParamsCSV;
   objectId?: string;
   isDirty?: boolean;
   onClose?: () => void;
