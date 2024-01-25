@@ -115,7 +115,7 @@ function useQueryCoordinates({
         },
       },
     }),
-    [serviceName],
+    [serviceName, minWidth, maxWidth],
     { name: `getCLickMapList` }
   );
 
