@@ -102,6 +102,7 @@ export const createMockEndpointAppContextService = (
   const fleetToHostFilesClientMock = createFleetToHostFilesClientMock();
   const fleetActionsClientMock = createFleetActionsClientMock();
   const loggerFactory = loggingSystemMock.create();
+  const featureUsageMock = createFeatureUsageServiceMock();
 
   return {
     start: jest.fn(),
@@ -120,7 +121,7 @@ export const createMockEndpointAppContextService = (
     getFleetToHostFilesClient: jest.fn(async () => fleetToHostFilesClientMock),
     setup: jest.fn(),
     getLicenseService: jest.fn(),
-    getFeatureUsageService: jest.fn(),
+    getFeatureUsageService: jest.fn().mockReturnValue(featureUsageMock),
     getExceptionListsClient: jest.fn(),
     getMessageSigningService: jest.fn(),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),

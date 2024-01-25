@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { USER_COLUMN } from '../../screens/alerts';
 import {
   OPEN_HOST_FLYOUT_BUTTON,
   OPEN_USER_FLYOUT_BUTTON,
@@ -14,18 +15,22 @@ import {
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SELECT_OPTION,
   HOST_DETAILS_FLYOUT_ASSET_CRITICALITY_MODAL_SAVE_BTN,
 } from '../../screens/asset_criticality/flyouts';
+import { scrollAlertTableColumnIntoView } from '../alerts';
 
 /**
  * Find the first alert row in the alerts table then click on the host name to open the flyout
  */
 export const expandFirstAlertHostFlyout = () => {
-  cy.get(OPEN_HOST_FLYOUT_BUTTON).first().click();
+  // Cypress is flaky on clicking this button despite production not having that issue
+  // eslint-disable-next-line cypress/no-force
+  cy.get(OPEN_HOST_FLYOUT_BUTTON).first().click({ force: true });
 };
 
 /**
  * Find the first alert row in the alerts table then click on the host name to open the flyout
  */
 export const expandFirstAlertUserFlyout = () => {
+  scrollAlertTableColumnIntoView(USER_COLUMN);
   cy.get(OPEN_USER_FLYOUT_BUTTON).first().click();
 };
 

@@ -271,7 +271,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#54B399', percentage: 80 },
               ],
             },
             {

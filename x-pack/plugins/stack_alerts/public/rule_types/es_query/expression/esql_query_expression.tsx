@@ -15,7 +15,6 @@ import {
   EuiFormRow,
   EuiSelect,
   EuiSpacer,
-  EuiTitle,
 } from '@elastic/eui';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
@@ -180,16 +179,17 @@ export const EsqlQueryExpression: React.FC<
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        id="queryEditor"
+        data-test-subj="queryEsqlEditor"
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.defineEsqlQueryPrompt"
             defaultMessage="Define your query using ES|QL"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFormRow id="queryEditor" data-test-subj="queryEsqlEditor" fullWidth>
+        }
+      >
         <TextBasedLangEditor
           query={query}
           onTextLangQueryChange={debounce((q: AggregateQuery) => {
@@ -215,20 +215,17 @@ export const EsqlQueryExpression: React.FC<
         errors={errors.sourceFields}
       />
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
-            defaultMessage="Select a time field"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
       <EuiFormRow
         id="timeField"
         fullWidth
         isInvalid={errors.timeField.length > 0 && timeField !== undefined}
         error={errors.timeField}
+        label={
+          <FormattedMessage
+            id="xpack.stackAlerts.esQuery.ui.selectEsqlQueryTimeFieldPrompt"
+            defaultMessage="Select a time field"
+          />
+        }
       >
         <EuiSelect
           options={timeFieldOptions}
@@ -243,21 +240,18 @@ export const EsqlQueryExpression: React.FC<
         />
       </EuiFormRow>
       <EuiSpacer />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
-            defaultMessage="Set the time window"
-          />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiFormRow
             id="timeWindowSize"
             isInvalid={errors.timeWindowSize.length > 0}
             error={errors.timeWindowSize}
+            label={
+              <FormattedMessage
+                id="xpack.stackAlerts.esQuery.ui.setEsqlQueryTimeWindowPrompt"
+                defaultMessage="Set the time window"
+              />
+            }
           >
             <EuiFieldNumber
               name="timeWindowSize"

@@ -15,13 +15,10 @@ import {
   SavedObjectNotFound,
 } from '@kbn/kibana-utils-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
-import {
-  AnalyticsNoDataPageKibanaProvider,
-  AnalyticsNoDataPage,
-} from '@kbn/shared-ux-page-analytics-no-data';
 import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { useUrl } from './hooks/use_url';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
@@ -282,6 +279,22 @@ export function DiscoverMainRoute({
 
   const mainContent = useMemo(() => {
     if (showNoDataPage) {
+      const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
+      const AnalyticsNoDataPageKibanaProvider = withSuspense(
+        React.lazy(() =>
+          importPromise.then(({ AnalyticsNoDataPageKibanaProvider: NoDataProvider }) => {
+            return { default: NoDataProvider };
+          })
+        )
+      );
+      const AnalyticsNoDataPage = withSuspense(
+        React.lazy(() =>
+          importPromise.then(({ AnalyticsNoDataPage: NoDataPage }) => {
+            return { default: NoDataPage };
+          })
+        )
+      );
+
       return (
         <AnalyticsNoDataPageKibanaProvider {...noDataDependencies}>
           <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />

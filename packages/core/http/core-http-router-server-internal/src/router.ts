@@ -125,11 +125,14 @@ function validOptions(
 export interface RouterOptions {
   /** Whether we are running in development */
   isDev?: boolean;
-  /**
-   * Which route resolution algo to use.
-   * @note default to "oldest", but when running in dev default to "none"
-   */
-  versionedRouteResolution?: 'newest' | 'oldest' | 'none';
+
+  versionedRouterOptions?: {
+    /** {@inheritdoc VersionedRouterArgs['defaultHandlerResolutionStrategy'] }*/
+    defaultHandlerResolutionStrategy?: 'newest' | 'oldest' | 'none';
+
+    /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
+    useVersionResolutionStrategyForInternalPaths?: string[];
+  };
 }
 
 /** @internal */
@@ -277,7 +280,7 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       this.versionedRouter = CoreVersionedRouter.from({
         router: this,
         isDev: this.options.isDev,
-        defaultHandlerResolutionStrategy: this.options.versionedRouteResolution,
+        ...this.options.versionedRouterOptions,
       });
     }
     return this.versionedRouter;

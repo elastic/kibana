@@ -529,7 +529,7 @@
             "label": "getFilters",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "() => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -537,7 +537,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]>"
+              "[]"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,
@@ -553,7 +553,7 @@
             "label": "getQuery",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "() => ",
               {
                 "pluginId": "@kbn/es-query",
                 "scope": "common",
@@ -561,7 +561,7 @@
                 "section": "def-common.Query",
                 "text": "Query"
               },
-              " | undefined>"
+              " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/embeddable/map_embeddable.tsx",
             "deprecated": false,

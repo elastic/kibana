@@ -76,6 +76,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     return new CoreVersionedRoute(router, method, path, options);
   }
 
+  private useDefaultStrategyForPath: boolean;
   private isPublic: boolean;
   private enableQueryVersion: boolean;
   private constructor(
@@ -84,6 +85,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     public readonly path: string,
     public readonly options: VersionedRouteConfig<Method>
   ) {
+    this.useDefaultStrategyForPath = router.useVersionResolutionStrategyForInternalPaths.has(path);
     this.isPublic = this.options.access === 'public';
     this.enableQueryVersion = this.options.enableQueryVersion === true;
     this.router.router[this.method](
@@ -128,7 +130,7 @@ export class CoreVersionedRoute implements VersionedRoute {
     let version: undefined | ApiVersion;
 
     const maybeVersion = readVersion(req, this.enableQueryVersion);
-    if (!maybeVersion && this.isPublic) {
+    if (!maybeVersion && (this.isPublic || this.useDefaultStrategyForPath)) {
       version = this.getDefaultVersion();
     } else {
       version = maybeVersion;

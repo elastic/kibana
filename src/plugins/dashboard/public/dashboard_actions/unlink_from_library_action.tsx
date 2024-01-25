@@ -6,29 +6,31 @@
  * Side Public License, v 1.
  */
 
-import {
-  ViewMode,
-  type PanelState,
-  type IEmbeddable,
-  isErrorEmbeddable,
-  PanelNotFoundError,
-  type EmbeddableInput,
-  isReferenceOrValueEmbeddable,
-} from '@kbn/embeddable-plugin/public';
+import { apiCanUnlinkFromLibrary, CanUnlinkFromLibrary } from '@kbn/presentation-library';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { DashboardPanelState } from '../../common';
+import {
+  apiCanAccessViewMode,
+  CanAccessViewMode,
+  EmbeddableApiContext,
+  getInheritedViewMode,
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import { pluginServices } from '../services/plugin_services';
 import { dashboardUnlinkFromLibraryActionStrings } from './_dashboard_actions_strings';
-import { type DashboardContainer, DASHBOARD_CONTAINER_TYPE } from '../dashboard_container';
 
 export const ACTION_UNLINK_FROM_LIBRARY = 'unlinkFromLibrary';
 
-export interface UnlinkFromLibraryActionContext {
-  embeddable: IEmbeddable;
-}
+export type UnlinkPanelFromLibraryActionApi = CanAccessViewMode &
+  CanUnlinkFromLibrary &
+  Partial<PublishesPanelTitle>;
 
-export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionContext> {
+export const unlinkActionIsCompatible = (
+  api: unknown | null
+): api is UnlinkPanelFromLibraryActionApi =>
+  Boolean(apiCanAccessViewMode(api) && apiCanUnlinkFromLibrary(api));
+
+export class UnlinkFromLibraryAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_UNLINK_FROM_LIBRARY;
   public readonly id = ACTION_UNLINK_FROM_LIBRARY;
   public order = 15;
@@ -41,64 +43,35 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
     } = pluginServices.getServices());
   }
 
-  public getDisplayName({ embeddable }: UnlinkFromLibraryActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return dashboardUnlinkFromLibraryActionStrings.getDisplayName();
   }
 
-  public getIconType({ embeddable }: UnlinkFromLibraryActionContext) {
-    if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-      throw new IncompatibleActionError();
-    }
+  public getIconType({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
     return 'folderExclamation';
   }
 
-  public async isCompatible({ embeddable }: UnlinkFromLibraryActionContext) {
-    return Boolean(
-      !isErrorEmbeddable(embeddable) &&
-        embeddable.getInput()?.viewMode !== ViewMode.VIEW &&
-        embeddable.getRoot() &&
-        embeddable.getRoot().isContainer &&
-        embeddable.getRoot().type === DASHBOARD_CONTAINER_TYPE &&
-        isReferenceOrValueEmbeddable(embeddable) &&
-        embeddable.inputIsRefType(embeddable.getInput())
-    );
+  public async isCompatible({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) return false;
+    return getInheritedViewMode(embeddable) === 'edit' && (await embeddable.canUnlinkFromLibrary());
   }
 
-  public async execute({ embeddable }: UnlinkFromLibraryActionContext) {
-    if (!isReferenceOrValueEmbeddable(embeddable)) {
-      throw new IncompatibleActionError();
+  public async execute({ embeddable }: EmbeddableApiContext) {
+    if (!unlinkActionIsCompatible(embeddable)) throw new IncompatibleActionError();
+    const title = embeddable.panelTitle?.value ?? embeddable.defaultPanelTitle?.value;
+    try {
+      await embeddable.unlinkFromLibrary();
+      this.toastsService.addSuccess({
+        title: dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(title ? `'${title}'` : ''),
+        'data-test-subj': 'unlinkPanelSuccess',
+      });
+    } catch (e) {
+      this.toastsService.addDanger({
+        title: dashboardUnlinkFromLibraryActionStrings.getFailureMessage(title ? `'${title}'` : ''),
+        'data-test-subj': 'unlinkPanelFailure',
+      });
     }
-
-    const newInput = await embeddable.getInputAsValueType();
-    embeddable.updateInput(newInput);
-
-    const dashboard = embeddable.getRoot() as DashboardContainer;
-    const panelToReplace = dashboard.getInput().panels[embeddable.id] as DashboardPanelState;
-
-    if (!panelToReplace) {
-      throw new PanelNotFoundError();
-    }
-
-    const newPanel: PanelState<EmbeddableInput> = {
-      type: embeddable.type,
-      explicitInput: { ...newInput, title: embeddable.getTitle() },
-    };
-    const replacedPanelId = await dashboard.replacePanel(panelToReplace, newPanel, true);
-
-    const title = dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(
-      embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
-    );
-
-    if (dashboard.getExpandedPanelId() !== undefined) {
-      dashboard.setExpandedPanelId(replacedPanelId);
-    }
-
-    this.toastsService.addSuccess({
-      title,
-      'data-test-subj': 'unlinkPanelSuccess',
-    });
   }
 }
