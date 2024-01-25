@@ -26,16 +26,11 @@ import type {
 } from '../../../../common/endpoint/service/response_actions/constants';
 import { doesLogsEndpointActionsIndexExist } from '../../utils';
 
-const formatStringIds = (value: string | string[] | undefined): undefined | string[] =>
-  typeof value === 'string' ? [value] : value;
-
-const formatCommandValues = (
-  value: ResponseActionsApiCommandNames | ResponseActionsApiCommandNames[] | undefined
-): undefined | ResponseActionsApiCommandNames[] => (typeof value === 'string' ? [value] : value);
-
-const formatAgentTypeValues = (
-  value: ResponseActionAgentType | ResponseActionAgentType[] | undefined
-): undefined | ResponseActionAgentType[] => (typeof value === 'string' ? [value] : value);
+const formatRequestParams = <
+  T extends string | ResponseActionsApiCommandNames | ResponseActionAgentType
+>(
+  value: T | T[] | undefined
+): T[] | undefined => (typeof value === 'string' ? [value] : value);
 
 const formatStatusValues = (
   value: ResponseActionStatus | ResponseActionStatus[]
@@ -81,7 +76,7 @@ export const actionListHandler = (
       }
 
       // verify feature flag for sentinel_one `aaentType`
-      const agentTypes = formatAgentTypeValues(_agentTypes);
+      const agentTypes = formatRequestParams(_agentTypes);
       if (
         !endpointContext.experimentalFeatures.responseActionsSentinelOneV1Enabled &&
         agentTypes?.includes('sentinel_one')
@@ -95,17 +90,17 @@ export const actionListHandler = (
 
       const requestParams = {
         agentTypes,
-        withOutputs: formatStringIds(withOutputs),
-        types: formatStringIds(types),
-        commands: formatCommandValues(commands),
+        withOutputs: formatRequestParams(withOutputs),
+        types: formatRequestParams(types),
+        commands: formatRequestParams(commands),
         esClient,
-        elasticAgentIds: formatStringIds(elasticAgentIds),
+        elasticAgentIds: formatRequestParams(elasticAgentIds),
         metadataService: endpointContext.service.getEndpointMetadataService(),
         page,
         pageSize,
         startDate,
         endDate,
-        userIds: formatStringIds(userIds),
+        userIds: formatRequestParams(userIds),
         logger,
       };
       // wrapper method to branch logic for
