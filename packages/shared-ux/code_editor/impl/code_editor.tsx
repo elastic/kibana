@@ -134,12 +134,12 @@ export interface CodeEditorProps {
   readOnlyMessage?: string;
 
   /**
-   * Enabled the editor to grow vertically to fit its content.
+   * Enables the editor to grow vertically to fit its content.
    * This option overrides the `height` option.
    */
   fitToContent?: {
-    minHeight?: number;
-    maxHeight?: number;
+    minLines?: number;
+    maxLines?: number;
   };
 }
 
@@ -449,7 +449,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
   }, [placeholder, value, euiTheme, _editor]);
 
-  useFitToContent({ editor: _editor, fitToContent });
+  useFitToContent({ editor: _editor, fitToContent, isFullScreen });
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
@@ -630,18 +630,23 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
 const useFitToContent = ({
   editor,
   fitToContent,
+  isFullScreen,
 }: {
   editor: monaco.editor.IStandaloneCodeEditor | null;
-  fitToContent?: { minHeight?: number; maxHeight?: number };
+  isFullScreen: boolean;
+  fitToContent?: { minLines?: number; maxLines?: number };
 }) => {
   useEffect(() => {
     if (!editor) return;
 
     const updateHeight = () => {
-      if (fitToContent) {
+      if (fitToContent && !isFullScreen) {
         const contentHeight = editor.getContentHeight();
-        const minHeight = fitToContent.minHeight ?? 21; /* line height */
-        const maxHeight = fitToContent.maxHeight ?? contentHeight;
+        const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+        const minHeight = (fitToContent.minLines ?? 1) * lineHeight;
+        const maxHeight = fitToContent.maxLines
+          ? fitToContent.maxLines * lineHeight
+          : contentHeight;
         editor.layout({
           height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
           width: editor.getLayoutInfo().width,
@@ -655,5 +660,5 @@ const useFitToContent = ({
     return () => {
       disposable.dispose();
     };
-  }, [editor, fitToContent]);
+  }, [editor, fitToContent, isFullScreen]);
 };

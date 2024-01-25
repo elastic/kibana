@@ -88,7 +88,7 @@ export const UrlDrilldownCollectConfig: React.FC<UrlDrilldownCollectConfigProps>
         labelAppend={variablesDropdown}
       >
         <UrlTemplateEditor
-          fitToContent={{ minHeight: 21 * 5, maxHeight: 21 * 15 /* 21 is lineheight */ }}
+          fitToContent={{ minLines: 5, maxLines: 15 }}
           variables={variables}
           value={urlTemplate}
           placeholder={exampleUrl}

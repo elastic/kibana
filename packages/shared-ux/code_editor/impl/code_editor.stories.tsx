@@ -234,7 +234,7 @@ export const FitToContent = (params: CodeEditorStorybookParams) => {
         action('on change');
       }}
       value={value}
-      fitToContent={{ minHeight: 100, maxHeight: 500 }}
+      fitToContent={{ minLines: 3, maxLines: 5 }}
       options={{ automaticLayout: true }}
     />
   );
