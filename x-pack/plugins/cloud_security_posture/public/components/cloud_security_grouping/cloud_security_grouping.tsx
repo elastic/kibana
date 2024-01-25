@@ -86,21 +86,27 @@ export const CloudSecurityGrouping = ({
         }
       `}
     >
+      {groupSelectorComponent && (
+        <div
+          css={css`
+            position: absolute;
+            right: 0;
+            top: 16px;
+          `}
+        >
+          {groupSelectorComponent}
+        </div>
+      )}
       <div
-        css={css`
-          position: absolute;
-          right: 0;
-          top: 16px;
-        `}
-      >
-        {groupSelectorComponent}
-      </div>
-      <div
-        css={css`
-          && [data-test-subj='alerts-table-group-selector'] {
-            display: none;
-          }
-        `}
+        css={
+          groupSelectorComponent
+            ? css`
+                && [data-test-subj='alerts-table-group-selector'] {
+                  display: none;
+                }
+              `
+            : undefined
+        }
       >
         {grouping.getGrouping({
           activePage: activePageIndex,
