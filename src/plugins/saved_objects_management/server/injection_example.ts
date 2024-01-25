@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+/* eslint-disable max-classes-per-file */
+
 import { inject, injectable, ServiceIdentifier, ServiceType } from '@kbn/core-di-common';
 import { coreGlobalService, coreRequestServices } from '@kbn/core/server';
 
