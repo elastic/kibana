@@ -27,7 +27,7 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning } from '../../utils/utils';
+import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
 export const createThreatSignals = async ({
@@ -90,6 +90,7 @@ export const createThreatSignals = async ({
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    suppressedAlertsCount: 0,
     createdSignals: [],
     errors: [],
     warningMessages: [],
@@ -180,7 +181,18 @@ export const createThreatSignals = async ({
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
       );
-      if (results.createdSignalsCount >= params.maxSignals) {
+      // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
+      if (
+        results.suppressedAlertsCount &&
+        results.suppressedAlertsCount > 0 &&
+        results.suppressedAlertsCount + results.createdSignalsCount >= 5 * params.maxSignals
+      ) {
+        // warning should be already set
+        ruleExecutionLogger.debug(
+          `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+        );
+        break;
+      } else if (results.createdSignalsCount >= params.maxSignals) {
         if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
         } else if (documentCount > 0) {

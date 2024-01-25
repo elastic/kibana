@@ -156,7 +156,7 @@ export default ({ getService }: FtrProviderContext) => {
     },
   ];
 
-  describe('@ess @serverless Indicator match type rules, alert suppression', () => {
+  describe.only('@ess @serverless Indicator match type rules, alert suppression', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
     });
@@ -2055,7 +2055,7 @@ export default ({ getService }: FtrProviderContext) => {
           // 9,000 is the size of chunk that is processed in IM rule
           // when number of documents in either of index exceeds this number it may leads to unexpected behavior
           // this test added to ensure these cases covered
-          it.skip('should not suppress more than limited number (max_signals x5) for number of events/threats greater than 9,000', async () => {
+          it('should not suppress more than limited number (max_signals x5) for number of events/threats greater than 9,000', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
 
