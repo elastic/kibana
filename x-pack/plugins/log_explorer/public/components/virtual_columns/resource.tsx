@@ -20,7 +20,7 @@ const AgentIcon = dynamic(() => import('@kbn/custom-icons/src/components/agent_i
 export const Resource = ({ row }: DataGridCellValueElementProps) => {
   const resourceDoc = getUnformattedResourceFields(row as LogDocument);
   return (
-    <span>
+    <div>
       {(resourceDoc[constants.SERVICE_NAME_FIELD] as string) && (
         <ChipWithPopover
           property={constants.SERVICE_NAME_FIELD}
@@ -62,6 +62,6 @@ export const Resource = ({ row }: DataGridCellValueElementProps) => {
           rightSideIcon="arrowDown"
         />
       )}
-    </span>
+    </div>
   );
 };

@@ -7,11 +7,8 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import { dynamic } from '../../../utils/dynamic';
+import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
 
-const ColumnHeaderTruncateContainer = dynamic(
-  () => import('@kbn/unified-data-table/src/components/column_header_truncate_container')
-);
 export const TooltipButtonComponent = ({
   displayText,
   headerRowHeight,

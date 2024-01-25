@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
@@ -16,6 +16,8 @@ import {
 } from '../../common/translations';
 import { HoverPopover } from '../../common/hover_popover';
 import { TooltipButtonComponent } from './tooltip_button';
+import { FieldWithToken } from './field_with_token';
+import * as constants from '../../../../common/constants';
 
 export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
   const { euiTheme } = useEuiTheme();
@@ -40,36 +42,8 @@ export const ContentColumnTooltip = ({ column, headerRowHeight }: CustomGridColu
         <EuiText size="s" css={spacingCSS}>
           <p>{contentHeaderTooltipParagraph2}</p>
         </EuiText>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="xs"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToken iconType="tokenKeyword" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>error.message</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiFlexGroup
-          responsive={false}
-          alignItems="center"
-          justifyContent="flexStart"
-          gutterSize="xs"
-        >
-          <EuiFlexItem grow={false}>
-            <EuiToken iconType="tokenEvent" size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="s">
-              <strong>event.original</strong>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <FieldWithToken field={constants.ERROR_MESSAGE_FIELD} />
+        <FieldWithToken field={constants.EVENT_ORIGINAL_FIELD} iconType="tokenEvent" />
       </div>
     </HoverPopover>
   );

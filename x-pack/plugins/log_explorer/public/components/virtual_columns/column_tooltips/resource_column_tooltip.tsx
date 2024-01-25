@@ -7,20 +7,18 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiToken, useEuiTheme } from '@elastic/eui';
+import { EuiText } from '@elastic/eui';
 import type { CustomGridColumnProps } from '@kbn/unified-data-table';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { resourceHeaderTooltipParagraph, resourceLabel } from '../../common/translations';
 import { HoverPopover } from '../../common/hover_popover';
 import { TooltipButtonComponent } from './tooltip_button';
+import * as constants from '../../../../common/constants';
+import { FieldWithToken } from './field_with_token';
 
 export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridColumnProps) => {
-  const { euiTheme } = useEuiTheme();
   const spacingCSS = css`
-    margin-bottom: ${euiTheme.size.s};
-  `;
-
-  const spacingXsCss = css`
-    margin-bottom: ${euiTheme.size.xs};
+    margin-bottom: ${euiThemeVars.euiSizeS};
   `;
 
   return (
@@ -37,91 +35,15 @@ export const ResourceColumnTooltip = ({ column, headerRowHeight }: CustomGridCol
         <EuiText size="s" css={spacingCSS}>
           <p>{resourceHeaderTooltipParagraph}</p>
         </EuiText>
-        <div css={spacingXsCss}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType="tokenKeyword" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>service.name</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div css={spacingXsCss}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType="tokenKeyword" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>container.name</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div css={spacingXsCss}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType="tokenKeyword" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>orchestrator.namespace</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div css={spacingXsCss}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType="tokenKeyword" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>host.name</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
-        <div css={spacingXsCss}>
-          <EuiFlexGroup
-            responsive={false}
-            alignItems="center"
-            justifyContent="flexStart"
-            gutterSize="xs"
-          >
-            <EuiFlexItem grow={false}>
-              <EuiToken iconType="tokenKeyword" size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">
-                <strong>cloud.instance.id</strong>
-              </EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </div>
+        {[
+          constants.SERVICE_NAME_FIELD,
+          constants.CONTAINER_NAME_FIELD,
+          constants.ORCHESTRATOR_NAMESPACE_FIELD,
+          constants.HOST_NAME_FIELD,
+          constants.CLOUD_INSTANCE_ID_FIELD,
+        ].map((field) => (
+          <FieldWithToken field={field} />
+        ))}
       </div>
     </HoverPopover>
   );
