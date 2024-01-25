@@ -138,6 +138,7 @@ export default function ({
       it('is available if new', async () => {
         await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openImageReportingPanel();
         await testSubjects.click('pngReportOption');
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);

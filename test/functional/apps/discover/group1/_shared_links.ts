@@ -64,6 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('permalink', function () {
         it('should allow for copying the snapshot URL', async function () {
+          await PageObjects.share.clickShareTopNavButton();
           const actualUrl = await PageObjects.share.getSharedUrl();
           expect(actualUrl).to.contain(`?l=${DISCOVER_APP_LOCATOR}`);
           const urlSearchParams = new URLSearchParams(actualUrl);
@@ -87,7 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               pause: true,
             },
           });
-          await PageObjects.share.closeShareModal();
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
         });
 
         it('should allow for copying the snapshot URL as a short URL', async function () {

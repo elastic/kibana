@@ -127,7 +127,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('Embed code shows create short-url button', async () => {
-        await PageObjects.share.openShareMenuItem('Embed');
+        await PageObjects.share.openShareMenuItem('Copyembed');
         await PageObjects.share.createShortUrlExistOrFail();
         if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();

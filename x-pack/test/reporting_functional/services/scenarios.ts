@@ -128,10 +128,11 @@ export function createScenarios(
     expect(queueReportError).to.be(true);
   };
   const tryGeneratePdfNotAvailable = async () => {
-    PageObjects.share.clickShareTopNavButton();
+    await PageObjects.share.clickShareTopNavButton();
     await testSubjects.missingOrFail(`sharePanel-PDFReports`);
   };
   const tryGeneratePdfSuccess = async () => {
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openImageReportingPanel();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };

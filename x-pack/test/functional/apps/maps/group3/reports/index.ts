@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 const REPORTS_FOLDER = __dirname;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard']);
+  const PageObjects = getPageObjects(['reporting', 'common', 'dashboard', 'share']);
   const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
@@ -63,6 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
+      await PageObjects.share.clickShareTopNavButton;
       await PageObjects.reporting.openImageReportingPanel();
       await PageObjects.reporting.clickGeneratePngReportButton();
 
