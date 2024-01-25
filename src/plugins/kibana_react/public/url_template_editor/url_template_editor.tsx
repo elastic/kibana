@@ -22,6 +22,7 @@ export interface UrlTemplateEditorVariable {
 export interface UrlTemplateEditorProps {
   value: string;
   height?: CodeEditorProps['height'];
+  fitToContent?: CodeEditorProps['fitToContent'];
   variables?: UrlTemplateEditorVariable[];
   onChange: CodeEditorProps['onChange'];
   onEditor?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
@@ -31,6 +32,7 @@ export interface UrlTemplateEditorProps {
 
 export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
   height = 105,
+  fitToContent,
   value,
   variables,
   onChange,
@@ -127,6 +129,7 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
       <Editor
         languageId={HandlebarsLang}
         height={height}
+        fitToContent={fitToContent}
         value={value}
         onChange={onChange}
         editorDidMount={handleEditor}
@@ -152,6 +155,10 @@ export const UrlTemplateEditor: React.FC<UrlTemplateEditorProps> = ({
           },
           wordWrap: 'on',
           wrappingIndent: 'none',
+          automaticLayout: true,
+          scrollBeyondLastLine: false,
+          overviewRulerLanes: 0,
+          padding: { top: 8, bottom: 8 },
         }}
       />
     </div>
