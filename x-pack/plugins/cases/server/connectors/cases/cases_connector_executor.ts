@@ -93,7 +93,7 @@ export class CasesConnectorExecutor {
      * A record does not exist if it is the first time the connector run for a specific grouping.
      * The returned map will contain all records old and new.
      */
-    const oracleRecordsMap = await this.upsertOracleRecords(groupedAlertsWithOracleKey);
+    const oracleRecordsMap = await this.upsertOracleRecords(params, groupedAlertsWithOracleKey);
 
     /**
      * If the time window has passed for a case we need to create a new case.
@@ -254,6 +254,7 @@ export class CasesConnectorExecutor {
   }
 
   private async upsertOracleRecords(
+    params: CasesConnectorRunParams,
     groupedAlertsWithOracleKey: Map<string, GroupedAlertsWithOracleKey>
   ): Promise<Map<string, GroupedAlertsWithOracleRecords>> {
     this.logger.debug(
@@ -325,8 +326,11 @@ export class CasesConnectorExecutor {
         const record = groupedAlertsWithOracleKey.get(error.id);
         bulkCreateReq.push({
           recordId: error.id,
-          // TODO: Add the rule info
-          payload: { cases: [], rules: [], grouping: record?.grouping ?? {} },
+          payload: {
+            cases: [],
+            rules: [{ id: params.rule.id }],
+            grouping: record?.grouping ?? {},
+          },
         });
       }
     }
@@ -685,9 +689,6 @@ export class CasesConnectorExecutor {
   }
 
   private getGroupingDescription(grouping: GroupedAlerts['grouping']) {
-    /**
-     * TODO: Handle multi values
-     */
     return Object.entries(grouping)
       .map(([key, value]) => {
         const keyAsCodeBlock = `\`${key}\``;

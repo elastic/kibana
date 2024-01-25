@@ -198,7 +198,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[0].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
             {
@@ -206,7 +210,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[1].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
             {
@@ -214,7 +222,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
@@ -361,7 +373,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
@@ -397,7 +413,11 @@ describe('CasesConnectorExecutor', () => {
               payload: {
                 cases: [],
                 grouping: groupedAlertsWithOracleKey[2].grouping,
-                rules: [],
+                rules: [
+                  {
+                    id: 'rule-test-id',
+                  },
+                ],
               },
             },
           ]);
