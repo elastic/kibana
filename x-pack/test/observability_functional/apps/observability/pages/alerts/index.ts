@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         describe('When open', async () => {
           before(async () => {
-            await observability.alerts.common.openAlertsFlyout();
+            await observability.alerts.common.openAlertsFlyout(20);
           });
 
           after(async () => {
