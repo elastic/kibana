@@ -8,10 +8,10 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
+import { RowHeightSettings } from '@kbn/unified-data-table';
 import { ToolbarPopover } from '../../../shared_components';
 import type { VisualizationToolbarProps } from '../../../types';
 import type { DatatableVisualizationState } from '../visualization';
-import { RowHeightSettings } from './row_height_settings';
 import { DEFAULT_PAGE_SIZE } from './table_basic';
 
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
