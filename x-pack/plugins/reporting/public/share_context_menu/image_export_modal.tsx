@@ -168,10 +168,6 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
     [apiClient, getJobParams, selectedRadio, getJobsParams, objectType, jobProviderOptions]
   );
 
-  useEffect(() => {
-    getAbsoluteReportGenerationUrl();
-  }, [getAbsoluteReportGenerationUrl]);
-
   const markAsStale = useCallback(() => {
     if (!isMounted) return;
     setIsStale(true);

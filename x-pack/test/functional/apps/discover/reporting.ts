@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getReport = async () => {
     // close any open notification toasts
     await PageObjects.reporting.clearToastNotifications();
-
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 

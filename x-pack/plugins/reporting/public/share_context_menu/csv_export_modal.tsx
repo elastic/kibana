@@ -65,8 +65,13 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   );
 
   useEffect(() => {
-    getAbsoluteReportGenerationUrl();
-  }, [getAbsoluteReportGenerationUrl]);
+    const reportingUrl = new URL(window.location.origin);
+    reportingUrl.pathname = apiClient.getReportingPublicJobPath(
+      CSV_JOB_TYPE,
+      apiClient.getDecoratedJobParams(getJobParams(true))
+    );
+    setAbsoluteUrl(reportingUrl.toString());
+  }, [getAbsoluteReportGenerationUrl, apiClient, getJobParams]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
