@@ -158,6 +158,7 @@
     "@kbn/dev-utils",
     "@kbn/server-http-tools",
     "@kbn/core-di-server",
+    "@kbn/core-di-server-mocks",
   ],
   "exclude": [
     "target/**/*",
