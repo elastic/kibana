@@ -175,7 +175,7 @@ export function Chart({
 
   const onSuggestionContextEdit = useCallback(
     (editedSuggestionContext: UnifiedHistogramSuggestionContext | undefined) => {
-      console.log('suggestion context was edited', editedSuggestionContext);
+      // console.log('suggestion context was edited', editedSuggestionContext);
       lensVisService.onSuggestionEdited({
         editedSuggestionContext,
       });

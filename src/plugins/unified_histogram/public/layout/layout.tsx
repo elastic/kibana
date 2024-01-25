@@ -244,7 +244,7 @@ export const UnifiedHistogramLayout = ({
 
   useEffect(() => {
     if (isChartLoading) {
-      console.log('chart is loading', requestParams.query, externalVisContext);
+      // console.log('chart is loading', requestParams.query, externalVisContext);
       return;
     }
 

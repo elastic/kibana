@@ -237,13 +237,13 @@ export const useDiscoverHistogram = ({
     }
 
     const fetchStart = stateContainer.dataState.fetch$.subscribe((value) => {
-      console.log('fetchStart', value);
+      // console.log('fetchStart', value);
       if (!skipRefetch.current) {
         setIsSuggestionLoading(true);
       }
     });
     const fetchComplete = textBasedFetchComplete$.subscribe((value) => {
-      console.log('fetchComplete', value);
+      // console.log('fetchComplete', value);
       setIsSuggestionLoading(false);
     });
 
@@ -332,7 +332,7 @@ export const useDiscoverHistogram = ({
 
   const onVisContextChanged = useCallback(
     (newVisContext: ExternalVisContext | undefined) => {
-      console.log('got new vis context from histogram', newVisContext);
+      // console.log('got new vis context from histogram', newVisContext);
       stateContainer.appState.update({ visContext: newVisContext });
     },
     [stateContainer]
