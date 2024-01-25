@@ -68,6 +68,7 @@ export const loadDashboardState = async ({
 
   const cachedDashboard = dashboardContentManagementCache.fetchDashboard(id);
   if (cachedDashboard) {
+    console.log('cached dashboard', cachedDashboard);
     /** If the dashboard exists in the cache, use the cached version to load the dashboard */
     ({ item: rawDashboardContent, meta: resolveMeta } = cachedDashboard);
   } else {
@@ -80,8 +81,14 @@ export const loadDashboardState = async ({
       .catch((e) => {
         throw new SavedObjectNotFound(DASHBOARD_CONTENT_ID, id);
       });
-
-    dashboardContentManagementCache.addDashboard(result);
+    const { outcome: loadOutcome } = result.meta;
+    if (loadOutcome !== 'aliasMatch') {
+      /**
+       * Only add the dashboard to the cache if it does not require a redirect - otherwise, the meta
+       * alias info gets cached and prevents the dashboard contents from being updated
+       */
+      dashboardContentManagementCache.addDashboard(result);
+    }
     ({ item: rawDashboardContent, meta: resolveMeta } = result);
   }
 
@@ -160,7 +167,6 @@ export const loadDashboardState = async ({
     {
       ...DEFAULT_DASHBOARD_INPUT,
       ...options,
-
       id: embeddableId,
       refreshInterval,
       timeRestore,
