@@ -13,7 +13,7 @@ import {
 } from '../../../../common/constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
-const getRuleStatesKey = 'get_rules_state_key';
+export const getRuleStatesKey = 'get_rules_state_key';
 
 export const useGetCspBenchmarkRulesStatesApi = () => {
   const { http } = useKibana().services;
