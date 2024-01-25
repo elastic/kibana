@@ -10,7 +10,7 @@ import { useDispatch } from 'react-redux';
 import type { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { DocumentDetailsRightPanelKey } from '../../flyout/document_details/right';
 import { useTourContext } from '../../common/components/guided_onboarding_tour';
 import {
@@ -61,7 +61,7 @@ const CaseContainerComponent: React.FC = () => {
   const { formatUrl: detectionsFormatUrl, search: detectionsUrlSearch } = useFormatUrl(
     SecurityPageName.rules
   );
-  const { openFlyout } = useExpandableFlyoutContext();
+  const { openFlyout } = useExpandableFlyoutApi();
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);
 
   const getDetectionsRuleDetailsHref = useCallback(

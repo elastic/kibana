@@ -28,7 +28,7 @@ import {
   clickingOnCreateTemplateFromTimelineBtn,
   closeTimeline,
   createNewTimelineTemplate,
-  createTimelineTemplateOptionsPopoverBottomBar,
+  createTimelineTemplateFromBottomBar,
   expandEventAction,
   markAsFavorite,
   openTimelineTemplate,
@@ -114,7 +114,7 @@ describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
 
   it('should create timeline template from bottombar', () => {
     visit(TIMELINES_URL);
-    createTimelineTemplateOptionsPopoverBottomBar();
+    createTimelineTemplateFromBottomBar();
     cy.get(TIMELINE_TITLE).should('have.text', 'Untitled template');
   });
 });

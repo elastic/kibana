@@ -17,6 +17,7 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps } from 'react-router-dom';
 
+import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
 import { Index } from '../../../../../../common';
 import {
@@ -77,6 +78,7 @@ interface Props {
   index: Index;
   tab: IndexDetailsTabId;
   history: RouteComponentProps['history'];
+  search: string;
   fetchIndexDetails: () => Promise<void>;
   navigateToIndicesList: () => void;
 }
@@ -84,6 +86,7 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
   index,
   tab,
   history,
+  search,
   fetchIndexDetails,
   navigateToIndicesList,
 }) => {
@@ -111,9 +114,9 @@ export const DetailsPageContent: FunctionComponent<Props> = ({
 
   const onSectionChange = useCallback(
     (newSection: IndexDetailsTabId) => {
-      return history.push(getIndexDetailsLink(index.name, newSection));
+      return history.push(getIndexDetailsLink(index.name, resetIndexUrlParams(search), newSection));
     },
-    [history, index]
+    [history, index.name, search]
   );
 
   const headerTabs = useMemo<EuiPageHeaderProps['tabs']>(() => {

@@ -82,7 +82,13 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(await screen.findByTestId('column-selection-popover-show-all-button'));
+    userEvent.click(
+      await screen.findByTestId('column-selection-popover-show-all-button'),
+      undefined,
+      {
+        skipPointerEventsCheck: true,
+      }
+    );
 
     const onSelectedColumnsChangeCallParams = selectedColumns.map((column) => ({
       ...column,
@@ -105,7 +111,13 @@ describe('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(await screen.findByTestId('column-selection-popover-hide-all-button'));
+    userEvent.click(
+      await screen.findByTestId('column-selection-popover-hide-all-button'),
+      undefined,
+      {
+        skipPointerEventsCheck: true,
+      }
+    );
 
     await waitFor(() => {
       expect(onSelectedColumnsChange).toHaveBeenCalledWith(

@@ -335,7 +335,21 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
-                  defaultMessage="Proxy"
+                  defaultMessage="Proxy {badge}"
+                  values={{
+                    badge: (
+                      <EuiBetaBadge
+                        size="s"
+                        className="eui-alignTop"
+                        label={i18n.translate(
+                          'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
+                          {
+                            defaultMessage: 'Beta',
+                          }
+                        )}
+                      />
+                    ),
+                  }}
                 />
               }
             >
