@@ -504,12 +504,15 @@ export class LinkModal extends Component<LinkModalProps, State> {
                           : 'Save before you generate a snapshot.'
                       }
                     >
-                      <EuiButton color="warning" iconType="warning">
+                      <EuiButton
+                        color="warning"
+                        iconType="warning"
+                        data-test-subj="copyShareUrlButton"
+                        data-share-url={this.state.url}
+                      >
                         <FormattedMessage
                           id="share.link.saveNeededButton"
                           defaultMessage="Copy link"
-                          data-test-subj="copyShareUrlButton"
-                          data-share-url={this.state.url}
                         />
                       </EuiButton>
                     </EuiToolTip>

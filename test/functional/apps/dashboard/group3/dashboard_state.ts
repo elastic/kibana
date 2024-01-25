@@ -181,6 +181,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           };
         }
       );
+      await PageObjects.share.closeShareModal();
 
       // We need to add a timestamp to the URL because URL changes now only work with a hard refresh.
       await browser.get(newUrl.toString());
@@ -195,10 +196,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
-      if (await PageObjects.share.isShareModalOpen()) {
-        await PageObjects.share.closeShareModal();
-      }
       log.debug(`sharedUrl: ${sharedUrl}`);
+      await PageObjects.share.closeShareModal();
       return sharedUrl;
     };
 
@@ -244,6 +243,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('for query parameter with soft refresh', async function () {
         await changeQuery(false, 'hi:goodbye');
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         await PageObjects.dashboard.expectAppStateRemovedFromURL();
       });
 

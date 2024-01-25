@@ -120,6 +120,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('Permalinks shows create short-url button', async () => {
+        await PageObjects.share.clickShareTopNavButton();
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close the menu
@@ -127,6 +128,7 @@ export default function (ctx: FtrProviderContext) {
       });
 
       it('shows CSV reports', async () => {
+        await PageObjects.share.clickShareTopNavButton();
         await testSubjects.click('sharePanel-CSVDownload');
         await PageObjects.share.closeShareModal();
       });
@@ -197,6 +199,7 @@ export default function (ctx: FtrProviderContext) {
 
       it(`Permalinks doesn't show create short-url button`, async () => {
         await PageObjects.share.clickShareTopNavButton();
+        await PageObjects.share.openPermaLinks();
         await PageObjects.share.createShortUrlMissingOrFail();
       });
 

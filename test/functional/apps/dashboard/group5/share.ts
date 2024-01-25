@@ -70,7 +70,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     const testFilterState = async (mode: TestingModes) => {
       it('should not have "filters" state in either app or global state when no filters', async () => {
         const testMode = await getSharedUrl(mode);
-        await PageObjects.share.closeShareModal();
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         expect(testMode).to.not.contain('filters');
       });
 

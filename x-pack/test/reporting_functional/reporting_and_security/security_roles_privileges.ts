@@ -98,7 +98,7 @@ export default function ({ getService }: FtrProviderContext) {
         await reportingFunctional.loginReportingUser();
         await reportingFunctional.openCanvasWorkpad(CANVAS_TITLE);
         await testSubjects.click('shareTopNavButton');
-        await testSubjects.click('sharePanel-PDFReports');
+        await testSubjects.click('sharePanel-imageExports');
         await testSubjects.click('generateReportButton');
       });
     });
