@@ -39,10 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('webhookPasswordInput', 'password');
       await commonScreenshots.takeScreenshot('cases-webhook-connector', screenshotDirectories);
       await testSubjects.click('casesWebhookNext');
-      await testSubjects.setValue(
-        'webhookCreateUrlText',
-        'https://testing-jira.atlassian.net/rest/api/2/issue'
-      );
+      await testSubjects.setValue('webhookCreateUrlText', 'https://example.com/issue');
       await testSubjects.setValue('webhookCreateIncidentJson', createCaseJson);
       await testSubjects.setValue('createIncidentResponseKeyText', 'id');
       await commonScreenshots.takeScreenshot(
@@ -54,12 +51,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('casesWebhookNext');
       await testSubjects.setValue(
         'getIncidentUrlInput',
-        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+        'https://example.com/issue/{{{external.system.id}}}'
       );
       await testSubjects.setValue('getIncidentResponseExternalTitleKeyText', 'key');
       await testSubjects.setValue(
         'viewIncidentUrlInput',
-        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.title}}}'
+        'https://example.com/issue/{{{external.system.title}}}'
       );
       await commonScreenshots.takeScreenshot(
         'cases-webhook-connector-get-case',
@@ -70,13 +67,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('casesWebhookNext');
       await testSubjects.setValue(
         'updateIncidentUrlInput',
-        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+        'https://example.com/issue/{{{external.system.id}}}'
       );
       await testSubjects.setValue('webhookUpdateIncidentJson', createCaseJson);
       await testSubjects.setValue('webhookCreateCommentMethodSelect', 'post');
       await testSubjects.setValue(
         'createCommentUrlInput',
-        'https://testing-jira.atlassian.net/rest/api/2/issue/{{{external.system.id}}}'
+        'https://example.com/issue/{{{external.system.id}}}'
       );
       await testSubjects.setValue('webhookCreateCommentJson', createCommentJson);
       await commonScreenshots.takeScreenshot(
