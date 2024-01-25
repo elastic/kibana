@@ -1820,7 +1820,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async isShareActionEnabled(action: 'csvDownload' | 'permalinks' | 'imageExports') {
       switch (action) {
         case 'csvDownload':
-          return await testSubjects.isEnabled('sharePanel-CSVDownload');
+          return await testSubjects.isEnabled('sharePanel-DownloadCSV');
         case 'permalinks':
           return await testSubjects.isEnabled('sharePanel-Permalinks');
         default:
@@ -1872,7 +1872,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async openCSVDownloadShare() {
       await this.ensureShareMenuIsOpen('csvDownload');
-      await testSubjects.click('sharePanel-CSVDownload');
+      await testSubjects.click('sharePanel-DownloadCSV');
     },
 
     async setCSVDownloadDebugFlag(value: boolean = true) {
