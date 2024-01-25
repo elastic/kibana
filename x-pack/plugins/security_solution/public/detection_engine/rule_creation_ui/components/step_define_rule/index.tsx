@@ -178,7 +178,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   thresholdFields,
   enableThresholdSuppression,
 }) => {
-  const { isSuppressionEnabled } = useAlertSuppression(ruleType);
+  const { isSuppressionEnabled: isAlertSuppressionEnabled } = useAlertSuppression(ruleType);
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
   const [indexModified, setIndexModified] = useState(false);
@@ -981,7 +981,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <EuiSpacer size="m" />
-          <RuleTypeEuiFormRow $isVisible={isSuppressionEnabled && isThresholdRule} fullWidth>
+          <RuleTypeEuiFormRow $isVisible={isAlertSuppressionEnabled && isThresholdRule} fullWidth>
             <EuiToolTip content={alertSuppressionUpsellingMessage} position="right">
               <CommonUseField
                 path="enableThresholdSuppression"
@@ -998,7 +998,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <RuleTypeEuiFormRow
-            $isVisible={isSuppressionEnabled && !isThresholdRule}
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionInput"
           >
             <UseField
@@ -1013,7 +1013,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           </RuleTypeEuiFormRow>
 
           <IntendedRuleTypeEuiFormRow
-            $isVisible={isSuppressionEnabled}
+            $isVisible={isAlertSuppressionEnabled}
             data-test-subj="alertSuppressionDuration"
           >
             <UseMultiFields
@@ -1035,7 +1035,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
           <IntendedRuleTypeEuiFormRow
             // threshold rule does not have this suppression configuration
-            $isVisible={isSuppressionEnabled && !isThresholdRule}
+            $isVisible={isAlertSuppressionEnabled && !isThresholdRule}
             data-test-subj="alertSuppressionMissingFields"
             label={
               <span>
