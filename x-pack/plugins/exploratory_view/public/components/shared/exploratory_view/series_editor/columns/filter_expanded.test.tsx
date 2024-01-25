@@ -16,6 +16,10 @@ describe('FilterExpanded', function () {
 
   const mockSeries = { ...mockUxSeries, filters };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('render', async () => {
     const initSeries = { filters };
     mockAppDataView();
@@ -75,7 +79,7 @@ describe('FilterExpanded', function () {
     );
 
     await waitFor(() => {
-      expect(spy).toHaveBeenCalledTimes(4);
+      expect(spy).toHaveBeenCalledTimes(1);
       expect(spy).toBeCalledWith(
         expect.objectContaining({
           time: { from: 'now-15m', to: 'now' },
