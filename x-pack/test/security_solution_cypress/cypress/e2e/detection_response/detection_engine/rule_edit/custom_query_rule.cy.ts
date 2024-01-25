@@ -6,8 +6,8 @@
  */
 
 import {
-  ADD_FILTER_FORM_FIELD_INPUT,
-  ADD_FILTER_FORM_OPERATOR_FIELD,
+  ADD_FILTER_FORM_FIELD_SELECTED_VALUE,
+  ADD_FILTER_FORM_OPERATOR_FIELD_SELECTED_VALUE,
   GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM,
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
 } from '../../../../screens/search_bar';
@@ -198,8 +198,8 @@ describe('Custom query rules', { tags: ['@ess', '@serverless', '@brokenInServerl
       cy.get(GLOBAL_SEARCH_BAR_EDIT_FILTER_MENU_ITEM).click();
 
       // Check that correct values are propagated in the filter editing dialog
-      cy.get(ADD_FILTER_FORM_FIELD_INPUT).should('contain.text', 'host.name');
-      cy.get(ADD_FILTER_FORM_OPERATOR_FIELD).should('contain.text', 'exists');
+      cy.get(ADD_FILTER_FORM_FIELD_SELECTED_VALUE).should('contain.text', 'host.name');
+      cy.get(ADD_FILTER_FORM_OPERATOR_FIELD_SELECTED_VALUE).should('contain.text', 'exists');
     });
   });
 });

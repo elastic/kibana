@@ -18,12 +18,18 @@ export const GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON = (localSearchBarSelector: strin
   `${localSearchBarSelector ?? ''} [data-test-subj="querySubmitButton"]`;
 
 export const ADD_FILTER_FORM_FIELD_INPUT =
+  '[data-test-subj="filterFieldSuggestionList"] input[data-test-subj="comboBoxSearchInput"]';
+
+export const ADD_FILTER_FORM_FIELD_SELECTED_VALUE =
   '[data-test-subj="filterFieldSuggestionList"] [data-test-subj="euiComboBoxPill"]';
 
 export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
   `[data-test-subj="comboBoxOptionsList filterFieldSuggestionList-optionsList"] button[title="${value}"]`;
 
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
+  '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
+
+export const ADD_FILTER_FORM_OPERATOR_FIELD_SELECTED_VALUE =
   '[data-test-subj="filterOperatorList"] [data-test-subj="euiComboBoxPill"]';
 
 export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams"] input';
