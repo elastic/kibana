@@ -110,21 +110,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(searchCount).to.be(expectedRequests);
       });
 
-      it(`should send ${expectedRefreshRequest} requests (documents + chart) when refreshing`, async () => {
-        await expectSearches(type, expectedRefreshRequest, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when refreshing`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send ${expectedRefreshRequest} requests (documents + chart) when changing the query`, async () => {
-        await expectSearches(type, expectedRefreshRequest, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when changing the query`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await setQuery(query1);
           await queryBar.clickQuerySubmitButton();
         });
       });
 
-      it(`should send ${expectedRefreshRequest} requests (documents + chart) when changing the time range`, async () => {
-        await expectSearches(type, expectedRefreshRequest, async () => {
+      it(`should send ${expectedRequests} requests (documents + chart) when changing the time range`, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await PageObjects.timePicker.setAbsoluteRange(
             'Sep 21, 2015 @ 06:31:44.000',
             'Sep 23, 2015 @ 00:00:00.000'
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await setQuery(query2);
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
-        await expectSearches(type, savedSearchesRequests ?? expectedRequests, async () => {
+        await expectSearches(type, expectedRequests, async () => {
           await PageObjects.discover.revertUnsavedChanges();
         });
         // clearing the saved search
@@ -227,7 +227,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('ES|QL mode', () => {
+    describe('ES|QL mode-woof and meow', () => {
       const type = 'esql';
 
       beforeEach(async () => {
@@ -250,7 +250,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expectedRefreshRequest: 2,
       });
 
-      it(`should send 3 requests (documents + chart) when toggling the chart visibility`, async () => {
+      it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
         await expectSearches(type, 3, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
