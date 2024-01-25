@@ -21,7 +21,6 @@ import type { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/cor
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import type { BaseParams } from '@kbn/reporting-common/types';
-import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 import React, { FC, useEffect, useMemo, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import url from 'url';
@@ -33,7 +32,7 @@ export interface CsvModalProps {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;
   uiSettings: IUiSettingsClient;
-  reportType?: string;
+  reportType: string;
   requiresSavedState: boolean; // Whether the report to be generated requires saved state that is not captured in the URL submitted to the report generator.
   getJobParams: (forShareUrl?: boolean) => Omit<BaseParams, 'browserTimezone' | 'version'>;
   objectId?: string;
@@ -47,7 +46,7 @@ export type Props = CsvModalProps & { intl: InjectedIntl };
 
 export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const isSaved = Boolean(props.objectId);
-  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType } = props;
+  const { apiClient, getJobParams, intl, toasts, theme, onClose, objectType, reportType } = props;
   const isMounted = useMountedState();
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
@@ -56,28 +55,28 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const getAbsoluteReportGenerationUrl = useMemo(
     () => () => {
       const relativePath = apiClient.getReportingPublicJobPath(
-        CSV_JOB_TYPE,
+        reportType,
         apiClient.getDecoratedJobParams(getJobParams(true))
       );
       return setAbsoluteUrl(url.resolve(window.location.href, relativePath));
     },
-    [apiClient, getJobParams]
+    [apiClient, getJobParams, reportType]
   );
 
   useEffect(() => {
     const reportingUrl = new URL(window.location.origin);
     reportingUrl.pathname = apiClient.getReportingPublicJobPath(
-      CSV_JOB_TYPE,
+      reportType,
       apiClient.getDecoratedJobParams(getJobParams(true))
     );
     setAbsoluteUrl(reportingUrl.toString());
-  }, [getAbsoluteReportGenerationUrl, apiClient, getJobParams]);
+  }, [getAbsoluteReportGenerationUrl, apiClient, getJobParams, reportType]);
 
   const generateReportingJob = () => {
     const decoratedJobParams = apiClient.getDecoratedJobParams(getJobParams());
     setCreatingReportJob(true);
     return apiClient
-      .createReportingJob('csv_searchsource', decoratedJobParams)
+      .createReportingJob(reportType, decoratedJobParams)
       .then(() => {
         toasts.addSuccess({
           title: intl.formatMessage(
