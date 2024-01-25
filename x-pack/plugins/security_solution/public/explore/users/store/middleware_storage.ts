@@ -7,23 +7,16 @@
 
 import type { Action, Middleware } from 'redux';
 import { get } from 'lodash/fp';
-import { debounce } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import { usersActions } from '.';
 import { selectUserAssetTables } from './selectors';
-import type { UserAssetQuery, UserAssetTableType } from './model';
+import type { UserAssetTableType } from './model';
 import type { State } from '../../../common/store/types';
 import { persistUserAssetTableInStorage } from './storage';
 
 const { removeUserAssetTableField, addUserAssetTableField } = usersActions;
 const tableActionTypes = new Set([removeUserAssetTableField.type, addUserAssetTableField.type]);
-
-const debouncedpersistUserAssetTableInStorage = debounce(
-  (storage: Storage, id: UserAssetTableType, table: UserAssetQuery) =>
-    persistUserAssetTableInStorage(storage, id, table),
-  500
-);
 
 export const userAssetTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =
   (storage: Storage) => (store) => (next) => (action: Action) => {
@@ -36,7 +29,7 @@ export const userAssetTableLocalStorageMiddleware: (storage: Storage) => Middlew
       if (tableById && storage) {
         if (tableActionTypes.has(action.type)) {
           const tableId: UserAssetTableType = get('payload.tableId', action);
-          debouncedpersistUserAssetTableInStorage(storage, tableId, tableById[tableId]);
+          persistUserAssetTableInStorage(storage, tableId, tableById[tableId]);
         }
       }
     }

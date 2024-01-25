@@ -7,11 +7,10 @@
 
 import type { Action, Middleware } from 'redux';
 import { get } from 'lodash/fp';
-import { debounce } from 'lodash';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { dataTableActions, dataTableSelectors } from '@kbn/securitysolution-data-table';
-import type { DataTableModel, TableIdLiteral } from '@kbn/securitysolution-data-table';
+import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
 import { updateTotalCount } from '../../../timelines/store/actions';
 import { addTableInStorage } from '../../../timelines/containers/local_storage';
 
@@ -48,12 +47,6 @@ const tableActionTypes = new Set([
   toggleDetailPanel.type,
 ]);
 
-const debouncedAddTableInStorage = debounce(
-  (storage: Storage, id: TableIdLiteral, table: DataTableModel) =>
-    addTableInStorage(storage, id, table),
-  500
-);
-
 export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{}, State> =
   (storage: Storage) => (store) => (next) => (action: Action) => {
     // perform the action
@@ -64,7 +57,7 @@ export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{
       const tableById = dataTableSelectors.tableByIdSelector(store.getState());
       if (tableById && storage) {
         const tableId: TableIdLiteral = get('payload.id', action);
-        debouncedAddTableInStorage(storage, tableId, tableById[tableId]);
+        addTableInStorage(storage, tableId, tableById[tableId]);
       }
     }
 
