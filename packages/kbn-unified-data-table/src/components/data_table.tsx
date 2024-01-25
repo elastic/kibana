@@ -128,9 +128,17 @@ export interface UnifiedDataTableProps {
    */
   showColumnTokens?: boolean;
   /**
+   * Optional value for providing configuration setting for UnifiedDataTable header row height
+   */
+  configHeaderRowHeight?: number;
+  /**
    * Determines number of rows of a column header
    */
   headerRowHeight?: number;
+  /**
+   * Update header row height state
+   */
+  onUpdateHeaderRowHeight?: (headerRowHeight: number) => void;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -208,6 +216,10 @@ export interface UnifiedDataTableProps {
    */
   controlColumnIds?: string[];
   /**
+   * Optional value for providing configuration setting for UnifiedDataTable row height
+   */
+  configRowHeight?: number;
+  /**
    * Row height from state
    */
   rowHeightState?: number;
@@ -268,10 +280,6 @@ export interface UnifiedDataTableProps {
     displayedColumns: string[],
     columnTypes?: DataTableColumnTypes
   ) => JSX.Element | undefined;
-  /**
-   * Optional value for providing configuration setting for UnifiedDataTable rows height
-   */
-  configRowHeight?: number;
   /**
    * Optional value for providing configuration setting for enabling to display the complex fields in the table. Default is true.
    */
@@ -361,7 +369,9 @@ export const UnifiedDataTable = ({
   columns,
   columnTypes,
   showColumnTokens,
+  configHeaderRowHeight,
   headerRowHeight,
+  onUpdateHeaderRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -809,6 +819,14 @@ export const UnifiedDataTable = ({
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
+          storage={storage}
+          consumer={consumer}
+          configRowHeight={configRowHeight}
+          rowHeightState={rowHeightState}
+          onChangeRowHeight={onUpdateRowHeight}
+          configHeaderRowHeight={configHeaderRowHeight}
+          headerRowHeightState={headerRowHeight}
+          onChangeHeaderRowHeight={onUpdateHeaderRowHeight}
           maxAllowedSampleSize={maxAllowedSampleSize}
           sampleSize={sampleSizeState}
           onChangeSampleSize={onUpdateSampleSize}
@@ -817,7 +835,19 @@ export const UnifiedDataTable = ({
     }
 
     return Object.keys(options).length ? options : undefined;
-  }, [maxAllowedSampleSize, sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
+  }, [
+    configHeaderRowHeight,
+    configRowHeight,
+    consumer,
+    headerRowHeight,
+    maxAllowedSampleSize,
+    onUpdateHeaderRowHeight,
+    onUpdateRowHeight,
+    onUpdateSampleSize,
+    rowHeightState,
+    sampleSizeState,
+    storage,
+  ]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length

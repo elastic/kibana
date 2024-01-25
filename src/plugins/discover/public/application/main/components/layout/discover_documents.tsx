@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -321,6 +321,8 @@ function DiscoverDocumentsComponent({
     [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
+  const [headerRowHeight, setHeaderRowHeight] = useState(3);
+
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
     return (
       <div className="dscDocuments__loading">
@@ -405,6 +407,9 @@ function DiscoverDocumentsComponent({
                   onSort={!isTextBasedQuery ? onSort : undefined}
                   onResize={onResizeDataGrid}
                   useNewFieldsApi={useNewFieldsApi}
+                  configHeaderRowHeight={3}
+                  headerRowHeight={headerRowHeight}
+                  onUpdateHeaderRowHeight={setHeaderRowHeight}
                   rowHeightState={rowHeight}
                   onUpdateRowHeight={onUpdateRowHeight}
                   isSortEnabled={isTextBasedQuery ? Boolean(currentColumns.length) : true}
@@ -424,7 +429,6 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
-                  headerRowHeight={3}
                   externalCustomRenderers={externalCustomRenderers}
                   customGridColumnsConfiguration={customGridColumnsConfiguration}
                 />

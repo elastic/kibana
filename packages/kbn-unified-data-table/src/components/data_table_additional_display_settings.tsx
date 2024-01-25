@@ -11,7 +11,9 @@ import { EuiFormRow, EuiRange } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
+import { RowHeightSettings } from './row_height_settings';
+import { useRowHeight } from '../hooks/use_row_height';
+import { ROWS_HEIGHT_OPTIONS } from '../constants';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;
@@ -21,10 +23,15 @@ export const RANGE_STEP_SAMPLE_SIZE = 10;
 export interface UnifiedDataTableAdditionalDisplaySettingsProps {
   storage: Storage;
   consumer: string;
-  rowLineHeightOverride?: string;
+  configRowHeight?: number;
+  rowHeightState?: number;
+  onChangeRowHeight?: (rowHeight: number) => void;
+  configHeaderRowHeight?: number;
+  headerRowHeightState?: number;
+  onChangeHeaderRowHeight?: (headerRowHeight: number) => void;
   maxAllowedSampleSize?: number;
   sampleSize: number;
-  onChangeSampleSize: (sampleSize: number) => void;
+  onChangeSampleSize?: (sampleSize: number) => void;
 }
 
 export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
@@ -32,7 +39,12 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
 > = ({
   storage,
   consumer,
-  rowLineHeightOverride,
+  configRowHeight = ROWS_HEIGHT_OPTIONS.default,
+  rowHeightState,
+  onChangeRowHeight,
+  configHeaderRowHeight = ROWS_HEIGHT_OPTIONS.default,
+  headerRowHeightState,
+  onChangeHeaderRowHeight,
   maxAllowedSampleSize = DEFAULT_MAX_ALLOWED_SAMPLE_SIZE,
   sampleSize,
   onChangeSampleSize,
@@ -44,7 +56,7 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
   ); // flexible: allows to go lower than RANGE_MIN_SAMPLE_SIZE but greater than MIN_ALLOWED_SAMPLE_SIZE
 
   const debouncedOnChangeSampleSize = useMemo(
-    () => debounce(onChangeSampleSize, 300, { leading: false, trailing: true }),
+    () => debounce(onChangeSampleSize ?? (() => {}), 300, { leading: false, trailing: true }),
     [onChangeSampleSize]
   );
 
@@ -75,56 +87,70 @@ export const UnifiedDataTableAdditionalDisplaySettings: React.FC<
     setActiveSampleSize(sampleSize); // reset local state
   }, [sampleSize, setActiveSampleSize]);
 
-  const [headerRowHeight, setHeaderRowHeight] = useState<
-    RowHeightSettingsProps['rowHeight'] | undefined
-  >();
-  const [headerRowLines, setHeaderRowLines] = useState<
-    RowHeightSettingsProps['rowHeightLines'] | undefined
-  >();
+  const {
+    rowHeight: headerRowHeight,
+    rowHeightLines: headerRowHeightLines,
+    onUpdateRowHeight: onUpdateHeaderRowHeight,
+    onUpdateRowHeightLines: onUpdateHeaderRowHeightLines,
+  } = useRowHeight({
+    storage,
+    consumer,
+    key: 'dataGridHeaderRowHeight',
+    configRowHeight: configHeaderRowHeight,
+    rowHeightState: headerRowHeightState,
+    onChangeRowHeight: onChangeHeaderRowHeight,
+  });
 
-  const [cellRowHeight, setCellRowHeight] = useState<
-    RowHeightSettingsProps['rowHeight'] | undefined
-  >();
-  const [cellRowLines, setCellRowLines] = useState<
-    RowHeightSettingsProps['rowHeightLines'] | undefined
-  >();
+  const { rowHeight, rowHeightLines, onUpdateRowHeight, onUpdateRowHeightLines } = useRowHeight({
+    storage,
+    consumer,
+    configRowHeight,
+    rowHeightState,
+    onChangeRowHeight,
+  });
 
   return (
     <>
-      <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
-        <EuiRange
-          compressed
-          fullWidth
-          min={minRangeSampleSize}
-          max={maxAllowedSampleSize}
-          step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
-          showInput
-          value={activeSampleSize}
-          onChange={onChangeActiveSampleSize}
-          data-test-subj="unifiedDataTableSampleSizeInput"
+      {onChangeSampleSize && (
+        <EuiFormRow label={sampleSizeLabel} display="columnCompressed">
+          <EuiRange
+            compressed
+            fullWidth
+            min={minRangeSampleSize}
+            max={maxAllowedSampleSize}
+            step={minRangeSampleSize === RANGE_MIN_SAMPLE_SIZE ? RANGE_STEP_SAMPLE_SIZE : 1}
+            showInput
+            value={activeSampleSize}
+            onChange={onChangeActiveSampleSize}
+            data-test-subj="unifiedDataTableSampleSizeInput"
+          />
+        </EuiFormRow>
+      )}
+      {onChangeHeaderRowHeight && (
+        <RowHeightSettings
+          rowHeight={headerRowHeight}
+          rowHeightLines={headerRowHeightLines}
+          label={i18n.translate('unifiedDataTable.headerRowHeightLabel', {
+            defaultMessage: 'Header row height',
+          })}
+          onChangeRowHeight={onUpdateHeaderRowHeight}
+          onChangeRowHeightLines={onUpdateHeaderRowHeightLines}
+          data-test-subj="unifiedDataTableHeaderHeightSettings"
+          maxRowHeight={5}
         />
-      </EuiFormRow>
-      <RowHeightSettings
-        rowHeight={headerRowHeight}
-        rowHeightLines={headerRowLines}
-        label={i18n.translate('xpack.lens.table.visualOptionsHeaderRowHeightLabel', {
-          defaultMessage: 'Header row height',
-        })}
-        onChangeRowHeight={(mode) => setHeaderRowHeight(mode)}
-        onChangeRowHeightLines={(lines) => setHeaderRowLines(lines)}
-        data-test-subj="lnsHeaderHeightSettings"
-        maxRowHeight={5}
-      />
-      <RowHeightSettings
-        rowHeight={cellRowHeight}
-        rowHeightLines={cellRowLines}
-        label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
-          defaultMessage: 'Cell row height',
-        })}
-        onChangeRowHeight={(mode) => setCellRowHeight(mode)}
-        onChangeRowHeightLines={(lines) => setCellRowLines(lines)}
-        data-test-subj="lnsRowHeightSettings"
-      />
+      )}
+      {onChangeRowHeight && (
+        <RowHeightSettings
+          rowHeight={rowHeight}
+          rowHeightLines={rowHeightLines}
+          label={i18n.translate('unifiedDataTable.rowHeightLabel', {
+            defaultMessage: 'Cell row height',
+          })}
+          onChangeRowHeight={onUpdateRowHeight}
+          onChangeRowHeightLines={onUpdateRowHeightLines}
+          data-test-subj="unifiedDataTableHeightSettings"
+        />
+      )}
     </>
   );
 };
