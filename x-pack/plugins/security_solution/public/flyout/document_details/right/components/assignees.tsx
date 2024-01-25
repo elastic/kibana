@@ -12,7 +12,7 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
+import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { useUpsellingMessage } from '../../../../common/hooks/use_upselling';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -60,13 +60,18 @@ export interface AssigneesProps {
    * Callback to handle the successful assignees update
    */
   onAssigneesUpdated?: () => void;
+
+  /**
+   * Boolean to indicate whether it is a preview flyout
+   */
+  isPreview?: boolean;
 }
 
 /**
  * Document assignees details displayed in flyout right section header
  */
 export const Assignees: FC<AssigneesProps> = memo(
-  ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
+  ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
 
@@ -108,9 +113,8 @@ export const Assignees: FC<AssigneesProps> = memo(
     return (
       <EuiFlexGroup
         data-test-subj={ASSIGNEES_HEADER_TEST_ID}
-        alignItems="center"
-        direction="row"
-        gutterSize="xs"
+        direction="column"
+        gutterSize="none"
         responsive={false}
       >
         <EuiFlexItem grow={false}>
@@ -118,39 +122,45 @@ export const Assignees: FC<AssigneesProps> = memo(
             <h3>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.right.header.assignedTitle"
-                defaultMessage="Assignees:"
+                defaultMessage="Assignees"
               />
             </h3>
           </EuiTitle>
         </EuiFlexItem>
-        {assignedUsers && (
-          <EuiFlexItem grow={false}>
-            <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <AssigneesPopover
-            assignedUserIds={assignedUserIds}
-            button={
-              <UpdateAssigneesButton
-                togglePopover={togglePopover}
-                isDisabled={!hasIndexWrite || !isPlatinumPlus}
-                toolTipMessage={
-                  upsellingMessage ??
-                  i18n.translate(
-                    'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
-                    {
-                      defaultMessage: 'Assign alert',
+        {isPreview ? (
+          getEmptyTagValue()
+        ) : (
+          <>
+            {assignedUsers && (
+              <EuiFlexItem grow={false}>
+                <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <AssigneesPopover
+                assignedUserIds={assignedUserIds}
+                button={
+                  <UpdateAssigneesButton
+                    togglePopover={togglePopover}
+                    isDisabled={!hasIndexWrite || !isPlatinumPlus}
+                    toolTipMessage={
+                      upsellingMessage ??
+                      i18n.translate(
+                        'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
+                        {
+                          defaultMessage: 'Assign alert',
+                        }
+                      )
                     }
-                  )
+                  />
                 }
+                isPopoverOpen={isPopoverOpen}
+                closePopover={togglePopover}
+                onAssigneesApply={onAssigneesApply}
               />
-            }
-            isPopoverOpen={isPopoverOpen}
-            closePopover={togglePopover}
-            onAssigneesApply={onAssigneesApply}
-          />
-        </EuiFlexItem>
+            </EuiFlexItem>
+          </>
+        )}
       </EuiFlexGroup>
     );
   }

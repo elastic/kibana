@@ -11,7 +11,7 @@ import { resolve } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import getPort from 'get-port';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { ArtifactLicense } from '@kbn/es';
+import type { ArtifactLicense, ServerlessProjectType } from '@kbn/es';
 import type { Config } from '../../functional_test_runner';
 import { createTestEsCluster, esTestConfig } from '../../es';
 
@@ -184,8 +184,24 @@ function getESServerlessOptions(
   const serverlessHost: string | undefined =
     config.has('esServerlessOptions.host') && config.get('esServerlessOptions.host');
 
+  const kbnServerArgs =
+    (config.has('kbnTestServer.serverArgs') &&
+      (config.get('kbnTestServer.serverArgs') as string[])) ||
+    [];
+
+  const projectTypeFromArgs = kbnServerArgs
+    .filter((arg) => arg.startsWith('--serverless'))
+    .reduce((acc, arg) => {
+      const match = arg.match(/--serverless[=\s](\w+)/);
+      return acc + (match ? match[1] : '');
+    }, '');
+  const projectType = projectTypeFromArgs.length
+    ? (projectTypeFromArgs as ServerlessProjectType)
+    : undefined;
+
   const commonOptions = {
     host: serverlessHost,
+    projectType,
     resources: serverlessResources,
     kibanaUrl: Url.format({
       protocol: config.get('servers.kibana.protocol'),
