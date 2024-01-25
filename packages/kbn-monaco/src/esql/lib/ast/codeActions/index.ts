@@ -165,7 +165,7 @@ async function getQuotableActionForColumns(
     const solution = `\`${errorText}\``;
     actions.push(
       createAction(
-        i18n.translate('xpack.data.querying.esql.quickfix.replaceWithSolution', {
+        i18n.translate('monaco.esql.quickfix.replaceWithSolution', {
           defaultMessage: 'Did you mean {solution} ?',
           values: {
             solution,
@@ -243,7 +243,7 @@ function wrapIntoSpellingChangeAction(
   return possibleSolution.map((solution) =>
     createAction(
       // @TODO: workout why the tooltip is truncating the title here
-      i18n.translate('xpack.data.querying.esql.quickfix.replaceWithSolution', {
+      i18n.translate('monaco.esql.quickfix.replaceWithSolution', {
         defaultMessage: 'Did you mean {solution} ?',
         values: {
           solution,
@@ -333,7 +333,7 @@ export async function getActions(
         const [, errorText] = error.message.split('at ');
         actions.push(
           createAction(
-            i18n.translate('xpack.data.querying.esql.quickfix.replaceWithQuote', {
+            i18n.translate('monaco.esql.quickfix.replaceWithQuote', {
               defaultMessage: 'Change quote to " (double)',
             }),
             errorText.replaceAll("'", '"'),
