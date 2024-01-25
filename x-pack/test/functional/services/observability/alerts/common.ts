@@ -159,8 +159,8 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const openAlertsFlyout = retryOnStale.wrap(async () => {
-    await openActionsMenuForRow(0);
+  const openAlertsFlyout = retryOnStale.wrap(async (index: number = 0) => {
+    await openActionsMenuForRow(index);
     await testSubjects.click('viewAlertDetailsFlyout');
     await retry.waitFor(
       'flyout open',

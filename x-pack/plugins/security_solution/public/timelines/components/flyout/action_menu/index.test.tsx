@@ -88,7 +88,9 @@ describe('Action menu', () => {
         </TestProviders>
       );
 
-      expect(screen.getByTestId('attach-timeline-case-button')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('timeline-modal-attach-to-case-dropdown-button')
+      ).toBeInTheDocument();
     });
 
     it('does not render the button when the user does not have create permissions', () => {
@@ -104,7 +106,9 @@ describe('Action menu', () => {
         </TestProviders>
       );
 
-      expect(screen.queryByTestId('attach-timeline-case-button')).not.toBeInTheDocument();
+      expect(
+        screen.queryByTestId('timeline-modal-attach-to-case-dropdown-button')
+      ).not.toBeInTheDocument();
     });
   });
 });

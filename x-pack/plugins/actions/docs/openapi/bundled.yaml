@@ -3664,6 +3664,45 @@ components:
             user:
               type: string
               description: The display name for the owner.
+    run_connector_subaction_closeincident:
+      title: The closeIncident subaction
+      type: object
+      required:
+        - subAction
+        - subActionParams
+      description: The `closeIncident` subaction for ServiceNow ITSM connectors.
+      properties:
+        subAction:
+          type: string
+          description: The action to test.
+          enum:
+            - closeIncident
+        subActionParams:
+          type: object
+          required:
+            - incident
+          properties:
+            incident:
+              type: object
+              anyOf:
+                - required:
+                    - correlation_id
+                - required:
+                    - externalId
+              properties:
+                correlation_id:
+                  type:
+                    - 'null'
+                    - string
+                  description: |
+                    An identifier that is assigned to the incident when it is created by the connector. NOTE: If you use the default value and the rule generates multiple alerts that use the same alert IDs, the latest open incident for this correlation ID is closed unless you specify the external ID.
+                  maxLength: 100
+                  default: '{{rule.id}}:{{alert.id}}'
+                externalId:
+                  type:
+                    - 'null'
+                    - string
+                  description: The unique identifier (`incidentId`) for the incident in ServiceNow.
     run_connector_subaction_createalert:
       title: The createAlert subaction
       type: object
@@ -4062,6 +4101,7 @@ components:
               oneOf:
                 - $ref: '#/components/schemas/run_connector_subaction_addevent'
                 - $ref: '#/components/schemas/run_connector_subaction_closealert'
+                - $ref: '#/components/schemas/run_connector_subaction_closeincident'
                 - $ref: '#/components/schemas/run_connector_subaction_createalert'
                 - $ref: '#/components/schemas/run_connector_subaction_fieldsbyissuetype'
                 - $ref: '#/components/schemas/run_connector_subaction_getchoices'
