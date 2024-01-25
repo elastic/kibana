@@ -187,6 +187,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        is_internal: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -699,6 +700,7 @@ export function registerEncryptedSavedObjects(
       'ca_trusted_fingerprint',
       'config',
       'config_yaml',
+      'is_internal',
       'is_preconfigured',
       'proxy_id',
       'version',

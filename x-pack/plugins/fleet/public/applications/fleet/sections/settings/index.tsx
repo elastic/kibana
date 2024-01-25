@@ -196,7 +196,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}
         proxies={proxies.data.items}
-        outputs={outputs.data.items}
+        outputs={outputs.data.items.filter((item) => !item.is_internal)}
         fleetServerHosts={fleetServerHosts.data.items}
         deleteOutput={deleteOutput}
         deleteFleetServerHost={deleteFleetServerHost}
