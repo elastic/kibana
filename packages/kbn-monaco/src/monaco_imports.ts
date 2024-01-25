@@ -25,6 +25,8 @@ import 'monaco-editor/esm/vs/editor/contrib/bracketMatching/browser/bracketMatch
 
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeAction.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionCommands.js';
+import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionContributions.js';
+// import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionKeybindingResolver.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionMenu.js';
 import 'monaco-editor/esm/vs/editor/contrib/codeAction/browser/codeActionModel.js';
 
