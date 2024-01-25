@@ -26,9 +26,9 @@ export const userAssetTableLocalStorageMiddleware: (storage: Storage) => Middlew
     // persist the table state when a table action has been performed
     if (tableActionTypes.has(action.type)) {
       const tableById = selectUserAssetTables(store.getState());
-      if (tableById && storage) {
+      const tableId: UserAssetTableType = get('payload.tableId', action);
+      if (tableById && tableById[tableId] && storage) {
         if (tableActionTypes.has(action.type)) {
-          const tableId: UserAssetTableType = get('payload.tableId', action);
           persistUserAssetTableInStorage(storage, tableId, tableById[tableId]);
         }
       }

@@ -55,8 +55,8 @@ export const dataTableLocalStorageMiddleware: (storage: Storage) => Middleware<{
     // persist the data table state when a table action has been performed
     if (tableActionTypes.has(action.type)) {
       const tableById = dataTableSelectors.tableByIdSelector(store.getState());
-      if (tableById && storage) {
-        const tableId: TableIdLiteral = get('payload.id', action);
+      const tableId: TableIdLiteral = get('payload.id', action);
+      if (tableById && tableById[tableId] && storage) {
         addTableInStorage(storage, tableId, tableById[tableId]);
       }
     }
