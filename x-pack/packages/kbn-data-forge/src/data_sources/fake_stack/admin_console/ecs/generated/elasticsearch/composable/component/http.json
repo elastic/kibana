@@ -1,0 +1,87 @@
+{
+  "_meta": {
+    "documentation": "https://www.elastic.co/guide/en/ecs/current/ecs-http.html",
+    "ecs_version": "8.0.0"
+  },
+  "template": {
+    "mappings": {
+      "properties": {
+        "http": {
+          "properties": {
+            "request": {
+              "properties": {
+                "body": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "content": {
+                      "fields": {
+                        "text": {
+                          "type": "match_only_text"
+                        }
+                      },
+                      "type": "wildcard"
+                    }
+                  }
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "id": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "method": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "mime_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "referrer": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                }
+              }
+            },
+            "response": {
+              "properties": {
+                "body": {
+                  "properties": {
+                    "bytes": {
+                      "type": "long"
+                    },
+                    "content": {
+                      "fields": {
+                        "text": {
+                          "type": "match_only_text"
+                        }
+                      },
+                      "type": "wildcard"
+                    }
+                  }
+                },
+                "bytes": {
+                  "type": "long"
+                },
+                "mime_type": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
+                "status_code": {
+                  "type": "long"
+                }
+              }
+            },
+            "version": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    }
+  }
+}

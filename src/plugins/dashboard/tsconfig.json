@@ -74,7 +74,8 @@
     "@kbn/presentation-containers",
     "@kbn/presentation-panel-plugin",
     "@kbn/content-management-table-list-view-common",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/managed-content-badge"
   ],
   "exclude": ["target/**/*"]
 }
