@@ -1629,7 +1629,7 @@ NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
         <Markdown
           openLinksInNewTab={true}
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirst.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction.markdown',
             {
               defaultMessage: `### MV_FIRST
 Converts a multivalued field into a single valued field containing the first value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`.
@@ -1838,7 +1838,7 @@ NOTE: The input type can be any number and the output type is the same as the in
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLast.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
             {
               defaultMessage: `### MV_LAST
 Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
@@ -2753,7 +2753,7 @@ Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLower.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction.markdown',
             {
               defaultMessage: `### TO_LOWER
 Returns a new string representing the input string converted to lower case.
@@ -2897,7 +2897,7 @@ Alias: TO_ULONG, TO_UL
       description: (
         <Markdown
           markdown={i18n.translate(
-            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpper.markdown',
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction.markdown',
             {
               defaultMessage: `### TO_UPPER
 Returns a new string representing the input string converted to upper case.
