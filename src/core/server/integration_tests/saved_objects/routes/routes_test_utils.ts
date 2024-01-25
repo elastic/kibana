@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 
 export function setupConfig(allowAccess: boolean = false) {
@@ -14,3 +15,9 @@ export function setupConfig(allowAccess: boolean = false) {
   } as SavedObjectConfig;
   return config;
 }
+
+export const getStartDeps = () => {
+  return {
+    injection: injectionServiceMock.createInternalStartContract(),
+  };
+};

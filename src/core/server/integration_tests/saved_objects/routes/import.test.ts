@@ -26,6 +26,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { setupServer, createExportableType } from '@kbn/core-test-helpers-test-utils';
+import { getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -88,7 +89,7 @@ describe(`POST ${URL}`, () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerImportRoute(router, { config, coreUsageData });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

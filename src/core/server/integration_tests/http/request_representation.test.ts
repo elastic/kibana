@@ -13,6 +13,7 @@ jest.mock('uuid', () => ({
 import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
@@ -27,6 +28,10 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 beforeEach(async () => {
@@ -53,7 +58,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: String(req) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toEqual(
@@ -70,7 +75,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: JSON.stringify(req) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -101,7 +106,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: inspect(req) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toMatchInlineSnapshot(`
@@ -141,7 +146,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: String(rawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toEqual(
@@ -159,7 +164,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: JSON.stringify(rawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(JSON.parse(replacePorts(response.body.req))).toEqual({
@@ -178,7 +183,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: inspect(rawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toMatchInlineSnapshot(
@@ -198,7 +203,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: String(rawRawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toEqual(
@@ -216,7 +221,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: JSON.stringify(rawRawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(JSON.parse(replacePorts(response.body.req))).toEqual({
@@ -237,7 +242,7 @@ describe('request logging', () => {
           return res.ok({ body: { req: inspect(rawRawRequest) } });
         }
       );
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toMatchInlineSnapshot(

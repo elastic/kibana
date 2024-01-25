@@ -14,6 +14,7 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { schema } from '@kbn/config-schema';
@@ -26,6 +27,10 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 beforeEach(async () => {
@@ -50,7 +55,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -64,7 +69,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -78,7 +83,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: false,
@@ -92,7 +97,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: true,
@@ -106,7 +111,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { isAuthenticated: req.auth.isAuthenticated } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           isAuthenticated: true,
@@ -125,7 +130,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: false } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: false,
@@ -139,7 +144,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: 'optional' } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: 'optional',
@@ -153,7 +158,7 @@ describe('KibanaRequest', () => {
           { path: '/', validate: false, options: { authRequired: true } },
           (context, req, res) => res.ok({ body: { authRequired: req.route.options.authRequired } })
         );
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200, {
           authRequired: true,
@@ -184,7 +189,7 @@ describe('KibanaRequest', () => {
           });
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         const incomingRequest = supertest(innerServer.listener)
           .get('/')
@@ -219,7 +224,7 @@ describe('KibanaRequest', () => {
           );
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         const incomingRequest = supertest(innerServer.listener)
           .post('/')
@@ -247,7 +252,7 @@ describe('KibanaRequest', () => {
           return res.ok({ body: 'ok' });
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/');
 
@@ -270,7 +275,7 @@ describe('KibanaRequest', () => {
           return res.badRequest();
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/');
 
@@ -305,7 +310,7 @@ describe('KibanaRequest', () => {
           }
         );
 
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).post('/').send({ data: 'test' }).expect(200);
 
@@ -333,7 +338,7 @@ describe('KibanaRequest', () => {
           return res.ok({ body: 'ok' });
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         await supertest(innerServer.listener).get('/').expect(200);
         expect(nextSpy).toHaveBeenCalledTimes(1);
@@ -360,7 +365,7 @@ describe('KibanaRequest', () => {
           });
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         const incomingRequest = supertest(innerServer.listener)
           .get('/')
@@ -394,7 +399,7 @@ describe('KibanaRequest', () => {
           );
         });
 
-        await server.start();
+        await server.start(startDeps);
 
         const incomingRequest = supertest(innerServer.listener)
           .post('/')
@@ -415,7 +420,7 @@ describe('KibanaRequest', () => {
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         return res.ok({ body: { requestId: req.id } });
       });
-      await server.start();
+      await server.start(startDeps);
 
       const st = supertest(innerServer.listener);
 
@@ -434,7 +439,7 @@ describe('KibanaRequest', () => {
       router.get({ path: '/', validate: false }, async (context, req, res) => {
         return res.ok({ body: { requestUuid: req.uuid } });
       });
-      await server.start();
+      await server.start(startDeps);
 
       const st = supertest(innerServer.listener);
 

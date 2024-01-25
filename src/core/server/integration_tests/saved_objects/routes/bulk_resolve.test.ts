@@ -19,7 +19,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig, getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -61,7 +61,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     const config = setupConfig();
     registerBulkResolveRoute(router, { config, coreUsageData, logger });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

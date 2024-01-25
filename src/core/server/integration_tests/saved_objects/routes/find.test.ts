@@ -21,7 +21,7 @@ import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
-import { setupConfig } from './routes_test_utils';
+import { setupConfig, getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -75,7 +75,7 @@ describe('GET /api/saved_objects/_find', () => {
 
     registerFindRoute(router, { config, coreUsageData, logger });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

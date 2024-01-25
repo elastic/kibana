@@ -25,6 +25,7 @@ import {
   registerResolveImportErrorsRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -96,7 +97,7 @@ describe(`POST ${URL}`, () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerResolveImportErrorsRoute(router, { config, coreUsageData });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

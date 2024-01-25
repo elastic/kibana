@@ -12,8 +12,9 @@ import supertest from 'supertest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import type { IRouter } from '@kbn/core-http-server';
-import { HttpService } from '@kbn/core-http-server-internal';
+import { HttpService, type HttpServiceStartDeps } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerRouteForBundle, FileHashCache } from '@kbn/core-apps-server-internal';
 
@@ -25,11 +26,13 @@ describe('bundle routes', () => {
   let contextSetup: ReturnType<typeof contextServiceMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.create>;
   let fileHashCache: FileHashCache;
+  let startDeps: HttpServiceStartDeps;
 
   beforeEach(async () => {
     contextSetup = contextServiceMock.createSetupContract();
     logger = loggingSystemMock.create();
     fileHashCache = new FileHashCache();
+    startDeps = { injection: injectionServiceMock.createInternalStartContract() };
 
     server = createHttpServer({ logger });
     await server.preboot({ context: contextServiceMock.createPrebootContract() });
@@ -59,7 +62,7 @@ describe('bundle routes', () => {
     });
 
     registerFooPluginRoute(createRouter(''));
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener)
       .get(`/${buildNum}/bundles/plugin/foo/image.png`)
@@ -77,7 +80,7 @@ describe('bundle routes', () => {
     });
 
     registerFooPluginRoute(createRouter(''));
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener)
       .get(`/${buildNum}/bundles/plugin/foo/plugin.js`)
@@ -95,7 +98,7 @@ describe('bundle routes', () => {
     });
 
     registerFooPluginRoute(createRouter(''));
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .get(`/${buildNum}/bundles/plugin/foo/../outside_output.js`)
@@ -109,7 +112,7 @@ describe('bundle routes', () => {
     });
 
     registerFooPluginRoute(createRouter(''));
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .get(`/${buildNum}/bundles/plugin/foo/missing.js`)
@@ -123,7 +126,7 @@ describe('bundle routes', () => {
     });
 
     registerFooPluginRoute(createRouter(''));
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener)
       .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
@@ -148,7 +151,7 @@ describe('bundle routes', () => {
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: true });
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)
@@ -167,7 +170,7 @@ describe('bundle routes', () => {
       });
 
       registerFooPluginRoute(createRouter(''), { isDist: false });
-      await server.start();
+      await server.start(startDeps);
 
       const response = await supertest(innerServer.listener)
         .get(`/${buildNum}/bundles/plugin/foo/gzip_chunk.js`)

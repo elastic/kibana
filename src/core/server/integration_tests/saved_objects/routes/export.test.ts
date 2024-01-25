@@ -20,6 +20,7 @@ import {
   registerExportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { getStartDeps } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 const allowedTypes = ['index-pattern', 'search'];
@@ -53,7 +54,7 @@ describe('POST /api/saved_objects/_export', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     registerExportRoute(router, { config, coreUsageData });
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

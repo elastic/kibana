@@ -15,8 +15,13 @@ import type { IRouter } from '@kbn/core-http-server';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import type { HttpService } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { ServerMetricsCollector } from '@kbn/core-metrics-collectors-server-internal';
 import { setTimeout as setTimeoutPromise } from 'timers/promises';
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
+};
 
 describe('ServerMetricsCollector', () => {
   let server: HttpService;
@@ -49,7 +54,7 @@ describe('ServerMetricsCollector', () => {
       return res.ok({ body: '' });
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     let metrics = await collector.collect();
 
@@ -91,7 +96,7 @@ describe('ServerMetricsCollector', () => {
       await never; // Never resolve the request
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start(startDeps);
 
     await sendGet('/');
 
@@ -158,7 +163,7 @@ describe('ServerMetricsCollector', () => {
       await delay(250);
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start(startDeps);
 
     await Promise.all([sendGet('/no-delay'), sendGet('/250-ms')]);
     let metrics = await collector.collect();
@@ -182,7 +187,7 @@ describe('ServerMetricsCollector', () => {
       await waitSubject.pipe(take(1)).toPromise();
       return res.ok({ body: '' });
     });
-    await server.start();
+    await server.start(startDeps);
 
     const waitForHits = (hits: number) =>
       hitSubject
@@ -223,7 +228,7 @@ describe('ServerMetricsCollector', () => {
       router.get({ path: '/', validate: false }, async (ctx, req, res) => {
         return res.ok({ body: '' });
       });
-      await server.start();
+      await server.start(startDeps);
 
       await sendGet('/');
       await sendGet('/');
@@ -273,7 +278,7 @@ describe('ServerMetricsCollector', () => {
         return res.ok({ body: '' });
       });
 
-      await server.start();
+      await server.start(startDeps);
 
       await Promise.all([sendGet('/no-delay'), sendGet('/500-ms')]);
       let metrics = await collector.collect();

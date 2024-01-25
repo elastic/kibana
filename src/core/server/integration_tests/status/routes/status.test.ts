@@ -18,6 +18,7 @@ import type { MetricsServiceSetup } from '@kbn/core-metrics-server';
 import { ServiceStatus, ServiceStatusLevels, ServiceStatusLevel } from '@kbn/core-status-common';
 import { statusServiceMock } from '@kbn/core-status-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { registerStatusRoute } from '@kbn/core-status-server-internal';
 
@@ -110,7 +111,7 @@ describe('GET /api/status', () => {
       }
     });
 
-    await server.start();
+    await server.start({ injection: injectionServiceMock.createInternalStartContract() });
   };
 
   afterEach(async () => {
