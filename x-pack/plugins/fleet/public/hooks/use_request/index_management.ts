@@ -9,7 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import type { GetDataStreamsResponse } from '../../types';
 
-import { sendRequest, useRequest } from './use_request';
+import { type RequestError, sendRequest, useRequest } from './use_request';
 
 export const useGetPipeline = (pipelineId: string) => {
   return useRequest<GetDataStreamsResponse>({
@@ -21,19 +21,6 @@ export const useGetPipeline = (pipelineId: string) => {
 export const useGetComponentTemplateQuery = (componentTemplateName: string) => {
   return useQuery({
     queryKey: ['component_templates', componentTemplateName],
-    retry: (failureCount, error) => {
-      if (
-        failureCount > 3 ||
-        (error &&
-          typeof error === 'object' &&
-          error.hasOwnProperty('statusCode') &&
-          error.statusCode === 404)
-      ) {
-        return false;
-      }
-
-      if (eror) console.log(error);
-    },
     queryFn: async () => {
       const { data, error } = await sendRequest<{ name: string }>({
         path: `/api/index_management/component_templates/${componentTemplateName}`,
@@ -45,6 +32,12 @@ export const useGetComponentTemplateQuery = (componentTemplateName: string) => {
       }
 
       return data;
+    },
+    retry: (failureCount, error: RequestError) => {
+      if (failureCount > 3 || (error && error.statusCode === 404)) {
+        return false;
+      }
+      return true;
     },
   });
 };
