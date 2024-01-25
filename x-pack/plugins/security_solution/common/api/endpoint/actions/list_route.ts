@@ -44,13 +44,6 @@ export const EndpointActionListRequestSchema = {
           ),
           {
             minSize: 1,
-            validate: (agentTypes) => {
-              if (
-                !agentTypes.every((agentType) => RESPONSE_ACTION_AGENT_TYPE.includes(agentType))
-              ) {
-                return 'agentType must contain valid agent type value';
-              }
-            },
           }
         ),
         schema.oneOf(
