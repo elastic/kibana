@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('Ecommerce Map');
-      await PageObjects.share.clickShareTopNavButton;
+      await PageObjects.share.clickShareTopNavButton();
       await PageObjects.reporting.openImageReportingPanel();
       await PageObjects.reporting.clickGeneratePngReportButton();
 
@@ -76,6 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('PNG file matches the baseline image, using embeddable example', async function () {
       await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
+      await PageObjects.share.clickShareTopNavButton();
       await PageObjects.reporting.openImageReportingPanel();
       await PageObjects.reporting.clickGeneratePngReportButton();
 

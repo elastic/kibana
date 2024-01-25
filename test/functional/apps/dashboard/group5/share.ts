@@ -142,6 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
           const testUrl = await getSharedUrl('snapshot');
           expect(testUrl).to.not.contain('panels');
+          await PageObjects.share.closeShareModal();
         });
 
         it('should have "panels" in app state when a panel has been modified', async () => {
