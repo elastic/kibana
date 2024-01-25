@@ -24,6 +24,7 @@ import {
 } from '../../../common/constants';
 import { BURN_RATE_DEFAULTS } from './constants';
 import { AlertTimeTable } from './alert_time_table';
+import { getGroupKeysProse } from '../../utils/slo/groupings';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -103,7 +104,7 @@ export function BurnRateRuleEditor(props: Props) {
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
-      {selectedSlo?.groupBy && selectedSlo.groupBy !== ALL_VALUE && (
+      {selectedSlo?.groupBy && ![selectedSlo.groupBy].flat().includes(ALL_VALUE) && (
         <>
           <EuiSpacer size="l" />
           <EuiCallOut
@@ -111,8 +112,8 @@ export function BurnRateRuleEditor(props: Props) {
             size="s"
             title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
               defaultMessage:
-                'The SLO you selected has been created with a group-by on "{groupByField}". This rule will monitor and generate an alert for every instance found in the group-by field.',
-              values: { groupByField: selectedSlo.groupBy },
+                'The SLO you selected has been created with a group-by on {groupByField}. This rule will monitor and generate an alert for every instance found in the group-by field.',
+              values: { groupByField: getGroupKeysProse(selectedSlo.groupBy) },
             })}
           />
         </>

@@ -164,6 +164,7 @@ function summarySearchResult(slo: SLO): Paginated<SLOSummary> {
       {
         id: slo.id,
         instanceId: slo.groupBy === ALL_VALUE ? ALL_VALUE : 'host-abcde',
+        groupings: {},
         summary: {
           status: 'HEALTHY',
           sliValue: 0.9999,
