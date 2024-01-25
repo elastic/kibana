@@ -329,7 +329,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   /**
    * Accessors for the plugin's configuration
    */
-  config: PluginConfig & {
+  config: PluginConfig<ConfigSchema> & {
     /**
      * Provide access to Kibana legacy configuration values.
      *
