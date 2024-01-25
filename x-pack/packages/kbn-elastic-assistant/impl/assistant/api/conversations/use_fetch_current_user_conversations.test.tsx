@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { act, renderHook } from '@testing-library/react-hooks';
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
@@ -33,19 +33,30 @@ const createWrapper = () => {
 };
 
 describe('useFetchCurrentUserConversations', () => {
-  it(`should make http request to fetch conversations`, () => {
+  it(`should make http request to fetch conversations`, async () => {
     renderHook(() => useFetchCurrentUserConversations(defaultProps), {
       wrapper: createWrapper(),
     });
 
-    expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-      '/api/elastic_assistant/conversations/current_user/_find',
-      {
-        method: 'GET',
-        version: '2023-10-31',
-        signal: undefined,
-      }
-    );
-    expect(onFetch).toHaveBeenCalled();
+    await act(async () => {
+      const { waitForNextUpdate } = renderHook(() =>
+        useFetchCurrentUserConversations(defaultProps)
+      );
+      await waitForNextUpdate();
+      expect(defaultProps.http.fetch).toHaveBeenCalledWith(
+        '/api/elastic_assistant/conversations/current_user/_find',
+        {
+          method: 'GET',
+          query: {
+            page: 1,
+            perPage: 100,
+          },
+          version: '2023-10-31',
+          signal: undefined,
+        }
+      );
+
+      expect(onFetch).toHaveBeenCalled();
+    });
   });
 });

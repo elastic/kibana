@@ -18,6 +18,7 @@ import {
   updateConversationApi,
 } from '../api/conversations';
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { WELCOME_CONVERSATION } from './sample_conversations';
 
 jest.mock('../api/conversations', () => {
   const actual = jest.requireActual('../api/conversations');
@@ -155,9 +156,8 @@ describe('useConversation', () => {
       await waitForNextUpdate();
 
       await result.current.setApiConfig({
-        conversationId: welcomeConvo.id,
+        conversation: WELCOME_CONVERSATION,
         apiConfig: mockConvo.apiConfig,
-        title: welcomeConvo.title,
       });
 
       expect(updateConversationApiMock).toHaveBeenCalledWith({

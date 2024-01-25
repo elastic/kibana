@@ -9,20 +9,17 @@ import React from 'react';
 import { useConnectorSetup } from '.';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { fireEvent, render } from '@testing-library/react';
-import { alertConvo, welcomeConvo } from '../../mock/conversation';
+import { welcomeConvo } from '../../mock/conversation';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { EuiCommentList } from '@elastic/eui';
 
 const onSetupComplete = jest.fn();
-const setConversations = jest.fn();
+const onConversationUpdate = jest.fn();
+
 const defaultProps = {
   conversation: welcomeConvo,
   onSetupComplete,
-  setConversations,
-  conversations: {
-    [alertConvo.id]: alertConvo,
-    [welcomeConvo.id]: welcomeConvo,
-  },
+  onConversationUpdate,
 };
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 jest.mock('../add_connector_modal', () => ({
@@ -141,7 +138,7 @@ describe('useConnectorSetup', () => {
 
       expect(clearTimeout).toHaveBeenCalled();
       expect(onSetupComplete).toHaveBeenCalled();
-      expect(setConversations).toHaveBeenCalled();
+      expect(onConversationUpdate).toHaveBeenCalled();
     });
   });
 });

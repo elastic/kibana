@@ -203,6 +203,8 @@ describe('split .kibana index into multiple system indices', () => {
             "connector_token",
             "core-usage-stats",
             "csp-rule-template",
+            "elastic-ai-assistant-anonimization-fields",
+            "elastic-ai-assistant-prompts",
             "endpoint:user-artifact-manifest",
             "enterprise_search_telemetry",
             "epm-packages",

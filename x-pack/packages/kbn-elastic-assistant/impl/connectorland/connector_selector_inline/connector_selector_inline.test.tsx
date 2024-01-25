@@ -141,8 +141,12 @@ describe('ConnectorSelectorInline', () => {
         model: undefined,
         provider: 'OpenAI',
       },
-      conversationId: 'conversation_id',
-      title: 'conversation_id',
+      conversation: {
+        apiConfig: {},
+        id: 'conversation_id',
+        messages: [],
+        title: 'conversation_id',
+      },
     });
   });
   it('On connector change to add new connector, onchange event does nothing', () => {
