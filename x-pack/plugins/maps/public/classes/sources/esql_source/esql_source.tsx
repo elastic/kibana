@@ -79,8 +79,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     };
   }
 
-  constructor(descriptor: ESQLSourceDescriptor) {
-    super(ESQLSource.createDescriptor(descriptor));
+  constructor(partialDescriptor: Partial<ESQLSourceDescriptor>) {
+    const descriptor = ESQLSource.createDescriptor(partialDescriptor);
+    super(descriptor);
     this._descriptor = descriptor;
   }
 

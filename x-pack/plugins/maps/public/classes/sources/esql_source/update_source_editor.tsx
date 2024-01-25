@@ -118,7 +118,7 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'narrowByMapBounds', value: narrowByField },
               ];
               // auto select first geo field when enabling narrowByMapBounds and geoField is not set
-              if (narrowByField && geoFields.length && !!props.sourceDescriptor.geoField) {
+              if (narrowByField && geoFields.length && !props.sourceDescriptor.geoField) {
                 changes.push({ propName: 'geoField', value: geoFields[0] });
               }
               props.onChange(...changes);
@@ -151,7 +151,7 @@ export function UpdateSourceEditor(props: Props) {
                 { propName: 'narrowByGlobalTime', value: narrowByField },
               ];
               // auto select first date field when enabling narrowByGlobalTime and dateField is not set
-              if (narrowByField && dateFields.length && !!props.sourceDescriptor.dateField) {
+              if (narrowByField && dateFields.length && !props.sourceDescriptor.dateField) {
                 changes.push({ propName: 'dateField', value: dateFields[0] });
               }
               props.onChange(...changes);
