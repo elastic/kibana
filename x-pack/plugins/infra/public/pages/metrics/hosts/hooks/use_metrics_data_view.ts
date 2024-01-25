@@ -6,24 +6,21 @@
  */
 
 import createContainer from 'constate';
-import { useDataMetricsAdHocDataView } from '../../../../hooks/use_metrics_adhoc_data_view';
+import { useDataView } from '../../../../hooks/use_data_view';
 
-export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
-  const {
-    dataView,
-    loading,
-    loadDataView: retry,
-    error,
-  } = useDataMetricsAdHocDataView({ metricAlias });
+export const useMetricsDataView = ({ metricAlias }: { metricAlias: string }) => {
+  const { dataView, loading, retry, error } = useDataView({
+    index: metricAlias,
+  });
 
   return {
     metricAlias,
     dataView,
     loading,
-    loadDataView: retry,
+    retry,
     error,
   };
 };
 
-export const MetricsDataView = createContainer(useDataView);
+export const MetricsDataView = createContainer(useMetricsDataView);
 export const [MetricsDataViewProvider, useMetricsDataViewContext] = MetricsDataView;

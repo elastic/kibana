@@ -12,31 +12,38 @@ import { useKibanaContextForPlugin } from './use_kibana';
 export const TIMESTAMP_FIELD = '@timestamp';
 export const DATA_VIEW_PREFIX = 'infra_metrics';
 
-export const generateDataViewId = (indexPattern: string) => {
+export const generateDataViewId = (index: string) => {
   // generates a unique but the same uuid as long as the index pattern doesn't change
-  return `${DATA_VIEW_PREFIX}_${uuidv5(indexPattern, uuidv5.DNS)}`;
+  return `${DATA_VIEW_PREFIX}_${uuidv5(index, uuidv5.DNS)}`;
 };
 
-export const useDataMetricsAdHocDataView = ({ metricAlias }: { metricAlias: string }) => {
+export const useDataView = ({ index }: { index?: string }) => {
   const {
     services: { dataViews },
   } = useKibanaContextForPlugin();
 
-  const state = useAsyncRetry(() => {
-    return dataViews.create({
-      id: generateDataViewId(metricAlias),
-      title: metricAlias,
-      timeFieldName: TIMESTAMP_FIELD,
-    });
-  }, [metricAlias]);
+  const state = useAsyncRetry(async () => {
+    if (!index) {
+      return Promise.resolve(undefined);
+    }
+
+    return dataViews.get(index, false).catch(() =>
+      // if data view doesn't exist, create an ad-hoc one
+      dataViews.create({
+        id: generateDataViewId(index),
+        title: index,
+        timeFieldName: TIMESTAMP_FIELD,
+      })
+    );
+  }, [index]);
 
   const { value: dataView, loading, error, retry } = state;
 
   return {
-    metricAlias,
+    index,
     dataView,
     loading,
-    loadDataView: retry,
+    retry,
     error,
   };
 };
