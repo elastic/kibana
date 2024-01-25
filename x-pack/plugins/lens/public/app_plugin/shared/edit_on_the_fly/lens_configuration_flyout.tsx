@@ -43,6 +43,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -230,9 +231,24 @@ export function LensEditConfigurationFlyout({
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
+
+    // check if visualization type changed, if it did, don't pass the previous visualization state
+    const prevVisState =
+      previousAttributes.current.visualizationType === visualization.activeId
+        ? previousAttributes.current.state.visualization
+        : undefined;
+    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+      visualization.state,
+      prevVisState
+    );
+    if (telemetryEvents && telemetryEvents.length) {
+      trackUiCounterEvents(telemetryEvents);
+    }
+
     onApplyCb?.();
     closeFlyout?.();
   }, [
+    visualization.activeId,
     savedObjectId,
     closeFlyout,
     onApplyCb,

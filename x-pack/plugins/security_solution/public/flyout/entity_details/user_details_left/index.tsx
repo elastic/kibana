@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { FlyoutPanelProps, PanelPath } from '@kbn/expandable-flyout';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useManagedUser } from '../../../timelines/components/side_panel/new_user_detail/hooks/use_managed_user';
 import { useTabs } from './tabs';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -59,7 +59,7 @@ const useSelectedTab = (
   tabs: LeftPanelTabsType,
   path: PanelPath | undefined
 ) => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabs[0].id;

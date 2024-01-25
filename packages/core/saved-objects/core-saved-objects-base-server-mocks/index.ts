@@ -8,3 +8,4 @@
 
 export { typeRegistryMock } from './src/saved_objects_type_registry.mock';
 export { serializerMock } from './src/serializer.mock';
+export { createDocumentMigratorMock } from './src/document_migrator.mock';

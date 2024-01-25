@@ -13,13 +13,12 @@ import { lastValueFrom, Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
 import {
-  CreateChatCompletionResponseChunk,
-  FunctionVisibility,
-  MessageRole,
-} from '../../../common/types';
-import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
-import { streamIntoObservable } from '../../service/util/stream_into_observable';
+  ChatCompletionChunkEvent,
+  StreamingChatResponseEventType,
+} from '../../../common/conversation_complete';
+import { FunctionVisibility, MessageRole } from '../../../common/types';
+import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -72,7 +71,7 @@ export function registerEsqlFunction({
       name: 'execute_query',
       contexts: ['core'],
       visibility: FunctionVisibility.User,
-      description: 'Execute an ES|QL query',
+      description: 'Execute an ES|QL query.',
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -126,17 +125,38 @@ export function registerEsqlFunction({
         ...messages.slice(1),
       ];
 
-      const source$ = streamIntoObservable(
+      const source$ = (
         await client.chat({
           connectorId,
-          messages: withEsqlSystemMessage(),
+          messages: withEsqlSystemMessage(
+            `Use the classify_esql function to classify the user's request
+            and get more information about specific functions and commands
+            you think are candidates for answering the question.
+            
+              
+            Examples for functions and commands:
+            Do you need to group data? Request \`STATS\`.
+            Extract data? Request \`DISSECT\` AND \`GROK\`.
+            Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
+
+            Examples for determining whether the user wants to execute a query:
+            - "Show me the avg of x"
+            - "Give me the results of y"
+            - "Display the sum of z"
+
+            Examples for determining whether the user does not want to execute a query:
+            - "I want a query that ..."
+            - "... Just show me the query"
+            - "Create a query that ..."`
+          ),
           signal,
-          stream: true,
           functions: [
             {
-              name: 'get_esql_info',
-              description:
-                'Use this function to get more information about syntax, commands and examples. Take a deep breath and reason about what commands and functions you expect to use. Do you need to group data? Request `STATS`. Extract data? Request `DISSECT` AND `GROK`. Convert a column based on a set of conditionals? Request `EVAL` and `CASE`.',
+              name: 'classify_esql',
+              description: `Use this function to determine:
+              - what ES|QL functions and commands are candidates for answering the user's question
+              - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
+              `,
               parameters: {
                 type: 'object',
                 properties: {
@@ -154,31 +174,36 @@ export function registerEsqlFunction({
                     },
                     description: 'A list of functions.',
                   },
+                  execute: {
+                    type: 'boolean',
+                    description:
+                      'Whether the user wants to execute a query (true) or just wants the query to be displayed (false)',
+                  },
                 },
-                required: ['commands', 'functions'],
+                required: ['commands', 'functions', 'execute'],
               },
             },
           ],
-          functionCall: 'get_esql_info',
+          functionCall: 'classify_esql',
         })
-      ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+      ).pipe(concatenateChatCompletionChunks());
 
       const response = await lastValueFrom(source$);
 
       const args = JSON.parse(response.message.function_call.arguments) as {
         commands: string[];
         functions: string[];
+        execute: boolean;
       };
 
       const keywords = args.commands.concat(args.functions).concat('SYNTAX').concat('OVERVIEW');
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
-      const esqlResponse$: Observable<CreateChatCompletionResponseChunk> = streamIntoObservable(
-        await client.chat({
-          messages: [
-            ...withEsqlSystemMessage(
-              `Format every ES|QL query as Markdown:
+      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
+        messages: [
+          ...withEsqlSystemMessage(
+            `Format every ES|QL query as Markdown:
               \`\`\`esql
               <query>
               \`\`\`
@@ -229,40 +254,38 @@ export function registerEsqlFunction({
               Here is an ES|QL query that you can use:
 
               <query>`
-            ),
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'get_esql_info',
-                  arguments: JSON.stringify(args),
-                  trigger: MessageRole.Assistant as const,
-                },
-              },
-            },
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
+          ),
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
                 name: 'get_esql_info',
-                content: JSON.stringify({
-                  documentation: messagesToInclude,
-                }),
+                arguments: JSON.stringify(args),
+                trigger: MessageRole.Assistant as const,
               },
             },
-          ],
-          connectorId,
-          functions: [],
-          signal,
-          stream: true,
-        })
-      ).pipe(processOpenAiStream());
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_esql_info',
+              content: JSON.stringify({
+                documentation: messagesToInclude,
+              }),
+            },
+          },
+        ],
+        connectorId,
+        signal,
+      });
 
       return esqlResponse$.pipe((source) => {
-        return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
+        return new Observable<ChatCompletionChunkEvent>((subscriber) => {
           let cachedContent: string = '';
+          let id: string = '';
 
           function includesDivider() {
             const firstDividerIndex = cachedContent.indexOf('--');
@@ -271,36 +294,45 @@ export function registerEsqlFunction({
 
           source.subscribe({
             next: (message) => {
+              id = message.id;
               if (includesDivider()) {
                 subscriber.next(message);
               }
-              cachedContent += message.choices[0].delta.content || '';
+              cachedContent += message.message.content || '';
             },
             complete: () => {
               if (!includesDivider()) {
                 subscriber.next({
-                  created: 0,
-                  id: '',
-                  model: '',
-                  object: 'chat.completion.chunk',
-                  choices: [
-                    {
-                      delta: {
-                        content: cachedContent,
-                      },
-                      index: 0,
-                      finish_reason: null,
-                    },
-                  ],
+                  id,
+                  message: {
+                    content: cachedContent,
+                  },
+                  type: StreamingChatResponseEventType.ChatCompletionChunk,
                 });
               }
+
+              const esqlQuery = cachedContent.match(/```esql([\s\S]*?)```/)?.[1];
+
+              if (esqlQuery && args.execute) {
+                subscriber.next({
+                  id,
+                  message: {
+                    function_call: {
+                      name: 'execute_query',
+                      arguments: JSON.stringify({ query: esqlQuery }),
+                    },
+                  },
+                  type: StreamingChatResponseEventType.ChatCompletionChunk,
+                });
+              }
+
               subscriber.complete();
             },
             error: (error) => {
               subscriber.error(error);
             },
           });
-        });
+        }).pipe(emitWithConcatenatedMessage());
       });
     }
   );

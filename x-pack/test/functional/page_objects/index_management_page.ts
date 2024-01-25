@@ -23,7 +23,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       return await testSubjects.find('reloadIndicesButton');
     },
     async toggleHiddenIndices() {
-      await testSubjects.click('indexTableIncludeHiddenIndicesToggle');
+      await testSubjects.click('checkboxToggles-includeHiddenIndices');
     },
 
     async clickEnrichPolicyAt(indexOfRow: number): Promise<void> {
