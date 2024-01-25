@@ -6,11 +6,47 @@
  */
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { updateConversation } from './update_conversation';
+import { UpdateConversationSchema, updateConversation } from './update_conversation';
+import { getConversation } from './get_conversation';
+import {
+  ConversationResponse,
+  ConversationUpdateProps,
+} from '../schemas/conversations/common_attributes.gen';
+
+export const getUpdateConversationOptionsMock = (): ConversationUpdateProps => ({
+  id: 'test',
+  title: 'test',
+  apiConfig: {
+    connectorId: '1',
+    connectorTypeTitle: 'test-connector',
+    defaultSystemPromptId: 'default-system-prompt',
+    model: 'test-model',
+    provider: 'OpenAI',
+  },
+  excludeFromLastConversationStorage: false,
+  messages: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacements: {} as any,
+});
+
+export const getConversationResponseMock = (): ConversationResponse => ({
+  id: 'test',
+  title: 'test',
+  apiConfig: {
+    connectorId: '1',
+    connectorTypeTitle: 'test-connector',
+    defaultSystemPromptId: 'default-system-prompt',
+    model: 'test-model',
+    provider: 'OpenAI',
+  },
+  excludeFromLastConversationStorage: false,
+  messages: [],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  replacements: {} as any,
+});
 
 jest.mock('./get_conversation', () => ({
-  getList: jest.fn(),
+  getConversation: jest.fn(),
 }));
 
 describe('updateConversation', () => {
@@ -22,45 +58,49 @@ describe('updateConversation', () => {
     jest.clearAllMocks();
   });
 
-  test('it returns a list with serializer and deserializer', async () => {
-    const list: ListSchema = {
-      ...getListResponseMock(),
-      deserializer: '{{value}}',
-      serializer: '(?<value>)',
+  test('it returns a conversation with serializer and deserializer', async () => {
+    const conversation: UpdateConversationSchema = {
+      ...getConversationResponseMock(),
+      title: 'test',
+      '@timestamp': Date.now().toLocaleString(),
     };
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getupdateConversationOptionsMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    const options = getUpdateConversationOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 1 });
-    const updatedList = await updateConversation({ ...options, esClient });
-    const expected: ListSchema = {
-      ...getListResponseMock(),
-      deserializer: '{{value}}',
-      id: list.id,
-      serializer: '(?<value>)',
+    const updatedList = await updateConversation(
+      esClient,
+      jest.fn(),
+      'index-1',
+      options,
+      conversation
+    );
+    const expected: UpdateConversationSchema = {
+      ...getConversationResponseMock(),
+      id: conversation.id,
+      title: 'test',
     };
     expect(updatedList).toEqual(expected);
   });
 
-  test('it returns null when there is not a list to update', async () => {
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(null);
-    const options = getupdateConversationOptionsMock();
+  test('it returns null when there is not a conversation to update', async () => {
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
+    const options = getUpdateConversationOptionsMock();
     const updatedList = await updateConversation(options);
     expect(updatedList).toEqual(null);
   });
 
-  test('throw error if no list was updated', async () => {
-    const list: ListSchema = {
-      ...getListResponseMock(),
-      deserializer: '{{value}}',
-      serializer: '(?<value>)',
+  test('throw error if no conversation was updated', async () => {
+    const conversation: UpdateConversationSchema = {
+      ...getConversationResponseMock(),
+      title: 'test',
     };
-    (getList as unknown as jest.Mock).mockResolvedValueOnce(list);
-    const options = getupdateConversationOptionsMock();
+    (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
+    const options = getUpdateConversationOptionsMock();
     const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
     esClient.updateByQuery.mockResolvedValue({ updated: 0 });
     await expect(updateConversation({ ...options, esClient })).rejects.toThrow(
-      'No list has been updated'
+      'No conversation has been updated'
     );
   });
 });

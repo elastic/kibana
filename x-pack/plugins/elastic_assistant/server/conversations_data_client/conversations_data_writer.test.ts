@@ -7,29 +7,31 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { RiskEngineDataWriter } from './risk_engine_data_writer';
-import { riskScoreServiceMock } from './risk_score_service.mock';
+import { ConversationDataWriter } from './conversations_data_writer';
 
-describe('RiskEngineDataWriter', () => {
+describe('ConversationDataWriter', () => {
   describe('#bulk', () => {
-    let writer: RiskEngineDataWriter;
+    let writer: ConversationDataWriter;
     let esClientMock: ElasticsearchClient;
     let loggerMock: Logger;
 
     beforeEach(() => {
       esClientMock = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
       loggerMock = loggingSystemMock.createLogger();
-      writer = new RiskEngineDataWriter({
+      writer = new ConversationDataWriter({
         esClient: esClientMock,
         logger: loggerMock,
-        index: 'risk-score.risk-score-default',
-        namespace: 'default',
+        index: 'conversations-default',
+        spaceId: 'default',
+        user: { name: 'test' },
       });
     });
 
-    it('converts a list of host risk scores to an appropriate list of operations', async () => {
+    it('converts a list of conversations to an appropriate list of operations', async () => {
       await writer.bulk({
-        host: [riskScoreServiceMock.createRiskScore(), riskScoreServiceMock.createRiskScore()],
+        conversationsToCreate: [],
+        conversationsToUpdate: [],
+        conversationsToDelete: ['1'],
       });
 
       const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
@@ -38,72 +40,29 @@ describe('RiskEngineDataWriter', () => {
         Array [
           Object {
             "create": Object {
-              "_index": "risk-score.risk-score-default",
+              "_index": "conversations-default",
             },
           },
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
-            "host": Object {
-              "name": "hostname",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "host.name",
-                "id_value": "hostname",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
           },
           Object {
             "create": Object {
-              "_index": "risk-score.risk-score-default",
+              "_index": "conversations-default",
             },
           },
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
-            "host": Object {
-              "name": "hostname",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "host.name",
-                "id_value": "hostname",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
           },
         ]
       `);
     });
 
-    it('converts a list of user risk scores to an appropriate list of operations', async () => {
+    it('converts a list of mixed conversations operations to an appropriate list of operations', async () => {
       await writer.bulk({
-        user: [
-          riskScoreServiceMock.createRiskScore({
-            id_field: 'user.name',
-            id_value: 'username_1',
-          }),
-          riskScoreServiceMock.createRiskScore({
-            id_field: 'user.name',
-            id_value: 'username_2',
-          }),
-        ],
+        conversationsToCreate: [],
+        conversationsToUpdate: [],
+        conversationsToDelete: ['1'],
       });
 
       const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
@@ -112,161 +71,27 @@ describe('RiskEngineDataWriter', () => {
         Array [
           Object {
             "create": Object {
-              "_index": "risk-score.risk-score-default",
+              "_index": "conversations-default",
             },
           },
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
-            "user": Object {
-              "name": "username_1",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "user.name",
-                "id_value": "username_1",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
           },
           Object {
-            "create": Object {
-              "_index": "risk-score.risk-score-default",
+            "update": Object {
+              "_index": "conversations-default",
             },
           },
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
-            "user": Object {
-              "name": "username_2",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "user.name",
-                "id_value": "username_2",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
           },
-        ]
-      `);
-    });
-
-    it('converts a list of mixed risk scores to an appropriate list of operations', async () => {
-      await writer.bulk({
-        host: [
-          riskScoreServiceMock.createRiskScore({
-            id_field: 'host.name',
-            id_value: 'hostname_1',
-          }),
-        ],
-        user: [
-          riskScoreServiceMock.createRiskScore({
-            id_field: 'user.name',
-            id_value: 'username_1',
-          }),
-          riskScoreServiceMock.createRiskScore({
-            id_field: 'user.name',
-            id_value: 'username_2',
-          }),
-        ],
-      });
-
-      const [{ operations }] = (esClientMock.bulk as jest.Mock).mock.lastCall;
-
-      expect(operations).toMatchInlineSnapshot(`
-        Array [
           Object {
-            "create": Object {
-              "_index": "risk-score.risk-score-default",
+            "delete": Object {
+              "_index": "conversations-default",
             },
           },
           Object {
             "@timestamp": "2023-02-15T00:15:19.231Z",
-            "host": Object {
-              "name": "hostname_1",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "host.name",
-                "id_value": "hostname_1",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
-          },
-          Object {
-            "create": Object {
-              "_index": "risk-score.risk-score-default",
-            },
-          },
-          Object {
-            "@timestamp": "2023-02-15T00:15:19.231Z",
-            "user": Object {
-              "name": "username_1",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "user.name",
-                "id_value": "username_1",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
-          },
-          Object {
-            "create": Object {
-              "_index": "risk-score.risk-score-default",
-            },
-          },
-          Object {
-            "@timestamp": "2023-02-15T00:15:19.231Z",
-            "user": Object {
-              "name": "username_2",
-              "risk": Object {
-                "calculated_level": "High",
-                "calculated_score": 149,
-                "calculated_score_norm": 85.332,
-                "category_1_count": 12,
-                "category_1_score": 85,
-                "category_2_count": 0,
-                "category_2_score": 0,
-                "criticality_level": "very_important",
-                "criticality_modifier": 2,
-                "id_field": "user.name",
-                "id_value": "username_2",
-                "inputs": Array [],
-                "notes": Array [],
-              },
-            },
           },
         ]
       `);
@@ -276,20 +101,24 @@ describe('RiskEngineDataWriter', () => {
       (esClientMock.bulk as jest.Mock).mockRejectedValue(new Error('something went wrong'));
 
       const { errors } = await writer.bulk({
-        host: [riskScoreServiceMock.createRiskScore()],
+        conversationsToCreate: [],
+        conversationsToUpdate: [],
+        conversationsToDelete: ['1'],
       });
 
       expect(errors).toEqual(['something went wrong']);
     });
 
-    it('returns the time it took to write the risk scores', async () => {
+    it('returns the time it took to write the conversations', async () => {
       (esClientMock.bulk as jest.Mock).mockResolvedValue({
         took: 123,
         items: [],
       });
 
       const { took } = await writer.bulk({
-        host: [riskScoreServiceMock.createRiskScore()],
+        conversationsToCreate: [],
+        conversationsToUpdate: [],
+        conversationsToDelete: ['1'],
       });
 
       expect(took).toEqual(123);
@@ -300,8 +129,10 @@ describe('RiskEngineDataWriter', () => {
         items: [{ create: { status: 201 } }, { create: { status: 200 } }],
       });
 
-      const { docs_written: docsWritten } = await writer.bulk({
-        host: [riskScoreServiceMock.createRiskScore()],
+      const { docs_deleted: docsWritten } = await writer.bulk({
+        conversationsToCreate: [],
+        conversationsToUpdate: [],
+        conversationsToDelete: ['1'],
       });
 
       expect(docsWritten).toEqual(2);
@@ -319,8 +150,10 @@ describe('RiskEngineDataWriter', () => {
       });
 
       it('returns the number of docs written', async () => {
-        const { docs_written: docsWritten } = await writer.bulk({
-          host: [riskScoreServiceMock.createRiskScore()],
+        const { docs_created: docsWritten } = await writer.bulk({
+          conversationsToCreate: [],
+          conversationsToUpdate: [],
+          conversationsToDelete: ['1'],
         });
 
         expect(docsWritten).toEqual(1);
@@ -328,14 +161,16 @@ describe('RiskEngineDataWriter', () => {
 
       it('returns the errors', async () => {
         const { errors } = await writer.bulk({
-          host: [riskScoreServiceMock.createRiskScore()],
+          conversationsToCreate: [],
+          conversationsToUpdate: [],
+          conversationsToDelete: ['1'],
         });
 
         expect(errors).toEqual(['something went wrong']);
       });
     });
 
-    describe('when there are no risk scores to write', () => {
+    describe('when there are no conversations to write', () => {
       it('returns an appropriate response', async () => {
         const response = await writer.bulk({});
         expect(response).toEqual({ errors: [], docs_written: 0, took: 0 });

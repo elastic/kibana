@@ -375,6 +375,7 @@ describe('SystemPrompt', () => {
         apiConfig: {
           defaultSystemPromptId: undefined,
         },
+        title: 'second',
         messages: [],
       };
       const localMockConversations: Record<string, Conversation> = {

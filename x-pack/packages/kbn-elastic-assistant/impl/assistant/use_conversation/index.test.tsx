@@ -61,7 +61,7 @@ describe('useConversation', () => {
   let httpMock: ReturnType<typeof httpServiceMock.createSetupContract>;
 
   beforeEach(() => {
-    httpMock = httpServiceMock.createSetupContract({ basePath: '/test' });
+    httpMock = httpServiceMock.createSetupContract();
 
     jest.clearAllMocks();
   });
@@ -226,8 +226,8 @@ describe('useConversation', () => {
       });
 
       expect(appendConversationMessagesApiMock).toHaveBeenCalledWith({
-        http: httpMock,
         conversationId: mockConvo.id,
+        http: httpMock,
         messages: [
           {
             ...anotherMessage,

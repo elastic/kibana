@@ -17,18 +17,38 @@ import {
   calculateDelay,
   getShouldRetry,
 } from './create_resource_installation_helper';
-import { retryUntil } from './test_utils';
+
+const RETRY_UNTIL_DEFAULT_COUNT = 20;
+const RETRY_UNTIL_DEFAULT_WAIT = 100; // milliseconds
+type RetryableFunction = () => Promise<boolean>;
+
+export const retryUntil = async (
+  label: string,
+  fn: RetryableFunction,
+  count: number = RETRY_UNTIL_DEFAULT_COUNT,
+  wait: number = RETRY_UNTIL_DEFAULT_WAIT
+): Promise<boolean> => {
+  await delay(wait);
+  while (count > 0) {
+    // eslint-disable-next-line no-param-reassign
+    count--;
+
+    if (await fn()) return true;
+
+    // eslint-disable-next-line no-console
+    console.log(`attempt failed waiting for "${label}", attempts left: ${count}`);
+
+    if (count === 0) return false;
+    await delay(wait);
+  }
+
+  return false;
+};
+
+const delay = async (millis: number) => new Promise((resolve) => setTimeout(resolve, millis));
 
 const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
   loggingSystemMock.createLogger();
-
-const initFn = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
-  logger.info(`${context.context}_${namespace}`);
-};
-
-const initFnWithError = async (context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
-  throw new Error('no go');
-};
 
 const getCommonInitPromise = async (
   resolution: boolean,
@@ -50,7 +70,7 @@ const getContextInitialized = async (
   context: string = 'test1',
   namespace: string = DEFAULT_NAMESPACE_STRING
 ) => {
-  const { result } = await helper.getInitializedResources(context, namespace);
+  const { result } = await helper.getInitializedResources(namespace);
   return result;
 };
 
@@ -63,52 +83,25 @@ describe('createResourceInstallationHelper', () => {
     const helper = createResourceInstallationHelper(
       logger,
       getCommonInitPromise(true, 100),
-      initFn
+      (namespace: string) => {
+        return Promise.resolve();
+      }
     );
 
     // Add two contexts that need to be initialized
-    helper.add({
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
-    helper.add({
-      context: 'test2',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
+    helper.add('test1');
+    helper.add('test2');
 
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 3);
 
     expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
     expect(logger.info).toHaveBeenNthCalledWith(2, 'test1_default');
     expect(logger.info).toHaveBeenNthCalledWith(3, 'test2_default');
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: true,
     });
-    expect(await helper.getInitializedResources('test2', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: true,
-    });
-  });
-
-  test(`should return false if context is unrecognized`, async () => {
-    const helper = createResourceInstallationHelper(
-      logger,
-      getCommonInitPromise(true, 100),
-      initFn
-    );
-
-    helper.add({
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
-
-    await retryUntil('init fns run', async () => logger.info.mock.calls.length === 2);
-
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
-      result: true,
-    });
-    expect(await helper.getInitializedResources('test2', DEFAULT_NAMESPACE_STRING)).toEqual({
-      result: false,
-      error: `Unrecognized context test2_default`,
     });
   });
 
@@ -116,32 +109,34 @@ describe('createResourceInstallationHelper', () => {
     const helper = createResourceInstallationHelper(
       logger,
       getCommonInitPromise(false, 100),
-      initFn
+      (namespace: string) => {
+        return Promise.resolve();
+      }
     );
 
-    helper.add({
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
+    helper.add('test1');
 
     await retryUntil('common init fns run', async () => logger.info.mock.calls.length === 1);
 
     expect(logger.warn).toHaveBeenCalledWith(
       `Common resources were not initialized, cannot initialize context for test1`
     );
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `error initializing`,
     });
   });
 
   test(`should log and return false if common init function throws error`, async () => {
-    const helper = createResourceInstallationHelper(logger, getCommonInitPromise(true, -1), initFn);
+    const helper = createResourceInstallationHelper(
+      logger,
+      getCommonInitPromise(true, -1),
+      (namespace: string) => {
+        return Promise.resolve();
+      }
+    );
 
-    helper.add({
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
+    helper.add('test1');
 
     await retryUntil(
       'common init fns run',
@@ -149,33 +144,9 @@ describe('createResourceInstallationHelper', () => {
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `fail`,
-    });
-  });
-
-  test(`should log and return false if context init function throws error`, async () => {
-    const helper = createResourceInstallationHelper(
-      logger,
-      getCommonInitPromise(true, 100),
-      initFnWithError
-    );
-
-    helper.add({
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    });
-
-    await retryUntil(
-      'context init fns run',
-      async () => (await getContextInitialized(helper)) === false
-    );
-
-    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - no go`);
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
-      result: false,
-      error: `no go`,
     });
   });
 
@@ -187,73 +158,28 @@ describe('createResourceInstallationHelper', () => {
     const helper = createResourceInstallationHelper(
       logger,
       getCommonInitPromise(false, 100),
-      initFn
+      (namespace: string) => {
+        return Promise.resolve();
+      }
     );
 
-    helper.add(context);
+    helper.add();
 
     await retryUntil('common init fns run', async () => logger.info.mock.calls.length === 1);
 
     expect(logger.warn).toHaveBeenCalledWith(
       `Common resources were not initialized, cannot initialize context for test1`
     );
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `error initializing`,
     });
 
-    helper.retry(context, undefined, getCommonInitPromise(true, 100, 'after retry'));
+    helper.retry(undefined, getCommonInitPromise(true, 100, 'after retry'));
 
     await retryUntil('common init fns run', async () => logger.info.mock.calls.length === 2);
     expect(logger.info).toHaveBeenCalledWith(`commonInitPromise resolved - after retry`);
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
-      result: true,
-    });
-  });
-
-  test(`should retry context init function`, async () => {
-    const initFnErrorOnce = jest
-      .fn()
-      .mockImplementationOnce(() => {
-        throw new Error('first error');
-      })
-      .mockImplementation((context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
-        logger.info(`${context.context}_${namespace} successfully retried`);
-      });
-    const context = {
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    };
-    const helper = createResourceInstallationHelper(
-      logger,
-      getCommonInitPromise(true, 100),
-      initFnErrorOnce
-    );
-
-    helper.add(context);
-
-    await retryUntil(
-      'context init fns run',
-      async () => (await getContextInitialized(helper)) === false
-    );
-
-    expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - first error`);
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
-      result: false,
-      error: `first error`,
-    });
-
-    helper.retry(context, undefined);
-
-    await retryUntil('init fns retried', async () => logger.info.mock.calls.length === 3);
-
-    expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
-    expect(logger.info).toHaveBeenNthCalledWith(
-      2,
-      `Retrying resource initialization for context "test1"`
-    );
-    expect(logger.info).toHaveBeenNthCalledWith(3, 'test1_default successfully retried');
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: true,
     });
   });
@@ -267,20 +193,17 @@ describe('createResourceInstallationHelper', () => {
       .mockImplementationOnce(() => {
         throw new Error('second error');
       })
-      .mockImplementation((context: IRuleTypeAlerts, namespace: string, timeoutMs?: number) => {
-        logger.info(`${context.context}_${namespace} successfully retried`);
+      .mockImplementation((namespace: string, timeoutMs?: number) => {
+        logger.info(`${namespace} successfully retried`);
       });
-    const context = {
-      context: 'test1',
-      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
-    };
+
     const helper = createResourceInstallationHelper(
       logger,
       getCommonInitPromise(true, 100),
       initFnErrorOnce
     );
 
-    helper.add(context);
+    helper.add();
 
     await retryUntil(
       'context init fns run',
@@ -288,7 +211,7 @@ describe('createResourceInstallationHelper', () => {
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - first error`);
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: `first error`,
     });
@@ -296,9 +219,9 @@ describe('createResourceInstallationHelper', () => {
     logger.info.mockClear();
     logger.error.mockClear();
 
-    helper.retry(context, undefined);
+    helper.retry(undefined);
     await new Promise((r) => setTimeout(r, 10));
-    helper.retry(context, undefined);
+    helper.retry(undefined);
 
     await retryUntil('init fns retried', async () => {
       return logger.error.mock.calls.length === 1;
@@ -308,7 +231,7 @@ describe('createResourceInstallationHelper', () => {
 
     // the second retry is throttled so this is never called
     expect(logger.info).not.toHaveBeenCalledWith('test1_default successfully retried');
-    expect(await helper.getInitializedResources('test1', DEFAULT_NAMESPACE_STRING)).toEqual({
+    expect(await helper.getInitializedResources(DEFAULT_NAMESPACE_STRING)).toEqual({
       result: false,
       error: 'second error',
     });
