@@ -28,7 +28,7 @@ import type {
 } from '../../../../../common/http_api';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useMetricsDataViewContext } from './use_data_view';
+import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
