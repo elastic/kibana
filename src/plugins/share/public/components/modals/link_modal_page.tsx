@@ -508,6 +508,8 @@ export class LinkModal extends Component<LinkModalProps, State> {
                         <FormattedMessage
                           id="share.link.saveNeededButton"
                           defaultMessage="Copy link"
+                          data-test-subj="copyShareUrlButton"
+                          data-share-url={this.state.url}
                         />
                       </EuiButton>
                     </EuiToolTip>

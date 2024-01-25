@@ -106,6 +106,7 @@ export function createScenarios(
     await testSubjects.existOrFail('csvDownloadStarted'); /* validate toast panel */
   };
   const tryDiscoverCsvFail = async () => {
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
     const queueReportError = await PageObjects.reporting.getQueueReportError();
@@ -137,6 +138,7 @@ export function createScenarios(
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };
   const tryGeneratePngSuccess = async () => {
+    await PageObjects.share.clickShareTopNavButton();
     await PageObjects.reporting.openImageReportingPanel();
     expect(await PageObjects.reporting.canReportBeCreated()).to.be(true);
   };

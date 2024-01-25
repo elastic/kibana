@@ -89,6 +89,6 @@ export class SharePageObject extends FtrService {
   async exportAsSavedObject() {
     await this.openPermaLinks();
     await this.testSubjects.click('exportAsSavedObject');
-    await this.testSubjects.click('copyShareUrlButton');
+    await this.testSubjects.getAttribute('copyShareUrlButton', 'data-share-url');
   }
 }

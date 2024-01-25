@@ -552,6 +552,8 @@ export class EmbedModal extends Component<EmbedModalProps, State> {
                         <EuiButton color="warning" iconType="warning">
                           <FormattedMessage
                             id="share.embed.saveNeededButton"
+                            data-test-subj="copyShareUrlButton"
+                            data-share-url={this.state.url}
                             defaultMessage="Copy link"
                           />
                         </EuiButton>
