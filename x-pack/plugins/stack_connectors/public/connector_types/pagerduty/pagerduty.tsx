@@ -93,17 +93,21 @@ export function getConnectorType(): ConnectorTypeModel<
         });
       }
       if (actionParams.customDetails?.length) {
+        const errorMessage = i18n.translate(
+          'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
+          {
+            defaultMessage: 'Custom details must be a valid JSON object.',
+          }
+        );
+
         try {
-          JSON.parse(actionParams.customDetails);
+          const parsedJSON = JSON.parse(actionParams.customDetails);
+
+          if (typeof parsedJSON !== 'object') {
+            errors.customDetails.push(errorMessage);
+          }
         } catch {
-          errors.customDetails.push(
-            i18n.translate(
-              'xpack.stackConnectors.components.pagerDuty.error.invalidCustomDetails',
-              {
-                defaultMessage: 'Custom details must be a valid JSON.',
-              }
-            )
-          );
+          errors.customDetails.push(errorMessage);
         }
       }
       return validationResult;
