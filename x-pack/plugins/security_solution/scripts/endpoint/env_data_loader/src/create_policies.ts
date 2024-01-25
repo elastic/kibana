@@ -56,7 +56,15 @@ export const createPolicies = async ({
     throttler.addToQueue(async () => {
       await copyAgentPolicy({ kbnClient, agentPolicyId })
         .then((response) => {
-          endpointIntegrationPolicyIds.push(response.id);
+          if (response.package_policies?.[0]) {
+            endpointIntegrationPolicyIds.push(response.package_policies[0].id);
+          } else {
+            errors.push(
+              new Error(
+                `Copy of agent policy [${agentPolicyId}] did not copy the Endpoint Integration!`
+              )
+            );
+          }
         })
         .catch((e) => {
           errors.push(e);

@@ -51,7 +51,7 @@ const gen = new (class extends BaseDataGenerator {
 
 const generatePerPolicyEffectiveScope = (policyIds: string[]): string[] => {
   return gen.randomArray(
-    gen.randomN(20),
+    gen.randomN(Math.min(100, policyIds.length)),
     () => `${BY_POLICY_ARTIFACT_TAG_PREFIX}${gen.randomChoice(policyIds)}`
   );
 };
@@ -111,7 +111,9 @@ export const createTrustedApps = async ({
       } else {
         effectScope = {
           type: 'policy',
-          policies: gen.randomArray(gen.randomN(20), () => gen.randomChoice(policyIds)),
+          policies: gen.randomArray(gen.randomN(Math.min(100, policyIds.length)), () =>
+            gen.randomChoice(policyIds)
+          ),
         };
       }
 
