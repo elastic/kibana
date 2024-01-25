@@ -9,7 +9,7 @@ import { type AnalyticsServiceSetup, ElasticsearchClient, Logger } from '@kbn/co
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Callbacks } from '@langchain/core/callbacks/manager';
-import { Document } from '@langchain/core/documents';
+import { Document } from 'langchain/document';
 import { VectorStore } from '@langchain/core/vectorstores';
 import * as uuid from 'uuid';
 

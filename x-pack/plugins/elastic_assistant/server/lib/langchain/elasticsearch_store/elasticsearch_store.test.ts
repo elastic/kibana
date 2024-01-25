@@ -11,7 +11,7 @@ import {
   IndicesCreateResponse,
   MlGetTrainedModelsStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { Document } from '@langchain/core/documents';
+import { Document } from 'langchain/document';
 
 import {
   ElasticsearchStore,
