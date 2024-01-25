@@ -181,73 +181,89 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     });
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    // FIXME:PT add real "options" to methods
-    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>('isolate', options);
+  async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
+    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>(
+      'isolate',
+      actionRequest,
+      options
+    );
   }
 
-  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  async release(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
     return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>(
       'unisolate',
+      actionRequest,
       options
     );
   }
 
   async killProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
     return this.handleResponseAction<
       KillOrSuspendProcessRequestBody,
       ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-    >('kill-process', options);
+    >('kill-process', actionRequest, options);
   }
 
   async suspendProcess(
-    options: KillOrSuspendProcessRequestBody
+    actionRequest: KillOrSuspendProcessRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
     return this.handleResponseAction<
       KillOrSuspendProcessRequestBody,
       ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
-    >('suspend-process', options);
+    >('suspend-process', actionRequest, options);
   }
 
   async runningProcesses(
-    options: GetProcessesRequestBody
+    actionRequest: GetProcessesRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
     return this.handleResponseAction<
       GetProcessesRequestBody,
       ActionDetails<GetProcessesActionOutputContent>
-    >('running-processes', options);
+    >('running-processes', actionRequest, options);
   }
 
   async getFile(
-    options: ResponseActionGetFileRequestBody
+    actionRequest: ResponseActionGetFileRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
     return this.handleResponseAction<
       ResponseActionGetFileRequestBody,
       ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-    >('get-file', options);
+    >('get-file', actionRequest, options);
   }
 
   async execute(
-    options: ExecuteActionRequestBody
+    actionRequest: ExecuteActionRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
     return this.handleResponseAction<
       ExecuteActionRequestBody,
       ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
-    >('execute', options);
+    >('execute', actionRequest, options);
   }
 
   async upload(
-    options: UploadActionApiRequestBody
+    actionRequest: UploadActionApiRequestBody,
+    options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
     const fleetFiles = await this.options.endpointService.getFleetToHostFilesClient();
-    const fileStream = options.file as HapiReadableStream;
-    const { file: _, parameters: userParams, ...actionPayload } = options;
+    const fileStream = actionRequest.file as HapiReadableStream;
+    const { file: _, parameters: userParams, ...actionPayload } = actionRequest;
     const uploadParameters: ResponseActionUploadParameters = {
       ...userParams,
       file_id: '',
@@ -273,7 +289,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       const createdAction = await this.handleResponseAction<
         typeof createFileActionOptions,
         ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
-      >('upload', createFileActionOptions);
+      >('upload', createFileActionOptions, options);
 
       // Update the file meta to include the action id, and if any errors (unlikely),
       // then just log them and still allow api to return success since the action has

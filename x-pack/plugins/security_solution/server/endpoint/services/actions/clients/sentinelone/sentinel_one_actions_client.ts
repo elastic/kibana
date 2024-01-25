@@ -17,6 +17,7 @@ import type {
   SentinelOneGetAgentsResponse,
   SentinelOneGetAgentsParams,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import type { CommonResponseActionMethodOptions } from '../../..';
 import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
 import type { SentinelOneConnectorExecuteOptions } from './types';
 import { stringify } from '../../../../utils/stringify';
@@ -183,11 +184,15 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return super.validateRequest(payload);
   }
 
-  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  async isolate(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
     // FIXME:PT support method options
 
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
-      ...options,
+      ...actionRequest,
+      ...this.getMethodOptions(options),
       command: 'isolate',
     };
 
@@ -195,7 +200,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!error) {
       try {
-        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
       } catch (err) {
         error = err;
       }
@@ -213,7 +218,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,
       alertIds: reqIndexOptions.alert_ids,
-      hosts: options.endpoint_ids.map((agentId) => {
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
@@ -235,9 +240,13 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
   }
 
-  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+  async release(
+    actionRequest: IsolationRouteRequestBody,
+    options: CommonResponseActionMethodOptions = {}
+  ): Promise<ActionDetails> {
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
-      ...options,
+      ...actionRequest,
+      ...this.getMethodOptions(options),
       command: 'unisolate',
     };
 
@@ -245,7 +254,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!error) {
       try {
-        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
+        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
       } catch (err) {
         error = err;
       }
@@ -263,7 +272,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,
       alertIds: reqIndexOptions.alert_ids,
-      hosts: options.endpoint_ids.map((agentId) => {
+      hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
