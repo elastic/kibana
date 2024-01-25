@@ -21,7 +21,7 @@ export const getServices = async (
   options: ServicesAPIRequest
 ) => {
   const { error, metric } = apmIndices;
-  const { filters, size, from, to } = options;
+  const { filters, size = 10, from, to } = options;
   const commonFiltersList: QueryDslQueryContainer[] = [
     {
       range: {
