@@ -135,7 +135,7 @@ class TimeseriesChartIntl extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { popoverData: null };
+    this.state = { popoverData: null, popoverCoords: [0, 0] };
   }
 
   componentWillUnmount() {
@@ -791,7 +791,12 @@ class TimeseriesChartIntl extends Component {
           (d) => d.source.timestamp === anomalyTime
         );
 
-        if (tableItem) that.setState({ popoverData: tableItem });
+        const dotRect = this.getBoundingClientRect();
+        const rootRect = that.rootNode.getBoundingClientRect();
+        const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+        const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - 28;
+
+        if (tableItem) that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
       })
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
@@ -1883,22 +1888,26 @@ class TimeseriesChartIntl extends Component {
   }
 
   render() {
-    const button = <>popover</>;
-
     const that = this;
     function closePopover() {
-      that.setState({ popoverData: null });
+      that.setState({ popoverData: null, popoverCoords: [0, 0] });
     }
 
     return (
       <>
-        <div>
+        <div
+          style={{
+            position: 'absolute',
+            marginLeft: that.state.popoverCoords[0],
+            marginTop: that.state.popoverCoords[1],
+            display: that.state.popoverData === null ? 'none' : 'block',
+          }}
+        >
           <EuiPopover
-            button={button}
             isOpen={this.state.popoverData !== null}
             closePopover={closePopover}
             panelPaddingSize="none"
-            anchorPosition="downLeft"
+            anchorPosition="upLeft"
           >
             {that.state.popoverData !== null && (
               <LinksMenuUI
