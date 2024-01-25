@@ -11,11 +11,11 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogDocument, LogExplorerDiscoverServices } from '../../controller';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
-import { dynamic } from '../../utils/dynamic';
 import { VirtualColumnServiceProvider } from '../../hooks/use_virtual_column_services';
 import './virtual_column.scss';
 

@@ -15,8 +15,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import React, { ReactNode } from 'react';
-import { dynamic } from '../../../utils/dynamic';
 import { HoverActionPopover } from './hover_popover_action';
 
 const HighlightFieldDescription = dynamic(() => import('./highlight_field_description'));

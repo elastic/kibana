@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { dynamic } from './dynamic';
-export type { DynamicOptions } from './dynamic';
+export { dynamic, type DynamicOptions } from './dynamic';

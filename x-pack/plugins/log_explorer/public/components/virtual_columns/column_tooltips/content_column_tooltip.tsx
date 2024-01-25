@@ -9,12 +9,12 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, EuiToken, useEuiTheme } fr
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import {
   contentHeaderTooltipParagraph1,
   contentHeaderTooltipParagraph2,
   contentLabel,
 } from '../../common/translations';
-import { dynamic } from '../../../utils/dynamic';
 import { HoverPopover } from '../../common/hover_popover';
 
 const ColumnHeaderTruncateContainer = dynamic(
