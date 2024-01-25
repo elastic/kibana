@@ -27,6 +27,11 @@ const statusesSchema = schema.oneOf(RESPONSE_ACTION_STATUS.map((status) => schem
 // @ts-expect-error TS2769: No overload matches this call
 const typesSchema = schema.oneOf(RESPONSE_ACTION_TYPE.map((type) => schema.literal(type)));
 
+const agentTypesSchema = schema.oneOf(
+  // @ts-expect-error TS2769: No overload matches this call
+  RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
+);
+
 export const EndpointActionListRequestSchema = {
   query: schema.object({
     agentIds: schema.maybe(
@@ -37,19 +42,10 @@ export const EndpointActionListRequestSchema = {
     ),
     agentTypes: schema.maybe(
       schema.oneOf([
-        schema.arrayOf(
-          schema.oneOf(
-            // @ts-expect-error TS2769: No overload matches this call
-            RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
-          ),
-          {
-            minSize: 1,
-          }
-        ),
-        schema.oneOf(
-          // @ts-expect-error TS2769: No overload matches this call
-          RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType))
-        ),
+        schema.arrayOf(agentTypesSchema, {
+          minSize: 1,
+        }),
+        agentTypesSchema,
       ])
     ),
     commands: schema.maybe(
