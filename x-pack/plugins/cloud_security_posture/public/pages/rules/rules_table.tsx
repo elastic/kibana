@@ -14,6 +14,8 @@ import {
   useEuiTheme,
   EuiSwitch,
   EuiCheckbox,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
@@ -190,7 +192,7 @@ const getColumns = ({
         }}
       />
     ),
-    width: '30px',
+    width: '40px',
     sortable: false,
     render: (rules, item: CspBenchmarkRulesWithStates) => {
       return (
@@ -219,7 +221,7 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.ruleNumberColumnLabel', {
       defaultMessage: 'Rule Number',
     }),
-    width: '10%',
+    width: '100px',
     sortable: true,
   },
   {
@@ -248,20 +250,21 @@ const getColumns = ({
     name: i18n.translate('xpack.csp.rules.rulesTable.cisSectionColumnLabel', {
       defaultMessage: 'CIS Section',
     }),
-    width: '15%',
+    width: '24%',
   },
   {
     field: 'metadata.name',
     name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
       defaultMessage: 'Enabled',
     }),
-    width: '10%',
+    align: 'right',
+    width: '100px',
     truncateText: true,
     render: (name, rule: CspBenchmarkRulesWithStates) => {
       const rulesObjectRequest = {
         benchmark_id: rule?.metadata.benchmark.id,
         benchmark_version: rule?.metadata.benchmark.version,
-        /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+        /* Rule number always exists from 8.7 */
         rule_number: rule?.metadata.benchmark.rule_number!,
         rule_id: rule?.metadata.id,
       };
@@ -275,13 +278,18 @@ const getColumns = ({
         }
       };
       return (
-        <EuiSwitch
-          className="eui-textTruncate"
-          checked={!isRuleMuted}
-          onChange={useChangeCspRuleStateFn}
-          data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
-          label=""
-        />
+        <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              className="eui-textTruncate"
+              checked={!isRuleMuted}
+              onChange={useChangeCspRuleStateFn}
+              data-test-subj={RULES_ROWS_ENABLE_SWITCH_BUTTON}
+              label=""
+              compressed={true}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       );
     },
   },
