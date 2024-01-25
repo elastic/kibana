@@ -11,13 +11,13 @@ import {
   ChatCompletionErrorCode,
   type StreamingChatResponseEvent,
   StreamingChatResponseEventType,
-  type StreamingChatResponseEventWithoutError,
+  type ChatCompletionErrorEvent,
 } from '../conversation_complete';
 
 export function throwSerializedChatCompletionErrors() {
-  return (
+  return <T extends StreamingChatResponseEvent>(
     source$: Observable<StreamingChatResponseEvent>
-  ): Observable<StreamingChatResponseEventWithoutError> => {
+  ): Observable<Exclude<T, ChatCompletionErrorEvent>> => {
     return source$.pipe(
       tap((event) => {
         if (event.type === StreamingChatResponseEventType.ChatCompletionError) {
@@ -27,7 +27,7 @@ export function throwSerializedChatCompletionErrors() {
         }
       }),
       filter(
-        (event): event is StreamingChatResponseEventWithoutError =>
+        (event): event is Exclude<T, ChatCompletionErrorEvent> =>
           event.type !== StreamingChatResponseEventType.ChatCompletionError
       )
     );
