@@ -95,6 +95,7 @@ describe('FindSLO', () => {
             enabled: slo.enabled,
             revision: slo.revision,
             groupBy: slo.groupBy,
+            groupings: {},
             instanceId: ALL_VALUE,
             version: SLO_MODEL_VERSION,
           },
