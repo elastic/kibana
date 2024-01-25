@@ -195,7 +195,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug(`getUrlFromShare`);
       await PageObjects.share.clickShareTopNavButton();
       const sharedUrl = await PageObjects.share.getSharedUrl();
-      await PageObjects.share.closeShareModal();
+      if (await PageObjects.share.isShareModalOpen()) {
+        await PageObjects.share.closeShareModal();
+      }
       log.debug(`sharedUrl: ${sharedUrl}`);
       return sharedUrl;
     };
@@ -219,6 +221,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const changeQuery = async (useHardRefresh: boolean, newQuery: string) => {
         await queryBar.clickQuerySubmitButton();
         const currentUrl = await getUrlFromShare();
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -252,6 +257,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('for panel size parameters', async function () {
         await dashboardAddPanel.addVisualization(PIE_CHART_VIS_NAME);
         const currentUrl = await getUrlFromShare();
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         const currentPanelDimensions = await PageObjects.dashboard.getPanelDimensions();
         const newUrl = updateAppStateQueryParam(
           currentUrl,
@@ -296,6 +304,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('when removing a panel', async function () {
         await PageObjects.dashboard.waitForRenderComplete();
         const currentUrl = await getUrlFromShare();
+        if (await PageObjects.share.isShareModalOpen()) {
+          await PageObjects.share.closeShareModal();
+        }
         const newUrl = updateAppStateQueryParam(
           currentUrl,
           (appState: Partial<SharedDashboardState>) => {
@@ -329,6 +340,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
           await PageObjects.visChart.selectNewLegendColorChoice('#F9D9F9');
           const currentUrl = await getUrlFromShare();
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           const newUrl = updateAppStateQueryParam(
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
@@ -375,6 +389,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         it('resets a pie slice color to the original when removed', async function () {
           const currentUrl = await getUrlFromShare();
+          if (await PageObjects.share.isShareModalOpen()) {
+            await PageObjects.share.closeShareModal();
+          }
           const newUrl = updateAppStateQueryParam(
             currentUrl,
             (appState: Partial<SharedDashboardState>) => {
