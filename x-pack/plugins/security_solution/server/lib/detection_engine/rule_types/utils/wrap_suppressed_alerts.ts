@@ -67,7 +67,7 @@ export const wrapSuppressedAlerts = ({
     >;
     const suppressionTerms = suppressedBy.map((field) => ({
       field,
-      value: (suppressedProps[field] && suppressedProps[field]?.join()) ?? null,
+      value: suppressedProps[field] ?? null,
     }));
 
     const id = objectHash([

@@ -29,9 +29,6 @@ export function createTestConfig(options: CreateTestConfigOptions) {
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           '--serverless=security',
           ...(options.kbnTestServerArgs || []),
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForThresholdRuleEnabled',
-          ])}`,
         ],
         env: {
           ...svlSharedConfig.get('kbnTestServer.env'),

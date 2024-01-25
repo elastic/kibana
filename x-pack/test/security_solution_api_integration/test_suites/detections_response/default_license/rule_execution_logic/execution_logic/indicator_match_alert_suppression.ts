@@ -15,6 +15,7 @@ import {
   ALERT_SUPPRESSION_TERMS,
   ALERT_LAST_DETECTED,
   TIMESTAMP,
+  ALERT_START,
 } from '@kbn/rule-data-utils';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 
@@ -220,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               // suppression boundaries equal to original event time, since no alert been suppressed
@@ -263,7 +264,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
@@ -363,7 +364,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -440,7 +441,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -455,7 +456,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T06:30:00.000Z',
@@ -542,11 +543,12 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
             [ALERT_LAST_DETECTED]: '2020-10-28T07:00:00.000Z', // Note: ALERT_LAST_DETECTED gets updated, timestamp does not
+            [ALERT_START]: '2020-10-28T06:00:00.000Z',
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
             [ALERT_SUPPRESSION_START]: firstTimestamp,
             [ALERT_SUPPRESSION_END]: thirdTimestamp,
@@ -640,11 +642,11 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
               {
                 field: 'agent.version',
-                value: '1',
+                value: ['1'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -658,11 +660,11 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
               {
                 field: 'agent.version',
-                value: '2',
+                value: ['2'],
               },
             ],
             [TIMESTAMP]: '2020-10-28T06:00:00.000Z',
@@ -748,7 +750,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -830,7 +832,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-0',
+                  value: ['agent-0'],
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -907,7 +909,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -986,7 +988,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'host.name',
-                value: 'host-a',
+                value: ['host-a'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1080,7 +1082,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'agent.name',
-                value: 'agent-1',
+                value: ['agent-1'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1188,7 +1190,7 @@ export default ({ getService }: FtrProviderContext) => {
             [ALERT_SUPPRESSION_TERMS]: [
               {
                 field: 'agent.name',
-                value: 'agent-1',
+                value: ['agent-1'],
               },
             ],
             [ALERT_ORIGINAL_TIME]: firstTimestamp,
@@ -1271,7 +1273,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a',
+                  value: ['host-a'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -1335,7 +1337,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'host.name',
-                  value: 'host-a,host-b',
+                  value: ['host-a', 'host-b'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -1425,11 +1427,11 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-a',
+                  value: ['agent-a'],
                 },
                 {
                   field: 'agent.version',
-                  value: '10',
+                  value: ['10'],
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1440,7 +1442,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-a',
+                  value: ['agent-a'],
                 },
                 {
                   field: 'agent.version',
@@ -1459,7 +1461,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
                 {
                   field: 'agent.version',
-                  value: '10',
+                  value: ['10'],
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1539,7 +1541,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-1',
+                  value: ['agent-1'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -1625,7 +1627,7 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-1',
+                  value: ['agent-1'],
                 },
               ],
               [TIMESTAMP]: '2020-10-28T07:00:00.000Z',
@@ -1725,11 +1727,11 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-a',
+                  value: ['agent-a'],
                 },
                 {
                   field: 'agent.version',
-                  value: '10',
+                  value: ['10'],
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
@@ -1746,11 +1748,83 @@ export default ({ getService }: FtrProviderContext) => {
             });
           });
 
-          // could happen when number of documents matching condition is more than 100
-          // and most of them suppressed
-          // when number of suppressed alerts could many thousands, search could
-          // iterate through them search exhaustion
-          it('should not suppress more than max_signals alerts', async () => {
+          // this test is not correct, use case for multiple duplicate alerts need to fixed
+          it('should deduplicate multiple alerts while suppressing on rule interval only', async () => {
+            const id = uuidv4();
+            const firstTimestamp = '2020-10-28T05:45:00.000Z';
+            const secondTimestamp = '2020-10-28T06:10:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': firstTimestamp,
+              host: { name: 'host-a' },
+            };
+
+            const doc2 = {
+              ...doc1,
+              '@timestamp': secondTimestamp,
+            };
+
+            await eventsFiller({
+              id,
+              count: eventsCount,
+              timestamp: [firstTimestamp, secondTimestamp],
+            });
+            await threatsFiller({ id, count: threatsCount, timestamp: firstTimestamp });
+
+            // 4 alert should be suppressed
+            await indexListOfSourceDocuments([doc1, doc1, doc2, doc2, doc2]);
+
+            await addThreatDocuments({
+              id,
+              timestamp: firstTimestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['host.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              // large look-back time covers all docs
+              from: 'now-50m',
+              interval: '30m',
+            };
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+              invocationCount: 2,
+            });
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['host.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: firstTimestamp,
+              [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: secondTimestamp,
+              // TODO: fix count, it should be 4 suppressed
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
+            });
+          });
+
+          it('should not suppress more than limited number (max_signals x5)', async () => {
             const id = uuidv4();
             const timestamp = '2020-10-28T06:45:00.000Z';
             const doc1 = {
@@ -1764,7 +1838,7 @@ export default ({ getService }: FtrProviderContext) => {
             await threatsFiller({ id, count: 20 * threatsCount, timestamp });
 
             await indexGeneratedSourceDocuments({
-              docsCount: 150,
+              docsCount: 700,
               seed: (index) => ({
                 id,
                 '@timestamp': `2020-10-28T06:50:00.${index}Z`,
@@ -1818,10 +1892,88 @@ export default ({ getService }: FtrProviderContext) => {
               [ALERT_SUPPRESSION_TERMS]: [
                 {
                   field: 'agent.name',
-                  value: 'agent-a',
+                  value: ['agent-a'],
                 },
               ],
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 99,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+            });
+          });
+
+          // 9,000 is the size of chunk that is processed in IM rule
+          // when number of documents in either of index exceeds this number it may leads to unexpected behavior
+          // this test added to ensure these cases covered
+          it('should not suppress more than limited number (max_signals x5) for number of events/threats greater than 9,000', async () => {
+            const id = uuidv4();
+            const timestamp = '2020-10-28T06:45:00.000Z';
+            const doc1 = {
+              id,
+              '@timestamp': timestamp,
+              host: { name: 'host-a' },
+              agent: { name: 'agent-b' },
+            };
+
+            await eventsFiller({ id, count: 10000 * eventsCount, timestamp: [timestamp] });
+            await threatsFiller({ id, count: 10000 * threatsCount, timestamp });
+
+            await indexGeneratedSourceDocuments({
+              docsCount: 15000,
+              seed: (index) => ({
+                id,
+                '@timestamp': `2020-10-28T06:50:00.${index}Z`,
+                host: {
+                  name: `host-a`,
+                },
+                agent: { name: 'agent-a' },
+              }),
+            });
+
+            await indexListOfSourceDocuments([doc1, doc1, doc1]);
+
+            await addThreatDocuments({
+              id,
+              timestamp,
+              fields: {
+                host: {
+                  name: 'host-a',
+                },
+              },
+              count: 1,
+            });
+
+            const rule: ThreatMatchRuleCreateProps = {
+              ...indicatorMatchRule(id),
+              alert_suppression: {
+                group_by: ['agent.name'],
+                missing_fields_strategy: 'suppress',
+              },
+              from: 'now-35m',
+              interval: '30m',
+            };
+
+            const { previewId, logs } = await previewRule({
+              supertest,
+              rule,
+              timeframeEnd: new Date('2020-10-28T07:00:00.000Z'),
+              invocationCount: 1,
+            });
+
+            expect(logs[0].warnings).toEqual(expect.arrayContaining([getMaxAlertsWarning()]));
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['agent.name', ALERT_ORIGINAL_TIME],
+            });
+            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts[0]._source).toEqual({
+              ...previewAlerts[0]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'agent.name',
+                  value: ['agent-a'],
+                },
+              ],
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
             });
           });
         });
