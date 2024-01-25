@@ -149,6 +149,7 @@ function createCoreRequestHandlerContextMock() {
 export type CustomRequestHandlerMock<T> = {
   core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
   resolve: jest.MockedFunction<any>;
+  _source: symbol;
 } & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
@@ -178,6 +179,8 @@ const createCustomRequestHandlerContextMock = <T extends Record<string, unknown>
     }
     return resolved;
   });
+
+  mock._source = Symbol.for('mock');
 
   return mock;
 };
