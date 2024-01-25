@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -251,7 +251,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
-        await expectSearches(type, 3, async () => {
+        await expectSearches(type, 2, async () => {
           await PageObjects.discover.toggleChartVisibility();
         });
         await expectSearches(type, 1, async () => {
