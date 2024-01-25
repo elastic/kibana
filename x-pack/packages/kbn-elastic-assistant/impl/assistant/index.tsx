@@ -347,7 +347,6 @@ const AssistantComponent: React.FC<Props> = ({
     conversation: blockBotConversation,
     onConversationUpdate: handleOnConversationSelected,
     onSetupComplete: () => {
-      console.log('clear')
       setConversations({
         ...conversations,
         [currentConversation.id]: clearPresentationData(currentConversation),
@@ -587,7 +586,15 @@ const AssistantComponent: React.FC<Props> = ({
             refetchConversationsState={async () => {
               const refetchedConversations = await refetchResults();
               if (refetchedConversations && refetchedConversations[selectedConversationId]) {
-                await refetchCurrentConversation();
+                setCurrentConversation(refetchedConversations[selectedConversationId]);
+              } else if (refetchedConversations) {
+                const createdSelectedConversation = Object.values(refetchedConversations).find(
+                  (c) => c.title === selectedConversationId
+                );
+                if (createdSelectedConversation) {
+                  setCurrentConversation(createdSelectedConversation);
+                  setSelectedConversationId(createdSelectedConversation.id);
+                }
               }
             }}
           />

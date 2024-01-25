@@ -9,19 +9,23 @@ import type { Conversation } from '@kbn/elastic-assistant';
 import { getConversationById, type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
+import { useBaseConversations } from '../use_conversation_store';
 
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
     services: { telemetry, http },
   } = useKibana();
+  const baseConversations = useBaseConversations();
 
   const getAnonymizedConversationId = useCallback(
     async (id) => {
-      const conversation = await getConversationById({ http, id });
+      const conversation = baseConversations[id]
+        ? baseConversations[id]
+        : await getConversationById({ http, id });
       const convo = (conversation as Conversation) ?? { isDefault: false };
       return convo.isDefault ? id : 'Custom';
     },
-    [http]
+    [baseConversations, http]
   );
 
   const reportTelemetry = useCallback(

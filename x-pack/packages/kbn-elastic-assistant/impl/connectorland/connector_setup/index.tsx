@@ -21,7 +21,7 @@ import { useLoadActionTypes } from '../use_load_action_types';
 import { StreamingText } from '../../assistant/streaming_text';
 import { ConnectorButton } from '../connector_button';
 import { useConversation } from '../../assistant/use_conversation';
-import { clearPresentationData, conversationHasNoPresentationData } from './helpers';
+import { conversationHasNoPresentationData } from './helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
@@ -103,7 +103,6 @@ export const useConnectorSetup = ({
     setShowAddConnectorButton(true);
     bottomRef.current?.scrollIntoView({ block: 'end' });
     onSetupComplete?.();
-    // setConversations({ ...conversations, [conversation.id]: clearPresentationData(conversation) });
   }, [onSetupComplete]);
 
   // Show button to add connector after last message has finished streaming
