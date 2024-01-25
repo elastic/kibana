@@ -40,7 +40,6 @@
     "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/task-manager-plugin",
     "@kbn/security-plugin",
-    "@kbn/securitysolution-io-ts-list-types",
     "@kbn/es-query",
     "@kbn/es-types",
     "@kbn/config-schema",
