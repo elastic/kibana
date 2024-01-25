@@ -23,10 +23,6 @@ import type {
 
 export class CasesOracleService {
   private readonly logger: Logger;
-  /**
-   * TODO: Think about permissions etc.
-   * Should we authorize based on the owner?
-   */
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private cryptoService: CryptoService;
 

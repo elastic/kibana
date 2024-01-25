@@ -940,6 +940,10 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['rule:rule-test-id'] }
+          );
         });
 
         it('does not attach alerts to cases when attaching the new alerts will surpass the limit', async () => {
@@ -956,6 +960,10 @@ describe('CasesConnectorExecutor', () => {
           await connectorExecutor.execute(params);
 
           expect(casesClientMock.attachments.bulkCreate).toHaveBeenCalledTimes(0);
+          expect(mockLogger.warn).toHaveBeenCalledWith(
+            'Cases with ids "mock-id-1" contain more than 1000 alerts. The new alerts will not be attached to the cases. Total new alerts: 1',
+            { tags: ['rule:rule-test-id'] }
+          );
         });
 
         it('attach alerts to cases when attaching the new alerts will be equal to the limit', async () => {

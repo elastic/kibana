@@ -7,7 +7,7 @@
 
 import stringify from 'json-stable-stringify';
 import pMap from 'p-map';
-import { pick } from 'lodash';
+import { partition, pick } from 'lodash';
 import dateMath from '@kbn/datemath';
 import { CaseStatuses } from '@kbn/cases-components';
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
@@ -906,13 +906,22 @@ export class CasesConnectorExecutor {
 
     const { rule } = params;
 
-    /**
-     * TODO: Log that we could not attach the alerts to the cases
-     * that have reached out the limit
-     */
-    const casesUnderAlertLimit = Array.from(groupedAlertsWithCases.values()).filter(
+    const [casesUnderAlertLimit, casesOverAlertLimit] = partition(
+      Array.from(groupedAlertsWithCases.values()),
       ({ theCase, alerts }) => theCase.totalAlerts + alerts.length <= MAX_ALERTS_PER_CASE
     );
+
+    if (casesOverAlertLimit.length > 0) {
+      const ids = casesOverAlertLimit.map(({ theCase }) => theCase.id);
+      const totalAlerts = casesOverAlertLimit.map(({ alerts }) => alerts.length).flat().length;
+
+      this.logger.warn(
+        `Cases with ids "${ids.join(
+          ','
+        )}" contain more than ${MAX_ALERTS_PER_CASE} alerts. The new alerts will not be attached to the cases. Total new alerts: ${totalAlerts}`,
+        this.getLogMetadata(params)
+      );
+    }
 
     this.logger.debug(
       `[CasesConnector][CasesConnectorExecutor][attachAlertsToCases] Attaching alerts to ${casesUnderAlertLimit.length} cases that do not have reach the alert limit per case`,
@@ -980,5 +989,12 @@ export class CasesConnectorExecutor {
     );
 
     throw new CasesConnectorError(message, firstError.statusCode);
+  }
+
+  private getLogMetadata(
+    params: CasesConnectorRunParams,
+    { extraTags = [] }: { extraTags?: string[] } = {}
+  ) {
+    return { tags: [...extraTags, `rule:${params.rule.id}`] };
   }
 }
