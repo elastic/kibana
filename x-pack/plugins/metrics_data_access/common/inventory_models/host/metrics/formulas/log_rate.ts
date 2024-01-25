@@ -6,18 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
+import type { LensBaseLayer } from '@kbn/lens-embeddable-utils/config_builder';
 
-export const logRate: FormulaValueConfig = {
+export const logRate: LensBaseLayer = {
   label: i18n.translate('xpack.metricsData.assetDetails.formulas.logRate', {
     defaultMessage: 'Log Rate',
   }),
   value: 'differences(cumulative_sum(count()))',
-  format: {
-    id: 'number',
-    params: {
-      decimals: 0,
-    },
-  },
-  timeScale: 's',
+  format: 'number',
+  decimals: 0,
+  normalizeByUnit: 's',
 };
