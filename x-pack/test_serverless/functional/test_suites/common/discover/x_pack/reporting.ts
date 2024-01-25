@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        if (await PageObjects.share.isShareMenuOpen()) {
+        if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
         }
         await reportingAPI.teardownEcommerce();

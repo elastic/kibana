@@ -129,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('Embed code shows create short-url button', async () => {
         await PageObjects.share.openShareMenuItem('Embed');
         await PageObjects.share.createShortUrlExistOrFail();
-        if (await PageObjects.share.isShareMenuOpen()) {
+        if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
         }
       });
@@ -138,7 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.openShareMenuItem('Permalinks');
         await PageObjects.share.createShortUrlExistOrFail();
         // close menu if open
-        if (await PageObjects.share.isShareMenuOpen()) {
+        if (await PageObjects.share.isShareModalOpen()) {
           await PageObjects.share.closeShareModal();
         }
       });

@@ -16,12 +16,21 @@ export class SharePageObject extends FtrService {
     return await this.testSubjects.exists('shareContextMenu');
   }
 
+  async isShareModalOpen() {
+    return (
+      (await this.testSubjects.exists('link-modal')) ||
+      (await this.testSubjects.exists('embed-modal')) ||
+      (await this.testSubjects.exists('export-csv-modal')) ||
+      (await this.testSubjects.exists('export-image-modal'))
+    );
+  }
+
   async clickShareTopNavButton() {
     return this.testSubjects.click('shareTopNavButton');
   }
 
   async closeShareModal() {
-    if (await this.isShareMenuOpen()) {
+    if (await this.isShareModalOpen()) {
       return this.testSubjects.click('share.doneButton');
     }
   }
@@ -29,12 +38,15 @@ export class SharePageObject extends FtrService {
   async openShareMenuItem(itemTitle: string) {
     this.log.debug(`openShareMenuItem title:${itemTitle}`);
     const isShareMenuOpen = await this.isShareMenuOpen();
-    if (!isShareMenuOpen) {
+    const isShareModalOpen = await this.isShareModalOpen();
+    if (!isShareMenuOpen && !isShareModalOpen) {
+      await this.clickShareTopNavButton();
+    } else if (isShareModalOpen) {
+      await this.closeShareModal();
       await this.clickShareTopNavButton();
     } else {
       // there is no easy way to ensure the menu is at the top level
       // so just close the existing menu
-      await this.closeShareModal();
       // and then re-open the menu
       await this.clickShareTopNavButton();
     }
@@ -76,6 +88,7 @@ export class SharePageObject extends FtrService {
 
   async exportAsSavedObject() {
     await this.openPermaLinks();
-    return await this.testSubjects.click('exportAsSavedObject');
+    await this.testSubjects.click('exportAsSavedObject');
+    await this.testSubjects.click('copyShareUrlButton');
   }
 }

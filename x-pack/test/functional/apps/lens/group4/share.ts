@@ -120,7 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const csv = await PageObjects.lens.getCSVContent();
       expect(csv).to.be.ok();
       expect(Object.keys(csv!)).to.have.length(1);
-      if (await PageObjects.share.isShareMenuOpen()) {
+      if (await PageObjects.share.isShareModalOpen()) {
         await PageObjects.share.closeShareModal();
       }
     });
