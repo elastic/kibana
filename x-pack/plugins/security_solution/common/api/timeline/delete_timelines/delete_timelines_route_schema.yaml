@@ -33,6 +33,10 @@ paths:
                   type: array
                   items:
                     type: string
+                searchId:
+                  type: array
+                  items:
+                    type: string
       responses:
         200:
           description: Indicates the timeline was successfully deleted.

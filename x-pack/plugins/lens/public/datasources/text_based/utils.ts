@@ -12,7 +12,6 @@ import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
-  getAggregateQueryMode,
 } from '@kbn/es-query';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
@@ -88,7 +87,6 @@ export async function getStateFromAggregateQuery(
   // get the id of the dataview
   let dataViewId = indexPatternRefs.find((r) => r.title === indexPattern)?.id ?? '';
   let columnsFromQuery: DatatableColumn[] = [];
-  let allColumns: TextBasedLayerColumn[] = [];
   let timeFieldName;
   try {
     const dataView = await dataViews.create({
@@ -111,9 +109,7 @@ export async function getStateFromAggregateQuery(
     timeFieldName = dataView.timeFieldName;
     const table = await fetchDataFromAggregateQuery(query, dataView, data, expressions);
     columnsFromQuery = table?.columns ?? [];
-    const language = getAggregateQueryMode(query);
-    addColumnsToCache(query[language], columnsFromQuery);
-    allColumns = getAllColumns(state.layers[newLayerId].allColumns, columnsFromQuery);
+    addColumnsToCache(query, columnsFromQuery);
   } catch (e) {
     errors.push(e);
   }
@@ -124,7 +120,6 @@ export async function getStateFromAggregateQuery(
         index: dataViewId,
         query,
         columns: state.layers[newLayerId].columns ?? [],
-        allColumns,
         timeField: timeFieldName,
         errors,
       },

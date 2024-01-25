@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
+import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
-import { CloudSamlSessionParams, CreateSamlSessionParams, LocalSamlSessionParams } from './types';
+import {
+  CloudSamlSessionParams,
+  CreateSamlSessionParams,
+  LocalSamlSessionParams,
+  UserProfile,
+} from './types';
 
 export class Session {
   readonly cookie;
@@ -68,11 +73,13 @@ const getCloudUrl = (hostname: string, pathname: string) => {
 
 const createCloudSession = async (params: CreateSamlSessionParams) => {
   const { hostname, email, password, log } = params;
-  const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
-  let sessionResponse: AxiosResponse;
-  try {
-    sessionResponse = await axios.request({
-      url: cloudLoginUrl,
+  // remove after ms-104 is released
+  const deprecatedLoginUrl = getCloudUrl(hostname, '/api/v1/users/_login');
+  const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
+  let sessionResponse: AxiosResponse | undefined;
+  const requestConfig = (cloudUrl: string) => {
+    return {
+      url: cloudUrl,
       method: 'post',
       data: {
         email,
@@ -84,17 +91,26 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
       },
       validateStatus: () => true,
       maxRedirects: 0,
-    });
+    };
+  };
+  try {
+    sessionResponse = await axios.request(requestConfig(deprecatedLoginUrl));
   } catch (ex) {
-    log.error('Failed to create the new cloud session');
-    cleanException(cloudLoginUrl, ex);
-    throw ex;
+    log.error(`Failed to create the new cloud session with 'POST ${deprecatedLoginUrl}'`);
+    // no error on purpose
   }
 
-  const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
-  const lastName = sessionResponse?.data?.user?.data?.last_name ?? '';
-  const firstLastNames = `${firstName} ${lastName}`.trim();
-  const fullname = firstLastNames.length > 0 ? firstLastNames : email;
+  if (!sessionResponse || sessionResponse?.status === 404) {
+    // Retrying with new cloud login endpoint
+    try {
+      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+    } catch (ex) {
+      log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
+      cleanException(cloudLoginUrl, ex);
+      throw ex;
+    }
+  }
+
   const token = sessionResponse?.data?.token as string;
   if (!token) {
     log.error(
@@ -104,7 +120,7 @@ const createCloudSession = async (params: CreateSamlSessionParams) => {
     );
     throw new Error(`Unable to create Cloud session, token is missing.`);
   }
-  return { token, fullname };
+  return token;
 };
 
 const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
@@ -202,14 +218,43 @@ const finishSAMLHandshake = async ({
   return cookie;
 };
 
+const getSecurityProfile = async ({
+  kbnHost,
+  cookie,
+  log,
+}: {
+  kbnHost: string;
+  cookie: Cookie;
+  log: ToolingLog;
+}) => {
+  let meResponse: AxiosResponse<UserProfile>;
+  const url = kbnHost + '/internal/security/me';
+  try {
+    meResponse = (await axios.get(url, {
+      headers: {
+        Cookie: cookie.cookieString(),
+        'x-elastic-internal-origin': 'Kibana',
+        'content-type': 'application/json',
+      },
+    })) as AxiosResponse<UserProfile>;
+  } catch (ex) {
+    log.error('Failed to fetch user profile data');
+    cleanException(url, ex);
+    throw ex;
+  }
+
+  return meResponse.data;
+};
+
 export const createCloudSAMLSession = async (params: CloudSamlSessionParams) => {
   const { email, password, kbnHost, kbnVersion, log } = params;
   const hostname = getCloudHostName();
-  const { token, fullname } = await createCloudSession({ hostname, email, password, log });
+  const token = await createCloudSession({ hostname, email, password, log });
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion, log);
   const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
-  return new Session(cookie, email, fullname);
+  const userProfile = await getSecurityProfile({ kbnHost, cookie, log });
+  return new Session(cookie, email, userProfile.full_name);
 };
 
 export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => {
@@ -217,7 +262,7 @@ export const createLocalSAMLSession = async (params: LocalSamlSessionParams) => 
   const samlResponse = await createMockedSAMLResponse({
     kibanaUrl: kbnHost + '/api/security/saml/callback',
     username,
-    fullname,
+    full_name: fullname,
     email,
     roles: [role],
   });
