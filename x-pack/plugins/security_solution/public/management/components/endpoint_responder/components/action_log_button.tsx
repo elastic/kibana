@@ -42,11 +42,11 @@ export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((p
         >
           <EuiFlyoutHeader hasBorder>
             <EuiTitle size="m">
-              <h1>{UX_MESSAGES.flyoutTitle(props.meta.endpoint.host.hostname)}</h1>
+              <h1>{UX_MESSAGES.flyoutTitle(props.meta.hostName)}</h1>
             </EuiTitle>
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
-            <ResponseActionsLog agentIds={props.meta.endpoint.agent.id} />
+            <ResponseActionsLog agentIds={props.meta.agentId} />
           </EuiFlyoutBody>
         </EuiFlyout>
       )}
