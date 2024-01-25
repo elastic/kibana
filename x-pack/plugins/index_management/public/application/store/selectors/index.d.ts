@@ -9,4 +9,4 @@ import { ExtensionsService } from '../../../services';
 
 export declare function setExtensionsService(extensionsService: ExtensionsService): any;
 
-export const getFilteredIndices: (state: any, props: any) => any;
+export const getFilteredIndices: (state: any) => any;

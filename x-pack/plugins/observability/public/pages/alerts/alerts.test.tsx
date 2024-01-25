@@ -60,7 +60,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   } as unknown as AppMountParameters,
   config: {
     unsafe: {
-      slo: { enabled: false },
       alertDetails: {
         apm: { enabled: false },
         metrics: { enabled: false },
