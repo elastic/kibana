@@ -36,6 +36,7 @@ import {
   hasWildcard,
   hasCCSSource,
   isSettingItem,
+  isAssignment,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -222,15 +223,25 @@ function validateFunction(
   astFunction: ESQLFunction,
   parentCommand: string,
   parentOption: string | undefined,
-  references: ReferenceMaps
+  references: ReferenceMaps,
+  isNested?: boolean
 ): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
   if (astFunction.incomplete) {
     return messages;
   }
+  const fnDefinition = getFunctionDefinition(astFunction.name)!;
+  const supportNestedFunctions =
+    fnDefinition?.signatures.some(({ params }) =>
+      params.some(({ noNestingFunctions }) => !noNestingFunctions)
+    ) || true;
 
-  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
+  const isFnSupported = isSupportedFunction(
+    astFunction.name,
+    isNested && !supportNestedFunctions ? 'eval' : parentCommand,
+    parentOption
+  );
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -244,7 +255,8 @@ function validateFunction(
         })
       );
     }
-    if (isFnSupported.reason === 'unsupportedFunction') {
+    // for nested functions skip this check and make the nested check fail later on
+    if (isFnSupported.reason === 'unsupportedFunction' && !isNested) {
       messages.push(
         parentOption
           ? getMessageFromId({
@@ -263,9 +275,10 @@ function validateFunction(
             })
       );
     }
-    return messages;
+    if (messages.length) {
+      return messages;
+    }
   }
-  const fnDefinition = getFunctionDefinition(astFunction.name)!;
   const matchingSignatures = fnDefinition.signatures.filter((def) => {
     if (def.infiniteParams && astFunction.args.length > 0) {
       return true;
@@ -297,7 +310,15 @@ function validateFunction(
     const wrappedArray = Array.isArray(arg) ? arg : [arg];
     for (const subArg of wrappedArray) {
       if (isFunctionItem(subArg)) {
-        messages.push(...validateFunction(subArg, parentCommand, parentOption, references));
+        messages.push(
+          ...validateFunction(
+            subArg,
+            parentCommand,
+            parentOption,
+            references,
+            isNested || !isAssignment(astFunction)
+          )
+        );
       }
     }
   }
@@ -322,6 +343,7 @@ function validateFunction(
         // few lines above
         return;
       }
+      // if the arg is an array of values, check each element
       if (Array.isArray(outerArg) && isArrayType(argDef.type)) {
         const extractedType = extractSingleType(argDef.type);
         const everyArgInListMessages = outerArg
