@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -89,7 +89,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearchesRequests,
       setQuery,
       expectedRequests = 2,
-      expectedRefreshRequest = expectedRequests,
     }: {
       type: 'ese' | 'esql';
       savedSearch: string;
@@ -247,7 +246,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         savedSearchesRequests: 2,
         setQuery: (query) => monacoEditor.setCodeEditorValue(query),
         expectedRequests: 1,
-        expectedRefreshRequest: 2,
       });
 
       it(`should send 2 requests (documents + chart) when toggling the chart visibility`, async () => {
