@@ -104,7 +104,7 @@ function useQueryCoordinates({
               },
               {
                 range: {
-                  'numeric_labels.x': {
+                  'numeric_labels.width': {
                     gte: minWidth,
                     lte: maxWidth,
                   },
