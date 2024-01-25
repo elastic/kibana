@@ -21,8 +21,10 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { AlertActionsProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { useRouteMatch } from 'react-router-dom';
+import { SLO_ALERTS_TABLE_ID } from '../../slo_details/components/slo_detail_alerts';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import { paths } from '../../../../common/locators/paths';
+import { paths, SLO_DETAIL_PATH } from '../../../../common/locators/paths';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { parseAlert } from '../helpers/parse_alert';
@@ -40,7 +42,10 @@ export function AlertActions({
   observabilityRuleTypeRegistry,
   ...customActionsProps
 }: ObservabilityAlertActionsProps) {
-  const { alert, refresh } = customActionsProps;
+  const { alert, refresh, id } = customActionsProps;
+  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
+
+  const isInApp = Boolean(id === SLO_ALERTS_TABLE_ID && isSLODetailsPage);
   const {
     cases: {
       helpers: { getRuleIdFromEvent, canUseCases },
@@ -183,7 +188,7 @@ export function AlertActions({
 
   return (
     <>
-      {viewInAppUrl ? (
+      {viewInAppUrl && !isInApp ? (
         <EuiFlexItem>
           <EuiToolTip
             content={i18n.translate('xpack.observability.alertsTable.viewInAppTextLabel', {
@@ -202,11 +207,13 @@ export function AlertActions({
             />
           </EuiToolTip>
         </EuiFlexItem>
-      ) : (
-        <EuiFlexItem style={{ width: 32 }} />
-      )}
+      ) : null}
 
-      <EuiFlexItem>
+      <EuiFlexItem
+        css={{
+          textAlign: 'center',
+        }}
+      >
         <EuiPopover
           anchorPosition="downLeft"
           button={

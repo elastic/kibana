@@ -12,6 +12,7 @@ import { DataQualityProvider } from '../data_quality_panel/data_quality_context'
 import { mockStatsGreenIndex } from '../mock/stats/mock_stats_green_index';
 import { ERROR_LOADING_STATS } from '../translations';
 import { useStats, UseStats } from '.';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const mockHttpFetch = jest.fn();
 const mockReportDataQualityIndexChecked = jest.fn();
@@ -20,12 +21,14 @@ const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
 };
+const { toasts } = notificationServiceMock.createSetupContract();
 
 const ContextWrapper: React.FC = ({ children }) => (
   <DataQualityProvider
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
+    toasts={toasts}
   >
     {children}
   </DataQualityProvider>
@@ -36,6 +39,7 @@ const ContextWrapperILMNotAvailable: React.FC = ({ children }) => (
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={false}
+    toasts={toasts}
   >
     {children}
   </DataQualityProvider>
