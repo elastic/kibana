@@ -47,7 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 60000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 60000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await alertingApi.waitForDocumentInIndex({ indexName: DATA_VIEW, docCountTarget: 60 });
@@ -101,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 5,
+                timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: Aggregators.COUNT }],
               },
@@ -193,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 comparator: Comparator.OUTSIDE_RANGE,
                 threshold: [1, 2],
-                timeSize: 5,
+                timeSize: 1,
                 timeUnit: 'm',
                 metrics: [{ name: 'A', filter: '', aggType: 'count' }],
               },

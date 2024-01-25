@@ -70,7 +70,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       logger.info(JSON.stringify(dataForgeIndices.join(',')));
