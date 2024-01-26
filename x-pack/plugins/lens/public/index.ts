@@ -7,9 +7,7 @@
 
 import { LensPlugin } from './plugin';
 
-export {
-  apiHasLensConfig,
-} from './embeddable/interfaces/has_lens_config';
+export { apiHasLensConfig } from './embeddable/interfaces/has_lens_config';
 export type {
   EmbeddableComponentProps,
   EmbeddableComponent,
