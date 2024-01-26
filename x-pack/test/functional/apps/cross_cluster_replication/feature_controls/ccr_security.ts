@@ -60,7 +60,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should render the "Data" section with CCR', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(4);
+        expect(sections).to.have.length(3);
         expect(sections[1]).to.eql({
           sectionId: 'data',
           sectionLinks: [

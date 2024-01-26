@@ -29,9 +29,21 @@ export const KibanaSettingsApplication = ({
   theme,
   history,
   sectionRegistry,
+  application,
+  chrome,
 }: SettingsApplicationKibanaDependencies) => (
   <SettingsApplicationKibanaProvider
-    {...{ settings, theme, i18n, notifications, docLinks, history, sectionRegistry }}
+    {...{
+      settings,
+      theme,
+      i18n,
+      notifications,
+      docLinks,
+      history,
+      sectionRegistry,
+      application,
+      chrome,
+    }}
   >
     <SettingsApplication />
   </SettingsApplicationKibanaProvider>

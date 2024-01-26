@@ -16,6 +16,7 @@ import {
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplication as Component } from '../application';
 import { SettingsApplicationProvider } from '../services';
 
@@ -46,6 +47,8 @@ const getSettingsApplicationStory = ({ hasGlobalSettings }: StoryProps) => (
     getSections={() => []}
     // @ts-ignore
     getToastsService={() => null}
+    getCapabilities={getSettingsCapabilitiesMock}
+    setBadge={() => {}}
     isCustomSetting={() => false}
     isOverriddenSetting={() => false}
     saveChanges={action('saveChanges')}

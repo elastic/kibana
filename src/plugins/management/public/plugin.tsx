@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -25,9 +23,6 @@ import {
   AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
-import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { withSuspense } from '@kbn/shared-ux-utility';
-import { SectionRegistry } from '@kbn/management-settings-section-registry';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
@@ -47,14 +42,6 @@ interface ManagementStartDependencies {
   share: SharePluginStart;
   serverless?: ServerlessPluginStart;
 }
-
-const { setup: sectionRegistrySetup, start: sectionRegistryStart } = new SectionRegistry();
-
-const LazyKibanaSettingsApplication = React.lazy(async () => ({
-  default: (await import('@kbn/management-settings-application')).KibanaSettingsApplication,
-}));
-
-const KibanaSettingsApplication = withSuspense(LazyKibanaSettingsApplication);
 
 export class ManagementPlugin
   implements
@@ -161,7 +148,6 @@ export class ManagementPlugin
     return {
       sections: this.managementSections.setup(),
       locator,
-      settingsSectionRegistry: sectionRegistrySetup,
     };
   }
 
@@ -179,31 +165,6 @@ export class ManagementPlugin
         };
       });
     }
-
-    const title = kbnI18n.translate('management.settings.settingsLabel', {
-      defaultMessage: 'Advanced Settings',
-    });
-
-    this.managementSections.definedSections.kibana.registerApp({
-      id: 'settings',
-      title,
-      order: 3,
-      async mount({ element, setBreadcrumbs, history }) {
-        setBreadcrumbs([{ text: title }]);
-
-        ReactDOM.render(
-          <KibanaRenderContextProvider {...core}>
-            <KibanaSettingsApplication
-              {...{ ...core, history, sectionRegistry: sectionRegistryStart }}
-            />
-          </KibanaRenderContextProvider>,
-          element
-        );
-        return () => {
-          ReactDOM.unmountComponentAtNode(element);
-        };
-      },
-    });
 
     return {
       setIsSidebarEnabled: (isSidebarEnabled: boolean) =>

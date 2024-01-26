@@ -3093,6 +3093,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/advanced-settings-plugin@link:src/plugins/advanced_settings":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ai-assistant-management-observability-plugin@link:src/plugins/ai_assistant_management/observability":
   version "0.0.0"
   uid ""

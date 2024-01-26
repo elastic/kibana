@@ -13,6 +13,7 @@
     "@kbn/core",
     "@kbn/usage-collection-plugin",
     "@kbn/telemetry-plugin",
+    "@kbn/advanced-settings-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
     "@kbn/i18n",
@@ -22,7 +23,6 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-components-field-row",
     "@kbn/core-ui-settings-browser",
-    "@kbn/management-plugin",
   ],
   "exclude": [
     "target/**/*",

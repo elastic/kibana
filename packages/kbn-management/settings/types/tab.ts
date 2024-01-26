@@ -18,5 +18,6 @@ export interface SettingsTabs {
     callOutTitle: string;
     callOutText: string;
     sections: RegistryEntry[];
+    isSavingEnabled: boolean;
   };
 }

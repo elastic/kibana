@@ -22,6 +22,12 @@ NOTE:
 |Description
 
 
+|{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
+|This plugin contains the advanced settings management section
+allowing users to configure their advanced settings, also known
+as uiSettings within the code.
+
+
 |{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/observability/README.md[aiAssistantManagementObservability]
 |The aiAssistantManagementObservability plugin manages the Ai Assistant for Observability management section.
 
