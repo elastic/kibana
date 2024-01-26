@@ -8,7 +8,6 @@
 
 import Path from 'path';
 import Fsp from 'fs/promises';
-import { coerce } from 'semver';
 
 import { run } from './spawn.mjs';
 import * as Color from './colors.mjs';
@@ -143,6 +142,20 @@ export async function cleanDiskCache(log) {
 }
 
 /**
+ * @param {string | undefined} version
+ */
+function isYarnV1(version) {
+  if (!version) {
+    return false;
+  }
+
+  // yarn version can be semver so trim any special characters
+  const majorVersion = version.replace(/[/^>=<~*]/, '').split('.')[0];
+
+  return parseInt(majorVersion) < 2;
+}
+
+/**
  * @param {import('./log.mjs').Log} log
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
@@ -150,11 +163,12 @@ export async function installYarnDeps(log, opts = undefined) {
   const path = Path.resolve(REPO_ROOT, 'package.json');
   /** @type {import('@kbn/repo-info').KibanaPackageJson} */
   const pkgJson = JSON.parse(await Fsp.readFile(path, 'utf8'));
-  const yarnVersion = coerce(pkgJson.engines?.yarn);
   const sharpVersion = pkgJson.devDependencies?.sharp;
+  const yarnVersion = pkgJson.engines?.yarn;
 
   // yarn v1 requires --ignore-engines flag for sharp to be installed cross-platform
-  if (yarnVersion && yarnVersion?.major < 2 && sharpVersion) {
+  if (isYarnV1(yarnVersion) && sharpVersion) {
+    log.debug('installing sharp for all platforms due to yarn v1');
     await run('yarn', ['add', `sharp@${sharpVersion}`, '--ignore-engines']);
     log.success('sharp installed with --ignore-engines');
   }
