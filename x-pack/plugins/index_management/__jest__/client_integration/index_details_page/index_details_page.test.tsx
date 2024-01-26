@@ -227,6 +227,13 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual(testIndexName);
   });
 
+  it('changes the tab when its header is clicked', async () => {
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+    expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
+  });
+
   describe('Overview tab', () => {
     it('updates the breadcrumbs to index details overview', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
