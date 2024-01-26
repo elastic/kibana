@@ -40,12 +40,13 @@ export type SentinelOneActionsClientOptions = ResponseActionsClientOptions & {
 export class SentinelOneActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'sentinel_one';
   private readonly connectorActionsClient: ActionsClient;
+  private readonly username: string;
   private readonly getConnector: () => Promise<ConnectorWithExtraFindData>;
 
-  constructor({ connectorActions, username, ...options }: SentinelOneActionsClientOptions) {
+  constructor({ connectorActions, ...options }: SentinelOneActionsClientOptions) {
     super(options);
     this.connectorActionsClient = connectorActions;
-    this.username = username;
+    this.username = options.username;
 
     this.getConnector = once(async () => {
       let connectorList: ConnectorWithExtraFindData[] = [];
