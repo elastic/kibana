@@ -68,7 +68,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.restoreDefaults();
     });
 
-    describe.only('create and edit', async () => {
+    describe('create and edit', async () => {
       it('can create a new range slider control from a blank state', async () => {
         await dashboardControls.createControl({
           controlType: RANGE_SLIDER_CONTROL,
