@@ -73,7 +73,7 @@ describe('Get API Keys route', () => {
     });
   });
 
-  it('should substitute an empty string for keys with `null` names', async () => {
+  it('should substitute the API key id for keys with `null` names', async () => {
     esClientMock.asCurrentUser.security.getApiKey.mockRestore();
     esClientMock.asCurrentUser.security.getApiKey.mockResponse({
       api_keys: [
