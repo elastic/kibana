@@ -189,6 +189,7 @@ export function useFetchAgentsData() {
           );
 
           const managedAgentPolicies = managedAgentPoliciesResponse.data?.items ?? [];
+
           if (managedAgentPolicies.length === 0) {
             setTotalManagedAgentIds([]);
             setManagedAgentsOnCurrentPage(0);
