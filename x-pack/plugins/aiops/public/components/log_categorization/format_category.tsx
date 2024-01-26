@@ -48,7 +48,7 @@ const useStyles = (): Styles => {
       };
 };
 
-const useCreateFormattedExample = () => {
+export const useCreateFormattedExample = () => {
   const { tokenStyle, wildcardStyle } = useStyles();
 
   function createFormattedExample(key: string, example: string): JSX.Element[] {
