@@ -10,11 +10,8 @@ import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
 import type { State } from '../../../common/store/types';
-import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
-import type { inputsModel } from '../../../common/store/inputs';
 import type { PinnedEventResponse } from '../../../../common/api/timeline';
 import {
   pinEvent,
@@ -25,6 +22,7 @@ import {
   showCallOutUnauthorizedMsg,
 } from '../actions';
 import { persistPinnedEvent } from '../../containers/pinned_event/api';
+import { refreshTimelines } from './helpers';
 
 type PinnedEventAction = ReturnType<typeof pinEvent | typeof unPinEvent>;
 
@@ -60,14 +58,7 @@ export const addPinnedEventToTimelineMiddleware: (kibana: CoreStart) => Middlewa
           store.dispatch(showCallOutUnauthorizedMsg());
         }
 
-        // TODO: move this into a helper
-        const allTimelineQuery = inputsSelectors.globalQueryByIdSelector()(
-          store.getState(),
-          ALL_TIMELINE_QUERY_ID
-        );
-        if (allTimelineQuery.refetch != null) {
-          (allTimelineQuery.refetch as inputsModel.Refetch)();
-        }
+        refreshTimelines(store.getState());
 
         // The response is null in case we unpinned an event.
         // In that case we want to remove the locally pinned event.

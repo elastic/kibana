@@ -10,7 +10,6 @@ import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 
 import type { State } from '../../../common/store/types';
-import { inputsSelectors } from '../../../common/store/inputs';
 import {
   endTimelineSaving,
   updateIsFavorite,
@@ -22,9 +21,8 @@ import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 import { selectTimelineById } from '../selectors';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-import type { inputsModel } from '../../../common/store/inputs';
 import * as i18n from '../../pages/translations';
+import { refreshTimelines } from './helpers';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
 
@@ -57,14 +55,7 @@ export const favoriteTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, S
           store.dispatch(showCallOutUnauthorizedMsg());
         }
 
-        // TODO: move this into a helper
-        const allTimelineQuery = inputsSelectors.globalQueryByIdSelector()(
-          store.getState(),
-          ALL_TIMELINE_QUERY_ID
-        );
-        if (allTimelineQuery.refetch != null) {
-          (allTimelineQuery.refetch as inputsModel.Refetch)();
-        }
+        refreshTimelines(store.getState());
 
         store.dispatch(
           updateTimeline({

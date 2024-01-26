@@ -31,7 +31,6 @@ import { copyTimeline, persistTimeline } from '../../containers/api';
 import type { State } from '../../../common/store/types';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
 import * as i18n from '../../pages/translations';
 import type { inputsModel } from '../../../common/store/inputs';
 import { TimelineStatus, TimelineType } from '../../../../common/api/timeline';
@@ -39,6 +38,7 @@ import type { TimelineErrorResponse, TimelineResponse } from '../../../../common
 import type { TimelineInput } from '../../../../common/search_strategy';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
+import { refreshTimelines } from './helpers';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -118,14 +118,7 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
           return;
         }
 
-        // TODO: move this into a helper
-        const allTimelineQuery = inputsSelectors.globalQueryByIdSelector()(
-          store.getState(),
-          ALL_TIMELINE_QUERY_ID
-        );
-        if (allTimelineQuery.refetch != null) {
-          (allTimelineQuery.refetch as inputsModel.Refetch)();
-        }
+        refreshTimelines(store.getState());
 
         store.dispatch(
           updateTimeline({

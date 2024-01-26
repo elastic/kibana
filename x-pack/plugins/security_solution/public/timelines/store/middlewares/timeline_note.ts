@@ -12,7 +12,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { appSelectors } from '../../../common/store/app';
 import type { NotesById } from '../../../common/store/app/model';
 import type { State } from '../../../common/store/types';
-import { inputsSelectors } from '../../../common/store/inputs';
 import { updateNote } from '../../../common/store/app/actions';
 import {
   addNote,
@@ -24,9 +23,8 @@ import {
 import { persistNote } from '../../containers/notes/api';
 import type { ResponseNote } from '../../../../common/api/timeline';
 import { selectTimelineById } from '../selectors';
-import { ALL_TIMELINE_QUERY_ID } from '../../containers/all';
-import type { inputsModel } from '../../../common/store/inputs';
 import * as i18n from '../../pages/translations';
+import { refreshTimelines } from './helpers';
 
 type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
@@ -64,14 +62,7 @@ export const addNoteToTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, 
           store.dispatch(showCallOutUnauthorizedMsg());
         }
 
-        // TODO: move this into a helper
-        const allTimelineQuery = inputsSelectors.globalQueryByIdSelector()(
-          store.getState(),
-          ALL_TIMELINE_QUERY_ID
-        );
-        if (allTimelineQuery.refetch != null) {
-          (allTimelineQuery.refetch as inputsModel.Refetch)();
-        }
+        refreshTimelines(store.getState());
 
         store.dispatch(
           updateNote({
