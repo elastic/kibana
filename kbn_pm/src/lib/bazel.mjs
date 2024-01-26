@@ -8,6 +8,7 @@
 
 import Path from 'path';
 import Fsp from 'fs/promises';
+import { coerce } from 'semver';
 
 import { run } from './spawn.mjs';
 import * as Color from './colors.mjs';
@@ -146,6 +147,18 @@ export async function cleanDiskCache(log) {
  * @param {{ offline?: boolean, quiet?: boolean } | undefined} opts
  */
 export async function installYarnDeps(log, opts = undefined) {
+  const path = Path.resolve(REPO_ROOT, 'package.json');
+  /** @type {import('@kbn/repo-info').KibanaPackageJson} */
+  const pkgJson = JSON.parse(await Fsp.readFile(path, 'utf8'));
+  const yarnVersion = coerce(pkgJson.engines?.yarn);
+  const sharpVersion = pkgJson.devDependencies?.sharp;
+
+  // yarn v1 requires --ignore-engines flag for sharp to be installed cross-platform
+  if (yarnVersion && yarnVersion?.major < 2 && sharpVersion) {
+    await run('yarn', ['add', `sharp@${sharpVersion}`, '--ignore-engines']);
+    log.success('sharp installed with --ignore-engines');
+  }
+
   await runBazel(log, ['run', '@nodejs//:yarn'], {
     offline: opts?.offline,
     quiet: opts?.quiet,
