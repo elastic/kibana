@@ -36,13 +36,12 @@ const MyLazyComponentWithFallback = dynamic(() => import('./MyLazyComponent'), {
 
 ### Named Exports
 
-If you have named exports in your dynamically loaded module, you can explicitly specify the exported component type using generics.
+If you have named exports in your dynamically loaded module, you can extract them returning an object with the `.default` property.
 
 ```tsx
 import { dynamic } from '@kbn/shared-ux-utility';
-import { MobileHeader, MobileHeaderProps } from './components/header';
 
-const LazyMobileHeader = dynamic<MobileHeaderProps>(() => import('./components/header').then(mod => ({ default: mod.MobileHeader })));
+const LazyMobileHeader = dynamic(() => import('./components/header').then(mod => ({ default: mod.MobileHeader })));
 
 // Usage in JSX
 <LazyMobileHeader />
@@ -50,7 +49,7 @@ const LazyMobileHeader = dynamic<MobileHeaderProps>(() => import('./components/h
 
 ## API Reference
 
-### dynamic<TProps = {}, TRef = {}>(loader: Loader<TProps>, options?: DynamicOptions): React.ComponentType<TProps>
+### dynamic<TElement extends React.ComponentType<any>, TRef = {}>(loader: Loader<TElement>, options?: DynamicOptions): React.ComponentType<TProps>
 
 - `loader`: A function that returns a `Promise` resolving to an object with a `default` property, which is the component to be lazily loaded.
 - `options`: Optional configuration object with the following property:

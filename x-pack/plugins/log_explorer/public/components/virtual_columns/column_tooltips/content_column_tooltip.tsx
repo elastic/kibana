@@ -9,7 +9,6 @@ import { EuiText, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { css } from '@emotion/react';
-import { dynamic } from '@kbn/shared-ux-utility';
 import {
   contentHeaderTooltipParagraph1,
   contentHeaderTooltipParagraph2,
