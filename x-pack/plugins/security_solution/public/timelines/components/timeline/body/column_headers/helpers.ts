@@ -64,3 +64,14 @@ export const getColumnHeader = (
   initialWidth: DEFAULT_COLUMN_MIN_WIDTH,
   ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
 });
+
+
+
+export const getUnifiedDataTableColumnHeader = (
+  fieldName: string,
+  defaultHeaders: ColumnHeaderOptions[]
+): ColumnHeaderOptions => ({
+  columnHeaderType: defaultColumnHeaderType,
+  id: fieldName,
+  ...(defaultHeaders.find((c) => c.id === fieldName) ?? {}),
+});

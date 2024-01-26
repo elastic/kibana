@@ -88,10 +88,17 @@ export const getFormattedFields = ({
       obj: Record<string, (props: EuiDataGridCellValueElementProps) => React.ReactNode>,
       field: string
     ) => {
-      obj[field] = FieldValueCell({ unifiedDataTableRows, scopeId, browserFieldsByName, closeCellPopover });
+      obj[field] = FieldValueCell({
+        data: [],
+        ecsData: [],
+        pageSize: 0,
+        unifiedDataTableRows,
+        scopeId,
+        browserFieldsByName,
+        closeCellPopover,
+      });
       return obj;
     },
     {}
   );
 };
-

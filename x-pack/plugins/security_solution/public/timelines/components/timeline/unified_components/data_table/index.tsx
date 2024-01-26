@@ -40,11 +40,11 @@ import { useSourcererDataView } from '../../../../../common/containers/sourcerer
 import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../../side_panel';
 import { SecurityCellActionsTrigger } from '../../../../../actions/constants';
-import { getColumnHeaderUnified } from '../../body/column_headers/helpers';
-import { getFormattedFields } from '../../body/renderers/unified_components/formatted_field';
+import { getUnifiedDataTableColumnHeader } from '../../body/column_headers/helpers';
+import { getFormattedFields } from '../../body/renderers/get_formatted_fields';
 import { timelineBodySelector } from '../../body/selectors';
 import ToolbarAdditionalControls from './toolbar_additional_controls';
-import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from './styles';
+import { StyledTimelineUnifiedDataTable, StyledEuiProgress } from '../styles';
 import CustomGridBodyControls from './render_custom_body';
 import { timelineDefaults } from '../../../../store/defaults';
 import { timelineActions } from '../../../../store';
@@ -234,7 +234,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
         setCustomGridBodyProps,
       }: EuiDataGridCustomBodyProps) => (
         <CustomGridBodyControls
-          tableRows={tableRows}
+          unifiedDataTableRows={tableRows}
           Cell={Cell}
           visibleColumns={visibleColumns}
           visibleRowData={visibleRowData}
@@ -344,7 +344,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           onSort(newState.sort);
         } else {
           const columnsStates = newState.columns.map((columnId) =>
-            getColumnHeaderUnified(columnId, defaultHeaders)
+            getUnifiedDataTableColumnHeader(columnId, defaultHeaders)
           );
           dispatch(timelineActions.updateColumns({ id: timelineId, columns: columnsStates }));
         }
@@ -397,7 +397,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const customColumnRenderers = useMemo(
       () =>
         getFormattedFields({
-          dataTableRows: tableRows,
+          unifiedDataTableRows: tableRows,
           scopeId: 'timeline',
           headers: columns,
           browserFieldsByName,
@@ -455,6 +455,8 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       dataViewFieldEditor,
       dataPluginContract,
     ]);
+
+    console.log("TABLE ROWS: ", tableRows, dataView);
 
     if (!dataView) {
       return null;
