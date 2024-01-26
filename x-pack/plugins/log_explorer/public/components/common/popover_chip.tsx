@@ -11,7 +11,6 @@ import {
   type EuiBadgeProps,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiPopover,
   useEuiFontSize,
   EuiPopoverFooter,
@@ -39,7 +38,7 @@ interface ChipWithPopoverProps {
    */
   text: string;
   dataTestSubj?: string;
-  leftSideIcon?: EuiBadgeProps['iconType'];
+  leftSideIcon?: React.ReactNode;
   rightSideIcon?: EuiBadgeProps['iconType'];
   borderColor?: string | null;
   style?: React.CSSProperties;
@@ -79,15 +78,12 @@ export function ChipWithPopover({
         font-size: ${xsFontSize};
         display: flex;
         justify-content: center;
+        margin-top: -3px;
       `}
       style={style}
     >
       <EuiFlexGroup gutterSize="xs">
-        {leftSideIcon && (
-          <EuiFlexItem>
-            <EuiIcon type={leftSideIcon} />
-          </EuiFlexItem>
-        )}
+        {leftSideIcon && <EuiFlexItem>{leftSideIcon}</EuiFlexItem>}
         <EuiFlexItem>{text}</EuiFlexItem>
       </EuiFlexGroup>
     </EuiBadge>
