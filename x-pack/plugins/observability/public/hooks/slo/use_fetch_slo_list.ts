@@ -10,6 +10,7 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { SearchState } from '../../pages/slos/hooks/use_url_search_state';
 import { useCreateDataView } from '../use_create_data_view';
 import {
   DEFAULT_SLO_PAGE_SIZE,
@@ -27,6 +28,7 @@ interface SLOListParams {
   perPage?: number;
   filters?: Filter[];
   lastRefresh?: number;
+  tags?: SearchState['tags'];
 }
 
 export interface UseFetchSloListResponse {
@@ -46,6 +48,7 @@ export function useFetchSloList({
   perPage = DEFAULT_SLO_PAGE_SIZE,
   filters: filterDSL = [],
   lastRefresh,
+  tags,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -69,9 +72,13 @@ export function useFetchSloList({
     }
   }, [filterDSL, dataView]);
 
+  const kqlQueryValue = useMemo(() => {
+    return mixKqlWithTags(kqlQuery, tags);
+  }, [kqlQuery, tags]);
+
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({
-      kqlQuery,
+      kqlQuery: kqlQueryValue,
       page,
       perPage,
       sortBy,
@@ -82,7 +89,7 @@ export function useFetchSloList({
     queryFn: async ({ signal }) => {
       return await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
-          ...(kqlQuery && { kqlQuery }),
+          ...(kqlQueryValue && { kqlQuery: kqlQueryValue }),
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
           ...(page && { page }),
@@ -123,3 +130,28 @@ export function useFetchSloList({
     isError,
   };
 }
+
+const mixKqlWithTags = (kqlQuery: string, tags: SearchState['tags']) => {
+  if (!tags) {
+    return kqlQuery;
+  }
+  const tagsKqlIncluded = tags.included?.join(' or ') || '';
+  const excludedTagsKql = tags.excluded?.join(' or ') || '';
+
+  let tagsQuery = '';
+  if (tagsKqlIncluded && excludedTagsKql) {
+    tagsQuery = `slo.tags: (${excludedTagsKql}) and not slo.tags: (${tagsKqlIncluded})`;
+  }
+  if (!excludedTagsKql && tagsKqlIncluded) {
+    tagsQuery = `slo.tags: (${tagsKqlIncluded})`;
+  }
+  if (!tagsKqlIncluded && excludedTagsKql) {
+    tagsQuery = `not slo.tags: (${excludedTagsKql})`;
+  }
+
+  if (!kqlQuery) {
+    return tagsQuery;
+  }
+
+  return `${kqlQuery} and ${tagsQuery}`;
+};

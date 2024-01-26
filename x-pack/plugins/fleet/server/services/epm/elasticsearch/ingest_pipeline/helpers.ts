@@ -80,25 +80,30 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
     pipeline.dataStream?.routing_rules?.find(
       (rule) => rule.source_dataset === pipeline.dataStream?.dataset
     )?.rules ?? [];
+
   const customPipelineProcessors = [
     {
       pipeline: {
         name: 'global@custom',
         ignore_missing_pipeline: true,
+        description: '[Fleet] Global pipeline for all data streams',
       },
     },
     {
       pipeline: {
         name: `${pipeline.dataStream.type}@custom`,
         ignore_missing_pipeline: true,
+        description: `[Fleet] Pipeline for all data streams of type \`${pipeline.dataStream.type}\``,
       },
     },
     ...(pipeline.dataStream.package
       ? [
           {
             pipeline: {
-              name: `${pipeline.dataStream.type}-${pipeline.dataStream.package}@custom`,
+              // This pipeline name gets the `.integration` suffix to avoid conflicts with the pipeline name for the dataset below
+              name: `${pipeline.dataStream.type}-${pipeline.dataStream.package}.integration@custom`,
               ignore_missing_pipeline: true,
+              description: `[Fleet] Pipeline for all data streams of type \`${pipeline.dataStream.type}\` defined by the \`${pipeline.dataStream.package}\` integration`,
             },
           },
         ]
@@ -107,6 +112,7 @@ export function addCustomPipelineAndLocalRoutingRulesProcessor(
       pipeline: {
         name: `${pipeline.dataStream.type}-${pipeline.dataStream.dataset}@custom`,
         ignore_missing_pipeline: true,
+        description: `[Fleet] Pipeline for the \`${pipeline.dataStream.dataset}\` dataset`,
       },
     },
   ];
