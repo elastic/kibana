@@ -18,6 +18,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
+  const retry = getService('retry');
 
   // AIOps / Log Rate Analysis lives in the ML UI so we need some related services.
   const ml = getService('ml');
@@ -170,45 +171,50 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
+      await retry.tryForTime(30 * 1000, async () => {
+        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
+          // Enabled grouping
+          await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
+
+          await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
+
+          const analysisGroupsTable =
+            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+
+          const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
+          const expectedAnalysisGroupsTable = orderBy(
+            testData.expected.analysisGroupsTable,
+            'group'
+          );
+
+          expect(actualAnalysisGroupsTable).to.be.eql(
+            expectedAnalysisGroupsTable,
+            `Expected analysis groups table to be ${JSON.stringify(
+              expectedAnalysisGroupsTable
+            )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
+          );
+        }
+      });
+
       if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-        // Enabled grouping
-        await aiops.logRateAnalysisPage.clickLogRateAnalysisResultsGroupSwitchOn();
-
-        await aiops.logRateAnalysisResultsGroupsTable.assertLogRateAnalysisResultsTableExists();
-
-        const analysisGroupsTable =
-          await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
-
-        const actualAnalysisGroupsTable = orderBy(analysisGroupsTable, 'group');
-        const expectedAnalysisGroupsTable = orderBy(testData.expected.analysisGroupsTable, 'group');
-
-        expect(actualAnalysisGroupsTable).to.be.eql(
-          expectedAnalysisGroupsTable,
-          `Expected analysis groups table to be ${JSON.stringify(
-            expectedAnalysisGroupsTable
-          )}, got ${JSON.stringify(actualAnalysisGroupsTable)}`
-        );
-
         await ml.testExecution.logTestStep('expand table row');
         await aiops.logRateAnalysisResultsGroupsTable.assertExpandRowButtonExists();
         await aiops.logRateAnalysisResultsGroupsTable.expandRow();
 
-        if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-          const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
+        const analysisTable = await aiops.logRateAnalysisResultsTable.parseAnalysisTable();
 
-          const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
-          const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
-            'fieldName',
-            'fieldValue',
-          ]);
+        const actualAnalysisTable = orderBy(analysisTable, ['fieldName', 'fieldValue']);
+        const expectedAnalysisTable = orderBy(testData.expected.analysisTable, [
+          'fieldName',
+          'fieldValue',
+        ]);
 
-          expect(actualAnalysisTable).to.be.eql(
-            expectedAnalysisTable,
-            `Expected analysis table results to be ${JSON.stringify(
-              expectedAnalysisTable
-            )}, got ${JSON.stringify(actualAnalysisTable)}`
-          );
-        }
+        expect(actualAnalysisTable).to.be.eql(
+          expectedAnalysisTable,
+          `Expected analysis table results to be ${JSON.stringify(
+            expectedAnalysisTable
+          )}, got ${JSON.stringify(actualAnalysisTable)}`
+        );
 
         await ml.testExecution.logTestStep('open the field filter');
         await aiops.logRateAnalysisPage.assertFieldFilterPopoverButtonExists(false);
@@ -231,23 +237,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('regroup results');
           await aiops.logRateAnalysisPage.clickFieldFilterApplyButton();
 
-          if (!isTestDataExpectedWithSampleProbability(testData.expected)) {
-            const filteredAnalysisGroupsTable =
-              await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
+          const filteredAnalysisGroupsTable =
+            await aiops.logRateAnalysisResultsGroupsTable.parseAnalysisTable();
 
-            const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
-            const expectedFilteredAnalysisGroupsTable = orderBy(
-              testData.expected.filteredAnalysisGroupsTable,
-              'group'
-            );
+          const actualFilteredAnalysisGroupsTable = orderBy(filteredAnalysisGroupsTable, 'group');
+          const expectedFilteredAnalysisGroupsTable = orderBy(
+            testData.expected.filteredAnalysisGroupsTable,
+            'group'
+          );
 
-            expect(actualFilteredAnalysisGroupsTable).to.be.eql(
-              expectedFilteredAnalysisGroupsTable,
-              `Expected filtered analysis groups table to be ${JSON.stringify(
-                expectedFilteredAnalysisGroupsTable
-              )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
-            );
-          }
+          expect(actualFilteredAnalysisGroupsTable).to.be.eql(
+            expectedFilteredAnalysisGroupsTable,
+            `Expected filtered analysis groups table to be ${JSON.stringify(
+              expectedFilteredAnalysisGroupsTable
+            )}, got ${JSON.stringify(actualFilteredAnalysisGroupsTable)}`
+          );
         }
 
         if (testData.action !== undefined) {
