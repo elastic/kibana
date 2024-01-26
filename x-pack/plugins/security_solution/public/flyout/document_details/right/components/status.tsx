@@ -20,7 +20,7 @@ import { SIGNAL_STATUS_FIELD_NAME } from '../../../../timelines/components/timel
 import { StatusPopoverButton } from '../../../../common/components/event_details/overview/status_popover_button';
 import { useRightPanelContext } from '../context';
 import { getEnrichedFieldInfo } from '../../../../common/components/event_details/helpers';
-import { DocumentFlyoutCellActions } from '../../shared/components/document_flyout_cell_actions';
+import { CellActions } from './cell_actions';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 /**
@@ -71,11 +71,7 @@ export const DocumentStatus: FC = () => {
         {!statusData || !hasData(statusData) || isPreview ? (
           getEmptyTagValue()
         ) : (
-          <DocumentFlyoutCellActions
-            field={SIGNAL_STATUS_FIELD_NAME}
-            value={statusData.values[0]}
-            useContext={useRightPanelContext}
-          >
+          <CellActions field={SIGNAL_STATUS_FIELD_NAME} value={statusData.values[0]}>
             <StatusPopoverButton
               eventId={eventId}
               contextId={scopeId}
@@ -83,7 +79,7 @@ export const DocumentStatus: FC = () => {
               scopeId={scopeId}
               handleOnEventClosed={closeFlyout}
             />
-          </DocumentFlyoutCellActions>
+          </CellActions>
         )}
       </EuiFlexItem>
     </EuiFlexGroup>

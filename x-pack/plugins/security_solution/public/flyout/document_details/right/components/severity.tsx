@@ -9,7 +9,7 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { ALERT_SEVERITY } from '@kbn/rule-data-utils';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
-import { DocumentFlyoutCellActions } from '../../shared/components/document_flyout_cell_actions';
+import { CellActions } from './cell_actions';
 import { useRightPanelContext } from '../context';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
@@ -37,13 +37,9 @@ export const DocumentSeverity: FC = memo(() => {
   }
 
   return (
-    <DocumentFlyoutCellActions
-      field={ALERT_SEVERITY}
-      value={alertSeverity}
-      useContext={useRightPanelContext}
-    >
+    <CellActions field={ALERT_SEVERITY} value={alertSeverity}>
       <SeverityBadge value={alertSeverity} />
-    </DocumentFlyoutCellActions>
+    </CellActions>
   );
 });
 

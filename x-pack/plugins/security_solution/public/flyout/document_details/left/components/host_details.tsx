@@ -32,7 +32,7 @@ import { RiskScoreEntity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { DefaultFieldRenderer } from '../../../../timelines/components/field_renderers/field_renderers';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
-import { DocumentFlyoutCellActions } from '../../shared/components/document_flyout_cell_actions';
+import { CellActions } from './cell_actions';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { manageQuery } from '../../../../common/components/page/manage_query';
@@ -46,7 +46,6 @@ import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HOST_DETAILS_TEST_ID, HOST_DETAILS_RELATED_USERS_TABLE_TEST_ID } from './test_ids';
 import { ENTITY_RISK_LEVEL } from '../../../../entity_analytics/components/risk_score/translations';
 import { useHasSecurityCapability } from '../../../../helper_hooks';
-import { useLeftPanelContext } from '../context';
 
 const HOST_DETAILS_ID = 'entities-hosts-details';
 const RELATED_USERS_ID = 'entities-hosts-related-users';
@@ -131,13 +130,9 @@ export const HostDetails: React.FC<HostDetailsProps> = ({ hostName, timestamp, s
         ),
         render: (user: string) => (
           <EuiText grow={false} size="xs">
-            <DocumentFlyoutCellActions
-              field={'user.name'}
-              value={user}
-              useContext={useLeftPanelContext}
-            >
+            <CellActions field={'user.name'} value={user}>
               {user}
-            </DocumentFlyoutCellActions>
+            </CellActions>
           </EuiText>
         ),
       },

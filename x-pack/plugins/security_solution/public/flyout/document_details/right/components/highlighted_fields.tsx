@@ -14,7 +14,7 @@ import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlight
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { DocumentFlyoutCellActions } from '../../shared/components/document_flyout_cell_actions';
+import { CellActions } from './cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
@@ -77,17 +77,13 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
     }) => (
-      <DocumentFlyoutCellActions
-        field={description.field}
-        value={description.values}
-        useContext={useRightPanelContext}
-      >
+      <CellActions field={description.field} value={description.values}>
         <HighlightedFieldsCell
           values={description.values}
           field={description.field}
           originalField={description.originalField}
         />
-      </DocumentFlyoutCellActions>
+      </CellActions>
     ),
   },
 ];
