@@ -64,7 +64,7 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     fleetServerHosts,
     fleetServerHost,
     isFleetServerHostSubmitted,
-    saveFleetServerHost,
+    submitForm,
     error: fleetServerError,
     setFleetServerHost,
     validate,
@@ -87,15 +87,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       if ((!fleetServerHost && validate()) || fleetServerHost) {
         setStatus('loading');
 
-        const newFleetServerHost = {
-          name: inputs.nameInput.value,
-          host_urls: inputs.hostUrlsInput.value,
-          is_default: inputs.isDefaultInput.value,
-          is_preconfigured: false,
-        };
-
         if (!fleetServerHost) {
-          const res = await saveFleetServerHost(newFleetServerHost);
+          const res = await submitForm();
           setFleetServerHost(res);
         }
 
@@ -133,11 +126,8 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
   }, [
     validate,
     fleetServerHost,
-    inputs.nameInput.value,
-    inputs.hostUrlsInput.value,
-    inputs.isDefaultInput.value,
+    submitForm,
     setFleetServerHost,
-    saveFleetServerHost,
     generateServiceToken,
     setFleetServerPolicyId,
     notifications.toasts,
