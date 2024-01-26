@@ -130,11 +130,13 @@ export const RangeSliderControl: FC = () => {
       placeholder: string;
     }) => {
       return {
-        isInvalid,
+        isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
         className: `rangeSliderAnchor__fieldNumber ${
-          isInvalid ? 'rangeSliderAnchor__fieldNumber--invalid' : ''
+          isInvalid
+            ? 'rangeSliderAnchor__fieldNumber--invalid'
+            : 'rangeSliderAnchor__fieldNumber--valid'
         }`,
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,

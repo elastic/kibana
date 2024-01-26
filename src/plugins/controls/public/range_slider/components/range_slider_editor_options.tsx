@@ -19,7 +19,7 @@ export const RangeSliderEditorOptions = ({
   onChange,
   setControlEditorValid,
 }: ControlEditorProps<RangeSliderEmbeddableInput>) => {
-  const [step, setStep] = useState<number>(initialInput?.step ?? 1);
+  const [step, setStep] = useState<number>(initialInput?.step || 1);
 
   return (
     <>
