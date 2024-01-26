@@ -39,10 +39,6 @@ const createSetupContract = (): ManagementSetup => ({
       state: {},
     })),
   },
-  settingsSectionRegistry: {
-    addSpaceSection: jest.fn(),
-    addGlobalSection: jest.fn(),
-  },
 });
 
 const createStartContract = (): ManagementStart => ({
