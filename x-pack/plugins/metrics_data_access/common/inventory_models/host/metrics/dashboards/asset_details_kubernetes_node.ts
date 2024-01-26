@@ -4,21 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { LensXYConfigBase } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
-  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: XYVisualOptions = {
-      showDottedLine: true,
-      missingValues: 'Linear',
+  get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
+    const baseConfig: Partial<LensXYConfigBase> = {
+      fittingFunction: 'Linear',
+      axisTitleVisibility: {
+        showXAxisTitle: false,
+        showYAxisTitle: false,
+      },
       legend: {
-        isVisible: true,
+        show: true,
         position: 'bottom',
       },
+      ...(metricsDataViewId
+        ? {
+            dataset: {
+              index: metricsDataViewId,
+            },
+          }
+        : {}),
     };
 
     return createDashboardModel({
@@ -26,6 +35,7 @@ export const assetDetailsKubernetesNode = {
       charts: [
         {
           id: 'nodeCpuCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
             {
@@ -34,19 +44,17 @@ export const assetDetailsKubernetesNode = {
           ),
           layers: [
             {
-              data: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
             },
           ],
-          dataView: metricsDataView,
-          visualizationType: 'lnsXY',
-          visualOptions: commonVisualOptions,
+          ...baseConfig,
         },
         {
           id: 'nodeMemoryCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
             {
@@ -55,19 +63,17 @@ export const assetDetailsKubernetesNode = {
           ),
           layers: [
             {
-              data: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
             },
           ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          ...baseConfig,
         },
         {
           id: 'nodeDiskCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
             {
@@ -76,19 +82,17 @@ export const assetDetailsKubernetesNode = {
           ),
           layers: [
             {
-              data: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
             },
           ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          ...baseConfig,
         },
         {
           id: 'nodePodCapacity',
+          chartType: 'xy',
           title: i18n.translate(
             'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
             {
@@ -97,16 +101,13 @@ export const assetDetailsKubernetesNode = {
           ),
           layers: [
             {
-              data: [formulas.nodePodCapacity, formulas.nodePodUsed],
-              options: {
-                seriesType: 'area',
-              },
-              layerType: 'data',
+              seriesType: 'area',
+              type: 'series',
+              xAxis: '@timestamp',
+              yAxis: [formulas.nodePodCapacity, formulas.nodePodUsed],
             },
           ],
-          visualizationType: 'lnsXY',
-          dataView: metricsDataView,
-          visualOptions: commonVisualOptions,
+          ...baseConfig,
         },
       ],
     });

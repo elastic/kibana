@@ -22,7 +22,7 @@ export const openCustomizePanelFlyout = ({
   api: CustomizePanelActionApi;
 }) => {
   // send the overlay ref to the parent if it is capable of tracking overlays
-  const parent = api.parentApi?.value;
+  const parent = api.parentApi;
   const overlayTracker = tracksOverlays(parent) ? parent : undefined;
 
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
