@@ -9,10 +9,10 @@ import { EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../../../utils/kibana_react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import HeaderMenuPortal from './header_menu_portal';
-import { useLocation } from 'react-router';
 
 const SLO_FEEDBACK_LINK = 'https://ela.st/slo-feedback';
 
