@@ -82,10 +82,12 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-      let stateToSave: SavedDashboardInput = {
+
+      const lastSavedInput: DashboardContainerInput = {
         ...currentState,
         ...stateFromSaveModal,
       };
+      let stateToSave: SavedDashboardInput = lastSavedInput;
       let persistableControlGroupInput: PersistableControlGroupInput | undefined;
       if (this.controlGroup) {
         persistableControlGroupInput = this.controlGroup.getPersistableInput();
@@ -110,7 +112,7 @@ export function runSaveAs(this: DashboardContainer) {
       if (saveResult.id) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-          this.dispatch.setLastSavedInput(stateToSave);
+          this.dispatch.setLastSavedInput(lastSavedInput);
           if (this.controlGroup && persistableControlGroupInput) {
             this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
           }
