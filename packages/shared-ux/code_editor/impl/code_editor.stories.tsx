@@ -199,3 +199,21 @@ export const HoverProvider = () => {
     </div>
   );
 };
+
+export const StaleStateInOnChangeCallback = (params: CodeEditorStorybookParams) => {
+  const [value, setValue] = React.useState('');
+  return (
+    <CodeEditor
+      {...params}
+      languageId="plainText"
+      height={250}
+      onChange={(newValue) => {
+        console.log(`onChange, newValue: ${newValue}, oldValue: ${value}`);
+        setValue(newValue);
+      }}
+      value={value}
+    />
+  );
+};
+
+StaleStateInOnChangeCallback.argTypes = argTypes;
