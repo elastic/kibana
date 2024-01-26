@@ -78,6 +78,35 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
     },
 
+    // Collapsable sections
+    async metadataSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetadataSectionExpandButton');
+    },
+    async alertsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsSectionExpandButton');
+    },
+    async metricsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetricsSectionExpandButton');
+    },
+
+    async alertsSectionCollapsibleClick() {
+      return await testSubjects.click('infraAssetDetailsAlertsSectionExpandButton');
+    },
+
+    async alertsSectionClosedContentExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+    },
+    async alertsSectionClosedContentMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+    },
+
+    async alertsSectionClosedContentNoAlertsExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
+    },
+    async alertsSectionClosedContentNoAlertsMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
+    },
+
     // Metadata
     async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');

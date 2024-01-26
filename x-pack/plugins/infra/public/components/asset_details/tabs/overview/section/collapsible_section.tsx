@@ -58,13 +58,14 @@ export const CollapsibleSection = ({
       buttonElement="div"
       element="fieldset"
       buttonContent={<ButtonContent />}
+      buttonProps={{ 'data-test-subj': dataTestSubj }}
       paddingSize="s"
       initialIsOpen={true}
       extraAction={extraAction ?? undefined}
       forceState={trigger}
       onToggle={onToggle}
       data-section-state={trigger}
-      data-test-subj={dataTestSubj}
+      data-test-subj={`${dataTestSubj}Section`}
     >
       {children}
     </EuiAccordion>

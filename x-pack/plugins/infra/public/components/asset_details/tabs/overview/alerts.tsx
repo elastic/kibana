@@ -135,7 +135,7 @@ const MemoAlertSummaryWidget = React.memo(
         <FormattedMessage
           id="xpack.infra.assetDetails.noActiveAlertsContentClosedSection"
           defaultMessage="No active alerts"
-          data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts"
+          data-test-subj="infraAssetDetailsNoActiveAlerts"
         />
       );
     }

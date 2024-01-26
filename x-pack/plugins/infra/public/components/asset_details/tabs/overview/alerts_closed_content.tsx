@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiIcon, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { AlertsEsQuery } from '../../../../common/alerts/types';
 import { useAlertsCount } from '../../../../hooks/use_alerts_count';
 import { infraAlertFeatureIds } from '../../../../pages/metrics/hosts/components/tabs/config';
@@ -47,11 +46,11 @@ export const AlertsClosedContent = ({ alertsEsQuery }: { alertsEsQuery: AlertsEs
         })}
       </span>
     ) : (
-      <FormattedMessage
-        id="xpack.infra.assetDetails.noActiveAlertsContentClosedSection"
-        defaultMessage="No active alerts"
-        data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts"
-      />
+      <span data-test-subj="infraAssetDetailsAlertsClosedContentNoAlerts">
+        {i18n.translate('xpack.infra.assetDetails.noActiveAlertsContentClosedSection', {
+          defaultMessage: 'No active alerts',
+        })}
+      </span>
     )
   ) : null;
 };
