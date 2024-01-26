@@ -272,7 +272,9 @@ export const createStore = (
   // I'm not doing it in this PR, as this will have an impact on literally hundreds of test files.
   // A separate PR will be created to clean this up.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const kibana = (kibana$ as any).source._value.kibana;
+  const kibanaObsv = kibana$ as any;
+  const kibana =
+    'source' in kibanaObsv ? kibanaObsv.source._value.kibana : kibanaObsv._value.kibana;
 
   const middlewareEnhancer = applyMiddleware(
     ...createMiddlewares(kibana, storage),
