@@ -78,6 +78,7 @@ export class DefaultSummaryClient implements SummaryClient {
           ],
         },
       },
+      // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
       aggs: {
         ...(includeInstanceIdQueries && extraGroupingsAgg),
         ...(timeslicesBudgetingMethodSchema.is(slo.budgetingMethod) && {
@@ -99,7 +100,8 @@ export class DefaultSummaryClient implements SummaryClient {
     const good = result.aggregations?.good?.value ?? 0;
     // @ts-ignore value is not type correctly
     const total = result.aggregations?.total?.value ?? 0;
-    const groupings = result.aggregations?.last_doc?.hits?.hits[0]?._source?.slo?.groupings;
+    // @ts-expect-error AggregationsAggregationContainer needs to be updated with top_hits
+    const groupings = result.aggregations?.last_doc?.hits?.hits?.[0]?._source?.slo?.groupings;
 
     const sliValue = computeSLI(good, total);
     const initialErrorBudget = 1 - slo.objective.target;
