@@ -27,7 +27,6 @@ export const limitedEditableSettings = [
   'index.blocks.write',
   'index.blocks.read',
   'index.blocks.read_only',
-  'index.blocks.metadata',
   'index.codec',
   'index.default_pipeline',
   'index.lifecycle.origination_date',
