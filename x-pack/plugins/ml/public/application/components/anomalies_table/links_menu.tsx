@@ -727,10 +727,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
 
           // Need to encode the _a parameter as it will contain characters such as '+' if using the regex.
           const { basePath } = kibana.services.http;
-          let path = basePath.get();
-          path += '/app/discover#/';
-          path += '?_g=' + _g;
-          path += '&_a=' + encodeURIComponent(_a);
+          const path = `${basePath.get()}/app/discover#/?_g=${_g}&_a=${encodeURIComponent(_a)}`;
           window.open(path, '_blank');
         })
         .catch((resp) => {
