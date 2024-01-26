@@ -14,6 +14,7 @@ import { Datatable } from '@kbn/expressions-plugin/common';
 import { useDiscoverHistogram } from './use_discover_histogram';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import { FetchStatus } from '../../../types';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   container: HTMLElement | null;
@@ -55,7 +56,7 @@ export const DiscoverHistogramLayout = ({
       isPlainRecord &&
       datatable &&
       datatable &&
-      ['partial', 'complete'].includes(datatable.fetchStatus)
+      [FetchStatus.PARTIAL, FetchStatus.COMPLETE].includes(datatable.fetchStatus)
     ) {
       return {
         type: 'datatable' as 'datatable',
