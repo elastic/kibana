@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
-  const PageObjects = getPageObjects(['common', 'reporting', 'dashboard']);
+  const PageObjects = getPageObjects(['common', 'reporting', 'dashboard', 'share']);
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const reportingFunctional = getService('reportingFunctional');
@@ -39,6 +39,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);
 
+      await PageObjects.share.clickShareTopNavButton();
       await PageObjects.reporting.openImageReportingPanel();
       await PageObjects.reporting.clickGenerateReportButton();
 

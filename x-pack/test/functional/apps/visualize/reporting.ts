@@ -77,6 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
         await PageObjects.reporting.openImageReportingPanel();
         expect(await PageObjects.reporting.isGenerateReportButtonDisabled()).to.be(null);
+        await PageObjects.share.closeShareModal();
       });
 
       it('becomes available when saved', async () => {
