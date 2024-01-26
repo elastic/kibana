@@ -618,7 +618,7 @@ describe('[Logs onboarding] Custom logs - install elastic agent', () => {
         .should('exist');
     });
 
-    it('when user clicks on Explore Logs it navigates to observability log explorer', () => {
+    it('when user clicks on Explore Logs it navigates to observability logs explorer', () => {
       cy.wait('@checkOnboardingProgress');
       cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 

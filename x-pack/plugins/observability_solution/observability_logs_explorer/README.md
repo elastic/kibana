@@ -1,4 +1,4 @@
-# Observability Log Explorer
+# Observability Logs Explorer
 
 This plugin provides an app based on the `LogExplorer` component from the `logs_explorer` plugin, but adds observability-specific affordances.
 
@@ -39,11 +39,11 @@ yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/ob
 
 ## Checktypes
 
-#### Log Explorer
+#### Logs Explorer
 ```
 node scripts/type_check.js --project x-pack/plugins/observability_solution/logs_explorer/tsconfig.json
 ```
-#### Observability Log Explorer
+#### Observability Logs Explorer
 ```
 node scripts/type_check.js --project x-pack/plugins/observability_solution/observability_logs_explorer/tsconfig.json
 ```

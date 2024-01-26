@@ -114,7 +114,7 @@ const defaultPageState: urlSchemaV1.UrlSchema = {
   },
 };
 
-export function ObservabilityLogExplorerPageObject({
+export function ObservabilityLogsExplorerPageObject({
   getPageObjects,
   getService,
 }: FtrProviderContext) {
@@ -224,7 +224,7 @@ export function ObservabilityLogExplorerPageObject({
       });
 
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogExplorer',
+        'observabilityLogsExplorer',
         '/',
         queryStringParams,
         {
@@ -249,7 +249,7 @@ export function ObservabilityLogExplorerPageObject({
       log.info('queryStringParams');
 
       return await PageObjects.common.navigateToUrlWithBrowserHistory(
-        'observabilityLogExplorer',
+        'observabilityLogsExplorer',
         '/',
         queryStringParams,
         {
@@ -330,7 +330,7 @@ export function ObservabilityLogExplorerPageObject({
 
     async getFlyoutDetail(rowIndex: number = 0) {
       await dataGrid.clickRowToggle({ rowIndex });
-      return testSubjects.find('logExplorerFlyoutDetail');
+      return testSubjects.find('logsExplorerFlyoutDetail');
     },
 
     async getIntegrations() {
@@ -416,15 +416,15 @@ export function ObservabilityLogExplorerPageObject({
     },
 
     getHeaderMenu() {
-      return testSubjects.find('logExplorerHeaderMenu');
+      return testSubjects.find('logsExplorerHeaderMenu');
     },
 
     getDiscoverFallbackLink() {
-      return testSubjects.find('logExplorerDiscoverFallbackLink');
+      return testSubjects.find('logsExplorerDiscoverFallbackLink');
     },
 
     getOnboardingLink() {
-      return testSubjects.find('logExplorerOnboardingLink');
+      return testSubjects.find('logsExplorerOnboardingLink');
     },
 
     // Query Bar

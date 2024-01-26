@@ -13,7 +13,7 @@ const defaultLogColumns = ['@timestamp', 'resource', 'content'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer']);
   const synthtrace = getService('logSynthtraceEsClient');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
@@ -21,8 +21,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const to = '2023-12-27T10:25:14.091Z';
   const TEST_TIMEOUT = 10 * 1000; // 10 secs
 
-  const navigateToLogExplorer = () =>
-    PageObjects.observabilityLogExplorer.navigateTo({
+  const navigateToLogsExplorer = () =>
+    PageObjects.observabilityLogsExplorer.navigateTo({
       pageState: {
         time: {
           from,
@@ -32,10 +32,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  describe('When the log explorer loads', () => {
+  describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
-      await navigateToLogExplorer();
+      await navigateToLogsExplorer();
     });
 
     after(async () => {
@@ -50,7 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should restore the table columns from the URL state if exists', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             time: {
               from,
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(cellValue.includes('event.original')).to.be(false);
 
           const cellAttribute = await cellElement.findByTestSubject(
-            'logExplorerCellDescriptionList'
+            'logsExplorerCellDescriptionList'
           );
           expect(cellAttribute).not.to.be.empty();
         });
@@ -137,7 +137,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('on cell expansion with message field should open regular popover', async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
         await retry.tryForTime(TEST_TIMEOUT, async () => {
           await dataGrid.clickCellExpandButton(3, 4);
           await testSubjects.existOrFail('euiDataGridExpansionPopover');
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('virtual column cell actions', async () => {
       beforeEach(async () => {
-        await navigateToLogExplorer();
+        await navigateToLogsExplorer();
       });
       it('should render a popover with cell actions when a chip on content column is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {

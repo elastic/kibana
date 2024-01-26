@@ -13,7 +13,7 @@ const defaultLogColumns = ['@timestamp', 'resource', 'content'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'svlCommonPage']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer', 'svlCommonPage']);
   const synthtrace = getService('svlLogsSynthtraceClient');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const TEST_TIMEOUT = 10 * 1000; // 10 secs
 
   const navigateToLogExplorer = () =>
-    PageObjects.observabilityLogExplorer.navigateTo({
+    PageObjects.observabilityLogsExplorer.navigateTo({
       pageState: {
         time: {
           from,
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       },
     });
 
-  describe('When the log explorer loads', () => {
+  describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
       await PageObjects.svlCommonPage.login();
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should restore the table columns from the URL state if exists', async () => {
-        await PageObjects.observabilityLogExplorer.navigateTo({
+        await PageObjects.observabilityLogsExplorer.navigateTo({
           pageState: {
             time: {
               from,
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(cellValue.includes('event.original')).to.be(false);
 
           const cellAttribute = await cellElement.findByTestSubject(
-            'logExplorerCellDescriptionList'
+            'logsExplorerCellDescriptionList'
           );
           expect(cellAttribute).not.to.be.empty();
         });
