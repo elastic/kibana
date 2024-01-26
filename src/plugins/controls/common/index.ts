@@ -25,6 +25,7 @@ export {
   rawControlGroupAttributesToControlGroupInput,
   rawControlGroupAttributesToSerializable,
   serializableToRawControlGroupAttributes,
+  getDefaultControlGroupPersistableInput,
   persistableControlGroupInputIsEqual,
   getDefaultControlGroupInput,
   generateNewControlIds,

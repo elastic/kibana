@@ -13,6 +13,7 @@ import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
+  getDefaultControlGroupPersistableInput,
   PersistableControlGroupInput,
 } from '@kbn/controls-plugin/common';
 import {
@@ -418,10 +419,9 @@ export const initializeDashboard = async ({
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
       const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
-        lastSavedInput: {
-          ...fullControlGroupInput,
-          ...loadDashboardReturn?.dashboardInput.controlGroupInput,
-        },
+        lastSavedInput:
+          loadDashboardReturn?.dashboardInput.controlGroupInput ??
+          getDefaultControlGroupPersistableInput(),
       });
       if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
         throw new Error('Error in control group startup');
