@@ -6,7 +6,7 @@
  */
 
 import { get } from 'lodash';
-import { RunContext, TaskDefinition } from './task';
+import { RunContext, TaskDefinition, TaskPriority } from './task';
 import { mockLogger } from './test_utils';
 import {
   sanitizeTaskDefinitions,
@@ -55,12 +55,12 @@ describe('taskTypeDictionary', () => {
     definitions = new TaskTypeDictionary(mockLogger());
   });
 
-  describe('sanitizeTaskDefinitions', () => {});
-  it('provides tasks with defaults', () => {
-    const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
-    const result = sanitizeTaskDefinitions(taskDefinitions);
+  describe('sanitizeTaskDefinitions', () => {
+    it('provides tasks with defaults', () => {
+      const taskDefinitions = getMockTaskDefinitions({ numTasks: 3 });
+      const result = sanitizeTaskDefinitions(taskDefinitions);
 
-    expect(result).toMatchInlineSnapshot(`
+      expect(result).toMatchInlineSnapshot(`
       Array [
         Object {
           "createTaskRunner": [Function],
@@ -85,89 +85,90 @@ describe('taskTypeDictionary', () => {
         },
       ]
     `);
-  });
+    });
 
-  it('throws a validation exception for invalid task definition', () => {
-    const runsanitize = () => {
-      const taskDefinitions: TaskDefinitionRegistry = {
-        some_kind_of_task: {
-          // @ts-ignore
-          fail: 'extremely', // cause a validation failure
-          type: 'breaky_task',
-          title: 'Test XYZ',
-          description: `Actually this won't work`,
-          createTaskRunner() {
-            return {
-              async run() {
-                return {
-                  state: {},
-                };
-              },
-            };
+    it('throws a validation exception for invalid task definition', () => {
+      const runsanitize = () => {
+        const taskDefinitions: TaskDefinitionRegistry = {
+          some_kind_of_task: {
+            // @ts-ignore
+            fail: 'extremely', // cause a validation failure
+            type: 'breaky_task',
+            title: 'Test XYZ',
+            description: `Actually this won't work`,
+            createTaskRunner() {
+              return {
+                async run() {
+                  return {
+                    state: {},
+                  };
+                },
+              };
+            },
           },
-        },
+        };
+
+        return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
-    };
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+        `"[fail]: definition for this key is missing"`
+      );
+    });
 
-    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-      `"[fail]: definition for this key is missing"`
-    );
-  });
-
-  it('throws a validation exception for invalid timeout on task definition', () => {
-    const runsanitize = () => {
-      const taskDefinitions: TaskDefinitionRegistry = {
-        some_kind_of_task: {
-          title: 'Test XYZ',
-          timeout: '15 days',
-          description: `Actually this won't work`,
-          createTaskRunner() {
-            return {
-              async run() {
-                return {
-                  state: {},
-                };
-              },
-            };
+    it('throws a validation exception for invalid timeout on task definition', () => {
+      const runsanitize = () => {
+        const taskDefinitions: TaskDefinitionRegistry = {
+          some_kind_of_task: {
+            title: 'Test XYZ',
+            timeout: '15 days',
+            description: `Actually this won't work`,
+            createTaskRunner() {
+              return {
+                async run() {
+                  return {
+                    state: {},
+                  };
+                },
+              };
+            },
           },
-        },
+        };
+
+        return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
-    };
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+      );
+    });
 
-    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid timeout \\"15 days\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
-    );
-  });
-
-  it('throws a validation exception for invalid floating point timeout on task definition', () => {
-    const runsanitize = () => {
-      const taskDefinitions: TaskDefinitionRegistry = {
-        some_kind_of_task: {
-          title: 'Test XYZ',
-          timeout: '1.5h',
-          description: `Actually this won't work`,
-          createTaskRunner() {
-            return {
-              async run() {
-                return {
-                  state: {},
-                };
-              },
-            };
+    it('throws a validation exception for invalid floating point timeout on task definition', () => {
+      const runsanitize = () => {
+        const taskDefinitions: TaskDefinitionRegistry = {
+          some_kind_of_task: {
+            title: 'Test XYZ',
+            timeout: '1.5h',
+            description: `Actually this won't work`,
+            createTaskRunner() {
+              return {
+                async run() {
+                  return {
+                    state: {},
+                  };
+                },
+              };
+            },
           },
-        },
+        };
+
+        return sanitizeTaskDefinitions(taskDefinitions);
       };
 
-      return sanitizeTaskDefinitions(taskDefinitions);
-    };
-
-    expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
-    );
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+      );
+    });
   });
 
   describe('registerTaskDefinitions', () => {
@@ -180,6 +181,25 @@ describe('taskTypeDictionary', () => {
         },
       });
       expect(definitions.has('foo')).toBe(true);
+    });
+
+    it('uses task priority if specified', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          maxConcurrency: 2,
+          priority: TaskPriority.High,
+          createTaskRunner: jest.fn(),
+        },
+      });
+      expect(definitions.get('foo')).toEqual({
+        createTaskRunner: expect.any(Function),
+        maxConcurrency: 2,
+        priority: 100,
+        timeout: '5m',
+        title: 'foo',
+        type: 'foo',
+      });
     });
 
     it('throws error when registering duplicate task type', () => {

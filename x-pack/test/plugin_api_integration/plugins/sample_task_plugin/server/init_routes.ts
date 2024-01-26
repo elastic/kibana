@@ -300,6 +300,7 @@ export function initRoutes(
         const taskManager = await taskManagerStart;
         return res.ok({
           body: await taskManager.fetch({
+            size: 20,
             query: taskManagerQuery,
           }),
         });
