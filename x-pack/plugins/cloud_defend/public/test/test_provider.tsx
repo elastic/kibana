@@ -16,7 +16,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fleetMock } from '@kbn/fleet-plugin/public/mocks';
 import type { CloudDefendPluginStartDeps } from '../types';
 import './__mocks__/worker';
-import './__mocks__/resizeobserver';
 import '@kbn/code-editor-mock/jest_helper';
 
 // @ts-ignore-next
