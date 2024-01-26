@@ -21,6 +21,44 @@
     "functions": [
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.configureMonacoYamlSchema",
+        "type": "Function",
+        "tags": [],
+        "label": "configureMonacoYamlSchema",
+        "description": [],
+        "signature": [
+          "(schemas: ",
+          "SchemasSettings",
+          "[] | undefined) => Promise<",
+          "MonacoYaml",
+          ">"
+        ],
+        "path": "packages/kbn-monaco/src/yaml/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/monaco",
+            "id": "def-common.configureMonacoYamlSchema.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "schemas",
+            "description": [],
+            "signature": [
+              "SchemasSettings",
+              "[] | undefined"
+            ],
+            "path": "packages/kbn-monaco/src/yaml/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.registerLanguage",
         "type": "Function",
         "tags": [],
@@ -1011,6 +1049,21 @@
       },
       {
         "parentPluginId": "@kbn/monaco",
+        "id": "def-common.ID",
+        "type": "string",
+        "tags": [],
+        "label": "ID",
+        "description": [],
+        "signature": [
+          "\"yaml\""
+        ],
+        "path": "packages/kbn-monaco/src/yaml/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/monaco",
         "id": "def-common.PainlessCompletionKind",
         "type": "Type",
         "tags": [],
@@ -1041,38 +1094,6 @@
       }
     ],
     "objects": [
-      {
-        "parentPluginId": "@kbn/monaco",
-        "id": "def-common.monacoeditoresmvseditoreditor.api",
-        "type": "Object",
-        "tags": [],
-        "label": "'monaco-editor/esm/vs/editor/editor.api'",
-        "description": [],
-        "signature": [
-          "typeof ",
-          "node_modules/monaco-editor/esm/vs/editor/editor.api"
-        ],
-        "path": "node_modules/monaco-yaml/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/monaco",
-        "id": "def-common.monacoeditoresmvseditoreditor.api",
-        "type": "Object",
-        "tags": [],
-        "label": "'monaco-editor/esm/vs/editor/editor.api'",
-        "description": [],
-        "signature": [
-          "typeof ",
-          "node_modules/monaco-editor/esm/vs/editor/editor.api"
-        ],
-        "path": "node_modules/monaco-yaml/index.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/monaco",
         "id": "def-common.ESQLLang",
