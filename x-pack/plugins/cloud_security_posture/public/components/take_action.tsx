@@ -86,37 +86,37 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
     toastLifeTimeMs: 10000,
     color: 'success',
     iconType: '',
-    'data-test-subj': 'csp:toast-success',
+    'data-test-subj': 'csp:toast-success-rule-state-change',
     text: toMountPoint(
       <div>
         <EuiText size="m">
           {isBenchmarkRuleMuted ? (
             <>
               <EuiText size="m">
-                <strong data-test-subj="csp:toast-success-title">
+                <strong data-test-subj="csp:toast-success-enable-rule-title">
                   <FormattedMessage
-                    id="xpack.csp.flyout.ruleCreatedToastTitle"
+                    id="xpack.csp.flyout.ruleEnabledToastTitle"
                     defaultMessage="Rule Enabled"
                   />
                 </strong>
               </EuiText>
               <FormattedMessage
-                id="xpack.csp.flyout.ruleCreatedToastTitle"
+                id="xpack.csp.flyout.ruleEnabledToast"
                 defaultMessage={`Successfully enabled rule`}
               />
             </>
           ) : (
             <>
               <EuiText size="m">
-                <strong data-test-subj="csp:toast-success-title">
+                <strong data-test-subj="csp:toast-success-disable-rule-title">
                   <FormattedMessage
-                    id="xpack.csp.flyout.ruleCreatedToastTitle"
+                    id="xpack.csp.flyout.ruleDisabledToastTitle"
                     defaultMessage="Rule Disabled"
                   />
                 </strong>
               </EuiText>
               <FormattedMessage
-                id="xpack.csp.flyout.ruleCreatedToastTitle"
+                id="xpack.csp.flyout.ruleDisabledToast"
                 defaultMessage={`Successfully disabled rule`}
               />
             </>

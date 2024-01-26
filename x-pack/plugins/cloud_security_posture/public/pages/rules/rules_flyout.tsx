@@ -28,6 +28,8 @@ import { useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { TakeAction } from '../../components/take_action';
 
+export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
+
 interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
@@ -151,7 +153,7 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
           className="eui-textTruncate"
           checked={rule?.state !== 'muted'}
           onChange={switchRuleStates}
-          data-test-subj={TEST_SUBJECTS.CSP_RULES_TABLE_ROW_ITEM_NAME}
+          data-test-subj={RULES_FLYOUT_SWITCH_BUTTON}
           label=" "
         />
       </>
