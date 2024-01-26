@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { FlyoutDoc } from '../flyout_detail/types';
+import { FlyoutDoc } from '../../../common/document';
 import { ChipWithPopover } from './popover_chip';
 import * as constants from '../../../common/constants';
 

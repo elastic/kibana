@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
 
 export const HoverPopover = ({
@@ -20,16 +20,26 @@ export const HoverPopover = ({
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const leaveTimer = useRef<NodeJS.Timeout | null>(null);
 
-  const onMouseEnter = () => {
+  const clearTimer = () => {
     if (leaveTimer.current) {
       clearTimeout(leaveTimer.current);
     }
+  };
+
+  const onMouseEnter = () => {
+    clearTimer();
     setIsPopoverOpen(true);
   };
 
   const onMouseLeave = () => {
     leaveTimer.current = setTimeout(() => setIsPopoverOpen(false), 100);
   };
+
+  useEffect(() => {
+    return () => {
+      clearTimer();
+    };
+  }, []);
 
   return (
     <div onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave}>
