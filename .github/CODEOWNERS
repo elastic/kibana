@@ -1534,6 +1534,7 @@ x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-e
 /x-pack/plugins/security_solution/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_ess/**/*.scss @elastic/security-design
 /x-pack/plugins/security_solution_serverless/**/*.scss @elastic/security-design
+/x-pack/plugins/observability_solution/logs_explorer/**/*.scss @elastic/observability-design
 
 # Logstash
 #CC# /x-pack/plugins/logstash/ @elastic/logstash
