@@ -7,6 +7,7 @@
 
 import type { Category } from '../../../common/api/log_categorization/types';
 import { useCreateFormattedExample } from './format_category';
+import { renderHook } from '@testing-library/react-hooks';
 
 jest.mock('../../hooks/use_eui_theme', () => ({
   useIsDarkTheme: () => false,
@@ -87,7 +88,8 @@ const categoryData: Array<{
 describe('FormattedPatternExamples', () => {
   it('correctly splits each example into correct number of html elements', () => {
     categoryData.forEach(({ category, elementCount }) => {
-      const createFormattedExample = useCreateFormattedExample();
+      const { result } = renderHook(() => useCreateFormattedExample());
+      const createFormattedExample = result.current;
       const resp = createFormattedExample(category.key, category.examples[0]);
       expect(resp.length).toEqual(elementCount);
     });
