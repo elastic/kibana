@@ -1805,7 +1805,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
               sort: ['host.name', ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts.length).toEqual(2);
             expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
@@ -1816,8 +1816,22 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+            });
+
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
               [ALERT_SUPPRESSION_END]: secondTimestamp,
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 4,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
             });
           });
 
@@ -1879,7 +1893,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
               sort: ['host.name', ALERT_ORIGINAL_TIME],
             });
-            expect(previewAlerts.length).toEqual(1);
+            expect(previewAlerts.length).toEqual(2);
             expect(previewAlerts[0]._source).toEqual({
               ...previewAlerts[0]._source,
               [ALERT_SUPPRESSION_TERMS]: [
@@ -1890,13 +1904,25 @@ export default ({ getService }: FtrProviderContext) => {
               ],
               [ALERT_ORIGINAL_TIME]: firstTimestamp,
               [ALERT_SUPPRESSION_START]: firstTimestamp,
+              [ALERT_SUPPRESSION_END]: firstTimestamp,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+            });
+            expect(previewAlerts[1]._source).toEqual({
+              ...previewAlerts[1]._source,
+              [ALERT_SUPPRESSION_TERMS]: [
+                {
+                  field: 'host.name',
+                  value: ['host-a'],
+                },
+              ],
+              [ALERT_ORIGINAL_TIME]: secondTimestamp,
+              [ALERT_SUPPRESSION_START]: secondTimestamp,
               [ALERT_SUPPRESSION_END]: secondTimestamp,
-              [ALERT_SUPPRESSION_DOCS_COUNT]: 3,
+              [ALERT_SUPPRESSION_DOCS_COUNT]: 2,
             });
           });
 
-          // TODO: is that correct behaviour?
-          it.skip('should create and suppress alert on rule execution when alert created on previous execution', async () => {
+          it('should create and suppress alert on rule execution when alert created on previous execution', async () => {
             const id = uuidv4();
             const firstTimestamp = '2020-10-28T05:45:00.000Z';
             const secondTimestamp = '2020-10-28T06:10:00.000Z';

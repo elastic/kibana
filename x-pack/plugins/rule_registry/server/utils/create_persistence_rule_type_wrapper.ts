@@ -299,7 +299,8 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
               alerts,
               suppressionWindow,
               enrichAlerts,
-              currentTimeOverride
+              currentTimeOverride,
+              isRuleExecutionOnly
             ) => {
               const ruleDataClientWriter = await ruleDataClient.getWriter({
                 namespace: options.spaceId,
@@ -424,10 +425,19 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                 const { alertCandidates, suppressedAlerts: suppressedInMemoryAlerts } =
                   suppressAlertsInMemory(nonSuppressedAlerts);
 
-                const [duplicateAlerts, newAlerts] = partition(
-                  alertCandidates,
-                  (alert) => existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]] != null
-                );
+                const [duplicateAlerts, newAlerts] = partition(alertCandidates, (alert) => {
+                  const existingAlert =
+                    existingAlertsByInstanceId[alert._source[ALERT_INSTANCE_ID]];
+
+                  // if suppression enabled only on rule execution, we need to account for alerts created earlier
+                  if (isRuleExecutionOnly) {
+                    return (
+                      existingAlert?._source?.[ALERT_RULE_EXECUTION_UUID] === options.executionId
+                    );
+                  } else {
+                    return existingAlert != null;
+                  }
+                });
 
                 const duplicateAlertUpdates = duplicateAlerts.flatMap((alert) => {
                   const existingAlert =

@@ -27,7 +27,7 @@ import { getAllowedFieldsForTermQuery } from './get_allowed_fields_for_terms_que
 import { getEventCount, getEventList } from './get_event_count';
 import { getMappingFilters } from './get_mapping_filters';
 import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
-import { getMaxSignalsWarning, getSuppressionMaxSignalsWarning } from '../../utils/utils';
+import { getMaxSignalsWarning } from '../../utils/utils';
 import { getFieldsForWildcard } from '../../utils/get_fields_for_wildcard';
 
 export const createThreatSignals = async ({

@@ -51,7 +51,8 @@ export type SuppressedAlertService = <T extends SuppressionFieldsLatest>(
     alerts: Array<{ _id: string; _source: T }>,
     params: { spaceId: string }
   ) => Promise<Array<{ _id: string; _source: T }>>,
-  currentTimeOverride?: Date
+  currentTimeOverride?: Date,
+  isRuleExecutionOnly?: boolean
 ) => Promise<SuppressedAlertServiceResult<T>>;
 
 export interface SuppressedAlertServiceResult<T>

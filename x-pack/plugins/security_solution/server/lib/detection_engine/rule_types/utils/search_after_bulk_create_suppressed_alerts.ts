@@ -221,6 +221,7 @@ export const searchAfterAndBulkCreateSuppressedAlerts = async ({
             services,
             suppressionWindow,
             alertTimestampOverride,
+            isSuppressionPerRuleExecution: !suppressionDuration,
           });
 
           addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
