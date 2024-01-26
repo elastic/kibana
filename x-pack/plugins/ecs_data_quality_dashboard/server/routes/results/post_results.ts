@@ -13,7 +13,6 @@ import { buildRouteValidation } from '../../schemas/common';
 import { PostResultBody } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { createDocumentFromResult } from './parser';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
 export const postResultsRoute = (
@@ -32,10 +31,6 @@ export const postResultsRoute = (
         validate: { request: { body: buildRouteValidation(PostResultBody) } },
       },
       async (context, request, response) => {
-        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-        return response.ok({ body: { result: 'noop' } });
-
-        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
@@ -51,20 +46,20 @@ export const postResultsRoute = (
         }
 
         try {
-          // Confirm user has authorization for the pattern payload
-          const { pattern } = request.body.rollup;
+          // Confirm user has authorization for the indexName payload
+          const { indexName } = request.body;
           const userEsClient = services.core.elasticsearch.client.asCurrentUser;
           const privileges = await userEsClient.security.hasPrivileges({
-            index: [{ names: [pattern], privileges: ['all', 'read', 'view_index_metadata'] }],
+            index: [{ names: [indexName], privileges: ['all', 'read', 'view_index_metadata'] }],
           });
           if (!privileges.has_all_requested) {
             return response.ok({ body: { result: 'noop' } });
           }
 
           // Index the result
-          const document = createDocumentFromResult(request.body);
+          const body = { '@timestamp': Date.now(), ...request.body };
           const esClient = services.core.elasticsearch.client.asInternalUser;
-          const outcome = await esClient.index({ index, body: document });
+          const outcome = await esClient.index({ index, body });
 
           return response.ok({ body: { result: outcome.result } });
         } catch (err) {

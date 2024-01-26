@@ -11,20 +11,17 @@ import { RESULTS_ROUTE_PATH, INTERNAL_API_VERSION } from '../../../common/consta
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { GetResultQuery } from '../../schemas/result';
-import type { Result, ResultDocument } from '../../schemas/result';
+import type { ResultDocument } from '../../schemas/result';
 import { API_DEFAULT_ERROR_MESSAGE } from '../../translations';
 import type { DataQualityDashboardRequestHandlerContext } from '../../types';
-import { createResultFromDocument } from './parser';
 import { API_RESULTS_INDEX_NOT_AVAILABLE } from './translations';
 
-export const getQuery = (patterns: string[]) => ({
+export const getQuery = (indexName: string[]) => ({
   size: 0,
-  query: {
-    bool: { filter: [{ terms: { 'rollup.pattern': patterns } }] },
-  },
+  query: { bool: { filter: [{ terms: { indexName } }] } },
   aggs: {
     latest: {
-      terms: { field: 'rollup.pattern', size: 10000 }, // big enough to get all patterns, but under `index.max_terms_count` (default 65536)
+      terms: { field: 'indexName', size: 10000 }, // big enough to get all indexNames, but under `index.max_terms_count` (default 65536)
       aggs: { latest_doc: { top_hits: { size: 1, sort: [{ '@timestamp': { order: 'desc' } }] } } },
     },
   },
@@ -51,10 +48,6 @@ export const getResultsRoute = (
         validate: { request: { query: buildRouteValidation(GetResultQuery) } },
       },
       async (context, request, response) => {
-        // TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-        return response.ok({ body: [] });
-
-        // eslint-disable-next-line no-unreachable
         const services = await context.resolve(['core', 'dataQualityDashboard']);
         const resp = buildResponse(response);
 
@@ -70,23 +63,18 @@ export const getResultsRoute = (
         }
 
         try {
-          // Confirm user has authorization for the requested patterns
-          const { patterns } = request.query;
+          const { pattern } = request.query;
+
+          // Get authorized indices
           const userEsClient = services.core.elasticsearch.client.asCurrentUser;
-          const privileges = await userEsClient.security.hasPrivileges({
-            index: [
-              { names: patterns.split(','), privileges: ['all', 'read', 'view_index_metadata'] },
-            ],
-          });
-          const authorizedPatterns = Object.keys(privileges.index).filter((pattern) =>
-            Object.values(privileges.index[pattern]).some((v) => v === true)
-          );
-          if (authorizedPatterns.length === 0) {
+          const indices = await userEsClient.indices.get({ index: pattern });
+          const authorizedIndexNames = Object.keys(indices);
+          if (authorizedIndexNames.length === 0) {
             return response.ok({ body: [] });
           }
 
           // Get the latest result of each pattern
-          const query = { index, ...getQuery(authorizedPatterns) };
+          const query = { index, ...getQuery(authorizedIndexNames) };
           const internalEsClient = services.core.elasticsearch.client.asInternalUser;
 
           const { aggregations } = await internalEsClient.search<
@@ -94,10 +82,9 @@ export const getResultsRoute = (
             Record<string, { buckets: LatestAggResponseBucket[] }>
           >(query);
 
-          const results: Result[] =
-            aggregations?.latest?.buckets.map((bucket) =>
-              createResultFromDocument(bucket.latest_doc.hits.hits[0]._source)
-            ) ?? [];
+          const results: ResultDocument[] =
+            aggregations?.latest?.buckets.map((bucket) => bucket.latest_doc.hits.hits[0]._source) ??
+            [];
 
           return response.ok({ body: results });
         } catch (err) {

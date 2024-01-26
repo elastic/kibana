@@ -186,8 +186,8 @@ export type DataQualityIndexCheckedParams = DataQualityCheckAllCompletedParams &
 
 export interface DataQualityCheckAllCompletedParams {
   batchId: string;
-  ecsVersion?: string;
-  isCheckAll?: boolean;
+  ecsVersion: string;
+  isCheckAll: boolean;
   numberOfDocuments?: number;
   numberOfIncompatibleFields?: number;
   numberOfIndices?: number;

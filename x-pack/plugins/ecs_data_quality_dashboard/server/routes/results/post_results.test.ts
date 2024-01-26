@@ -15,16 +15,19 @@ import type {
   SecurityHasPrivilegesResponse,
   WriteResponseBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import { resultBody, resultDocument } from './results.mock';
+import { resultDocument } from './results.mock';
 
-// TODO: https://github.com/elastic/kibana/pull/173185#issuecomment-1908034302
-describe.skip('postResultsRoute route', () => {
+describe('postResultsRoute route', () => {
   describe('indexation', () => {
     let server: ReturnType<typeof serverMock.create>;
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
 
-    const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+    const req = requestMock.create({
+      method: 'post',
+      path: RESULTS_ROUTE_PATH,
+      body: resultDocument,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -85,7 +88,11 @@ describe.skip('postResultsRoute route', () => {
     let { context } = requestContextMock.createTools();
     let logger: MockedLogger;
 
-    const req = requestMock.create({ method: 'post', path: RESULTS_ROUTE_PATH, body: resultBody });
+    const req = requestMock.create({
+      method: 'post',
+      path: RESULTS_ROUTE_PATH,
+      body: resultDocument,
+    });
 
     beforeEach(() => {
       jest.clearAllMocks();
@@ -113,7 +120,7 @@ describe.skip('postResultsRoute route', () => {
       expect(mockHasPrivileges).toHaveBeenCalledWith({
         index: [
           {
-            names: [resultBody.rollup.pattern],
+            names: [resultDocument.indexName],
             privileges: ['all', 'read', 'view_index_metadata'],
           },
         ],
@@ -134,7 +141,7 @@ describe.skip('postResultsRoute route', () => {
       expect(mockHasPrivileges).toHaveBeenCalledWith({
         index: [
           {
-            names: [resultBody.rollup.pattern],
+            names: [resultDocument.indexName],
             privileges: ['all', 'read', 'view_index_metadata'],
           },
         ],
@@ -170,7 +177,7 @@ describe.skip('postResultsRoute route', () => {
       const req = requestMock.create({
         method: 'post',
         path: RESULTS_ROUTE_PATH,
-        body: { rollup: resultBody.rollup },
+        body: { indexName: 'invalid body' },
       });
       const result = server.validate(req);
 
