@@ -17,12 +17,12 @@
   font-weight: $euiFontWeightMedium;
   box-shadow: none;
   text-align: center;
-  background-color: transparent;  
+  background-color: transparent;
 
-  &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus){
+  &.rangeSliderAnchor__fieldNumber--valid:invalid:not(:focus) {
     background-image: none; // override the red underline for values between steps
   }
-  
+
   &.rangeSliderAnchor__fieldNumber--invalid {
     color: $euiTextSubduedColor;
     text-decoration: line-through;
