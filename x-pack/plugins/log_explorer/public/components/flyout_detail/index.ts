@@ -6,4 +6,3 @@
  */
 
 export * from './flyout_detail';
-export * from './types';
