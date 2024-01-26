@@ -178,17 +178,17 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-      earliest: number | undefined;
-      latest: number | undefined;
-      aggInterval: TimeBucketsInterval;
-      intervalMs: number;
-      searchQuery: AggregateQuery;
-      indexPattern: string | undefined;
-      timeFieldName: string | undefined;
-      lastRefresh: number;
-      filter?: QueryDslQueryContainer;
-      limitSize?: ESQLDefaultLimitSizeOption;
-    }
+        earliest: number | undefined;
+        latest: number | undefined;
+        aggInterval: TimeBucketsInterval;
+        intervalMs: number;
+        searchQuery: AggregateQuery;
+        indexPattern: string | undefined;
+        timeFieldName: string | undefined;
+        lastRefresh: number;
+        filter?: QueryDslQueryContainer;
+        limitSize?: ESQLDefaultLimitSizeOption;
+      }
     | undefined
 ) => {
   const {
@@ -248,11 +248,13 @@ export const useESQLOverallStatsData = (
           },
           { strategy: ESQL_SEARCH_STRATEGY }
         );
-        // @ts-expect-error ES types need to be updated with columns for ESQL queries
-        const columns = columnsResp.rawResponse.columns.map((c) => ({
-          ...c,
-          secondaryType: getSupportedFieldType(c.type),
-        })) as Column[];
+        const columns = columnsResp?.rawResponse
+          ? // @ts-expect-error ES types need to be updated with columns for ESQL queries
+            (columnsResp.rawResponse.columns.map((c) => ({
+              ...c,
+              secondaryType: getSupportedFieldType(c.type),
+            })) as Column[])
+          : [];
 
         const timeFields = columns.filter((d) => d.type === 'date');
 

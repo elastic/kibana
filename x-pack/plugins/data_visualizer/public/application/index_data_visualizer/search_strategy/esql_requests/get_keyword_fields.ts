@@ -62,21 +62,24 @@ export const getESQLKeywordFieldStats = async ({
 
         if (isFulfilled(resp)) {
           const results = resp.value?.rawResponse.values as Array<[BucketCount, BucketTerm]>;
-          const topValuesSampleSize = results.reduce((acc: number, row) => acc + row[0], 0);
+          if (results) {
+            const topValuesSampleSize = results?.reduce((acc: number, row) => acc + row[0], 0);
 
-          const terms = results.map((row) => ({
-            key: row[1],
-            doc_count: row[0],
-            percent: row[0] / topValuesSampleSize,
-          }));
+            const terms = results.map((row) => ({
+              key: row[1],
+              doc_count: row[0],
+              percent: row[0] / topValuesSampleSize,
+            }));
 
-          return {
-            fieldName: field.name,
-            topValues: terms,
-            topValuesSampleSize,
-            topValuesSamplerShardSize: topValuesSampleSize,
-            isTopValuesSampled: false,
-          } as StringFieldStats;
+            return {
+              fieldName: field.name,
+              topValues: terms,
+              topValuesSampleSize,
+              topValuesSamplerShardSize: topValuesSampleSize,
+              isTopValuesSampled: false,
+            } as StringFieldStats;
+          }
+          return;
         }
 
         if (isRejected(resp)) {

@@ -62,8 +62,8 @@ export const getESQLBooleanFieldStats = async ({
 
         if (!resp) return;
 
-        if (isFulfilled(resp)) {
-          const results = resp.value?.rawResponse.values as Array<[BucketCount, boolean]>;
+        if (isFulfilled(resp) && resp.value) {
+          const results = resp.value.rawResponse.values as Array<[BucketCount, boolean]>;
           const topValuesSampleSize = results.reduce((acc, row) => acc + row[0], 0);
 
           let falseCount = 0;
