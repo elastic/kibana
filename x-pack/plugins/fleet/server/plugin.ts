@@ -583,6 +583,8 @@ export class FleetPlugin
           }
         );
 
+        // Generate/encrypt uninstall tokens asynchronously
+        this.generateUninstallTokens();
         // Validate Unintall Tokens asynchronously, showing errors in Kibana logs
         this.validateUninstallTokens();
 
@@ -700,6 +702,23 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private async generateUninstallTokens() {
+    const logger = appContextService.getLogger();
+
+    logger.debug('Generating Agent uninstall tokens');
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.warn(
+        'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+      );
+    }
+    await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+    if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.debug('Checking for and encrypting plain text uninstall tokens');
+      await appContextService.getUninstallTokenService()?.encryptTokens();
+    }
   }
 
   private validateUninstallTokens() {
