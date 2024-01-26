@@ -79,7 +79,6 @@ export function useUrlSearchState(): {
       sub?.unsubscribe();
     };
   }, [urlStateStorage]);
-
   return {
     state: deepmerge(DEFAULT_STATE, state),
     store: (newState: Partial<SearchState>) =>

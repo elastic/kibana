@@ -20,6 +20,7 @@ interface SloListFilter {
 interface SloGroupListFilter {
   page: number;
   perPage: number;
+  groupBy: string;
 }
 
 export const sloKeys = {

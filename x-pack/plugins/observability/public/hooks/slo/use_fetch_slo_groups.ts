@@ -14,6 +14,7 @@ import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../../common/slo/constants';
 interface SLOGroupsParams {
   page?: number;
   perPage?: number;
+  groupBy?: string;
 }
 
 interface UseFetchSloGroupsResponse {
@@ -27,13 +28,14 @@ interface UseFetchSloGroupsResponse {
 export function useFetchSloGroups({
   page = 1,
   perPage = DEFAULT_SLO_GROUPS_PAGE_SIZE,
+  groupBy = 'ungrouped',
 }: SLOGroupsParams = {}): UseFetchSloGroupsResponse {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
   const { data, isLoading, isSuccess, isError, isRefetching } = useQuery({
-    queryKey: sloKeys.groups({ page, perPage }),
+    queryKey: sloKeys.groups({ page, perPage, groupBy }),
     queryFn: async ({ signal }) => {
       const response = await http.get<FindSLOGroupsResponse>(
         '/internal/api/observability/slos/_groups',
@@ -41,6 +43,7 @@ export function useFetchSloGroups({
           query: {
             ...(page && { page }),
             ...(perPage && { perPage }),
+            ...(groupBy && { groupBy }),
           },
           signal,
         }

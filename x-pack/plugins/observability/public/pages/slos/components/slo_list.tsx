@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
-import React, { useState } from 'react';
+import React from 'react';
 import { CreateSloBtn } from './common/create_slo_btn';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
@@ -15,14 +15,12 @@ import { SlosView } from './slos_view';
 
 import { SloListSearchBar } from './slo_list_search_bar';
 import { ToggleSLOView } from './toggle_slo_view';
-import { GroupByField, SloGroupBy } from './slo_list_group_by';
+import { SloGroupBy } from './slo_list_group_by';
 import { GroupView } from './grouped_slos/group_view';
 
 export function SloList() {
   const { state, store: storeState } = useUrlSearchState();
-  const [groupBy, setGroupBy] = useState(state.groupBy);
-  const { view, page, perPage, kqlQuery, filters, compact: isCompact, tags } = state;
-
+  const { view, page, perPage, kqlQuery, filters, compact: isCompact, groupBy, tags } = state;
   const {
     isLoading,
     isRefetching,
@@ -49,11 +47,6 @@ export function SloList() {
     storeState({ page: 0, ...newState });
   };
 
-  const handleChangeGroupBy = (newGroupBy: GroupByField) => {
-    setGroupBy(newGroupBy);
-    storeState({ page: 0, groupBy: newGroupBy });
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">
       <EuiFlexItem grow>
@@ -75,8 +68,8 @@ export function SloList() {
       <EuiFlexGroup direction="row">
         <EuiFlexItem>
           <SloGroupBy
-            onChangeGroupBy={handleChangeGroupBy}
-            initialState={state}
+            onStateChange={onStateChange}
+            initialState={state.groupBy}
             loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           />
         </EuiFlexItem>

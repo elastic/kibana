@@ -27,6 +27,7 @@ import {
   settingsSchema,
   sloIdSchema,
   summarySchema,
+  groupSummarySchema,
   tagsSchema,
   timeWindowSchema,
   timeWindowTypeSchema,
@@ -96,7 +97,12 @@ const findSLOParamsSchema = t.partial({
   }),
 });
 
-const groupBySchema = t.literal('tags'); // TODO add t.union when the rest options will be added
+const groupBySchema = t.union([
+  t.literal('ungrouped'),
+  t.literal('slo.tags'),
+  t.literal('status'),
+  t.literal('slo.indicator.type'),
+]);
 
 const findSLOGroupsParamsSchema = t.partial({
   query: t.partial({
@@ -134,7 +140,11 @@ const sloWithSummaryResponseSchema = t.intersection([
   t.type({ summary: summarySchema }),
 ]);
 
-const sloGroupsResponseSchema = t.record(t.string, t.number);
+const sloGroupWithSummaryResponseSchema = t.type({
+  group: t.string,
+  groupBy: t.string,
+  summary: groupSummarySchema,
+});
 
 const getSLOQuerySchema = t.partial({
   query: t.partial({
@@ -192,7 +202,7 @@ const findSLOGroupsResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: sloGroupsResponseSchema,
+  results: t.array(sloGroupWithSummaryResponseSchema),
 });
 
 const deleteSLOInstancesParamsSchema = t.type({
@@ -261,6 +271,8 @@ const getSLOInstancesResponseSchema = t.type({
 
 type SLOResponse = t.OutputOf<typeof sloResponseSchema>;
 type SLOWithSummaryResponse = t.OutputOf<typeof sloWithSummaryResponseSchema>;
+
+type SLOGroupWithSummaryResponse = t.OutputOf<typeof sloGroupWithSummaryResponseSchema>;
 
 type CreateSLOInput = t.OutputOf<typeof createSLOParamsSchema.props.body>; // Raw payload sent by the frontend
 type CreateSLOParams = t.TypeOf<typeof createSLOParamsSchema.props.body>; // Parsed payload used by the backend
@@ -335,6 +347,7 @@ export {
   resetSLOResponseSchema,
   sloResponseSchema,
   sloWithSummaryResponseSchema,
+  sloGroupWithSummaryResponseSchema,
   updateSLOParamsSchema,
   updateSLOResponseSchema,
   getSLOBurnRatesParamsSchema,
@@ -367,6 +380,7 @@ export type {
   ResetSLOResponse,
   SLOResponse,
   SLOWithSummaryResponse,
+  SLOGroupWithSummaryResponse,
   UpdateSLOInput,
   UpdateSLOParams,
   UpdateSLOResponse,
