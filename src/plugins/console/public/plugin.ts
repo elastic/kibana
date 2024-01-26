@@ -105,7 +105,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     const {
       ui: { enabled: isConsoleUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
-    if (isConsoleUiEnabled) {
+
+    if (isConsoleUiEnabled && core.application.capabilities?.dev_tools?.show === true) {
       return {
         renderEmbeddableConsole: (props: EmbeddableConsoleProps) => {
           const consoleDeps: EmbeddableConsoleDependencies = {

@@ -9,17 +9,14 @@ import Fs from 'fs';
 import { keyBy, mapValues, once, pick } from 'lodash';
 import pLimit from 'p-limit';
 import Path from 'path';
-import { lastValueFrom, Observable } from 'rxjs';
+import { lastValueFrom, type Observable } from 'rxjs';
 import { promisify } from 'util';
 import type { FunctionRegistrationParameters } from '..';
-import {
-  CreateChatCompletionResponseChunk,
-  FunctionVisibility,
-  MessageRole,
-} from '../../../common/types';
-import { concatenateOpenAiChunks } from '../../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
-import { streamIntoObservable } from '../../service/util/stream_into_observable';
+import type { ChatCompletionChunkEvent } from '../../../common/conversation_complete';
+import { FunctionVisibility, MessageRole } from '../../../common/types';
+import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
+import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
+import { correctCommonEsqlMistakes } from './correct_common_esql_mistakes';
 
 const readFile = promisify(Fs.readFile);
 const readdir = promisify(Fs.readdir);
@@ -126,7 +123,7 @@ export function registerEsqlFunction({
         ...messages.slice(1),
       ];
 
-      const source$ = streamIntoObservable(
+      const source$ = (
         await client.chat({
           connectorId,
           messages: withEsqlSystemMessage(
@@ -151,7 +148,6 @@ export function registerEsqlFunction({
             - "Create a query that ..."`
           ),
           signal,
-          stream: true,
           functions: [
             {
               name: 'classify_esql',
@@ -188,7 +184,7 @@ export function registerEsqlFunction({
           ],
           functionCall: 'classify_esql',
         })
-      ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+      ).pipe(concatenateChatCompletionChunks());
 
       const response = await lastValueFrom(source$);
 
@@ -202,157 +198,82 @@ export function registerEsqlFunction({
 
       const messagesToInclude = mapValues(pick(esqlDocs, keywords), ({ data }) => data);
 
-      const esqlResponse$: Observable<CreateChatCompletionResponseChunk> = streamIntoObservable(
-        await client.chat({
-          messages: [
-            ...withEsqlSystemMessage(
-              `Format every ES|QL query as Markdown:
+      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
+        messages: [
+          ...withEsqlSystemMessage(
+            `Format every ES|QL query as Markdown:
               \`\`\`esql
               <query>
               \`\`\`
 
-              Prefer to use commands and functions for which you have documentation.
-              
-              Pay special attention to these instructions. Not following these instructions to the tee
-              will lead to excruciating consequences for the user.
-              
-              #1
-              Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation functions in stats commands, NOT in SORT or EVAL.
-              Rationale: Only aggregation functions are supported in STATS commands, and aggregation functions are only supported in STATS commands. 
-              Action: Create new columns using EVAL first and then aggregate over them in STATS commands. Do not use aggregation functions anywhere else, such as SORT or EVAL.
-              Example: EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0) | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
+              Prefer to use commands and functions for which you have requested documentation.
 
-              #2
-              Directive: Use the \`=\` operator to create new columns in STATS and EVAL, DO NOT UNDER ANY CIRCUMSTANCES use \`AS\`.
-              Rationale: The \`=\` operator is used for aliasing. Using \`AS\` leads to syntax errors.
-              Action: When creating a new column in a command, use the = operator.
-              Example: STATS total_requests = COUNT(*)
-
-              #3
-              Directive: Use placeholder values for information that is missing.
-              Rationale: It is critical to generate a syntactically valid query.
-              Action: When you don't know the arguments to a function because information is missing, use placeholder values.
-              Example: "Here's an ES|QL query that generates a timeseries of 50 buckets calculating the average duration. I've used 
-              "2023-01-23T12:15:00.000Z" and "2023-01-23T12:30:00.000Z" as placeholder values. Replace them with the start
-              and end date that work for your use case."
-
-              #4
-              Directive: Wrap string literals in double quotes.
-              Rationale: It is critical to generate a syntactically valid query.
-              Action: When using string literals in function calls, wrap them in double quotes, not single quotes.
-              Example: DATE_EXTRACT("year", @timestamp)
+              DO NOT UNDER ANY CIRCUMSTANCES use commands or functions that are not a capability of ES|QL
+              as mentioned in the system message and documentation.
               
-              At the start of every message, YOU MUST, for every instruction that is relevant to the query you want to construct,
-              repeat its directives, verbatim, at the start of every message. Exclude the rationales, actions, and examples. Follow
-              it up by using a delimiter: --
-              
+              Directive: ONLY use aggregation functions in STATS commands, and use ONLY aggregation
+              functions in stats commands, NOT in SORT or EVAL.
+              Rationale: Only aggregation functions are supported in STATS commands, and aggregation
+              functions are only supported in STATS commands. 
+              Action: Create new columns using EVAL first and then aggregate over them in STATS commands.
+              Do not use aggregation functions anywhere else, such as SORT or EVAL.
               Example:
+              \`\`\`esql
+              EVAL is_failure_as_number = CASE(event.outcome == "failure", 1, 0)
+              | STATS total_failures = SUM(is_failure_as_number) BY my_grouping_name
+              \`\`\`
               
-              #1: <directive>
-              #2: <directive>
-              #3: <directive>
-
-              --
-
-              Here is an ES|QL query that you can use:
-
-              <query>`
-            ),
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.Assistant,
-                content: '',
-                function_call: {
-                  name: 'get_esql_info',
-                  arguments: JSON.stringify(args),
-                  trigger: MessageRole.Assistant as const,
-                },
-              },
-            },
-            {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                role: MessageRole.User,
+              `
+          ),
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
                 name: 'get_esql_info',
-                content: JSON.stringify({
-                  documentation: messagesToInclude,
-                }),
+                arguments: JSON.stringify(args),
+                trigger: MessageRole.Assistant as const,
               },
             },
-          ],
-          connectorId,
-          signal,
-          stream: true,
-        })
-      ).pipe(processOpenAiStream());
-
-      return esqlResponse$.pipe((source) => {
-        return new Observable<CreateChatCompletionResponseChunk>((subscriber) => {
-          let cachedContent: string = '';
-
-          function includesDivider() {
-            const firstDividerIndex = cachedContent.indexOf('--');
-            return firstDividerIndex !== -1;
-          }
-
-          source.subscribe({
-            next: (message) => {
-              if (includesDivider()) {
-                subscriber.next(message);
-              }
-              cachedContent += message.choices[0].delta.content || '';
+          },
+          {
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              name: 'get_esql_info',
+              content: JSON.stringify({
+                documentation: messagesToInclude,
+              }),
             },
-            complete: () => {
-              if (!includesDivider()) {
-                subscriber.next({
-                  created: 0,
-                  id: '',
-                  model: '',
-                  object: 'chat.completion.chunk',
-                  choices: [
-                    {
-                      delta: {
-                        content: cachedContent,
-                      },
-                      index: 0,
-                      finish_reason: null,
-                    },
-                  ],
-                });
-              }
-
-              const esqlQuery = cachedContent.match(/```esql([\s\S]*?)```/)?.[1];
-
-              if (esqlQuery && args.execute) {
-                subscriber.next({
-                  created: 0,
-                  id: '',
-                  model: '',
-                  object: 'chat.completion.chunk',
-                  choices: [
-                    {
-                      delta: {
-                        function_call: {
-                          name: 'execute_query',
-                          arguments: JSON.stringify({ query: esqlQuery }),
-                        },
-                      },
-                      index: 0,
-                      finish_reason: null,
-                    },
-                  ],
-                });
-              }
-
-              subscriber.complete();
-            },
-            error: (error) => {
-              subscriber.error(error);
-            },
-          });
-        });
+          },
+        ],
+        connectorId,
+        signal,
       });
+
+      return esqlResponse$.pipe(
+        emitWithConcatenatedMessage((msg) => {
+          const esqlQuery = msg.message.content.match(/```esql([\s\S]*?)```/)?.[1];
+
+          return {
+            ...msg,
+            message: {
+              ...msg.message,
+              content: correctCommonEsqlMistakes(msg.message.content, resources.logger),
+              ...(esqlQuery && args.execute
+                ? {
+                    function_call: {
+                      name: 'execute_query',
+                      arguments: JSON.stringify({ query: esqlQuery }),
+                      trigger: MessageRole.Assistant as const,
+                    },
+                  }
+                : {}),
+            },
+          };
+        })
+      );
     }
   );
 }
