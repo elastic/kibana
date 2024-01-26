@@ -17,6 +17,8 @@ post:
         schema:
           $ref: '../components/schemas/run_connector_request.yaml'
         examples:
+          runCasesWebhookConnectorRequest:
+            $ref: '../components/examples/run_cases_webhook_connector_request.yaml'
           runEmailConnectorRequest:
             $ref: '../components/examples/run_email_connector_request.yaml'
           runIndexConnectorRequest:
@@ -61,6 +63,8 @@ post:
                   - error
                   - ok
           examples:
+            runCasesWebhookConnectorResponse:
+              $ref: '../components/examples/run_cases_webhook_connector_response.yaml'
             runEmailConnectorResponse:
               $ref: '../components/examples/run_email_connector_response.yaml'
             runIndexConnectorResponse:
