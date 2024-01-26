@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { createMemoryHistory } from 'history';
-import { useStepFromQueryString } from './component_template_edit';
+import { useStepFromQueryString } from './use_step_from_query_string';
 
 describe('useStepFromQueryString', () => {
   it('should return undefined if no step is set in the url', () => {
