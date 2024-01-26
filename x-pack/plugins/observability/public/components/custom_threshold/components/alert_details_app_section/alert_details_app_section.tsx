@@ -120,13 +120,9 @@ export default function AlertDetailsAppSection({
 
   useEffect(() => {
     let query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-    if (query) {
-      query = `(${query})`;
-    }
     if (groups) {
-      groups?.forEach(({ field, value }) => {
-        query += ` and ${field}: ${value}`;
-      });
+      const groupQueries = groups?.map(({ field, value }) => `${field}: ${value}`).join(' and ');
+      query = query ? `(${query}) and ${groupQueries}` : groupQueries;
     }
     setFilterQuery(query);
   }, [groups, ruleParams.searchConfiguration]);
