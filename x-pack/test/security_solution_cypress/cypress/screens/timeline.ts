@@ -30,11 +30,12 @@ export const CLOSE_TIMELINE_BTN = '[data-test-subj="close-timeline"]';
 
 export const COMBO_BOX_INPUT = '[data-test-subj="comboBoxInput"]';
 
-export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-new"]';
+export const CREATE_NEW_TIMELINE = '[data-test-subj="timeline-modal-new-timeline"]';
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline"]';
 
-export const CREATE_NEW_TIMELINE_TEMPLATE = '[data-test-subj="template-timeline-new"]';
+export const CREATE_NEW_TIMELINE_TEMPLATE =
+  '[data-test-subj="timeline-modal-new-timeline-template"]';
 export const BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE =
   '[data-test-subj="timeline-bottom-bar-create-new-timeline-template"]';
 
@@ -311,7 +312,9 @@ export const TIMELINE_DATE_PICKER_CONTAINER = getDataTestSubjectSelector(
 
 export const TIMELINE_FILTER_BADGE = `[data-test-subj^='timeline-filters-container'] [data-test-subj^="filter-badge"]`;
 
-export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector('new-timeline-action');
+export const NEW_TIMELINE_ACTION = getDataTestSubjectSelector(
+  'timeline-modal-new-timeline-dropdown-button'
+);
 
 export const SAVE_TIMELINE_ACTION = getDataTestSubjectSelector('save-timeline-action');
 export const SAVE_TIMELINE_ACTION_BTN = getDataTestSubjectSelector('timeline-modal-save-timeline');
