@@ -65,8 +65,12 @@ describe('Get API Keys route', () => {
     );
 
     expect(response.status).toBe(200);
-    expect(response.payload.apiKeys).toContainEqual({ id: '123', name: '', invalidated: false });
-    expect(response.payload.apiKeys).not.toContainEqual({ id: '456', name: '', invalidated: true });
+    expect(response.payload.apiKeys).toContainEqual({ id: '123', name: '123', invalidated: false });
+    expect(response.payload.apiKeys).not.toContainEqual({
+      id: '456',
+      name: '456',
+      invalidated: true,
+    });
   });
 
   it('should substitute an empty string for keys with `null` names', async () => {
@@ -94,12 +98,12 @@ describe('Get API Keys route', () => {
       },
       {
         id: 'undefined_name',
-        name: '',
+        name: 'undefined_name',
         invalidated: false,
       },
       {
         id: 'null_name',
-        name: '',
+        name: 'null_name',
         invalidated: false,
       },
     ]);

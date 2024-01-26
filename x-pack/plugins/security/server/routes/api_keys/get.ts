@@ -70,7 +70,7 @@ export function defineGetApiKeysRoutes({
           .filter(({ invalidated }) => !invalidated)
           .map((key) => {
             if (!key.name) {
-              key.name = '';
+              key.name = key.id;
             }
             return key;
           });
