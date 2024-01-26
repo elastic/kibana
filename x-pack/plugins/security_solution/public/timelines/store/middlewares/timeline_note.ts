@@ -32,7 +32,7 @@ type NoteAction = ReturnType<typeof addNote | typeof addNoteToEvent>;
 
 const timelineNoteActionsType = new Set([addNote.type, addNoteToEvent.type]);
 
-export function isNoteAction(action: Action): action is NoteAction {
+function isNoteAction(action: Action): action is NoteAction {
   return timelineNoteActionsType.has(action.type);
 }
 

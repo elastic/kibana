@@ -28,7 +28,7 @@ import * as i18n from '../../pages/translations';
 
 type FavoriteTimelineAction = ReturnType<typeof updateIsFavorite>;
 
-export function isFavoriteTimelineAction(action: Action): action is FavoriteTimelineAction {
+function isFavoriteTimelineAction(action: Action): action is FavoriteTimelineAction {
   return action.type === updateIsFavorite.type;
 }
 
