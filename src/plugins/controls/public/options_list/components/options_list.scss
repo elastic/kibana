@@ -31,12 +31,9 @@
       color: $euiColorDanger;
     }
 
-    .euiFilterButton__text {
+    .optionsList--selectionText {
+      flex-grow: 1;
       text-align: left;
-
-      &-hasNotification {
-        flex-grow: 1;
-      }
     }
   }
 
