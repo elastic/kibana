@@ -12,7 +12,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
 import { ExportModalShareOpts, JobParamsProviderOptions, ReportingSharingData } from '.';
-import { ReportingModalContent } from './image_export_modal';
+import { ReportingModalContent } from './reporting_panel_content_lazy';
 
 export const reportingScreenshotShareProvider = ({
   apiClient,
