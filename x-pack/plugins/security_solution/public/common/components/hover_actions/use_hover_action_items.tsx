@@ -13,7 +13,6 @@ import { isEmpty } from 'lodash';
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { useDispatch } from 'react-redux';
-import { useLocation } from 'react-router-dom';
 import { isActiveTimeline } from '../../../helpers';
 import { timelineSelectors } from '../../../timelines/store';
 import { useKibana } from '../../lib/kibana';
@@ -23,7 +22,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { ShowTopNButton } from './actions/show_top_n';
 import { addProvider } from '../../../timelines/store/actions';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
-import { getScopeFromPath, useSourcererDataView } from '../../containers/sourcerer';
+import { useSourcererDataView } from '../../containers/sourcerer';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { isDetectionsAlertsTable } from '../top_n/helpers';
 export interface UseHoverActionItemsProps {
