@@ -549,15 +549,18 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
       validate: {
-        query: schema.object({
+        params: schema.object({
           connectorId: schema.string(),
+        }),
+        query: schema.object({
           indexNameToDelete: schema.maybe(schema.string()),
         }),
       },
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { connectorId, indexNameToDelete } = request.query;
+      const { connectorId } = request.params;
+      const { indexNameToDelete } = request.query;
 
       let connectorResponse;
       try {

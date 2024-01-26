@@ -23,11 +23,10 @@ export const deleteConnector = async ({
   connectorId,
   indexNameToDelete,
 }: DeleteConnectorApiLogicArgs) => {
-  return await HttpLogic.values.http.delete<DeleteConnectorResponse>(
-    '/internal/enterprise_search/connectors/{connectorId}',
+  return await HttpLogic.values.http.delete(
+    `/internal/enterprise_search/connectors/${connectorId}`,
     {
       query: {
-        connectorId,
         indexNameToDelete,
       },
     }
@@ -41,5 +40,5 @@ export const DeleteConnectorApiLogic = createApiLogic(
 
 export type DeleteConnectorApiLogicActions = Actions<
   DeleteConnectorApiLogicArgs,
-  DeleteConnectorApiLogicResponse
+  DeleteConnectorResponse
 >;

@@ -24,12 +24,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { deleteConnector } from '../../api/connector/delete_connector_api_logic';
-
 import { ConnectorsLogic } from './connectors_logic';
 
 export const DeleteConnectorModal: React.FC = () => {
-  const { closeDeleteModal } = useActions(ConnectorsLogic);
+  const { closeDeleteModal, deleteConnector } = useActions(ConnectorsLogic);
   const {
     deleteModalConnectorId: connectorId,
     deleteModalConnectorName: connectorName,

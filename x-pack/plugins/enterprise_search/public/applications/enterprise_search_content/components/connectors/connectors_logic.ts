@@ -100,16 +100,16 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
   },
   connect: {
     actions: [
+      DeleteConnectorApiLogic,
+      ['apiError as deleteError', 'apiSuccess as deleteSuccess', 'makeRequest as deleteConnector'],
       FetchConnectorsApiLogic,
       ['makeRequest', 'apiSuccess', 'apiError'],
-      DeleteConnectorApiLogic,
-      ['makeRequest as deleteConnector', 'apiSuccess as deleteSuccess', 'apiError as deleteError'],
     ],
     values: [
-      FetchConnectorsApiLogic,
-      ['data', 'status'],
       DeleteConnectorApiLogic,
       ['status as deleteStatus'],
+      FetchConnectorsApiLogic,
+      ['data', 'status'],
     ],
   },
   listeners: ({ actions, values }) => ({
