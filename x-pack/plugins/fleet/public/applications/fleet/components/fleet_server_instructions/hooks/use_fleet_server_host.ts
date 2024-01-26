@@ -78,7 +78,6 @@ export const useFleetServerHost = (): FleetServerHostForm => {
       name: inputs.nameInput.value,
       host_urls: inputs.hostUrlsInput.value,
       is_default: inputs.isDefaultInput.value,
-      is_preconfigured: false,
     };
 
     const res = await sendPostFleetServerHost(newFleetServerHost);
